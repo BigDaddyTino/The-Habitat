@@ -13,7 +13,8 @@ Last updated: 2026-08-09
 ## Phase 1 - PostgreSQL and Prisma
 
 - [x] Private PostgreSQL Compose definition added
-- [ ] Prisma schema, migration, seed, and container validation
+- [x] Prisma 7 schema, generated client, initial migration, and idempotent seed
+- [x] Database health, localhost-only binding, named-volume restart persistence validated
 
 ## Phase 2 - Auth and RBAC
 

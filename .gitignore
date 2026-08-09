@@ -8,6 +8,6 @@ coverage/
 !.env.example
 *.log
 *.tsbuildinfo
+packages/db/src/generated/
 data/
 backups/
-

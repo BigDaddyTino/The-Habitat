@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum GameType {
+  SEVEN_DAYS_TO_DIE
+  PROJECT_ZOMBOID
+  DRAGONWILDS
+  ENSHROUDED
+  PALWORLD
+  VALHEIM
+}
+
+enum ServerState {
+  ONLINE
+  STARTING
+  STOPPING
+  SLEEPING
+  UPDATING
+  DEGRADED
+  DOWN_UNEXPECTEDLY
+  UNKNOWN
+}
+
+enum ServerEventType {
+  SERVER_STARTED
+  SERVER_STOPPED
+  SERVER_SLEEPING
+  SERVER_CRASHED
+  SERVER_UPDATED
+  PLAYER_JOINED
+  PLAYER_LEFT
+  PLAYER_DIED
+  PLAYER_KILLED
+  BOSS_KILLED
+  CHAT_MESSAGE
+  WORLD_SAVED
+  BACKUP_CREATED
+  ACHIEVEMENT_EARNED
+  RECORD_BROKEN
+  ADMIN_ANNOUNCEMENT
+  WAKE_REQUESTED
+  WAKE_APPROVED
+}
+
+model User {
+  id               String           @id @default(uuid()) @db.Uuid
+  username         String           @unique
+  displayName      String
+  email            String?          @unique
+  role             Role             @default(VIEWER)
+  imageUrl         String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  playerIdentities PlayerIdentity[]
+  auditLogs        AuditLog[]
+}
+
+model GameServer {
+  id              String                @id @default(uuid()) @db.Uuid
+  slug            String                @unique
+  displayName     String
+  gameType        GameType
+  worldName       String
+  description     String?
+  enabled         Boolean               @default(true)
+  desiredState    ServerState           @default(SLEEPING)
+  actualState     ServerState           @default(UNKNOWN)
+  lastStateChangeAt DateTime?
+  lastQueryAt     DateTime?
+  lastOnlineAt    DateTime?
+  currentVersion  String?
+  currentBuildId  String?
+  maxPlayers      Int?
+  adapterType     String
+  capabilities    Json
+  publicNotes     String?
+  adminNotes      String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  runtimeState    ServerRuntimeState?
+  statusHistory   ServerStatusHistory[]
+  events          ServerEvent[]
+  playerIdentities PlayerIdentity[]
+}
+
+model ServerRuntimeState {
+  id              String      @id @default(uuid()) @db.Uuid
+  serverId        String      @unique @db.Uuid
+  state           ServerState @default(UNKNOWN)
+  reachable       Boolean?
+  playerCount     Int?
+  maxPlayers      Int?
+  pingMs          Int?
+  version         String?
+  buildId         String?
+  processRunning  Boolean?
+  processStartedAt DateTime?
+  observedAt      DateTime    @default(now())
+  details         Json?
+  server          GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+}
+
+model ServerStatusHistory {
+  id         String      @id @default(uuid()) @db.Uuid
+  serverId   String      @db.Uuid
+  state      ServerState
+  desiredState ServerState?
+  observedAt DateTime    @default(now())
+  reason     String?
+  details    Json?
+  server     GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, observedAt])
+}
+
+model PlayerIdentity {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String?     @db.Uuid
+  serverId    String?     @db.Uuid
+  gameType    GameType
+  displayName String
+  providerKey String
+  verifiedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  server      GameServer? @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  events      ServerEvent[]
+
+  @@unique([gameType, providerKey])
+}
+
+model ServerEvent {
+  id               String           @id @default(uuid()) @db.Uuid
+  serverId         String           @db.Uuid
+  gameType         GameType
+  eventType        ServerEventType
+  occurredAt       DateTime
+  receivedAt       DateTime         @default(now())
+  playerIdentityId String?          @db.Uuid
+  actorText        String?
+  targetText       String?
+  cause            String?
+  valueNumber      Float?
+  valueText        String?
+  metadata         Json?
+  source           String
+  sourceConfidence Int              @default(100)
+  dedupeKey        String?          @unique
+  server           GameServer       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  playerIdentity   PlayerIdentity?  @relation(fields: [playerIdentityId], references: [id], onDelete: SetNull)
+
+  @@index([serverId, occurredAt])
+  @@index([eventType, occurredAt])
+  @@index([playerIdentityId, occurredAt])
+}
+
+model AuditLog {
+  id          String    @id @default(uuid()) @db.Uuid
+  actorUserId String?   @db.Uuid
+  action      String
+  entityType  String
+  entityId    String?
+  before      Json?
+  after       Json?
+  requestHash String?
+  createdAt   DateTime  @default(now())
+  actor       User?     @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+}
