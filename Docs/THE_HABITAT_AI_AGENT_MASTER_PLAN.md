@@ -276,7 +276,7 @@ Use:
 - Server Components by default
 - Client Components only where interaction requires them
 
-At the time this plan was prepared, Next.js 16.3 existed and 16.2.11 was the patched Active-LTS line.
+At the time this plan was prepared, Next.js 16.3 was preview material and 16.2.11 was the patched Active-LTS production line.
 
 **Agent requirement:** before installation, verify the official Next.js security/release page and install the latest patched production-safe 16.x release.
 
@@ -1406,6 +1406,8 @@ Use:
 2. Habitat Agent process telemetry;
 3. dedicated-server logs;
 4. optional server-side Habitat plugins for structured events.
+
+Valheim must start in public mode (`-public 1`) to respond to GameDig queries. Crossplay servers report zero players through GameDig, so player count must be marked unsupported for crossplay until another verified source exists.
 
 Valheim is an excellent first target for richer custom Habitat telemetry.
 
@@ -3386,7 +3388,7 @@ These notes were checked while preparing this plan on August 9, 2026.
 
 The current Next.js documentation uses the App Router and modern React Server Component architecture.
 
-Next.js 16.3 was released in 2026. The project should use the latest patched production-safe Next.js 16.x version verified at implementation time.
+Next.js 16.3 was preview material in 2026. The project should use the latest patched production-safe stable Next.js 16.x version verified at implementation time.
 
 References:
 
