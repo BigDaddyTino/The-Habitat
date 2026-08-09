@@ -22,7 +22,7 @@ Last updated: 2026-08-09
 - [x] Server-side `ADMIN` / `USER` / `VIEWER` permission helpers and protected admin endpoint added
 - [x] Invite-only sign-in gate and documented bootstrap-admin path added
 - [x] Role-boundary tests and unauthenticated direct API denial verified
-- [ ] Create Discord OAuth application, configure local credentials, and verify an end-to-end Discord login
+- [x] Discord OAuth application configured; end-to-end owner login verified and bootstrap setting removed
 
 ## Phase 3 - Server Registry and Basic UI
 
