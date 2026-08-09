@@ -10,3 +10,13 @@ export function createPrismaClient(connectionString = process.env.DATABASE_URL) 
     adapter: new PrismaPg({ connectionString }),
   });
 }
+
+const globalForPrisma = globalThis as unknown as { habitatPrisma?: ReturnType<typeof createPrismaClient> };
+
+export function getPrismaClient() {
+  if (!globalForPrisma.habitatPrisma) {
+    globalForPrisma.habitatPrisma = createPrismaClient();
+  }
+
+  return globalForPrisma.habitatPrisma;
+}

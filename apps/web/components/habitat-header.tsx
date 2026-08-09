@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Landmark, Map, ScrollText, Trophy } from "lucide-react";
+import { Landmark, LogIn, Map, ScrollText, Trophy, UserRound } from "lucide-react";
+import { auth } from "@/auth";
 
 const navigation = [
   { href: "/", label: "Great Hall", icon: Landmark },
@@ -8,7 +9,8 @@ const navigation = [
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
 ];
 
-export function HabitatHeader() {
+export async function HabitatHeader() {
+  const session = await auth();
   return (
     <header className="site-header">
       <Link className="brand" href="/" aria-label="The Habitat home">
@@ -26,7 +28,14 @@ export function HabitatHeader() {
           </Link>
         ))}
       </nav>
-      <div className="header-status"><span /> Seeded preview</div>
+      <div className="header-actions">
+        <div className="header-status"><span /> Seeded preview</div>
+        {session?.user?.isActive ? (
+          <Link className="profile-link" href="/profile"><UserRound aria-hidden="true" size={15} /> Profile</Link>
+        ) : (
+          <Link className="profile-link" href="/sign-in"><LogIn aria-hidden="true" size={15} /> Sign in</Link>
+        )}
+      </div>
     </header>
   );
 }
