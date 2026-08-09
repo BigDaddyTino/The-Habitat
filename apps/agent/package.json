@@ -5,10 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
     "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@habitat/shared": "workspace:*",
+    "dotenv": "^17.2.3",
+    "gamedig": "5.3.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/node": "^24.10.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }

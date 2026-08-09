@@ -14,7 +14,7 @@ The master plan is a strong foundation and is approved as the build direction. I
 
 ## Local readiness
 
-- MartServ102 resolves to `192.168.86.102` on the LAN.
+- Verify MartServ102 resolves to its private LAN address during deployment; do not record infrastructure addresses in Git.
 - Node 24.19.0 and pnpm 11.21.0 are available.
 - Docker Desktop was started, but this shell does not yet have a `docker` executable on `PATH`; Phase 1 container validation waits on that host-level CLI availability.
 

@@ -33,7 +33,12 @@ Last updated: 2026-08-09
 
 ## Phase 4 - Habitat Agent
 
-- [ ] Not started
+- [x] Private read-only Node/TypeScript agent with token and source-IP authentication
+- [x] Authenticated health, server list, and config-allow-listed status routes; no action or shell routes
+- [x] Windows process, uptime, memory, CPU-time, disk, executable-version, and optional GameDig observations
+- [x] WinSW template plus explicit install, uninstall, and MartServ101-only firewall scripts
+- [x] Worker-to-agent authenticated health probe and tests
+- [ ] Deploy to MartServ102 with inspected game paths, process names, bind address, and firewall source
 
 ## Phase 5 - Live Monitoring
 

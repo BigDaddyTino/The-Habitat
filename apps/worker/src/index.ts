@@ -1,3 +1,3 @@
-export {};
+export { checkAgentHealth } from "./agent-health.js";
 
-export const workerPhase = "scaffolded";
+export const workerPhase = "agent-health-ready";

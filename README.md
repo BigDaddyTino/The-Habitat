@@ -4,7 +4,7 @@ The private operations center for six dedicated survival-game worlds: status, hi
 
 ## Current slice
 
-The Great Hall reads its world registry from PostgreSQL. It deliberately does not represent live game-server telemetry until the Habitat Agent and worker are in place; unknown stays unknown.
+The Great Hall reads its world registry from PostgreSQL. A private, read-only Habitat Agent is ready for deployment to MartServ102, but the dashboard deliberately does not represent live game-server telemetry until that host has been inspected and reporting through the worker; unknown stays unknown.
 
 ## Development
 

@@ -6,6 +6,10 @@ coverage/
 .env.local
 .env.*.local
 !.env.example
+apps/agent/agent.config.json
+apps/agent/HabitatAgent.exe
+apps/agent/HabitatAgent.xml
+apps/agent/logs/
 *.log
 *.tsbuildinfo
 packages/db/src/generated/

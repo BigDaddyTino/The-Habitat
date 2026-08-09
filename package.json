@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @habitat/web dev",
-    "build": "pnpm --filter @habitat/web build",
+    "build": "pnpm --filter @habitat/agent build && pnpm --filter @habitat/web build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r typecheck"
