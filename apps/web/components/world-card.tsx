@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowUpRight, UsersRound, Wifi } from "lucide-react";
-import type { World } from "@habitat/shared";
+import type { WorldView } from "@/lib/world-data";
 import { StatusBadge } from "./status-badge";
 
-export function WorldCard({ world }: { world: World }) {
+export function WorldCard({ world }: { world: WorldView }) {
   const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity}`;
   return (
     <article className={`world-card accent-${world.accent}`}>

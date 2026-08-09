@@ -1,11 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getPrismaClient } from "@habitat/db/client";
-import dotenv from "dotenv";
 import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
-import path from "node:path";
-
-dotenv.config({ path: path.resolve(process.cwd(), "../../.env"), quiet: true });
+import "@/lib/environment";
 
 const db = getPrismaClient();
 

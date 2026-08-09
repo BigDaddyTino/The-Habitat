@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Landmark, LogIn, Map, ScrollText, Trophy, UserRound } from "lucide-react";
+import { Landmark, LogIn, Map, ScrollText, Settings, Trophy, UserRound } from "lucide-react";
 import { auth } from "@/auth";
 
 const navigation = [
@@ -29,9 +29,12 @@ export async function HabitatHeader() {
         ))}
       </nav>
       <div className="header-actions">
-        <div className="header-status"><span /> Seeded preview</div>
+        <div className="header-status"><span /> Registry online</div>
         {session?.user?.isActive ? (
-          <Link className="profile-link" href="/profile"><UserRound aria-hidden="true" size={15} /> Profile</Link>
+          <>
+            {session.user.role === "ADMIN" ? <Link className="profile-link" href="/admin/servers"><Settings aria-hidden="true" size={15} /> Admin</Link> : null}
+            <Link className="profile-link" href="/profile"><UserRound aria-hidden="true" size={15} /> Profile</Link>
+          </>
         ) : (
           <Link className="profile-link" href="/sign-in"><LogIn aria-hidden="true" size={15} /> Sign in</Link>
         )}

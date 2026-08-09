@@ -4,7 +4,7 @@ The private operations center for six dedicated survival-game worlds: status, hi
 
 ## Current slice
 
-The initial Great Hall is a static, seeded dashboard. It deliberately does not represent live game-server telemetry yet.
+The Great Hall reads its world registry from PostgreSQL. It deliberately does not represent live game-server telemetry until the Habitat Agent and worker are in place; unknown stays unknown.
 
 ## Development
 

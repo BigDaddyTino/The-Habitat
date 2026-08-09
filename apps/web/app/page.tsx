@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, Flame, ShieldCheck, UsersRound } from "lucide-react";
-import { chronicle, worlds } from "@habitat/shared";
 import { StatusBadge } from "@/components/status-badge";
 import { WorldCard } from "@/components/world-card";
+import { getWorlds } from "@/lib/world-data";
 
-export default function GreatHallPage() {
+export default async function GreatHallPage() {
+  const worlds = await getWorlds();
   const liveWorlds = worlds.filter((world) => world.state === "ONLINE");
   const activePlayers = liveWorlds.reduce((total, world) => total + (world.players ?? 0), 0);
   return (
@@ -16,8 +17,8 @@ export default function GreatHallPage() {
           <p className="eyebrow">Private operations center</p>
           <h1>The Habitat</h1>
           <p className="hero-subtitle">God&apos;s Country</p>
-          <p className="hero-copy">The fires are burning. Six worlds, one clubhouse, and a permanent record of every questionable decision.</p>
-          <div className="hero-facts" aria-label="Current seeded overview">
+          <p className="hero-copy">{liveWorlds.length > 0 ? "The fires are burning." : "Quiet night in God’s Country."} Six worlds, one clubhouse, and a permanent record of every questionable decision.</p>
+          <div className="hero-facts" aria-label="Current world overview">
             <div><Flame aria-hidden="true" /><strong>{liveWorlds.length}</strong><span>fires burning</span></div>
             <div><UsersRound aria-hidden="true" /><strong>{activePlayers}</strong><span>players online</span></div>
             <div><ShieldCheck aria-hidden="true" /><strong>{worlds.length}</strong><span>worlds registered</span></div>
@@ -29,7 +30,7 @@ export default function GreatHallPage() {
       <section className="content-shell world-section">
         <div className="section-heading">
           <div><p className="eyebrow">World registry</p><h2>Tonight in the Habitat</h2></div>
-          <p>Static seed data for the first visual slice. Live telemetry joins after the agent and worker are in place.</p>
+          <p>These world definitions come directly from the Habitat registry. Live telemetry arrives through the agent and worker.</p>
         </div>
         <div className="world-grid">
           {worlds.map((world) => <WorldCard world={world} key={world.slug} />)}
@@ -39,15 +40,13 @@ export default function GreatHallPage() {
       <section className="content-shell lower-grid">
         <div className="chronicle-panel">
           <div className="panel-heading"><div><p className="eyebrow">The Habitat Chronicle</p><h2>Recent dispatches</h2></div><Link href="/chronicle">All history <ArrowRight size={15} /></Link></div>
-          <ol className="chronicle-list">
-            {chronicle.map((entry) => <li key={`${entry.time}-${entry.text}`}><time>{entry.time}</time><span className={`chronicle-dot ${entry.kind}`} aria-hidden="true" /><p>{entry.text}</p></li>)}
-          </ol>
+          <div className="chronicle-empty"><p>No verified Chronicle events yet.</p><span>Monitoring will write the first true dispatch.</span></div>
         </div>
         <aside className="fire-panel">
           <p className="eyebrow">Light the fire</p>
-          <h2>Palworld is sleeping.</h2>
-          <p>Four people want this world awake. Wake requests will become available after Auth.js and server-side permissions are in place.</p>
-          <div className="fire-panel-status"><StatusBadge state="SLEEPING" /><span>Last fire: Yesterday, 1:18 AM</span></div>
+          <h2>The next fire starts here.</h2>
+          <p>Wake requests open after live monitoring has proven the world states.</p>
+          <div className="fire-panel-status"><StatusBadge state="UNKNOWN" /><span>Waiting on MartServ102 telemetry</span></div>
         </aside>
       </section>
     </div>

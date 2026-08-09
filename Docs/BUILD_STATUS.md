@@ -26,9 +26,10 @@ Last updated: 2026-08-09
 
 ## Phase 3 - Server Registry and Basic UI
 
-- [x] Great Hall static dashboard and six seeded world definitions
+- [x] Great Hall dashboard and six registered world definitions
 - [x] Worlds and Departure Board routes
-- [ ] Database-backed registry and admin metadata editor
+- [x] Database-backed registry and audited admin metadata editor
+- [x] Dashboard uses only verified registry data; runtime telemetry remains `UNKNOWN` until the agent reports it
 
 ## Phase 4 - Habitat Agent
 

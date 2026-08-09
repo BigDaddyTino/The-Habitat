@@ -1,4 +1,5 @@
 import { ShieldCheck } from "lucide-react";
+import Link from "next/link";
 import { requireRole } from "@/lib/authorization";
 
 export default async function AdminPage() {
@@ -9,7 +10,8 @@ export default async function AdminPage() {
         <ShieldCheck aria-hidden="true" size={28} />
         <p className="eyebrow">Authorized administrator</p>
         <h1>Operations center reserved.</h1>
-        <p>{user.name ?? "Admin"}, the admin center opens as server telemetry and audited operations come online.</p>
+        <p>{user.name ?? "Admin"}, registry metadata is ready. Monitoring and audited operations follow as their phases open.</p>
+        <Link className="primary-link admin-link" href="/admin/servers">Manage world registry</Link>
       </div>
     </section>
   );
