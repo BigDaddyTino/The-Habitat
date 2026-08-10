@@ -151,6 +151,7 @@ model GameServer {
   metricSamples   ServerMetricSample[]
   events          ServerEvent[]
   playerIdentities PlayerIdentity[]
+  playerPresence  ServerPlayerPresence[]
 }
 
 model ServerRuntimeState {
@@ -241,6 +242,19 @@ model ServerEvent {
   @@index([serverId, occurredAt])
   @@index([eventType, occurredAt])
   @@index([playerIdentityId, occurredAt])
+}
+
+model ServerPlayerPresence {
+  serverId        String   @db.Uuid
+  providerKey     String
+  displayName     String
+  present         Boolean  @default(false)
+  firstObservedAt DateTime
+  lastObservedAt  DateTime
+  server          GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@id([serverId, providerKey])
+  @@index([serverId, present])
 }
 
 model ChronicleReaction {

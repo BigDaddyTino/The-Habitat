@@ -3,7 +3,7 @@ import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import path from "node:path";
 import { GameDig } from "gamedig";
-import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
+import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentPlayerObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
@@ -86,7 +86,7 @@ async function observeExecutable(executablePath: string): Promise<AgentExecutabl
 
 async function observeGameQuery(server: AgentServerConfiguration): Promise<AgentQueryObservation> {
   const query = server.query;
-  if (!query) return { attempted: false, reachable: null, pingMs: null, playerCount: null, maxPlayers: null, version: null };
+  if (!query) return { attempted: false, reachable: null, pingMs: null, playerCount: null, maxPlayers: null, version: null, players: null };
   try {
     const result = await GameDig.query({
       type: query.type as never,
@@ -102,10 +102,25 @@ async function observeGameQuery(server: AgentServerConfiguration): Promise<Agent
       playerCount: query.playerCountSupported && Number.isFinite(result.numplayers) ? result.numplayers : null,
       maxPlayers: query.playerCountSupported ? result.maxplayers : null,
       version: result.version || null,
+      players: query.type === "palworld" ? parsePalworldPlayers(result.players) : null,
     };
   } catch {
-    return { attempted: true, reachable: false, pingMs: null, playerCount: null, maxPlayers: null, version: null };
+    return { attempted: true, reachable: false, pingMs: null, playerCount: null, maxPlayers: null, version: null, players: null };
   }
+}
+
+export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unknown }>): AgentPlayerObservation[] | null {
+  const parsed: AgentPlayerObservation[] = [];
+  const providerKeys = new Set<string>();
+  for (const player of players) {
+    const raw = isRecord(player.raw) ? player.raw : null;
+    const providerKey = typeof raw?.playerId === "string" ? raw.playerId.trim() : "";
+    const displayName = typeof player.name === "string" ? player.name.trim() : typeof raw?.name === "string" ? raw.name.trim() : "";
+    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(providerKey) || displayName.length < 1 || displayName.length > 80 || providerKeys.has(providerKey)) return null;
+    providerKeys.add(providerKey);
+    parsed.push({ providerKey, displayName });
+  }
+  return parsed.sort((left, right) => left.providerKey.localeCompare(right.providerKey));
 }
 
 export async function observeDragonwildsLog(logPath: string): Promise<AgentLogObservation> {
@@ -159,4 +174,8 @@ function parseSingleJson<T>(value: string): T | null {
 function sumNullable(values: Array<number | undefined>): number | null {
   const present = values.filter((value): value is number => typeof value === "number" && Number.isFinite(value));
   return present.length > 0 ? present.reduce((total, value) => total + value, 0) : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object";
 }

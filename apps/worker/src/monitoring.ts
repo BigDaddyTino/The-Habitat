@@ -1,4 +1,4 @@
-import { getPrismaClient } from "@habitat/db/client";
+import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import { normalizeServerState } from "./state.js";
 
@@ -8,6 +8,7 @@ export type MonitoredServer = {
   gameType: string;
   desiredState: ServerState;
   actualState: ServerState;
+  playerPresenceInitialized: boolean;
 };
 
 export type MonitoringRepository = {
@@ -27,6 +28,8 @@ export type MonitoringCycleResult = {
   ignored: number;
   agentAvailable: boolean;
 };
+
+type PresenceTransaction = Prisma.TransactionClient;
 
 export async function runMonitoringCycle(repository: MonitoringRepository, agent: AgentPoller, now = new Date()): Promise<MonitoringCycleResult> {
   let statuses: Array<{ key: string; status: AgentServerStatus | null }>;
@@ -64,7 +67,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async findBySlug(slug) {
       const server = await db.gameServer.findUnique({
         where: { slug },
-        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true },
+        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
       });
       return server ? toMonitoredServer(server) : null;
     },
@@ -74,7 +77,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           lastQueryAt: { not: null },
           runtimeState: { is: { processRunning: { not: null } } },
         },
-        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true },
+        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
       });
       return servers.map(toMonitoredServer);
     },
@@ -84,14 +87,16 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
       const decision = normalizeServerState(effectiveDesiredState, status);
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
+      const palworldPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.players) ? status.query.players : null;
       const details = {
         source: "HABITAT_AGENT",
         agentKey: status.key,
         process: status.process,
         disk: status.disk,
         executable: status.executable,
-        query: status.query,
+        query: status.query ? { ...status.query, players: status.query.players === null || status.query.players === undefined ? null : { available: true, count: status.query.players.length } } : null,
         log: status.log,
+        playerPresenceInitialized: server.playerPresenceInitialized || palworldPlayers !== null,
       };
       await db.$transaction(async (transaction) => {
         await transaction.serverRuntimeState.upsert({
@@ -175,6 +180,9 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             update: {},
           });
         }
+        if (palworldPlayers !== null) {
+          await synchronizePalworldPresence(transaction, server, palworldPlayers, observedAt);
+        }
         await transaction.serverMetricSample.create({
           data: {
             serverId: server.id,
@@ -232,8 +240,54 @@ function chronicleEventType(state: ServerState): "SERVER_STARTED" | "SERVER_SLEE
   return null;
 }
 
-function toMonitoredServer(server: { id: string; slug: string; gameType: string; desiredState: string; actualState: string }): MonitoredServer {
-  return { id: server.id, slug: server.slug, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState };
+function toMonitoredServer(server: { id: string; slug: string; gameType: string; desiredState: string; actualState: string; runtimeState: { details: unknown } | null }): MonitoredServer {
+  return { id: server.id, slug: server.slug, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details) };
+}
+
+async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: Array<{ providerKey: string; displayName: string }>, observedAt: Date) {
+  const known = await transaction.serverPlayerPresence.findMany({ where: { serverId: server.id } });
+  const knownByKey = new Map(known.map((presence) => [presence.providerKey, presence]));
+  const observedKeys = new Set(players.map((player) => player.providerKey));
+
+  for (const player of players) {
+    const previous = knownByKey.get(player.providerKey);
+    if (!previous) {
+      await transaction.serverPlayerPresence.create({ data: { serverId: server.id, providerKey: player.providerKey, displayName: player.displayName, present: true, firstObservedAt: observedAt, lastObservedAt: observedAt } });
+      if (server.playerPresenceInitialized) await createPalworldPresenceEvent(transaction, server, player, "PLAYER_JOINED", observedAt);
+      continue;
+    }
+    if (!previous.present) await createPalworldPresenceEvent(transaction, server, player, "PLAYER_JOINED", observedAt);
+    await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: player.providerKey } }, data: { displayName: player.displayName, present: true, lastObservedAt: observedAt } });
+  }
+
+  if (!server.playerPresenceInitialized) return;
+  for (const presence of known.filter((item) => item.present && !observedKeys.has(item.providerKey))) {
+    await createPalworldPresenceEvent(transaction, server, presence, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
+    await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
+  }
+}
+
+async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
+  const occurrence = priorObservedAt ?? observedAt;
+  await transaction.serverEvent.upsert({
+    where: { dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}` },
+    create: {
+      serverId: server.id,
+      gameType: server.gameType as never,
+      eventType,
+      occurredAt: observedAt,
+      actorText: player.displayName,
+      source: "PALWORLD_REST",
+      sourceConfidence: 100,
+      dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}`,
+      metadata: { providerKey: player.providerKey, observedBy: "player_list_snapshot" },
+    },
+    update: {},
+  });
+}
+
+function hasPlayerPresenceBaseline(details: unknown): boolean {
+  return Boolean(details && typeof details === "object" && "playerPresenceInitialized" in details && (details as { playerPresenceInitialized?: unknown }).playerPresenceInitialized === true);
 }
 
 export function resolveDesiredState(currentDesiredState: ServerState, status: AgentServerStatus): ServerState {

@@ -58,7 +58,8 @@ Last updated: 2026-08-10
 - [x] Replay-safe Dragonwilds save ingestion verified against live agent telemetry
 - [x] Server-rendered Chronicle filters and permanent event detail links
 - [x] Authenticated, audit-logged, database-deduplicated member reactions
-- [ ] Player join/leave and death events, only where a reliable adapter source exists
+- [ ] Palworld REST player-presence tracker awaiting first baseline and live join/leave verification
+- [ ] Death events, only where a reliable adapter source exists
 
 ## Phase 7 - Player Identities and Profiles
 

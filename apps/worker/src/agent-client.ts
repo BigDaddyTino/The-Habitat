@@ -56,7 +56,11 @@ function isExecutableObservation(value: unknown): boolean {
 }
 
 function isQueryObservation(value: unknown): boolean {
-  return isRecord(value) && typeof value.attempted === "boolean" && (value.reachable === null || typeof value.reachable === "boolean") && isNullableNumber(value.pingMs) && isNullableNumber(value.playerCount) && isNullableNumber(value.maxPlayers) && isNullableString(value.version);
+  return isRecord(value) && typeof value.attempted === "boolean" && (value.reachable === null || typeof value.reachable === "boolean") && isNullableNumber(value.pingMs) && isNullableNumber(value.playerCount) && isNullableNumber(value.maxPlayers) && isNullableString(value.version) && (value.players === undefined || value.players === null || isPlayerObservationArray(value.players));
+}
+
+function isPlayerObservationArray(value: unknown): boolean {
+  return Array.isArray(value) && value.every((player) => isRecord(player) && typeof player.providerKey === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(player.providerKey) && typeof player.displayName === "string" && player.displayName.length >= 1 && player.displayName.length <= 80);
 }
 
 function isLogObservation(value: unknown): boolean {

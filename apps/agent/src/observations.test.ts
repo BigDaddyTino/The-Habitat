@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { observeProcess, parseDragonwildsLog } from "./observations.js";
+import { observeProcess, parseDragonwildsLog, parsePalworldPlayers } from "./observations.js";
 
 test("Windows process observation sees the agent's Node runtime", { skip: process.platform !== "win32" }, async () => {
   const observation = await observeProcess("node");
@@ -21,4 +21,9 @@ test("Dragonwilds log parsing keeps only verified lifecycle markers", () => {
     "[2026.08.10-15.31.40:155][923]LogPersistence: [DedicatedServer] SaveGame() : Starting save",
   ].join("\n");
   assert.deepEqual(parseDragonwildsLog(log), { lastWorldLoadAt: "2026.08.10-15.21.38:902", lastSaveAt: "2026.08.10-15.31.40:155" });
+});
+
+test("Palworld player parsing retains only a stable ID and display name", () => {
+  assert.deepEqual(parsePalworldPlayers([{ name: "HabitatTino", raw: { playerId: "AFAFD830000000000000000000000000", ip: "192.168.86.10" } }]), [{ providerKey: "AFAFD830000000000000000000000000", displayName: "HabitatTino" }]);
+  assert.equal(parsePalworldPlayers([{ name: "Missing ID", raw: {} }]), null);
 });

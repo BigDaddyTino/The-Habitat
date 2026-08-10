@@ -33,6 +33,11 @@ export type AgentExecutableObservation = {
   version: string | null;
 };
 
+export type AgentPlayerObservation = {
+  providerKey: string;
+  displayName: string;
+};
+
 export type AgentQueryObservation = {
   attempted: boolean;
   reachable: boolean | null;
@@ -40,6 +45,7 @@ export type AgentQueryObservation = {
   playerCount: number | null;
   maxPlayers: number | null;
   version: string | null;
+  players: AgentPlayerObservation[] | null;
 };
 
 export type AgentLogObservation = {
