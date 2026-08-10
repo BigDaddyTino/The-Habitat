@@ -45,6 +45,8 @@ Example shape, with placeholders rather than real paths:
 
 `query.host` is restricted to loopback or a private IPv4 address. Set `playerCountSupported` to `false` when a query protocol is known not to provide a trustworthy count, including Valheim crossplay until another verified source exists.
 
+For Palworld, use `"type": "palworld"`, `"host": "127.0.0.1"`, and `"port": 8212`. The agent requires `HABITAT_PALWORLD_ADMIN_PASSWORD` in its ignored local `.env`; it sends that credential only to Palworld's local REST endpoint and never includes it in status responses, logs, or browser data. Do not port-forward the REST endpoint.
+
 ## Install
 
 From an elevated PowerShell session on MartServ102, set a random token in the current session without committing it, then run:

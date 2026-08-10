@@ -47,3 +47,29 @@ test("agent configuration accepts a UTF-8 byte order mark", async () => {
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("Palworld REST configuration requires its local admin password", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "habitat-agent-"));
+  const configurationPath = path.join(directory, "agent.config.json");
+  await writeFile(configurationPath, JSON.stringify({
+    servers: [{
+      key: "palworld",
+      displayName: "Habitat Preserve",
+      processName: "PalServer-Win64-Shipping-Cmd",
+      query: { type: "palworld", host: "127.0.0.1", port: 8212 },
+    }],
+  }));
+  const environment = {
+    HABITAT_AGENT_TOKEN: "a-32-character-minimum-agent-token!!",
+    HABITAT_AGENT_BIND_HOST: "127.0.0.1",
+    HABITAT_AGENT_ALLOWED_IPS: "127.0.0.1",
+    HABITAT_AGENT_CONFIG_PATH: configurationPath,
+  };
+  try {
+    await assert.rejects(() => loadAgentConfiguration(environment));
+    const configuration = await loadAgentConfiguration({ ...environment, HABITAT_PALWORLD_ADMIN_PASSWORD: "local-only-admin-password" });
+    assert.equal(configuration.servers[0]?.query?.type, "palworld");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

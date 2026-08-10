@@ -10,6 +10,16 @@ const serverKey = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/);
 const processName = z.string().regex(/^[A-Za-z0-9_.-]+$/);
 const privateIpv4 = z.string().refine(isPrivateIpv4, "must be a private IPv4 address");
 const localQueryHost = z.string().refine(isLocalQueryHost, "must be loopback or a private IPv4 address");
+const queryBaseSchema = z.object({
+  host: localQueryHost.default("127.0.0.1"),
+  port: z.number().int().min(1).max(65535).optional(),
+  timeoutMs: z.number().int().min(500).max(10_000).default(3_000),
+  playerCountSupported: z.boolean().default(true),
+}).strict();
+const querySchema = z.union([
+  queryBaseSchema.extend({ type: z.literal("palworld"), passwordEnv: z.literal("HABITAT_PALWORLD_ADMIN_PASSWORD").default("HABITAT_PALWORLD_ADMIN_PASSWORD") }),
+  queryBaseSchema.extend({ type: z.string().trim().min(1).max(60).refine((value) => value !== "palworld", "Palworld queries must use the Palworld REST configuration") }),
+]);
 
 const serverConfigurationSchema = z.object({
   key: serverKey,
@@ -18,13 +28,7 @@ const serverConfigurationSchema = z.object({
   processCommandLineIncludes: z.string().trim().min(1).max(200).refine((value) => !/[\r\n]/.test(value), "must not contain line breaks").optional(),
   executablePath: z.string().trim().min(1).max(500).optional(),
   installPath: z.string().trim().min(1).max(500).optional(),
-  query: z.object({
-    type: z.string().trim().min(1).max(60),
-    host: localQueryHost.default("127.0.0.1"),
-    port: z.number().int().min(1).max(65535).optional(),
-    timeoutMs: z.number().int().min(500).max(10_000).default(3_000),
-    playerCountSupported: z.boolean().default(true),
-  }).strict().optional(),
+  query: querySchema.optional(),
 }).strict();
 
 const configurationFileSchema = z.object({
@@ -77,6 +81,12 @@ export async function loadAgentConfiguration(environment = process.env): Promise
     throw new Error(`Invalid agent configuration: ${parsedConfiguration.error.issues.map((issue) => issue.message).join("; ")}`);
   }
 
+  for (const server of parsedConfiguration.data.servers) {
+    if (server.query?.type === "palworld" && !isUsableSecret(environment.HABITAT_PALWORLD_ADMIN_PASSWORD)) {
+      throw new Error("HABITAT_PALWORLD_ADMIN_PASSWORD must be set when the Palworld REST query is configured.");
+    }
+  }
+
   return { bindHost, port, allowedIps, token, servers: parsedConfiguration.data.servers };
 }
 
@@ -92,4 +102,8 @@ function isAllowedClientAddress(value: string): boolean {
 
 function isLocalQueryHost(value: string): boolean {
   return value === "127.0.0.1" || value === "::1" || isPrivateIpv4(value);
+}
+
+function isUsableSecret(value: string | undefined): boolean {
+  return Boolean(value?.trim()) && !/[\r\n]/.test(value ?? "");
 }

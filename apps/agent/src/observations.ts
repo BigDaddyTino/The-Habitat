@@ -91,6 +91,7 @@ async function observeGameQuery(server: AgentServerConfiguration): Promise<Agent
       host: query.host,
       port: query.port,
       socketTimeout: query.timeoutMs,
+      ...(query.type === "palworld" ? { username: "admin", password: process.env.HABITAT_PALWORLD_ADMIN_PASSWORD?.trim() } : {}),
     });
     return {
       attempted: true,

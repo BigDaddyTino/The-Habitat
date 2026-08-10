@@ -4,6 +4,8 @@ declare module "gamedig" {
     host: string;
     port?: number;
     socketTimeout?: number;
+    username?: string;
+    password?: string;
   };
 
   export type QueryResult = {
