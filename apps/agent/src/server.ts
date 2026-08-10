@@ -1,13 +1,14 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import os from "node:os";
 import type { AddressInfo } from "node:net";
-import { agentServerActions, type AgentHealth, type AgentServerAction, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
+import type { AgentHealth, AgentServerAction, AgentServerStatus, AgentServerSummary } from "@habitat/shared";
 import type { AgentConfiguration } from "./config.js";
 import { observeServer } from "./observations.js";
 import { hasValidAgentToken, normalizeRemoteAddress } from "./security.js";
 import { ServiceControlError, WindowsServiceController } from "./service-control.js";
 
 const version = "0.1.0";
+const agentServerActions = ["start", "stop", "restart", "update"] as const;
 
 export function createAgentServer(configuration: AgentConfiguration) {
   const serviceController = new WindowsServiceController();
