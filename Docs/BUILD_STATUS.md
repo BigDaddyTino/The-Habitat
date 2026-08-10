@@ -47,7 +47,7 @@ Last updated: 2026-08-10
 - [x] MartServ101 worker service records verified process telemetry and metric samples for all six registered worlds
 - [x] Verified local GameDig queries for Valheim, Enshrouded, Project Zomboid, and 7 Days to Die provide ping, capacity, and supported player counts
 - [x] Authenticated Palworld REST query deployed locally with agent-only credentials; player count, capacity, and version verified end to end
-- [ ] Investigate a verified Dragonwilds query or log adapter
+- [x] Dragonwilds process telemetry and allow-listed lifecycle-log heartbeats verified; player counts remain intentionally unavailable
 
 ## Phase 6 - Chronicle and Event Ingestion
 
