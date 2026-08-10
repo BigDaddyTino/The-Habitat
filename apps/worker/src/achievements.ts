@@ -1,6 +1,7 @@
 import type { Prisma } from "@habitat/db/client";
 import { parseDistinctGameEventCountRule, parseEventCountRule } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
+import { queueDiscordNotification } from "./discord-notifications.js";
 
 export async function evaluateAchievementsForEvent(transaction: Prisma.TransactionClient, eventId: string) {
   const event = await transaction.serverEvent.findUnique({ where: { id: eventId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
@@ -34,6 +35,9 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
       update: {},
     });
     await evaluateRecordsForEvent(transaction, achievementEvent.id);
+    if (definition.rarity === "LEGENDARY") {
+      await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${event.playerIdentity.displayName}** earned a Legendary Habitat achievement: **${definition.name}**.` });
+    }
   }
 }
 

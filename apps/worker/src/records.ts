@@ -1,5 +1,6 @@
 import type { Prisma } from "@habitat/db/client";
 import { isAchievementCountRecordRule, parseDistinctGameEventCountRecordRule, parsePlayerEventCountRecordRule } from "@habitat/shared";
+import { queueDiscordNotification } from "./discord-notifications.js";
 
 type HabitatGameType = Prisma.GameServerGetPayload<{ select: { gameType: true } }>["gameType"];
 
@@ -82,7 +83,7 @@ async function recordIfBroken(transaction: Prisma.TransactionClient, definition:
     },
     update: {},
   });
-  await transaction.serverEvent.upsert({
+  const recordEvent = await transaction.serverEvent.upsert({
     where: { dedupeKey: `record-event:${history.dedupeKey}` },
     create: {
       serverId: event.serverId,
@@ -100,6 +101,7 @@ async function recordIfBroken(transaction: Prisma.TransactionClient, definition:
     },
     update: {},
   });
+  await queueDiscordNotification(transaction, { serverEventId: recordEvent.id, kind: "RECORD_BROKEN", content: `**${player.displayName}** set a Habitat record: **${definition.title}** (${value} ${definition.valueLabel}).` });
 }
 
 function isUniqueConstraint(error: unknown): boolean {

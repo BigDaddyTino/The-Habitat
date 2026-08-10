@@ -2,11 +2,13 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import { evaluateAchievementsForEvent } from "./achievements.js";
 import { evaluateRecordsForEvent } from "./records.js";
+import { queueDiscordNotification } from "./discord-notifications.js";
 import { normalizeServerState } from "./state.js";
 
 export type MonitoredServer = {
   id: string;
   slug: string;
+  displayName: string;
   gameType: string;
   desiredState: ServerState;
   actualState: ServerState;
@@ -69,7 +71,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async findBySlug(slug) {
       const server = await db.gameServer.findUnique({
         where: { slug },
-        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
       });
       return server ? toMonitoredServer(server) : null;
     },
@@ -79,7 +81,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           lastQueryAt: { not: null },
           runtimeState: { is: { processRunning: { not: null } } },
         },
-        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
       });
       return servers.map(toMonitoredServer);
     },
@@ -153,7 +155,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           });
           const eventType = chronicleEventType(decision.state);
           if (eventType) {
-            await transaction.serverEvent.create({
+            const event = await transaction.serverEvent.create({
               data: {
                 serverId: server.id,
                 gameType: server.gameType as never,
@@ -164,6 +166,8 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
                 dedupeKey: `state:${server.id}:${decision.state}:${observedAt.toISOString()}`,
               },
             });
+            const notification = stateNotification(server.displayName, eventType);
+            if (notification) await queueDiscordNotification(transaction, { serverEventId: event.id, ...notification });
           }
         }
         if (status.log?.available && status.log.lastSaveAt) {
@@ -242,8 +246,15 @@ function chronicleEventType(state: ServerState): "SERVER_STARTED" | "SERVER_SLEE
   return null;
 }
 
-function toMonitoredServer(server: { id: string; slug: string; gameType: string; desiredState: string; actualState: string; runtimeState: { details: unknown } | null }): MonitoredServer {
-  return { id: server.id, slug: server.slug, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details) };
+function stateNotification(serverName: string, eventType: ReturnType<typeof chronicleEventType>) {
+  if (eventType === "SERVER_STARTED") return { kind: "SERVER_ONLINE" as const, content: `**${serverName}** came online.` };
+  if (eventType === "SERVER_SLEEPING") return { kind: "SERVER_SLEEPING" as const, content: `**${serverName}** entered intentional rest.` };
+  if (eventType === "SERVER_CRASHED") return { kind: "SERVER_OUTAGE" as const, content: `**${serverName}** stopped unexpectedly.` };
+  return null;
+}
+
+function toMonitoredServer(server: { id: string; slug: string; displayName: string; gameType: string; desiredState: string; actualState: string; runtimeState: { details: unknown } | null }): MonitoredServer {
+  return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details) };
 }
 
 async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: Array<{ providerKey: string; displayName: string }>, observedAt: Date) {

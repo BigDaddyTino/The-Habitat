@@ -27,6 +27,7 @@ test("replaying a qualifying event records one Legend break", async () => {
       },
     },
     recordDefinition: { findMany: async () => [definition] },
+    discordGuildConfig: { findMany: async () => [] },
     recordHolder: {
       findUnique: async ({ where }: { where: { recordDefinitionId: string } }) => holders.get(where.recordDefinitionId) ?? null,
       create: async ({ data }: { data: { recordDefinitionId: string; valueNumber: number; holderName: string } }) => {

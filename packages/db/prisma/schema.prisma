@@ -98,6 +98,15 @@ enum RecordRuleType {
   ACHIEVEMENT_COUNT
 }
 
+enum DiscordNotificationKind {
+  SERVER_ONLINE
+  SERVER_SLEEPING
+  SERVER_OUTAGE
+  RECORD_BROKEN
+  LEGENDARY_ACHIEVEMENT
+  WEEKLY_CHRONICLE
+}
+
 model User {
   id               String           @id @default(uuid()) @db.Uuid
   name             String?
@@ -419,10 +428,44 @@ model ServerEvent {
   server           GameServer       @relation(fields: [serverId], references: [id], onDelete: Cascade)
   playerIdentity   PlayerIdentity?  @relation(fields: [playerIdentityId], references: [id], onDelete: SetNull)
   reactions        ChronicleReaction[]
+  discordNotifications DiscordNotification[]
 
   @@index([serverId, occurredAt])
   @@index([eventType, occurredAt])
   @@index([playerIdentityId, occurredAt])
+}
+
+model DiscordGuildConfig {
+  id                           String                @id @default(uuid()) @db.Uuid
+  guildId                      String                @unique
+  announcementChannelId        String?
+  commandsEnabled              Boolean               @default(true)
+  notificationsEnabled         Boolean               @default(true)
+  notifyServerOnline           Boolean               @default(true)
+  notifyServerSleeping         Boolean               @default(false)
+  notifyServerOutage           Boolean               @default(true)
+  notifyRecordBroken           Boolean               @default(true)
+  notifyLegendaryAchievement   Boolean               @default(true)
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+  notifications                DiscordNotification[]
+}
+
+model DiscordNotification {
+  id            String                  @id @default(uuid()) @db.Uuid
+  configId      String                  @db.Uuid
+  serverEventId String?                 @db.Uuid
+  kind          DiscordNotificationKind
+  content       String
+  dedupeKey     String                  @unique
+  queuedAt      DateTime                @default(now())
+  sentAt        DateTime?
+  attempts      Int                     @default(0)
+  lastError     String?
+  config        DiscordGuildConfig      @relation(fields: [configId], references: [id], onDelete: Cascade)
+  serverEvent   ServerEvent?            @relation(fields: [serverEventId], references: [id], onDelete: SetNull)
+
+  @@index([configId, sentAt, queuedAt])
 }
 
 model ServerPlayerPresence {

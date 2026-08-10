@@ -91,7 +91,13 @@ Last updated: 2026-08-10
 
 ## Phase 10 - Discord
 
-- [ ] Not started
+- [x] Optional private Discord bot runtime in the MartServ101 worker; monitoring remains independent when Discord is unavailable
+- [x] Guild-scoped read-only commands: `/habitat`, `/server`, `/who`, `/leaderboard`, `/shame`, `/chronicle`, and a safe non-actioning `/wake`
+- [x] Admin-only, audit-logged guild and announcement-channel configuration
+- [x] Durable, replay-safe Discord outbox for server online/rest/outage, record-break, and Legendary-achievement notices
+- [x] Category-level notification toggles; ordinary joins and leaves remain silent
+- [ ] Live bot install, guild command registration, channel delivery, and command verification
+- [ ] Wake-request notices, weekly Chronicle summary, and other Phase 11-driven Discord flows
 
 ## Phase 11 - Wake Requests and Polls
 

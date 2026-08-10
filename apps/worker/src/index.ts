@@ -2,6 +2,8 @@ import { HabitatAgentClient } from "./agent-client.js";
 import { loadWorkerConfiguration } from "./config.js";
 import { createPostgresMonitoringRepository, runMonitoringCycle } from "./monitoring.js";
 import { getPrismaClient } from "@habitat/db/client";
+import { startDiscordBot } from "./discord-bot.js";
+import { dispatchPendingDiscordNotifications } from "./discord-notifications.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -13,10 +15,25 @@ async function main(): Promise<void> {
   const repository = createPostgresMonitoringRepository();
   const agent = new HabitatAgentClient(configuration.agentUrl, configuration.agentToken);
   const runOnce = process.argv.includes("--once");
+  let discordBot: Awaited<ReturnType<typeof startDiscordBot>> = null;
+  if (!runOnce) {
+    try {
+      discordBot = await startDiscordBot();
+    } catch {
+      console.warn("Habitat Discord bot was not started. Monitoring remains available.");
+    }
+  }
 
   const run = async () => {
     const result = await runMonitoringCycle(repository, agent);
+    let notifications: Awaited<ReturnType<typeof dispatchPendingDiscordNotifications>> | null = null;
+    try {
+      notifications = await dispatchPendingDiscordNotifications();
+    } catch {
+      console.warn("Habitat Discord delivery failed. Monitoring remains available.");
+    }
     console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
+    if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
   };
 
   if (runOnce) {
@@ -44,6 +61,7 @@ async function main(): Promise<void> {
   const interval = setInterval(() => { void tick(); }, configuration.pollIntervalMs);
   const shutdown = () => {
     clearInterval(interval);
+    discordBot?.stop();
     void getPrismaClient().$disconnect().finally(() => process.exit(0));
   };
   process.once("SIGINT", shutdown);
