@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardCheck, LayoutDashboard, Map } from "lucide-react";
+import { Award, ClipboardCheck, LayoutDashboard, Map } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const items = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/servers", label: "World registry", icon: Map },
   { href: "/admin/claims", label: "Identity claims", icon: ClipboardCheck },
+  { href: "/admin/titles", label: "Titles", icon: Award },
 ];
 
 export function AdminSuiteNav() {

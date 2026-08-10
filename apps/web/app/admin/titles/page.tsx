@@ -1,0 +1,15 @@
+import { Award, Plus } from "lucide-react";
+import { getPrismaClient } from "@habitat/db/client";
+import { requireRole } from "@/lib/authorization";
+import { createTitleDefinition, grantTitle } from "./actions";
+
+const db = getPrismaClient();
+
+export default async function AdminTitlesPage() {
+  await requireRole("ADMIN");
+  const [titles, users] = await Promise.all([
+    db.titleDefinition.findMany({ orderBy: { name: "asc" }, include: { _count: { select: { userTitles: true } } } }),
+    db.user.findMany({ where: { isActive: true }, select: { id: true, name: true, email: true }, orderBy: { name: "asc" } }),
+  ]);
+  return <section className="page-shell"><div className="page-intro"><p className="eyebrow">Habitat administration</p><h1>Titles</h1><p>Create manually awarded titles here. Achievement-issued titles will join this same inventory once the achievement engine is live.</p></div><div className="admin-title-grid"><form action={createTitleDefinition} className="server-editor"><div className="server-editor-heading"><div><p className="eyebrow">Definition</p><h2>New title</h2></div><Plus aria-hidden="true" size={18} /></div><div className="server-editor-fields"><label className="field-wide">Title name<input name="name" maxLength={60} required /></label><label className="field-wide">Description<textarea name="description" maxLength={180} rows={3} /></label></div><button className="save-server" type="submit"><Plus aria-hidden="true" size={16} /> Create title</button></form><form action={grantTitle} className="server-editor"><div className="server-editor-heading"><div><p className="eyebrow">Manual grant</p><h2>Award a title</h2></div><Award aria-hidden="true" size={18} /></div><div className="server-editor-fields"><label className="field-wide">Title<select name="titleDefinitionId" required defaultValue=""><option disabled value="">Choose a title</option>{titles.filter((title) => title.enabled).map((title) => <option key={title.id} value={title.id}>{title.name}</option>)}</select></label><label className="field-wide">Habitat member<select name="userId" required defaultValue=""><option disabled value="">Choose a member</option>{users.map((user) => <option key={user.id} value={user.id}>{user.name ?? user.email ?? "Habitat member"}</option>)}</select></label></div><button className="save-server" disabled={titles.length === 0 || users.length === 0} type="submit"><Award aria-hidden="true" size={16} /> Grant title</button></form></div><div className="profile-heading"><div><p className="eyebrow">Title inventory</p><h2>Available titles</h2></div></div>{titles.length === 0 ? <div className="chronicle-empty"><p>No title definitions yet.</p><span>Create a title only when there is a real reason to award it.</span></div> : <div className="title-grid">{titles.map((title) => <article className="title-card" key={title.id}><p className="eyebrow">{title._count.userTitles} holders</p><h2>{title.name}</h2><p>{title.description ?? "No description recorded."}</p></article>)}</div>}</section>;
+}

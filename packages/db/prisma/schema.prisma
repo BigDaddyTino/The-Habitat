@@ -68,6 +68,11 @@ enum IdentityClaimStatus {
   REJECTED
 }
 
+enum UserTitleSource {
+  ADMIN
+  ACHIEVEMENT
+}
+
 model User {
   id               String           @id @default(uuid()) @db.Uuid
   name             String?
@@ -87,6 +92,8 @@ model User {
   chronicleReactions ChronicleReaction[]
   identityClaims   PlayerIdentityClaim[] @relation("IdentityClaimant")
   resolvedIdentityClaims PlayerIdentityClaim[] @relation("IdentityClaimResolver")
+  titles           UserTitle[] @relation("TitleOwner")
+  awardedTitles    UserTitle[] @relation("TitleAwarder")
 }
 
 model Account {
@@ -243,6 +250,33 @@ model PlayerIdentityClaim {
   @@unique([playerIdentityId, userId])
   @@index([status, requestedAt])
   @@index([userId, requestedAt])
+}
+
+model TitleDefinition {
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique
+  name        String    @unique
+  description String?
+  enabled     Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userTitles  UserTitle[]
+}
+
+model UserTitle {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String          @db.Uuid
+  titleDefinitionId String        @db.Uuid
+  source          UserTitleSource
+  equipped        Boolean         @default(false)
+  awardedAt       DateTime        @default(now())
+  awardedByUserId String?         @db.Uuid
+  user            User            @relation("TitleOwner", fields: [userId], references: [id], onDelete: Cascade)
+  title           TitleDefinition @relation(fields: [titleDefinitionId], references: [id], onDelete: Cascade)
+  awardedBy       User?           @relation("TitleAwarder", fields: [awardedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, titleDefinitionId])
+  @@index([userId, equipped])
 }
 
 model ServerEvent {
