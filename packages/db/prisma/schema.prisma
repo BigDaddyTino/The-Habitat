@@ -62,6 +62,12 @@ enum ChronicleReactionType {
   SKILL_ISSUE
 }
 
+enum IdentityClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id               String           @id @default(uuid()) @db.Uuid
   name             String?
@@ -79,6 +85,8 @@ model User {
   playerIdentities PlayerIdentity[]
   auditLogs        AuditLog[]
   chronicleReactions ChronicleReaction[]
+  identityClaims   PlayerIdentityClaim[] @relation("IdentityClaimant")
+  resolvedIdentityClaims PlayerIdentityClaim[] @relation("IdentityClaimResolver")
 }
 
 model Account {
@@ -214,8 +222,27 @@ model PlayerIdentity {
   user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   server      GameServer? @relation(fields: [serverId], references: [id], onDelete: SetNull)
   events      ServerEvent[]
+  claims      PlayerIdentityClaim[]
 
   @@unique([gameType, providerKey])
+}
+
+model PlayerIdentityClaim {
+  id               String              @id @default(uuid()) @db.Uuid
+  playerIdentityId String              @db.Uuid
+  userId           String              @db.Uuid
+  status           IdentityClaimStatus @default(PENDING)
+  requestedAt      DateTime            @default(now())
+  resolvedAt       DateTime?
+  resolvedByUserId String?             @db.Uuid
+  resolutionNote   String?
+  playerIdentity   PlayerIdentity      @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
+  user             User                @relation("IdentityClaimant", fields: [userId], references: [id], onDelete: Cascade)
+  resolvedBy       User?               @relation("IdentityClaimResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([playerIdentityId, userId])
+  @@index([status, requestedAt])
+  @@index([userId, requestedAt])
 }
 
 model ServerEvent {

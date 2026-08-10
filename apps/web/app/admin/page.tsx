@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { ClipboardCheck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { requireRole } from "@/lib/authorization";
 
@@ -11,7 +11,7 @@ export default async function AdminPage() {
         <p className="eyebrow">Authorized administrator</p>
         <h1>Operations center reserved.</h1>
         <p>{user.name ?? "Admin"}, registry metadata is ready. Monitoring and audited operations follow as their phases open.</p>
-        <Link className="primary-link admin-link" href="/admin/servers">Manage world registry</Link>
+        <div className="admin-links"><Link className="primary-link admin-link" href="/admin/servers">Manage world registry</Link><Link className="primary-link admin-link" href="/admin/claims"><ClipboardCheck aria-hidden="true" size={16} /> Identity claims</Link></div>
       </div>
     </section>
   );

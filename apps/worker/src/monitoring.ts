@@ -250,24 +250,31 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
   const observedKeys = new Set(players.map((player) => player.providerKey));
 
   for (const player of players) {
+    const identity = await transaction.playerIdentity.upsert({
+      where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: player.providerKey } },
+      create: { gameType: "PALWORLD", providerKey: player.providerKey, displayName: player.displayName, serverId: server.id },
+      update: { displayName: player.displayName, serverId: server.id },
+      select: { id: true },
+    });
     const previous = knownByKey.get(player.providerKey);
     if (!previous) {
       await transaction.serverPlayerPresence.create({ data: { serverId: server.id, providerKey: player.providerKey, displayName: player.displayName, present: true, firstObservedAt: observedAt, lastObservedAt: observedAt } });
-      if (server.playerPresenceInitialized) await createPalworldPresenceEvent(transaction, server, player, "PLAYER_JOINED", observedAt);
+      if (server.playerPresenceInitialized) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
       continue;
     }
-    if (!previous.present) await createPalworldPresenceEvent(transaction, server, player, "PLAYER_JOINED", observedAt);
+    if (!previous.present) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: player.providerKey } }, data: { displayName: player.displayName, present: true, lastObservedAt: observedAt } });
   }
 
   if (!server.playerPresenceInitialized) return;
   for (const presence of known.filter((item) => item.present && !observedKeys.has(item.providerKey))) {
-    await createPalworldPresenceEvent(transaction, server, presence, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
+    const identity = await transaction.playerIdentity.findUnique({ where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: presence.providerKey } }, select: { id: true } });
+    await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
   }
 }
 
-async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
+async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
   const occurrence = priorObservedAt ?? observedAt;
   await transaction.serverEvent.upsert({
     where: { dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}` },
@@ -277,6 +284,7 @@ async function createPalworldPresenceEvent(transaction: PresenceTransaction, ser
       eventType,
       occurredAt: observedAt,
       actorText: player.displayName,
+      playerIdentityId,
       source: "PALWORLD_REST",
       sourceConfidence: 100,
       dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}`,

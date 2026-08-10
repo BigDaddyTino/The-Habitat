@@ -63,7 +63,11 @@ Last updated: 2026-08-10
 
 ## Phase 7 - Player Identities and Profiles
 
-- [ ] Not started
+- [x] Private cross-game identity registry populated from verified Palworld player observations
+- [x] Authenticated member claim requests and admin-only, audit-logged approval or rejection flow
+- [x] Profile identity cards and protected admin claim-review route
+- [ ] Live claim and approval verification with a newly observed Palworld identity
+- [ ] Discord identity, titles, equipped-title selection, and verified game-stat sections
 
 ## Phase 8 - Achievement Engine
 
