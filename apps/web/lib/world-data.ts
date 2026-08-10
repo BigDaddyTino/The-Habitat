@@ -22,6 +22,8 @@ export type WorldView = {
   enabled: boolean;
 };
 
+export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string };
+
 const accents: Record<string, WorldView["accent"]> = {
   SEVEN_DAYS_TO_DIE: "rose",
   PROJECT_ZOMBOID: "moss",
@@ -90,4 +92,18 @@ export async function getWorldBySlug(slug: string) {
   } catch {
     return null;
   }
+}
+
+export async function getChronicleEvents(limit = 50): Promise<ChronicleEventView[]> {
+  const events = await db.serverEvent.findMany({ include: { server: { select: { displayName: true, slug: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take: Math.min(Math.max(limit, 1), 100) });
+  return events.map((event) => ({ id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName) }));
+}
+
+function chronicleText(eventType: string, world: string) {
+  if (eventType === "SERVER_STARTED") return `${world} came online.`;
+  if (eventType === "SERVER_SLEEPING") return `${world} entered intentional rest.`;
+  if (eventType === "SERVER_UPDATED") return `${world} entered an update cycle.`;
+  if (eventType === "SERVER_CRASHED") return `${world} stopped unexpectedly.`;
+  if (eventType === "WORLD_SAVED") return `${world} completed a verified world save.`;
+  return `${world} recorded a verified event.`;
 }

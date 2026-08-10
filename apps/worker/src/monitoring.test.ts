@@ -3,7 +3,7 @@ import test from "node:test";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import { runMonitoringCycle, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
 
-const valheim: MonitoredServer = { id: "server-1", slug: "valheim", desiredState: "ONLINE", actualState: "UNKNOWN" };
+const valheim: MonitoredServer = { id: "server-1", slug: "valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN" };
 const status: AgentServerStatus = {
   key: "valheim",
   observedAt: new Date().toISOString(),

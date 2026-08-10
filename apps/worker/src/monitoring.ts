@@ -5,6 +5,7 @@ import { normalizeServerState } from "./state.js";
 export type MonitoredServer = {
   id: string;
   slug: string;
+  gameType: string;
   desiredState: ServerState;
   actualState: ServerState;
 };
@@ -63,7 +64,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async findBySlug(slug) {
       const server = await db.gameServer.findUnique({
         where: { slug },
-        select: { id: true, slug: true, desiredState: true, actualState: true },
+        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true },
       });
       return server ? toMonitoredServer(server) : null;
     },
@@ -73,7 +74,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           lastQueryAt: { not: null },
           runtimeState: { is: { processRunning: { not: null } } },
         },
-        select: { id: true, slug: true, desiredState: true, actualState: true },
+        select: { id: true, slug: true, gameType: true, desiredState: true, actualState: true },
       });
       return servers.map(toMonitoredServer);
     },
@@ -90,6 +91,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
         disk: status.disk,
         executable: status.executable,
         query: status.query,
+        log: status.log,
       };
       await db.$transaction(async (transaction) => {
         await transaction.serverRuntimeState.upsert({
@@ -142,6 +144,36 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
               details: { source: "HABITAT_AGENT", processRunning: status.process.running, queryReachable: status.query?.reachable ?? null },
             },
           });
+          const eventType = chronicleEventType(decision.state);
+          if (eventType) {
+            await transaction.serverEvent.create({
+              data: {
+                serverId: server.id,
+                gameType: server.gameType as never,
+                eventType,
+                occurredAt: observedAt,
+                source: "HABITAT_AGENT",
+                sourceConfidence: 100,
+                dedupeKey: `state:${server.id}:${decision.state}:${observedAt.toISOString()}`,
+              },
+            });
+          }
+        }
+        if (status.log?.available && status.log.lastSaveAt) {
+          await transaction.serverEvent.upsert({
+            where: { dedupeKey: `dragonwilds-save:${server.id}:${status.log.lastSaveAt}` },
+            create: {
+              serverId: server.id,
+              gameType: server.gameType as never,
+              eventType: "WORLD_SAVED",
+              occurredAt: observedAt,
+              source: "DRAGONWILDS_LOG",
+              sourceConfidence: 100,
+              dedupeKey: `dragonwilds-save:${server.id}:${status.log.lastSaveAt}`,
+              metadata: { sourceTimestamp: status.log.lastSaveAt },
+            },
+            update: {},
+          });
         }
         await transaction.serverMetricSample.create({
           data: {
@@ -192,8 +224,16 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
   };
 }
 
-function toMonitoredServer(server: { id: string; slug: string; desiredState: string; actualState: string }): MonitoredServer {
-  return { id: server.id, slug: server.slug, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState };
+function chronicleEventType(state: ServerState): "SERVER_STARTED" | "SERVER_SLEEPING" | "SERVER_UPDATED" | "SERVER_CRASHED" | null {
+  if (state === "ONLINE") return "SERVER_STARTED";
+  if (state === "SLEEPING") return "SERVER_SLEEPING";
+  if (state === "UPDATING") return "SERVER_UPDATED";
+  if (state === "DOWN_UNEXPECTEDLY") return "SERVER_CRASHED";
+  return null;
+}
+
+function toMonitoredServer(server: { id: string; slug: string; gameType: string; desiredState: string; actualState: string }): MonitoredServer {
+  return { id: server.id, slug: server.slug, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState };
 }
 
 export function resolveDesiredState(currentDesiredState: ServerState, status: AgentServerStatus): ServerState {

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, Flame, ShieldCheck, UsersRound } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
+import { ChronicleFeed } from "@/components/chronicle-feed";
 import { WorldCard } from "@/components/world-card";
-import { getWorlds } from "@/lib/world-data";
+import { getChronicleEvents, getWorlds } from "@/lib/world-data";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
+  const chronicle = await getChronicleEvents(4);
   const liveWorlds = worlds.filter((world) => world.state === "ONLINE");
   const reportingWorlds = worlds.filter((world) => world.state !== "UNKNOWN");
   const monitorFocus = reportingWorlds[0] ?? null;
@@ -42,7 +44,7 @@ export default async function GreatHallPage() {
       <section className="content-shell lower-grid">
         <div className="chronicle-panel">
           <div className="panel-heading"><div><p className="eyebrow">The Habitat Chronicle</p><h2>Recent dispatches</h2></div><Link href="/chronicle">All history <ArrowRight size={15} /></Link></div>
-          <div className="chronicle-empty"><p>No verified Chronicle events yet.</p><span>Monitoring will write the first true dispatch.</span></div>
+          <ChronicleFeed events={chronicle} compact />
         </div>
         <aside className="fire-panel">
           <p className="eyebrow">Monitor report</p>
