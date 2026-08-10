@@ -139,6 +139,7 @@ model GameServer {
   updatedAt       DateTime              @updatedAt
   runtimeState    ServerRuntimeState?
   statusHistory   ServerStatusHistory[]
+  metricSamples   ServerMetricSample[]
   events          ServerEvent[]
   playerIdentities PlayerIdentity[]
 }
@@ -169,6 +170,23 @@ model ServerStatusHistory {
   reason     String?
   details    Json?
   server     GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, observedAt])
+}
+
+model ServerMetricSample {
+  id                 String   @id @default(uuid()) @db.Uuid
+  serverId           String   @db.Uuid
+  observedAt         DateTime
+  playerCount        Int?
+  maxPlayers         Int?
+  pingMs             Int?
+  processMemoryBytes BigInt?
+  cpuSeconds         Float?
+  diskFreeBytes      BigInt?
+  diskTotalBytes     BigInt?
+  source             String
+  server             GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, observedAt])
 }

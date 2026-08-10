@@ -7,6 +7,8 @@ import { getWorlds } from "@/lib/world-data";
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
   const liveWorlds = worlds.filter((world) => world.state === "ONLINE");
+  const reportingWorlds = worlds.filter((world) => world.state !== "UNKNOWN");
+  const monitorFocus = reportingWorlds[0] ?? null;
   const activePlayers = liveWorlds.reduce((total, world) => total + (world.players ?? 0), 0);
   return (
     <div className="great-hall">
@@ -43,10 +45,10 @@ export default async function GreatHallPage() {
           <div className="chronicle-empty"><p>No verified Chronicle events yet.</p><span>Monitoring will write the first true dispatch.</span></div>
         </div>
         <aside className="fire-panel">
-          <p className="eyebrow">Light the fire</p>
-          <h2>The next fire starts here.</h2>
-          <p>Wake requests open after live monitoring has proven the world states.</p>
-          <div className="fire-panel-status"><StatusBadge state="UNKNOWN" /><span>Waiting on MartServ102 telemetry</span></div>
+          <p className="eyebrow">Monitor report</p>
+          <h2>{monitorFocus ? `${monitorFocus.game} is ${monitorFocus.state.replaceAll("_", " ").toLowerCase()}.` : "Waiting on the first report."}</h2>
+          <p>{monitorFocus ? `${reportingWorlds.length} world${reportingWorlds.length === 1 ? " is" : "s are"} reporting verified runtime state through the Habitat Agent.` : "The dashboard will remain unknown until the worker records verified agent telemetry."}</p>
+          <div className="fire-panel-status"><StatusBadge state={monitorFocus?.state ?? "UNKNOWN"} /><span>{monitorFocus ? `Last fire: ${monitorFocus.lastFire}` : "Waiting on MartServ102 telemetry"}</span></div>
         </aside>
       </section>
     </div>

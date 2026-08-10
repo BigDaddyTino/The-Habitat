@@ -1,0 +1,43 @@
+# Habitat Worker Deployment
+
+The Habitat Worker runs natively on MartServ101. It makes outbound, bearer-authenticated requests to the private MartServ102 agent and writes verified observations to localhost-only PostgreSQL. It does not expose an HTTP port.
+
+## Configuration
+
+Keep the existing MartServ101 root `.env` in place and add these local-only values:
+
+```text
+HABITAT_AGENT_URL=http://<MartServ102 private LAN IP>:4317
+HABITAT_AGENT_TOKEN=<the same token used by the MartServ102 agent>
+HABITAT_WORKER_POLL_INTERVAL_MS=15000
+```
+
+The worker rejects public, HTTPS, credentialed, or path-bearing agent URLs. Its token stays in `.env`; it is not typed into a PowerShell variable for normal operation.
+
+## First Cycle
+
+From an ordinary MartServ101 PowerShell session at the repository root:
+
+```powershell
+$env:Path = "C:\Program Files\nodejs;$env:Path"
+& "C:\Program Files\nodejs\corepack.cmd" pnpm --filter @habitat/worker run-once
+```
+
+The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`.
+
+## Windows Service
+
+After a successful one-cycle check, download the WinSW executable to `<repository>\HabitatWorker.exe`. From an elevated PowerShell session:
+
+```powershell
+Set-Location "<repository>"
+.\apps\worker\scripts\install-worker.ps1 -InstallRoot (Get-Location)
+```
+
+The service reads the persistent root `.env` automatically. It has no inbound firewall rule or listening port. Its logs are local-only in `worker-logs`.
+
+To remove it without deleting the local configuration or logs:
+
+```powershell
+.\apps\worker\scripts\uninstall-worker.ps1 -InstallRoot "<repository>"
+```

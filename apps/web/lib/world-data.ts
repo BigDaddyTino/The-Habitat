@@ -42,7 +42,8 @@ function formatLastFire(lastOnlineAt: Date | null) {
 }
 
 function adapterNote(adapterType: string) {
-  if (adapterType === "palworld-rest") return "Official LAN-only REST adapter.";
+  if (adapterType === "palworld-rest") return "Agent process observation is live; LAN-only REST remains planned.";
+  if (adapterType === "gamedig") return "Agent process observation is live; game query support remains planned.";
   if (adapterType === "dragonwilds") return "Agent and log adapter planned.";
   return "Game query adapter planned.";
 }

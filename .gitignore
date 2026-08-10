@@ -10,6 +10,9 @@ apps/agent/agent.config.json
 apps/agent/HabitatAgent.exe
 apps/agent/HabitatAgent.xml
 apps/agent/logs/
+HabitatWorker.exe
+HabitatWorker.xml
+worker-logs/
 *.log
 *.tsbuildinfo
 packages/db/src/generated/

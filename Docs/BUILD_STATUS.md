@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-09
+Last updated: 2026-08-10
 
 ## Phase 0 - Repository and Documentation
 
@@ -38,11 +38,14 @@ Last updated: 2026-08-09
 - [x] Windows process, uptime, memory, CPU-time, disk, executable-version, and optional GameDig observations
 - [x] WinSW template plus explicit install, uninstall, and MartServ101-only firewall scripts
 - [x] Worker-to-agent authenticated health probe and tests
-- [ ] Deploy to MartServ102 with inspected game paths, process names, bind address, and firewall source
+- [x] Deployed to MartServ102 with source-locked firewall and inspected Valheim/Palworld process telemetry
 
 ## Phase 5 - Live Monitoring
 
-- [ ] Not started
+- [x] Authenticated worker client, state normalization, runtime persistence, transition history, and metric samples
+- [x] Native MartServ101 worker service packaging and one-cycle rollout command
+- [ ] Configure MartServ101 worker credentials and record the first verified database cycle
+- [ ] Add verified game-query adapters and remaining game-server process configurations
 
 ## Phase 6 - Chronicle and Event Ingestion
 
