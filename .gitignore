@@ -13,6 +13,9 @@ apps/agent/logs/
 HabitatWorker.exe
 HabitatWorker.xml
 worker-logs/
+HabitatWeb.exe
+HabitatWeb.xml
+web-logs/
 *.log
 *.tsbuildinfo
 packages/db/src/generated/

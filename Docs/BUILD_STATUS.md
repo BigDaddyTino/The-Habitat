@@ -30,6 +30,7 @@ Last updated: 2026-08-10
 - [x] Worlds and Departure Board routes
 - [x] Database-backed registry and audited admin metadata editor
 - [x] Dashboard uses only verified registry data; runtime telemetry remains `UNKNOWN` until the agent reports it
+- [x] Loopback-only production web service packaging with WinSW install, update, and removal scripts
 
 ## Phase 4 - Habitat Agent
 
