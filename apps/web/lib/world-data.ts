@@ -42,7 +42,7 @@ function formatLastFire(lastOnlineAt: Date | null) {
 }
 
 function adapterNote(adapterType: string) {
-  if (adapterType === "palworld-rest") return "Verified process telemetry is live; the authenticated LAN-only REST adapter remains next.";
+  if (adapterType === "palworld-rest") return "Verified local authenticated REST query reports process state, capacity, player count, and version.";
   if (adapterType === "gamedig") return "Verified local game query reports process state, ping, capacity, and supported player counts.";
   if (adapterType === "dragonwilds") return "Verified process telemetry is live; a game query adapter has not yet been confirmed.";
   return "Verified process telemetry is live; game query support is not configured.";
