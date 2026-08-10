@@ -6,9 +6,9 @@ import type { AgentDiskObservation, AgentExecutableObservation, AgentProcessObse
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
-const processLookupScript = "$items = @(Get-Process -Name $env:HABITAT_PROCESS_NAME -ErrorAction SilentlyContinue | Select-Object Id,ProcessName,StartTime,WorkingSet64,CPU,Path); $items | ConvertTo-Json -Compress";
+const processLookupScript = "$name = $env:HABITAT_PROCESS_EXE; $items = @(Get-CimInstance Win32_Process -Filter \"Name='$name'\" -ErrorAction SilentlyContinue | ForEach-Object { [PSCustomObject]@{ Id = $_.ProcessId; StartTime = if ($_.CreationDate) { $_.CreationDate.ToUniversalTime().ToString('o') } else { $null }; WorkingSet64 = [double]$_.WorkingSetSize; CPU = ([double]$_.KernelModeTime + [double]$_.UserModeTime) / 10000000 } }); $items | ConvertTo-Json -Compress";
 const diskLookupScript = "$drive = $env:HABITAT_DISK_DRIVE; $disk = Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='$drive'\" | Select-Object FreeSpace,Size; $disk | ConvertTo-Json -Compress";
-const executableLookupScript = "$item = Get-Item -LiteralPath $env:HABITAT_EXECUTABLE_PATH -ErrorAction SilentlyContinue; if ($item) { [PSCustomObject]@{ Version = $item.VersionInfo.FileVersion } | ConvertTo-Json -Compress }";
+const executableLookupScript = "$item = Get-Item -LiteralPath $env:HABITAT_EXECUTABLE_PATH -ErrorAction SilentlyContinue; if ($item) { [PSCustomObject]@{ Exists = $true; Version = $item.VersionInfo.FileVersion } | ConvertTo-Json -Compress }";
 
 type WindowsProcess = { Id: number; StartTime?: string; WorkingSet64?: number; CPU?: number };
 
@@ -24,11 +24,12 @@ export async function observeServer(server: AgentServerConfiguration): Promise<{
 
 export async function observeProcess(configuredProcessName: string): Promise<AgentProcessObservation> {
   if (process.platform !== "win32") return emptyProcessObservation();
+  const executableName = configuredProcessName.toLowerCase().endsWith(".exe") ? configuredProcessName : `${configuredProcessName}.exe`;
   try {
     const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", processLookupScript], {
       timeout: 5_000,
       windowsHide: true,
-      env: { ...process.env, HABITAT_PROCESS_NAME: configuredProcessName },
+      env: { ...process.env, HABITAT_PROCESS_EXE: executableName },
     });
     const processes = parseJsonArray<WindowsProcess>(stdout);
     if (processes.length === 0) return emptyProcessObservation();
@@ -74,8 +75,8 @@ async function observeExecutable(executablePath: string): Promise<AgentExecutabl
       windowsHide: true,
       env: { ...process.env, HABITAT_EXECUTABLE_PATH: executablePath },
     });
-    const value = parseSingleJson<{ Version?: string }>(stdout);
-    return { available: Boolean(value?.Version), version: value?.Version?.trim() || null };
+    const value = parseSingleJson<{ Exists?: boolean; Version?: string }>(stdout);
+    return { available: value?.Exists === true, version: value?.Version?.trim() || null };
   } catch {
     return { available: false, version: null };
   }
