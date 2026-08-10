@@ -6,7 +6,7 @@ The Habitat Agent is a private, read-only Windows service for MartServ102. It is
 
 - The agent binds to one explicit private LAN address. It never binds to `0.0.0.0`.
 - Every route requires `Authorization: Bearer <HABITAT_AGENT_TOKEN>`.
-- The firewall accepts TCP 4317 only from the explicit MartServ101 LAN address supplied at install time.
+- The firewall accepts TCP 4317 only from the explicit MartServ101 LAN address supplied at install time, on the agent's configured private address. The rule applies across Windows network profiles without broadening its address scope.
 - The only implemented routes are `GET /health`, `GET /v1/servers`, and `GET /v1/servers/:key/status`.
 - There are no action, shell, command, arbitrary-path, or arbitrary-host endpoints.
 

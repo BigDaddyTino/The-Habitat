@@ -25,5 +25,5 @@ if (-not (Test-PrivateIpv4 $AgentBindIp) -or -not (Test-PrivateIpv4 $MartServ101
 }
 
 Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule
-New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -Action Allow -Protocol TCP -LocalAddress $AgentBindIp -LocalPort $Port -RemoteAddress $MartServ101Ip -Profile Private | Out-Null
+New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -Action Allow -Protocol TCP -LocalAddress $AgentBindIp -LocalPort $Port -RemoteAddress $MartServ101Ip -Profile Any | Out-Null
 Write-Output "Firewall allows Habitat Agent TCP $Port only from $MartServ101Ip."
