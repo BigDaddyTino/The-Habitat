@@ -3,6 +3,7 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
 
@@ -73,4 +74,5 @@ export async function updateServerMetadata(formData: FormData) {
   revalidatePath(`/worlds/${existing.slug}`);
   revalidatePath("/departure-board");
   revalidatePath("/admin/servers");
+  redirect("/admin/servers");
 }
