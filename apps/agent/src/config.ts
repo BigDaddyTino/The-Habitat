@@ -72,7 +72,7 @@ export async function loadAgentConfiguration(environment = process.env): Promise
 
   const configurationPath = path.resolve(environment.HABITAT_AGENT_CONFIG_PATH ?? path.resolve(process.cwd(), "agent.config.json"));
   const rawConfiguration = await readFile(configurationPath, "utf8");
-  const parsedConfiguration = configurationFileSchema.safeParse(JSON.parse(rawConfiguration));
+  const parsedConfiguration = configurationFileSchema.safeParse(JSON.parse(rawConfiguration.replace(/^\uFEFF/, "")));
   if (!parsedConfiguration.success) {
     throw new Error(`Invalid agent configuration: ${parsedConfiguration.error.issues.map((issue) => issue.message).join("; ")}`);
   }

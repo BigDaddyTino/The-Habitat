@@ -30,3 +30,20 @@ test("agent configuration requires explicit local trust boundaries", async () =>
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("agent configuration accepts a UTF-8 byte order mark", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "habitat-agent-"));
+  const configurationPath = path.join(directory, "agent.config.json");
+  await writeFile(configurationPath, `\uFEFF${JSON.stringify({ servers: [] })}`, "utf8");
+  try {
+    const configuration = await loadAgentConfiguration({
+      HABITAT_AGENT_TOKEN: "a-32-character-minimum-agent-token!!",
+      HABITAT_AGENT_BIND_HOST: "127.0.0.1",
+      HABITAT_AGENT_ALLOWED_IPS: "127.0.0.1",
+      HABITAT_AGENT_CONFIG_PATH: configurationPath,
+    });
+    assert.deepEqual(configuration.servers, []);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
