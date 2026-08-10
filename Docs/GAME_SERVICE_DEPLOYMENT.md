@@ -6,12 +6,11 @@ Phase 12 controls only named Windows services. The Habitat agent never accepts a
 
 Run these steps on MartServ102 from an elevated PowerShell session.
 
-1. Keep each current start and update batch unchanged.
+1. Keep each current start and update batch unchanged as a known-good manual fallback.
 2. Copy `apps/agent/game-services.example.json` to the ignored local `apps/agent/game-services.json`.
-3. Populate each game with its existing start and update batch paths, the corresponding working directories, and unique service names.
-4. For 7 Days to Die, copy `apps/agent/service-templates/7-days-to-die-launch.cmd.example` into the server directory, name it something local such as `Habitat-7DaysToDie-Service.cmd`, and use that file as `startScript`. Its existing launcher detaches the game process, so it cannot be service-managed safely.
+3. Set only `valheimPassword` in that local file.
 
-The installer creates ignored copies in `apps/agent/game-services/<key>/` and removes `pause` lines from those copies. Sensitive launch arguments remain local and are never committed.
+The installer generates Habitat-owned non-interactive start and update scripts for all six games in `apps/agent/game-services/<key>/`. Their executable paths, working directories, Steam application IDs, and known launch flags come from the inspected dedicated-server commands. The Valheim password remains only in ignored local configuration and the generated local service XML.
 
 The installer adds the corresponding `control` block to each matching entry in the ignored `agent.config.json`; do not copy service names or script paths into tracked files.
 

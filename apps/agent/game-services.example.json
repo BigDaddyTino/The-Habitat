@@ -1,10 +1,3 @@
 {
-  "games": [
-    { "key": "valheim", "serviceName": "HabitatGameValheim", "updateServiceName": "HabitatUpdateValheim", "startScript": "C:\\path\\to\\Valheim-Start.bat", "startWorkingDirectory": "C:\\path\\to\\Valheim", "updateScript": "C:\\path\\to\\Valheim-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\Valheim", "stopTimeoutSeconds": 120 },
-    { "key": "palworld", "serviceName": "HabitatGamePalworld", "updateServiceName": "HabitatUpdatePalworld", "startScript": "C:\\path\\to\\Palworld-Start.bat", "startWorkingDirectory": "C:\\path\\to\\Palworld", "updateScript": "C:\\path\\to\\Palworld-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\SteamCMD", "stopTimeoutSeconds": 120 },
-    { "key": "dragonwilds", "serviceName": "HabitatGameDragonwilds", "updateServiceName": "HabitatUpdateDragonwilds", "startScript": "C:\\path\\to\\Dragonwilds-Start.bat", "startWorkingDirectory": "C:\\path\\to\\Dragonwilds", "updateScript": "C:\\path\\to\\Dragonwilds-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\SteamCMD", "stopTimeoutSeconds": 120 },
-    { "key": "enshrouded", "serviceName": "HabitatGameEnshrouded", "updateServiceName": "HabitatUpdateEnshrouded", "startScript": "C:\\path\\to\\Enshrouded-Start.bat", "startWorkingDirectory": "C:\\path\\to\\Enshrouded", "updateScript": "C:\\path\\to\\Enshrouded-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\SteamCMD", "stopTimeoutSeconds": 120 },
-    { "key": "project-zomboid", "serviceName": "HabitatGameProjectZomboid", "updateServiceName": "HabitatUpdateProjectZomboid", "startScript": "C:\\path\\to\\ProjectZomboid-Start.bat", "startWorkingDirectory": "C:\\path\\to\\ProjectZomboid", "updateScript": "C:\\path\\to\\ProjectZomboid-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\SteamCMD", "stopTimeoutSeconds": 180 },
-    { "key": "7-days-to-die", "serviceName": "HabitatGame7DaysToDie", "updateServiceName": "HabitatUpdate7DaysToDie", "startScript": "C:\\path\\to\\Habitat-7DaysToDie-Service.cmd", "startWorkingDirectory": "C:\\path\\to\\7DaysToDie", "updateScript": "C:\\path\\to\\7DaysToDie-Update.bat", "updateWorkingDirectory": "C:\\path\\to\\SteamCMD", "stopTimeoutSeconds": 180 }
-  ]
+  "valheimPassword": "REPLACE_WITH_YOUR_VALHEIM_PASSWORD"
 }

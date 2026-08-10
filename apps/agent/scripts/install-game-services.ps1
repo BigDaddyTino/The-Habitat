@@ -22,43 +22,78 @@ foreach ($required in @($configurationPath, $agentConfigurationPath, $winsw)) {
 }
 
 $configuration = Get-Content -Raw -LiteralPath $configurationPath | ConvertFrom-Json
-$agentConfiguration = Get-Content -Raw -LiteralPath $agentConfigurationPath | ConvertFrom-Json
-if ($null -eq $configuration.games -or @($configuration.games).Count -eq 0) { throw "game-services.json must contain at least one game." }
-
-$seenKeys = @{}
-$seenServiceNames = @{}
-New-Item -ItemType Directory -Path $servicesRoot -Force | Out-Null
-
-foreach ($game in @($configuration.games)) {
-  foreach ($property in @("key", "serviceName", "updateServiceName", "startScript", "updateScript")) {
-    if ([string]::IsNullOrWhiteSpace([string]$game.$property)) { throw "Each game requires $property." }
-  }
-  if ([string]$game.key -notmatch '^[a-z0-9][a-z0-9-]{0,62}$') { throw "Invalid game key: $($game.key)" }
-  foreach ($serviceName in @([string]$game.serviceName, [string]$game.updateServiceName)) {
-    if ($serviceName -notmatch '^[A-Za-z0-9_.-]{1,120}$') { throw "Invalid Windows service name: $serviceName" }
-    if ($seenServiceNames.ContainsKey($serviceName)) { throw "Duplicate Windows service name: $serviceName" }
-    $seenServiceNames[$serviceName] = $true
-  }
-  if ($seenKeys.ContainsKey([string]$game.key)) { throw "Duplicate game key: $($game.key)" }
-  $seenKeys[[string]$game.key] = $true
-  foreach ($scriptPath in @([string]$game.startScript, [string]$game.updateScript)) {
-    if (-not [System.IO.Path]::IsPathFullyQualified($scriptPath) -or -not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) { throw "Script path must be an existing absolute local file: $scriptPath" }
-  }
-  if ($null -eq ($agentConfiguration.servers | Where-Object { $_.key -eq $game.key })) { throw "Agent configuration does not contain server key: $($game.key)" }
+$valheimPassword = [string]$configuration.valheimPassword
+if ([string]::IsNullOrWhiteSpace($valheimPassword) -or $valheimPassword -eq "REPLACE_WITH_YOUR_VALHEIM_PASSWORD") {
+  throw "Set valheimPassword in the ignored local game-services.json before installing."
 }
 
-function Escape-Xml([string] $value) {
-  return [Security.SecurityElement]::Escape($value)
+function New-GameDefinition([string] $key, [string] $serviceName, [string] $updateServiceName, [string] $startWorkingDirectory, [string] $updateWorkingDirectory, [int] $stopTimeoutSeconds, [string] $startScript, [string] $updateScript, [hashtable] $environment = @{}) {
+  return [pscustomobject]@{ Key = $key; ServiceName = $serviceName; UpdateServiceName = $updateServiceName; StartWorkingDirectory = $startWorkingDirectory; UpdateWorkingDirectory = $updateWorkingDirectory; StopTimeoutSeconds = $stopTimeoutSeconds; StartScript = $startScript; UpdateScript = $updateScript; Environment = $environment }
 }
 
-function Copy-NonInteractiveScript([string] $sourcePath, [string] $destinationPath) {
-  $content = Get-Content -Raw -LiteralPath $sourcePath
-  $content = [regex]::Replace($content, '(?im)^\s*pause(?:\s+.*)?\s*\r?\n?', '')
-  [System.IO.File]::WriteAllText($destinationPath, $content, [System.Text.UTF8Encoding]::new($false))
+$games = @(
+  (New-GameDefinition "valheim" "HabitatGameValheim" "HabitatUpdateValheim" "C:\ValheimServer" "C:\ValheimServer" 120 @'
+@echo off
+set SteamAppId=892970
+cd /d "C:\ValheimServer"
+valheim_server.exe -nographics -batchmode -name "Habitat" -port 2456 -world "HabitatValhalla" -password "%HABITAT_VALHEIM_PASSWORD%" -savedir "C:\ValheimData" -public 1 -saveinterval 1800 -backups 10 -backupshort 7200 -backuplong 43200 -logFile-
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\ValheimServer" +login anonymous +app_update 896660 +quit
+'@ @{ HABITAT_VALHEIM_PASSWORD = $valheimPassword })
+  (New-GameDefinition "palworld" "HabitatGamePalworld" "HabitatUpdatePalworld" "C:\steamcmd\palworld_server" "C:\steamcmd" 120 @'
+@echo off
+cd /d "C:\steamcmd\palworld_server"
+PalServer.exe -log -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -publiclobby
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\steamcmd\palworld_server" +login anonymous +app_update 2394010 +quit
+'@)
+  (New-GameDefinition "dragonwilds" "HabitatGameDragonwilds" "HabitatUpdateDragonwilds" "C:\RSDragonwildsServer" "C:\steamcmd" 120 @'
+@echo off
+"C:\RSDragonwildsServer\RSDragonwildsServer.exe" -log -NewConsole
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\RSDragonwildsServer" +login anonymous +app_update 4019830 +quit
+'@)
+  (New-GameDefinition "enshrouded" "HabitatGameEnshrouded" "HabitatUpdateEnshrouded" "C:\Enshrouded" "C:\steamcmd" 120 @'
+@echo off
+"C:\Enshrouded\enshrouded_server.exe"
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\Enshrouded" +login anonymous +app_update 2278520 +quit
+'@)
+  (New-GameDefinition "project-zomboid" "HabitatGameProjectZomboid" "HabitatUpdateProjectZomboid" "C:\pzserver" "C:\steamcmd" 180 @'
+@echo off
+cd /d "C:\pzserver"
+set PZ_CLASSPATH=java/istack-commons-runtime.jar;java/jassimp.jar;java/javacord-2.0.17-shaded.jar;java/javax.activation-api.jar;java/jaxb-api.jar;java/jaxb-runtime.jar;java/lwjgl.jar;java/lwjgl-natives-windows.jar;java/lwjgl-glfw.jar;java/lwjgl-glfw-natives-windows.jar;java/lwjgl-jemalloc.jar;java/lwjgl-jemalloc-natives-windows.jar;java/lwjgl-opengl.jar;java/lwjgl-opengl-natives-windows.jar;java/lwjgl_util.jar;java/sqlite-jdbc-3.27.2.1.jar;java/trove-3.0.3.jar;java/uncommons-maths-1.2.3.jar;java/commons-compress-1.18.jar;java/
+".\jre64\bin\java.exe" -Djava.awt.headless=true -Dzomboid.steam=1 -Dzomboid.znetlog=1 -XX:+UseZGC -XX:-CreateCoredumpOnCrash -XX:-OmitStackTraceInFastThrow -Xms16g -Xmx16g -Djava.library.path=natives/;natives/win64/;. -cp %PZ_CLASSPATH% zombie.network.GameServer -statistic 0
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\steamcmd\steamapps\common\Project Zomboid Dedicated Server" +login anonymous +app_update 380870 +quit
+'@)
+  (New-GameDefinition "7-days-to-die" "HabitatGame7DaysToDie" "HabitatUpdate7DaysToDie" "C:\7daysserver" "C:\steamcmd" 180 @'
+@echo off
+cd /d "C:\7daysserver"
+echo|set /p="251570" > steam_appid.txt
+set SteamAppId=251570
+set SteamGameId=251570
+7DaysToDieServer.exe -logfile "C:\7daysserver\output_log_dedi_habitat.txt" -quit -batchmode -nographics -configfile=serverconfig.xml -dedicated
+'@ @'
+@echo off
+"C:\steamcmd\steamcmd.exe" +force_install_dir "C:\7daysserver" +login anonymous +app_update 294420 +quit
+'@)
+)
+
+function Escape-Xml([string] $value) { return [Security.SecurityElement]::Escape($value) }
+
+function Write-GeneratedScript([string] $destinationPath, [string] $content) {
+  [System.IO.File]::WriteAllText($destinationPath, $content.Trim() + [Environment]::NewLine, [System.Text.UTF8Encoding]::new($false))
 }
 
-function Write-ServiceXml([string] $xmlPath, [string] $id, [string] $name, [string] $scriptPath, [string] $workingDirectory, [int] $stopTimeoutSeconds, [string] $logPath) {
+function Write-ServiceXml([string] $xmlPath, [string] $id, [string] $name, [string] $scriptPath, [string] $workingDirectory, [int] $stopTimeoutSeconds, [string] $logPath, [hashtable] $environment) {
   $command = "/d /c call `"$scriptPath`""
+  $environmentXml = ($environment.GetEnumerator() | ForEach-Object { '  <env name="{0}" value="{1}" />' -f (Escape-Xml ([string]$_.Key)), (Escape-Xml ([string]$_.Value)) }) -join [Environment]::NewLine
   $xml = @"
 <service>
   <id>$(Escape-Xml $id)</id>
@@ -67,6 +102,7 @@ function Write-ServiceXml([string] $xmlPath, [string] $id, [string] $name, [stri
   <executable>C:\Windows\System32\cmd.exe</executable>
   <arguments>$(Escape-Xml $command)</arguments>
   <workingdirectory>$(Escape-Xml $workingDirectory)</workingdirectory>
+$environmentXml
   <logpath>$(Escape-Xml $logPath)</logpath>
   <log mode="roll-by-size-time">
     <sizeThreshold>10485760</sizeThreshold>
@@ -80,25 +116,25 @@ function Write-ServiceXml([string] $xmlPath, [string] $id, [string] $name, [stri
   [System.IO.File]::WriteAllText($xmlPath, $xml, [System.Text.UTF8Encoding]::new($false))
 }
 
-foreach ($game in @($configuration.games)) {
-  $gameRoot = Join-Path $servicesRoot $game.key
-  New-Item -ItemType Directory -Path $gameRoot -Force | Out-Null
-  $startDestination = Join-Path $gameRoot "start.cmd"
-  $updateDestination = Join-Path $gameRoot "update.cmd"
-  Copy-NonInteractiveScript ([string]$game.startScript) $startDestination
-  Copy-NonInteractiveScript ([string]$game.updateScript) $updateDestination
+$agentConfiguration = Get-Content -Raw -LiteralPath $agentConfigurationPath | ConvertFrom-Json
+New-Item -ItemType Directory -Path $servicesRoot -Force | Out-Null
 
-  $startWorkingDirectory = if ([string]::IsNullOrWhiteSpace([string]$game.startWorkingDirectory)) { Split-Path -Parent ([string]$game.startScript) } else { [string]$game.startWorkingDirectory }
-  $updateWorkingDirectory = if ([string]::IsNullOrWhiteSpace([string]$game.updateWorkingDirectory)) { Split-Path -Parent ([string]$game.updateScript) } else { [string]$game.updateWorkingDirectory }
-  foreach ($workingDirectory in @($startWorkingDirectory, $updateWorkingDirectory)) {
-    if (-not [System.IO.Path]::IsPathFullyQualified($workingDirectory) -or -not (Test-Path -LiteralPath $workingDirectory -PathType Container)) { throw "Working directory must be an existing absolute local directory: $workingDirectory" }
+foreach ($game in $games) {
+  foreach ($directory in @($game.StartWorkingDirectory, $game.UpdateWorkingDirectory)) {
+    if (-not (Test-Path -LiteralPath $directory -PathType Container)) { throw "Expected game directory was not found: $directory" }
   }
-  $stopTimeoutSeconds = if ($null -eq $game.stopTimeoutSeconds) { 120 } else { [int]$game.stopTimeoutSeconds }
-  if ($stopTimeoutSeconds -lt 15 -or $stopTimeoutSeconds -gt 180) { throw "stopTimeoutSeconds must be between 15 and 180." }
+  if ($null -eq ($agentConfiguration.servers | Where-Object { $_.key -eq $game.Key })) { throw "Agent configuration does not contain server key: $($game.Key)" }
+
+  $gameRoot = Join-Path $servicesRoot $game.Key
+  New-Item -ItemType Directory -Path $gameRoot -Force | Out-Null
+  $startScript = Join-Path $gameRoot "start.cmd"
+  $updateScript = Join-Path $gameRoot "update.cmd"
+  Write-GeneratedScript $startScript $game.StartScript
+  Write-GeneratedScript $updateScript $game.UpdateScript
 
   foreach ($definition in @(
-    @{ Id = [string]$game.serviceName; Name = "Habitat Game - $($game.key)"; Script = $startDestination; WorkingDirectory = $startWorkingDirectory; Timeout = $stopTimeoutSeconds; Log = (Join-Path $gameRoot "logs") },
-    @{ Id = [string]$game.updateServiceName; Name = "Habitat Update - $($game.key)"; Script = $updateDestination; WorkingDirectory = $updateWorkingDirectory; Timeout = 300; Log = (Join-Path $gameRoot "update-logs") }
+    @{ Id = $game.ServiceName; Name = "Habitat Game - $($game.Key)"; Script = $startScript; WorkingDirectory = $game.StartWorkingDirectory; Timeout = $game.StopTimeoutSeconds; Log = (Join-Path $gameRoot "logs"); Environment = $game.Environment },
+    @{ Id = $game.UpdateServiceName; Name = "Habitat Update - $($game.Key)"; Script = $updateScript; WorkingDirectory = $game.UpdateWorkingDirectory; Timeout = 180; Log = (Join-Path $gameRoot "update-logs"); Environment = @{} }
   )) {
     $wrapper = Join-Path $gameRoot "$($definition.Id).exe"
     $xml = Join-Path $gameRoot "$($definition.Id).xml"
@@ -109,18 +145,14 @@ foreach ($game in @($configuration.games)) {
       & $wrapper uninstall
     }
     Copy-Item -LiteralPath $winsw -Destination $wrapper -Force
-    Write-ServiceXml $xml $definition.Id $definition.Name $definition.Script $definition.WorkingDirectory $definition.Timeout $definition.Log
+    Write-ServiceXml $xml $definition.Id $definition.Name $definition.Script $definition.WorkingDirectory $definition.Timeout $definition.Log $definition.Environment
     & $wrapper install
     Set-Service -Name $definition.Id -StartupType Manual
   }
 
-  $agentServer = $agentConfiguration.servers | Where-Object { $_.key -eq $game.key } | Select-Object -First 1
-  $agentServer | Add-Member -NotePropertyName control -NotePropertyValue ([pscustomobject]@{
-    serviceName = [string]$game.serviceName
-    updateServiceName = [string]$game.updateServiceName
-    timeoutMs = $stopTimeoutSeconds * 1000
-  }) -Force
+  $agentServer = $agentConfiguration.servers | Where-Object { $_.key -eq $game.Key } | Select-Object -First 1
+  $agentServer | Add-Member -NotePropertyName control -NotePropertyValue ([pscustomobject]@{ serviceName = $game.ServiceName; updateServiceName = $game.UpdateServiceName; timeoutMs = $game.StopTimeoutSeconds * 1000 }) -Force
 }
 
 $agentConfiguration | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $agentConfigurationPath -Encoding utf8
-Write-Output "Installed $(@($configuration.games).Count * 2) local Habitat game services. They are manual-start by design; restart HabitatAgent after reviewing the generated service scripts."
+Write-Output "Generated and installed 12 local Habitat services. They are manual-start by design; restart HabitatAgent before portal control is enabled."
