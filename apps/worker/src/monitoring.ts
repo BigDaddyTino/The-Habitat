@@ -1,5 +1,6 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
+import { evaluateAchievementsForEvent } from "./achievements.js";
 import { normalizeServerState } from "./state.js";
 
 export type MonitoredServer = {
@@ -276,7 +277,7 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
 
 async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
   const occurrence = priorObservedAt ?? observedAt;
-  await transaction.serverEvent.upsert({
+  const presenceEvent = await transaction.serverEvent.upsert({
     where: { dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}` },
     create: {
       serverId: server.id,
@@ -292,6 +293,7 @@ async function createPalworldPresenceEvent(transaction: PresenceTransaction, ser
     },
     update: {},
   });
+  await evaluateAchievementsForEvent(transaction, presenceEvent.id);
 }
 
 function hasPlayerPresenceBaseline(details: unknown): boolean {

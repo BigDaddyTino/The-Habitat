@@ -25,7 +25,7 @@ export type WorldView = {
 export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string };
 
 export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
-export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "WORLD_SAVED"] as const;
+export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "ACHIEVEMENT_EARNED", "WORLD_SAVED"] as const;
 export const chronicleReactionTypes = ["SKULL", "FIRE", "FACEPALM", "CROWN", "SKILL_ISSUE"] as const;
 
 export type ChronicleGameType = (typeof chronicleGameTypes)[number];
@@ -52,6 +52,7 @@ export const chronicleEventLabels: Record<ChronicleEventType, string> = {
   SERVER_UPDATED: "Update cycle",
   PLAYER_JOINED: "Player joined",
   PLAYER_LEFT: "Player left",
+  ACHIEVEMENT_EARNED: "Achievement earned",
   WORLD_SAVED: "World save",
 };
 
@@ -156,17 +157,18 @@ export async function getChronicleEvent(eventId: string, viewerUserId?: string):
   };
 }
 
-function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; actorText: string | null; server: { displayName: string; slug: string } }): ChronicleEventView {
-  return { id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName, event.actorText) };
+function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; actorText: string | null; valueText: string | null; server: { displayName: string; slug: string } }): ChronicleEventView {
+  return { id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName, event.actorText, event.valueText) };
 }
 
-function chronicleText(eventType: string, world: string, actorText: string | null) {
+function chronicleText(eventType: string, world: string, actorText: string | null, valueText: string | null) {
   if (eventType === "SERVER_STARTED") return `${world} came online.`;
   if (eventType === "SERVER_SLEEPING") return `${world} entered intentional rest.`;
   if (eventType === "SERVER_UPDATED") return `${world} entered an update cycle.`;
   if (eventType === "SERVER_CRASHED") return `${world} stopped unexpectedly.`;
   if (eventType === "PLAYER_JOINED" && actorText) return `${actorText} joined ${world}.`;
   if (eventType === "PLAYER_LEFT" && actorText) return `${actorText} left ${world}.`;
+  if (eventType === "ACHIEVEMENT_EARNED" && actorText && valueText) return `${actorText} earned ${valueText}.`;
   if (eventType === "WORLD_SAVED") return `${world} completed a verified world save.`;
   return `${world} recorded a verified event.`;
 }

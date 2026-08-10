@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Landmark, LogIn, Map, ScrollText, Settings, Trophy, UserRound } from "lucide-react";
+import { Award, Landmark, LogIn, Map, ScrollText, Settings, Trophy, UserRound } from "lucide-react";
 import { auth } from "@/auth";
 
 const navigation = [
@@ -7,6 +7,7 @@ const navigation = [
   { href: "/worlds", label: "Worlds", icon: Map },
   { href: "/departure-board", label: "Departure Board", icon: Trophy },
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
+  { href: "/achievements", label: "Achievements", icon: Award },
 ];
 
 export async function HabitatHeader() {

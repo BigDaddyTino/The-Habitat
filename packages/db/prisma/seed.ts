@@ -16,6 +16,11 @@ const servers = [
   { slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", worldName: "Habitat Valhalla", maxPlayers: 10, adapterType: "gamedig", description: "A quiet coast, an unreasonable number of portals, and one tree with a grudge.", capabilities: { status: true, playerCount: true, playerNames: false, version: true, ping: true, deaths: false, kills: false, chat: false, adminControl: false } },
 ] as const;
 
+const achievements = [
+  { slug: "welcome-to-gods-country", name: "Welcome to God's Country", description: "Join any Habitat world after your identity is verified.", rarity: "COMMON", category: "Social", ruleType: "EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 1 }, points: 10 },
+  { slug: "habitat-tourist", name: "Habitat Tourist", description: "Join verified worlds in three different games.", rarity: "UNCOMMON", category: "Exploration", ruleType: "DISTINCT_GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 3 }, points: 25 },
+] as const;
+
 async function main() {
   for (const server of servers) {
     await prisma.gameServer.upsert({
@@ -28,6 +33,22 @@ async function main() {
         maxPlayers: server.maxPlayers,
         adapterType: server.adapterType,
         capabilities: server.capabilities,
+      },
+    });
+  }
+  for (const achievement of achievements) {
+    await prisma.achievementDefinition.upsert({
+      where: { slug: achievement.slug },
+      create: achievement,
+      update: {
+        name: achievement.name,
+        description: achievement.description,
+        rarity: achievement.rarity,
+        category: achievement.category,
+        ruleType: achievement.ruleType,
+        ruleConfig: achievement.ruleConfig,
+        points: achievement.points,
+        enabled: true,
       },
     });
   }

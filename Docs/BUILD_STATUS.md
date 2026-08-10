@@ -72,7 +72,12 @@ Last updated: 2026-08-10
 
 ## Phase 8 - Achievement Engine
 
-- [ ] Not started
+- [x] Achievement definitions, rarity, points, data-driven rule configuration, and persistent award records
+- [x] Event-driven, idempotent evaluation from verified player-join Chronicle events
+- [x] Initial verified participation definitions seeded: Welcome to God's Country and Habitat Tourist
+- [x] Member-facing achievement archive and Chronicle award entries
+- [ ] Live award verification after an approved Palworld identity joins a Habitat world
+- [ ] Additional verified rule types, secret achievements, progress views, manual awards, and notifications
 
 ## Phase 9 - Halls of Shame and Legends
 
