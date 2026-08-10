@@ -57,16 +57,22 @@ export function createPostgresServerCommandRepository(): ServerCommandRepository
     },
     async succeeded(commandId, result) {
       const now = new Date();
+      const command = await db.serverCommand.findUniqueOrThrow({ where: { id: commandId }, select: { serverId: true, action: true } });
+      const desiredState = command.action === "STOP" || command.action === "UPDATE" ? "SLEEPING" : "ONLINE";
       await db.$transaction([
         db.serverCommand.update({ where: { id: commandId }, data: { status: "SUCCEEDED", completedAt: now, result: { action: result.action, executedAt: result.executedAt, serviceState: result.serviceState, detail: result.detail } } }),
         db.serverCommandAudit.create({ data: { serverCommandId: commandId, status: "SUCCEEDED", details: { serviceState: result.serviceState, detail: result.detail } } }),
+        db.gameServer.update({ where: { id: command.serverId }, data: { desiredState } }),
       ]);
     },
     async failed(commandId, errorCode, details) {
       const now = new Date();
+      const command = await db.serverCommand.findUniqueOrThrow({ where: { id: commandId }, select: { serverId: true, action: true } });
+      const desiredState = command.action === "STOP" ? "ONLINE" : command.action === "UPDATE" ? "SLEEPING" : "ONLINE";
       await db.$transaction([
         db.serverCommand.update({ where: { id: commandId }, data: { status: "FAILED", completedAt: now, errorCode, result: details as never } }),
         db.serverCommandAudit.create({ data: { serverCommandId: commandId, status: "FAILED", details: { errorCode, ...details } } }),
+        db.gameServer.update({ where: { id: command.serverId }, data: { desiredState } }),
       ]);
     },
   };
