@@ -120,6 +120,23 @@ enum ServerPollStatus {
   CLOSED
 }
 
+enum ServerCommandAction {
+  START
+  STOP
+  RESTART
+  UPDATE
+}
+
+enum ServerCommandStatus {
+  REQUESTED
+  AUTHORIZED
+  DISPATCHED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  TIMED_OUT
+}
+
 model User {
   id               String           @id @default(uuid()) @db.Uuid
   name             String?
@@ -149,6 +166,7 @@ model User {
   wakeVotes        WakeVote[]
   pollsCreated     ServerPoll[] @relation("PollCreator")
   pollVotes        ServerPollVote[]
+  serverCommands   ServerCommand[]
 }
 
 model Account {
@@ -202,6 +220,7 @@ model GameServer {
   worldName       String
   description     String?
   enabled         Boolean               @default(true)
+  controlEnabled  Boolean               @default(false)
   desiredState    ServerState           @default(SLEEPING)
   actualState     ServerState           @default(UNKNOWN)
   lastStateChangeAt DateTime?
@@ -224,6 +243,7 @@ model GameServer {
   playerPresence  ServerPlayerPresence[]
   wakeRequests    WakeRequest[]
   pollOptions     ServerPollOption[]
+  commands        ServerCommand[]
 }
 
 model ServerRuntimeState {
@@ -541,6 +561,40 @@ model ServerPollVote {
 
   @@id([pollId, userId])
   @@index([optionId])
+}
+
+model ServerCommand {
+  id                String              @id @default(uuid()) @db.Uuid
+  serverId          String              @db.Uuid
+  requestedByUserId String              @db.Uuid
+  action            ServerCommandAction
+  status            ServerCommandStatus @default(REQUESTED)
+  requestedAt       DateTime            @default(now())
+  authorizedAt      DateTime?
+  dispatchedAt      DateTime?
+  startedAt         DateTime?
+  completedAt       DateTime?
+  result            Json?
+  errorCode         String?
+  server            GameServer          @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  requestedBy       User                @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  audits            ServerCommandAudit[]
+
+  @@index([status, requestedAt])
+  @@index([serverId, requestedAt])
+  @@index([requestedByUserId, requestedAt])
+}
+
+model ServerCommandAudit {
+  id              String              @id @default(uuid()) @db.Uuid
+  serverCommandId String              @db.Uuid
+  status          ServerCommandStatus
+  recordedAt      DateTime            @default(now())
+  actorUserId     String?             @db.Uuid
+  details         Json?
+  command         ServerCommand       @relation(fields: [serverCommandId], references: [id], onDelete: Cascade)
+
+  @@index([serverCommandId, recordedAt])
 }
 
 model DiscordNotification {

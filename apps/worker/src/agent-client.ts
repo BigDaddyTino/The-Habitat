@@ -1,4 +1,4 @@
-import type { AgentServerStatus, AgentServerSummary } from "@habitat/shared";
+import { agentServerActions, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
 
 export type AgentStatusResult =
   | { key: string; status: AgentServerStatus }
@@ -19,6 +19,20 @@ export class HabitatAgentClient {
     }));
   }
 
+  async requestServerAction(key: string, action: AgentServerAction): Promise<AgentServerActionResult> {
+    if (!isServerKey(key) || !agentServerActions.includes(action)) throw new Error("Invalid server action request.");
+    const response = await this.request(this.urlFor(`/v1/servers/${key}/actions/${action}`), {
+      method: "POST",
+      headers: { authorization: `Bearer ${this.token}`, accept: "application/json", "content-type": "application/json" },
+      body: "{}",
+      redirect: "error",
+      signal: AbortSignal.timeout(190_000),
+    });
+    const body: unknown = await response.json().catch(() => null);
+    if (!isAgentServerActionResult(body) || (!response.ok && response.status !== 409)) throw new Error("Agent action was not accepted.");
+    return body;
+  }
+
   private async getJson<T>(url: URL, isExpected: (value: unknown) => value is T): Promise<T> {
     const response = await this.request(url, {
       headers: { authorization: `Bearer ${this.token}`, accept: "application/json" },
@@ -34,6 +48,10 @@ export class HabitatAgentClient {
   private urlFor(pathname: string): URL {
     return new URL(pathname, this.endpoint);
   }
+}
+
+function isAgentServerActionResult(value: unknown): value is AgentServerActionResult {
+  return isRecord(value) && isServerKey(value.key) && typeof value.executedAt === "string" && typeof value.accepted === "boolean" && agentServerActions.includes(value.action as AgentServerAction) && ["RUNNING", "STOPPED", "PENDING", "UNKNOWN"].includes(value.serviceState as string) && ["requested", "already_in_requested_state", "update_started", "server_service_must_be_stopped"].includes(value.detail as string);
 }
 
 function isServerSummaryArray(value: unknown): value is AgentServerSummary[] {

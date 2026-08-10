@@ -17,6 +17,7 @@ const metadataSchema = z.object({
   maxPlayers: z.preprocess((value) => value === "" ? null : value, z.coerce.number().int().min(1).max(256).nullable()),
   desiredState: z.enum(states),
   enabled: z.boolean(),
+  controlEnabled: z.boolean(),
 });
 
 export async function updateServerMetadata(formData: FormData) {
@@ -29,6 +30,7 @@ export async function updateServerMetadata(formData: FormData) {
     maxPlayers: formData.get("maxPlayers"),
     desiredState: formData.get("desiredState"),
     enabled: formData.get("enabled") === "on",
+    controlEnabled: formData.get("controlEnabled") === "on",
   });
 
   if (!parsed.success) throw new Error("Invalid server metadata.");
@@ -41,6 +43,7 @@ export async function updateServerMetadata(formData: FormData) {
     maxPlayers: parsed.data.maxPlayers,
     desiredState: parsed.data.desiredState,
     enabled: parsed.data.enabled,
+    controlEnabled: parsed.data.controlEnabled,
   };
 
   await db.$transaction([
@@ -58,6 +61,7 @@ export async function updateServerMetadata(formData: FormData) {
           maxPlayers: existing.maxPlayers,
           desiredState: existing.desiredState,
           enabled: existing.enabled,
+          controlEnabled: existing.controlEnabled,
         },
         after: metadata,
       },

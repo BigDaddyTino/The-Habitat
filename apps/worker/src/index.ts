@@ -4,6 +4,7 @@ import { createPostgresMonitoringRepository, runMonitoringCycle } from "./monito
 import { getPrismaClient } from "@habitat/db/client";
 import { startDiscordBot } from "./discord-bot.js";
 import { dispatchPendingDiscordNotifications } from "./discord-notifications.js";
+import { createPostgresServerCommandRepository, dispatchAuthorizedServerCommands } from "./server-commands.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -26,6 +27,7 @@ async function main(): Promise<void> {
 
   const run = async () => {
     const result = await runMonitoringCycle(repository, agent);
+    const commands = await dispatchAuthorizedServerCommands(createPostgresServerCommandRepository(), agent);
     let notifications: Awaited<ReturnType<typeof dispatchPendingDiscordNotifications>> | null = null;
     try {
       notifications = await dispatchPendingDiscordNotifications();
@@ -34,6 +36,7 @@ async function main(): Promise<void> {
     }
     console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
     if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
+    if (commands.dispatched > 0) console.info(`Habitat server commands: ${commands.succeeded} succeeded, ${commands.failed} failed.`);
   };
 
   if (runOnce) {

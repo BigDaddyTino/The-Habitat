@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Award, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle } from "lucide-react";
+import { Award, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, RadioTower } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
   { href: "/admin/titles", label: "Titles", icon: Award },
   { href: "/admin/discord", label: "Discord", icon: MessageCircle },
   { href: "/admin/community", label: "Community", icon: Flame },
+  { href: "/admin/operations", label: "Operations", icon: RadioTower },
 ];
 
 export function AdminSuiteNav() {

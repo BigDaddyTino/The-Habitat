@@ -8,6 +8,7 @@ dotenv.config({ path: path.resolve(import.meta.dirname, "../.env"), quiet: true 
 
 const serverKey = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/);
 const processName = z.string().regex(/^[A-Za-z0-9_.-]+$/);
+const windowsServiceName = z.string().regex(/^[A-Za-z0-9_.-]{1,120}$/);
 const privateIpv4 = z.string().refine(isPrivateIpv4, "must be a private IPv4 address");
 const localQueryHost = z.string().refine(isLocalQueryHost, "must be loopback or a private IPv4 address");
 const localLogPath = z.string().trim().min(3).max(500).refine(isLocalLogPath, "must be an absolute local Windows path");
@@ -31,6 +32,11 @@ const serverConfigurationSchema = z.object({
   installPath: z.string().trim().min(1).max(500).optional(),
   log: z.object({ type: z.literal("dragonwilds"), path: localLogPath }).strict().optional(),
   query: querySchema.optional(),
+  control: z.object({
+    serviceName: windowsServiceName,
+    updateServiceName: windowsServiceName,
+    timeoutMs: z.number().int().min(5_000).max(180_000).default(60_000),
+  }).strict().optional(),
 }).strict();
 
 const configurationFileSchema = z.object({

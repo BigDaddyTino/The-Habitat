@@ -110,7 +110,11 @@ Last updated: 2026-08-10
 
 ## Phase 12 - Controlled Server Actions
 
-- [ ] Not started
+- [x] Local-only service-wrapper installer and non-interactive batch-copy flow for named game and update services
+- [x] Agent-side fixed allow-list for `start`, `stop`, `restart`, and `update`; no request can provide a command, path, argument, or service name
+- [x] Admin-only, typed-confirmation command queue with worker dispatch and append-only command lifecycle audits
+- [ ] Install and individually verify the six MartServ102 game/update service pairs
+- [ ] Persisted command queue, admin confirmation surface, worker dispatch, and command audit trail
 
 ## Phase 13 - Production Hardening
 

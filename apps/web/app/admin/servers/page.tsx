@@ -31,6 +31,7 @@ export default async function AdminServersPage() {
               <label>World name<input defaultValue={server.worldName} name="worldName" required /></label>
               <label>Capacity<input defaultValue={server.maxPlayers ?? ""} min="1" name="maxPlayers" type="number" /></label>
               <label>Desired state<select defaultValue={server.desiredState} name="desiredState">{serverStates.map((state) => <option key={state} value={state}>{state.replaceAll("_", " ")}</option>)}</select></label>
+              <label className="enabled-toggle"><input defaultChecked={server.controlEnabled} name="controlEnabled" type="checkbox" /><Check aria-hidden="true" size={14} /> Lifecycle control</label>
               <label className="field-wide">Public note<textarea defaultValue={server.description ?? ""} name="description" rows={3} /></label>
             </div>
             <button className="save-server" type="submit"><Save aria-hidden="true" size={16} /> Save registry</button>

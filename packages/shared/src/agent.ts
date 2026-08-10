@@ -12,6 +12,19 @@ export type AgentServerSummary = {
   displayName: string;
 };
 
+export const agentServerActions = ["start", "stop", "restart", "update"] as const;
+
+export type AgentServerAction = typeof agentServerActions[number];
+
+export type AgentServerActionResult = {
+  key: string;
+  action: AgentServerAction;
+  accepted: boolean;
+  executedAt: string;
+  serviceState: "RUNNING" | "STOPPED" | "PENDING" | "UNKNOWN";
+  detail: "requested" | "already_in_requested_state" | "update_started" | "server_service_must_be_stopped";
+};
+
 export type AgentProcessObservation = {
   running: boolean;
   processCount: number;

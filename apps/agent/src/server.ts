@@ -1,25 +1,32 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import os from "node:os";
 import type { AddressInfo } from "node:net";
-import type { AgentHealth, AgentServerStatus, AgentServerSummary } from "@habitat/shared";
+import { agentServerActions, type AgentHealth, type AgentServerAction, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
 import type { AgentConfiguration } from "./config.js";
 import { observeServer } from "./observations.js";
 import { hasValidAgentToken, normalizeRemoteAddress } from "./security.js";
+import { ServiceControlError, WindowsServiceController } from "./service-control.js";
 
 const version = "0.1.0";
 
 export function createAgentServer(configuration: AgentConfiguration) {
+  const serviceController = new WindowsServiceController();
   const server = createServer(async (request, response) => {
     setSecurityHeaders(response);
-    if (request.method !== "GET") return sendJson(response, 405, { error: "method_not_allowed" }, { Allow: "GET" });
+    if (request.method !== "GET" && request.method !== "POST") return sendJson(response, 405, { error: "method_not_allowed" }, { Allow: "GET, POST" });
 
     const remoteAddress = normalizeRemoteAddress(request.socket.remoteAddress);
     if (!remoteAddress || !configuration.allowedIps.includes(remoteAddress)) return sendJson(response, 403, { error: "forbidden" });
     if (!hasValidAgentToken(request.headers.authorization, configuration.token)) return sendJson(response, 401, { error: "unauthorized" });
 
     try {
-      await handleGetRequest(request, response, configuration);
-    } catch {
+      if (request.method === "GET") await handleGetRequest(request, response, configuration);
+      else await handlePostRequest(request, response, configuration, serviceController);
+    } catch (error) {
+      if (error instanceof ServiceControlError) {
+        const status = error.code === "control_not_configured" ? 404 : error.code === "service_timeout" ? 504 : 503;
+        return sendJson(response, status, { error: error.code });
+      }
       sendJson(response, 503, { error: "observation_unavailable" });
     }
   });
@@ -27,6 +34,19 @@ export function createAgentServer(configuration: AgentConfiguration) {
   server.headersTimeout = 10_000;
   server.keepAliveTimeout = 5_000;
   return server;
+}
+
+async function handlePostRequest(request: IncomingMessage, response: ServerResponse, configuration: AgentConfiguration, serviceController: WindowsServiceController): Promise<void> {
+  const pathname = new URL(request.url ?? "/", "http://agent.local").pathname;
+  const actionMatch = /^\/v1\/servers\/([a-z0-9][a-z0-9-]{0,62})\/actions\/(start|stop|restart|update)$/.exec(pathname);
+  if (!actionMatch) return sendJson(response, 404, { error: "not_found" });
+  await assertEmptyJsonBody(request);
+  const configuredServer = configuration.servers.find((server) => server.key === actionMatch[1]);
+  if (!configuredServer) return sendJson(response, 404, { error: "not_found" });
+  const action = actionMatch[2] as AgentServerAction;
+  if (!agentServerActions.includes(action)) return sendJson(response, 404, { error: "not_found" });
+  const result = await serviceController.perform(configuredServer, action);
+  return sendJson(response, result.accepted ? 202 : 409, result);
 }
 
 export async function startAgentServer(configuration: AgentConfiguration) {
@@ -80,4 +100,19 @@ function sendJson(response: ServerResponse, status: number, body: unknown, heade
   if (headers) for (const [name, value] of Object.entries(headers)) response.setHeader(name, value);
   response.writeHead(status);
   response.end(JSON.stringify(body));
+}
+
+async function assertEmptyJsonBody(request: IncomingMessage): Promise<void> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of request) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    size += buffer.length;
+    if (size > 1_024) throw new ServiceControlError("service_unavailable");
+    chunks.push(buffer);
+  }
+  if (size === 0) return;
+  let parsed: unknown;
+  try { parsed = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new ServiceControlError("service_unavailable"); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== 0) throw new ServiceControlError("service_unavailable");
 }

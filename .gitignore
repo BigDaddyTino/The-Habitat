@@ -10,6 +10,8 @@ apps/agent/agent.config.json
 apps/agent/HabitatAgent.exe
 apps/agent/HabitatAgent.xml
 apps/agent/logs/
+apps/agent/game-services.json
+apps/agent/game-services/
 HabitatWorker.exe
 HabitatWorker.xml
 worker-logs/

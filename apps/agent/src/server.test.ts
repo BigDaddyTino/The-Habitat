@@ -40,8 +40,8 @@ test("agent routes require authentication and reject arbitrary operations", asyn
     const arbitraryRoute = await fetch(`${baseUrl}/shell`, { headers: { authorization: `Bearer ${token}` } });
     assert.equal(arbitraryRoute.status, 404);
 
-    const actionAttempt = await fetch(`${baseUrl}/v1/servers/example/actions/start`, { method: "POST" });
-    assert.equal(actionAttempt.status, 405);
+    const actionAttempt = await fetch(`${baseUrl}/v1/servers/example/actions/start`, { method: "POST", headers: { authorization: `Bearer ${token}` } });
+    assert.equal(actionAttempt.status, 404);
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
