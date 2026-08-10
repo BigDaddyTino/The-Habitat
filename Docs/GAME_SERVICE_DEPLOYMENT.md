@@ -29,6 +29,7 @@ The game and update services are installed with manual startup. This prevents al
 ## Operational behavior
 
 - `start`, `stop`, and `restart` target the configured game service only.
+- The agent waits an additional 30 seconds beyond the service stop timeout before reporting a failed shutdown.
 - `update` first verifies that the configured game service is stopped, then starts its configured one-shot update service.
 - A service operation is not proof that the game is reachable. Habitat monitoring remains the authority for live world state.
 - Existing manual game instances must be stopped before the matching Habitat service is started; do not run both.

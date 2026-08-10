@@ -151,7 +151,7 @@ foreach ($game in $games) {
   }
 
   $agentServer = $agentConfiguration.servers | Where-Object { $_.key -eq $game.Key } | Select-Object -First 1
-  $agentServer | Add-Member -NotePropertyName control -NotePropertyValue ([pscustomobject]@{ serviceName = $game.ServiceName; updateServiceName = $game.UpdateServiceName; timeoutMs = $game.StopTimeoutSeconds * 1000 }) -Force
+  $agentServer | Add-Member -NotePropertyName control -NotePropertyValue ([pscustomobject]@{ serviceName = $game.ServiceName; updateServiceName = $game.UpdateServiceName; timeoutMs = [Math]::Min(($game.StopTimeoutSeconds + 30) * 1000, 300000) }) -Force
 }
 
 $agentConfiguration | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $agentConfigurationPath -Encoding utf8

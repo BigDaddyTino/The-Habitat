@@ -35,7 +35,7 @@ const serverConfigurationSchema = z.object({
   control: z.object({
     serviceName: windowsServiceName,
     updateServiceName: windowsServiceName,
-    timeoutMs: z.number().int().min(5_000).max(180_000).default(60_000),
+    timeoutMs: z.number().int().min(5_000).max(300_000).default(60_000),
   }).strict().optional(),
 }).strict();
 
