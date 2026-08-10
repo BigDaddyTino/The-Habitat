@@ -79,7 +79,8 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     },
     async saveObservation(server, status) {
       const observedAt = parseObservedAt(status.observedAt);
-      const decision = normalizeServerState(server.desiredState, status);
+      const effectiveDesiredState = resolveDesiredState(server.desiredState, status);
+      const decision = normalizeServerState(effectiveDesiredState, status);
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
       const details = {
@@ -123,6 +124,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           where: { id: server.id },
           data: {
             actualState: decision.state,
+            desiredState: effectiveDesiredState,
             lastQueryAt: observedAt,
             lastOnlineAt: decision.state === "ONLINE" ? observedAt : undefined,
             lastStateChangeAt: stateChanged ? observedAt : undefined,
@@ -134,7 +136,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             data: {
               serverId: server.id,
               state: decision.state,
-              desiredState: server.desiredState,
+              desiredState: effectiveDesiredState,
               observedAt,
               reason: decision.reason,
               details: { source: "HABITAT_AGENT", processRunning: status.process.running, queryReachable: status.query?.reachable ?? null },
@@ -192,6 +194,10 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
 
 function toMonitoredServer(server: { id: string; slug: string; desiredState: string; actualState: string }): MonitoredServer {
   return { id: server.id, slug: server.slug, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState };
+}
+
+export function resolveDesiredState(currentDesiredState: ServerState, status: AgentServerStatus): ServerState {
+  return status.process.running && currentDesiredState === "SLEEPING" ? "ONLINE" : currentDesiredState;
 }
 
 function parseObservedAt(value: string): Date {

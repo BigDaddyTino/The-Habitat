@@ -25,6 +25,8 @@ $env:Path = "C:\Program Files\nodejs;$env:Path"
 
 The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`. Valheim and Palworld are the first validated agent-backed worlds.
 
+When a server configured as `SLEEPING` is observed with a verified running process, the worker automatically promotes its desired state to `ONLINE`. No routine admin edit is needed when a server comes online. A later missing process is `DOWN_UNEXPECTEDLY` unless the Habitat initiated the stop or receives another trusted shutdown signal.
+
 ## Windows Service
 
 After a successful one-cycle check, download the WinSW executable to `<repository>\HabitatWorker.exe`. From an elevated PowerShell session:
