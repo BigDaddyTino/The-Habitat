@@ -25,7 +25,8 @@ if (-not (Test-Path -LiteralPath $serviceExecutable)) {
   Copy-Item -LiteralPath $workerExecutable -Destination $serviceExecutable
 }
 
-Copy-Item -LiteralPath $serviceTemplate -Destination $serviceXml -Force
+$serviceConfiguration = [System.IO.File]::ReadAllText($serviceTemplate).Replace("{{INSTALL_ROOT}}", $root)
+[System.IO.File]::WriteAllText($serviceXml, $serviceConfiguration)
 & $serviceExecutable install
 Set-Service -Name "HabitatWeb" -StartupType Automatic
 & $serviceExecutable start

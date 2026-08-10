@@ -21,7 +21,7 @@ $env:Path = "C:\Program Files\nodejs;$env:Path"
 Get-Service HabitatWeb
 ```
 
-The installer copies the existing `HabitatWorker.exe` WinSW wrapper to the ignored local `HabitatWeb.exe` when needed, creates the ignored `HabitatWeb.xml`, configures automatic startup, and writes local service logs to `web-logs`.
+The installer copies the existing `HabitatWorker.exe` WinSW wrapper to the ignored local `HabitatWeb.exe` when needed, creates the ignored `HabitatWeb.xml` with the resolved repository working directory, configures automatic startup, and writes local service logs to `web-logs`.
 
 ## Verify
 

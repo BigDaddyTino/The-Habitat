@@ -4,7 +4,7 @@
   <description>Loopback-only Next.js application service for The Habitat.</description>
   <executable>node.exe</executable>
   <arguments>node_modules\next\dist\bin\next start -H 127.0.0.1 -p 3000</arguments>
-  <workingdirectory>apps\web</workingdirectory>
+  <workingdirectory>{{INSTALL_ROOT}}\apps\web</workingdirectory>
   <logpath>web-logs</logpath>
   <log mode="roll-by-size-time">
     <sizeThreshold>10485760</sizeThreshold>
