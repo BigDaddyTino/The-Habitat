@@ -15,6 +15,7 @@ const serverConfigurationSchema = z.object({
   key: serverKey,
   displayName: z.string().trim().min(1).max(80),
   processName,
+  processCommandLineIncludes: z.string().trim().min(1).max(200).refine((value) => !/[\r\n]/.test(value), "must not contain line breaks").optional(),
   executablePath: z.string().trim().min(1).max(500).optional(),
   installPath: z.string().trim().min(1).max(500).optional(),
   query: z.object({

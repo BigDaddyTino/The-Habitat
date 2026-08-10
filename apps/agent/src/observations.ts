@@ -6,7 +6,7 @@ import type { AgentDiskObservation, AgentExecutableObservation, AgentProcessObse
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
-const processLookupScript = "$name = $env:HABITAT_PROCESS_EXE; $items = @(Get-CimInstance Win32_Process -Filter \"Name='$name'\" -ErrorAction SilentlyContinue | ForEach-Object { [PSCustomObject]@{ Id = $_.ProcessId; StartTime = if ($_.CreationDate) { $_.CreationDate.ToUniversalTime().ToString('o') } else { $null }; WorkingSet64 = [double]$_.WorkingSetSize; CPU = ([double]$_.KernelModeTime + [double]$_.UserModeTime) / 10000000 } }); $items | ConvertTo-Json -Compress";
+const processLookupScript = "$name = $env:HABITAT_PROCESS_EXE; $needle = $env:HABITAT_PROCESS_COMMAND_LINE_INCLUDES; $processes = @(Get-CimInstance Win32_Process -Filter \"Name='$name'\" -ErrorAction SilentlyContinue); if ($needle) { $processes = @($processes | Where-Object { $_.CommandLine -and $_.CommandLine.IndexOf($needle, [System.StringComparison]::OrdinalIgnoreCase) -ge 0 }) }; $items = @($processes | ForEach-Object { [PSCustomObject]@{ Id = $_.ProcessId; StartTime = if ($_.CreationDate) { $_.CreationDate.ToUniversalTime().ToString('o') } else { $null }; WorkingSet64 = [double]$_.WorkingSetSize; CPU = ([double]$_.KernelModeTime + [double]$_.UserModeTime) / 10000000 } }); $items | ConvertTo-Json -Compress";
 const diskLookupScript = "$drive = $env:HABITAT_DISK_DRIVE; $disk = Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='$drive'\" | Select-Object FreeSpace,Size; $disk | ConvertTo-Json -Compress";
 const executableLookupScript = "$item = Get-Item -LiteralPath $env:HABITAT_EXECUTABLE_PATH -ErrorAction SilentlyContinue; if ($item) { [PSCustomObject]@{ Exists = $true; Version = $item.VersionInfo.FileVersion } | ConvertTo-Json -Compress }";
 
@@ -14,7 +14,7 @@ type WindowsProcess = { Id: number; StartTime?: string; WorkingSet64?: number; C
 
 export async function observeServer(server: AgentServerConfiguration): Promise<{ process: AgentProcessObservation; disk: AgentDiskObservation | null; executable: AgentExecutableObservation | null; query: AgentQueryObservation | null }> {
   const [process, disk, executable, query] = await Promise.all([
-    observeProcess(server.processName),
+    observeProcess(server.processName, server.processCommandLineIncludes),
     server.installPath ? observeDisk(server.installPath) : Promise.resolve(null),
     server.executablePath ? observeExecutable(server.executablePath) : Promise.resolve(null),
     server.query ? observeGameQuery(server) : Promise.resolve(null),
@@ -22,14 +22,14 @@ export async function observeServer(server: AgentServerConfiguration): Promise<{
   return { process, disk, executable, query };
 }
 
-export async function observeProcess(configuredProcessName: string): Promise<AgentProcessObservation> {
+export async function observeProcess(configuredProcessName: string, processCommandLineIncludes?: string): Promise<AgentProcessObservation> {
   if (process.platform !== "win32") return emptyProcessObservation();
   const executableName = configuredProcessName.toLowerCase().endsWith(".exe") ? configuredProcessName : `${configuredProcessName}.exe`;
   try {
     const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", processLookupScript], {
       timeout: 5_000,
       windowsHide: true,
-      env: { ...process.env, HABITAT_PROCESS_EXE: executableName },
+      env: { ...process.env, HABITAT_PROCESS_EXE: executableName, HABITAT_PROCESS_COMMAND_LINE_INCLUDES: processCommandLineIncludes ?? "" },
     });
     const processes = parseJsonArray<WindowsProcess>(stdout);
     if (processes.length === 0) return emptyProcessObservation();
