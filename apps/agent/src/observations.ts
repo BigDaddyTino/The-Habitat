@@ -96,7 +96,7 @@ async function observeGameQuery(server: AgentServerConfiguration): Promise<Agent
       attempted: true,
       reachable: true,
       pingMs: Number.isFinite(result.ping) ? result.ping : null,
-      playerCount: query.playerCountSupported ? result.players.length : null,
+      playerCount: query.playerCountSupported && Number.isFinite(result.numplayers) ? result.numplayers : null,
       maxPlayers: query.playerCountSupported ? result.maxplayers : null,
       version: result.version || null,
     };

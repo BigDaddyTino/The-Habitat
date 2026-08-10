@@ -8,6 +8,7 @@ declare module "gamedig" {
 
   export type QueryResult = {
     ping: number;
+    numplayers: number;
     players: unknown[];
     maxplayers: number | null;
     version: string;
