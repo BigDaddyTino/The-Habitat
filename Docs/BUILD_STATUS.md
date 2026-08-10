@@ -45,7 +45,9 @@ Last updated: 2026-08-10
 - [x] Authenticated worker client, state normalization, runtime persistence, transition history, and metric samples
 - [x] Native MartServ101 worker service packaging and one-cycle rollout command
 - [x] MartServ101 worker service records verified process telemetry and metric samples for all six registered worlds
-- [ ] Add verified game-query adapters for player counts, ping, and game-native version data
+- [x] Verified local GameDig queries for Valheim, Enshrouded, Project Zomboid, and 7 Days to Die provide ping, capacity, and supported player counts
+- [ ] Add the authenticated, LAN-only Palworld REST adapter
+- [ ] Investigate a verified Dragonwilds query or log adapter
 
 ## Phase 6 - Chronicle and Event Ingestion
 

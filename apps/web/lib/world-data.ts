@@ -42,10 +42,10 @@ function formatLastFire(lastOnlineAt: Date | null) {
 }
 
 function adapterNote(adapterType: string) {
-  if (adapterType === "palworld-rest") return "Agent process observation is live; LAN-only REST remains planned.";
-  if (adapterType === "gamedig") return "Agent process observation is live; game query support remains planned.";
-  if (adapterType === "dragonwilds") return "Agent and log adapter planned.";
-  return "Game query adapter planned.";
+  if (adapterType === "palworld-rest") return "Verified process telemetry is live; the authenticated LAN-only REST adapter remains next.";
+  if (adapterType === "gamedig") return "Verified local game query reports process state, ping, capacity, and supported player counts.";
+  if (adapterType === "dragonwilds") return "Verified process telemetry is live; a game query adapter has not yet been confirmed.";
+  return "Verified process telemetry is live; game query support is not configured.";
 }
 
 function toWorldView(server: Awaited<ReturnType<typeof getServerRecord>>): WorldView {
