@@ -101,7 +101,12 @@ Last updated: 2026-08-10
 
 ## Phase 11 - Wake Requests and Polls
 
-- [ ] Not started
+- [x] Authenticated wake requests for intentionally sleeping worlds with database-enforced one-request-per-world behavior
+- [x] Member support votes, admin approval or rejection, Chronicle entries, and audit records; no server action is dispatched
+- [x] Optional Discord wake notice and mapped Discord `/wake` request path, both dormant until bot installation
+- [x] One active, time-bounded game-night poll with one revisable vote per member
+- [x] Admin poll creation and closure, member poll page, and active-poll Great Hall surface
+- [ ] Live request, approval, poll, and Discord verification with Habitat members
 
 ## Phase 12 - Controlled Server Actions
 

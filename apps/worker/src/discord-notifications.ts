@@ -3,7 +3,7 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 
 export type DiscordNotificationInput = {
   serverEventId: string;
-  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT";
+  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "WAKE_REQUEST";
   content: string;
 };
 
@@ -52,11 +52,12 @@ export async function dispatchPendingDiscordNotifications(environment = process.
   return { enabled: true, sent, failed };
 }
 
-function configurationAllows(configuration: { notifyServerOnline: boolean; notifyServerSleeping: boolean; notifyServerOutage: boolean; notifyRecordBroken: boolean; notifyLegendaryAchievement: boolean }, kind: DiscordNotificationInput["kind"]) {
+function configurationAllows(configuration: { notifyServerOnline: boolean; notifyServerSleeping: boolean; notifyServerOutage: boolean; notifyRecordBroken: boolean; notifyLegendaryAchievement: boolean; notifyWakeRequest: boolean }, kind: DiscordNotificationInput["kind"]) {
   if (kind === "SERVER_ONLINE") return configuration.notifyServerOnline;
   if (kind === "SERVER_SLEEPING") return configuration.notifyServerSleeping;
   if (kind === "SERVER_OUTAGE") return configuration.notifyServerOutage;
   if (kind === "RECORD_BROKEN") return configuration.notifyRecordBroken;
+  if (kind === "WAKE_REQUEST") return configuration.notifyWakeRequest;
   return configuration.notifyLegendaryAchievement;
 }
 

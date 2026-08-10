@@ -104,7 +104,20 @@ enum DiscordNotificationKind {
   SERVER_OUTAGE
   RECORD_BROKEN
   LEGENDARY_ACHIEVEMENT
+  WAKE_REQUEST
   WEEKLY_CHRONICLE
+}
+
+enum WakeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ServerPollStatus {
+  ACTIVE
+  CLOSED
 }
 
 model User {
@@ -131,6 +144,11 @@ model User {
   achievements     PlayerAchievement[]
   recordHolders    RecordHolder[] @relation("RecordHolderUser")
   recordHistory    RecordHistory[] @relation("RecordHistoryUser")
+  wakeRequests     WakeRequest[] @relation("WakeRequestRequester")
+  resolvedWakeRequests WakeRequest[] @relation("WakeRequestResolver")
+  wakeVotes        WakeVote[]
+  pollsCreated     ServerPoll[] @relation("PollCreator")
+  pollVotes        ServerPollVote[]
 }
 
 model Account {
@@ -204,6 +222,8 @@ model GameServer {
   events          ServerEvent[]
   playerIdentities PlayerIdentity[]
   playerPresence  ServerPlayerPresence[]
+  wakeRequests    WakeRequest[]
+  pollOptions     ServerPollOption[]
 }
 
 model ServerRuntimeState {
@@ -446,9 +466,81 @@ model DiscordGuildConfig {
   notifyServerOutage           Boolean               @default(true)
   notifyRecordBroken           Boolean               @default(true)
   notifyLegendaryAchievement   Boolean               @default(true)
+  notifyWakeRequest            Boolean               @default(true)
   createdAt                    DateTime              @default(now())
   updatedAt                    DateTime              @updatedAt
   notifications                DiscordNotification[]
+}
+
+model WakeRequest {
+  id               String            @id @default(uuid()) @db.Uuid
+  serverId         String            @db.Uuid
+  requesterUserId  String            @db.Uuid
+  status           WakeRequestStatus @default(PENDING)
+  requestedAt      DateTime          @default(now())
+  resolvedAt       DateTime?
+  resolvedByUserId String?           @db.Uuid
+  resolutionNote   String?
+  server           GameServer        @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  requester        User              @relation("WakeRequestRequester", fields: [requesterUserId], references: [id], onDelete: Cascade)
+  resolvedBy       User?             @relation("WakeRequestResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  votes            WakeVote[]
+
+  @@index([serverId, status, requestedAt])
+  @@index([requesterUserId, requestedAt])
+}
+
+model WakeVote {
+  wakeRequestId String      @db.Uuid
+  userId        String      @db.Uuid
+  createdAt     DateTime    @default(now())
+  wakeRequest   WakeRequest @relation(fields: [wakeRequestId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([wakeRequestId, userId])
+  @@index([userId, createdAt])
+}
+
+model ServerPoll {
+  id          String           @id @default(uuid()) @db.Uuid
+  question    String
+  status      ServerPollStatus @default(ACTIVE)
+  closesAt    DateTime
+  createdByUserId String       @db.Uuid
+  createdAt   DateTime         @default(now())
+  closedAt    DateTime?
+  creator     User             @relation("PollCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  options     ServerPollOption[]
+  votes       ServerPollVote[]
+
+  @@index([status, closesAt])
+}
+
+model ServerPollOption {
+  id        String         @id @default(uuid()) @db.Uuid
+  pollId    String         @db.Uuid
+  serverId  String         @db.Uuid
+  position  Int
+  poll      ServerPoll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  server    GameServer     @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  votes     ServerPollVote[]
+
+  @@unique([pollId, serverId])
+  @@unique([pollId, position])
+}
+
+model ServerPollVote {
+  pollId    String           @db.Uuid
+  userId    String           @db.Uuid
+  optionId  String           @db.Uuid
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  poll      ServerPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  option    ServerPollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@id([pollId, userId])
+  @@index([optionId])
 }
 
 model DiscordNotification {

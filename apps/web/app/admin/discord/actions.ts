@@ -19,6 +19,7 @@ const configurationSchema = z.object({
   notifyServerOutage: z.boolean(),
   notifyRecordBroken: z.boolean(),
   notifyLegendaryAchievement: z.boolean(),
+  notifyWakeRequest: z.boolean(),
 });
 
 export async function saveDiscordConfiguration(formData: FormData) {
@@ -34,6 +35,7 @@ export async function saveDiscordConfiguration(formData: FormData) {
     notifyServerOutage: formData.get("notifyServerOutage") === "on",
     notifyRecordBroken: formData.get("notifyRecordBroken") === "on",
     notifyLegendaryAchievement: formData.get("notifyLegendaryAchievement") === "on",
+    notifyWakeRequest: formData.get("notifyWakeRequest") === "on",
   });
   if (!parsed.success) throw new Error("Discord configuration must use valid Discord server and channel IDs.");
   const { id: _id, ...data } = parsed.data;

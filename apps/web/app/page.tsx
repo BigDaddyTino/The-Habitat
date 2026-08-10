@@ -4,10 +4,13 @@ import { StatusBadge } from "@/components/status-badge";
 import { ChronicleFeed } from "@/components/chronicle-feed";
 import { WorldCard } from "@/components/world-card";
 import { getChronicleEvents, getWorlds } from "@/lib/world-data";
+import { getActivePoll } from "@/lib/community-data";
+import { ActivePoll } from "@/components/active-poll";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
   const chronicle = await getChronicleEvents({ limit: 4 });
+  const activePoll = await getActivePoll();
   const liveWorlds = worlds.filter((world) => world.state === "ONLINE");
   const reportingWorlds = worlds.filter((world) => world.state !== "UNKNOWN");
   const monitorFocus = reportingWorlds[0] ?? null;
@@ -53,6 +56,7 @@ export default async function GreatHallPage() {
           <div className="fire-panel-status"><StatusBadge state={monitorFocus?.state ?? "UNKNOWN"} /><span>{monitorFocus ? `Last fire: ${monitorFocus.lastFire}` : "Waiting on MartServ102 telemetry"}</span></div>
         </aside>
       </section>
+      {activePoll ? <section className="content-shell poll-home-section"><ActivePoll poll={activePoll} /></section> : null}
     </div>
   );
 }

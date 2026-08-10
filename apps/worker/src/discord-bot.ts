@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, Client, Events, GatewayIntentBits, MessageFlags, REST, Routes, SlashCommandBuilder } from "discord.js";
 import { getPrismaClient } from "@habitat/db/client";
+import { queueDiscordNotification } from "./discord-notifications.js";
 
 const db = getPrismaClient();
 
@@ -10,7 +11,8 @@ const commands = [
   new SlashCommandBuilder().setName("leaderboard").setDescription("Show the current Hall of Legends."),
   new SlashCommandBuilder().setName("shame").setDescription("Show the current Hall of Shame."),
   new SlashCommandBuilder().setName("chronicle").setDescription("Show recent verified Chronicle entries."),
-  new SlashCommandBuilder().setName("wake").setDescription("Explain the current wake-request status."),
+  new SlashCommandBuilder().setName("wake").setDescription("Request a sleeping Habitat world for game night.").addStringOption((option) => option.setName("world").setDescription("World slug, such as valheim or palworld").setRequired(true)),
+  new SlashCommandBuilder().setName("poll").setDescription("Show the active Habitat game-night poll."),
 ].map((command) => command.toJSON());
 
 export type DiscordBotHandle = { stop(): void };
@@ -62,7 +64,8 @@ async function commandReply(interaction: ChatInputCommandInteraction) {
   if (interaction.commandName === "leaderboard") return recordSummary("LEGENDS", "Hall of Legends");
   if (interaction.commandName === "shame") return recordSummary("SHAME", "Hall of Shame");
   if (interaction.commandName === "chronicle") return chronicleSummary();
-  return "Wake requests are not active yet. No server action was taken.";
+  if (interaction.commandName === "wake") return requestWakeFromDiscord(interaction.user.id, interaction.options.getString("world", true));
+  return pollSummary();
 }
 
 async function habitatSummary() {
@@ -97,6 +100,31 @@ async function chronicleSummary() {
   const events = await db.serverEvent.findMany({ include: { server: { select: { displayName: true } } }, orderBy: { occurredAt: "desc" }, take: 3 });
   if (events.length === 0) return "The Chronicle has no verified entries yet.";
   return `**Recent Chronicle**\n${events.map((event) => `- ${event.server.displayName}: ${eventLabel(event.eventType, event.actorText, event.valueText)}`).join("\n")}`;
+}
+
+async function requestWakeFromDiscord(discordUserId: string, worldSlug: string) {
+  const account = await db.account.findUnique({ where: { provider_providerAccountId: { provider: "discord", providerAccountId: discordUserId } }, include: { user: { select: { id: true, name: true, role: true, isActive: true } } } });
+  if (!account?.user.isActive || (account.user.role !== "USER" && account.user.role !== "ADMIN")) return "Sign in to the Habitat portal with Discord first, then use `/wake` again.";
+  return db.$transaction(async (transaction) => {
+    const server = await transaction.gameServer.findUnique({ where: { slug: worldSlug.trim().toLowerCase() }, select: { id: true, displayName: true, gameType: true, enabled: true, actualState: true } });
+    if (!server?.enabled || server.actualState !== "SLEEPING") return "Only intentionally sleeping Habitat worlds can receive a wake request.";
+    let request = await transaction.wakeRequest.findFirst({ where: { serverId: server.id, status: "PENDING" }, select: { id: true } });
+    if (!request) {
+      request = await transaction.wakeRequest.create({ data: { serverId: server.id, requesterUserId: account.user.id }, select: { id: true } });
+      const event = await transaction.serverEvent.create({ data: { serverId: server.id, gameType: server.gameType, eventType: "WAKE_REQUESTED", occurredAt: new Date(), actorText: account.user.name ?? "Habitat member", source: "HABITAT_DISCORD", sourceConfidence: 100, dedupeKey: `wake-request:${request.id}` } });
+      await queueDiscordNotification(transaction, { serverEventId: event.id, kind: "WAKE_REQUEST", content: `**${account.user.name ?? "A Habitat member"}** asked to light the fire for **${server.displayName}**.` });
+    }
+    await transaction.wakeVote.upsert({ where: { wakeRequestId_userId: { wakeRequestId: request.id, userId: account.user.id } }, create: { wakeRequestId: request.id, userId: account.user.id }, update: {} });
+    const supporters = await transaction.wakeVote.count({ where: { wakeRequestId: request.id } });
+    await transaction.auditLog.create({ data: { actorUserId: account.user.id, action: "DISCORD_WAKE_REQUEST_SUPPORTED", entityType: "WakeRequest", entityId: request.id, after: { serverId: server.id } } });
+    return `Wake request recorded for **${server.displayName}**. ${supporters} Habitat member${supporters === 1 ? " supports" : "s support"} it. No server action was taken.`;
+  });
+}
+
+async function pollSummary() {
+  const poll = await db.serverPoll.findFirst({ where: { status: "ACTIVE", closesAt: { gt: new Date() } }, include: { options: { include: { server: { select: { displayName: true } }, _count: { select: { votes: true } } }, orderBy: { position: "asc" } } }, orderBy: { createdAt: "desc" } });
+  if (!poll) return "No Habitat game-night poll is open.";
+  return `**${poll.question}**\n${poll.options.map((option) => `- ${option.server.displayName}: ${option._count.votes}`).join("\n")}`;
 }
 
 function eventLabel(type: string, actor: string | null, value: string | null) {
