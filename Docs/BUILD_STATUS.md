@@ -44,7 +44,7 @@ Last updated: 2026-08-10
 
 - [x] Authenticated worker client, state normalization, runtime persistence, transition history, and metric samples
 - [x] Native MartServ101 worker service packaging and one-cycle rollout command
-- [ ] Configure MartServ101 worker credentials and record the first verified database cycle
+- [x] MartServ101 worker service records verified Valheim and Palworld runtime states and metric samples
 - [ ] Add verified game-query adapters and remaining game-server process configurations
 
 ## Phase 6 - Chronicle and Event Ingestion

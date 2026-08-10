@@ -23,7 +23,7 @@ $env:Path = "C:\Program Files\nodejs;$env:Path"
 & "C:\Program Files\nodejs\corepack.cmd" pnpm --filter @habitat/worker run-once
 ```
 
-The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`.
+The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`. Valheim and Palworld are the first validated agent-backed worlds.
 
 ## Windows Service
 
