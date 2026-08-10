@@ -56,8 +56,9 @@ Last updated: 2026-08-10
 - [x] Verified server lifecycle transitions and Dragonwilds world-save events recorded by the worker
 - [x] Database-backed Chronicle route and Great Hall preview added with stable entry fragments
 - [x] Replay-safe Dragonwilds save ingestion verified against live agent telemetry
+- [x] Server-rendered Chronicle filters and permanent event detail links
 - [ ] Player join/leave and death events, only where a reliable adapter source exists
-- [ ] Chronicle filters, event detail routes, and member reactions
+- [ ] Authenticated member reactions
 
 ## Phase 7 - Player Identities and Profiles
 

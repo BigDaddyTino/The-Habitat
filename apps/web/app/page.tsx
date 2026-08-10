@@ -7,7 +7,7 @@ import { getChronicleEvents, getWorlds } from "@/lib/world-data";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
-  const chronicle = await getChronicleEvents(4);
+  const chronicle = await getChronicleEvents({ limit: 4 });
   const liveWorlds = worlds.filter((world) => world.state === "ONLINE");
   const reportingWorlds = worlds.filter((world) => world.state !== "UNKNOWN");
   const monitorFocus = reportingWorlds[0] ?? null;

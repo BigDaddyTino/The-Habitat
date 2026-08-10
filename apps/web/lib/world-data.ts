@@ -24,6 +24,31 @@ export type WorldView = {
 
 export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string };
 
+export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
+export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "WORLD_SAVED"] as const;
+
+export type ChronicleGameType = (typeof chronicleGameTypes)[number];
+export type ChronicleEventType = (typeof chronicleEventTypes)[number];
+export type ChronicleQuery = { limit?: number; gameType?: ChronicleGameType; eventType?: ChronicleEventType };
+
+export const chronicleGameLabels: Record<ChronicleGameType, string> = {
+  VALHEIM: "Valheim",
+  PALWORLD: "Palworld",
+  ENSHROUDED: "Enshrouded",
+  SEVEN_DAYS_TO_DIE: "7 Days to Die",
+  DRAGONWILDS: "RuneScape: Dragonwilds",
+  PROJECT_ZOMBOID: "Project Zomboid",
+};
+
+export const chronicleEventLabels: Record<ChronicleEventType, string> = {
+  SERVER_STARTED: "Server online",
+  SERVER_STOPPED: "Server stopped",
+  SERVER_SLEEPING: "Intentional rest",
+  SERVER_CRASHED: "Unexpected stop",
+  SERVER_UPDATED: "Update cycle",
+  WORLD_SAVED: "World save",
+};
+
 const accents: Record<string, WorldView["accent"]> = {
   SEVEN_DAYS_TO_DIE: "rose",
   PROJECT_ZOMBOID: "moss",
@@ -94,9 +119,31 @@ export async function getWorldBySlug(slug: string) {
   }
 }
 
-export async function getChronicleEvents(limit = 50): Promise<ChronicleEventView[]> {
-  const events = await db.serverEvent.findMany({ include: { server: { select: { displayName: true, slug: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take: Math.min(Math.max(limit, 1), 100) });
-  return events.map((event) => ({ id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName) }));
+export function isChronicleGameType(value: string | undefined): value is ChronicleGameType {
+  return Boolean(value && chronicleGameTypes.includes(value as ChronicleGameType));
+}
+
+export function isChronicleEventType(value: string | undefined): value is ChronicleEventType {
+  return Boolean(value && chronicleEventTypes.includes(value as ChronicleEventType));
+}
+
+export async function getChronicleEvents({ limit = 50, gameType, eventType }: ChronicleQuery = {}): Promise<ChronicleEventView[]> {
+  const events = await db.serverEvent.findMany({
+    where: { ...(gameType ? { gameType } : {}), ...(eventType ? { eventType } : {}) },
+    include: { server: { select: { displayName: true, slug: true } } },
+    orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+    take: Math.min(Math.max(limit, 1), 100),
+  });
+  return events.map(toChronicleEventView);
+}
+
+export async function getChronicleEvent(eventId: string): Promise<ChronicleEventView | null> {
+  const event = await db.serverEvent.findUnique({ where: { id: eventId }, include: { server: { select: { displayName: true, slug: true } } } });
+  return event ? toChronicleEventView(event) : null;
+}
+
+function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; server: { displayName: string; slug: string } }): ChronicleEventView {
+  return { id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName) };
 }
 
 function chronicleText(eventType: string, world: string) {
