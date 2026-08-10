@@ -26,10 +26,14 @@ export type ChronicleEventView = { id: string; occurredAt: Date; world: string; 
 
 export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
 export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "WORLD_SAVED"] as const;
+export const chronicleReactionTypes = ["SKULL", "FIRE", "FACEPALM", "CROWN", "SKILL_ISSUE"] as const;
 
 export type ChronicleGameType = (typeof chronicleGameTypes)[number];
 export type ChronicleEventType = (typeof chronicleEventTypes)[number];
+export type ChronicleReactionType = (typeof chronicleReactionTypes)[number];
 export type ChronicleQuery = { limit?: number; gameType?: ChronicleGameType; eventType?: ChronicleEventType };
+export type ChronicleReactionView = { reactionType: ChronicleReactionType; count: number; reacted: boolean };
+export type ChronicleEventDetailView = ChronicleEventView & { reactions: ChronicleReactionView[] };
 
 export const chronicleGameLabels: Record<ChronicleGameType, string> = {
   VALHEIM: "Valheim",
@@ -137,9 +141,17 @@ export async function getChronicleEvents({ limit = 50, gameType, eventType }: Ch
   return events.map(toChronicleEventView);
 }
 
-export async function getChronicleEvent(eventId: string): Promise<ChronicleEventView | null> {
-  const event = await db.serverEvent.findUnique({ where: { id: eventId }, include: { server: { select: { displayName: true, slug: true } } } });
-  return event ? toChronicleEventView(event) : null;
+export async function getChronicleEvent(eventId: string, viewerUserId?: string): Promise<ChronicleEventDetailView | null> {
+  const event = await db.serverEvent.findUnique({ where: { id: eventId }, include: { server: { select: { displayName: true, slug: true } }, reactions: { select: { reactionType: true, userId: true } } } });
+  if (!event) return null;
+  return {
+    ...toChronicleEventView(event),
+    reactions: chronicleReactionTypes.map((reactionType) => ({
+      reactionType,
+      count: event.reactions.filter((reaction) => reaction.reactionType === reactionType).length,
+      reacted: Boolean(viewerUserId && event.reactions.some((reaction) => reaction.reactionType === reactionType && reaction.userId === viewerUserId)),
+    })),
+  };
 }
 
 function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; server: { displayName: string; slug: string } }): ChronicleEventView {

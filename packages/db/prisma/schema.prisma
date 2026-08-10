@@ -54,6 +54,14 @@ enum ServerEventType {
   WAKE_APPROVED
 }
 
+enum ChronicleReactionType {
+  SKULL
+  FIRE
+  FACEPALM
+  CROWN
+  SKILL_ISSUE
+}
+
 model User {
   id               String           @id @default(uuid()) @db.Uuid
   name             String?
@@ -70,6 +78,7 @@ model User {
   sessions         Session[]
   playerIdentities PlayerIdentity[]
   auditLogs        AuditLog[]
+  chronicleReactions ChronicleReaction[]
 }
 
 model Account {
@@ -227,10 +236,24 @@ model ServerEvent {
   dedupeKey        String?          @unique
   server           GameServer       @relation(fields: [serverId], references: [id], onDelete: Cascade)
   playerIdentity   PlayerIdentity?  @relation(fields: [playerIdentityId], references: [id], onDelete: SetNull)
+  reactions        ChronicleReaction[]
 
   @@index([serverId, occurredAt])
   @@index([eventType, occurredAt])
   @@index([playerIdentityId, occurredAt])
+}
+
+model ChronicleReaction {
+  id            String                @id @default(uuid()) @db.Uuid
+  serverEventId String                @db.Uuid
+  userId        String                @db.Uuid
+  reactionType  ChronicleReactionType
+  createdAt     DateTime              @default(now())
+  serverEvent   ServerEvent           @relation(fields: [serverEventId], references: [id], onDelete: Cascade)
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([serverEventId, userId, reactionType])
+  @@index([serverEventId, reactionType])
 }
 
 model AuditLog {
