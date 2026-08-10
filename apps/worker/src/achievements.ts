@@ -1,5 +1,6 @@
 import type { Prisma } from "@habitat/db/client";
 import { parseDistinctGameEventCountRule, parseEventCountRule } from "@habitat/shared";
+import { evaluateRecordsForEvent } from "./records.js";
 
 export async function evaluateAchievementsForEvent(transaction: Prisma.TransactionClient, eventId: string) {
   const event = await transaction.serverEvent.findUnique({ where: { id: eventId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
@@ -15,7 +16,7 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
       create: { userId: event.playerIdentity.userId, achievementDefinitionId: definition.id, sourceEventId: event.id, dedupeKey },
       update: {},
     });
-    await transaction.serverEvent.upsert({
+    const achievementEvent = await transaction.serverEvent.upsert({
       where: { dedupeKey: `achievement-event:${dedupeKey}` },
       create: {
         serverId: event.serverId,
@@ -32,6 +33,7 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
       },
       update: {},
     });
+    await evaluateRecordsForEvent(transaction, achievementEvent.id);
   }
 }
 

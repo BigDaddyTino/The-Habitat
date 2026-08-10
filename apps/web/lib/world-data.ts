@@ -25,7 +25,7 @@ export type WorldView = {
 export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string };
 
 export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
-export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "ACHIEVEMENT_EARNED", "WORLD_SAVED"] as const;
+export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "ACHIEVEMENT_EARNED", "RECORD_BROKEN", "WORLD_SAVED"] as const;
 export const chronicleReactionTypes = ["SKULL", "FIRE", "FACEPALM", "CROWN", "SKILL_ISSUE"] as const;
 
 export type ChronicleGameType = (typeof chronicleGameTypes)[number];
@@ -53,6 +53,7 @@ export const chronicleEventLabels: Record<ChronicleEventType, string> = {
   PLAYER_JOINED: "Player joined",
   PLAYER_LEFT: "Player left",
   ACHIEVEMENT_EARNED: "Achievement earned",
+  RECORD_BROKEN: "Record broken",
   WORLD_SAVED: "World save",
 };
 
@@ -169,6 +170,7 @@ function chronicleText(eventType: string, world: string, actorText: string | nul
   if (eventType === "PLAYER_JOINED" && actorText) return `${actorText} joined ${world}.`;
   if (eventType === "PLAYER_LEFT" && actorText) return `${actorText} left ${world}.`;
   if (eventType === "ACHIEVEMENT_EARNED" && actorText && valueText) return `${actorText} earned ${valueText}.`;
+  if (eventType === "RECORD_BROKEN" && actorText && valueText) return `${actorText} set a new record: ${valueText}.`;
   if (eventType === "WORLD_SAVED") return `${world} completed a verified world save.`;
   return `${world} recorded a verified event.`;
 }

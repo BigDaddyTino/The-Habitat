@@ -81,7 +81,13 @@ Last updated: 2026-08-10
 
 ## Phase 9 - Halls of Shame and Legends
 
-- [ ] Not started
+- [x] Record definitions, current holders, break history, and database-enforced replay safety
+- [x] Event-driven Legend evaluator for verified visits, games explored, and achievements earned
+- [x] Chronicle `RECORD_BROKEN` entries with a direct link back to the qualifying evidence
+- [x] Hall of Legends and Hall of Shame routes with world and record-holder filters
+- [x] Hall cards show current holder, value, date, prior record, and a restrained new-record treatment
+- [ ] Live first-record verification after an approved identity produces a qualifying event
+- [ ] Shame categories, pending a trustworthy death or reconnect adapter source
 
 ## Phase 10 - Discord
 

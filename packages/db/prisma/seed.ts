@@ -21,6 +21,12 @@ const achievements = [
   { slug: "habitat-tourist", name: "Habitat Tourist", description: "Join verified worlds in three different games.", rarity: "UNCOMMON", category: "Exploration", ruleType: "DISTINCT_GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 3 }, points: 25 },
 ] as const;
 
+const records = [
+  { slug: "most-verified-visits", title: "Most Verified Visits", description: "The most recorded, verified player joins across all Habitat worlds.", hall: "LEGENDS", category: "Community", valueLabel: "verified visits", ruleType: "PLAYER_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
+  { slug: "most-worlds-touched", title: "Most Worlds Touched", description: "The most distinct Habitat games joined with a verified identity.", hall: "LEGENDS", category: "Exploration", valueLabel: "games explored", ruleType: "DISTINCT_GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
+  { slug: "most-achievements", title: "Most Achievements", description: "The highest verified achievement count in the Habitat.", hall: "LEGENDS", category: "Achievement", valueLabel: "achievements earned", ruleType: "ACHIEVEMENT_COUNT", ruleConfig: {} },
+] as const;
+
 async function main() {
   for (const server of servers) {
     await prisma.gameServer.upsert({
@@ -48,6 +54,22 @@ async function main() {
         ruleType: achievement.ruleType,
         ruleConfig: achievement.ruleConfig,
         points: achievement.points,
+        enabled: true,
+      },
+    });
+  }
+  for (const record of records) {
+    await prisma.recordDefinition.upsert({
+      where: { slug: record.slug },
+      create: record,
+      update: {
+        title: record.title,
+        description: record.description,
+        hall: record.hall,
+        category: record.category,
+        valueLabel: record.valueLabel,
+        ruleType: record.ruleType,
+        ruleConfig: record.ruleConfig,
         enabled: true,
       },
     });
