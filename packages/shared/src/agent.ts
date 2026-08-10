@@ -42,6 +42,12 @@ export type AgentQueryObservation = {
   version: string | null;
 };
 
+export type AgentLogObservation = {
+  available: boolean;
+  lastWorldLoadAt: string | null;
+  lastSaveAt: string | null;
+};
+
 export type AgentServerStatus = {
   key: string;
   observedAt: string;
@@ -49,4 +55,5 @@ export type AgentServerStatus = {
   disk: AgentDiskObservation | null;
   executable: AgentExecutableObservation | null;
   query: AgentQueryObservation | null;
+  log: AgentLogObservation | null;
 };

@@ -11,6 +11,7 @@ const status: AgentServerStatus = {
   disk: null,
   executable: null,
   query: null,
+  log: null,
 };
 
 test("a successful agent poll persists only registered agent worlds", async () => {

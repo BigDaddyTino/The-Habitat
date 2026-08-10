@@ -44,7 +44,7 @@ function isAgentServerStatus(value: unknown): value is AgentServerStatus {
   if (!isRecord(value) || !isServerKey(value.key) || typeof value.observedAt !== "string" || !isRecord(value.process)) return false;
   const process = value.process;
   if (typeof process.running !== "boolean" || !isNullableNumber(process.processCount) || !isNullableNumber(process.pid) || !isNullableString(process.startedAt) || !isNullableNumber(process.uptimeSeconds) || !isNullableNumber(process.memoryBytes) || !isNullableNumber(process.cpuSeconds)) return false;
-  return isNullableObservation(value.disk, isDiskObservation) && isNullableObservation(value.executable, isExecutableObservation) && isNullableObservation(value.query, isQueryObservation);
+  return isNullableObservation(value.disk, isDiskObservation) && isNullableObservation(value.executable, isExecutableObservation) && isNullableObservation(value.query, isQueryObservation) && isNullableObservation(value.log, isLogObservation);
 }
 
 function isDiskObservation(value: unknown): boolean {
@@ -57,6 +57,10 @@ function isExecutableObservation(value: unknown): boolean {
 
 function isQueryObservation(value: unknown): boolean {
   return isRecord(value) && typeof value.attempted === "boolean" && (value.reachable === null || typeof value.reachable === "boolean") && isNullableNumber(value.pingMs) && isNullableNumber(value.playerCount) && isNullableNumber(value.maxPlayers) && isNullableString(value.version);
+}
+
+function isLogObservation(value: unknown): boolean {
+  return isRecord(value) && typeof value.available === "boolean" && isNullableString(value.lastWorldLoadAt) && isNullableString(value.lastSaveAt);
 }
 
 function isNullableObservation(value: unknown, predicate: (value: unknown) => boolean): boolean {

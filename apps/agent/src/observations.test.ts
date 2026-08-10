@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { observeProcess } from "./observations.js";
+import { observeProcess, parseDragonwildsLog } from "./observations.js";
 
 test("Windows process observation sees the agent's Node runtime", { skip: process.platform !== "win32" }, async () => {
   const observation = await observeProcess("node");
@@ -12,4 +12,13 @@ test("Windows process observation sees the agent's Node runtime", { skip: proces
 test("command-line matching prevents a shared runtime from matching every process", { skip: process.platform !== "win32" }, async () => {
   const observation = await observeProcess("node", "habitat-impossible-command-line-match");
   assert.equal(observation.running, false);
+});
+
+test("Dragonwilds log parsing keeps only verified lifecycle markers", () => {
+  const log = [
+    "[2026.08.10-15.21.38:902][107]LogPersistence: [DedicatedServer] PostLoadWorldState() : World load SUCCEEDED",
+    "[2026.08.10-15.26.38:578][931]LogPersistence: [DedicatedServer] SaveGame() : Starting save",
+    "[2026.08.10-15.31.40:155][923]LogPersistence: [DedicatedServer] SaveGame() : Starting save",
+  ].join("\n");
+  assert.deepEqual(parseDragonwildsLog(log), { lastWorldLoadAt: "2026.08.10-15.21.38:902", lastSaveAt: "2026.08.10-15.31.40:155" });
 });

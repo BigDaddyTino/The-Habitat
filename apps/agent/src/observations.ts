@@ -1,8 +1,9 @@
 import { execFile } from "node:child_process";
+import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import path from "node:path";
 import { GameDig } from "gamedig";
-import type { AgentDiskObservation, AgentExecutableObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
+import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
@@ -12,14 +13,15 @@ const executableLookupScript = "$item = Get-Item -LiteralPath $env:HABITAT_EXECU
 
 type WindowsProcess = { Id: number; StartTime?: string; WorkingSet64?: number; CPU?: number };
 
-export async function observeServer(server: AgentServerConfiguration): Promise<{ process: AgentProcessObservation; disk: AgentDiskObservation | null; executable: AgentExecutableObservation | null; query: AgentQueryObservation | null }> {
-  const [process, disk, executable, query] = await Promise.all([
+export async function observeServer(server: AgentServerConfiguration): Promise<{ process: AgentProcessObservation; disk: AgentDiskObservation | null; executable: AgentExecutableObservation | null; query: AgentQueryObservation | null; log: AgentLogObservation | null }> {
+  const [process, disk, executable, query, log] = await Promise.all([
     observeProcess(server.processName, server.processCommandLineIncludes),
     server.installPath ? observeDisk(server.installPath) : Promise.resolve(null),
     server.executablePath ? observeExecutable(server.executablePath) : Promise.resolve(null),
     server.query ? observeGameQuery(server) : Promise.resolve(null),
+    server.log ? observeDragonwildsLog(server.log.path) : Promise.resolve(null),
   ]);
-  return { process, disk, executable, query };
+  return { process, disk, executable, query, log };
 }
 
 export async function observeProcess(configuredProcessName: string, processCommandLineIncludes?: string): Promise<AgentProcessObservation> {
@@ -104,6 +106,40 @@ async function observeGameQuery(server: AgentServerConfiguration): Promise<Agent
   } catch {
     return { attempted: true, reachable: false, pingMs: null, playerCount: null, maxPlayers: null, version: null };
   }
+}
+
+export async function observeDragonwildsLog(logPath: string): Promise<AgentLogObservation> {
+  try {
+    const handle = await open(logPath, "r");
+    try {
+      const { size } = await handle.stat();
+      const length = Math.min(size, 262_144);
+      const buffer = Buffer.alloc(length);
+      await handle.read(buffer, 0, length, Math.max(0, size - length));
+      const parsed = parseDragonwildsLog(buffer.toString("utf8"));
+      return { available: true, ...parsed };
+    } finally {
+      await handle.close();
+    }
+  } catch {
+    return { available: false, lastWorldLoadAt: null, lastSaveAt: null };
+  }
+}
+
+export function parseDragonwildsLog(contents: string): Pick<AgentLogObservation, "lastWorldLoadAt" | "lastSaveAt"> {
+  const lastWorldLoadAt = lastDragonwildsTimestamp(contents, /LogPersistence: \[DedicatedServer\] PostLoadWorldState\(\) : World load SUCCEEDED/);
+  const lastSaveAt = lastDragonwildsTimestamp(contents, /LogPersistence: \[DedicatedServer\] SaveGame\(\) : Starting save/);
+  return { lastWorldLoadAt, lastSaveAt };
+}
+
+function lastDragonwildsTimestamp(contents: string, marker: RegExp): string | null {
+  let latest: string | null = null;
+  for (const line of contents.split(/\r?\n/)) {
+    if (!marker.test(line)) continue;
+    const timestamp = /^\[([^\]]+)]/.exec(line)?.[1] ?? null;
+    if (timestamp) latest = timestamp;
+  }
+  return latest;
 }
 
 function emptyProcessObservation(): AgentProcessObservation {

@@ -10,6 +10,7 @@ const serverKey = z.string().regex(/^[a-z0-9][a-z0-9-]{0,62}$/);
 const processName = z.string().regex(/^[A-Za-z0-9_.-]+$/);
 const privateIpv4 = z.string().refine(isPrivateIpv4, "must be a private IPv4 address");
 const localQueryHost = z.string().refine(isLocalQueryHost, "must be loopback or a private IPv4 address");
+const localLogPath = z.string().trim().min(3).max(500).refine(isLocalLogPath, "must be an absolute local Windows path");
 const queryBaseSchema = z.object({
   host: localQueryHost.default("127.0.0.1"),
   port: z.number().int().min(1).max(65535).optional(),
@@ -28,6 +29,7 @@ const serverConfigurationSchema = z.object({
   processCommandLineIncludes: z.string().trim().min(1).max(200).refine((value) => !/[\r\n]/.test(value), "must not contain line breaks").optional(),
   executablePath: z.string().trim().min(1).max(500).optional(),
   installPath: z.string().trim().min(1).max(500).optional(),
+  log: z.object({ type: z.literal("dragonwilds"), path: localLogPath }).strict().optional(),
   query: querySchema.optional(),
 }).strict();
 
@@ -102,6 +104,10 @@ function isAllowedClientAddress(value: string): boolean {
 
 function isLocalQueryHost(value: string): boolean {
   return value === "127.0.0.1" || value === "::1" || isPrivateIpv4(value);
+}
+
+function isLocalLogPath(value: string): boolean {
+  return /^[A-Za-z]:\\/.test(value) && !value.includes("..") && !value.startsWith("\\\\");
 }
 
 function isUsableSecret(value: string | undefined): boolean {

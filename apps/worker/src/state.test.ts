@@ -11,6 +11,7 @@ const status = (running: boolean, query: AgentServerStatus["query"] = null): Age
   disk: null,
   executable: null,
   query,
+  log: null,
 });
 
 test("intentional sleep is distinct from an unexpected down process", () => {
