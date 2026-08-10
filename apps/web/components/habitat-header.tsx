@@ -32,7 +32,7 @@ export async function HabitatHeader() {
         <div className="header-status"><span /> Registry online</div>
         {session?.user?.isActive ? (
           <>
-            {session.user.role === "ADMIN" ? <Link className="profile-link" href="/admin/servers"><Settings aria-hidden="true" size={15} /> Admin</Link> : null}
+            {session.user.role === "ADMIN" ? <Link className="profile-link" href="/admin"><Settings aria-hidden="true" size={15} /> Admin</Link> : null}
             <Link className="profile-link" href="/profile"><UserRound aria-hidden="true" size={15} /> Profile</Link>
           </>
         ) : (
