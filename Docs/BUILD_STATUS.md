@@ -51,7 +51,12 @@ Last updated: 2026-08-10
 
 ## Phase 6 - Chronicle and Event Ingestion
 
-- [ ] Not started
+- [x] Persistent normalized `ServerEvent` ingestion with database-enforced dedupe keys
+- [x] Verified server lifecycle transitions and Dragonwilds world-save events recorded by the worker
+- [x] Database-backed Chronicle route and Great Hall preview added with stable entry fragments
+- [x] Replay-safe Dragonwilds save ingestion verified against live agent telemetry
+- [ ] Player join/leave and death events, only where a reliable adapter source exists
+- [ ] Chronicle filters, event detail routes, and member reactions
 
 ## Phase 7 - Player Identities and Profiles
 
