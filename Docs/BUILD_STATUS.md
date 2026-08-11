@@ -96,7 +96,7 @@ Last updated: 2026-08-10
 - [x] Admin-only, audit-logged guild and announcement-channel configuration
 - [x] Durable, replay-safe Discord outbox for server online/rest/outage, record-break, and Legendary-achievement notices
 - [x] Category-level notification toggles; ordinary joins and leaves remain silent
-- [ ] Live bot install, guild command registration, channel delivery, and command verification
+- [x] Live bot install, guild command registration, private command delivery, and command verification
 - [ ] Wake-request notices, weekly Chronicle summary, and other Phase 11-driven Discord flows
 
 ## Phase 11 - Wake Requests and Polls
@@ -110,11 +110,12 @@ Last updated: 2026-08-10
 
 ## Phase 12 - Controlled Server Actions
 
-- [x] Local-only service-wrapper installer and non-interactive batch-copy flow for named game and update services
+- [x] Local-only direct-executable service-wrapper installer for named game and update services
 - [x] Agent-side fixed allow-list for `start`, `stop`, `restart`, and `update`; no request can provide a command, path, argument, or service name
 - [x] Admin-only, typed-confirmation command queue with worker dispatch and append-only command lifecycle audits
-- [ ] Install and individually verify the six MartServ102 game/update service pairs
-- [ ] Persisted command queue, admin confirmation surface, worker dispatch, and command audit trail
+- [x] Install and individually verify start/stop/restart behavior for all six MartServ102 game services and update behavior for Valheim
+- [x] Persisted command queue, admin confirmation surface, worker dispatch, and command audit trail
+- [ ] Replace the initial command-shell wrappers with direct executable ownership and repeat lifecycle verification, including proof that no configured process remains after stop
 
 ## Phase 13 - Production Hardening
 

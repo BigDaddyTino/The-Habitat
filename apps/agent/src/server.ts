@@ -25,7 +25,7 @@ export function createAgentServer(configuration: AgentConfiguration) {
       else await handlePostRequest(request, response, configuration, serviceController);
     } catch (error) {
       if (error instanceof ServiceControlError) {
-        const status = error.code === "control_not_configured" ? 404 : error.code === "service_timeout" ? 504 : 503;
+        const status = error.code === "control_not_configured" ? 404 : error.code === "service_stop_incomplete" ? 409 : error.code === "service_timeout" ? 504 : 503;
         return sendJson(response, status, { error: error.code });
       }
       sendJson(response, 503, { error: "observation_unavailable" });

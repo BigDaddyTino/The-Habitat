@@ -2,13 +2,17 @@ import { spawn } from "node:child_process";
 import { setTimeout as wait } from "node:timers/promises";
 import type { AgentServerAction, AgentServerActionResult } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
+import { observeProcess } from "./observations.js";
 
 type ServiceState = "RUNNING" | "STOPPED" | "PENDING" | "UNKNOWN";
 
 type CommandResult = { exitCode: number; output: string };
 
 export class WindowsServiceController {
-  constructor(private readonly run = runSc) {}
+  constructor(
+    private readonly run = runSc,
+    private readonly observe = observeProcess,
+  ) {}
 
   async perform(server: AgentServerConfiguration, action: AgentServerAction): Promise<AgentServerActionResult> {
     if (!server.control) throw new ServiceControlError("control_not_configured");
@@ -19,6 +23,7 @@ export class WindowsServiceController {
       if (gameState !== "STOPPED") {
         return this.result(server.key, action, false, gameState, "server_service_must_be_stopped");
       }
+      await this.assertGameStopped(server);
       await this.start(updateServiceName);
       return this.result(server.key, action, true, "PENDING", "update_started");
     }
@@ -26,6 +31,7 @@ export class WindowsServiceController {
     if (action === "start") {
       const state = await this.getState(serviceName);
       if (state === "RUNNING") return this.result(server.key, action, true, state, "already_in_requested_state");
+      await this.assertGameStopped(server);
       await this.start(serviceName);
       const settled = await this.waitForState(serviceName, "RUNNING", timeoutMs);
       return this.result(server.key, action, true, settled, "requested");
@@ -33,9 +39,13 @@ export class WindowsServiceController {
 
     if (action === "stop") {
       const state = await this.getState(serviceName);
-      if (state === "STOPPED") return this.result(server.key, action, true, state, "already_in_requested_state");
+      if (state === "STOPPED") {
+        await this.assertGameStopped(server);
+        return this.result(server.key, action, true, state, "already_in_requested_state");
+      }
       await this.stop(serviceName);
       const settled = await this.waitForState(serviceName, "STOPPED", timeoutMs);
+      await this.assertGameStopped(server, true);
       return this.result(server.key, action, true, settled, "requested");
     }
 
@@ -43,6 +53,9 @@ export class WindowsServiceController {
     if (state !== "STOPPED") {
       await this.stop(serviceName);
       await this.waitForState(serviceName, "STOPPED", timeoutMs);
+      await this.assertGameStopped(server, true);
+    } else {
+      await this.assertGameStopped(server);
     }
     await this.start(serviceName);
     const settled = await this.waitForState(serviceName, "RUNNING", timeoutMs);
@@ -76,13 +89,19 @@ export class WindowsServiceController {
     return state;
   }
 
+  private async assertGameStopped(server: AgentServerConfiguration, waitForExit = false): Promise<void> {
+    if (waitForExit) await wait(1_000);
+    const process = await this.observe(server.processName, server.processCommandLineIncludes);
+    if (process.running) throw new ServiceControlError("service_stop_incomplete");
+  }
+
   private result(key: string, action: AgentServerAction, accepted: boolean, serviceState: ServiceState, detail: AgentServerActionResult["detail"]): AgentServerActionResult {
     return { key, action, accepted, executedAt: new Date().toISOString(), serviceState, detail };
   }
 }
 
 export class ServiceControlError extends Error {
-  constructor(readonly code: "control_not_configured" | "service_unavailable" | "service_start_failed" | "service_stop_failed" | "service_timeout") {
+  constructor(readonly code: "control_not_configured" | "service_unavailable" | "service_start_failed" | "service_stop_failed" | "service_stop_incomplete" | "service_timeout") {
     super(code);
   }
 }
