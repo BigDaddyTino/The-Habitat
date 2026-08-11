@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { BadgeCheck, Check, ExternalLink, ImagePlus, Medal, Palette, Sparkles } from "lucide-react";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
+import { progressionForXp } from "@habitat/shared";
 import { socialPlatformLabels, socialPlatforms } from "@/lib/social-platforms";
 import { addSocialAccount, disconnectSteam, equipCosmetic, equipTitle, removeSocialAccount, selectAvatarPreset, updateProfile } from "./actions";
 
@@ -14,12 +15,14 @@ const manualSocialPlatforms = socialPlatforms.filter((platform) => platform !== 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) redirect("/sign-in");
-  const [member, identities, titles, rewards] = await Promise.all([
+  const [member, identities, titles, rewards, xpTotal] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: session.user.id }, select: { name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true, socialAccounts: { orderBy: { platform: "asc" } } } }),
     db.playerIdentity.findMany({ where: { userId: session.user.id }, include: { server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } } }, orderBy: { displayName: "asc" } }),
     db.userTitle.findMany({ where: { userId: session.user.id }, include: { title: true }, orderBy: [{ equipped: "desc" }, { awardedAt: "desc" }] }),
     db.userAchievementReward.findMany({ where: { userId: session.user.id }, include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } }, orderBy: { unlockedAt: "desc" } }),
+    db.userXpEntry.aggregate({ where: { userId: session.user.id }, _sum: { amount: true } }),
   ]);
+  const progression = progressionForXp(xpTotal._sum.amount ?? 0);
   const recordedEvents = identities.reduce((total, identity) => total + identity._count.events, 0);
   const equippedTitle = titles.find((title) => title.equipped)?.title.name ?? null;
   const borders = rewards.filter((entry) => entry.reward.kind === "AVATAR_BORDER");
@@ -35,7 +38,8 @@ export default async function ProfilePage() {
         <div><p className="eyebrow">Habitat profile</p><h1>{member.displayName ?? member.name ?? "Habitat member"}</h1><p>{equippedTitle ?? "No title equipped."} Your world record, appearance, and optional links live here.</p></div>
         {member.username ? <Link className="primary-link" href={`/members/${member.username}`}>View public card <ExternalLink aria-hidden="true" size={15} /></Link> : null}
       </div>
-      <dl className="profile-metrics"><div><dt>Verified worlds</dt><dd>{identities.length}</dd></div><div><dt>Recorded events</dt><dd>{recordedEvents}</dd></div><div><dt>Loot unlocked</dt><dd>{rewards.length}</dd></div></dl>
+      <dl className="profile-metrics"><div><dt>Habitat level</dt><dd>{progression.level}</dd></div><div><dt>Total XP</dt><dd>{progression.totalXp.toLocaleString()}</dd></div><div><dt>Loot unlocked</dt><dd>{rewards.length}</dd></div></dl>
+      <div className="level-track compact"><i style={{ width: `${progression.progressPercent}%` }} /><div><span>{progression.currentLevelXp.toLocaleString()} XP this level</span><span>{progression.level === 100 ? "Maximum level" : `${progression.nextLevelXp.toLocaleString()} XP to Level ${progression.level + 1}`}</span><strong>{identities.length} verified worlds · {recordedEvents} recorded events</strong></div></div>
 
       <div className="profile-heading"><div><p className="eyebrow">Identity kit</p><h2>Make it yours</h2></div></div>
       <div className="profile-customizer">

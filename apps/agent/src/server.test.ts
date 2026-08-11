@@ -37,6 +37,13 @@ test("agent routes require authentication and reject arbitrary operations", asyn
     assert.equal(typeof statusBody.process.running, "boolean");
     assert.equal(typeof statusBody.process.processCount, "number");
 
+    const history = await fetch(`${baseUrl}/v1/servers/habitat-test/history`, { headers: { authorization: `Bearer ${token}` } });
+    assert.equal(history.status, 200);
+    const historyBody = await history.json() as { key: string; scannedAt: string; sources: unknown[] };
+    assert.equal(historyBody.key, "habitat-test");
+    assert.equal(Number.isNaN(new Date(historyBody.scannedAt).getTime()), false);
+    assert.deepEqual(historyBody.sources, []);
+
     const arbitraryRoute = await fetch(`${baseUrl}/shell`, { headers: { authorization: `Bearer ${token}` } });
     assert.equal(arbitraryRoute.status, 404);
 

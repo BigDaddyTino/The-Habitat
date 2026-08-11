@@ -12,6 +12,12 @@ const windowsServiceName = z.string().regex(/^[A-Za-z0-9_.-]{1,120}$/);
 const privateIpv4 = z.string().refine(isPrivateIpv4, "must be a private IPv4 address");
 const localQueryHost = z.string().refine(isLocalQueryHost, "must be loopback or a private IPv4 address");
 const localLogPath = z.string().trim().min(3).max(500).refine(isLocalLogPath, "must be an absolute local Windows path");
+const historySourceSchema = z.object({
+  kind: z.enum(["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL"]),
+  label: z.string().trim().min(1).max(80),
+  path: localLogPath,
+  maxBytes: z.number().int().min(1_024).max(67_108_864).default(33_554_432),
+}).strict();
 const queryBaseSchema = z.object({
   host: localQueryHost.default("127.0.0.1"),
   port: z.number().int().min(1).max(65535).optional(),
@@ -31,6 +37,7 @@ const serverConfigurationSchema = z.object({
   executablePath: z.string().trim().min(1).max(500).optional(),
   installPath: z.string().trim().min(1).max(500).optional(),
   log: z.object({ type: z.literal("dragonwilds"), path: localLogPath }).strict().optional(),
+  history: z.array(historySourceSchema).max(16).optional(),
   query: querySchema.optional(),
   control: z.object({
     serviceName: windowsServiceName,

@@ -9,6 +9,7 @@ export type WorkerConfiguration = {
   agentUrl: URL;
   agentToken: string;
   pollIntervalMs: number;
+  historyScanIntervalMs: number;
 };
 
 export function loadWorkerConfiguration(environment = process.env): WorkerConfiguration {
@@ -19,7 +20,8 @@ export function loadWorkerConfiguration(environment = process.env): WorkerConfig
 
   const agentUrl = parseAgentUrl(environment.HABITAT_AGENT_URL ?? "");
   const pollIntervalMs = z.coerce.number().int().min(5_000).max(300_000).catch(15_000).parse(environment.HABITAT_WORKER_POLL_INTERVAL_MS ?? "15000");
-  return { agentUrl, agentToken, pollIntervalMs };
+  const historyScanIntervalMs = z.coerce.number().int().min(300_000).max(86_400_000).catch(21_600_000).parse(environment.HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS ?? "21600000");
+  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs };
 }
 
 function parseAgentUrl(value: string): URL {

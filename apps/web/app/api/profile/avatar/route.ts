@@ -5,6 +5,7 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
+import { avatarStorageDirectory, resolveAvatarFile, uploadedAvatarFilename } from "@/lib/avatar-storage";
 
 const db = getPrismaClient();
 const maxAvatarBytes = 2 * 1024 * 1024;
@@ -16,17 +17,10 @@ const imageTypes = {
   "image/gif": { extension: "gif", magic: (bytes: Uint8Array) => String.fromCharCode(...bytes.slice(0, 6)) === "GIF87a" || String.fromCharCode(...bytes.slice(0, 6)) === "GIF89a" },
 } as const;
 
-function storageDirectory() {
-  return process.env.HABITAT_AVATAR_STORAGE_PATH
-    ? path.resolve(process.env.HABITAT_AVATAR_STORAGE_PATH)
-    : path.resolve(process.cwd(), "public", "member-avatars");
-}
-
 async function removePreviousUpload(image: string | null) {
-  const match = image?.match(/^\/member-avatars\/([a-f0-9-]{36}\.(?:jpg|png|webp|gif))$/i);
-  if (!match) return;
-  const target = path.resolve(storageDirectory(), match[1]);
-  if (!target.startsWith(`${storageDirectory()}${path.sep}`)) return;
+  const filename = uploadedAvatarFilename(image);
+  const target = filename ? resolveAvatarFile(filename) : null;
+  if (!target) return;
   await unlink(target).catch(() => undefined);
 }
 
@@ -42,7 +36,7 @@ export async function POST(request: Request) {
   const imageType = imageTypes[upload.type as keyof typeof imageTypes];
   if (!imageType.magic(bytes)) return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
 
-  const directory = storageDirectory();
+  const directory = avatarStorageDirectory();
   await mkdir(directory, { recursive: true });
   const filename = `${randomUUID()}.${imageType.extension}`;
   const target = path.resolve(directory, filename);

@@ -126,7 +126,12 @@ export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unkn
 
 function extractSteamId64(raw: Record<string, unknown> | null, providerKey: string) {
   const candidates = [raw?.steamId, raw?.steamid, raw?.steamID, raw?.userId, raw?.user_id, raw?.accountId, providerKey];
-  return candidates.find((value): value is string => typeof value === "string" && /^7656119\d{10}$/.test(value.trim()))?.trim() ?? null;
+  for (const value of candidates) {
+    if (typeof value !== "string") continue;
+    const match = /^(?:steam_)?(7656119\d{10})$/i.exec(value.trim());
+    if (match?.[1]) return match[1];
+  }
+  return null;
 }
 
 export async function observeDragonwildsLog(logPath: string): Promise<AgentLogObservation> {

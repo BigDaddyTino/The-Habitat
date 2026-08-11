@@ -6,6 +6,7 @@
 
 - Node.js 24 LTS is installed at `C:\Program Files\nodejs`.
 - The repository root `.env` has the production database and Auth.js settings.
+- `HABITAT_AVATAR_STORAGE_PATH` points at the persistent storage volume so a rebuild does not destroy member uploads. See [Operations](OPERATIONS.md).
 - Dependencies are installed and the production build succeeds.
 - `HabitatWorker.exe` is already present from the worker installation, or a WinSW executable has been placed at `<repository>\HabitatWeb.exe`.
 

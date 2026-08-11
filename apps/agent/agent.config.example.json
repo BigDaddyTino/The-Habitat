@@ -1,3 +1,17 @@
 {
-  "servers": []
+  "servers": [
+    {
+      "key": "valheim",
+      "displayName": "Habitat Valhalla",
+      "processName": "valheim_server",
+      "history": [
+        {
+          "kind": "VALHEIM_LOG",
+          "label": "Valheim archived server logs",
+          "path": "C:\\Habitat\\Valheim\\logs",
+          "maxBytes": 33554432
+        }
+      ]
+    }
+  ]
 }

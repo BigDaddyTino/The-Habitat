@@ -5,6 +5,8 @@ import { getPrismaClient } from "@habitat/db/client";
 import { startDiscordBot } from "./discord-bot.js";
 import { dispatchPendingDiscordNotifications } from "./discord-notifications.js";
 import { createPostgresServerCommandRepository, dispatchAuthorizedServerCommands } from "./server-commands.js";
+import { importLegacyHistory } from "./legacy-history.js";
+import { reconcileProgression } from "./progression.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -17,6 +19,7 @@ async function main(): Promise<void> {
   const agent = new HabitatAgentClient(configuration.agentUrl, configuration.agentToken);
   const runOnce = process.argv.includes("--once");
   let discordBot: Awaited<ReturnType<typeof startDiscordBot>> = null;
+  let nextHistoryScanAt = 0;
   if (!runOnce) {
     try {
       discordBot = await startDiscordBot();
@@ -37,6 +40,21 @@ async function main(): Promise<void> {
     console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
     if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
     if (commands.dispatched > 0) console.info(`Habitat server commands: ${commands.succeeded} succeeded, ${commands.failed} failed.`);
+    if (Date.now() >= nextHistoryScanAt) {
+      try {
+        const history = await importLegacyHistory(agent);
+        console.info(`Habitat legacy history: ${history.evidenceImported} evidence records and ${history.sessionsImported} timed sessions imported from ${history.servers} servers.`);
+      } catch {
+        console.warn("Habitat legacy history scan failed. Live monitoring remains available.");
+      }
+      try {
+        const users = await reconcileProgression();
+        console.info(`Habitat progression: weekly rotation ready and ${users} member XP records reconciled.`);
+      } catch {
+        console.warn("Habitat progression reconciliation failed. Live monitoring remains available.");
+      }
+      nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
+    }
   };
 
   if (runOnce) {

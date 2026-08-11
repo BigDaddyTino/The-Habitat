@@ -1,5 +1,5 @@
 import type { Prisma } from "@habitat/db/client";
-import { parseDistinctGameEventCountRule, parseEventCountRule } from "@habitat/shared";
+import { parseDistinctGameEventCountRule, parseEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, progressionForXp } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
 
@@ -11,39 +11,69 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
   for (const definition of definitions) {
     const eligible = await isEligible(transaction, definition, event.playerIdentity.userId);
     if (!eligible) continue;
-    const dedupeKey = `achievement:${definition.id}:${event.playerIdentity.userId}:${definition.isRepeatable ? event.id : "once"}`;
-    const award = await transaction.playerAchievement.upsert({
-      where: { dedupeKey },
-      create: { userId: event.playerIdentity.userId, achievementDefinitionId: definition.id, sourceEventId: event.id, dedupeKey },
-      update: {},
-    });
-    await unlockAchievementRewards(transaction, {
-      achievementDefinitionId: definition.id,
-      userId: event.playerIdentity.userId,
-      playerAchievementId: award.id,
-    });
-    const achievementEvent = await transaction.serverEvent.upsert({
-      where: { dedupeKey: `achievement-event:${dedupeKey}` },
-      create: {
-        serverId: event.serverId,
-        gameType: event.gameType,
-        eventType: "ACHIEVEMENT_EARNED",
-        occurredAt: event.occurredAt,
-        playerIdentityId: event.playerIdentity.id,
-        actorText: event.playerIdentity.displayName,
-        valueText: definition.name,
-        source: "ACHIEVEMENT_ENGINE",
-        sourceConfidence: 100,
-        dedupeKey: `achievement-event:${dedupeKey}`,
-        metadata: { achievementSlug: definition.slug, rarity: definition.rarity, points: definition.points, sourceEventId: event.id },
-      },
-      update: {},
-    });
-    await evaluateRecordsForEvent(transaction, achievementEvent.id);
-    if (definition.rarity === "LEGENDARY") {
-      await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${event.playerIdentity.displayName}** earned a Legendary Habitat achievement: **${definition.name}**.` });
-    }
+    await awardAchievement(transaction, definition, { userId: event.playerIdentity.userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: event.id, source: "ACHIEVEMENT_ENGINE" });
   }
+}
+
+export async function evaluateAchievementsForLegacyEvidence(transaction: Prisma.TransactionClient, evidenceId: string) {
+  const evidence = await transaction.legacyPlayerEvidence.findUnique({ where: { id: evidenceId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
+  if (!evidence?.playerIdentity.userId) return;
+  const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true, ruleType: "LEGACY_EVIDENCE_COUNT" } });
+  for (const definition of definitions) {
+    const rule = parseLegacyEvidenceCountRule(definition.ruleConfig);
+    if (!rule) continue;
+    const count = await transaction.legacyPlayerEvidence.count({ where: { playerIdentity: { is: { userId: evidence.playerIdentity.userId } } } });
+    if (count < rule.threshold) continue;
+    await awardAchievement(transaction, definition, { userId: evidence.playerIdentity.userId, playerIdentityId: evidence.playerIdentity.id, displayName: evidence.playerIdentity.displayName, serverId: evidence.serverId, gameType: evidence.gameType, occurredAt: evidence.occurredAt, sourceEventId: null, repeatKey: evidence.id, source: "LEGACY_HISTORY_IMPORT" });
+  }
+}
+
+export async function evaluateLevelAchievementsForUser(
+  transaction: Prisma.TransactionClient,
+  userId: string,
+  event: { id: string; serverId: string; gameType: Prisma.ServerEventCreateInput["gameType"]; occurredAt: Date; playerIdentity: { id: string; displayName: string } },
+) {
+  const total = await transaction.userXpEntry.aggregate({ where: { userId }, _sum: { amount: true } });
+  const level = progressionForXp(total._sum.amount ?? 0).level;
+  const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true, ruleType: "LEVEL_REACHED" } });
+  for (const definition of definitions) {
+    const rule = parseLevelReachedRule(definition.ruleConfig);
+    if (!rule || level < rule.level) continue;
+    await awardAchievement(transaction, definition, { userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: `level-${rule.level}`, source: "PROGRESSION_ENGINE" });
+  }
+}
+
+async function awardAchievement(
+  transaction: Prisma.TransactionClient,
+  definition: { id: string; slug: string; name: string; rarity: string; points: number; isRepeatable: boolean },
+  input: { userId: string; playerIdentityId: string; displayName: string; serverId: string; gameType: Prisma.ServerEventCreateInput["gameType"]; occurredAt: Date; sourceEventId: string | null; repeatKey: string; source: string },
+) {
+  const dedupeKey = `achievement:${definition.id}:${input.userId}:${definition.isRepeatable ? input.repeatKey : "once"}`;
+  const award = await transaction.playerAchievement.upsert({
+    where: { dedupeKey },
+    create: { userId: input.userId, achievementDefinitionId: definition.id, sourceEventId: input.sourceEventId, awardedAt: input.occurredAt, dedupeKey },
+    update: {},
+  });
+  await unlockAchievementRewards(transaction, { achievementDefinitionId: definition.id, userId: input.userId, playerAchievementId: award.id });
+  const achievementEvent = await transaction.serverEvent.upsert({
+    where: { dedupeKey: `achievement-event:${dedupeKey}` },
+    create: {
+      serverId: input.serverId,
+      gameType: input.gameType,
+      eventType: "ACHIEVEMENT_EARNED",
+      occurredAt: input.occurredAt,
+      playerIdentityId: input.playerIdentityId,
+      actorText: input.displayName,
+      valueText: definition.name,
+      source: input.source,
+      sourceConfidence: 100,
+      dedupeKey: `achievement-event:${dedupeKey}`,
+      metadata: { achievementSlug: definition.slug, rarity: definition.rarity, points: definition.points, sourceEventId: input.sourceEventId },
+    },
+    update: {},
+  });
+  await evaluateRecordsForEvent(transaction, achievementEvent.id);
+  if (["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${input.displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
 }
 
 async function unlockAchievementRewards(

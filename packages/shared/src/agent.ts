@@ -78,3 +78,33 @@ export type AgentServerStatus = {
   query: AgentQueryObservation | null;
   log: AgentLogObservation | null;
 };
+
+export const agentLegacyEvidenceKinds = ["PARTICIPATION", "SESSION"] as const;
+export type AgentLegacyEvidenceKind = typeof agentLegacyEvidenceKinds[number];
+
+export type AgentLegacyPlayerEvidence = {
+  kind: AgentLegacyEvidenceKind;
+  providerKey: string;
+  displayName: string | null;
+  externalProvider: "STEAM";
+  externalAccountId: string;
+  occurredAt: string;
+  endedAt: string | null;
+  durationSeconds: number | null;
+  sourceRecordHash: string;
+};
+
+export type AgentLegacyHistorySource = {
+  kind: "VALHEIM_LOG" | "STEAM_PLATFORM_LOG" | "HABITAT_SESSION_JSONL";
+  label: string;
+  available: boolean;
+  truncated: boolean;
+  filesScanned: number;
+  evidence: AgentLegacyPlayerEvidence[];
+};
+
+export type AgentLegacyHistory = {
+  key: string;
+  scannedAt: string;
+  sources: AgentLegacyHistorySource[];
+};

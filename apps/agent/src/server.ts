@@ -3,6 +3,7 @@ import os from "node:os";
 import type { AddressInfo } from "node:net";
 import type { AgentHealth, AgentServerAction, AgentServerStatus, AgentServerSummary } from "@habitat/shared";
 import type { AgentConfiguration } from "./config.js";
+import { readLegacyHistory } from "./history.js";
 import { observeServer } from "./observations.js";
 import { hasValidAgentToken, normalizeRemoteAddress } from "./security.js";
 import { ServiceControlError, WindowsServiceController } from "./service-control.js";
@@ -72,6 +73,13 @@ async function handleGetRequest(request: IncomingMessage, response: ServerRespon
   const pathname = new URL(request.url ?? "/", "http://agent.local").pathname;
   if (pathname === "/health") return sendJson(response, 200, getHealth());
   if (pathname === "/v1/servers") return sendJson(response, 200, getServers(configuration));
+
+  const historyMatch = /^\/v1\/servers\/([a-z0-9][a-z0-9-]{0,62})\/history$/.exec(pathname);
+  if (historyMatch) {
+    const configuredServer = configuration.servers.find((server) => server.key === historyMatch[1]);
+    if (!configuredServer) return sendJson(response, 404, { error: "not_found" });
+    return sendJson(response, 200, await readLegacyHistory(configuredServer));
+  }
 
   const statusMatch = /^\/v1\/servers\/([a-z0-9][a-z0-9-]{0,62})\/status$/.exec(pathname);
   if (!statusMatch) return sendJson(response, 404, { error: "not_found" });

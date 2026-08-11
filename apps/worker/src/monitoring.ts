@@ -4,6 +4,7 @@ import { evaluateAchievementsForEvent } from "./achievements.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
 import { normalizeServerState } from "./state.js";
+import { processProgressionForEvent } from "./progression.js";
 
 export type MonitoredServer = {
   id: string;
@@ -303,6 +304,7 @@ export async function autoLinkVerifiedSteamIdentity(transaction: PresenceTransac
 
 async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
   const occurrence = priorObservedAt ?? observedAt;
+  const durationSeconds = eventType === "PLAYER_LEFT" && priorObservedAt ? Math.max(0, Math.min(43_200, Math.floor((observedAt.getTime() - priorObservedAt.getTime()) / 1_000))) : null;
   const presenceEvent = await transaction.serverEvent.upsert({
     where: { dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}` },
     create: {
@@ -312,15 +314,17 @@ async function createPalworldPresenceEvent(transaction: PresenceTransaction, ser
       occurredAt: observedAt,
       actorText: player.displayName,
       playerIdentityId,
+      valueNumber: durationSeconds,
       source: "PALWORLD_REST",
       sourceConfidence: 100,
       dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}`,
-      metadata: { providerKey: player.providerKey, observedBy: "player_list_snapshot" },
+      metadata: { providerKey: player.providerKey, observedBy: "player_list_snapshot", ...(durationSeconds !== null ? { durationSeconds } : {}) },
     },
     update: {},
   });
   await evaluateAchievementsForEvent(transaction, presenceEvent.id);
   await evaluateRecordsForEvent(transaction, presenceEvent.id);
+  await processProgressionForEvent(transaction, presenceEvent.id);
 }
 
 function hasPlayerPresenceBaseline(details: unknown): boolean {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cormorant_Garamond, DM_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { HabitatHeader } from "@/components/habitat-header";
+import { ProgressionToasts } from "@/components/progression-toasts";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${display.variable} ${sans.variable} ${mono.variable}`}>
         <HabitatHeader />
         <main>{children}</main>
+        <ProgressionToasts />
       </body>
     </html>
   );

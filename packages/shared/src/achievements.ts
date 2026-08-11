@@ -3,6 +3,7 @@ export const achievementEventTypes = ["PLAYER_JOINED"] as const;
 export type AchievementEventType = (typeof achievementEventTypes)[number];
 export type EventCountRule = { eventType: AchievementEventType; threshold: number };
 export type DistinctGameEventCountRule = { eventType: AchievementEventType; threshold: number };
+export type LegacyEvidenceCountRule = { threshold: number };
 
 export function parseEventCountRule(value: unknown): EventCountRule | null {
   if (!isRecord(value) || !isAchievementEventType(value.eventType) || !isPositiveInteger(value.threshold)) return null;
@@ -12,6 +13,11 @@ export function parseEventCountRule(value: unknown): EventCountRule | null {
 export function parseDistinctGameEventCountRule(value: unknown): DistinctGameEventCountRule | null {
   if (!isRecord(value) || !isAchievementEventType(value.eventType) || !isPositiveInteger(value.threshold)) return null;
   return { eventType: value.eventType, threshold: value.threshold };
+}
+
+export function parseLegacyEvidenceCountRule(value: unknown): LegacyEvidenceCountRule | null {
+  if (!isRecord(value) || !isPositiveInteger(value.threshold)) return null;
+  return { threshold: value.threshold };
 }
 
 function isAchievementEventType(value: unknown): value is AchievementEventType {

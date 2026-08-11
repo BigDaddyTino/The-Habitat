@@ -85,6 +85,24 @@ enum AchievementRarity {
 enum AchievementRuleType {
   EVENT_COUNT
   DISTINCT_GAME_EVENT_COUNT
+  LEGACY_EVIDENCE_COUNT
+  LEVEL_REACHED
+}
+
+enum LegacyEvidenceKind {
+  PARTICIPATION
+  SESSION
+}
+
+enum XpSource {
+  VERIFIED_PLAYTIME
+  WEEKLY_QUEST
+}
+
+enum WeeklyQuestRuleType {
+  PLAY_SECONDS
+  JOIN_COUNT
+  DISTINCT_GAME_COUNT
 }
 
 enum AchievementRewardKind {
@@ -158,41 +176,43 @@ enum ServerCommandStatus {
 }
 
 model User {
-  id               String           @id @default(uuid()) @db.Uuid
-  name             String?
-  username         String?          @unique
-  displayName      String?
-  email            String?          @unique
-  emailVerified    DateTime?
-  role             Role             @default(VIEWER)
-  image            String?
-  bio              String?          @db.VarChar(500)
-  avatarBorder     String?          @db.VarChar(64)
-  profileLayout    String?          @db.VarChar(64)
-  isActive         Boolean          @default(false)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  accounts         Account[]
-  sessions         Session[]
-  playerIdentities PlayerIdentity[]
-  auditLogs        AuditLog[]
-  chronicleReactions ChronicleReaction[]
-  identityClaims   PlayerIdentityClaim[] @relation("IdentityClaimant")
-  resolvedIdentityClaims PlayerIdentityClaim[] @relation("IdentityClaimResolver")
-  titles           UserTitle[] @relation("TitleOwner")
-  awardedTitles    UserTitle[] @relation("TitleAwarder")
-  achievements     PlayerAchievement[]
-  recordHolders    RecordHolder[] @relation("RecordHolderUser")
-  recordHistory    RecordHistory[] @relation("RecordHistoryUser")
-  wakeRequests     WakeRequest[] @relation("WakeRequestRequester")
-  resolvedWakeRequests WakeRequest[] @relation("WakeRequestResolver")
-  wakeVotes        WakeVote[]
-  pollsCreated     ServerPoll[] @relation("PollCreator")
-  pollVotes        ServerPollVote[]
-  serverCommands   ServerCommand[]
-  socialAccounts   UserSocialAccount[]
-  unlockedRewards  UserAchievementReward[]
-  steamLinkNonces  SteamLinkNonce[]
+  id                     String                    @id @default(uuid()) @db.Uuid
+  name                   String?
+  username               String?                   @unique
+  displayName            String?
+  email                  String?                   @unique
+  emailVerified          DateTime?
+  role                   Role                      @default(VIEWER)
+  image                  String?
+  bio                    String?                   @db.VarChar(500)
+  avatarBorder           String?                   @db.VarChar(64)
+  profileLayout          String?                   @db.VarChar(64)
+  isActive               Boolean                   @default(false)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  accounts               Account[]
+  sessions               Session[]
+  playerIdentities       PlayerIdentity[]
+  auditLogs              AuditLog[]
+  chronicleReactions     ChronicleReaction[]
+  identityClaims         PlayerIdentityClaim[]     @relation("IdentityClaimant")
+  resolvedIdentityClaims PlayerIdentityClaim[]     @relation("IdentityClaimResolver")
+  titles                 UserTitle[]               @relation("TitleOwner")
+  awardedTitles          UserTitle[]               @relation("TitleAwarder")
+  achievements           PlayerAchievement[]
+  recordHolders          RecordHolder[]            @relation("RecordHolderUser")
+  recordHistory          RecordHistory[]           @relation("RecordHistoryUser")
+  wakeRequests           WakeRequest[]             @relation("WakeRequestRequester")
+  resolvedWakeRequests   WakeRequest[]             @relation("WakeRequestResolver")
+  wakeVotes              WakeVote[]
+  pollsCreated           ServerPoll[]              @relation("PollCreator")
+  pollVotes              ServerPollVote[]
+  serverCommands         ServerCommand[]
+  socialAccounts         UserSocialAccount[]
+  unlockedRewards        UserAchievementReward[]
+  steamLinkNonces        SteamLinkNonce[]
+  xpEntries              UserXpEntry[]
+  weeklyQuestProgress    UserWeeklyQuestProgress[]
 }
 
 model Account {
@@ -230,81 +250,82 @@ model VerificationToken {
 }
 
 model Invitation {
-  id          String   @id @default(uuid()) @db.Uuid
-  email       String   @unique
-  role        Role     @default(USER)
-  expiresAt   DateTime
-  acceptedAt  DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(uuid()) @db.Uuid
+  email      String    @unique
+  role       Role      @default(USER)
+  expiresAt  DateTime
+  acceptedAt DateTime?
+  createdAt  DateTime  @default(now())
 }
 
 model GameServer {
-  id              String                @id @default(uuid()) @db.Uuid
-  slug            String                @unique
-  displayName     String
-  gameType        GameType
-  worldName       String
-  description     String?
-  enabled         Boolean               @default(true)
-  controlEnabled  Boolean               @default(false)
-  desiredState    ServerState           @default(SLEEPING)
-  actualState     ServerState           @default(UNKNOWN)
-  lastStateChangeAt DateTime?
-  lastQueryAt     DateTime?
-  lastOnlineAt    DateTime?
-  currentVersion  String?
-  currentBuildId  String?
-  maxPlayers      Int?
-  adapterType     String
-  capabilities    Json
-  publicNotes     String?
-  adminNotes      String?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  runtimeState    ServerRuntimeState?
-  statusHistory   ServerStatusHistory[]
-  metricSamples   ServerMetricSample[]
-  events          ServerEvent[]
-  playerIdentities PlayerIdentity[]
-  playerPresence  ServerPlayerPresence[]
-  wakeRequests    WakeRequest[]
-  pollOptions     ServerPollOption[]
-  commands        ServerCommand[]
+  id                   String                 @id @default(uuid()) @db.Uuid
+  slug                 String                 @unique
+  displayName          String
+  gameType             GameType
+  worldName            String
+  description          String?
+  enabled              Boolean                @default(true)
+  controlEnabled       Boolean                @default(false)
+  desiredState         ServerState            @default(SLEEPING)
+  actualState          ServerState            @default(UNKNOWN)
+  lastStateChangeAt    DateTime?
+  lastQueryAt          DateTime?
+  lastOnlineAt         DateTime?
+  currentVersion       String?
+  currentBuildId       String?
+  maxPlayers           Int?
+  adapterType          String
+  capabilities         Json
+  publicNotes          String?
+  adminNotes           String?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  runtimeState         ServerRuntimeState?
+  statusHistory        ServerStatusHistory[]
+  metricSamples        ServerMetricSample[]
+  events               ServerEvent[]
+  playerIdentities     PlayerIdentity[]
+  playerPresence       ServerPlayerPresence[]
+  legacyPlayerEvidence LegacyPlayerEvidence[]
+  wakeRequests         WakeRequest[]
+  pollOptions          ServerPollOption[]
+  commands             ServerCommand[]
 }
 
 model ServerRuntimeState {
-  id              String      @id @default(uuid()) @db.Uuid
-  serverId        String      @unique @db.Uuid
-  state           ServerState @default(UNKNOWN)
-  reachable       Boolean?
-  playerCount     Int?
-  maxPlayers      Int?
-  pingMs          Int?
-  version         String?
-  buildId         String?
-  processRunning  Boolean?
+  id               String      @id @default(uuid()) @db.Uuid
+  serverId         String      @unique @db.Uuid
+  state            ServerState @default(UNKNOWN)
+  reachable        Boolean?
+  playerCount      Int?
+  maxPlayers       Int?
+  pingMs           Int?
+  version          String?
+  buildId          String?
+  processRunning   Boolean?
   processStartedAt DateTime?
-  observedAt      DateTime    @default(now())
-  details         Json?
-  server          GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  observedAt       DateTime    @default(now())
+  details          Json?
+  server           GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
 }
 
 model ServerStatusHistory {
-  id         String      @id @default(uuid()) @db.Uuid
-  serverId   String      @db.Uuid
-  state      ServerState
+  id           String       @id @default(uuid()) @db.Uuid
+  serverId     String       @db.Uuid
+  state        ServerState
   desiredState ServerState?
-  observedAt DateTime    @default(now())
-  reason     String?
-  details    Json?
-  server     GameServer  @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  observedAt   DateTime     @default(now())
+  reason       String?
+  details      Json?
+  server       GameServer   @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@index([serverId, observedAt])
 }
 
 model ServerMetricSample {
-  id                 String   @id @default(uuid()) @db.Uuid
-  serverId           String   @db.Uuid
+  id                 String     @id @default(uuid()) @db.Uuid
+  serverId           String     @db.Uuid
   observedAt         DateTime
   playerCount        Int?
   maxPlayers         Int?
@@ -320,23 +341,24 @@ model ServerMetricSample {
 }
 
 model PlayerIdentity {
-  id          String      @id @default(uuid()) @db.Uuid
-  userId      String?     @db.Uuid
-  serverId    String?     @db.Uuid
-  gameType    GameType
-  displayName String
-  providerKey String
-  externalProvider SocialPlatform?
-  externalAccountId String?     @db.VarChar(80)
-  verifiedAt  DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
-  server      GameServer? @relation(fields: [serverId], references: [id], onDelete: SetNull)
-  events      ServerEvent[]
-  claims      PlayerIdentityClaim[]
-  recordHolders RecordHolder[]
-  recordHistory RecordHistory[]
+  id                String                 @id @default(uuid()) @db.Uuid
+  userId            String?                @db.Uuid
+  serverId          String?                @db.Uuid
+  gameType          GameType
+  displayName       String
+  providerKey       String
+  externalProvider  SocialPlatform?
+  externalAccountId String?                @db.VarChar(80)
+  verifiedAt        DateTime?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  user              User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  server            GameServer?            @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  events            ServerEvent[]
+  claims            PlayerIdentityClaim[]
+  recordHolders     RecordHolder[]
+  recordHistory     RecordHistory[]
+  legacyEvidence    LegacyPlayerEvidence[]
 
   @@unique([gameType, providerKey])
   @@index([externalProvider, externalAccountId])
@@ -360,29 +382,117 @@ model PlayerIdentityClaim {
   @@index([userId, requestedAt])
 }
 
+model LegacyPlayerEvidence {
+  id               String             @id @default(uuid()) @db.Uuid
+  serverId         String             @db.Uuid
+  playerIdentityId String             @db.Uuid
+  gameType         GameType
+  kind             LegacyEvidenceKind
+  occurredAt       DateTime
+  endedAt          DateTime?
+  durationSeconds  Int?
+  sourceKind       String             @db.VarChar(40)
+  sourceLabel      String             @db.VarChar(80)
+  sourceRecordHash String             @db.VarChar(64)
+  importedAt       DateTime           @default(now())
+  dedupeKey        String             @unique @db.VarChar(220)
+  server           GameServer         @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  playerIdentity   PlayerIdentity     @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
+
+  @@index([serverId, occurredAt])
+  @@index([playerIdentityId, occurredAt])
+  @@index([kind, occurredAt])
+}
+
+model UserXpEntry {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @db.Uuid
+  serverEventId String?      @db.Uuid
+  source        XpSource
+  amount        Int
+  description   String       @db.VarChar(160)
+  earnedAt      DateTime     @default(now())
+  dedupeKey     String       @unique @db.VarChar(220)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serverEvent   ServerEvent? @relation(fields: [serverEventId], references: [id], onDelete: SetNull)
+
+  @@index([userId, earnedAt])
+  @@index([source, earnedAt])
+}
+
+model WeeklyQuestDefinition {
+  id          String                 @id @default(uuid()) @db.Uuid
+  slug        String                 @unique @db.VarChar(80)
+  name        String                 @db.VarChar(100)
+  description String                 @db.VarChar(240)
+  ruleType    WeeklyQuestRuleType
+  threshold   Int
+  xpReward    Int
+  icon        String?                @db.VarChar(40)
+  enabled     Boolean                @default(true)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  selections  WeeklyQuestSelection[]
+}
+
+model WeeklyQuestCycle {
+  id         String                 @id @default(uuid()) @db.Uuid
+  weekStart  DateTime               @unique
+  endsAt     DateTime
+  createdAt  DateTime               @default(now())
+  selections WeeklyQuestSelection[]
+}
+
+model WeeklyQuestSelection {
+  id           String                    @id @default(uuid()) @db.Uuid
+  cycleId      String                    @db.Uuid
+  definitionId String                    @db.Uuid
+  sortOrder    Int
+  cycle        WeeklyQuestCycle          @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  definition   WeeklyQuestDefinition     @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  progress     UserWeeklyQuestProgress[]
+
+  @@unique([cycleId, definitionId])
+  @@index([cycleId, sortOrder])
+}
+
+model UserWeeklyQuestProgress {
+  id          String               @id @default(uuid()) @db.Uuid
+  userId      String               @db.Uuid
+  selectionId String               @db.Uuid
+  progress    Int                  @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime             @updatedAt
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  selection   WeeklyQuestSelection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, selectionId])
+  @@index([userId, completedAt])
+}
+
 model TitleDefinition {
-  id          String    @id @default(uuid()) @db.Uuid
-  slug        String    @unique
-  name        String    @unique
-  description String?
-  enabled     Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  userTitles  UserTitle[]
+  id                 String              @id @default(uuid()) @db.Uuid
+  slug               String              @unique
+  name               String              @unique
+  description        String?
+  enabled            Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  userTitles         UserTitle[]
   achievementRewards AchievementReward[]
 }
 
 model UserTitle {
-  id              String          @id @default(uuid()) @db.Uuid
-  userId          String          @db.Uuid
-  titleDefinitionId String        @db.Uuid
-  source          UserTitleSource
-  equipped        Boolean         @default(false)
-  awardedAt       DateTime        @default(now())
-  awardedByUserId String?         @db.Uuid
-  user            User            @relation("TitleOwner", fields: [userId], references: [id], onDelete: Cascade)
-  title           TitleDefinition @relation(fields: [titleDefinitionId], references: [id], onDelete: Cascade)
-  awardedBy       User?           @relation("TitleAwarder", fields: [awardedByUserId], references: [id], onDelete: SetNull)
+  id                String          @id @default(uuid()) @db.Uuid
+  userId            String          @db.Uuid
+  titleDefinitionId String          @db.Uuid
+  source            UserTitleSource
+  equipped          Boolean         @default(false)
+  awardedAt         DateTime        @default(now())
+  awardedByUserId   String?         @db.Uuid
+  user              User            @relation("TitleOwner", fields: [userId], references: [id], onDelete: Cascade)
+  title             TitleDefinition @relation(fields: [titleDefinitionId], references: [id], onDelete: Cascade)
+  awardedBy         User?           @relation("TitleAwarder", fields: [awardedByUserId], references: [id], onDelete: SetNull)
 
   @@unique([userId, titleDefinitionId])
   @@index([userId, equipped])
@@ -411,15 +521,15 @@ model AchievementDefinition {
 }
 
 model AchievementReward {
-  id                      String                @id @default(uuid()) @db.Uuid
-  achievementDefinitionId String                @db.Uuid
+  id                      String                  @id @default(uuid()) @db.Uuid
+  achievementDefinitionId String                  @db.Uuid
   kind                    AchievementRewardKind
-  code                    String                @db.VarChar(64)
-  name                    String                @db.VarChar(80)
-  description             String?               @db.VarChar(180)
-  titleDefinitionId       String?               @db.Uuid
-  achievement             AchievementDefinition @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
-  title                   TitleDefinition?      @relation(fields: [titleDefinitionId], references: [id], onDelete: SetNull)
+  code                    String                  @db.VarChar(64)
+  name                    String                  @db.VarChar(80)
+  description             String?                 @db.VarChar(180)
+  titleDefinitionId       String?                 @db.Uuid
+  achievement             AchievementDefinition   @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
+  title                   TitleDefinition?        @relation(fields: [titleDefinitionId], references: [id], onDelete: SetNull)
   unlocks                 UserAchievementReward[]
 
   @@unique([achievementDefinitionId, kind, code])
@@ -427,29 +537,29 @@ model AchievementReward {
 }
 
 model UserAchievementReward {
-  id                    String            @id @default(uuid()) @db.Uuid
-  userId                String            @db.Uuid
-  achievementRewardId   String            @db.Uuid
-  playerAchievementId   String?           @db.Uuid
-  unlockedAt            DateTime          @default(now())
-  equipped              Boolean           @default(false)
-  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reward                AchievementReward @relation(fields: [achievementRewardId], references: [id], onDelete: Cascade)
-  playerAchievement     PlayerAchievement? @relation(fields: [playerAchievementId], references: [id], onDelete: SetNull)
+  id                  String             @id @default(uuid()) @db.Uuid
+  userId              String             @db.Uuid
+  achievementRewardId String             @db.Uuid
+  playerAchievementId String?            @db.Uuid
+  unlockedAt          DateTime           @default(now())
+  equipped            Boolean            @default(false)
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward              AchievementReward  @relation(fields: [achievementRewardId], references: [id], onDelete: Cascade)
+  playerAchievement   PlayerAchievement? @relation(fields: [playerAchievementId], references: [id], onDelete: SetNull)
 
   @@unique([userId, achievementRewardId])
   @@index([userId, equipped])
 }
 
 model PlayerAchievement {
-  id                      String                @id @default(uuid()) @db.Uuid
-  userId                  String                @db.Uuid
-  achievementDefinitionId String                @db.Uuid
-  sourceEventId           String?               @db.Uuid
-  awardedAt               DateTime              @default(now())
-  dedupeKey               String                @unique
-  user                    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement             AchievementDefinition @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
+  id                      String                  @id @default(uuid()) @db.Uuid
+  userId                  String                  @db.Uuid
+  achievementDefinitionId String                  @db.Uuid
+  sourceEventId           String?                 @db.Uuid
+  awardedAt               DateTime                @default(now())
+  dedupeKey               String                  @unique
+  user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement             AchievementDefinition   @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
   unlockedRewards         UserAchievementReward[]
 
   @@index([userId, awardedAt])
@@ -457,17 +567,17 @@ model PlayerAchievement {
 }
 
 model UserSocialAccount {
-  id            String         @id @default(uuid()) @db.Uuid
-  userId        String         @db.Uuid
-  platform      SocialPlatform
-  handle        String         @db.VarChar(80)
-  profileUrl    String?        @db.VarChar(300)
-  providerAccountId String?    @db.VarChar(80)
-  verifiedAt    DateTime?
-  displayPublic Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String         @id @default(uuid()) @db.Uuid
+  userId            String         @db.Uuid
+  platform          SocialPlatform
+  handle            String         @db.VarChar(80)
+  profileUrl        String?        @db.VarChar(300)
+  providerAccountId String?        @db.VarChar(80)
+  verifiedAt        DateTime?
+  displayPublic     Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, platform])
   @@unique([platform, handle])
@@ -476,13 +586,13 @@ model UserSocialAccount {
 }
 
 model SteamLinkNonce {
-  id        String    @id @default(uuid()) @db.Uuid
-  userId    String    @db.Uuid
-  stateHash String    @unique @db.VarChar(64)
-  expiresAt DateTime
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  stateHash  String    @unique @db.VarChar(64)
+  expiresAt  DateTime
   consumedAt DateTime?
-  createdAt DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
 }
@@ -543,26 +653,27 @@ model RecordHistory {
 }
 
 model ServerEvent {
-  id               String           @id @default(uuid()) @db.Uuid
-  serverId         String           @db.Uuid
-  gameType         GameType
-  eventType        ServerEventType
-  occurredAt       DateTime
-  receivedAt       DateTime         @default(now())
-  playerIdentityId String?          @db.Uuid
-  actorText        String?
-  targetText       String?
-  cause            String?
-  valueNumber      Float?
-  valueText        String?
-  metadata         Json?
-  source           String
-  sourceConfidence Int              @default(100)
-  dedupeKey        String?          @unique
-  server           GameServer       @relation(fields: [serverId], references: [id], onDelete: Cascade)
-  playerIdentity   PlayerIdentity?  @relation(fields: [playerIdentityId], references: [id], onDelete: SetNull)
-  reactions        ChronicleReaction[]
+  id                   String                @id @default(uuid()) @db.Uuid
+  serverId             String                @db.Uuid
+  gameType             GameType
+  eventType            ServerEventType
+  occurredAt           DateTime
+  receivedAt           DateTime              @default(now())
+  playerIdentityId     String?               @db.Uuid
+  actorText            String?
+  targetText           String?
+  cause                String?
+  valueNumber          Float?
+  valueText            String?
+  metadata             Json?
+  source               String
+  sourceConfidence     Int                   @default(100)
+  dedupeKey            String?               @unique
+  server               GameServer            @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  playerIdentity       PlayerIdentity?       @relation(fields: [playerIdentityId], references: [id], onDelete: SetNull)
+  reactions            ChronicleReaction[]
   discordNotifications DiscordNotification[]
+  xpEntries            UserXpEntry[]
 
   @@index([serverId, occurredAt])
   @@index([eventType, occurredAt])
@@ -570,20 +681,20 @@ model ServerEvent {
 }
 
 model DiscordGuildConfig {
-  id                           String                @id @default(uuid()) @db.Uuid
-  guildId                      String                @unique
-  announcementChannelId        String?
-  commandsEnabled              Boolean               @default(true)
-  notificationsEnabled         Boolean               @default(true)
-  notifyServerOnline           Boolean               @default(true)
-  notifyServerSleeping         Boolean               @default(false)
-  notifyServerOutage           Boolean               @default(true)
-  notifyRecordBroken           Boolean               @default(true)
-  notifyLegendaryAchievement   Boolean               @default(true)
-  notifyWakeRequest            Boolean               @default(true)
-  createdAt                    DateTime              @default(now())
-  updatedAt                    DateTime              @updatedAt
-  notifications                DiscordNotification[]
+  id                         String                @id @default(uuid()) @db.Uuid
+  guildId                    String                @unique
+  announcementChannelId      String?
+  commandsEnabled            Boolean               @default(true)
+  notificationsEnabled       Boolean               @default(true)
+  notifyServerOnline         Boolean               @default(true)
+  notifyServerSleeping       Boolean               @default(false)
+  notifyServerOutage         Boolean               @default(true)
+  notifyRecordBroken         Boolean               @default(true)
+  notifyLegendaryAchievement Boolean               @default(true)
+  notifyWakeRequest          Boolean               @default(true)
+  createdAt                  DateTime              @default(now())
+  updatedAt                  DateTime              @updatedAt
+  notifications              DiscordNotification[]
 }
 
 model WakeRequest {
@@ -616,28 +727,28 @@ model WakeVote {
 }
 
 model ServerPoll {
-  id          String           @id @default(uuid()) @db.Uuid
-  question    String
-  status      ServerPollStatus @default(ACTIVE)
-  closesAt    DateTime
-  createdByUserId String       @db.Uuid
-  createdAt   DateTime         @default(now())
-  closedAt    DateTime?
-  creator     User             @relation("PollCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  options     ServerPollOption[]
-  votes       ServerPollVote[]
+  id              String             @id @default(uuid()) @db.Uuid
+  question        String
+  status          ServerPollStatus   @default(ACTIVE)
+  closesAt        DateTime
+  createdByUserId String             @db.Uuid
+  createdAt       DateTime           @default(now())
+  closedAt        DateTime?
+  creator         User               @relation("PollCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  options         ServerPollOption[]
+  votes           ServerPollVote[]
 
   @@index([status, closesAt])
 }
 
 model ServerPollOption {
-  id        String         @id @default(uuid()) @db.Uuid
-  pollId    String         @db.Uuid
-  serverId  String         @db.Uuid
-  position  Int
-  poll      ServerPoll     @relation(fields: [pollId], references: [id], onDelete: Cascade)
-  server    GameServer     @relation(fields: [serverId], references: [id], onDelete: Cascade)
-  votes     ServerPollVote[]
+  id       String           @id @default(uuid()) @db.Uuid
+  pollId   String           @db.Uuid
+  serverId String           @db.Uuid
+  position Int
+  poll     ServerPoll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  server   GameServer       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  votes    ServerPollVote[]
 
   @@unique([pollId, serverId])
   @@unique([pollId, position])
@@ -658,20 +769,20 @@ model ServerPollVote {
 }
 
 model ServerCommand {
-  id                String              @id @default(uuid()) @db.Uuid
-  serverId          String              @db.Uuid
-  requestedByUserId String              @db.Uuid
+  id                String               @id @default(uuid()) @db.Uuid
+  serverId          String               @db.Uuid
+  requestedByUserId String               @db.Uuid
   action            ServerCommandAction
-  status            ServerCommandStatus @default(REQUESTED)
-  requestedAt       DateTime            @default(now())
+  status            ServerCommandStatus  @default(REQUESTED)
+  requestedAt       DateTime             @default(now())
   authorizedAt      DateTime?
   dispatchedAt      DateTime?
   startedAt         DateTime?
   completedAt       DateTime?
   result            Json?
   errorCode         String?
-  server            GameServer          @relation(fields: [serverId], references: [id], onDelete: Cascade)
-  requestedBy       User                @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
+  server            GameServer           @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  requestedBy       User                 @relation(fields: [requestedByUserId], references: [id], onDelete: Restrict)
   audits            ServerCommandAudit[]
 
   @@index([status, requestedAt])
@@ -709,10 +820,10 @@ model DiscordNotification {
 }
 
 model ServerPlayerPresence {
-  serverId        String   @db.Uuid
+  serverId        String     @db.Uuid
   providerKey     String
   displayName     String
-  present         Boolean  @default(false)
+  present         Boolean    @default(false)
   firstObservedAt DateTime
   lastObservedAt  DateTime
   server          GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
@@ -735,16 +846,16 @@ model ChronicleReaction {
 }
 
 model AuditLog {
-  id          String    @id @default(uuid()) @db.Uuid
-  actorUserId String?   @db.Uuid
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @db.Uuid
   action      String
   entityType  String
   entityId    String?
   before      Json?
   after       Json?
   requestHash String?
-  createdAt   DateTime  @default(now())
-  actor       User?     @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
 }

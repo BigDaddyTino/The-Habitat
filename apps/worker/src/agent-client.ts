@@ -1,4 +1,4 @@
-import { agentServerActions, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
+import { agentLegacyEvidenceKinds, agentServerActions, type AgentLegacyHistory, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
 
 export type AgentStatusResult =
   | { key: string; status: AgentServerStatus }
@@ -33,6 +33,15 @@ export class HabitatAgentClient {
     return body;
   }
 
+  async readLegacyHistories(): Promise<AgentLegacyHistory[]> {
+    const summaries = await this.getJson(this.urlFor("/v1/servers"), isServerSummaryArray);
+    const histories = await Promise.all(summaries.map(async ({ key }) => {
+      try { return await this.getJson(this.urlFor(`/v1/servers/${key}/history`), isAgentLegacyHistory, 60_000); }
+      catch { return null; }
+    }));
+    return histories.filter((history): history is AgentLegacyHistory => history !== null);
+  }
+
   private async getJson<T>(url: URL, isExpected: (value: unknown) => value is T, timeoutMs = 5_000): Promise<T> {
     const response = await this.request(url, {
       headers: { authorization: `Bearer ${this.token}`, accept: "application/json" },
@@ -63,6 +72,22 @@ function isAgentServerStatus(value: unknown): value is AgentServerStatus {
   const process = value.process;
   if (typeof process.running !== "boolean" || !isNullableNumber(process.processCount) || !isNullableNumber(process.pid) || !isNullableString(process.startedAt) || !isNullableNumber(process.uptimeSeconds) || !isNullableNumber(process.memoryBytes) || !isNullableNumber(process.cpuSeconds)) return false;
   return isNullableObservation(value.disk, isDiskObservation) && isNullableObservation(value.executable, isExecutableObservation) && isNullableObservation(value.query, isQueryObservation) && isNullableObservation(value.log, isLogObservation);
+}
+
+function isAgentLegacyHistory(value: unknown): value is AgentLegacyHistory {
+  return isRecord(value) && isServerKey(value.key) && isIsoDate(value.scannedAt) && Array.isArray(value.sources) && value.sources.length <= 16 && value.sources.every((source) => {
+    if (!isRecord(source) || !["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL"].includes(source.kind as string) || typeof source.label !== "string" || source.label.length < 1 || source.label.length > 80 || typeof source.available !== "boolean" || typeof source.truncated !== "boolean" || !Number.isInteger(source.filesScanned) || !Array.isArray(source.evidence) || source.evidence.length > 5_000) return false;
+    return source.evidence.every((item) => isRecord(item)
+      && agentLegacyEvidenceKinds.includes(item.kind as never)
+      && typeof item.providerKey === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(item.providerKey)
+      && (item.displayName === null || typeof item.displayName === "string" && item.displayName.length <= 80)
+      && item.externalProvider === "STEAM"
+      && typeof item.externalAccountId === "string" && /^7656119\d{10}$/.test(item.externalAccountId)
+      && isIsoDate(item.occurredAt)
+      && (item.endedAt === null || isIsoDate(item.endedAt))
+      && (item.durationSeconds === null || typeof item.durationSeconds === "number" && Number.isInteger(item.durationSeconds) && item.durationSeconds >= 0 && item.durationSeconds <= 604_800)
+      && typeof item.sourceRecordHash === "string" && /^[a-f0-9]{64}$/.test(item.sourceRecordHash));
+  });
 }
 
 function isDiskObservation(value: unknown): boolean {
@@ -107,6 +132,12 @@ function isNullableString(value: unknown): boolean {
 
 function isServerKey(value: unknown): value is string {
   return typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,62}$/.test(value);
+}
+
+function isIsoDate(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === value;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

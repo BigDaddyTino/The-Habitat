@@ -129,4 +129,14 @@ Last updated: 2026-08-10
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
 - [x] Great Hall daylight scenes in Eastern time with reduced-motion-aware ambient encounters
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
+- [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
+- [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs
+- [x] Automatic Steam ownership for recovered identities, retroactive verified-visit achievement evaluation, and a separate Old Guard legacy achievement for non-timed evidence
+- [x] Legacy Hours leaderboard and public-profile totals; only timestamp-paired sessions contribute playtime
+- [x] Persistent Level 1-100 progression ledger with a deliberately steep 1.2M+ XP summit
+- [x] Cumulative verified-playtime XP with partial-session carryover and historical-session reconciliation
+- [x] Four deterministic-random weekly quests with automatic replay-safe rewards and weekly member progress
+- [x] Level milestone achievements at 10/25/50/75/100 with titles, animated borders, layouts, and badges
+- [x] Quest board, profile level bars, Habitat Level leaderboard, and reduced-motion-aware XP/level-up toasts
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
+- [ ] Server-specific archived log paths must be allow-listed on MartServ102 before live legacy evidence can be imported

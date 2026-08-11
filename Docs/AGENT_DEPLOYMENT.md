@@ -7,8 +7,8 @@ The Habitat Agent is a private, read-only Windows service for MartServ102. It is
 - The agent binds to one explicit private LAN address. It never binds to `0.0.0.0`.
 - Every route requires `Authorization: Bearer <HABITAT_AGENT_TOKEN>`.
 - The firewall accepts TCP 4317 only from the explicit MartServ101 LAN address supplied at install time, on the agent's configured private address. The rule applies across Windows network profiles without broadening its address scope.
-- The only implemented routes are `GET /health`, `GET /v1/servers`, and `GET /v1/servers/:key/status`.
-- There are no action, shell, command, arbitrary-path, or arbitrary-host endpoints.
+- Read routes are limited to `GET /health`, `GET /v1/servers`, `GET /v1/servers/:key/status`, and `GET /v1/servers/:key/history`.
+- Server actions remain the fixed, authenticated action allow-list. There are no shell, request-supplied command, arbitrary-path, or arbitrary-host endpoints.
 
 ## Before Installation
 
@@ -46,6 +46,27 @@ Example shape, with placeholders rather than real paths:
 `query.host` is restricted to loopback or a private IPv4 address. Set `playerCountSupported` to `false` when a query protocol is known not to provide a trustworthy count, including Valheim crossplay until another verified source exists.
 
 For Palworld, use `"type": "palworld"`, `"host": "127.0.0.1"`, and `"port": 8212`. The agent requires `HABITAT_PALWORLD_ADMIN_PASSWORD` in its ignored local `.env`; it sends that credential only to Palworld's local REST endpoint and never includes it in status responses, logs, or browser data. Do not port-forward the REST endpoint.
+
+## Legacy History Sources
+
+Archived history is opt-in per server. Every source path must be an inspected, absolute local Windows path in the ignored `agent.config.json`; clients cannot provide or override a path. The agent reads at most the configured `maxBytes`, scans at most 100 non-recursive `.log`, `.txt`, or `.jsonl` files, returns at most 5,000 normalized evidence records, and never returns raw log lines.
+
+```json
+"history": [
+  {
+    "kind": "VALHEIM_LOG",
+    "label": "Valheim archived server logs",
+    "path": "<inspected log file or directory>",
+    "maxBytes": 33554432
+  }
+]
+```
+
+- `VALHEIM_LOG` reconstructs a timed session only from a timestamped `Got connection SteamID` paired with its later `Closing socket`. An unmatched connection becomes participation evidence without playtime.
+- `STEAM_PLATFORM_LOG` records conservative participation evidence only when a timestamp, SteamID64, and explicit player activity marker occur on the same line. It never estimates session time.
+- `HABITAT_SESSION_JSONL` accepts a controlled migration export with `externalProvider: "STEAM"`, `externalAccountId`, ISO `occurredAt`, optional ISO `endedAt`, and optional `displayName`. Use it only for an inspected export from a source whose semantics are known.
+
+The worker rescans these sources every six hours by default. `HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS` can set an interval from five minutes to 24 hours. Database dedupe keys make replay safe.
 
 ## Install
 
