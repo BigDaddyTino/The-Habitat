@@ -6,7 +6,7 @@ import { StatusBadge } from "./status-badge";
 export function WorldCard({ world }: { world: WorldView }) {
   const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity}`;
   return (
-    <article className={`world-card accent-${world.accent}`}>
+    <article className={`world-card accent-${world.accent}${world.state === "SLEEPING" ? " state-sleeping" : ""}`}>
       <div className="world-card-topline">
         <span className="world-game">{world.game}</span>
         <StatusBadge state={world.state} />
