@@ -43,6 +43,18 @@ const achievements = [
   { slug: "touch-grass-legend", name: "Touch Grass Legend", description: "Reach Habitat Level 75. The grass has filed a missing-person report.", rarity: "LEGENDARY", category: "Progression", ruleType: "LEVEL_REACHED", ruleConfig: { level: 75 }, points: 250 },
   { slug: "almost-unreasonable", name: "Almost Unreasonable", description: "Reach Habitat Level 90. Concerned friends have formed a committee.", rarity: "LEGENDARY", category: "Progression", ruleType: "LEVEL_REACHED", ruleConfig: { level: 90 }, points: 350 },
   { slug: "the-longest-game", name: "The Longest Game", description: "Reach Habitat Level 100. Years of verified chaos, permanently entered into lodge history.", rarity: "QUESTIONABLE_LIFE_CHOICE", category: "Progression", ruleType: "LEVEL_REACHED", ruleConfig: { level: 100 }, points: 500 },
+  { slug: "tutorial-took-it-personally", name: "The Tutorial Took It Personally", description: "Reach Habitat Level 20. Whatever was supposed to teach moderation has clearly failed.", secretDescription: "A classified milestone somewhere beyond the tutorial.", icon: "COMPASS", rarity: "RARE", category: "Secret", ruleType: "LEVEL_REACHED", ruleConfig: { level: 20 }, isSecret: true, points: 55 },
+  { slug: "inventory-full-life-complicated", name: "Inventory Full, Life Complicated", description: "Reach Habitat Level 40. Every pocket contains something essential and at least one rock.", secretDescription: "A secret for someone carrying far too much.", icon: "PACK", rarity: "EPIC", category: "Secret", ruleType: "LEVEL_REACHED", ruleConfig: { level: 40 }, isSecret: true, points: 110 },
+  { slug: "concerned-committee", name: "The Concerned Committee", description: "Reach Habitat Level 80. Friends have reviewed the hours and scheduled a tasteful intervention.", secretDescription: "Several people are quietly comparing notes.", icon: "EYE", rarity: "LEGENDARY", category: "Secret", ruleType: "LEVEL_REACHED", ruleConfig: { level: 80 }, isSecret: true, points: 290 },
+  { slug: "chair-has-a-groove", name: "The Chair Has a Groove", description: "Make 150 verified visits. The furniture now contains a historically significant impression.", secretDescription: "The lodge furniture is beginning to remember you.", icon: "CHAIR", rarity: "EPIC", category: "Secret", ruleType: "EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 150 }, isSecret: true, points: 300 },
+  { slug: "permanent-resident-allegedly", name: "Permanent Resident, Allegedly", description: "Make 500 verified visits. The deed is disputed, but the key works and nobody is asking questions.", secretDescription: "A deeply unreasonable number of arrivals remains classified.", icon: "KEY", rarity: "QUESTIONABLE_LIFE_CHOICE", category: "Secret", ruleType: "EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 500 }, isSecret: true, points: 650 },
+  { slug: "museum-of-bad-decisions", name: "Museum of Bad Decisions", description: "Recover ten verified legacy records. The archive has been upgraded from folder to exhibit.", secretDescription: "Old evidence is accumulating behind a locked cabinet.", icon: "ARCHIVE", rarity: "LEGENDARY", category: "Secret", ruleType: "LEGACY_EVIDENCE_COUNT", ruleConfig: { threshold: 10 }, isSecret: true, points: 210 },
+  { slug: "osha-left-the-longhouse", name: "OSHA Left the Longhouse", description: "Make 15 verified visits to Valheim. The safety meeting has been postponed indefinitely.", secretDescription: "A Valheim regular is making the inspectors nervous.", icon: "RUNE", gameType: "VALHEIM", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "VALHEIM", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "management-denies-everything", name: "Management Denies Everything", description: "Make 15 verified visits to Palworld. The preserve remains completely normal and legally unremarkable.", secretDescription: "The Palworld management report has been heavily redacted.", icon: "PAW", gameType: "PALWORLD", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "PALWORLD", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "seven-days-no-calendar", name: "Seven Days, No Calendar", description: "Make 15 verified visits to 7 Days to Die. Every day is apparently Tuesday with more screaming.", secretDescription: "The blood moon calendar contains an unexplained appointment.", icon: "MOON", gameType: "SEVEN_DAYS_TO_DIE", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "SEVEN_DAYS_TO_DIE", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "this-is-how-you-logged-in", name: "This Is How You Logged In", description: "Make 15 verified visits to Project Zomboid. Survival remains pending; attendance is impeccable.", secretDescription: "Knox Country has noticed a familiar login.", icon: "SKULL", gameType: "PROJECT_ZOMBOID", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "PROJECT_ZOMBOID", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "respiratory-optional", name: "Respiratory Optional", description: "Make 15 verified visits to Enshrouded. Clean air continues to be treated as premium content.", secretDescription: "Something persistent is moving through the Shroud.", icon: "FLAME", gameType: "ENSHROUDED", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "ENSHROUDED", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "dragon-under-control", name: "Dragon? Under Control.", description: "Make 15 verified visits to Dragonwilds. The question mark is part of the official safety statement.", secretDescription: "The Wild Country incident report ends with a question mark.", icon: "SHIELD", gameType: "DRAGONWILDS", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "DRAGONWILDS", threshold: 15 }, isSecret: true, points: 105 },
 ] as const;
 
 const titles = [
@@ -57,6 +69,7 @@ const titles = [
   { slug: "chronicle-menace", name: "Chronicle Menace", description: "A recurring complication for the official record." },
   { slug: "time-thief", name: "Certified Time Thief", description: "Time failed to secure itself." },
   { slug: "almost-unreasonable", name: "Almost Unreasonable", description: "A deeply committed upper-tier resident." },
+  { slug: "lodge-owner-on-paper", name: "Lodge Owner on Paper", description: "The deed is dubious. The authority is not." },
 ] as const;
 
 const achievementRewards = [
@@ -94,6 +107,24 @@ const achievementRewards = [
   { achievementSlug: "the-longest-game", kind: "AVATAR_BORDER", code: "centurion-ring", name: "Centurion Singularity", description: "The Level 100 animated avatar border." },
   { achievementSlug: "the-longest-game", kind: "PROFILE_LAYOUT", code: "centurion-hall", name: "Centurion Hall", description: "The final legendary profile presentation." },
   { achievementSlug: "the-longest-game", kind: "BADGE", code: "level-100", name: "Level 100", description: "The deliberately unreasonable summit." },
+  { achievementSlug: "the-long-haul", kind: "TROPHY", code: "fifty-visit-antler", name: "The Fifty-Visit Antler", description: "A carved lodge trophy for returning long after good judgment clocked out." },
+  { achievementSlug: "passport-of-chaos", kind: "MEDAL", code: "five-world-compass", name: "Five-World Compass", description: "A compass that points toward the next questionable server." },
+  { achievementSlug: "six-pack-of-worlds", kind: "TROPHY", code: "six-world-crown", name: "Crown of Six Worlds", description: "The centerpiece for a complete Habitat passport." },
+  { achievementSlug: "old-maps-new-scars", kind: "MEDAL", code: "archive-service-medal", name: "Archive Service Medal", description: "Recovered from logs old enough to have opinions." },
+  { achievementSlug: "tutorial-took-it-personally", kind: "BADGE", code: "tutorial-survivor", name: "Tutorial Survivor", description: "The instructions were defeated through stubbornness." },
+  { achievementSlug: "inventory-full-life-complicated", kind: "MEDAL", code: "overpacked-medal", name: "Order of the Overpacked", description: "Awarded for carrying everything except restraint." },
+  { achievementSlug: "concerned-committee", kind: "TROPHY", code: "committee-concern", name: "Committee's Formal Concern", description: "A tasteful monument to deeply committed attendance." },
+  { achievementSlug: "chair-has-a-groove", kind: "TROPHY", code: "grooved-armchair", name: "The Grooved Armchair", description: "A miniature throne shaped by 150 verified arrivals." },
+  { achievementSlug: "permanent-resident-allegedly", kind: "TITLE", code: "lodge-owner-on-paper", name: "Lodge Owner on Paper", description: "Selectable title of legally ambiguous residence", titleSlug: "lodge-owner-on-paper" },
+  { achievementSlug: "permanent-resident-allegedly", kind: "TROPHY", code: "deed-to-the-lodge", name: "Deed to the Lodge", description: "Signed, framed, and almost certainly enforceable." },
+  { achievementSlug: "museum-of-bad-decisions", kind: "TROPHY", code: "dusty-ledger", name: "The Dusty Ledger", description: "Ten authenticated chapters from before the Chronicle." },
+  { achievementSlug: "osha-left-the-longhouse", kind: "MEDAL", code: "valheim-iron-rune", name: "Iron Rune of Valheim", description: "World-mastery medal forged beside the longhouse." },
+  { achievementSlug: "management-denies-everything", kind: "MEDAL", code: "palworld-management-seal", name: "Preserve Management Seal", description: "Officially issued. Ethically inconclusive." },
+  { achievementSlug: "seven-days-no-calendar", kind: "MEDAL", code: "blood-moon-service", name: "Blood Moon Service Medal", description: "Stamped by fifteen returns to Navezgane." },
+  { achievementSlug: "this-is-how-you-logged-in", kind: "MEDAL", code: "knox-return-medal", name: "Knox County Return Medal", description: "Attendance confirmed. Survival not guaranteed." },
+  { achievementSlug: "respiratory-optional", kind: "MEDAL", code: "embervale-breather", name: "Embervale Breather", description: "A Shroud-darkened medal for repeat expeditions." },
+  { achievementSlug: "dragon-under-control", kind: "MEDAL", code: "wild-country-ward", name: "Wild Country Ward", description: "Dragon-tested. Wording approved by nervous counsel." },
+  { achievementSlug: "the-longest-game", kind: "TROPHY", code: "centurion-monument", name: "The Centurion Monument", description: "The final centerpiece of the Habitat cabinet." },
 ] as const;
 
 const weeklyQuests = [
@@ -136,10 +167,14 @@ async function main() {
       update: {
         name: achievement.name,
         description: achievement.description,
+        secretDescription: "secretDescription" in achievement ? achievement.secretDescription : null,
+        icon: "icon" in achievement ? achievement.icon : null,
+        gameType: "gameType" in achievement ? achievement.gameType : null,
         rarity: achievement.rarity,
         category: achievement.category,
         ruleType: achievement.ruleType,
         ruleConfig: achievement.ruleConfig,
+        isSecret: "isSecret" in achievement ? achievement.isSecret : false,
         points: achievement.points,
         enabled: true,
       },

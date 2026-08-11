@@ -78,7 +78,8 @@ Last updated: 2026-08-11
 - [x] Initial verified participation definitions seeded: Welcome to God's Country and Habitat Tourist
 - [x] Member-facing achievement archive and Chronicle award entries
 - [ ] Live award verification after an approved Palworld identity joins a Habitat world
-- [ ] Additional verified rule types, secret achievements, progress views, manual awards, and notifications
+- [x] Additional verified rule types, concealed secret achievements, verified progress views, rarity ceremonies, and top-tier notifications
+- [ ] Manual achievement awards remain intentionally unimplemented; the normal award path requires verified Chronicle evidence
 
 ## Phase 9 - Halls of Shame and Legends
 
@@ -144,8 +145,11 @@ Last updated: 2026-08-11
 - [x] Compact, hourly-cached game-specific news and patch-note dispatch rail on each server dossier, capped at three linked source items
 - [x] Observed-but-unclaimed player identities shown as explicitly labeled competitors in server rosters and leaderboards, with provisional standing only
 - [x] Durable, idempotent claim-reconciliation queue: approved or Steam-verified ownership replays attached verified history into XP, achievements, titles, badges, layouts, and leaderboard totals
-- [x] Legendary achievement toasts with extended, reduced-motion-aware visual treatment
-- [x] Expanded verified achievement catalogue: progression, legacy, exploration, and extreme return-visit milestones with titles, borders, layouts, badges, and medals
+- [x] Unified rarity-aware reward ceremonies for XP, levels, and every achievement tier, coordinating a Three.js particle scene and Canvas2D Rive state machine from one animation clock
+- [x] Living Three.js trophy cabinet on private and public profiles, filled exclusively from persisted badge, medal, and trophy unlocks with pointer inspection, accessible inventory controls, mobile composition, and non-WebGL fallback
+- [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 38 catalogue records
+- [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies
+- [x] Replay-safe historical catalogue reconciliation for claimed members with retroactive rewards and suppressed Discord announcements
 - [x] Live bounded history sources deployed on MartServ102: Valheim HabitatCore Chronicle, Project Zomboid named Steam connections, Enshrouded accepted Steam sessions, 7 Days persistent-player XML, and Dragonwilds session logs
 - [x] Recovered unclaimed rosters and Chronicle events imported without premature XP: 6 Valheim names, 4 Project Zomboid names, 4 Enshrouded Steam identities, and 2 named 7 Days Steam identities
 - [x] Palworld official game-data snapshot support enabled for the next normal server start, adding offline player actors to the roster without treating them as currently online

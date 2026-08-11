@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { Prisma } from "@habitat/db/client";
+import { parseEventCountRule, parseGameEventCountRule } from "@habitat/shared";
 import { evaluateAchievementsForEvent } from "./achievements.js";
 
 test("replaying a qualifying event awards a non-repeatable achievement once", async () => {
@@ -44,4 +45,10 @@ test("replaying a qualifying event awards a non-repeatable achievement once", as
 
   assert.equal(awards.size, 1);
   assert.equal(chronicle.size, 1);
+});
+
+test("high visit thresholds and game-specific rules remain bounded and explicit", () => {
+  assert.deepEqual(parseEventCountRule({ eventType: "PLAYER_JOINED", threshold: 500 }), { eventType: "PLAYER_JOINED", threshold: 500 });
+  assert.deepEqual(parseGameEventCountRule({ eventType: "PLAYER_JOINED", gameType: "PALWORLD", threshold: 15 }), { eventType: "PLAYER_JOINED", gameType: "PALWORLD", threshold: 15 });
+  assert.equal(parseGameEventCountRule({ eventType: "PLAYER_JOINED", gameType: "NOT_A_GAME", threshold: 15 }), null);
 });

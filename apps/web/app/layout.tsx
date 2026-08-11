@@ -3,6 +3,7 @@ import { Cormorant_Garamond, DM_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { HabitatHeader } from "@/components/habitat-header";
 import { ProgressionToasts } from "@/components/progression-toasts";
+import { auth } from "@/auth";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -27,13 +28,14 @@ export const metadata: Metadata = {
   description: "A private survival-gaming clubhouse and operations center.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const session = await auth();
   return (
     <html lang="en">
       <body className={`${display.variable} ${sans.variable} ${mono.variable}`}>
         <HabitatHeader />
         <main>{children}</main>
-        <ProgressionToasts />
+        <ProgressionToasts enabled={Boolean(session?.user?.isActive)} />
       </body>
     </html>
   );

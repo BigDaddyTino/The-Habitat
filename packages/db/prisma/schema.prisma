@@ -84,6 +84,7 @@ enum AchievementRarity {
 
 enum AchievementRuleType {
   EVENT_COUNT
+  GAME_EVENT_COUNT
   DISTINCT_GAME_EVENT_COUNT
   LEGACY_EVIDENCE_COUNT
   LEVEL_REACHED
@@ -110,6 +111,8 @@ enum AchievementRewardKind {
   AVATAR_BORDER
   PROFILE_LAYOUT
   BADGE
+  MEDAL
+  TROPHY
 }
 
 enum SocialPlatform {

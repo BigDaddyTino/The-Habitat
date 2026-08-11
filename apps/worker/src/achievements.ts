@@ -1,9 +1,11 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import { parseDistinctGameEventCountRule, parseEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, progressionForXp } from "@habitat/shared";
+import { parseDistinctGameEventCountRule, parseEventCountRule, parseGameEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, progressionForXp } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
 
-export async function evaluateAchievementsForEvent(transaction: Prisma.TransactionClient, eventId: string) {
+type AchievementEvaluationOptions = { suppressNotifications?: boolean };
+
+export async function evaluateAchievementsForEvent(transaction: Prisma.TransactionClient, eventId: string, options: AchievementEvaluationOptions = {}) {
   const event = await transaction.serverEvent.findUnique({ where: { id: eventId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
   if (!event?.playerIdentity?.userId || event.eventType !== "PLAYER_JOINED") return;
 
@@ -11,11 +13,11 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
   for (const definition of definitions) {
     const eligible = await isEligible(transaction, definition, event.playerIdentity.userId);
     if (!eligible) continue;
-    await awardAchievement(transaction, definition, { userId: event.playerIdentity.userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: event.id, source: "ACHIEVEMENT_ENGINE" });
+    await awardAchievement(transaction, definition, { userId: event.playerIdentity.userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: event.id, source: "ACHIEVEMENT_ENGINE", suppressNotifications: options.suppressNotifications });
   }
 }
 
-export async function evaluateAchievementsForLegacyEvidence(transaction: Prisma.TransactionClient, evidenceId: string) {
+export async function evaluateAchievementsForLegacyEvidence(transaction: Prisma.TransactionClient, evidenceId: string, options: AchievementEvaluationOptions = {}) {
   const evidence = await transaction.legacyPlayerEvidence.findUnique({ where: { id: evidenceId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
   if (!evidence?.playerIdentity.userId) return;
   const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true, ruleType: "LEGACY_EVIDENCE_COUNT" } });
@@ -24,7 +26,7 @@ export async function evaluateAchievementsForLegacyEvidence(transaction: Prisma.
     if (!rule) continue;
     const count = await transaction.legacyPlayerEvidence.count({ where: { playerIdentity: { is: { userId: evidence.playerIdentity.userId } } } });
     if (count < rule.threshold) continue;
-    await awardAchievement(transaction, definition, { userId: evidence.playerIdentity.userId, playerIdentityId: evidence.playerIdentity.id, displayName: evidence.playerIdentity.displayName, serverId: evidence.serverId, gameType: evidence.gameType, occurredAt: evidence.occurredAt, sourceEventId: null, repeatKey: evidence.id, source: "LEGACY_HISTORY_IMPORT" });
+    await awardAchievement(transaction, definition, { userId: evidence.playerIdentity.userId, playerIdentityId: evidence.playerIdentity.id, displayName: evidence.playerIdentity.displayName, serverId: evidence.serverId, gameType: evidence.gameType, occurredAt: evidence.occurredAt, sourceEventId: null, repeatKey: evidence.id, source: "LEGACY_HISTORY_IMPORT", suppressNotifications: options.suppressNotifications });
   }
 }
 
@@ -32,6 +34,7 @@ export async function evaluateLevelAchievementsForUser(
   transaction: Prisma.TransactionClient,
   userId: string,
   event: { id: string; serverId: string; gameType: Prisma.ServerEventCreateInput["gameType"]; occurredAt: Date; playerIdentity: { id: string; displayName: string } },
+  options: AchievementEvaluationOptions = {},
 ) {
   const total = await transaction.userXpEntry.aggregate({ where: { userId }, _sum: { amount: true } });
   const level = progressionForXp(total._sum.amount ?? 0).level;
@@ -39,7 +42,7 @@ export async function evaluateLevelAchievementsForUser(
   for (const definition of definitions) {
     const rule = parseLevelReachedRule(definition.ruleConfig);
     if (!rule || level < rule.level) continue;
-    await awardAchievement(transaction, definition, { userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: `level-${rule.level}`, source: "PROGRESSION_ENGINE" });
+    await awardAchievement(transaction, definition, { userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: `level-${rule.level}`, source: "PROGRESSION_ENGINE", suppressNotifications: options.suppressNotifications });
   }
 }
 
@@ -59,15 +62,15 @@ export async function reconcileAchievementCatalog() {
       }),
     ]);
     await db.$transaction(async (transaction) => {
-      if (joinEvent) await evaluateAchievementsForEvent(transaction, joinEvent.id);
-      if (legacyEvidence) await evaluateAchievementsForLegacyEvidence(transaction, legacyEvidence.id);
+      if (joinEvent) await evaluateAchievementsForEvent(transaction, joinEvent.id, { suppressNotifications: true });
+      if (legacyEvidence) await evaluateAchievementsForLegacyEvidence(transaction, legacyEvidence.id, { suppressNotifications: true });
       if (progressionEvent?.playerIdentity?.userId) await evaluateLevelAchievementsForUser(transaction, user.id, {
         id: progressionEvent.id,
         serverId: progressionEvent.serverId,
         gameType: progressionEvent.gameType,
         occurredAt: progressionEvent.occurredAt,
         playerIdentity: { id: progressionEvent.playerIdentity.id, displayName: progressionEvent.playerIdentity.displayName },
-      });
+      }, { suppressNotifications: true });
     });
     reconciled += 1;
   }
@@ -77,7 +80,7 @@ export async function reconcileAchievementCatalog() {
 async function awardAchievement(
   transaction: Prisma.TransactionClient,
   definition: { id: string; slug: string; name: string; rarity: string; points: number; isRepeatable: boolean },
-  input: { userId: string; playerIdentityId: string; displayName: string; serverId: string; gameType: Prisma.ServerEventCreateInput["gameType"]; occurredAt: Date; sourceEventId: string | null; repeatKey: string; source: string },
+  input: { userId: string; playerIdentityId: string; displayName: string; serverId: string; gameType: Prisma.ServerEventCreateInput["gameType"]; occurredAt: Date; sourceEventId: string | null; repeatKey: string; source: string; suppressNotifications?: boolean },
 ) {
   const dedupeKey = `achievement:${definition.id}:${input.userId}:${definition.isRepeatable ? input.repeatKey : "once"}`;
   const award = await transaction.playerAchievement.upsert({
@@ -104,7 +107,7 @@ async function awardAchievement(
     update: {},
   });
   await evaluateRecordsForEvent(transaction, achievementEvent.id);
-  if (["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${input.displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
+  if (!input.suppressNotifications && ["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${input.displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
 }
 
 async function unlockAchievementRewards(
@@ -144,6 +147,12 @@ async function isEligible(transaction: Prisma.TransactionClient, definition: { r
     if (!rule) return false;
     const games = await transaction.serverEvent.findMany({ where: { playerIdentity: { is: { userId } }, eventType: rule.eventType }, distinct: ["gameType"], select: { gameType: true } });
     return games.length >= rule.threshold;
+  }
+  if (definition.ruleType === "GAME_EVENT_COUNT") {
+    const rule = parseGameEventCountRule(definition.ruleConfig);
+    if (!rule) return false;
+    const count = await transaction.serverEvent.count({ where: { playerIdentity: { is: { userId } }, eventType: rule.eventType, gameType: rule.gameType } });
+    return count >= rule.threshold;
   }
   return false;
 }

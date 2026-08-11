@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "run-once": "tsx src/index.ts --once",
+    "reconcile-achievements": "tsx src/reconcile-achievements.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/*.test.ts"

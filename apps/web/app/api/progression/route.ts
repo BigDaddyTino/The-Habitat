@@ -11,7 +11,7 @@ export async function GET() {
   const [total, entries, achievements] = await Promise.all([
     db.userXpEntry.aggregate({ where: { userId: session.user.id }, _sum: { amount: true } }),
     db.userXpEntry.findMany({ where: { userId: session.user.id }, orderBy: [{ earnedAt: "desc" }, { id: "desc" }], take: 12, select: { id: true, amount: true, source: true, description: true, earnedAt: true } }),
-    db.playerAchievement.findMany({ where: { userId: session.user.id, achievement: { rarity: { in: ["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"] } } }, orderBy: [{ awardedAt: "desc" }, { id: "desc" }], take: 8, select: { id: true, awardedAt: true, achievement: { select: { name: true, rarity: true, description: true } } } }),
+    db.playerAchievement.findMany({ where: { userId: session.user.id }, orderBy: [{ awardedAt: "desc" }, { id: "desc" }], take: 16, select: { id: true, awardedAt: true, achievement: { select: { name: true, rarity: true, description: true, category: true, points: true, rewards: { select: { kind: true, name: true } } } } } }),
   ]);
   return NextResponse.json({ ...progressionForXp(total._sum.amount ?? 0), entries, achievements }, { headers: { "Cache-Control": "no-store" } });
 }
