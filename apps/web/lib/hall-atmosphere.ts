@@ -12,6 +12,8 @@ export type GreatHallAtmosphere = {
   sky: HallSky;
   encounter: HallEncounter;
   encounterKey: string | null;
+  encounterDurationSeconds: number;
+  encounterProgress: number;
 };
 
 const EASTERN_TIME = "America/New_York";
@@ -32,9 +34,9 @@ const encounterDuration: Record<Exclude<HallEncounter, "none">, number> = {
 };
 
 const encountersBySky: Record<HallSky, Array<Exclude<HallEncounter, "none">>> = {
-  sunrise: ["birds", "bear", "comet", "fireflies", "storm", "lightning", "eclipse"],
-  midday: ["birds", "bear", "ufo", "storm", "lightning", "eclipse", "comet"],
-  sunset: ["birds", "bear", "comet", "fireflies", "storm", "lightning", "blood-moon"],
+  sunrise: ["birds", "bear", "comet", "storm", "lightning", "eclipse"],
+  midday: ["birds", "bear", "ufo", "storm", "lightning", "eclipse"],
+  sunset: ["birds", "bear", "comet", "fireflies", "storm", "lightning"],
   night: ["bear", "ufo", "comet", "aurora", "fireflies", "blood-moon", "lightning", "storm"],
 };
 
@@ -121,6 +123,10 @@ export function getGreatHallAtmosphere(now = new Date()): GreatHallAtmosphere {
     sky: getHallSky(parts.hour),
     encounter: activeWindow?.encounter ?? "none",
     encounterKey: activeWindow?.encounterKey ?? null,
+    encounterDurationSeconds: activeWindow ? activeWindow.endsAtSecond - activeWindow.startsAtSecond : 0,
+    encounterProgress: activeWindow
+      ? Math.min(1, Math.max(0, (secondOfHour - activeWindow.startsAtSecond) / (activeWindow.endsAtSecond - activeWindow.startsAtSecond)))
+      : 0,
   };
 }
 

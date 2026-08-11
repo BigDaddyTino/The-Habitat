@@ -31,6 +31,9 @@ test("is quiet outside a window and server-verifies an active encounter key", ()
   const atmosphere = getGreatHallAtmosphere(active);
   assert.equal(atmosphere.encounter, window.encounter);
   assert.equal(atmosphere.encounterKey, window.encounterKey);
+  assert.ok(atmosphere.encounterProgress > 0);
+  assert.ok(atmosphere.encounterProgress < 1);
+  assert.equal(atmosphere.encounterDurationSeconds, window.endsAtSecond - window.startsAtSecond);
   assert.equal(isCurrentHallEncounter(window.encounter, window.encounterKey, active), true);
   assert.equal(isCurrentHallEncounter(window.encounter, `${window.encounterKey}:forged`, active), false);
 });

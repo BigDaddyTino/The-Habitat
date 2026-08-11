@@ -132,6 +132,7 @@ Last updated: 2026-08-11
 - [x] Always-cinematic Great Hall with composition-matched sunrise/midday/sunset/night plates tied to America/New_York, a continuously rendered Three.js vista, pointer-depth parallax, adaptive quality, reduced-motion behavior, and an image fallback
 - [x] Deterministic living-window scheduler produces exactly three brief, sky-appropriate encounters per Eastern hour while leaving the Hall quiet most of the time: bird flocks, bear visits, UFOs, comets, aurora, fireflies, eclipse, blood moon, lightning, and storms
 - [x] Server-verified clickable bear encounter with a synthesized roar, replay-safe secret achievement, selectable Bearly Welcome title, Window Bear trophy, immediate reward ceremony, and audit record
+- [x] Cinematic event parity pass with generated, alpha-matted bear/raven/UFO plates; phase-aware color grading; exterior-window feathering; balcony-rail depth occlusion; synchronized elapsed-event animation; photographic storm, comet, celestial, aurora, and branched-lightning composites; and Chrome desktop/mobile visual QA
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs

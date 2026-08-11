@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import type { AchievementRarity, AchievementRewardKind } from "@habitat/shared";
 import type { BufferGeometry, Group, Material, PerspectiveCamera, Points, Scene, Texture, WebGLRenderer } from "three";
 import { getGreatHallAtmosphere, type GreatHallAtmosphere } from "@/lib/hall-atmosphere";
@@ -21,6 +22,8 @@ const SKY_PARTICLE_COLOR: Record<GreatHallAtmosphere["sky"], number> = {
 };
 
 type NetworkInformation = { saveData?: boolean };
+const hallPreviewEncounters = new Set<GreatHallAtmosphere["encounter"]>(["birds", "bear", "ufo", "comet", "aurora", "fireflies", "eclipse", "blood-moon", "lightning", "storm"]);
+const hallPreviewSkies = new Set<GreatHallAtmosphere["sky"]>(["sunrise", "midday", "sunset", "night"]);
 type BearResponse = {
   awarded: boolean;
   alreadyEarned: boolean;
@@ -76,6 +79,7 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
   const atmosphereRef = useRef<HTMLDivElement>(null);
   const threeCanvasRef = useRef<HTMLCanvasElement>(null);
   const claimedBearRef = useRef<string | null>(null);
+  const atmosphereSynchronizedRef = useRef(false);
   const [atmosphere, setAtmosphere] = useState(initial);
   const [bearFeedback, setBearFeedback] = useState<{ key: string | null; status: "roaring" | "awarded" | "remembered" | "signed-out" | "missed" } | null>(null);
   const bearState = bearFeedback?.key === atmosphere.encounterKey ? bearFeedback.status : "idle";
@@ -83,7 +87,22 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
   useEffect(() => {
     const tick = () => {
       const next = getGreatHallAtmosphere();
-      setAtmosphere((current) => current.sky === next.sky && current.encounterKey === next.encounterKey ? current : next);
+      const preview = ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)
+        ? new URLSearchParams(window.location.search).get("hallPreview") as GreatHallAtmosphere["encounter"] | null
+        : null;
+      if (preview && hallPreviewEncounters.has(preview)) {
+        const requestedSky = new URLSearchParams(window.location.search).get("hallSky") as GreatHallAtmosphere["sky"] | null;
+        const sky = requestedSky && hallPreviewSkies.has(requestedSky) ? requestedSky : next.sky;
+        setAtmosphere({ ...next, sky, encounter: preview, encounterKey: `visual-preview:${sky}:${preview}`, encounterDurationSeconds: 45, encounterProgress: 0.5 });
+        return;
+      }
+      setAtmosphere((current) => {
+        if (!atmosphereSynchronizedRef.current) {
+          atmosphereSynchronizedRef.current = true;
+          return next;
+        }
+        return current.sky === next.sky && current.encounterKey === next.encounterKey ? current : next;
+      });
     };
     tick();
     const interval = window.setInterval(tick, 1_000);
@@ -302,23 +321,39 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
   };
 
   const bearMessage = bearState === "awarded" ? "Secret unlocked: Do Not Tap the Glass" : bearState === "remembered" ? "The bear remembers you." : bearState === "signed-out" ? "The bear roared. Sign in to earn its mark next time." : bearState === "missed" ? "The moment escaped into the treeline." : bearState === "roaring" ? "That was louder than expected." : "";
+  const eventDuration = Math.max(1, atmosphere.encounterDurationSeconds);
+  const eventStyle = {
+    "--event-duration": `${eventDuration}s`,
+    "--event-delay": `${-(atmosphere.encounterProgress * eventDuration)}s`,
+    "--hall-event-image": `url(${SKY_IMAGE[atmosphere.sky]})`,
+  } as CSSProperties;
 
   return <>
-    <div ref={atmosphereRef} className={`hall-atmosphere sky-${atmosphere.sky} encounter-${atmosphere.encounter}`} data-encounter={atmosphere.encounter} aria-hidden="true">
-      <canvas ref={threeCanvasRef} className="hall-three-canvas" />
-      <div className="hall-haze" /><div className="hall-stars" /><div className="hall-aurora" />
-      <div className="hall-eclipse" /><div className="hall-blood-moon" /><div className="hall-storm"><i /><i /><i /></div><div className="hall-lightning"><i /></div>
-      <div className="hall-sun" /><div className="hall-cloud cloud-one" /><div className="hall-cloud cloud-two" />
-      <svg className="hall-pines" viewBox="0 0 1440 300" preserveAspectRatio="none"><path d="M0 300V180l52-90 31 58 36-110 43 118 55-70 58 104 63-151 54 151 56-91 41 64 45-125 43 125 59-75 63 117 50-143 51 143 52-73 52 89 71-165 52 165 55-122 43 122 74-88 49 88 53-160 55 160 48-96 59 96 46-136 44 136 73-68 66 68v120z" /></svg>
-      <div className="hall-bird-flock">{[0, 1, 2, 3].map((bird) => <svg key={bird} viewBox="0 0 120 50"><path d="M2 31c17-21 31-20 48-4 8-23 21-25 31 0 10-13 21-13 37 4-20-5-35-3-49 9-14-12-35-14-67-9z" /></svg>)}</div>
-      <svg className="hall-ufo" viewBox="0 0 190 85"><path d="M70 42c5-26 45-26 50 0" /><path d="M32 46c25-19 101-19 126 0-14 17-104 17-126 0z" /><path d="M53 65v14m42-11v14m42-17v14" /></svg>
-      <svg className="hall-comet" viewBox="0 0 240 110"><path d="M0 103 176 20" /><circle cx="191" cy="13" r="12" /></svg>
-      <div className="hall-fireflies">{Array.from({ length: 12 }, (_, index) => <i key={index} />)}</div>
+    <div ref={atmosphereRef} className={`hall-atmosphere sky-${atmosphere.sky} encounter-${atmosphere.encounter}`} data-encounter={atmosphere.encounter} data-preview={atmosphere.encounterKey?.startsWith("visual-preview:") ? "true" : undefined} style={eventStyle}>
+      <canvas ref={threeCanvasRef} className="hall-three-canvas" aria-hidden="true" />
+      <div className="hall-haze" aria-hidden="true" /><div className="hall-stars" aria-hidden="true" /><div className="hall-aurora" aria-hidden="true" />
+      <div className="hall-event-window" aria-hidden="true">
+        <div className="hall-eclipse" /><div className="hall-blood-moon" />
+        <div className="hall-storm"><i /><i /><i /></div>
+        <div className="hall-lightning">
+          <svg viewBox="0 0 120 520" role="presentation">
+            <path className="lightning-core" d="M67 4 57 91 70 94 47 191 59 194 38 286 49 284 25 413 33 409 14 516" />
+            <path className="lightning-branch" d="m52 168-29 63 20-15-18 78M43 269l35 52-24-18 8 62M31 382l-20 43 15-11-9 49" />
+          </svg>
+        </div>
+        <div className="hall-sun" /><div className="hall-cloud cloud-one" /><div className="hall-cloud cloud-two" />
+        <Image className="hall-ravens" src="/images/hall-events/ravens.png" alt="" width={1686} height={933} />
+        <div className="hall-ufo"><Image src="/images/hall-events/ufo.png" alt="" width={1701} height={925} /><i /><i /><i /></div>
+        <div className="hall-comet"><i /><i /></div>
+        <div className="hall-fireflies">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
+      </div>
+      {atmosphere.encounter === "bear" ? <button className={`hall-bear-encounter ${bearState !== "idle" ? "is-roaring" : ""}`} type="button" onClick={() => { void meetTheBear(); }} aria-label="A black bear is visiting the Great Hall balcony. Tap it before it leaves.">
+        <Image src="/images/hall-events/bear.png" alt="" width={1536} height={1024} priority />
+        <span>Something is watching</span>
+      </button> : null}
+      <div className="hall-depth-rail" aria-hidden="true" />
+      <div className="hall-glass-reflection" aria-hidden="true" />
     </div>
-    {atmosphere.encounter === "bear" ? <button className={`hall-bear-encounter ${bearState !== "idle" ? "is-roaring" : ""}`} type="button" onClick={() => { void meetTheBear(); }} aria-label="A bear is at the Great Hall window. Tap it before it leaves.">
-      <svg viewBox="0 0 180 105" aria-hidden="true"><path d="M18 89c4-24 23-38 46-36 8-21 28-27 42-12 15-9 34 0 38 18 19 1 29 12 28 30h-25v16h-15V89H76v16H60V89H44v16H29V89z" /><circle cx="98" cy="43" r="6" /></svg>
-      <span>Something is watching</span>
-    </button> : null}
     <p className="hall-encounter-status" aria-live="polite">{bearMessage}</p>
   </>;
 }
