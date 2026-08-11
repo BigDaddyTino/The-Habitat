@@ -139,6 +139,7 @@ Last updated: 2026-08-11
 - [x] Level milestone achievements at 10/25/50/75/100 with titles, animated borders, layouts, and badges
 - [x] Quest board, profile level bars, Habitat Level leaderboard, and reduced-motion-aware XP/level-up toasts
 - [x] Full-card Great Hall server dossiers with sleeping-world access, retained telemetry, verified roster activity, and server Chronicle signals
+- [x] Compact, hourly-cached game-specific news and patch-note dispatch rail on each server dossier, capped at three linked source items
 - [x] Legendary achievement toasts with extended, reduced-motion-aware visual treatment
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, and extreme return-visit milestones with titles, borders, layouts, badges, and medals
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
