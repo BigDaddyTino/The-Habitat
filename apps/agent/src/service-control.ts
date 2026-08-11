@@ -12,6 +12,7 @@ export class WindowsServiceController {
   constructor(
     private readonly run = runSc,
     private readonly observe = observeProcess,
+    private readonly shutdownPalworld = requestPalworldShutdown,
   ) {}
 
   async perform(server: AgentServerConfiguration, action: AgentServerAction): Promise<AgentServerActionResult> {
@@ -39,6 +40,15 @@ export class WindowsServiceController {
 
     if (action === "stop") {
       const state = await this.getState(serviceName);
+      if (this.isPalworld(server) && (await this.observe(server.processName, server.processCommandLineIncludes)).running) {
+        await this.shutdownPalworld(server);
+        await this.waitForGameStopped(server, timeoutMs);
+        if ((await this.getState(serviceName)) !== "STOPPED") {
+          await this.stop(serviceName);
+          await this.waitForState(serviceName, "STOPPED", timeoutMs);
+        }
+        return this.result(server.key, action, true, "STOPPED", "requested");
+      }
       if (state === "STOPPED") {
         await this.assertGameStopped(server);
         return this.result(server.key, action, true, state, "already_in_requested_state");
@@ -50,6 +60,11 @@ export class WindowsServiceController {
     }
 
     const state = await this.getState(serviceName);
+    const process = await this.observe(server.processName, server.processCommandLineIncludes);
+    if (this.isPalworld(server) && process.running) {
+      await this.shutdownPalworld(server);
+      await this.waitForGameStopped(server, timeoutMs);
+    }
     if (state !== "STOPPED") {
       await this.stop(serviceName);
       await this.waitForState(serviceName, "STOPPED", timeoutMs);
@@ -95,14 +110,49 @@ export class WindowsServiceController {
     if (process.running) throw new ServiceControlError("service_stop_incomplete");
   }
 
+  private async waitForGameStopped(server: AgentServerConfiguration, timeoutMs: number): Promise<void> {
+    const deadline = Date.now() + timeoutMs;
+    while ((await this.observe(server.processName, server.processCommandLineIncludes)).running) {
+      if (Date.now() >= deadline) throw new ServiceControlError("service_timeout");
+      await wait(1_000);
+    }
+  }
+
+  private isPalworld(server: AgentServerConfiguration): boolean {
+    return server.query?.type === "palworld";
+  }
+
   private result(key: string, action: AgentServerAction, accepted: boolean, serviceState: ServiceState, detail: AgentServerActionResult["detail"]): AgentServerActionResult {
     return { key, action, accepted, executedAt: new Date().toISOString(), serviceState, detail };
   }
 }
 
 export class ServiceControlError extends Error {
-  constructor(readonly code: "control_not_configured" | "service_unavailable" | "service_start_failed" | "service_stop_failed" | "service_stop_incomplete" | "service_timeout") {
+  constructor(readonly code: "control_not_configured" | "palworld_shutdown_failed" | "service_unavailable" | "service_start_failed" | "service_stop_failed" | "service_stop_incomplete" | "service_timeout") {
     super(code);
+  }
+}
+
+async function requestPalworldShutdown(server: AgentServerConfiguration): Promise<void> {
+  const query = server.query;
+  const password = process.env.HABITAT_PALWORLD_ADMIN_PASSWORD?.trim();
+  if (query?.type !== "palworld" || !query.port || !password) throw new ServiceControlError("palworld_shutdown_failed");
+
+  try {
+    const authorization = Buffer.from(`admin:${password}`).toString("base64");
+    const response = await fetch(`http://${query.host}:${query.port}/v1/api/shutdown`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Basic ${authorization}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ waittime: 15, message: "The Habitat is shutting down this world." }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) throw new Error(`Palworld shutdown returned ${response.status}`);
+  } catch {
+    throw new ServiceControlError("palworld_shutdown_failed");
   }
 }
 
