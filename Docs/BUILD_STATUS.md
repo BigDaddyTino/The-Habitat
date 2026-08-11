@@ -147,6 +147,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Level milestone achievements at 10/25/50/75/100 with titles, animated borders, layouts, and badges
 - [x] Quest board, profile level bars, Habitat Level leaderboard, and reduced-motion-aware XP/level-up toasts
 - [x] Full-card Great Hall server dossiers with sleeping-world access, retained telemetry, verified roster activity, and server Chronicle signals
+- [x] Compact live-character disclosure in each server dossier: current named-player snapshots are persisted for name-capable adapters and shown only for the matching current agent sample; count-only adapters remain explicitly unnamed
 - [x] Compact, hourly-cached game-specific news and patch-note dispatch rail on each server dossier, capped at three linked source items
 - [x] Observed-but-unclaimed player identities shown as explicitly labeled competitors in server rosters and leaderboards, with provisional standing only
 - [x] Durable, idempotent claim-reconciliation queue: approved or Steam-verified ownership replays attached verified history into XP, achievements, titles, badges, layouts, and leaderboard totals

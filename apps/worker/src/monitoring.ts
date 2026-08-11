@@ -123,7 +123,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
       const decision = normalizeServerState(effectiveDesiredState, status);
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
-      const palworldPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.players) ? status.query.players : null;
+      const namedPlayers = Array.isArray(status.query?.players) ? status.query.players : null;
       const palworldKnownPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.knownPlayers) ? status.query.knownPlayers : null;
       const details = {
         source: "HABITAT_AGENT",
@@ -133,7 +133,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
         executable: status.executable,
         query: status.query ? { ...status.query, players: status.query.players === null || status.query.players === undefined ? null : { available: true, count: status.query.players.length }, knownPlayers: status.query.knownPlayers === null || status.query.knownPlayers === undefined ? null : { available: true, count: status.query.knownPlayers.length } } : null,
         log: status.log,
-        playerPresenceInitialized: server.playerPresenceInitialized || palworldPlayers !== null,
+        playerPresenceInitialized: server.playerPresenceInitialized || namedPlayers !== null,
       };
       await db.$transaction(async (transaction) => {
         await transaction.serverRuntimeState.upsert({
@@ -222,8 +222,8 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             update: {},
           });
         }
-        if (palworldPlayers !== null) {
-          await synchronizePalworldPresence(transaction, server, palworldPlayers, observedAt);
+        if (namedPlayers !== null) {
+          await synchronizeNamedPlayerPresence(transaction, server, namedPlayers, observedAt, server.gameType === "PALWORLD");
         }
         if (palworldKnownPlayers !== null) {
           await synchronizePalworldKnownPlayers(transaction, server, palworldKnownPlayers, observedAt);
@@ -304,7 +304,7 @@ function toMonitoredServer(server: { id: string; slug: string; displayName: stri
   return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details), lastStateChangeAt: server.lastStateChangeAt };
 }
 
-async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date) {
+async function synchronizeNamedPlayerPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date, emitPalworldChronicleEvents: boolean) {
   const known = await transaction.serverPlayerPresence.findMany({ where: { serverId: server.id } });
   const knownByKey = new Map(known.map((presence) => [presence.providerKey, presence]));
   const observedKeys = new Set(players.map((player) => player.providerKey));
@@ -323,17 +323,19 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
     const previous = knownByKey.get(player.providerKey);
     if (!previous) {
       await transaction.serverPlayerPresence.create({ data: { serverId: server.id, providerKey: player.providerKey, displayName: player.displayName, present: true, firstObservedAt: observedAt, lastObservedAt: observedAt } });
-      if (server.playerPresenceInitialized) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
+      if (emitPalworldChronicleEvents && server.playerPresenceInitialized) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
       continue;
     }
-    if (!previous.present) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
+    if (emitPalworldChronicleEvents && !previous.present) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: player.providerKey } }, data: { displayName: player.displayName, present: true, lastObservedAt: observedAt, ...(previous.present ? {} : { firstObservedAt: observedAt }) } });
   }
 
   if (!server.playerPresenceInitialized) return;
   for (const presence of known.filter((item) => item.present && !observedKeys.has(item.providerKey))) {
-    const identity = await transaction.playerIdentity.findUnique({ where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: presence.providerKey } }, select: { id: true } });
-    await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt, presence.firstObservedAt);
+    if (emitPalworldChronicleEvents) {
+      const identity = await transaction.playerIdentity.findUnique({ where: { gameType_providerKey: { gameType: server.gameType as never, providerKey: presence.providerKey } }, select: { id: true } });
+      await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt, presence.firstObservedAt);
+    }
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
   }
 }

@@ -2,6 +2,8 @@
 
 Every adapter emits a normalized status shape and an explicit capability boundary. A missing capability is absent in the UI and API; it is never guessed from unrelated data.
 
+When an adapter returns a current named player snapshot, the worker persists that snapshot as live character presence. World dossiers show those character names only when they match the current agent observation; a numeric population without a supplied player list remains explicitly count-only.
+
 ## Current adapter coverage
 
 | Game | Live observation | Roster/history sources | Important limit |

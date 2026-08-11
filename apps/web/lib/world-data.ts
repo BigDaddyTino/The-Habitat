@@ -14,6 +14,7 @@ export type WorldView = {
   players: number | null;
   capacity: number | null;
   version: string | null;
+  observedAt: Date | null;
   lastFire: string;
   ping: number | null;
   accent: "ember" | "moss" | "gold" | "sky" | "rose" | "violet";
@@ -97,6 +98,7 @@ function toWorldView(server: Awaited<ReturnType<typeof getServerRecord>>): World
     players: runtime?.playerCount ?? null,
     capacity: runtime?.maxPlayers ?? server.maxPlayers,
     version: runtime?.version ?? server.currentVersion,
+    observedAt: runtime?.observedAt ?? null,
     lastFire: formatLastFire(server.lastOnlineAt),
     ping: runtime?.pingMs ?? null,
     accent: accents[server.gameType] ?? "moss",
