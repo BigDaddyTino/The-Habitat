@@ -4,14 +4,15 @@ import { evaluateAchievementsForEvent, evaluateAchievementsForLegacyEvidence } f
 import { autoLinkVerifiedSteamIdentity } from "./monitoring.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { processProgressionForEvent } from "./progression.js";
+import { reconcileSteamIdentityNames } from "./steam-personas.js";
 
 export type LegacyHistoryReader = { readLegacyHistories(): Promise<AgentLegacyHistory[]> };
-export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; ignored: number };
+export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; namesReconciled: number; ignored: number };
 
 export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<LegacyImportResult> {
   const db = getPrismaClient();
   const histories = await reader.readLegacyHistories();
-  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, ignored: 0 };
+  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, namesReconciled: 0, ignored: 0 };
   for (const history of histories) {
     const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true } });
     if (!server) { result.ignored += 1; continue; }
@@ -29,6 +30,7 @@ export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<
       }
     }
   }
+  result.namesReconciled = await reconcileSteamIdentityNames();
   return result;
 }
 

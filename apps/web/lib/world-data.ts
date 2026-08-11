@@ -31,7 +31,7 @@ export const chronicleReactionTypes = ["SKULL", "FIRE", "FACEPALM", "CROWN", "SK
 export type ChronicleGameType = (typeof chronicleGameTypes)[number];
 export type ChronicleEventType = (typeof chronicleEventTypes)[number];
 export type ChronicleReactionType = (typeof chronicleReactionTypes)[number];
-export type ChronicleQuery = { limit?: number; gameType?: ChronicleGameType; eventType?: ChronicleEventType };
+export type ChronicleQuery = { limit?: number; gameType?: ChronicleGameType; eventType?: ChronicleEventType; playerIdentityId?: string };
 export type ChronicleReactionView = { reactionType: ChronicleReactionType; count: number; reacted: boolean };
 export type ChronicleEventDetailView = ChronicleEventView & { reactions: ChronicleReactionView[] };
 
@@ -137,9 +137,9 @@ export function isChronicleEventType(value: string | undefined): value is Chroni
   return Boolean(value && chronicleEventTypes.includes(value as ChronicleEventType));
 }
 
-export async function getChronicleEvents({ limit = 50, gameType, eventType }: ChronicleQuery = {}): Promise<ChronicleEventView[]> {
+export async function getChronicleEvents({ limit = 50, gameType, eventType, playerIdentityId }: ChronicleQuery = {}): Promise<ChronicleEventView[]> {
   const events = await db.serverEvent.findMany({
-    where: { ...(gameType ? { gameType } : {}), ...(eventType ? { eventType } : {}) },
+    where: { ...(gameType ? { gameType } : {}), ...(eventType ? { eventType } : {}), ...(playerIdentityId ? { playerIdentityId } : {}) },
     include: { server: { select: { displayName: true, slug: true } } },
     orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
     take: Math.min(Math.max(limit, 1), 100),

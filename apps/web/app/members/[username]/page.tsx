@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Award, BadgeCheck, ExternalLink, MapPinned, Trophy } from "lucide-react";
 import { getPrismaClient } from "@habitat/db/client";
@@ -19,7 +20,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true,
       socialAccounts: { where: { displayPublic: true }, orderBy: { platform: "asc" } },
       titles: { where: { equipped: true }, include: { title: true }, take: 1 },
-      playerIdentities: { select: { gameType: true, displayName: true, _count: { select: { events: true } }, legacyEvidence: { select: { durationSeconds: true } } }, orderBy: { displayName: "asc" } },
+      playerIdentities: { select: { id: true, gameType: true, displayName: true, server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } }, legacyEvidence: { select: { durationSeconds: true } } }, orderBy: { displayName: "asc" } },
       achievements: { include: { achievement: true }, orderBy: { awardedAt: "desc" } },
       unlockedRewards: { where: { reward: { kind: { in: ["BADGE", "MEDAL", "TROPHY"] } } }, include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } }, orderBy: { unlockedAt: "desc" } },
       xpEntries: { select: { amount: true } },
@@ -42,7 +43,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     <div className="level-track compact"><i style={{ width: `${progression.progressPercent}%` }} /><div><span>{progression.currentLevelXp.toLocaleString()} XP this level</span><span>{progression.level === 100 ? "Maximum level" : `${progression.nextLevelXp.toLocaleString()} XP to Level ${progression.level + 1}`}</span><strong>{member.playerIdentities.length} worlds · {legacySeconds > 0 ? `${(legacySeconds / 3_600).toFixed(1)} legacy hours` : "live record"}</strong></div></div>
     <TrophyCabinet compact items={cabinetItems} ownerName={ownerName} />
     <div className="public-profile-grid">
-      <article><MapPinned aria-hidden="true" size={19} /><p className="eyebrow">Verified identity</p><h2>World trail</h2>{member.playerIdentities.length ? <ul>{member.playerIdentities.map((identity) => <li key={`${identity.gameType}-${identity.displayName}`}><strong>{identity.displayName}</strong><span>{identity.gameType.replaceAll("_", " ")} · {identity._count.events} events · {identity.legacyEvidence.length} legacy records</span></li>)}</ul> : <p>No verified game identities yet.</p>}<small>{legacyRecords > 0 ? `${legacyRecords} recovered records; only timestamp-paired sessions count as hours.` : `${events} verified Chronicle events.`}</small></article>
+      <article><MapPinned aria-hidden="true" size={19} /><p className="eyebrow">Verified identity</p><h2>World trail</h2>{member.playerIdentities.length ? <ul>{member.playerIdentities.map((identity) => <li key={identity.id}><Link className="identity-trail-link" href={`/chronicle/identity/${identity.id}`}><strong>{identity.displayName}</strong><span>{identity.server?.worldName ?? identity.server?.displayName ?? identity.gameType.replaceAll("_", " ")} · {identity._count.events} events · {identity.legacyEvidence.length} legacy records</span></Link></li>)}</ul> : <p>No verified game identities yet.</p>}<small>{legacyRecords > 0 ? `${legacyRecords} recovered records; only timestamp-paired sessions count as hours.` : `${events} verified Chronicle events.`}</small></article>
       <article><Trophy aria-hidden="true" size={19} /><p className="eyebrow">Trophy record</p><h2>Recent awards</h2>{member.achievements.length ? <ul>{member.achievements.slice(0, 5).map((award) => <li key={award.id}><strong>{award.achievement.name}</strong><span>{award.achievement.rarity.replaceAll("_", " ")}</span></li>)}</ul> : <p>The shelf is waiting for verified milestones.</p>}</article>
       <article><Award aria-hidden="true" size={19} /><p className="eyebrow">Physical collection</p><h2>Cabinet pieces</h2>{member.unlockedRewards.length ? <ul>{member.unlockedRewards.slice(0, 6).map((unlock) => <li key={unlock.id}><BadgeCheck aria-hidden="true" size={14} /><strong>{unlock.reward.name}</strong><span>{unlock.reward.kind.toLowerCase()} · {unlock.reward.achievement.rarity.replaceAll("_", " ")}</span></li>)}</ul> : <p>No cabinet pieces unlocked yet.</p>}</article>
     </div>

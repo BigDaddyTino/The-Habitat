@@ -131,10 +131,12 @@ Last updated: 2026-08-11
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
 - [x] Cinematic Great Hall with composition-matched generated sunrise/midday/sunset/night plates, pointer-depth parallax, reduced-motion behavior, and sky-aware ambient encounters
 - [x] Coordinated Great Hall render stack with one Three.js WebGL background, one Rive Canvas2D state-machine instrument, a shared animation clock, two-way focus/pointer interaction, adaptive quality, and image/HTML fallbacks
+- [x] Replaced the prominent Great Hall field-glass/reticle with a compact cinematic-view control while preserving coordinated Three.js/Rive focus behavior
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs
 - [x] Automatic Steam ownership for recovered identities, retroactive verified-visit achievement evaluation, and a separate Old Guard legacy achievement for non-timed evidence
+- [x] Cross-game and public-Steam persona reconciliation replaces Enshrouded `Steam ######` fallbacks and rewrites matching historical Chronicle actor labels without altering verified ownership
 - [x] Legacy Hours leaderboard and public-profile totals; only timestamp-paired sessions contribute playtime
 - [x] Persistent Level 1-100 progression ledger with a deliberately steep 1.2M+ XP summit
 - [x] Cumulative verified-playtime XP with partial-session carryover and historical-session reconciliation
@@ -145,6 +147,7 @@ Last updated: 2026-08-11
 - [x] Compact, hourly-cached game-specific news and patch-note dispatch rail on each server dossier, capped at three linked source items
 - [x] Observed-but-unclaimed player identities shown as explicitly labeled competitors in server rosters and leaderboards, with provisional standing only
 - [x] Durable, idempotent claim-reconciliation queue: approved or Steam-verified ownership replays attached verified history into XP, achievements, titles, badges, layouts, and leaderboard totals
+- [x] Clickable claimed-character cards on private and public profiles open an exact identity-filtered Chronicle containing up to 100 retained events
 - [x] Unified rarity-aware reward ceremonies for XP, levels, and every achievement tier, coordinating a Three.js particle scene and Canvas2D Rive state machine from one animation clock
 - [x] Living Three.js trophy cabinet on private and public profiles, filled exclusively from persisted badge, medal, and trophy unlocks with pointer inspection, accessible inventory controls, mobile composition, and non-WebGL fallback
 - [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 38 catalogue records

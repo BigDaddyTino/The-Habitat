@@ -8,6 +8,7 @@
     "start": "tsx src/index.ts",
     "run-once": "tsx src/index.ts --once",
     "reconcile-achievements": "tsx src/reconcile-achievements.ts",
+    "reconcile-identity-names": "tsx src/reconcile-identity-names.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/*.test.ts"

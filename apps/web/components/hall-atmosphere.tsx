@@ -12,7 +12,6 @@ import type {
   BufferGeometry,
   Group,
   Material,
-  Mesh,
   PerspectiveCamera,
   Points,
   Scene,
@@ -73,7 +72,6 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
     let threeRenderer: WebGLRenderer | null = null;
     let scene: Scene | null = null;
     let camera: PerspectiveCamera | null = null;
-    let vistaTarget: Mesh | null = null;
     let particleField: Points | null = null;
     let fogGroup: Group | null = null;
     let imageTexture: Texture | null = null;
@@ -139,11 +137,6 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
       hero.style.setProperty("--hall-x", String(pointer.targetX * 0.5));
       hero.style.setProperty("--hall-y", String(pointer.targetY * -0.5));
 
-      const dx = pointer.targetX - 0.72;
-      const dy = pointer.targetY + 0.24;
-      pointer.hot = dx * dx + dy * dy < 0.08;
-      atmosphere.toggleAttribute("data-vista-hot", pointer.hot);
-
       const rivePoint = mapPointerToRive(event);
       if (rivePoint) riveStateMachine?.pointerMove(rivePoint.x, rivePoint.y, event.pointerId);
     };
@@ -151,13 +144,14 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
     const leave = (event: PointerEvent) => {
       pointer.targetX = 0;
       pointer.targetY = 0;
-      pointer.hot = false;
       hero.style.setProperty("--hall-x", "0");
       hero.style.setProperty("--hall-y", "0");
-      atmosphere.removeAttribute("data-vista-hot");
       const rivePoint = mapPointerToRive(event);
       if (rivePoint) riveStateMachine?.pointerExit(rivePoint.x, rivePoint.y, event.pointerId);
     };
+
+    const enterControl = () => { pointer.hot = true; };
+    const leaveControl = () => { pointer.hot = false; };
 
     const rivePointerDown = (event: PointerEvent) => {
       const point = mapPointerToRive(event);
@@ -312,22 +306,6 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
       }
       scene.add(fogGroup);
 
-      const targetGeometry = new THREE.RingGeometry(0.29, 0.305, 64);
-      geometries.push(targetGeometry);
-      const targetMaterial = new THREE.MeshBasicMaterial({
-        color: 0xd6c397,
-        transparent: true,
-        opacity: 0.16,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      });
-      materials.push(targetMaterial);
-      vistaTarget = new THREE.Mesh(targetGeometry, targetMaterial);
-      vistaTarget.position.set(1.9, -0.56, 1.08);
-      scene.add(vistaTarget);
-
-      const raycaster = new THREE.Raycaster();
-      const ndc = new THREE.Vector2();
       const frame = (time: number) => {
         if (disposed || !threeRenderer || !scene || !camera) return;
         const delta = Math.min(0.05, Math.max(0.001, (time - lastFrame) / 1000));
@@ -335,10 +313,6 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
         pointer.x += (pointer.targetX - pointer.x) * Math.min(1, delta * 4.6);
         pointer.y += (pointer.targetY - pointer.y) * Math.min(1, delta * 4.6);
 
-        ndc.set(pointer.targetX, pointer.targetY);
-        raycaster.setFromCamera(ndc, camera);
-        const raycastHot = vistaTarget ? raycaster.intersectObject(vistaTarget, false).length > 0 : false;
-        pointer.hot = pointer.hot || raycastHot;
         focusAmount += ((focusModeRef.current ? 1 : pointer.hot ? 0.34 : 0) - focusAmount) * Math.min(1, delta * 3.2);
 
         camera.position.x += (pointer.x * 0.055 - camera.position.x) * Math.min(1, delta * 2.4);
@@ -360,13 +334,6 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
           fogGroup.position.x = ((time * 0.000035) % 3.1) - 1.55;
           fogGroup.position.y = pointer.y * -0.035;
         }
-        if (vistaTarget) {
-          vistaTarget.rotation.z = time * 0.00016;
-          vistaTarget.scale.setScalar(1 + focusAmount * 0.22 + Math.sin(time * 0.0012) * 0.025);
-          const material = vistaTarget.material as Material & { opacity: number };
-          material.opacity = 0.12 + focusAmount * 0.34 + (pointer.hot ? 0.14 : 0);
-        }
-
         renderRive(delta);
         threeRenderer.render(scene, camera);
       };
@@ -423,6 +390,8 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
     hero.addEventListener("pointerleave", leave);
     control.addEventListener("pointerdown", rivePointerDown);
     control.addEventListener("pointerup", rivePointerUp);
+    control.addEventListener("pointerenter", enterControl);
+    control.addEventListener("pointerleave", leaveControl);
     threeCanvas.addEventListener("webglcontextlost", onContextLost);
     threeCanvas.addEventListener("webglcontextrestored", onContextRestored);
     reducedMotion.addEventListener("change", onMotionPreference);
@@ -445,6 +414,8 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
       hero.removeEventListener("pointerleave", leave);
       control.removeEventListener("pointerdown", rivePointerDown);
       control.removeEventListener("pointerup", rivePointerUp);
+      control.removeEventListener("pointerenter", enterControl);
+      control.removeEventListener("pointerleave", leaveControl);
       threeCanvas.removeEventListener("webglcontextlost", onContextLost);
       threeCanvas.removeEventListener("webglcontextrestored", onContextRestored);
       reducedMotion.removeEventListener("change", onMotionPreference);
@@ -484,10 +455,9 @@ export function HallAtmosphere({ sky, encounter }: { sky: HallSky; encounter: Ha
       aria-label={`${focusMode ? "Leave" : "Enter"} cinematic vista focus mode`}
       onClick={toggleFocusMode}
     >
-      <span className="hall-vista-kicker">Field glass</span>
       <canvas ref={riveCanvasRef} className="hall-rive-canvas" aria-hidden="true" />
-      <span className="hall-vista-reticle" aria-hidden="true" />
-      <span className="hall-vista-label">{focusMode ? "Return to hall" : "Survey the valley"}</span>
+      <span className="hall-vista-mark" aria-hidden="true"><i /><i /><i /></span>
+      <span><span className="hall-vista-kicker">Cinematic view</span><span className="hall-vista-label">{focusMode ? "Return to hall" : "Enter the vista"}</span></span>
     </button>
   </>;
 }
