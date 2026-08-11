@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { open, readdir, stat } from "node:fs/promises";
 import path from "node:path";
-import type { AgentLegacyHistory, AgentLegacyHistorySource, AgentLegacyPlayerEvidence } from "@habitat/shared";
+import type { AgentLegacyHistory, AgentLegacyHistorySource, AgentLegacyPlayerEvent, AgentLegacyPlayerEvidence } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
 const steamIdPattern = /\b(?:steam[_ :])?(7656119\d{10})\b/i;
@@ -20,6 +20,7 @@ async function readSource(configuration: NonNullable<AgentServerConfiguration["h
     let remainingBytes = configuration.maxBytes;
     let truncated = files.length > 100;
     const evidence: AgentLegacyPlayerEvidence[] = [];
+    const events: AgentLegacyPlayerEvent[] = [];
     let filesScanned = 0;
     for (const file of files.slice(0, 100)) {
       if (remainingBytes <= 0) { truncated = true; break; }
@@ -32,12 +33,14 @@ async function readSource(configuration: NonNullable<AgentServerConfiguration["h
       const contents = buffer.toString("utf8");
       remainingBytes -= bytesToRead;
       filesScanned += 1;
-      evidence.push(...parseSource(configuration.kind, contents));
-      if (evidence.length >= 5_000) { truncated = true; break; }
+      const parsed = parseSource(configuration.kind, contents, file);
+      evidence.push(...parsed.evidence);
+      events.push(...parsed.events);
+      if (evidence.length >= 5_000 || events.length >= 5_000) { truncated = true; break; }
     }
-    return { kind: configuration.kind, label: configuration.label, available: true, truncated, filesScanned, evidence: dedupeEvidence(evidence).slice(0, 5_000) };
+    return { kind: configuration.kind, label: configuration.label, available: true, truncated, filesScanned, evidence: dedupeEvidence(evidence).slice(0, 5_000), events: dedupeEvents(events).slice(0, 5_000) };
   } catch {
-    return { kind: configuration.kind, label: configuration.label, available: false, truncated: false, filesScanned: 0, evidence: [] };
+    return { kind: configuration.kind, label: configuration.label, available: false, truncated: false, filesScanned: 0, evidence: [], events: [] };
   }
 }
 
@@ -52,14 +55,164 @@ async function resolveSourceFiles(configuredPath: string): Promise<string[]> {
     .sort((left, right) => left.localeCompare(right));
 }
 
-export function parseLegacyHistory(kind: AgentLegacyHistorySource["kind"], contents: string): AgentLegacyPlayerEvidence[] {
-  return dedupeEvidence(parseSource(kind, contents));
+export function parseLegacyHistory(kind: AgentLegacyHistorySource["kind"], contents: string, sourcePath?: string): AgentLegacyPlayerEvidence[] {
+  return dedupeEvidence(parseSource(kind, contents, sourcePath).evidence);
 }
 
-function parseSource(kind: AgentLegacyHistorySource["kind"], contents: string): AgentLegacyPlayerEvidence[] {
-  if (kind === "VALHEIM_LOG") return parseValheimLog(contents);
-  if (kind === "HABITAT_SESSION_JSONL") return parseSessionJsonl(contents);
-  return parseSteamPlatformLog(contents);
+export function parseLegacyHistoryEvents(kind: AgentLegacyHistorySource["kind"], contents: string, sourcePath?: string): AgentLegacyPlayerEvent[] {
+  return dedupeEvents(parseSource(kind, contents, sourcePath).events);
+}
+
+function parseSource(kind: AgentLegacyHistorySource["kind"], contents: string, sourcePath?: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  if (kind === "HABITAT_CHRONICLE_LOG") return parseHabitatChronicleLog(contents);
+  if (kind === "PROJECT_ZOMBOID_LOG") return parseProjectZomboidLog(contents);
+  if (kind === "ENSHROUDED_LOG") return parseEnshroudedLog(contents, sourcePath);
+  if (kind === "SEVEN_DAYS_PLAYERS_XML") return parseSevenDaysPlayersXml(contents);
+  if (kind === "DRAGONWILDS_LOG") return parseDragonwildsHistoryLog(contents);
+  if (kind === "VALHEIM_LOG") return { evidence: parseValheimLog(contents), events: [] };
+  if (kind === "HABITAT_SESSION_JSONL") return { evidence: parseSessionJsonl(contents), events: [] };
+  return { evidence: parseSteamPlatformLog(contents), events: [] };
+}
+
+function parseSevenDaysPlayersXml(contents: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  const evidence: AgentLegacyPlayerEvidence[] = [];
+  const events: AgentLegacyPlayerEvent[] = [];
+  for (const match of contents.matchAll(/<player\b([^>]*)>/gi)) {
+    const attributes = parseXmlAttributes(match[1] ?? "");
+    const steamId = attributes.nativeplatform?.toLocaleLowerCase("en-US") === "steam" ? attributes.nativeuserid : null;
+    const displayName = attributes.playername?.trim() ?? "";
+    const occurredAt = parseLocalDateTime(attributes.lastlogin ?? "");
+    if (!steamId || !/^7656119\d{10}$/.test(steamId) || !isSafeDisplayName(displayName) || !occurredAt) continue;
+    const record = match[0];
+    const sourceRecordHash = hashRecord(record);
+    evidence.push({ ...makeEvidence("PARTICIPATION", steamId, occurredAt, null, null, record), displayName });
+    events.push({ eventType: "PLAYER_JOINED", providerKey: steamId, displayName, externalProvider: "STEAM", externalAccountId: steamId, occurredAt, valueText: "Recovered last login", sourceRecordHash });
+  }
+  return { evidence, events };
+}
+
+function parseDragonwildsHistoryLog(contents: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  const evidence: AgentLegacyPlayerEvidence[] = [];
+  const events: AgentLegacyPlayerEvent[] = [];
+  for (const line of contents.split(/\r?\n/)) {
+    const occurredAt = parseLineTimestamp(line);
+    if (!occurredAt) continue;
+    const match = /Player (ADDED to session|Removed from session) \[([^\]]{1,160})]-\[([^\]]{1,80})]/i.exec(line);
+    if (!match?.[1] || !match[2] || !match[3]) continue;
+    const account = match[2].trim();
+    const displayName = match[3].trim();
+    if (!account || !isSafeDisplayName(displayName)) continue;
+    const providerKey = `dragonwilds:${hashRecord(account).slice(0, 32)}`;
+    const sourceRecordHash = hashRecord(line);
+    const eventType = match[1].toLocaleLowerCase("en-US").startsWith("added") ? "PLAYER_JOINED" : "PLAYER_LEFT";
+    if (eventType === "PLAYER_JOINED") {
+      evidence.push({ kind: "PARTICIPATION", providerKey, displayName, externalProvider: null, externalAccountId: null, occurredAt, endedAt: null, durationSeconds: null, sourceRecordHash });
+    }
+    events.push({ eventType, providerKey, displayName, externalProvider: null, externalAccountId: null, occurredAt, valueText: null, sourceRecordHash });
+  }
+  return { evidence, events };
+}
+
+function parseXmlAttributes(value: string) {
+  const attributes: Record<string, string> = {};
+  for (const match of value.matchAll(/([A-Za-z][A-Za-z0-9_-]*)="([^"]*)"/g)) {
+    if (match[1] && match[2] !== undefined) attributes[match[1].toLocaleLowerCase("en-US")] = decodeXml(match[2]);
+  }
+  return attributes;
+}
+
+function decodeXml(value: string) {
+  return value.replaceAll("&quot;", '"').replaceAll("&apos;", "'").replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&");
+}
+
+function parseLocalDateTime(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return null;
+  const parsed = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), Number(match[4]), Number(match[5]), Number(match[6]));
+  return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+}
+
+function parseProjectZomboidLog(contents: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  const evidence: AgentLegacyPlayerEvidence[] = [];
+  const events: AgentLegacyPlayerEvent[] = [];
+  for (const line of contents.split(/\r?\n/)) {
+    if (!line.includes('"client-connect"')) continue;
+    const match = /^\[(\d{2})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})\.\d{3}].*\bsteam-id=(7656119\d{10})\b.*\busername="([^"]{1,80})"/i.exec(line);
+    if (!match) continue;
+    const [, day, month, year, hour, minute, second, steamId, rawName] = match;
+    if (!day || !month || !year || !hour || !minute || !second || !steamId || !rawName) continue;
+    const displayName = rawName.trim();
+    if (!isSafeDisplayName(displayName) || displayName === "null") continue;
+    const parsed = new Date(2000 + Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+    if (Number.isNaN(parsed.getTime())) continue;
+    const occurredAt = parsed.toISOString();
+    const sourceRecordHash = hashRecord(line);
+    const item = { ...makeEvidence("PARTICIPATION", steamId, occurredAt, null, null, line), displayName };
+    evidence.push(item);
+    events.push({ eventType: "PLAYER_JOINED", providerKey: steamId, displayName, externalProvider: "STEAM", externalAccountId: steamId, occurredAt, valueText: null, sourceRecordHash });
+  }
+  return { evidence, events };
+}
+
+function parseEnshroudedLog(contents: string, sourcePath?: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  const base = sourcePath ? parseEnshroudedFileDate(path.basename(sourcePath)) : null;
+  if (!base) return { evidence: [], events: [] };
+  const evidence: AgentLegacyPlayerEvidence[] = [];
+  const events: AgentLegacyPlayerEvent[] = [];
+  for (const line of contents.split(/\r?\n/)) {
+    const match = /^\[I (\d{2,3}):(\d{2}):(\d{2}),(\d{3})].*Session accepted with peer \(steamid:(7656119\d{10})\)/i.exec(line);
+    if (!match) continue;
+    const [, hours, minutes, seconds, milliseconds, steamId] = match;
+    if (!hours || !minutes || !seconds || !milliseconds || !steamId) continue;
+    const occurredAt = new Date(base.getTime() + (Number(hours) * 3_600_000) + (Number(minutes) * 60_000) + (Number(seconds) * 1_000) + Number(milliseconds)).toISOString();
+    const displayName = `Steam ${steamId.slice(-6)}`;
+    const sourceRecordHash = hashRecord(`${path.basename(sourcePath ?? "")}:${line}`);
+    evidence.push({ ...makeEvidence("PARTICIPATION", steamId, occurredAt, null, null, `${path.basename(sourcePath ?? "")}:${line}`), displayName });
+    events.push({ eventType: "PLAYER_JOINED", providerKey: steamId, displayName, externalProvider: "STEAM", externalAccountId: steamId, occurredAt, valueText: null, sourceRecordHash });
+  }
+  return { evidence, events };
+}
+
+function parseEnshroudedFileDate(fileName: string): Date | null {
+  const match = /^enshrouded_server_(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})\.log$/i.exec(fileName);
+  if (!match) return null;
+  const [, year, month, day, hour, minute, second] = match;
+  const parsed = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseHabitatChronicleLog(contents: string): { evidence: AgentLegacyPlayerEvidence[]; events: AgentLegacyPlayerEvent[] } {
+  const firstSeen = new Map<string, AgentLegacyPlayerEvidence>();
+  const events: AgentLegacyPlayerEvent[] = [];
+  for (const line of contents.split(/\r?\n/)) {
+    const fields = line.split("\t");
+    if (fields.length < 4) continue;
+    const [timestamp, kind, rawName, ...detailParts] = fields;
+    if (!timestamp || !kind || !rawName || Number.isNaN(new Date(timestamp).getTime())) continue;
+    const displayName = rawName.trim();
+    const detail = detailParts.join(" ").trim();
+    if (!isSafeDisplayName(displayName) || !detail || detail.length > 240) continue;
+    const eventType = kind === "PLAYER" ? "PLAYER_JOINED" : kind === "DEATH" ? "PLAYER_DIED" : kind === "ACHIEVEMENT" ? "ACHIEVEMENT_EARNED" : kind === "RECORD" ? "RECORD_BROKEN" : null;
+    if (!eventType) continue;
+    const occurredAt = new Date(timestamp).toISOString();
+    const providerKey = nativeProviderKey(displayName);
+    const sourceRecordHash = hashRecord(line);
+    if (!firstSeen.has(providerKey)) {
+      firstSeen.set(providerKey, {
+        kind: "PARTICIPATION",
+        providerKey,
+        displayName,
+        externalProvider: null,
+        externalAccountId: null,
+        occurredAt,
+        endedAt: null,
+        durationSeconds: null,
+        sourceRecordHash: hashRecord(`native-player:${providerKey}`),
+      });
+    }
+    events.push({ eventType, providerKey, displayName, externalProvider: null, externalAccountId: null, occurredAt, valueText: eventType === "PLAYER_JOINED" ? null : detail, sourceRecordHash });
+  }
+  return { evidence: [...firstSeen.values()], events };
 }
 
 function parseValheimLog(contents: string): AgentLegacyPlayerEvidence[] {
@@ -130,7 +283,7 @@ function makeEvidence(kind: AgentLegacyPlayerEvidence["kind"], steamId: string, 
     occurredAt,
     endedAt,
     durationSeconds,
-    sourceRecordHash: createHash("sha256").update(record).digest("hex"),
+    sourceRecordHash: hashRecord(record),
   };
 }
 
@@ -147,6 +300,22 @@ function parseLineTimestamp(line: string): string | null {
 
 function dedupeEvidence(evidence: AgentLegacyPlayerEvidence[]) {
   return [...new Map(evidence.map((item) => [item.sourceRecordHash, item])).values()].sort((left, right) => left.occurredAt.localeCompare(right.occurredAt));
+}
+
+function dedupeEvents(events: AgentLegacyPlayerEvent[]) {
+  return [...new Map(events.map((item) => [item.sourceRecordHash, item])).values()].sort((left, right) => left.occurredAt.localeCompare(right.occurredAt));
+}
+
+function nativeProviderKey(displayName: string) {
+  return `native:${createHash("sha256").update(displayName.toLocaleLowerCase("en-US")).digest("hex").slice(0, 32)}`;
+}
+
+function hashRecord(record: string) {
+  return createHash("sha256").update(record).digest("hex");
+}
+
+function isSafeDisplayName(value: string) {
+  return value.length >= 1 && value.length <= 80 && !/[\u0000-\u001f\u007f]/.test(value);
 }
 
 function isIsoDate(value: string) {

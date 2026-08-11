@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { observeProcess, parseDragonwildsLog, parsePalworldPlayers } from "./observations.js";
+import { observeProcess, parseDragonwildsLog, parsePalworldKnownPlayers, parsePalworldPlayers } from "./observations.js";
 
 test("Windows process observation sees the agent's Node runtime", { skip: process.platform !== "win32" }, async () => {
   const observation = await observeProcess("node");
@@ -28,4 +28,11 @@ test("Palworld player parsing retains only a stable ID and display name", () => 
   assert.deepEqual(parsePalworldPlayers([{ name: "SteamTino", raw: { playerId: "AFAFD830000000000000000000000001", userId: "76561198000000000" } }]), [{ providerKey: "AFAFD830000000000000000000000001", displayName: "SteamTino", externalProvider: "STEAM", externalAccountId: "76561198000000000" }]);
   assert.deepEqual(parsePalworldPlayers([{ name: "SteamPrefix", raw: { playerId: "AFAFD830000000000000000000000002", userId: "steam_76561198000000001" } }]), [{ providerKey: "AFAFD830000000000000000000000002", displayName: "SteamPrefix", externalProvider: "STEAM", externalAccountId: "76561198000000001" }]);
   assert.equal(parsePalworldPlayers([{ name: "Missing ID", raw: {} }]), null);
+});
+
+test("Palworld game-data parsing retains offline player actors without non-player world actors", () => {
+  assert.deepEqual(parsePalworldKnownPlayers({ ActorData: [
+    { UnitType: "Player", InstanceID: "AFAFD830000000000000000000000000", NickName: "Old Pal", userid: "steam_76561198000000000", IsActive: "false" },
+    { UnitType: "WildPal", InstanceID: "wild", NickName: "Lamball" },
+  ] }), [{ providerKey: "AFAFD830000000000000000000000000", displayName: "Old Pal", externalProvider: "STEAM", externalAccountId: "76561198000000000" }]);
 });

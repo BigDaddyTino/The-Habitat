@@ -103,10 +103,44 @@ async function observeGameQuery(server: AgentServerConfiguration): Promise<Agent
       maxPlayers: query.playerCountSupported ? result.maxplayers : null,
       version: result.version || null,
       players: query.type === "palworld" ? parsePalworldPlayers(result.players) : null,
+      ...(query.type === "palworld" && "gameDataEnabled" in query && query.gameDataEnabled ? { knownPlayers: await observePalworldKnownPlayers(query.host, query.port, query.timeoutMs) } : {}),
     };
   } catch {
     return { attempted: true, reachable: false, pingMs: null, playerCount: null, maxPlayers: null, version: null, players: null };
   }
+}
+
+async function observePalworldKnownPlayers(host: string, port: number | undefined, timeoutMs: number) {
+  const password = process.env.HABITAT_PALWORLD_ADMIN_PASSWORD?.trim();
+  if (!password || !port) return null;
+  try {
+    const response = await fetch(`http://${host}:${port}/v1/api/game-data`, {
+      headers: { authorization: `Basic ${Buffer.from(`admin:${password}`).toString("base64")}`, accept: "application/json" },
+      redirect: "error",
+      signal: AbortSignal.timeout(Math.max(timeoutMs, 10_000)),
+    });
+    if (!response.ok) return null;
+    const length = Number(response.headers.get("content-length") ?? "0");
+    if (Number.isFinite(length) && length > 16_777_216) return null;
+    return parsePalworldKnownPlayers(await response.json());
+  } catch {
+    return null;
+  }
+}
+
+export function parsePalworldKnownPlayers(value: unknown): AgentPlayerObservation[] | null {
+  if (!isRecord(value) || !Array.isArray(value.ActorData) || value.ActorData.length > 100_000) return null;
+  const players = new Map<string, AgentPlayerObservation>();
+  for (const actor of value.ActorData) {
+    if (!isRecord(actor) || actor.UnitType !== "Player") continue;
+    const providerKey = typeof actor.InstanceID === "string" ? actor.InstanceID.trim() : "";
+    const displayName = typeof actor.NickName === "string" ? actor.NickName.trim() : "";
+    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(providerKey) || displayName.length < 1 || displayName.length > 80) continue;
+    const steamId = extractSteamId64(actor, providerKey);
+    players.set(providerKey, { providerKey, displayName, ...(steamId ? { externalProvider: "STEAM" as const, externalAccountId: steamId } : {}) });
+    if (players.size >= 500) break;
+  }
+  return [...players.values()].sort((left, right) => left.providerKey.localeCompare(right.providerKey));
 }
 
 export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unknown }>): AgentPlayerObservation[] | null {
@@ -125,7 +159,7 @@ export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unkn
 }
 
 function extractSteamId64(raw: Record<string, unknown> | null, providerKey: string) {
-  const candidates = [raw?.steamId, raw?.steamid, raw?.steamID, raw?.userId, raw?.user_id, raw?.accountId, providerKey];
+  const candidates = [raw?.steamId, raw?.steamid, raw?.steamID, raw?.userId, raw?.userid, raw?.user_id, raw?.accountId, providerKey];
   for (const value of candidates) {
     if (typeof value !== "string") continue;
     const match = /^(?:steam_)?(7656119\d{10})$/i.exec(value.trim());

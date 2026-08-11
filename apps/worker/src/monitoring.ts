@@ -93,13 +93,14 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
       const palworldPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.players) ? status.query.players : null;
+      const palworldKnownPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.knownPlayers) ? status.query.knownPlayers : null;
       const details = {
         source: "HABITAT_AGENT",
         agentKey: status.key,
         process: status.process,
         disk: status.disk,
         executable: status.executable,
-        query: status.query ? { ...status.query, players: status.query.players === null || status.query.players === undefined ? null : { available: true, count: status.query.players.length } } : null,
+        query: status.query ? { ...status.query, players: status.query.players === null || status.query.players === undefined ? null : { available: true, count: status.query.players.length }, knownPlayers: status.query.knownPlayers === null || status.query.knownPlayers === undefined ? null : { available: true, count: status.query.knownPlayers.length } } : null,
         log: status.log,
         playerPresenceInitialized: server.playerPresenceInitialized || palworldPlayers !== null,
       };
@@ -189,6 +190,9 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
         }
         if (palworldPlayers !== null) {
           await synchronizePalworldPresence(transaction, server, palworldPlayers, observedAt);
+        }
+        if (palworldKnownPlayers !== null) {
+          await synchronizePalworldKnownPlayers(transaction, server, palworldKnownPlayers, observedAt);
         }
         await transaction.serverMetricSample.create({
           data: {
@@ -289,6 +293,23 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
     const identity = await transaction.playerIdentity.findUnique({ where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: presence.providerKey } }, select: { id: true } });
     await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
+  }
+}
+
+async function synchronizePalworldKnownPlayers(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date) {
+  for (const player of players) {
+    const matched = player.externalProvider === "STEAM" && player.externalAccountId
+      ? await transaction.playerIdentity.findFirst({ where: { gameType: "PALWORLD", externalProvider: "STEAM", externalAccountId: player.externalAccountId }, select: { id: true } })
+      : null;
+    const identity = matched
+      ? await transaction.playerIdentity.update({ where: { id: matched.id }, data: { displayName: player.displayName, serverId: server.id }, select: { id: true, userId: true } })
+      : await transaction.playerIdentity.upsert({
+        where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: player.providerKey } },
+        create: { gameType: "PALWORLD", providerKey: player.providerKey, displayName: player.displayName, serverId: server.id, ...(player.externalProvider === "STEAM" && player.externalAccountId ? { externalProvider: "STEAM" as const, externalAccountId: player.externalAccountId } : {}) },
+        update: { displayName: player.displayName, serverId: server.id, ...(player.externalProvider === "STEAM" && player.externalAccountId ? { externalProvider: "STEAM" as const, externalAccountId: player.externalAccountId } : {}) },
+        select: { id: true, userId: true },
+      });
+    if (!identity.userId && player.externalProvider === "STEAM" && player.externalAccountId) await autoLinkVerifiedSteamIdentity(transaction, identity.id, player.externalAccountId, observedAt);
   }
 }
 

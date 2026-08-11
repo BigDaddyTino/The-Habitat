@@ -61,6 +61,7 @@ export type AgentQueryObservation = {
   maxPlayers: number | null;
   version: string | null;
   players: AgentPlayerObservation[] | null;
+  knownPlayers?: AgentPlayerObservation[] | null;
 };
 
 export type AgentLogObservation = {
@@ -86,21 +87,36 @@ export type AgentLegacyPlayerEvidence = {
   kind: AgentLegacyEvidenceKind;
   providerKey: string;
   displayName: string | null;
-  externalProvider: "STEAM";
-  externalAccountId: string;
+  externalProvider: "STEAM" | null;
+  externalAccountId: string | null;
   occurredAt: string;
   endedAt: string | null;
   durationSeconds: number | null;
   sourceRecordHash: string;
 };
 
+export const agentLegacyEventTypes = ["PLAYER_JOINED", "PLAYER_LEFT", "PLAYER_DIED", "ACHIEVEMENT_EARNED", "RECORD_BROKEN"] as const;
+export type AgentLegacyEventType = typeof agentLegacyEventTypes[number];
+
+export type AgentLegacyPlayerEvent = {
+  eventType: AgentLegacyEventType;
+  providerKey: string;
+  displayName: string;
+  externalProvider: "STEAM" | null;
+  externalAccountId: string | null;
+  occurredAt: string;
+  valueText: string | null;
+  sourceRecordHash: string;
+};
+
 export type AgentLegacyHistorySource = {
-  kind: "VALHEIM_LOG" | "STEAM_PLATFORM_LOG" | "HABITAT_SESSION_JSONL";
+  kind: "VALHEIM_LOG" | "STEAM_PLATFORM_LOG" | "HABITAT_SESSION_JSONL" | "HABITAT_CHRONICLE_LOG" | "PROJECT_ZOMBOID_LOG" | "ENSHROUDED_LOG" | "SEVEN_DAYS_PLAYERS_XML" | "DRAGONWILDS_LOG";
   label: string;
   available: boolean;
   truncated: boolean;
   filesScanned: number;
   evidence: AgentLegacyPlayerEvidence[];
+  events: AgentLegacyPlayerEvent[];
 };
 
 export type AgentLegacyHistory = {

@@ -1,17 +1,17 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import type { AgentLegacyHistory, AgentLegacyPlayerEvidence } from "@habitat/shared";
+import type { AgentLegacyHistory, AgentLegacyPlayerEvent, AgentLegacyPlayerEvidence } from "@habitat/shared";
 import { evaluateAchievementsForEvent, evaluateAchievementsForLegacyEvidence } from "./achievements.js";
 import { autoLinkVerifiedSteamIdentity } from "./monitoring.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { processProgressionForEvent } from "./progression.js";
 
 export type LegacyHistoryReader = { readLegacyHistories(): Promise<AgentLegacyHistory[]> };
-export type LegacyImportResult = { servers: number; evidenceImported: number; sessionsImported: number; ignored: number };
+export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; ignored: number };
 
 export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<LegacyImportResult> {
   const db = getPrismaClient();
   const histories = await reader.readLegacyHistories();
-  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, sessionsImported: 0, ignored: 0 };
+  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, ignored: 0 };
   for (const history of histories) {
     const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true } });
     if (!server) { result.ignored += 1; continue; }
@@ -22,6 +22,10 @@ export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<
         const imported = await db.$transaction((transaction) => importEvidence(transaction, server, source.kind, source.label, item));
         if (imported.created) result.evidenceImported += 1;
         if (imported.created && item.kind === "SESSION") result.sessionsImported += 1;
+      }
+      for (const item of source.events) {
+        const imported = await db.$transaction((transaction) => importHistoricalEvent(transaction, server, source.kind, source.label, item));
+        if (imported) result.eventsImported += 1;
       }
     }
   }
@@ -35,17 +39,7 @@ async function importEvidence(
   sourceLabel: string,
   item: AgentLegacyPlayerEvidence,
 ) {
-  const observedAt = new Date();
-  const matchedIdentity = await transaction.playerIdentity.findFirst({ where: { gameType: server.gameType, externalProvider: "STEAM", externalAccountId: item.externalAccountId }, select: { id: true } });
-  const identity = matchedIdentity
-    ? await transaction.playerIdentity.update({ where: { id: matchedIdentity.id }, data: { serverId: server.id, ...(item.displayName ? { displayName: item.displayName } : {}) }, select: { id: true, userId: true } })
-    : await transaction.playerIdentity.upsert({
-      where: { gameType_providerKey: { gameType: server.gameType, providerKey: item.providerKey } },
-      create: { gameType: server.gameType, providerKey: item.providerKey, displayName: item.displayName ?? `Steam ${item.externalAccountId.slice(-6)}`, serverId: server.id, externalProvider: "STEAM", externalAccountId: item.externalAccountId },
-      update: { serverId: server.id, externalProvider: "STEAM", externalAccountId: item.externalAccountId, ...(item.displayName ? { displayName: item.displayName } : {}) },
-      select: { id: true, userId: true },
-    });
-  if (!identity.userId) await autoLinkVerifiedSteamIdentity(transaction, identity.id, item.externalAccountId, observedAt);
+  const identity = await ensureIdentity(transaction, server, item);
 
   const dedupeKey = `legacy:${server.id}:${sourceKind}:${item.sourceRecordHash}`;
   const existing = await transaction.legacyPlayerEvidence.findUnique({ where: { dedupeKey }, select: { id: true } });
@@ -107,4 +101,56 @@ async function importEvidence(
   }
   await evaluateAchievementsForLegacyEvidence(transaction, evidence.id);
   return { created: !existing };
+}
+
+async function importHistoricalEvent(
+  transaction: Prisma.TransactionClient,
+  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"] },
+  sourceKind: string,
+  sourceLabel: string,
+  item: AgentLegacyPlayerEvent,
+) {
+  const identity = await ensureIdentity(transaction, server, item);
+  const dedupeKey = `legacy-event:${server.id}:${sourceKind}:${item.sourceRecordHash}`;
+  const existing = await transaction.serverEvent.findUnique({ where: { dedupeKey }, select: { id: true } });
+  if (existing) return false;
+  await transaction.serverEvent.create({
+    data: {
+      serverId: server.id,
+      gameType: server.gameType,
+      eventType: item.eventType,
+      occurredAt: new Date(item.occurredAt),
+      playerIdentityId: identity.id,
+      actorText: item.displayName,
+      valueText: item.valueText,
+      source: "HABITAT_NATIVE_HISTORY",
+      sourceConfidence: 100,
+      dedupeKey,
+      metadata: { sourceKind, sourceLabel, recovered: true },
+    },
+  });
+  return true;
+}
+
+async function ensureIdentity(
+  transaction: Prisma.TransactionClient,
+  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"] },
+  item: Pick<AgentLegacyPlayerEvidence, "providerKey" | "displayName" | "externalProvider" | "externalAccountId">,
+) {
+  const matchedIdentity = item.externalProvider === "STEAM" && item.externalAccountId
+    ? await transaction.playerIdentity.findFirst({ where: { gameType: server.gameType, externalProvider: "STEAM", externalAccountId: item.externalAccountId }, select: { id: true } })
+    : null;
+  const fallbackName = item.externalAccountId ? `Steam ${item.externalAccountId.slice(-6)}` : "Recovered player";
+  const identity = matchedIdentity
+    ? await transaction.playerIdentity.update({ where: { id: matchedIdentity.id }, data: { serverId: server.id, ...(item.displayName ? { displayName: item.displayName } : {}) }, select: { id: true, userId: true } })
+    : await transaction.playerIdentity.upsert({
+      where: { gameType_providerKey: { gameType: server.gameType, providerKey: item.providerKey } },
+      create: { gameType: server.gameType, providerKey: item.providerKey, displayName: item.displayName ?? fallbackName, serverId: server.id, externalProvider: item.externalProvider, externalAccountId: item.externalAccountId },
+      update: { serverId: server.id, externalProvider: item.externalProvider, externalAccountId: item.externalAccountId, ...(item.displayName ? { displayName: item.displayName } : {}) },
+      select: { id: true, userId: true },
+    });
+  if (!identity.userId && item.externalProvider === "STEAM" && item.externalAccountId) {
+    await autoLinkVerifiedSteamIdentity(transaction, identity.id, item.externalAccountId, new Date());
+  }
+  return identity;
 }

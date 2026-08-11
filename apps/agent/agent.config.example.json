@@ -6,9 +6,9 @@
       "processName": "valheim_server",
       "history": [
         {
-          "kind": "VALHEIM_LOG",
-          "label": "Valheim archived server logs",
-          "path": "C:\\Habitat\\Valheim\\logs",
+          "kind": "HABITAT_CHRONICLE_LOG",
+          "label": "HabitatCore Chronicle",
+          "path": "C:\\ValheimServer\\BepInEx\\config\\HabitatCore\\chronicle.log",
           "maxBytes": 33554432
         }
       ]

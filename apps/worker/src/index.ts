@@ -47,7 +47,7 @@ async function main(): Promise<void> {
     if (Date.now() >= nextHistoryScanAt) {
       try {
         const history = await importLegacyHistory(agent);
-        console.info(`Habitat legacy history: ${history.evidenceImported} evidence records and ${history.sessionsImported} timed sessions imported from ${history.servers} servers.`);
+        console.info(`Habitat legacy history: ${history.evidenceImported} evidence records, ${history.eventsImported} native events, and ${history.sessionsImported} timed sessions imported from ${history.servers} servers.`);
       } catch {
         console.warn("Habitat legacy history scan failed. Live monitoring remains available.");
       }

@@ -1,4 +1,4 @@
-import { agentLegacyEvidenceKinds, agentServerActions, type AgentLegacyHistory, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
+import { agentLegacyEventTypes, agentLegacyEvidenceKinds, agentServerActions, type AgentLegacyHistory, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
 
 export type AgentStatusResult =
   | { key: string; status: AgentServerStatus }
@@ -76,18 +76,29 @@ function isAgentServerStatus(value: unknown): value is AgentServerStatus {
 
 function isAgentLegacyHistory(value: unknown): value is AgentLegacyHistory {
   return isRecord(value) && isServerKey(value.key) && isIsoDate(value.scannedAt) && Array.isArray(value.sources) && value.sources.length <= 16 && value.sources.every((source) => {
-    if (!isRecord(source) || !["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL"].includes(source.kind as string) || typeof source.label !== "string" || source.label.length < 1 || source.label.length > 80 || typeof source.available !== "boolean" || typeof source.truncated !== "boolean" || !Number.isInteger(source.filesScanned) || !Array.isArray(source.evidence) || source.evidence.length > 5_000) return false;
+    if (!isRecord(source) || !["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL", "HABITAT_CHRONICLE_LOG", "PROJECT_ZOMBOID_LOG", "ENSHROUDED_LOG", "SEVEN_DAYS_PLAYERS_XML", "DRAGONWILDS_LOG"].includes(source.kind as string) || typeof source.label !== "string" || source.label.length < 1 || source.label.length > 80 || typeof source.available !== "boolean" || typeof source.truncated !== "boolean" || !Number.isInteger(source.filesScanned) || !Array.isArray(source.evidence) || source.evidence.length > 5_000 || !Array.isArray(source.events) || source.events.length > 5_000) return false;
     return source.evidence.every((item) => isRecord(item)
       && agentLegacyEvidenceKinds.includes(item.kind as never)
       && typeof item.providerKey === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(item.providerKey)
       && (item.displayName === null || typeof item.displayName === "string" && item.displayName.length <= 80)
-      && item.externalProvider === "STEAM"
-      && typeof item.externalAccountId === "string" && /^7656119\d{10}$/.test(item.externalAccountId)
+      && isLegacyExternalIdentity(item.externalProvider, item.externalAccountId)
       && isIsoDate(item.occurredAt)
       && (item.endedAt === null || isIsoDate(item.endedAt))
       && (item.durationSeconds === null || typeof item.durationSeconds === "number" && Number.isInteger(item.durationSeconds) && item.durationSeconds >= 0 && item.durationSeconds <= 604_800)
-      && typeof item.sourceRecordHash === "string" && /^[a-f0-9]{64}$/.test(item.sourceRecordHash));
+      && typeof item.sourceRecordHash === "string" && /^[a-f0-9]{64}$/.test(item.sourceRecordHash))
+      && source.events.every((item) => isRecord(item)
+        && agentLegacyEventTypes.includes(item.eventType as never)
+        && typeof item.providerKey === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(item.providerKey)
+        && typeof item.displayName === "string" && item.displayName.length >= 1 && item.displayName.length <= 80
+        && isLegacyExternalIdentity(item.externalProvider, item.externalAccountId)
+        && isIsoDate(item.occurredAt)
+        && (item.valueText === null || typeof item.valueText === "string" && item.valueText.length <= 240)
+        && typeof item.sourceRecordHash === "string" && /^[a-f0-9]{64}$/.test(item.sourceRecordHash));
   });
+}
+
+function isLegacyExternalIdentity(provider: unknown, accountId: unknown): boolean {
+  return provider === null && accountId === null || provider === "STEAM" && typeof accountId === "string" && /^7656119\d{10}$/.test(accountId);
 }
 
 function isDiskObservation(value: unknown): boolean {
@@ -99,7 +110,7 @@ function isExecutableObservation(value: unknown): boolean {
 }
 
 function isQueryObservation(value: unknown): boolean {
-  return isRecord(value) && typeof value.attempted === "boolean" && (value.reachable === null || typeof value.reachable === "boolean") && isNullableNumber(value.pingMs) && isNullableNumber(value.playerCount) && isNullableNumber(value.maxPlayers) && isNullableString(value.version) && (value.players === undefined || value.players === null || isPlayerObservationArray(value.players));
+  return isRecord(value) && typeof value.attempted === "boolean" && (value.reachable === null || typeof value.reachable === "boolean") && isNullableNumber(value.pingMs) && isNullableNumber(value.playerCount) && isNullableNumber(value.maxPlayers) && isNullableString(value.version) && (value.players === undefined || value.players === null || isPlayerObservationArray(value.players)) && (value.knownPlayers === undefined || value.knownPlayers === null || isPlayerObservationArray(value.knownPlayers));
 }
 
 function isPlayerObservationArray(value: unknown): boolean {

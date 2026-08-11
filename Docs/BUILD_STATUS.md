@@ -59,7 +59,8 @@ Last updated: 2026-08-11
 - [x] Server-rendered Chronicle filters and permanent event detail links
 - [x] Authenticated, audit-logged, database-deduplicated member reactions
 - [ ] Palworld REST player-presence tracker awaiting first baseline and live join/leave verification
-- [ ] Death events, only where a reliable adapter source exists
+- [x] Valheim death, native achievement, and personal-record recovery from the structured HabitatCore Chronicle
+- [ ] Death events for other games, only where a reliable adapter source exists
 
 ## Phase 7 - Player Identities and Profiles
 
@@ -127,7 +128,7 @@ Last updated: 2026-08-11
 - [x] Verified-data leaderboards for activity, exploration, and achievement points
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
-- [x] Great Hall daylight scenes in Eastern time with reduced-motion-aware ambient encounters
+- [x] Cinematic Great Hall with composition-matched generated sunrise/midday/sunset/night plates, pointer-depth parallax, reduced-motion behavior, and sky-aware ambient encounters
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs
@@ -144,6 +145,9 @@ Last updated: 2026-08-11
 - [x] Durable, idempotent claim-reconciliation queue: approved or Steam-verified ownership replays attached verified history into XP, achievements, titles, badges, layouts, and leaderboard totals
 - [x] Legendary achievement toasts with extended, reduced-motion-aware visual treatment
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, and extreme return-visit milestones with titles, borders, layouts, badges, and medals
+- [x] Live bounded history sources deployed on MartServ102: Valheim HabitatCore Chronicle, Project Zomboid named Steam connections, Enshrouded accepted Steam sessions, 7 Days persistent-player XML, and Dragonwilds session logs
+- [x] Recovered unclaimed rosters and Chronicle events imported without premature XP: 6 Valheim names, 4 Project Zomboid names, 4 Enshrouded Steam identities, and 2 named 7 Days Steam identities
+- [x] Palworld official game-data snapshot support enabled for the next normal server start, adding offline player actors to the roster without treating them as currently online
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
-- [ ] Server-specific archived log paths must be allow-listed on MartServ102 before live legacy evidence can be imported
+- [ ] Dragonwilds retained dedicated-server logs contain no player-session lines yet; the deployed collector will ingest authenticated account/name join and leave signals when real sessions occur

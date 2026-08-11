@@ -22,8 +22,8 @@ export default async function GreatHallPage() {
   const atmosphere = getGreatHallAtmosphere();
   return (
     <div className="great-hall">
-      <section className="hall-hero">
-        <div className="hero-image" aria-hidden="true" />
+      <section className={`hall-hero sky-${atmosphere.sky}`}>
+        <div className={`hero-image hero-image-${atmosphere.sky}`} aria-hidden="true" />
         <HallAtmosphere {...atmosphere} />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content content-shell">

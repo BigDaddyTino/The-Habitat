@@ -13,7 +13,7 @@ const privateIpv4 = z.string().refine(isPrivateIpv4, "must be a private IPv4 add
 const localQueryHost = z.string().refine(isLocalQueryHost, "must be loopback or a private IPv4 address");
 const localLogPath = z.string().trim().min(3).max(500).refine(isLocalLogPath, "must be an absolute local Windows path");
 const historySourceSchema = z.object({
-  kind: z.enum(["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL"]),
+  kind: z.enum(["VALHEIM_LOG", "STEAM_PLATFORM_LOG", "HABITAT_SESSION_JSONL", "HABITAT_CHRONICLE_LOG", "PROJECT_ZOMBOID_LOG", "ENSHROUDED_LOG", "SEVEN_DAYS_PLAYERS_XML", "DRAGONWILDS_LOG"]),
   label: z.string().trim().min(1).max(80),
   path: localLogPath,
   maxBytes: z.number().int().min(1_024).max(67_108_864).default(33_554_432),
@@ -25,7 +25,7 @@ const queryBaseSchema = z.object({
   playerCountSupported: z.boolean().default(true),
 }).strict();
 const querySchema = z.union([
-  queryBaseSchema.extend({ type: z.literal("palworld"), passwordEnv: z.literal("HABITAT_PALWORLD_ADMIN_PASSWORD").default("HABITAT_PALWORLD_ADMIN_PASSWORD") }),
+  queryBaseSchema.extend({ type: z.literal("palworld"), passwordEnv: z.literal("HABITAT_PALWORLD_ADMIN_PASSWORD").default("HABITAT_PALWORLD_ADMIN_PASSWORD"), gameDataEnabled: z.boolean().default(false) }),
   queryBaseSchema.extend({ type: z.string().trim().min(1).max(60).refine((value) => value !== "palworld", "Palworld queries must use the Palworld REST configuration") }),
 ]);
 
