@@ -8,6 +8,7 @@ const navigation = [
   { href: "/departure-board", label: "Departure Board", icon: Trophy },
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
   { href: "/achievements", label: "Achievements", icon: Award },
+  { href: "/leaderboards", label: "Leaderboards", icon: Trophy },
   { href: "/hall-of-legends", label: "Halls", icon: Crown },
   { href: "/polls", label: "Game Night", icon: Vote },
 ];

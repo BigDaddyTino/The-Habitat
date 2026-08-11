@@ -121,3 +121,12 @@ Last updated: 2026-08-10
 ## Phase 13 - Production Hardening
 
 - [ ] Intentionally paused before Phase 13
+
+## Pre-Phase 13 - Community and Great Hall Expansion
+
+- [x] Verified-data leaderboards for activity, exploration, and achievement points
+- [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
+- [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
+- [x] Great Hall daylight scenes in Eastern time with reduced-motion-aware ambient encounters
+- [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
+- [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live

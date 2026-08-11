@@ -1,5 +1,5 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import type { AgentServerStatus, ServerState } from "@habitat/shared";
+import type { AgentPlayerObservation, AgentServerStatus, ServerState } from "@habitat/shared";
 import { evaluateAchievementsForEvent } from "./achievements.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
@@ -257,18 +257,22 @@ function toMonitoredServer(server: { id: string; slug: string; displayName: stri
   return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details) };
 }
 
-async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: Array<{ providerKey: string; displayName: string }>, observedAt: Date) {
+async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date) {
   const known = await transaction.serverPlayerPresence.findMany({ where: { serverId: server.id } });
   const knownByKey = new Map(known.map((presence) => [presence.providerKey, presence]));
   const observedKeys = new Set(players.map((player) => player.providerKey));
 
   for (const player of players) {
+    const externalIdentity = player.externalProvider === "STEAM" && player.externalAccountId
+      ? { externalProvider: "STEAM" as const, externalAccountId: player.externalAccountId }
+      : null;
     const identity = await transaction.playerIdentity.upsert({
       where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: player.providerKey } },
-      create: { gameType: "PALWORLD", providerKey: player.providerKey, displayName: player.displayName, serverId: server.id },
-      update: { displayName: player.displayName, serverId: server.id },
-      select: { id: true },
+      create: { gameType: "PALWORLD", providerKey: player.providerKey, displayName: player.displayName, serverId: server.id, ...(externalIdentity ?? {}) },
+      update: { displayName: player.displayName, serverId: server.id, ...(externalIdentity ?? {}) },
+      select: { id: true, userId: true },
     });
+    if (externalIdentity && !identity.userId) await autoLinkVerifiedSteamIdentity(transaction, identity.id, externalIdentity.externalAccountId, observedAt);
     const previous = knownByKey.get(player.providerKey);
     if (!previous) {
       await transaction.serverPlayerPresence.create({ data: { serverId: server.id, providerKey: player.providerKey, displayName: player.displayName, present: true, firstObservedAt: observedAt, lastObservedAt: observedAt } });
@@ -285,6 +289,16 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
     await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
   }
+}
+
+export async function autoLinkVerifiedSteamIdentity(transaction: PresenceTransaction, identityId: string, steamId: string, observedAt: Date) {
+  const account = await transaction.userSocialAccount.findFirst({ where: { platform: "STEAM", providerAccountId: steamId, verifiedAt: { not: null } }, select: { userId: true } });
+  if (!account) return;
+  const assigned = await transaction.playerIdentity.updateMany({ where: { id: identityId, userId: null, externalProvider: "STEAM", externalAccountId: steamId }, data: { userId: account.userId, verifiedAt: observedAt } });
+  if (assigned.count !== 1) return;
+  await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: account.userId, status: "PENDING" }, data: { status: "APPROVED", resolvedAt: observedAt, resolvedByUserId: account.userId, resolutionNote: "Automatically verified by linked SteamID64." } });
+  await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: { not: account.userId }, status: "PENDING" }, data: { status: "REJECTED", resolvedAt: observedAt, resolutionNote: "Identity ownership was verified through a linked Steam account." } });
+  await transaction.auditLog.create({ data: { actorUserId: account.userId, action: "STEAM_IDENTITY_AUTO_LINKED", entityType: "PlayerIdentity", entityId: identityId, after: { provider: "STEAM", verification: "OPENID" } } });
 }
 
 async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {

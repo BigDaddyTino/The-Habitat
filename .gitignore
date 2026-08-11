@@ -18,6 +18,8 @@ worker-logs/
 HabitatWeb.exe
 HabitatWeb.xml
 web-logs/
+apps/web/public/member-avatars/*
+!apps/web/public/member-avatars/.gitkeep
 *.log
 *.tsbuildinfo
 packages/db/src/generated/

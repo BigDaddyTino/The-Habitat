@@ -49,6 +49,8 @@ export type AgentExecutableObservation = {
 export type AgentPlayerObservation = {
   providerKey: string;
   displayName: string;
+  externalProvider?: "STEAM";
+  externalAccountId?: string;
 };
 
 export type AgentQueryObservation = {

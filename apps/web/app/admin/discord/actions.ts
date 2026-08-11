@@ -38,7 +38,10 @@ export async function saveDiscordConfiguration(formData: FormData) {
     notifyWakeRequest: formData.get("notifyWakeRequest") === "on",
   });
   if (!parsed.success) throw new Error("Discord configuration must use valid Discord server and channel IDs.");
-  const { id: _id, ...data } = parsed.data;
+  // The form's record id is only used to validate an existing configuration;
+  // guildId is the safe upsert key and Prisma must never receive a client id.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: ignoredId, ...data } = parsed.data;
   const configuration = await db.discordGuildConfig.upsert({ where: { guildId: data.guildId }, create: data, update: data });
   await db.auditLog.create({ data: { actorUserId: admin.id, action: "DISCORD_GUILD_CONFIGURATION_SAVED", entityType: "DiscordGuildConfig", entityId: configuration.id, after: { guildId: configuration.guildId, commandsEnabled: configuration.commandsEnabled, notificationsEnabled: configuration.notificationsEnabled } } });
   revalidatePath("/admin/discord");

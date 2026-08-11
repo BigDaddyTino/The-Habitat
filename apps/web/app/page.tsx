@@ -6,6 +6,10 @@ import { WorldCard } from "@/components/world-card";
 import { getChronicleEvents, getWorlds } from "@/lib/world-data";
 import { getActivePoll } from "@/lib/community-data";
 import { ActivePoll } from "@/components/active-poll";
+import { HallAtmosphere } from "@/components/hall-atmosphere";
+import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
+
+export const revalidate = 300;
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
@@ -15,10 +19,12 @@ export default async function GreatHallPage() {
   const reportingWorlds = worlds.filter((world) => world.state !== "UNKNOWN");
   const monitorFocus = reportingWorlds[0] ?? null;
   const activePlayers = liveWorlds.reduce((total, world) => total + (world.players ?? 0), 0);
+  const atmosphere = getGreatHallAtmosphere();
   return (
     <div className="great-hall">
       <section className="hall-hero">
         <div className="hero-image" aria-hidden="true" />
+        <HallAtmosphere {...atmosphere} />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content content-shell">
           <p className="eyebrow">Private operations center</p>

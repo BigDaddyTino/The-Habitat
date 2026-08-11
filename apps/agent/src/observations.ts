@@ -118,9 +118,15 @@ export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unkn
     const displayName = typeof player.name === "string" ? player.name.trim() : typeof raw?.name === "string" ? raw.name.trim() : "";
     if (!/^[A-Za-z0-9._:-]{1,160}$/.test(providerKey) || displayName.length < 1 || displayName.length > 80 || providerKeys.has(providerKey)) return null;
     providerKeys.add(providerKey);
-    parsed.push({ providerKey, displayName });
+    const steamId = extractSteamId64(raw, providerKey);
+    parsed.push({ providerKey, displayName, ...(steamId ? { externalProvider: "STEAM" as const, externalAccountId: steamId } : {}) });
   }
   return parsed.sort((left, right) => left.providerKey.localeCompare(right.providerKey));
+}
+
+function extractSteamId64(raw: Record<string, unknown> | null, providerKey: string) {
+  const candidates = [raw?.steamId, raw?.steamid, raw?.steamID, raw?.userId, raw?.user_id, raw?.accountId, providerKey];
+  return candidates.find((value): value is string => typeof value === "string" && /^7656119\d{10}$/.test(value.trim()))?.trim() ?? null;
 }
 
 export async function observeDragonwildsLog(logPath: string): Promise<AgentLogObservation> {

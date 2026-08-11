@@ -87,6 +87,26 @@ enum AchievementRuleType {
   DISTINCT_GAME_EVENT_COUNT
 }
 
+enum AchievementRewardKind {
+  TITLE
+  AVATAR_BORDER
+  PROFILE_LAYOUT
+  BADGE
+}
+
+enum SocialPlatform {
+  TWITCH
+  STEAM
+  DISCORD
+  YOUTUBE
+  XBOX
+  PLAYSTATION
+  EPIC_GAMES
+  BATTLE_NET
+  RIOT_GAMES
+  GITHUB
+}
+
 enum RecordHall {
   LEGENDS
   SHAME
@@ -146,6 +166,9 @@ model User {
   emailVerified    DateTime?
   role             Role             @default(VIEWER)
   image            String?
+  bio              String?          @db.VarChar(500)
+  avatarBorder     String?          @db.VarChar(64)
+  profileLayout    String?          @db.VarChar(64)
   isActive         Boolean          @default(false)
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
@@ -167,6 +190,9 @@ model User {
   pollsCreated     ServerPoll[] @relation("PollCreator")
   pollVotes        ServerPollVote[]
   serverCommands   ServerCommand[]
+  socialAccounts   UserSocialAccount[]
+  unlockedRewards  UserAchievementReward[]
+  steamLinkNonces  SteamLinkNonce[]
 }
 
 model Account {
@@ -300,6 +326,8 @@ model PlayerIdentity {
   gameType    GameType
   displayName String
   providerKey String
+  externalProvider SocialPlatform?
+  externalAccountId String?     @db.VarChar(80)
   verifiedAt  DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -311,6 +339,7 @@ model PlayerIdentity {
   recordHistory RecordHistory[]
 
   @@unique([gameType, providerKey])
+  @@index([externalProvider, externalAccountId])
 }
 
 model PlayerIdentityClaim {
@@ -340,6 +369,7 @@ model TitleDefinition {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   userTitles  UserTitle[]
+  achievementRewards AchievementReward[]
 }
 
 model UserTitle {
@@ -377,6 +407,38 @@ model AchievementDefinition {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   awards            PlayerAchievement[]
+  rewards           AchievementReward[]
+}
+
+model AchievementReward {
+  id                      String                @id @default(uuid()) @db.Uuid
+  achievementDefinitionId String                @db.Uuid
+  kind                    AchievementRewardKind
+  code                    String                @db.VarChar(64)
+  name                    String                @db.VarChar(80)
+  description             String?               @db.VarChar(180)
+  titleDefinitionId       String?               @db.Uuid
+  achievement             AchievementDefinition @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
+  title                   TitleDefinition?      @relation(fields: [titleDefinitionId], references: [id], onDelete: SetNull)
+  unlocks                 UserAchievementReward[]
+
+  @@unique([achievementDefinitionId, kind, code])
+  @@index([achievementDefinitionId])
+}
+
+model UserAchievementReward {
+  id                    String            @id @default(uuid()) @db.Uuid
+  userId                String            @db.Uuid
+  achievementRewardId   String            @db.Uuid
+  playerAchievementId   String?           @db.Uuid
+  unlockedAt            DateTime          @default(now())
+  equipped              Boolean           @default(false)
+  user                  User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward                AchievementReward @relation(fields: [achievementRewardId], references: [id], onDelete: Cascade)
+  playerAchievement     PlayerAchievement? @relation(fields: [playerAchievementId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, achievementRewardId])
+  @@index([userId, equipped])
 }
 
 model PlayerAchievement {
@@ -388,9 +450,41 @@ model PlayerAchievement {
   dedupeKey               String                @unique
   user                    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   achievement             AchievementDefinition @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
+  unlockedRewards         UserAchievementReward[]
 
   @@index([userId, awardedAt])
   @@index([achievementDefinitionId, awardedAt])
+}
+
+model UserSocialAccount {
+  id            String         @id @default(uuid()) @db.Uuid
+  userId        String         @db.Uuid
+  platform      SocialPlatform
+  handle        String         @db.VarChar(80)
+  profileUrl    String?        @db.VarChar(300)
+  providerAccountId String?    @db.VarChar(80)
+  verifiedAt    DateTime?
+  displayPublic Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@unique([platform, handle])
+  @@unique([platform, providerAccountId])
+  @@index([userId, displayPublic])
+}
+
+model SteamLinkNonce {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  stateHash String    @unique @db.VarChar(64)
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model RecordDefinition {

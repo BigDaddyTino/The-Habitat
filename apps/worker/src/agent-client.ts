@@ -78,7 +78,15 @@ function isQueryObservation(value: unknown): boolean {
 }
 
 function isPlayerObservationArray(value: unknown): boolean {
-  return Array.isArray(value) && value.every((player) => isRecord(player) && typeof player.providerKey === "string" && /^[A-Za-z0-9._:-]{1,160}$/.test(player.providerKey) && typeof player.displayName === "string" && player.displayName.length >= 1 && player.displayName.length <= 80);
+  return Array.isArray(value) && value.every((player) => isRecord(player)
+    && typeof player.providerKey === "string"
+    && /^[A-Za-z0-9._:-]{1,160}$/.test(player.providerKey)
+    && typeof player.displayName === "string"
+    && player.displayName.length >= 1
+    && player.displayName.length <= 80
+    && (player.externalProvider === undefined || player.externalProvider === "STEAM")
+    && (player.externalAccountId === undefined || typeof player.externalAccountId === "string" && /^7656119\d{10}$/.test(player.externalAccountId))
+    && ((player.externalProvider === undefined && player.externalAccountId === undefined) || (player.externalProvider === "STEAM" && typeof player.externalAccountId === "string")));
 }
 
 function isLogObservation(value: unknown): boolean {

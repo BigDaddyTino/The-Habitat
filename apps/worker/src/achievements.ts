@@ -12,10 +12,15 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
     const eligible = await isEligible(transaction, definition, event.playerIdentity.userId);
     if (!eligible) continue;
     const dedupeKey = `achievement:${definition.id}:${event.playerIdentity.userId}:${definition.isRepeatable ? event.id : "once"}`;
-    await transaction.playerAchievement.upsert({
+    const award = await transaction.playerAchievement.upsert({
       where: { dedupeKey },
       create: { userId: event.playerIdentity.userId, achievementDefinitionId: definition.id, sourceEventId: event.id, dedupeKey },
       update: {},
+    });
+    await unlockAchievementRewards(transaction, {
+      achievementDefinitionId: definition.id,
+      userId: event.playerIdentity.userId,
+      playerAchievementId: award.id,
     });
     const achievementEvent = await transaction.serverEvent.upsert({
       where: { dedupeKey: `achievement-event:${dedupeKey}` },
@@ -37,6 +42,31 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
     await evaluateRecordsForEvent(transaction, achievementEvent.id);
     if (definition.rarity === "LEGENDARY") {
       await queueDiscordNotification(transaction, { serverEventId: achievementEvent.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${event.playerIdentity.displayName}** earned a Legendary Habitat achievement: **${definition.name}**.` });
+    }
+  }
+}
+
+async function unlockAchievementRewards(
+  transaction: Prisma.TransactionClient,
+  input: { achievementDefinitionId: string; userId: string; playerAchievementId: string },
+) {
+  const rewards = await transaction.achievementReward.findMany({
+    where: { achievementDefinitionId: input.achievementDefinitionId },
+    select: { id: true, kind: true, titleDefinitionId: true },
+  });
+
+  for (const reward of rewards) {
+    await transaction.userAchievementReward.upsert({
+      where: { userId_achievementRewardId: { userId: input.userId, achievementRewardId: reward.id } },
+      create: { userId: input.userId, achievementRewardId: reward.id, playerAchievementId: input.playerAchievementId },
+      update: {},
+    });
+    if (reward.kind === "TITLE" && reward.titleDefinitionId) {
+      await transaction.userTitle.upsert({
+        where: { userId_titleDefinitionId: { userId: input.userId, titleDefinitionId: reward.titleDefinitionId } },
+        create: { userId: input.userId, titleDefinitionId: reward.titleDefinitionId, source: "ACHIEVEMENT" },
+        update: {},
+      });
     }
   }
 }

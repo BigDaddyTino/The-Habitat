@@ -31,9 +31,12 @@ test("replaying a qualifying event awards a non-repeatable achievement once", as
     playerAchievement: {
       upsert: async ({ where, create }: { where: { dedupeKey: string }; create: unknown }) => {
         if (!awards.has(where.dedupeKey)) awards.set(where.dedupeKey, create);
-        return awards.get(where.dedupeKey);
+        return { id: "66666666-6666-6666-6666-666666666666" };
       },
     },
+    achievementReward: { findMany: async () => [] },
+    userAchievementReward: { upsert: async () => ({}) },
+    userTitle: { upsert: async () => ({}) },
   } as unknown as Prisma.TransactionClient;
 
   await evaluateAchievementsForEvent(transaction, sourceEvent.id);
