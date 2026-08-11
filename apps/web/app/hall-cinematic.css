@@ -1,12 +1,14 @@
 /* Always-on cinematic Great Hall: generated subjects, scene-bound weather, and foreground occlusion. */
 .hall-hero { --hall-x:0; --hall-y:0; }
 .hall-hero .hero-shade { pointer-events:none; }
-.hall-atmosphere { z-index:1; mix-blend-mode:normal!important; isolation:isolate; }
+.hall-atmosphere { z-index:1; isolation:isolate; }
 .hall-three-canvas { position:absolute; z-index:0; inset:0; width:100%; height:100%; opacity:0; transition:opacity 1.4s ease; pointer-events:none; }
 .hall-atmosphere[data-three-ready] .hall-three-canvas { opacity:1; }
 .hall-atmosphere[data-three-ready] .hall-haze { opacity:.16; }
-.hall-atmosphere::after { z-index:8!important; pointer-events:none; opacity:.075!important; }
-.hall-atmosphere.sky-night .hall-stars { display:block; position:absolute; z-index:2; inset:4% 3% 66% 48%; opacity:.3; clip-path:polygon(0 0,100% 0,100% 100%,0 86%); -webkit-mask-image:linear-gradient(#000 0 70%,transparent); mask-image:linear-gradient(#000 0 70%,transparent); }
+.hall-atmosphere::after { content:""; position:absolute; z-index:8; inset:0; opacity:.075; background-image:repeating-radial-gradient(circle at 30% 20%,transparent 0 1px,#fff 1px 1.3px); background-size:5px 5px; mix-blend-mode:soft-light; pointer-events:none; }
+.hall-stars,.hall-aurora,.hall-fireflies { display:none; }
+.hall-atmosphere.sky-night .hall-stars { display:block; position:absolute; z-index:2; inset:4% 3% 66% 48%; opacity:.3; background-image:radial-gradient(circle,#fff 0 1px,transparent 1.4px),radial-gradient(circle,#cbd9ff 0 1px,transparent 1.4px); background-position:0 0,35px 22px; background-size:83px 71px,109px 91px; clip-path:polygon(0 0,100% 0,100% 100%,0 86%); -webkit-mask-image:linear-gradient(#000 0 70%,transparent); mask-image:linear-gradient(#000 0 70%,transparent); animation:star-breathe 5s ease-in-out infinite; }
+@keyframes star-breathe { 50% { opacity:.42; } }
 
 .hall-event-window { position:absolute; z-index:3!important; inset:0; overflow:hidden; clip-path:polygon(43.5% 4%,96.5% 0,97% 69%,43.5% 69%); -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 100%); mask-image:linear-gradient(90deg,transparent 0,#000 5%,#000 100%); pointer-events:none; }
 .hall-event-window>* { pointer-events:none; }
@@ -76,7 +78,7 @@
 .hall-lightning .lightning-core { stroke:#f5ffff; stroke-width:2.1; }
 .hall-lightning .lightning-branch { stroke:rgba(220,243,246,.86); stroke-width:1.25; }
 
-.hall-atmosphere.sky-night.encounter-aurora .hall-aurora { display:block!important; position:absolute!important; z-index:3!important; inset:-8% -4% 43% 42%!important; opacity:0; clip-path:polygon(0 0,100% 0,93% 100%,4% 82%); background:linear-gradient(108deg,transparent 0 9%,rgba(66,178,142,.18) 18%,rgba(86,218,163,.7) 27%,rgba(95,117,205,.34) 34%,transparent 43%),linear-gradient(77deg,transparent 13%,rgba(72,186,147,.52) 27%,rgba(143,93,205,.34) 36%,transparent 48%),linear-gradient(101deg,transparent 38%,rgba(93,222,173,.44) 49%,rgba(89,112,201,.28) 57%,transparent 67%)!important; filter:blur(8px); mix-blend-mode:screen; transform-origin:50% 0; animation:hall-aurora-arrival var(--event-duration) ease-in-out var(--event-delay) 1 both,hall-aurora-fold 8s ease-in-out infinite alternate!important; }
+.hall-atmosphere.sky-night.encounter-aurora .hall-aurora { display:block; position:absolute; z-index:3; inset:-8% -4% 43% 42%; opacity:0; clip-path:polygon(0 0,100% 0,93% 100%,4% 82%); background:linear-gradient(108deg,transparent 0 9%,rgba(66,178,142,.18) 18%,rgba(86,218,163,.7) 27%,rgba(95,117,205,.34) 34%,transparent 43%),linear-gradient(77deg,transparent 13%,rgba(72,186,147,.52) 27%,rgba(143,93,205,.34) 36%,transparent 48%),linear-gradient(101deg,transparent 38%,rgba(93,222,173,.44) 49%,rgba(89,112,201,.28) 57%,transparent 67%); filter:blur(14px); mix-blend-mode:screen; transform-origin:50% 0; animation:hall-aurora-arrival var(--event-duration) ease-in-out var(--event-delay) 1 both,hall-aurora-fold 8s ease-in-out infinite alternate; }
 
 .hall-atmosphere.encounter-fireflies .hall-event-window .hall-fireflies { display:block!important; position:absolute!important; z-index:3; inset:45% 2% 5% 39%!important; animation:hall-weather-arrival var(--event-duration) ease-in-out var(--event-delay) 1 both; }
 .hall-fireflies i { position:absolute; width:3px; height:3px; border-radius:50%; background:#ffd786; box-shadow:0 0 7px 2px rgba(255,190,77,.62); animation:hall-firefly 4.8s ease-in-out infinite; }
@@ -88,7 +90,7 @@
 .sky-sunrise .hall-bear-encounter img { filter:sepia(.2) hue-rotate(-8deg) brightness(.96) saturate(.78); }
 .sky-midday .hall-bear-encounter img { filter:brightness(1.14) saturate(.76) contrast(.96); }
 .sky-sunset .hall-bear-encounter img { filter:sepia(.3) hue-rotate(-12deg) brightness(.84) saturate(.86); }
-.hall-bear-encounter span { position:absolute; right:7px; bottom:27%; padding:5px 8px; border:1px solid rgba(214,195,151,.25); background:rgba(8,11,9,.78); font-family:var(--font-mono); font-size:7px; letter-spacing:1px; text-transform:uppercase; opacity:0; transform:translateY(5px); transition:opacity .25s ease,transform .25s ease; }
+.hall-bear-encounter span { position:absolute; right:7px; bottom:27%; padding:5px 8px; border:1px solid rgba(214,195,151,.25); background:rgba(8,11,9,.78); font-family:var(--font-mono); font-size:9px; letter-spacing:1px; text-transform:uppercase; opacity:0; transform:translateY(5px); transition:opacity .25s ease,transform .25s ease; }
 .hall-bear-encounter:hover img,.hall-bear-encounter:focus-visible img { transform:scale(1.025); filter:brightness(.7) saturate(.76) drop-shadow(0 0 12px rgba(214,195,151,.16)); }
 .hall-bear-encounter:hover span,.hall-bear-encounter:focus-visible span { opacity:1; transform:none; }
 .hall-bear-encounter:focus-visible { outline:2px solid var(--brass); outline-offset:-18px; }
@@ -109,7 +111,7 @@
 @keyframes hall-storm-flash { 0%,36%,39%,100%{opacity:0} 37%{opacity:.38} 38%{opacity:.08} 72%{opacity:.24} 73%{opacity:0} }
 @keyframes hall-lightning-sequence { 0%,9%,12%,33%,36%,62%,65%,100%{opacity:0} 10%,34%,63%{opacity:.86} 11%,35%,64%{opacity:.18} }
 @keyframes hall-aurora-arrival { 0%,100%{opacity:0} 15%,85%{opacity:.78} }
-@keyframes hall-aurora-fold { to{transform:translate3d(-3%,3%,0) skewX(6deg) scaleY(1.1);filter:blur(21px) hue-rotate(13deg)} }
+@keyframes hall-aurora-fold { to{transform:translate3d(-3%,3%,0) skewX(6deg) scaleY(1.1)} }
 @keyframes hall-firefly { 0%,100%{opacity:.08;transform:translate(0,0) scale(.45)} 35%{opacity:1;transform:translate(11px,-15px) scale(1)} 70%{opacity:.28;transform:translate(-7px,-28px) scale(.68)} }
 @keyframes hall-bear-visit { 0%,100%{transform:translate3d(28px,94%,0) scale(.86);opacity:0} 10%{opacity:.16} 22%,78%{transform:translate3d(0,0,0) scale(1);opacity:.94} 88%{opacity:.78} }
 @keyframes hall-bear-roar { to{transform:scale(1.045) translateX(3px) rotate(.45deg)} }
@@ -123,14 +125,14 @@
   .hall-bear-encounter { right:-8px; bottom:-2%; width:250px; height:320px; }
   .sky-night .hall-bear-encounter img { filter:brightness(.84) saturate(.72) sepia(.05); }
   .hall-bear-encounter span { display:none; }
-  .hall-encounter-status { right:16px; bottom:18px; max-width:190px; font-size:7px; }
+  .hall-encounter-status { right:16px; bottom:18px; max-width:190px; font-size:9px; }
   .hall-atmosphere.encounter-eclipse .hall-event-window .hall-eclipse,.hall-atmosphere.encounter-blood-moon .hall-event-window .hall-blood-moon { right:21%; }
   .hall-atmosphere.encounter-birds .hall-event-window .hall-ravens { width:230px; }
 }
 
 @media (prefers-reduced-motion:reduce) {
   .hall-three-canvas { transition:none; }
-  .hall-glass-reflection,.hall-ravens,.hall-ufo,.hall-comet,.hall-eclipse,.hall-blood-moon,.hall-storm,.hall-lightning,.hall-aurora,.hall-fireflies,.hall-fireflies i,.hall-bear-encounter,.hall-bear-encounter.is-roaring img { animation:none!important; }
+  .hall-glass-reflection,.hall-stars,.hall-ravens,.hall-ufo,.hall-ufo i,.hall-comet,.hall-eclipse,.hall-blood-moon,.hall-storm,.hall-storm::before,.hall-storm::after,.hall-storm i,.hall-lightning,.hall-aurora,.hall-fireflies,.hall-fireflies i,.hall-bear-encounter,.hall-bear-encounter.is-roaring img,.hall-bear-encounter.is-roaring::after { animation:none!important; }
   .hall-atmosphere.encounter-birds .hall-event-window .hall-ravens { left:62%; top:9%; opacity:.94; transform:scale(.82); filter:brightness(1.2) saturate(.7) drop-shadow(0 7px 7px rgba(0,0,0,.28)); }
   .hall-atmosphere.encounter-birds .hall-event-window .hall-ravens,.hall-atmosphere.encounter-ufo .hall-event-window .hall-ufo,.hall-atmosphere.encounter-comet .hall-event-window .hall-comet,.hall-atmosphere.encounter-eclipse .hall-event-window .hall-eclipse,.hall-atmosphere.encounter-blood-moon .hall-event-window .hall-blood-moon,.hall-atmosphere.encounter-storm .hall-event-window .hall-storm,.hall-atmosphere.encounter-lightning .hall-event-window .hall-lightning,.hall-atmosphere.sky-night.encounter-aurora .hall-aurora,.hall-atmosphere.encounter-fireflies .hall-event-window .hall-fireflies,.hall-atmosphere.encounter-bear .hall-bear-encounter { animation:none!important; }
   .hall-atmosphere.encounter-ufo .hall-event-window .hall-ufo { left:66%!important; opacity:.72; transform:scale(.64); }

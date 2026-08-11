@@ -25,6 +25,7 @@ export function createAgentServer(configuration: AgentConfiguration) {
       if (request.method === "GET") await handleGetRequest(request, response, configuration);
       else await handlePostRequest(request, response, configuration, serviceController);
     } catch (error) {
+      if (error instanceof InvalidRequestBodyError) return sendJson(response, 400, { error: "invalid_request_body" });
       if (error instanceof ServiceControlError) {
         const status = error.code === "control_not_configured" ? 404 : error.code === "service_stop_incomplete" ? 409 : error.code === "service_timeout" ? 504 : 503;
         return sendJson(response, status, { error: error.code });
@@ -111,17 +112,23 @@ function sendJson(response: ServerResponse, status: number, body: unknown, heade
   response.end(JSON.stringify(body));
 }
 
+class InvalidRequestBodyError extends Error {
+  constructor() {
+    super("invalid_request_body");
+  }
+}
+
 async function assertEmptyJsonBody(request: IncomingMessage): Promise<void> {
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of request) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     size += buffer.length;
-    if (size > 1_024) throw new ServiceControlError("service_unavailable");
+    if (size > 1_024) throw new InvalidRequestBodyError();
     chunks.push(buffer);
   }
   if (size === 0) return;
   let parsed: unknown;
-  try { parsed = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new ServiceControlError("service_unavailable"); }
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== 0) throw new ServiceControlError("service_unavailable");
+  try { parsed = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { throw new InvalidRequestBodyError(); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== 0) throw new InvalidRequestBodyError();
 }

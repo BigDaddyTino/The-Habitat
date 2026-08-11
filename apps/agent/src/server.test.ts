@@ -49,6 +49,11 @@ test("agent routes require authentication and reject arbitrary operations", asyn
 
     const actionAttempt = await fetch(`${baseUrl}/v1/servers/example/actions/start`, { method: "POST", headers: { authorization: `Bearer ${token}` } });
     assert.equal(actionAttempt.status, 404);
+
+    const nonEmptyBody = await fetch(`${baseUrl}/v1/servers/habitat-test/actions/start`, { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json" }, body: JSON.stringify({ unexpected: true }) });
+    assert.equal(nonEmptyBody.status, 400);
+    const nonEmptyBodyResult = await nonEmptyBody.json() as { error: string };
+    assert.equal(nonEmptyBodyResult.error, "invalid_request_body");
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }

@@ -44,8 +44,11 @@ export async function dispatchPendingDiscordNotifications(environment = process.
       await rest.post(Routes.channelMessages(notification.config.announcementChannelId!), { body: { content: notification.content } });
       await db.discordNotification.update({ where: { id: notification.id }, data: { sentAt: new Date(), attempts: { increment: 1 }, lastError: null } });
       sent += 1;
-    } catch {
-      await db.discordNotification.update({ where: { id: notification.id }, data: { attempts: { increment: 1 }, lastError: "Discord delivery failed." } });
+    } catch (error) {
+      const status = error && typeof error === "object" && "status" in error ? ` (status ${String((error as { status?: unknown }).status)})` : "";
+      const message = `${error instanceof Error ? error.message : String(error)}${status}`.slice(0, 500);
+      console.error(`[discord-notifications] delivery failed for notification ${notification.id}:`, message);
+      await db.discordNotification.update({ where: { id: notification.id }, data: { attempts: { increment: 1 }, lastError: message } });
       failed += 1;
     }
   }

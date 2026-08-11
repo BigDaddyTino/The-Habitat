@@ -3,13 +3,14 @@ import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
+import { hasRequiredRole } from "@/lib/permissions";
 import { steamOpenIdEndpoint } from "@/lib/steam-openid";
 
 const db = getPrismaClient();
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.isActive) return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(new URL("/sign-in", request.url));
   const state = randomBytes(32).toString("hex");
   const stateHash = createHash("sha256").update(state).digest("hex");
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

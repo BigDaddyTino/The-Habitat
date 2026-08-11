@@ -425,6 +425,9 @@ model LegacyPlayerEvidence {
   @@index([kind, occurredAt])
 }
 
+/// Hand-written SQL constraint (migration 20260811183000_add_progression_constraints):
+/// CHECK "UserXpEntry_amount_positive" ("amount" > 0).
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model UserXpEntry {
   id            String       @id @default(uuid()) @db.Uuid
   userId        String       @db.Uuid
@@ -441,6 +444,10 @@ model UserXpEntry {
   @@index([source, earnedAt])
 }
 
+/// Hand-written SQL constraints (migration 20260811183000_add_progression_constraints):
+/// CHECK "WeeklyQuestDefinition_threshold_positive" ("threshold" > 0) and
+/// CHECK "WeeklyQuestDefinition_xpReward_positive" ("xpReward" > 0).
+/// They exist only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop them.
 model WeeklyQuestDefinition {
   id          String                 @id @default(uuid()) @db.Uuid
   slug        String                 @unique @db.VarChar(80)
@@ -456,6 +463,9 @@ model WeeklyQuestDefinition {
   selections  WeeklyQuestSelection[]
 }
 
+/// Hand-written SQL constraint (migration 20260811183000_add_progression_constraints):
+/// CHECK "WeeklyQuestCycle_valid_window" ("endsAt" > "weekStart").
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model WeeklyQuestCycle {
   id         String                 @id @default(uuid()) @db.Uuid
   weekStart  DateTime               @unique
@@ -464,6 +474,9 @@ model WeeklyQuestCycle {
   selections WeeklyQuestSelection[]
 }
 
+/// Hand-written SQL constraint (migration 20260811183000_add_progression_constraints):
+/// CHECK "WeeklyQuestSelection_sortOrder_valid" ("sortOrder" >= 0 AND "sortOrder" < 16).
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model WeeklyQuestSelection {
   id           String                    @id @default(uuid()) @db.Uuid
   cycleId      String                    @db.Uuid
@@ -477,6 +490,9 @@ model WeeklyQuestSelection {
   @@index([cycleId, sortOrder])
 }
 
+/// Hand-written SQL constraint (migration 20260811183000_add_progression_constraints):
+/// CHECK "UserWeeklyQuestProgress_nonnegative" ("progress" >= 0).
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model UserWeeklyQuestProgress {
   id          String               @id @default(uuid()) @db.Uuid
   userId      String               @db.Uuid
@@ -503,6 +519,9 @@ model TitleDefinition {
   achievementRewards AchievementReward[]
 }
 
+/// Hand-written SQL constraint (migration 20260810204000_enforce_one_equipped_title):
+/// partial unique index "UserTitle_one_equipped_per_user" ON ("userId") WHERE "equipped" = true.
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model UserTitle {
   id                String          @id @default(uuid()) @db.Uuid
   userId            String          @db.Uuid
@@ -718,6 +737,9 @@ model DiscordGuildConfig {
   notifications              DiscordNotification[]
 }
 
+/// Hand-written SQL constraint (migration 20260810213126_add_wake_requests_and_polls):
+/// partial unique index "WakeRequest_one_pending_per_server" ON ("serverId") WHERE "status" = 'PENDING'.
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model WakeRequest {
   id               String            @id @default(uuid()) @db.Uuid
   serverId         String            @db.Uuid
@@ -747,6 +769,9 @@ model WakeVote {
   @@index([userId, createdAt])
 }
 
+/// Hand-written SQL constraint (migration 20260810213126_add_wake_requests_and_polls):
+/// partial unique index "ServerPoll_one_active" ON ((1)) WHERE "status" = 'ACTIVE' — at most one active poll.
+/// It exists only in the migration SQL, not in this schema — `prisma migrate dev` can silently drop it.
 model ServerPoll {
   id              String             @id @default(uuid()) @db.Uuid
   question        String

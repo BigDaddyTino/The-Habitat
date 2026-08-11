@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { isCurrentHallEncounter } from "@/lib/hall-atmosphere";
+import { hasRequiredRole } from "@/lib/permissions";
 
 const db = getPrismaClient();
 const achievementSlug = "do-not-tap-the-glass";
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest) {
 
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!hasRequiredRole(session.user.role, "USER")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const body = await request.json().catch(() => null) as { encounterKey?: unknown } | null;
   const encounterKey = typeof body?.encounterKey === "string" && body.encounterKey.length <= 100 ? body.encounterKey : null;
   if (!encounterKey || !isCurrentHallEncounter("bear", encounterKey)) {

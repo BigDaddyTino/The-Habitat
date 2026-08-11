@@ -6,6 +6,8 @@ import { formatChronicleTime } from "@/components/chronicle-feed";
 import { chronicleReactionTypes, getChronicleEvent, type ChronicleReactionType } from "@/lib/world-data";
 import { toggleChronicleReaction } from "./actions";
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 const reactionPresentation: Record<ChronicleReactionType, { label: string; Icon: LucideIcon }> = {
   SKULL: { label: "Skull", Icon: Skull },
   FIRE: { label: "Fire", Icon: Flame },
@@ -16,6 +18,7 @@ const reactionPresentation: Record<ChronicleReactionType, { label: string; Icon:
 
 export default async function ChronicleEventPage({ params }: { params: Promise<{ eventId: string }> }) {
   const { eventId } = await params;
+  if (!uuidPattern.test(eventId)) notFound();
   const session = await auth();
   const member = Boolean(session?.user?.id && session.user.isActive && (session.user.role === "USER" || session.user.role === "ADMIN"));
   const event = await getChronicleEvent(eventId, member ? session?.user?.id : undefined);

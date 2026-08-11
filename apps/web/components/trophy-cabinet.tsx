@@ -119,12 +119,15 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
 
       const raycaster = new THREE.Raycaster();
       const rayPoint = new THREE.Vector2();
+      // Under prefers-reduced-motion we render single still frames instead of running the loop.
+      let renderStill: (() => void) | null = null;
       const resize = () => {
         if (!renderer) return;
         const bounds = root.getBoundingClientRect();
         renderer.setSize(Math.max(1, bounds.width), Math.max(1, bounds.height), false);
         camera.aspect = bounds.width / Math.max(1, bounds.height);
         camera.updateProjectionMatrix();
+        renderStill?.();
       };
       const move = (event: PointerEvent) => {
         const bounds = canvas.getBoundingClientRect();
@@ -134,29 +137,44 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         const hit = raycaster.intersectObjects(groups, true).find((entry) => typeof entry.object.userData.itemIndex === "number");
         canvas.style.cursor = hit ? "pointer" : "default";
         if (hit) setSelectedIndex(hit.object.userData.itemIndex as number);
+        renderStill?.();
       };
       const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(root); resize();
       const intersectionObserver = new IntersectionObserver(([entry]) => { visible = entry?.isIntersecting ?? true; }, { threshold: 0.03 }); intersectionObserver.observe(root);
       canvas.addEventListener("pointermove", move);
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const clock = new THREE.Clock();
-      renderer.setAnimationLoop(() => {
-        if (!renderer || disposed || !visible) return;
-        const elapsed = clock.getElapsedTime();
-        camera.position.x += (pointer.x * 0.22 - camera.position.x) * 0.035;
-        camera.position.y += (0.15 + pointer.y * 0.13 - camera.position.y) * 0.035;
-        camera.lookAt(0, 0, -0.2);
-        groups.forEach((group, index) => {
-          group.rotation.y = reduced ? 0 : Math.sin(elapsed * 0.55 + index * 0.7) * 0.12;
-          group.position.y = (group.userData.baseY as number) + (reduced ? 0 : Math.sin(elapsed * 0.8 + index) * 0.018);
+      if (reduced) {
+        renderStill = () => {
+          if (!renderer || disposed) return;
+          camera.position.set(pointer.x * 0.22, 0.15 + pointer.y * 0.13, 9.6);
+          camera.lookAt(0, 0, -0.2);
+          renderer.render(scene, camera);
+        };
+        renderStill();
+      } else {
+        renderer.setAnimationLoop(() => {
+          if (!renderer || disposed || !visible) return;
+          const elapsed = clock.getElapsedTime();
+          camera.position.x += (pointer.x * 0.22 - camera.position.x) * 0.035;
+          camera.position.y += (0.15 + pointer.y * 0.13 - camera.position.y) * 0.035;
+          camera.lookAt(0, 0, -0.2);
+          groups.forEach((group, index) => {
+            group.rotation.y = Math.sin(elapsed * 0.55 + index * 0.7) * 0.12;
+            group.position.y = (group.userData.baseY as number) + Math.sin(elapsed * 0.8 + index) * 0.018;
+          });
+          renderer.render(scene, camera);
         });
-        renderer.render(scene, camera);
-      });
+      }
       root.setAttribute("data-cabinet-ready", "true");
       return () => { resizeObserver.disconnect(); intersectionObserver.disconnect(); canvas.removeEventListener("pointermove", move); };
     };
     let detach: (() => void) | undefined;
-    void initialize().then((value) => { detach = value; }).catch(() => root.setAttribute("data-cabinet-fallback", "true"));
+    void initialize().then((value) => {
+      // If the effect was cleaned up while initialize() was still resolving, run the
+      // returned teardown immediately so observers and listeners are never leaked.
+      if (disposed) value?.(); else detach = value;
+    }).catch(() => root.setAttribute("data-cabinet-fallback", "true"));
     return () => { disposed = true; detach?.(); renderer?.setAnimationLoop(null); geometries.forEach((value) => value.dispose()); materials.forEach((value) => value.dispose()); renderer?.dispose(); };
   }, [displayedItems]);
 

@@ -9,6 +9,8 @@ import { requireRole } from "@/lib/authorization";
 const db = getPrismaClient();
 const resolveSchema = z.object({ wakeRequestId: z.string().uuid(), status: z.enum(["APPROVED", "REJECTED"]), resolutionNote: z.preprocess((value) => value === "" ? null : value, z.string().trim().max(240).nullable()) });
 const pollSchema = z.object({ question: z.string().trim().min(3).max(100), closesAt: z.string().datetime(), serverIds: z.array(z.string().uuid()).min(2).max(6).refine((values) => new Set(values).size === values.length) });
+const datetimeLocalPattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+const tzOffsetSchema = z.coerce.number().int().min(-16 * 60).max(16 * 60);
 
 export async function resolveWakeRequest(formData: FormData) {
   const admin = await requireRole("ADMIN");
@@ -27,7 +29,11 @@ export async function resolveWakeRequest(formData: FormData) {
 
 export async function createServerPoll(formData: FormData) {
   const admin = await requireRole("ADMIN");
-  const closesAt = new Date(String(formData.get("closesAt")));
+  const localCloseTime = datetimeLocalPattern.exec(String(formData.get("closesAt")));
+  const tzOffset = tzOffsetSchema.safeParse(formData.get("tzOffsetMinutes"));
+  if (!localCloseTime || !tzOffset.success) throw new Error("Choose a valid poll close time.");
+  const [, year, month, day, hour, minute, second] = localCloseTime;
+  const closesAt = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second ?? "0")) + tzOffset.data * 60_000);
   if (Number.isNaN(closesAt.getTime())) throw new Error("Choose a valid poll close time.");
   const parsed = pollSchema.safeParse({ question: formData.get("question"), closesAt: closesAt.toISOString(), serverIds: formData.getAll("serverIds") });
   if (!parsed.success || new Date(parsed.data.closesAt) <= new Date()) throw new Error("Choose at least two worlds and a future close time.");

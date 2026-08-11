@@ -4,7 +4,7 @@ import type { WorldView } from "@/lib/world-data";
 import { StatusBadge } from "./status-badge";
 
 export function WorldCard({ world }: { world: WorldView }) {
-  const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity}`;
+  const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity ?? "-"}`;
   return (
     <Link href={`/worlds/${world.slug}`} className={`world-card world-card-link accent-${world.accent}${world.state === "SLEEPING" ? " state-sleeping" : ""}`} aria-label={`Open ${world.worldName} server dossier`}>
       <div className="world-card-topline">

@@ -4,7 +4,7 @@ import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import type { Prisma } from "@habitat/db/client";
 import { autoLinkVerifiedSteamIdentity, runMonitoringCycle, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
 
-const valheim: MonitoredServer = { id: "server-1", slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN", playerPresenceInitialized: false };
+const valheim: MonitoredServer = { id: "server-1", slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN", playerPresenceInitialized: false, lastStateChangeAt: null };
 const status: AgentServerStatus = {
   key: "valheim",
   observedAt: new Date().toISOString(),
@@ -26,14 +26,19 @@ test("a successful agent poll persists only registered agent worlds", async () =
   assert.deepEqual(saved, ["valheim"]);
 });
 
-test("an unavailable agent marks only previously monitored worlds unknown", async () => {
+test("an unavailable agent marks only previously monitored worlds unknown after two consecutive failed cycles", async () => {
   const unavailable: string[] = [];
+  const server: MonitoredServer = { ...valheim, id: "server-unavailable" };
   const repository = fakeRepository({
-    findPreviouslyAgentMonitored: async () => [valheim],
-    markAgentUnavailable: async (server) => { unavailable.push(server.slug); },
+    findPreviouslyAgentMonitored: async () => [server],
+    markAgentUnavailable: async (failedServer) => { unavailable.push(failedServer.slug); },
   });
-  const result = await runMonitoringCycle(repository, { pollStatuses: async () => { throw new Error("agent unavailable"); } });
-  assert.deepEqual(result, { observed: 0, unknown: 1, ignored: 0, agentAvailable: false });
+  const poller = { pollStatuses: async (): Promise<never> => { throw new Error("agent unavailable"); } };
+  const first = await runMonitoringCycle(repository, poller, new Date(), 0);
+  assert.deepEqual(first, { observed: 0, unknown: 1, ignored: 0, agentAvailable: false });
+  assert.deepEqual(unavailable, []);
+  const second = await runMonitoringCycle(repository, poller, new Date(), 0);
+  assert.deepEqual(second, { observed: 0, unknown: 1, ignored: 0, agentAvailable: false });
   assert.deepEqual(unavailable, ["valheim"]);
 });
 

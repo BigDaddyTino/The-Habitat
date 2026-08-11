@@ -27,33 +27,45 @@ export async function startDiscordBot(environment = process.env): Promise<Discor
 
   const rest = new REST({ version: "10" }).setToken(token);
   for (const configuration of configurations) {
-    await rest.put(Routes.applicationGuildCommands(applicationId, configuration.guildId), { body: commands });
+    try {
+      await rest.put(Routes.applicationGuildCommands(applicationId, configuration.guildId), { body: commands });
+    } catch (error) {
+      console.error(`[discord-bot] slash command registration failed for guild ${configuration.guildId}:`, error instanceof Error ? error.message : String(error));
+    }
   }
 
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
   client.on(Events.InteractionCreate, (interaction) => {
-    if (interaction.isChatInputCommand()) void handleCommand(interaction);
+    if (interaction.isChatInputCommand()) void handleCommand(interaction).catch((error: unknown) => {
+      console.error("[discord-bot] command handler rejected unexpectedly:", error instanceof Error ? error.message : String(error));
+    });
   });
   await client.login(token);
   return { stop: () => client.destroy() };
 }
 
 async function handleCommand(interaction: ChatInputCommandInteraction) {
-  if (!interaction.guildId) {
-    await interaction.reply({ content: "Habitat commands are available only in the configured Habitat server.", flags: MessageFlags.Ephemeral });
-    return;
-  }
-  const configuration = await db.discordGuildConfig.findUnique({ where: { guildId: interaction.guildId }, select: { commandsEnabled: true } });
-  if (!configuration?.commandsEnabled) {
-    await interaction.reply({ content: "This Discord server is not configured for Habitat commands.", flags: MessageFlags.Ephemeral });
-    return;
-  }
-
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   try {
+    if (!interaction.guildId) {
+      await interaction.reply({ content: "Habitat commands are available only in the configured Habitat server.", flags: MessageFlags.Ephemeral });
+      return;
+    }
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const configuration = await db.discordGuildConfig.findUnique({ where: { guildId: interaction.guildId }, select: { commandsEnabled: true } });
+    if (!configuration?.commandsEnabled) {
+      await interaction.editReply("This Discord server is not configured for Habitat commands.");
+      return;
+    }
     await interaction.editReply(await commandReply(interaction));
-  } catch {
-    await interaction.editReply("Habitat could not read its private registry right now. No server action was taken.");
+  } catch (error) {
+    console.error(`[discord-bot] /${interaction.commandName} command failed:`, error instanceof Error ? error.message : String(error));
+    try {
+      const content = "Habitat could not read its private registry right now. No server action was taken.";
+      if (interaction.deferred || interaction.replied) await interaction.editReply(content);
+      else await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    } catch (replyError) {
+      console.error("[discord-bot] error reply could not be delivered:", replyError instanceof Error ? replyError.message : String(replyError));
+    }
   }
 }
 

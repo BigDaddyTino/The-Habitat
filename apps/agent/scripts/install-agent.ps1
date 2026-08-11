@@ -3,7 +3,10 @@ param(
   [Parameter(Mandatory)] [string] $InstallRoot,
   [Parameter(Mandatory)] [string] $AgentBindIp,
   [Parameter(Mandatory)] [string] $MartServ101Ip,
-  [ValidateRange(1, 65535)] [int] $Port = 4317
+  [ValidateRange(1, 65535)] [int] $Port = 4317,
+  # Optional. Written as HABITAT_PALWORLD_ADMIN_PASSWORD; required only when
+  # agent.config.json enables the local Palworld REST query.
+  [string] $PalworldAdminPassword
 )
 
 Set-StrictMode -Version Latest
@@ -34,12 +37,37 @@ if (-not (Test-Path -LiteralPath $configuration)) {
   Write-Warning "Created an empty agent.config.json. Add only inspected MartServ102 server definitions before relying on status endpoints."
 }
 
-[System.IO.File]::WriteAllLines($environmentFile, @(
-  "HABITAT_AGENT_TOKEN=$($env:HABITAT_AGENT_TOKEN.Trim())",
-  "HABITAT_AGENT_BIND_HOST=$AgentBindIp",
-  "HABITAT_AGENT_ALLOWED_IPS=$MartServ101Ip",
-  "HABITAT_AGENT_PORT=$Port"
-))
+# Build the keys this installer manages, then merge with any existing .env so a
+# reinstall never silently drops keys added by hand (for example
+# HABITAT_PALWORLD_ADMIN_PASSWORD).
+$managedValues = [ordered]@{
+  "HABITAT_AGENT_TOKEN"       = $env:HABITAT_AGENT_TOKEN.Trim()
+  "HABITAT_AGENT_BIND_HOST"   = $AgentBindIp
+  "HABITAT_AGENT_ALLOWED_IPS" = $MartServ101Ip
+  "HABITAT_AGENT_PORT"        = "$Port"
+}
+if (-not [string]::IsNullOrWhiteSpace($PalworldAdminPassword)) {
+  if ($PalworldAdminPassword.Contains("`r") -or $PalworldAdminPassword.Contains("`n")) {
+    throw "PalworldAdminPassword must be a single-line value."
+  }
+  $managedValues["HABITAT_PALWORLD_ADMIN_PASSWORD"] = $PalworldAdminPassword
+}
+$preservedLines = @()
+if (Test-Path -LiteralPath $environmentFile) {
+  foreach ($existingLine in [System.IO.File]::ReadAllLines($environmentFile)) {
+    if ($existingLine -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=') {
+      if (-not $managedValues.Contains($Matches[1])) { $preservedLines += $existingLine }
+    } elseif (-not [string]::IsNullOrWhiteSpace($existingLine)) {
+      # Keep comments and any other non-blank lines untouched.
+      $preservedLines += $existingLine
+    }
+  }
+}
+$environmentLines = @()
+foreach ($entry in $managedValues.GetEnumerator()) { $environmentLines += "$($entry.Key)=$($entry.Value)" }
+$environmentLines += $preservedLines
+# WriteAllLines emits UTF-8 without a BOM, which dotenv requires for the first key.
+[System.IO.File]::WriteAllLines($environmentFile, [string[]]$environmentLines)
 Copy-Item -LiteralPath $serviceTemplate -Destination $serviceXml -Force
 & (Join-Path $PSScriptRoot "set-agent-firewall.ps1") -AgentBindIp $AgentBindIp -MartServ101Ip $MartServ101Ip -Port $Port
 & $serviceExecutable install

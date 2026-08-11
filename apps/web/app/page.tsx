@@ -9,8 +9,6 @@ import { ActivePoll } from "@/components/active-poll";
 import { HallAtmosphere } from "@/components/hall-atmosphere";
 import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
 
-export const revalidate = 300;
-
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
   const chronicle = await getChronicleEvents({ limit: 4 });

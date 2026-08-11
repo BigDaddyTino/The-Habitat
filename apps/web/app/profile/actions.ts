@@ -53,12 +53,14 @@ export async function addSocialAccount(formData: FormData) {
   if (parsed.data.platform === "STEAM") throw new Error("Steam accounts must be verified through Steam sign-in.");
   const existingHandle = await db.userSocialAccount.findFirst({ where: { platform: parsed.data.platform, handle: parsed.data.handle, userId: { not: user.id } }, select: { id: true } });
   if (existingHandle) throw new Error("That public handle is already linked to another Habitat profile.");
-  const account = await db.userSocialAccount.upsert({
-    where: { userId_platform: { userId: user.id, platform: parsed.data.platform } },
-    create: { userId: user.id, platform: parsed.data.platform, handle: parsed.data.handle, profileUrl: profileUrlForPlatform(parsed.data.platform, parsed.data.handle) },
-    update: { handle: parsed.data.handle, profileUrl: profileUrlForPlatform(parsed.data.platform, parsed.data.handle) },
+  await db.$transaction(async (transaction) => {
+    const account = await transaction.userSocialAccount.upsert({
+      where: { userId_platform: { userId: user.id, platform: parsed.data.platform } },
+      create: { userId: user.id, platform: parsed.data.platform, handle: parsed.data.handle, profileUrl: profileUrlForPlatform(parsed.data.platform, parsed.data.handle) },
+      update: { handle: parsed.data.handle, profileUrl: profileUrlForPlatform(parsed.data.platform, parsed.data.handle) },
+    });
+    await transaction.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_SOCIAL_ACCOUNT_SAVED", entityType: "UserSocialAccount", entityId: account.id, after: { platform: account.platform } } });
   });
-  await db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_SOCIAL_ACCOUNT_SAVED", entityType: "UserSocialAccount", entityId: account.id, after: { platform: account.platform } } });
   revalidatePath("/profile");
 }
 
@@ -93,7 +95,10 @@ export async function equipCosmetic(formData: FormData) {
   if (!parsed.success) throw new Error("Invalid cosmetic selection.");
   const field = parsed.data.kind === "AVATAR_BORDER" ? "avatarBorder" : "profileLayout";
   if (parsed.data.code === "default") {
-    await db.user.update({ where: { id: user.id }, data: { [field]: null } });
+    await db.$transaction([
+      db.user.update({ where: { id: user.id }, data: { [field]: null } }),
+      db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_COSMETIC_EQUIPPED", entityType: "User", entityId: user.id, after: { kind: parsed.data.kind, code: parsed.data.code } } }),
+    ]);
   } else {
     const reward = await db.userAchievementReward.findFirst({ where: { userId: user.id, reward: { kind: parsed.data.kind, code: parsed.data.code } }, select: { id: true } });
     if (!reward) throw new Error("That cosmetic has not been unlocked.");
@@ -101,9 +106,9 @@ export async function equipCosmetic(formData: FormData) {
       db.userAchievementReward.updateMany({ where: { userId: user.id, reward: { kind: parsed.data.kind } }, data: { equipped: false } }),
       db.userAchievementReward.update({ where: { id: reward.id }, data: { equipped: true } }),
       db.user.update({ where: { id: user.id }, data: { [field]: parsed.data.code } }),
+      db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_COSMETIC_EQUIPPED", entityType: "User", entityId: user.id, after: { kind: parsed.data.kind, code: parsed.data.code } } }),
     ]);
   }
-  await db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_COSMETIC_EQUIPPED", entityType: "User", entityId: user.id, after: { kind: parsed.data.kind, code: parsed.data.code } } });
   revalidatePath("/profile");
 }
 

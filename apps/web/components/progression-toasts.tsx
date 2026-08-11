@@ -24,6 +24,7 @@ function rarityForLevel(level: number): AchievementRarity {
 export function ProgressionToasts({ enabled }: { enabled: boolean }) {
   const initialized = useRef(false);
   const [queue, setQueue] = useState<RewardCeremonyDetail[]>([]);
+  const [leavingId, setLeavingId] = useState<string | null>(null);
   const active = queue[0] ?? null;
 
   useEffect(() => {
@@ -68,9 +69,12 @@ export function ProgressionToasts({ enabled }: { enabled: boolean }) {
   useEffect(() => {
     if (!active) return;
     const legendary = active.rarity === "LEGENDARY" || active.rarity === "QUESTIONABLE_LIFE_CHOICE";
-    const timeout = window.setTimeout(() => setQueue((current) => current.slice(1)), legendary ? 10_500 : active.kind === "achievement" || active.kind === "level" ? 7_500 : 5_200);
-    return () => window.clearTimeout(timeout);
+    const displayMs = legendary ? 10_500 : active.kind === "achievement" || active.kind === "level" ? 7_500 : 5_200;
+    const exitMs = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 250;
+    const leaveTimeout = window.setTimeout(() => setLeavingId(active.id), displayMs);
+    const removeTimeout = window.setTimeout(() => { setLeavingId(null); setQueue((current) => current.slice(1)); }, displayMs + exitMs);
+    return () => { window.clearTimeout(leaveTimeout); window.clearTimeout(removeTimeout); };
   }, [active]);
 
-  return active ? <RewardCeremony key={active.id} toast={active} /> : null;
+  return active ? <RewardCeremony key={active.id} toast={active} leaving={leavingId === active.id} /> : null;
 }

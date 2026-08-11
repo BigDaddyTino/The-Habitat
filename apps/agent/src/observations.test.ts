@@ -24,7 +24,7 @@ test("Dragonwilds log parsing keeps only verified lifecycle markers", () => {
 });
 
 test("Palworld player parsing retains only a stable ID and display name", () => {
-  assert.deepEqual(parsePalworldPlayers([{ name: "HabitatTino", raw: { playerId: "AFAFD830000000000000000000000000", ip: "192.168.86.10" } }]), [{ providerKey: "AFAFD830000000000000000000000000", displayName: "HabitatTino" }]);
+  assert.deepEqual(parsePalworldPlayers([{ name: "HabitatTino", raw: { playerId: "AFAFD830000000000000000000000000", ip: "10.0.0.10" } }]), [{ providerKey: "AFAFD830000000000000000000000000", displayName: "HabitatTino" }]);
   assert.deepEqual(parsePalworldPlayers([{ name: "SteamTino", raw: { playerId: "AFAFD830000000000000000000000001", userId: "76561198000000000" } }]), [{ providerKey: "AFAFD830000000000000000000000001", displayName: "SteamTino", externalProvider: "STEAM", externalAccountId: "76561198000000000" }]);
   assert.deepEqual(parsePalworldPlayers([{ name: "SteamPrefix", raw: { playerId: "AFAFD830000000000000000000000002", userId: "steam_76561198000000001" } }]), [{ providerKey: "AFAFD830000000000000000000000002", displayName: "SteamPrefix", externalProvider: "STEAM", externalAccountId: "76561198000000001" }]);
   assert.equal(parsePalworldPlayers([{ name: "Missing ID", raw: {} }]), null);

@@ -3,6 +3,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
 import "@/lib/environment";
+import type { HabitatRole } from "@/lib/permissions";
 
 const db = getPrismaClient();
 
@@ -50,9 +51,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const existingUser = await db.user.findUnique({
         where: { email },
-        select: { isActive: true },
+        select: { id: true, isActive: true },
       });
-      if (existingUser) return existingUser.isActive;
+      if (existingUser) {
+        if (existingUser.isActive) return true;
+
+        // Heal a locked-out row: if the invitation expired between the signIn
+        // check and the createUser event, the user was created inactive. A
+        // currently valid unconsumed invitation reactivates the member.
+        const pendingInvitation = await db.invitation.findFirst({
+          where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
+          select: { id: true, role: true },
+        });
+        if (!pendingInvitation) return false;
+
+        await db.$transaction([
+          db.user.update({ where: { id: existingUser.id }, data: { role: pendingInvitation.role, isActive: true } }),
+          db.invitation.update({ where: { id: pendingInvitation.id }, data: { acceptedAt: new Date() } }),
+        ]);
+        return true;
+      }
 
       const invitation = await db.invitation.findFirst({
         where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
@@ -63,10 +81,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, user }) {
       if (!session.user) return session;
 
-      const habitatUser = await db.user.findUnique({
-        where: { id: user.id },
-        select: { id: true, role: true, isActive: true },
-      });
+      // PrismaAdapter passes the raw Habitat user row; the AdapterUser typing
+      // simply does not declare the extra columns. Fall back to a lookup if a
+      // future adapter ever strips them.
+      const adapterUser = user as typeof user & { role?: HabitatRole; isActive?: boolean };
+      const habitatUser = adapterUser.role !== undefined && adapterUser.isActive !== undefined
+        ? { id: adapterUser.id, role: adapterUser.role, isActive: adapterUser.isActive }
+        : await db.user.findUnique({
+            where: { id: user.id },
+            select: { id: true, role: true, isActive: true },
+          });
       if (!habitatUser) return session;
 
       session.user.id = habitatUser.id;

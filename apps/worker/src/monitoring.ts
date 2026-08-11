@@ -14,6 +14,7 @@ export type MonitoredServer = {
   desiredState: ServerState;
   actualState: ServerState;
   playerPresenceInitialized: boolean;
+  lastStateChangeAt: Date | null;
 };
 
 export type MonitoringRepository = {
@@ -36,14 +37,29 @@ export type MonitoringCycleResult = {
 
 type PresenceTransaction = Prisma.TransactionClient;
 
-export async function runMonitoringCycle(repository: MonitoringRepository, agent: AgentPoller, now = new Date()): Promise<MonitoringCycleResult> {
+const unknownDebounceThreshold = 2;
+const consecutiveObservationFailures = new Map<string, number>();
+const consecutiveRunningObservations = new Map<string, number>();
+
+export async function runMonitoringCycle(repository: MonitoringRepository, agent: AgentPoller, now = new Date(), retryDelayMs = 2_000): Promise<MonitoringCycleResult> {
   let statuses: Array<{ key: string; status: AgentServerStatus | null }>;
   try {
     statuses = await agent.pollStatuses();
-  } catch {
-    const previouslyMonitored = await repository.findPreviouslyAgentMonitored();
-    await Promise.all(previouslyMonitored.map((server) => repository.markAgentUnavailable(server, "agent_unavailable", now)));
-    return { observed: 0, unknown: previouslyMonitored.length, ignored: 0, agentAvailable: false };
+  } catch (firstError) {
+    console.error("[monitoring] agent poll failed, retrying once:", firstError instanceof Error ? firstError.message : String(firstError));
+    try {
+      await delay(retryDelayMs);
+      statuses = await agent.pollStatuses();
+    } catch (retryError) {
+      console.error("[monitoring] agent poll retry failed:", retryError instanceof Error ? retryError.message : String(retryError));
+      const previouslyMonitored = await repository.findPreviouslyAgentMonitored();
+      let unknown = 0;
+      for (const server of previouslyMonitored) {
+        unknown += 1;
+        if (registerObservationFailure(server.id) >= unknownDebounceThreshold) await repository.markAgentUnavailable(server, "agent_unavailable", now);
+      }
+      return { observed: 0, unknown, ignored: 0, agentAvailable: false };
+    }
   }
 
   let observed = 0;
@@ -56,14 +72,25 @@ export async function runMonitoringCycle(repository: MonitoringRepository, agent
       continue;
     }
     if (!entry.status) {
-      await repository.markAgentUnavailable(server, "agent_status_unavailable", now);
       unknown += 1;
+      if (registerObservationFailure(server.id) >= unknownDebounceThreshold) await repository.markAgentUnavailable(server, "agent_status_unavailable", now);
       continue;
     }
+    consecutiveObservationFailures.delete(server.id);
     await repository.saveObservation(server, entry.status);
     observed += 1;
   }
   return { observed, unknown, ignored, agentAvailable: true };
+}
+
+function registerObservationFailure(serverId: string): number {
+  const failures = (consecutiveObservationFailures.get(serverId) ?? 0) + 1;
+  consecutiveObservationFailures.set(serverId, failures);
+  return failures;
+}
+
+function delay(durationMs: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, durationMs));
 }
 
 export function createPostgresMonitoringRepository(): MonitoringRepository {
@@ -72,7 +99,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async findBySlug(slug) {
       const server = await db.gameServer.findUnique({
         where: { slug },
-        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true } } },
       });
       return server ? toMonitoredServer(server) : null;
     },
@@ -82,13 +109,17 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           lastQueryAt: { not: null },
           runtimeState: { is: { processRunning: { not: null } } },
         },
-        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true } } },
       });
       return servers.map(toMonitoredServer);
     },
     async saveObservation(server, status) {
       const observedAt = parseObservedAt(status.observedAt);
-      const effectiveDesiredState = resolveDesiredState(server.desiredState, status);
+      const runningStreak = status.process.running ? (consecutiveRunningObservations.get(server.id) ?? 0) + 1 : 0;
+      if (runningStreak > 0) consecutiveRunningObservations.set(server.id, runningStreak);
+      else consecutiveRunningObservations.delete(server.id);
+      const settledDesiredState = settleTransitionalDesiredState(server, status, observedAt);
+      const effectiveDesiredState = resolveDesiredState(settledDesiredState, status, runningStreak);
       const decision = normalizeServerState(effectiveDesiredState, status);
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
@@ -156,17 +187,20 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             },
           });
           const eventType = chronicleEventType(decision.state);
-          if (eventType) {
-            const event = await transaction.serverEvent.create({
-              data: {
+          if (eventType && shouldAnnounceTransition(eventType, server.actualState)) {
+            const dedupeKey = `state:${server.id}:${decision.state}:${observedAt.toISOString()}`;
+            const event = await transaction.serverEvent.upsert({
+              where: { dedupeKey },
+              create: {
                 serverId: server.id,
                 gameType: server.gameType as never,
                 eventType,
                 occurredAt: observedAt,
                 source: "HABITAT_AGENT",
                 sourceConfidence: 100,
-                dedupeKey: `state:${server.id}:${decision.state}:${observedAt.toISOString()}`,
+                dedupeKey,
               },
+              update: {},
             });
             const notification = stateNotification(server.displayName, eventType);
             if (notification) await queueDiscordNotification(transaction, { serverEventId: event.id, ...notification });
@@ -213,9 +247,12 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async markAgentUnavailable(server, reason, observedAt) {
       const stateChanged = server.actualState !== "UNKNOWN";
       await db.$transaction(async (transaction) => {
+        const existingState = await transaction.serverRuntimeState.findUnique({ where: { serverId: server.id }, select: { details: true } });
+        const existingDetails = existingState?.details && typeof existingState.details === "object" && !Array.isArray(existingState.details) ? existingState.details as Record<string, unknown> : {};
+        const details = { ...existingDetails, source: "HABITAT_AGENT", agentAvailable: false, reason } as Prisma.InputJsonObject;
         await transaction.serverRuntimeState.upsert({
           where: { serverId: server.id },
-          create: { serverId: server.id, state: "UNKNOWN", observedAt, details: { source: "HABITAT_AGENT", agentAvailable: false, reason } },
+          create: { serverId: server.id, state: "UNKNOWN", observedAt, details },
           update: {
             state: "UNKNOWN",
             reachable: null,
@@ -226,7 +263,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             processRunning: null,
             processStartedAt: null,
             observedAt,
-            details: { source: "HABITAT_AGENT", agentAvailable: false, reason },
+            details,
           },
         });
         await transaction.gameServer.update({
@@ -258,8 +295,13 @@ function stateNotification(serverName: string, eventType: ReturnType<typeof chro
   return null;
 }
 
-function toMonitoredServer(server: { id: string; slug: string; displayName: string; gameType: string; desiredState: string; actualState: string; runtimeState: { details: unknown } | null }): MonitoredServer {
-  return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details) };
+function shouldAnnounceTransition(eventType: NonNullable<ReturnType<typeof chronicleEventType>>, previousState: ServerState): boolean {
+  if (eventType !== "SERVER_STARTED") return true;
+  return previousState === "SLEEPING" || previousState === "DOWN_UNEXPECTEDLY" || previousState === "STOPPING" || previousState === "STARTING";
+}
+
+function toMonitoredServer(server: { id: string; slug: string; displayName: string; gameType: string; desiredState: string; actualState: string; lastStateChangeAt: Date | null; runtimeState: { details: unknown } | null }): MonitoredServer {
+  return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details), lastStateChangeAt: server.lastStateChangeAt };
 }
 
 async function synchronizePalworldPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date) {
@@ -285,13 +327,13 @@ async function synchronizePalworldPresence(transaction: PresenceTransaction, ser
       continue;
     }
     if (!previous.present) await createPalworldPresenceEvent(transaction, server, player, identity.id, "PLAYER_JOINED", observedAt);
-    await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: player.providerKey } }, data: { displayName: player.displayName, present: true, lastObservedAt: observedAt } });
+    await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: player.providerKey } }, data: { displayName: player.displayName, present: true, lastObservedAt: observedAt, ...(previous.present ? {} : { firstObservedAt: observedAt }) } });
   }
 
   if (!server.playerPresenceInitialized) return;
   for (const presence of known.filter((item) => item.present && !observedKeys.has(item.providerKey))) {
     const identity = await transaction.playerIdentity.findUnique({ where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: presence.providerKey } }, select: { id: true } });
-    await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt);
+    await createPalworldPresenceEvent(transaction, server, presence, identity?.id ?? null, "PLAYER_LEFT", observedAt, presence.lastObservedAt, presence.firstObservedAt);
     await transaction.serverPlayerPresence.update({ where: { serverId_providerKey: { serverId: server.id, providerKey: presence.providerKey } }, data: { present: false } });
   }
 }
@@ -324,9 +366,9 @@ export async function autoLinkVerifiedSteamIdentity(transaction: PresenceTransac
   await transaction.auditLog.create({ data: { actorUserId: account.userId, action: "STEAM_IDENTITY_AUTO_LINKED", entityType: "PlayerIdentity", entityId: identityId, after: { provider: "STEAM", verification: "OPENID" } } });
 }
 
-async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date) {
+async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date, sessionStartedAt?: Date) {
   const occurrence = priorObservedAt ?? observedAt;
-  const durationSeconds = eventType === "PLAYER_LEFT" && priorObservedAt ? Math.max(0, Math.min(43_200, Math.floor((observedAt.getTime() - priorObservedAt.getTime()) / 1_000))) : null;
+  const durationSeconds = eventType === "PLAYER_LEFT" && priorObservedAt && sessionStartedAt ? Math.max(0, Math.min(43_200, Math.floor((priorObservedAt.getTime() - sessionStartedAt.getTime()) / 1_000))) : null;
   const presenceEvent = await transaction.serverEvent.upsert({
     where: { dedupeKey: `palworld:${eventType}:${server.id}:${player.providerKey}:${occurrence.toISOString()}` },
     create: {
@@ -353,8 +395,21 @@ function hasPlayerPresenceBaseline(details: unknown): boolean {
   return Boolean(details && typeof details === "object" && "playerPresenceInitialized" in details && (details as { playerPresenceInitialized?: unknown }).playerPresenceInitialized === true);
 }
 
-export function resolveDesiredState(currentDesiredState: ServerState, status: AgentServerStatus): ServerState {
-  return status.process.running && currentDesiredState === "SLEEPING" ? "ONLINE" : currentDesiredState;
+const updatingSettleTimeoutMs = 3_600_000;
+
+export function settleTransitionalDesiredState(server: MonitoredServer, status: AgentServerStatus, observedAt: Date): ServerState {
+  const running = status.process.running;
+  if (server.desiredState === "STOPPING" && !running) return "SLEEPING";
+  if (server.desiredState === "STARTING" && running) return "ONLINE";
+  if (server.desiredState === "UPDATING") {
+    if (running) return "ONLINE";
+    if (server.lastStateChangeAt && observedAt.getTime() - server.lastStateChangeAt.getTime() > updatingSettleTimeoutMs) return "SLEEPING";
+  }
+  return server.desiredState;
+}
+
+export function resolveDesiredState(currentDesiredState: ServerState, status: AgentServerStatus, consecutiveRunning = 2): ServerState {
+  return status.process.running && consecutiveRunning >= 2 && currentDesiredState === "SLEEPING" ? "ONLINE" : currentDesiredState;
 }
 
 function parseObservedAt(value: string): Date {

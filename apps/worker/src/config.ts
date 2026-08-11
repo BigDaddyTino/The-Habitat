@@ -19,9 +19,16 @@ export function loadWorkerConfiguration(environment = process.env): WorkerConfig
   }
 
   const agentUrl = parseAgentUrl(environment.HABITAT_AGENT_URL ?? "");
-  const pollIntervalMs = z.coerce.number().int().min(5_000).max(300_000).catch(15_000).parse(environment.HABITAT_WORKER_POLL_INTERVAL_MS ?? "15000");
-  const historyScanIntervalMs = z.coerce.number().int().min(300_000).max(86_400_000).catch(21_600_000).parse(environment.HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS ?? "21600000");
+  const pollIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_POLL_INTERVAL_MS, "HABITAT_WORKER_POLL_INTERVAL_MS", 5_000, 300_000, 15_000);
+  const historyScanIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS, "HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS", 300_000, 86_400_000, 21_600_000);
   return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs };
+}
+
+function parseIntervalMs(rawValue: string | undefined, variableName: string, minimum: number, maximum: number, fallback: number): number {
+  const parsed = z.coerce.number().int().min(minimum).max(maximum).safeParse(rawValue ?? String(fallback));
+  if (parsed.success) return parsed.data;
+  console.warn(`[config] ${variableName} was rejected by validation; falling back to ${fallback} ms.`);
+  return fallback;
 }
 
 function parseAgentUrl(value: string): URL {

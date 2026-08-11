@@ -57,7 +57,7 @@ export default async function AchievementsPage() {
     const concealed = definition.isSecret && !earnedByUser;
     return {
       id: definition.id,
-      slug: definition.slug,
+      slug: concealed ? `secret-${definition.id}` : definition.slug,
       name: concealed ? "" : definition.name,
       description: concealed ? "" : definition.description,
       secretDescription: definition.secretDescription,

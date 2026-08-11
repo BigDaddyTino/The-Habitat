@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
+import { hasRequiredRole } from "@/lib/permissions";
 import { verifySteamOpenId } from "@/lib/steam-openid";
 
 const db = getPrismaClient();
@@ -16,7 +17,7 @@ function profileRedirect(request: Request, status: string) {
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.isActive) return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(new URL("/sign-in", request.url));
   const parameters = new URL(request.url).searchParams;
   const state = parameters.get("state");
   if (!state || !/^[a-f0-9]{64}$/.test(state)) return profileRedirect(request, "invalid");

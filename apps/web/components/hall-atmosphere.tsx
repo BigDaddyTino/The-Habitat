@@ -8,10 +8,10 @@ import { getGreatHallAtmosphere, type GreatHallAtmosphere } from "@/lib/hall-atm
 import { previewReward } from "@/lib/reward-events";
 
 const SKY_IMAGE: Record<GreatHallAtmosphere["sky"], string> = {
-  sunrise: "/images/habitat-lodge-sunrise.png",
-  midday: "/images/habitat-lodge-midday.png",
-  sunset: "/images/habitat-lodge-sunset.png",
-  night: "/images/habitat-lodge.png",
+  sunrise: "/images/habitat-lodge-sunrise.webp",
+  midday: "/images/habitat-lodge-midday.webp",
+  sunset: "/images/habitat-lodge-sunset.webp",
+  night: "/images/habitat-lodge.webp",
 };
 
 const SKY_PARTICLE_COLOR: Record<GreatHallAtmosphere["sky"], number> = {
@@ -341,14 +341,14 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
             <path className="lightning-branch" d="m52 168-29 63 20-15-18 78M43 269l35 52-24-18 8 62M31 382l-20 43 15-11-9 49" />
           </svg>
         </div>
-        <div className="hall-sun" /><div className="hall-cloud cloud-one" /><div className="hall-cloud cloud-two" />
-        <Image className="hall-ravens" src="/images/hall-events/ravens.png" alt="" width={1686} height={933} />
-        <div className="hall-ufo"><Image src="/images/hall-events/ufo.png" alt="" width={1701} height={925} /><i /><i /><i /></div>
+        <div className="hall-cloud cloud-one" /><div className="hall-cloud cloud-two" />
+        <Image className="hall-ravens" src="/images/hall-events/ravens.png" alt="" width={1686} height={933} sizes="(max-width: 800px) 230px, 320px" />
+        <div className="hall-ufo"><Image src="/images/hall-events/ufo.png" alt="" width={1701} height={925} sizes="280px" /><i /><i /><i /></div>
         <div className="hall-comet"><i /><i /></div>
         <div className="hall-fireflies">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
       </div>
       {atmosphere.encounter === "bear" ? <button className={`hall-bear-encounter ${bearState !== "idle" ? "is-roaring" : ""}`} type="button" onClick={() => { void meetTheBear(); }} aria-label="A black bear is visiting the Great Hall balcony. Tap it before it leaves.">
-        <Image src="/images/hall-events/bear.png" alt="" width={1536} height={1024} priority />
+        <Image src="/images/hall-events/bear.png" alt="" width={1536} height={1024} sizes="(max-width: 800px) 250px, 350px" />
         <span>Something is watching</span>
       </button> : null}
       <div className="hall-depth-rail" aria-hidden="true" />

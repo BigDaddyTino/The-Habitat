@@ -13,25 +13,30 @@ function Leaderboard({ title, eyebrow, icon: Icon, entries }: { title: string; e
 }
 
 export default async function LeaderboardsPage() {
-  const [members, unclaimedIdentities, definitions] = await Promise.all([
-    db.user.findMany({ where: { isActive: true }, select: { id: true, name: true, username: true, displayName: true, playerIdentities: { select: { gameType: true, events: { where: { eventType: "PLAYER_JOINED" }, select: { id: true } }, legacyEvidence: { where: { kind: "SESSION" }, select: { durationSeconds: true } } } }, achievements: { select: { achievement: { select: { points: true } } } }, xpEntries: { select: { amount: true } } } }),
-    db.playerIdentity.findMany({ where: { userId: null }, select: { id: true, displayName: true, gameType: true, events: { select: { eventType: true, gameType: true, source: true, sourceConfidence: true, valueNumber: true } }, legacyEvidence: { where: { kind: "SESSION" }, select: { durationSeconds: true } } } }),
+  const [members, unclaimedIdentities, definitions, sessionEvidence, unclaimedPlaytime] = await Promise.all([
+    db.user.findMany({ where: { isActive: true }, select: { id: true, name: true, username: true, displayName: true, playerIdentities: { select: { id: true, gameType: true, _count: { select: { events: { where: { eventType: "PLAYER_JOINED" } }, legacyEvidence: { where: { kind: "SESSION" } } } } } }, achievements: { select: { achievement: { select: { points: true } } } }, xpEntries: { select: { amount: true } } } }),
+    db.playerIdentity.findMany({ where: { userId: null }, select: { id: true, displayName: true, gameType: true, _count: { select: { events: { where: { eventType: "PLAYER_JOINED" } }, legacyEvidence: { where: { kind: "SESSION" } } } } } }),
     db.achievementDefinition.findMany({ where: { enabled: true }, select: { ruleType: true, ruleConfig: true, points: true } }),
+    db.legacyPlayerEvidence.groupBy({ by: ["playerIdentityId"], where: { kind: "SESSION" }, _sum: { durationSeconds: true } }),
+    db.serverEvent.groupBy({ by: ["playerIdentityId"], where: { playerIdentity: { userId: null }, eventType: "PLAYER_LEFT", sourceConfidence: { gte: 100 }, source: { in: ["PALWORLD_REST", "LEGACY_HISTORY_IMPORT"] }, valueNumber: { gt: 0 } }, _sum: { valueNumber: true } }),
   ]);
-  const claimed: Competitor[] = members.map((member) => { const xp = member.xpEntries.reduce((sum, entry) => sum + entry.amount, 0); return { id: member.id, name: member.displayName ?? member.name ?? "Habitat member", username: member.username, xp, level: levelForXp(xp), visits: member.playerIdentities.reduce((sum, identity) => sum + identity.events.length, 0), worlds: new Set(member.playerIdentities.filter((identity) => identity.events.length > 0 || identity.legacyEvidence.length > 0).map((identity) => identity.gameType)).size, legacySeconds: member.playerIdentities.flatMap((identity) => identity.legacyEvidence).reduce((sum, evidence) => sum + (evidence.durationSeconds ?? 0), 0), legacySessions: member.playerIdentities.reduce((sum, identity) => sum + identity.legacyEvidence.length, 0), points: member.achievements.reduce((sum, award) => sum + award.achievement.points, 0), achievements: member.achievements.length, unclaimed: false }; });
+  const sessionSecondsByIdentity = new Map(sessionEvidence.map((entry) => [entry.playerIdentityId, entry._sum.durationSeconds ?? 0]));
+  const playtimeByIdentity = new Map(unclaimedPlaytime.map((entry) => [entry.playerIdentityId, entry._sum.valueNumber ?? 0]));
+  const claimed: Competitor[] = members.map((member) => { const xp = member.xpEntries.reduce((sum, entry) => sum + entry.amount, 0); return { id: member.id, name: member.displayName ?? member.name ?? "Habitat member", username: member.username, xp, level: levelForXp(xp), visits: member.playerIdentities.reduce((sum, identity) => sum + identity._count.events, 0), worlds: new Set(member.playerIdentities.filter((identity) => identity._count.events > 0 || identity._count.legacyEvidence > 0).map((identity) => identity.gameType)).size, legacySeconds: member.playerIdentities.reduce((sum, identity) => sum + (sessionSecondsByIdentity.get(identity.id) ?? 0), 0), legacySessions: member.playerIdentities.reduce((sum, identity) => sum + identity._count.legacyEvidence, 0), points: member.achievements.reduce((sum, award) => sum + award.achievement.points, 0), achievements: member.achievements.length, unclaimed: false }; });
   const unclaimed: Competitor[] = unclaimedIdentities.map((identity) => {
-    const visits = identity.events.filter((event) => event.eventType === "PLAYER_JOINED").length;
-    const playtimeSeconds = identity.events.filter((event) => event.eventType === "PLAYER_LEFT" && event.sourceConfidence >= 100 && ["PALWORLD_REST", "LEGACY_HISTORY_IMPORT"].includes(event.source) && typeof event.valueNumber === "number" && event.valueNumber > 0).reduce((sum, event) => sum + (event.valueNumber ?? 0), 0);
+    const visits = identity._count.events;
+    const playtimeSeconds = playtimeByIdentity.get(identity.id) ?? 0;
     const xp = verifiedPlaytimeXp(playtimeSeconds);
     const level = levelForXp(xp);
-    const legacySeconds = identity.legacyEvidence.reduce((sum, evidence) => sum + (evidence.durationSeconds ?? 0), 0);
+    const legacySeconds = sessionSecondsByIdentity.get(identity.id) ?? 0;
+    const legacySessions = identity._count.legacyEvidence;
     const points = definitions.reduce((sum, definition) => {
       if (definition.ruleType === "EVENT_COUNT") { const rule = parseEventCountRule(definition.ruleConfig); return sum + (rule && rule.eventType === "PLAYER_JOINED" && visits >= rule.threshold ? definition.points : 0); }
       if (definition.ruleType === "DISTINCT_GAME_EVENT_COUNT") { const rule = parseDistinctGameEventCountRule(definition.ruleConfig); return sum + (rule && rule.eventType === "PLAYER_JOINED" && visits > 0 && 1 >= rule.threshold ? definition.points : 0); }
-      if (definition.ruleType === "LEGACY_EVIDENCE_COUNT") { const rule = parseLegacyEvidenceCountRule(definition.ruleConfig); return sum + (rule && identity.legacyEvidence.length >= rule.threshold ? definition.points : 0); }
+      if (definition.ruleType === "LEGACY_EVIDENCE_COUNT") { const rule = parseLegacyEvidenceCountRule(definition.ruleConfig); return sum + (rule && legacySessions >= rule.threshold ? definition.points : 0); }
       const rule = parseLevelReachedRule(definition.ruleConfig); return sum + (rule && level >= rule.level ? definition.points : 0);
     }, 0);
-    return { id: identity.id, name: identity.displayName, username: null, xp, level, visits, worlds: visits || identity.legacyEvidence.length ? 1 : 0, legacySeconds, legacySessions: identity.legacyEvidence.length, points, achievements: 0, unclaimed: true };
+    return { id: identity.id, name: identity.displayName, username: null, xp, level, visits, worlds: visits || legacySessions ? 1 : 0, legacySeconds, legacySessions, points, achievements: 0, unclaimed: true };
   });
   const competitors = [...claimed, ...unclaimed];
   const rank = (items: Competitor[], score: (member: Competitor) => number, format: (member: Competitor) => number | string, detail: (member: Competitor) => string) => items.filter((member) => score(member) > 0).sort((left, right) => score(right) - score(left) || left.name.localeCompare(right.name)).slice(0, 10).map((member) => ({ id: member.id, name: member.name, username: member.username, score: format(member), detail: detail(member), unclaimed: member.unclaimed }));

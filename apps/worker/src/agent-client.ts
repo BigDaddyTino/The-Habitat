@@ -13,8 +13,16 @@ export class HabitatAgentClient {
       try {
         const status = await this.getJson(this.urlFor(`/v1/servers/${key}/status`), isAgentServerStatus, 12_000);
         return { key, status };
-      } catch {
-        return { key, status: null };
+      } catch (firstError) {
+        console.error(`[agent-client] status fetch for ${key} failed, retrying once:`, firstError instanceof Error ? firstError.message : String(firstError));
+        try {
+          await delay(2_000);
+          const status = await this.getJson(this.urlFor(`/v1/servers/${key}/status`), isAgentServerStatus, 12_000);
+          return { key, status };
+        } catch (retryError) {
+          console.error(`[agent-client] status retry for ${key} failed:`, retryError instanceof Error ? retryError.message : String(retryError));
+          return { key, status: null };
+        }
       }
     }));
   }
@@ -26,9 +34,12 @@ export class HabitatAgentClient {
       headers: { authorization: `Bearer ${this.token}`, accept: "application/json", "content-type": "application/json" },
       body: "{}",
       redirect: "error",
-      signal: AbortSignal.timeout(190_000),
+      signal: AbortSignal.timeout(480_000),
     });
-    const body: unknown = await response.json().catch(() => null);
+    const body: unknown = await response.json().catch((error: unknown) => {
+      console.error("[agent-client] action response body could not be parsed:", error instanceof Error ? error.message : String(error));
+      return null;
+    });
     if (!isAgentServerActionResult(body) || (!response.ok && response.status !== 409)) throw new Error("Agent action was not accepted.");
     return body;
   }
@@ -37,7 +48,10 @@ export class HabitatAgentClient {
     const summaries = await this.getJson(this.urlFor("/v1/servers"), isServerSummaryArray);
     const histories = await Promise.all(summaries.map(async ({ key }) => {
       try { return await this.getJson(this.urlFor(`/v1/servers/${key}/history`), isAgentLegacyHistory, 60_000); }
-      catch { return null; }
+      catch (error) {
+        console.error(`[agent-client] legacy history fetch for ${key} failed:`, error instanceof Error ? error.message : String(error));
+        return null;
+      }
     }));
     return histories.filter((history): history is AgentLegacyHistory => history !== null);
   }
@@ -57,6 +71,10 @@ export class HabitatAgentClient {
   private urlFor(pathname: string): URL {
     return new URL(pathname, this.endpoint);
   }
+}
+
+function delay(durationMs: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, durationMs));
 }
 
 function isAgentServerActionResult(value: unknown): value is AgentServerActionResult {

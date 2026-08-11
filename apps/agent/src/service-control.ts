@@ -164,16 +164,22 @@ export function parseServiceState(output: string): ServiceState {
   return "PENDING";
 }
 
+const scCommandTimeoutMs = 15_000;
+
 async function runSc(argumentsList: string[]): Promise<CommandResult> {
   const executable = `${process.env.SystemRoot ?? "C:\\Windows"}\\System32\\sc.exe`;
   return new Promise((resolve, reject) => {
     const child = spawn(executable, argumentsList, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let output = "";
+    const killTimer = setTimeout(() => {
+      child.kill();
+      reject(new ServiceControlError("service_timeout"));
+    }, scCommandTimeoutMs);
     child.stdout.setEncoding("utf8");
     child.stderr.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => { output += chunk; });
     child.stderr.on("data", (chunk: string) => { output += chunk; });
-    child.once("error", reject);
-    child.once("close", (exitCode) => resolve({ exitCode: exitCode ?? 1, output }));
+    child.once("error", (error) => { clearTimeout(killTimer); reject(error); });
+    child.once("close", (exitCode) => { clearTimeout(killTimer); resolve({ exitCode: exitCode ?? 1, output }); });
   });
 }

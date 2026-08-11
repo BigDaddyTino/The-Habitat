@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { avatarStorageDirectory, resolveAvatarFile, uploadedAvatarFilename } from "@/lib/avatar-storage";
+import { hasRequiredRole } from "@/lib/permissions";
 
 const db = getPrismaClient();
 const maxAvatarBytes = 2 * 1024 * 1024;
@@ -26,8 +27,9 @@ async function removePreviousUpload(image: string | null) {
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.isActive) return NextResponse.redirect(new URL("/sign-in", request.url), 303);
-  const formData = await request.formData();
+  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(new URL("/sign-in", request.url), 303);
+  const formData = await request.formData().catch(() => null);
+  if (!formData) return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
   const upload = formData.get("avatar");
   if (!(upload instanceof File) || upload.size === 0 || upload.size > maxAvatarBytes || !(upload.type in imageTypes)) {
     return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
@@ -45,10 +47,15 @@ export async function POST(request: Request) {
 
   const user = await db.user.findUnique({ where: { id: session.user.id }, select: { image: true } });
   const image = `/member-avatars/${filename}`;
-  await db.$transaction([
-    db.user.update({ where: { id: session.user.id }, data: { image } }),
-    db.auditLog.create({ data: { actorUserId: session.user.id, action: "PROFILE_AVATAR_UPLOADED", entityType: "User", entityId: session.user.id, after: { storage: "member-avatar" } } }),
-  ]);
+  try {
+    await db.$transaction([
+      db.user.update({ where: { id: session.user.id }, data: { image } }),
+      db.auditLog.create({ data: { actorUserId: session.user.id, action: "PROFILE_AVATAR_UPLOADED", entityType: "User", entityId: session.user.id, after: { storage: "member-avatar" } } }),
+    ]);
+  } catch (error) {
+    await unlink(target).catch(() => undefined);
+    throw error;
+  }
   await removePreviousUpload(user?.image ?? null);
   return NextResponse.redirect(new URL("/profile?avatar=uploaded", request.url), 303);
 }
