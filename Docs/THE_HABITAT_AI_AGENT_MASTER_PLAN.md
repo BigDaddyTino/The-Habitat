@@ -2942,8 +2942,8 @@ feat: add guarded dedicated-server controls
 - [ ] Add health checks.
 - [ ] Add backup scripts.
 - [ ] Add retention job.
-- [ ] Add Cloudflare hostname.
-- [ ] Confirm only web is publicly exposed.
+- [x] Add Cloudflare hostname.
+- [x] Confirm only web is publicly exposed.
 - [ ] Run dependency audit.
 - [ ] Run authorization tests.
 - [ ] Run Playwright.
@@ -3211,7 +3211,7 @@ can reuse the same data.
 
 V1 is complete when:
 
-- [ ] `habitat.martinobear.com` is live through Cloudflare Tunnel.
+- [x] `habitat.martinobear.com` is live through Cloudflare Tunnel.
 - [ ] The Habitat branding looks intentional and polished.
 - [ ] Discord login works.
 - [ ] ADMIN / USER / VIEWER permissions work.

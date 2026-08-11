@@ -1,6 +1,6 @@
 # Habitat Web Deployment
 
-`HabitatWeb` runs the production Next.js application as a native Windows service on MartServ101. It binds to `127.0.0.1:3000` only. A local Cloudflare Tunnel or reverse proxy may reach that loopback endpoint; the database, Habitat Agent, game ports, and management APIs remain private.
+`HabitatWeb` runs the production Next.js application as a native Windows service on MartServ101. It binds to `127.0.0.1:3000` only. The local `habitat-martserv101` Cloudflare Tunnel reaches that loopback endpoint at `https://habitat.martinobear.com`; the database, Habitat Agent, game ports, and management APIs remain private.
 
 ## Prerequisites
 
@@ -32,6 +32,8 @@ Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:3000/chronicle" |
 ```
 
 Expected result: `200`. Also verify the Great Hall with a signed-out browser, then a permitted Discord member account, and confirm the page represents unavailable game telemetry as `UNKNOWN` rather than as live data.
+
+For tunnel verification, confirm `Get-Service Cloudflared` reports `Running` with automatic startup and verify the public hostname from a resolver that is not using MartServDMC's temporary split-horizon override. The Cloudflare dashboard route must remain exactly `HTTP` to `127.0.0.1:3000` with no path restriction.
 
 ## Update
 
