@@ -129,9 +129,9 @@ Last updated: 2026-08-11
 - [x] Verified-data leaderboards for activity, exploration, and achievement points
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
-- [x] Cinematic Great Hall with composition-matched generated sunrise/midday/sunset/night plates, pointer-depth parallax, reduced-motion behavior, and sky-aware ambient encounters
-- [x] Coordinated Great Hall render stack with one Three.js WebGL background, one Rive Canvas2D state-machine instrument, a shared animation clock, two-way focus/pointer interaction, adaptive quality, and image/HTML fallbacks
-- [x] Replaced the prominent Great Hall field-glass/reticle with a compact cinematic-view control while preserving coordinated Three.js/Rive focus behavior
+- [x] Always-cinematic Great Hall with composition-matched sunrise/midday/sunset/night plates tied to America/New_York, a continuously rendered Three.js vista, pointer-depth parallax, adaptive quality, reduced-motion behavior, and an image fallback
+- [x] Deterministic living-window scheduler produces exactly three brief, sky-appropriate encounters per Eastern hour while leaving the Hall quiet most of the time: bird flocks, bear visits, UFOs, comets, aurora, fireflies, eclipse, blood moon, lightning, and storms
+- [x] Server-verified clickable bear encounter with a synthesized roar, replay-safe secret achievement, selectable Bearly Welcome title, Window Bear trophy, immediate reward ceremony, and audit record
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs
@@ -150,7 +150,7 @@ Last updated: 2026-08-11
 - [x] Clickable claimed-character cards on private and public profiles open an exact identity-filtered Chronicle containing up to 100 retained events
 - [x] Unified rarity-aware reward ceremonies for XP, levels, and every achievement tier, coordinating a Three.js particle scene and Canvas2D Rive state machine from one animation clock
 - [x] Living Three.js trophy cabinet on private and public profiles, filled exclusively from persisted badge, medal, and trophy unlocks with pointer inspection, accessible inventory controls, mobile composition, and non-WebGL fallback
-- [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 38 catalogue records
+- [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 39 catalogue records
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies
 - [x] Replay-safe historical catalogue reconciliation for claimed members with retroactive rewards and suppressed Discord announcements
 - [x] Live bounded history sources deployed on MartServ102: Valheim HabitatCore Chronicle, Project Zomboid named Steam connections, Enshrouded accepted Steam sessions, 7 Days persistent-player XML, and Dragonwilds session logs

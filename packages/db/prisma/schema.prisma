@@ -88,6 +88,7 @@ enum AchievementRuleType {
   DISTINCT_GAME_EVENT_COUNT
   LEGACY_EVIDENCE_COUNT
   LEVEL_REACHED
+  WEB_INTERACTION
 }
 
 enum LegacyEvidenceKind {

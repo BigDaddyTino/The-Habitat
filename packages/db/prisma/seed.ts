@@ -55,6 +55,7 @@ const achievements = [
   { slug: "this-is-how-you-logged-in", name: "This Is How You Logged In", description: "Make 15 verified visits to Project Zomboid. Survival remains pending; attendance is impeccable.", secretDescription: "Knox Country has noticed a familiar login.", icon: "SKULL", gameType: "PROJECT_ZOMBOID", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "PROJECT_ZOMBOID", threshold: 15 }, isSecret: true, points: 105 },
   { slug: "respiratory-optional", name: "Respiratory Optional", description: "Make 15 verified visits to Enshrouded. Clean air continues to be treated as premium content.", secretDescription: "Something persistent is moving through the Shroud.", icon: "FLAME", gameType: "ENSHROUDED", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "ENSHROUDED", threshold: 15 }, isSecret: true, points: 105 },
   { slug: "dragon-under-control", name: "Dragon? Under Control.", description: "Make 15 verified visits to Dragonwilds. The question mark is part of the official safety statement.", secretDescription: "The Wild Country incident report ends with a question mark.", icon: "SHIELD", gameType: "DRAGONWILDS", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "DRAGONWILDS", threshold: 15 }, isSecret: true, points: 105 },
+  { slug: "do-not-tap-the-glass", name: "Do Not Tap the Glass", description: "Click the bear during a live Great Hall encounter. It objected loudly.", secretDescription: "The Great Hall window occasionally looks back.", icon: "BEAR", rarity: "EPIC", category: "Secret", ruleType: "WEB_INTERACTION", ruleConfig: { interaction: "HALL_BEAR_CLICK" }, isSecret: true, points: 125 },
 ] as const;
 
 const titles = [
@@ -70,6 +71,7 @@ const titles = [
   { slug: "time-thief", name: "Certified Time Thief", description: "Time failed to secure itself." },
   { slug: "almost-unreasonable", name: "Almost Unreasonable", description: "A deeply committed upper-tier resident." },
   { slug: "lodge-owner-on-paper", name: "Lodge Owner on Paper", description: "The deed is dubious. The authority is not." },
+  { slug: "bearly-welcome", name: "Bearly Welcome", description: "Tapped the glass and survived the formal complaint." },
 ] as const;
 
 const achievementRewards = [
@@ -125,6 +127,8 @@ const achievementRewards = [
   { achievementSlug: "respiratory-optional", kind: "MEDAL", code: "embervale-breather", name: "Embervale Breather", description: "A Shroud-darkened medal for repeat expeditions." },
   { achievementSlug: "dragon-under-control", kind: "MEDAL", code: "wild-country-ward", name: "Wild Country Ward", description: "Dragon-tested. Wording approved by nervous counsel." },
   { achievementSlug: "the-longest-game", kind: "TROPHY", code: "centurion-monument", name: "The Centurion Monument", description: "The final centerpiece of the Habitat cabinet." },
+  { achievementSlug: "do-not-tap-the-glass", kind: "TITLE", code: "bearly-welcome", name: "Bearly Welcome", description: "A selectable title for somebody who ignored the glass-tapping policy.", titleSlug: "bearly-welcome" },
+  { achievementSlug: "do-not-tap-the-glass", kind: "TROPHY", code: "window-bear", name: "The Window Bear", description: "A roaring cabinet piece commemorating one inadvisable tap on the Great Hall glass." },
 ] as const;
 
 const weeklyQuests = [
