@@ -7,8 +7,8 @@ import { socialPlatformLabels } from "@/lib/social-platforms";
 
 const db = getPrismaClient();
 const fallbackAvatar = "/images/avatars/campfire.svg";
-const safeBorders = new Set(["ember-ring", "aurora-ring", "ironwood-ring", "mythic-flame-ring", "centurion-ring"]);
-const safeLayouts = new Set(["trophy-case", "veteran-vault", "centurion-hall"]);
+const safeBorders = new Set(["ember-ring", "aurora-ring", "ironwood-ring", "mythic-flame-ring", "centurion-ring", "porchlight-ring", "kindling-ring", "solar-flare-ring"]);
+const safeLayouts = new Set(["trophy-case", "veteran-vault", "centurion-hall", "war-room", "weekend-myth"]);
 
 export default async function MemberProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;

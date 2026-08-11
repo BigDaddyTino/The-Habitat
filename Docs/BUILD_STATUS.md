@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-10
+Last updated: 2026-08-11
 
 ## Phase 0 - Repository and Documentation
 
@@ -138,5 +138,9 @@ Last updated: 2026-08-10
 - [x] Four deterministic-random weekly quests with automatic replay-safe rewards and weekly member progress
 - [x] Level milestone achievements at 10/25/50/75/100 with titles, animated borders, layouts, and badges
 - [x] Quest board, profile level bars, Habitat Level leaderboard, and reduced-motion-aware XP/level-up toasts
+- [x] Full-card Great Hall server dossiers with sleeping-world access, retained telemetry, verified roster activity, and server Chronicle signals
+- [x] Legendary achievement toasts with extended, reduced-motion-aware visual treatment
+- [x] Expanded verified achievement catalogue: progression, legacy, exploration, and extreme return-visit milestones with titles, borders, layouts, badges, and medals
+- [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
 - [ ] Server-specific archived log paths must be allow-listed on MartServ102 before live legacy evidence can be imported

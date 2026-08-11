@@ -1,4 +1,4 @@
-import type { Prisma } from "@habitat/db/client";
+import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import { parseDistinctGameEventCountRule, parseEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, progressionForXp } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
@@ -41,6 +41,37 @@ export async function evaluateLevelAchievementsForUser(
     if (!rule || level < rule.level) continue;
     await awardAchievement(transaction, definition, { userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: `level-${rule.level}`, source: "PROGRESSION_ENGINE" });
   }
+}
+
+/** Replays only each member's latest verified evidence to make newly seeded rules retroactive. */
+export async function reconcileAchievementCatalog() {
+  const db = getPrismaClient();
+  const users = await db.user.findMany({ where: { isActive: true }, select: { id: true } });
+  let reconciled = 0;
+  for (const user of users) {
+    const [joinEvent, legacyEvidence, progressionEvent] = await Promise.all([
+      db.serverEvent.findFirst({ where: { eventType: "PLAYER_JOINED", playerIdentity: { is: { userId: user.id } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { id: true } }),
+      db.legacyPlayerEvidence.findFirst({ where: { playerIdentity: { is: { userId: user.id } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { id: true } }),
+      db.serverEvent.findFirst({
+        where: { playerIdentity: { is: { userId: user.id } } },
+        orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+        include: { playerIdentity: { select: { id: true, displayName: true, userId: true } } },
+      }),
+    ]);
+    await db.$transaction(async (transaction) => {
+      if (joinEvent) await evaluateAchievementsForEvent(transaction, joinEvent.id);
+      if (legacyEvidence) await evaluateAchievementsForLegacyEvidence(transaction, legacyEvidence.id);
+      if (progressionEvent?.playerIdentity?.userId) await evaluateLevelAchievementsForUser(transaction, user.id, {
+        id: progressionEvent.id,
+        serverId: progressionEvent.serverId,
+        gameType: progressionEvent.gameType,
+        occurredAt: progressionEvent.occurredAt,
+        playerIdentity: { id: progressionEvent.playerIdentity.id, displayName: progressionEvent.playerIdentity.displayName },
+      });
+    });
+    reconciled += 1;
+  }
+  return reconciled;
 }
 
 async function awardAchievement(

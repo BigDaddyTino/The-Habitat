@@ -7,6 +7,7 @@ import { dispatchPendingDiscordNotifications } from "./discord-notifications.js"
 import { createPostgresServerCommandRepository, dispatchAuthorizedServerCommands } from "./server-commands.js";
 import { importLegacyHistory } from "./legacy-history.js";
 import { reconcileProgression } from "./progression.js";
+import { reconcileAchievementCatalog } from "./achievements.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -52,6 +53,12 @@ async function main(): Promise<void> {
         console.info(`Habitat progression: weekly rotation ready and ${users} member XP records reconciled.`);
       } catch {
         console.warn("Habitat progression reconciliation failed. Live monitoring remains available.");
+      }
+      try {
+        const users = await reconcileAchievementCatalog();
+        console.info(`Habitat achievements: ${users} member catalogues reconciled.`);
+      } catch {
+        console.warn("Habitat achievement reconciliation failed. Live monitoring remains available.");
       }
       nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
     }

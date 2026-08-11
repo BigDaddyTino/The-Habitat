@@ -6,7 +6,7 @@ import { StatusBadge } from "./status-badge";
 export function WorldCard({ world }: { world: WorldView }) {
   const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity}`;
   return (
-    <article className={`world-card accent-${world.accent}${world.state === "SLEEPING" ? " state-sleeping" : ""}`}>
+    <Link href={`/worlds/${world.slug}`} className={`world-card world-card-link accent-${world.accent}${world.state === "SLEEPING" ? " state-sleeping" : ""}`} aria-label={`Open ${world.worldName} server dossier`}>
       <div className="world-card-topline">
         <span className="world-game">{world.game}</span>
         <StatusBadge state={world.state} />
@@ -17,7 +17,7 @@ export function WorldCard({ world }: { world: WorldView }) {
         <div><dt><UsersRound aria-hidden="true" size={14} /> Players</dt><dd>{playerLabel}</dd></div>
         <div><dt><Wifi aria-hidden="true" size={14} /> {world.ping === null ? "Last fire" : "Ping"}</dt><dd>{world.ping === null ? world.lastFire : `${world.ping} ms`}</dd></div>
       </dl>
-      <Link href={`/worlds/${world.slug}`} className="world-link">View world <ArrowUpRight aria-hidden="true" size={16} /></Link>
-    </article>
+      <span className="world-link">Open server dossier <ArrowUpRight aria-hidden="true" size={16} /></span>
+    </Link>
   );
 }
