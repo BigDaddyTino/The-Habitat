@@ -1,28 +1,23 @@
 # Master Plan Validation
 
-Validated: 2026-08-09
+Validated: 2026-08-11
 
-The master plan is a strong foundation and is approved as the build direction. Its most important decisions are correct: private agent boundary, Cloudflare-only public web exposure, independent background worker, explicit server states, capability-based adapters, and a phased control rollout.
+The master plan remains the product direction, but it is a historical planning document—not a live implementation checklist. [Build Status](BUILD_STATUS.md) and the focused operational documents are the source of truth for the current app.
 
-## Corrections applied
+## Confirmed architecture decisions
 
-- Node 24 is an LTS line. The local build toolchain is Node `24.19.0`.
-- PostgreSQL 18 remains the current supported major release. The Compose file follows the rolling `postgres:18` image tag so security patches arrive inside the approved major line.
-- Next.js 16.3 is preview material, not the production version to pin. The web package uses patched `16.2.11` pending a stable later 16.x release.
-- GameDig supports the listed five games, with caveats: Valheim requires `-public 1`; its crossplay server player count is not reliable. Palworld GameDig support is experimental and requires the REST API configuration, so the official LAN-only REST API remains its primary source.
-- Dragonwilds’ official guide confirms Windows/Linux dedicated hosting, logs, and home hosting. It does not establish a tested general-purpose query protocol, so its custom adapter posture remains correct.
+- Node.js 24 LTS, strict TypeScript, pnpm, Next.js App Router, PostgreSQL 18, Prisma, a separate worker, and a Windows-native agent are the implemented baseline.
+- MartServ101 owns the web, worker, database, backup, and public-tunnel boundary; MartServ102 owns game processes, local observations, and private agent/service control.
+- The portal never fabricates unavailable telemetry, exposes game-management interfaces publicly, or accepts arbitrary shell/RCON/file-path input.
+- SLEEPING and DOWN_UNEXPECTEDLY remain distinct states, and adapter capability maps continue to prevent unsupported metrics from being shown as facts.
 
-## Local readiness
+## Current implementation additions
 
-- Verify MartServ102 resolves to its private LAN address during deployment; do not record infrastructure addresses in Git.
-- Node 24.19.0 and pnpm 11.21.0 are available.
-- Docker Desktop was started, but this shell does not yet have a `docker` executable on `PATH`; Phase 1 container validation waits on that host-level CLI availability.
+The live implementation now extends the original plan with Steam OpenID ownership proof, idempotent legacy-history reconciliation, provisional unclaimed identity visibility, 1–100 progression, deterministic weekly quests, reward inventories, Rive/Three.js ceremonies, a trophy cabinet, server dossiers, compact cached news/patch notes, and the time-aware cinematic Great Hall.
 
-## Sources
+## Remaining validation work
 
-- [Next.js security release](https://nextjs.org/blog)
-- [Node.js release status](https://nodejs.org/en/about/previous-releases)
-- [PostgreSQL 18 release](https://www.postgresql.org/about/news/postgresql-18-released-3142/)
-- [GameDig supported games and notes](https://github.com/gamedig/node-gamedig/blob/master/GAMES_LIST.md)
-- [Palworld REST API guide](https://docs.palworldgame.com/api/rest-api/palwold-rest-api/)
-- [Dragonwilds dedicated-server guide](https://dragonwilds.runescape.com/news/how-to-dedicated-servers)
+- Phase 13 hardening remains intentionally pending.
+- Verify new telemetry/history collectors with live player activity before relying on their richer game-specific details.
+- Provider-authenticated live social presence and gameplay-changing or client-required mods are not deployed.
+- Dragonwilds player-session evidence awaits real dedicated-server session lines in retained logs.

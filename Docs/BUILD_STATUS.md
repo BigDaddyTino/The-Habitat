@@ -2,6 +2,8 @@
 
 Last updated: 2026-08-11
 
+This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
+
 ## Phase 0 - Repository and Documentation
 
 - [x] Git repository connected to `BigDaddyTino/The-Habitat`

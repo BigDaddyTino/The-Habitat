@@ -2,6 +2,10 @@
 
 Phase 12 controls only named Windows services. The Habitat agent never accepts a program, path, argument, or service name from a portal request.
 
+## Current implementation
+
+The installer creates direct-executable WinSW game and one-shot update services for all six registered games. The web portal does not contact them directly: an administrator submits a typed-confirmed command, the worker persists and audits it, and the private agent dispatches only the configured action for the configured world. Service/process verification determines the final command result.
+
 ## Before installation
 
 Run these steps on MartServ102 from an elevated PowerShell session.

@@ -7,7 +7,7 @@
 - Node.js 24 LTS is installed at `C:\Program Files\nodejs`.
 - The repository root `.env` has the production database and Auth.js settings.
 - `HABITAT_AVATAR_STORAGE_PATH` points at the persistent storage volume so a rebuild does not destroy member uploads. See [Operations](OPERATIONS.md).
-- Dependencies are installed and the production build succeeds.
+- Dependencies are installed and `pnpm test`, `pnpm lint`, `pnpm typecheck`, and the production build succeed.
 - `HabitatWorker.exe` is already present from the worker installation, or a WinSW executable has been placed at `<repository>\HabitatWeb.exe`.
 
 ## Build and Install
@@ -31,7 +31,7 @@ Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:3000/chronicle" |
   Select-Object StatusCode
 ```
 
-Expected result: `200`.
+Expected result: `200`. Also verify the Great Hall with a signed-out browser, then a permitted Discord member account, and confirm the page represents unavailable game telemetry as `UNKNOWN` rather than as live data.
 
 ## Update
 

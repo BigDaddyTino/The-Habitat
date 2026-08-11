@@ -10,6 +10,7 @@ Keep the existing MartServ101 root `.env` in place and add these local-only valu
 HABITAT_AGENT_URL=http://<MartServ102 private LAN IP>:4317
 HABITAT_AGENT_TOKEN=<the same token used by the MartServ102 agent>
 HABITAT_WORKER_POLL_INTERVAL_MS=15000
+HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS=21600000
 ```
 
 The worker rejects public, HTTPS, credentialed, or path-bearing agent URLs. Its token stays in `.env`; it is not typed into a PowerShell variable for normal operation.
@@ -23,9 +24,11 @@ $env:Path = "C:\Program Files\nodejs;$env:Path"
 & "C:\Program Files\nodejs\corepack.cmd" pnpm --filter @habitat/worker run-once
 ```
 
-The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`. Valheim and Palworld are the first validated agent-backed worlds.
+The first successful cycle creates live runtime entries, metric samples, and initial state-history transitions only for worlds returned by the agent. Other worlds remain `UNKNOWN`. The current agent supports all six registered worlds, with game-specific capabilities documented in [Game Adapters](GAME_ADAPTERS.md).
 
 When a server configured as `SLEEPING` is observed with a verified running process, the worker automatically promotes its desired state to `ONLINE`. No routine admin edit is needed when a server comes online. A later missing process is `DOWN_UNEXPECTEDLY` unless the Habitat initiated the stop or receives another trusted shutdown signal.
+
+The same worker also performs bounded history imports, name/persona reconciliation, XP/quest/achievement/record evaluation, reward reconciliation after claims, Discord outbox delivery when configured, and audited command dispatch. These jobs use replay-safe database dedupe keys; they still require real, configured sources before producing game-specific data.
 
 ## Windows Service
 

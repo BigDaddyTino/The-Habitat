@@ -1,4 +1,6 @@
 # THE HABITAT
+
+> **Implementation status — updated 2026-08-11:** This is the original product and build-direction document, retained for rationale and future planning. It is not a live task checklist. Phases 0–12 plus the documented pre-Phase-13 community, progression, history, reward, dossier, and cinematic Great Hall expansion are substantially implemented. For exact shipped scope, known limits, and remaining validation work, use [BUILD_STATUS.md](BUILD_STATUS.md) and the focused deployment/operations documents.
 ## “God’s Country”
 ### AI Agent Master Build Plan for VS Code
 

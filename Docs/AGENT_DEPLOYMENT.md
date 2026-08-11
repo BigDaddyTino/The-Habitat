@@ -1,6 +1,6 @@
 # Habitat Agent Deployment
 
-The Habitat Agent is a private, read-only Windows service for MartServ102. It is not part of Docker Compose, Cloudflare Tunnel, or the public website.
+The Habitat Agent is a private Windows service for MartServ102. It provides read-only observation plus a tiny fixed allow-list of authenticated named-service actions; it is not part of Docker Compose, Cloudflare Tunnel, or the public website.
 
 ## Boundary
 
@@ -8,7 +8,7 @@ The Habitat Agent is a private, read-only Windows service for MartServ102. It is
 - Every route requires `Authorization: Bearer <HABITAT_AGENT_TOKEN>`.
 - The firewall accepts TCP 4317 only from the explicit MartServ101 LAN address supplied at install time, on the agent's configured private address. The rule applies across Windows network profiles without broadening its address scope.
 - Read routes are limited to `GET /health`, `GET /v1/servers`, `GET /v1/servers/:key/status`, and `GET /v1/servers/:key/history`.
-- Server actions remain the fixed, authenticated action allow-list. There are no shell, request-supplied command, arbitrary-path, or arbitrary-host endpoints.
+- The only write routes are fixed `POST /v1/servers/:key/actions/:action` actions for `start`, `stop`, `restart`, and `update`, with an empty JSON body. There are no shell, request-supplied command, arbitrary-path, or arbitrary-host endpoints.
 
 ## Before Installation
 
@@ -90,4 +90,4 @@ To remove the service and only its dedicated firewall rule, while retaining loca
 .\scripts\uninstall-agent.ps1 -InstallRoot "<repository>\apps\agent"
 ```
 
-The worker health-probe helper is implemented and tested, but the continuous worker polling and PostgreSQL heartbeat persistence belong to the next monitoring phase.
+The worker health probe, continuous monitoring, PostgreSQL persistence, legacy-history scan, Steam persona reconciliation, reward evaluation, and command dispatch are implemented. Verify every newly configured source and service locally before treating its resulting data or control path as production-ready.
