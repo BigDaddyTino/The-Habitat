@@ -116,8 +116,8 @@ Last updated: 2026-08-10
 - [x] Install and individually verify start/stop/restart behavior for all six MartServ102 game services and update behavior for Valheim
 - [x] Replace the initial command-shell wrappers with direct executable ownership; 7 Days to Die process exit and Palworld native REST shutdown verified end to end
 - [x] Persisted command queue, admin confirmation surface, worker dispatch, and command audit trail
-- [ ] Repeat direct-wrapper lifecycle verification for Valheim, Enshrouded, Project Zomboid, and Dragonwilds before broadly enabling portal control
+- [x] Direct-wrapper lifecycle verification accepted for Valheim, Enshrouded, Project Zomboid, and Dragonwilds
 
 ## Phase 13 - Production Hardening
 
-- [ ] Not started
+- [ ] Intentionally paused before Phase 13
