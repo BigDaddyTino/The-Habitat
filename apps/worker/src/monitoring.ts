@@ -297,6 +297,7 @@ export async function autoLinkVerifiedSteamIdentity(transaction: PresenceTransac
   if (!account) return;
   const assigned = await transaction.playerIdentity.updateMany({ where: { id: identityId, userId: null, externalProvider: "STEAM", externalAccountId: steamId }, data: { userId: account.userId, verifiedAt: observedAt } });
   if (assigned.count !== 1) return;
+  await transaction.identityRewardReconciliation.upsert({ where: { playerIdentityId: identityId }, create: { playerIdentityId: identityId, userId: account.userId }, update: { userId: account.userId, completedAt: null, lastError: null } });
   await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: account.userId, status: "PENDING" }, data: { status: "APPROVED", resolvedAt: observedAt, resolvedByUserId: account.userId, resolutionNote: "Automatically verified by linked SteamID64." } });
   await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: { not: account.userId }, status: "PENDING" }, data: { status: "REJECTED", resolvedAt: observedAt, resolutionNote: "Identity ownership was verified through a linked Steam account." } });
   await transaction.auditLog.create({ data: { actorUserId: account.userId, action: "STEAM_IDENTITY_AUTO_LINKED", entityType: "PlayerIdentity", entityId: identityId, after: { provider: "STEAM", verification: "OPENID" } } });

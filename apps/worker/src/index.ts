@@ -8,6 +8,7 @@ import { createPostgresServerCommandRepository, dispatchAuthorizedServerCommands
 import { importLegacyHistory } from "./legacy-history.js";
 import { reconcileProgression } from "./progression.js";
 import { reconcileAchievementCatalog } from "./achievements.js";
+import { reconcilePendingIdentityRewards } from "./identity-reconciliation.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -32,6 +33,7 @@ async function main(): Promise<void> {
   const run = async () => {
     const result = await runMonitoringCycle(repository, agent);
     const commands = await dispatchAuthorizedServerCommands(createPostgresServerCommandRepository(), agent);
+    const identityRewards = await reconcilePendingIdentityRewards();
     let notifications: Awaited<ReturnType<typeof dispatchPendingDiscordNotifications>> | null = null;
     try {
       notifications = await dispatchPendingDiscordNotifications();
@@ -41,6 +43,7 @@ async function main(): Promise<void> {
     console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
     if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
     if (commands.dispatched > 0) console.info(`Habitat server commands: ${commands.succeeded} succeeded, ${commands.failed} failed.`);
+    if (identityRewards > 0) console.info(`Habitat identity rewards: ${identityRewards} claimed identity histories reconciled.`);
     if (Date.now() >= nextHistoryScanAt) {
       try {
         const history = await importLegacyHistory(agent);

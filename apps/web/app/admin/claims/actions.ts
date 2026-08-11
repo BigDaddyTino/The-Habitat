@@ -20,6 +20,7 @@ export async function resolveIdentityClaim(formData: FormData) {
     if (parsed.data.decision === "APPROVED") {
       const assigned = await transaction.playerIdentity.updateMany({ where: { id: claim.playerIdentity.id, userId: null }, data: { userId: claim.userId, verifiedAt: new Date() } });
       if (assigned.count !== 1) throw new Error("This identity has already been claimed.");
+      await transaction.identityRewardReconciliation.upsert({ where: { playerIdentityId: claim.playerIdentity.id }, create: { playerIdentityId: claim.playerIdentity.id, userId: claim.userId }, update: { userId: claim.userId, completedAt: null, lastError: null } });
       await transaction.playerIdentityClaim.update({ where: { id: claim.id }, data: { status: "APPROVED", resolvedAt: new Date(), resolvedByUserId: admin.id } });
       await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: claim.playerIdentity.id, status: "PENDING", id: { not: claim.id } }, data: { status: "REJECTED", resolvedAt: new Date(), resolvedByUserId: admin.id, resolutionNote: "Identity approved for another member." } });
     } else {
@@ -31,4 +32,5 @@ export async function resolveIdentityClaim(formData: FormData) {
   revalidatePath("/admin/claims");
   revalidatePath("/profile");
   revalidatePath("/profile/identities");
+  revalidatePath("/leaderboards");
 }

@@ -213,6 +213,7 @@ model User {
   steamLinkNonces        SteamLinkNonce[]
   xpEntries              UserXpEntry[]
   weeklyQuestProgress    UserWeeklyQuestProgress[]
+  identityReconciliations IdentityRewardReconciliation[]
 }
 
 model Account {
@@ -359,6 +360,7 @@ model PlayerIdentity {
   recordHolders     RecordHolder[]
   recordHistory     RecordHistory[]
   legacyEvidence    LegacyPlayerEvidence[]
+  reconciliation    IdentityRewardReconciliation?
 
   @@unique([gameType, providerKey])
   @@index([externalProvider, externalAccountId])
@@ -380,6 +382,21 @@ model PlayerIdentityClaim {
   @@unique([playerIdentityId, userId])
   @@index([status, requestedAt])
   @@index([userId, requestedAt])
+}
+
+model IdentityRewardReconciliation {
+  id               String          @id @default(uuid()) @db.Uuid
+  playerIdentityId String          @unique @db.Uuid
+  userId           String          @db.Uuid
+  queuedAt         DateTime        @default(now())
+  completedAt      DateTime?
+  attempts         Int             @default(0)
+  lastError        String?         @db.VarChar(180)
+  playerIdentity   PlayerIdentity  @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([completedAt, queuedAt])
+  @@index([userId, completedAt])
 }
 
 model LegacyPlayerEvidence {

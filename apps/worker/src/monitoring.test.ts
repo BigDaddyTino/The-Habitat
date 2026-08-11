@@ -42,11 +42,12 @@ test("a verified SteamID64 automatically attaches an unclaimed identity", async 
   const transaction = {
     userSocialAccount: { findFirst: async () => ({ userId: "user-1" }) },
     playerIdentity: { updateMany: async () => ({ count: 1 }) },
+    identityRewardReconciliation: { upsert: async () => { calls.push("QUEUED"); return {}; } },
     playerIdentityClaim: { updateMany: async ({ data }: { data: { status: string } }) => { calls.push(data.status); return { count: 1 }; } },
     auditLog: { create: async () => { calls.push("AUDITED"); return {}; } },
   } as unknown as Prisma.TransactionClient;
   await autoLinkVerifiedSteamIdentity(transaction, "identity-1", "76561198000000000", new Date("2026-08-11T12:00:00Z"));
-  assert.deepEqual(calls, ["APPROVED", "REJECTED", "AUDITED"]);
+  assert.deepEqual(calls, ["QUEUED", "APPROVED", "REJECTED", "AUDITED"]);
 });
 
 function fakeRepository(overrides: Partial<MonitoringRepository>): MonitoringRepository {
