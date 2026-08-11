@@ -129,6 +129,7 @@ Last updated: 2026-08-11
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
 - [x] Cinematic Great Hall with composition-matched generated sunrise/midday/sunset/night plates, pointer-depth parallax, reduced-motion behavior, and sky-aware ambient encounters
+- [x] Coordinated Great Hall render stack with one Three.js WebGL background, one Rive Canvas2D state-machine instrument, a shared animation clock, two-way focus/pointer interaction, adaptive quality, and image/HTML fallbacks
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs

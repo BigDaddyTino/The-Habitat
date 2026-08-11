@@ -1,0 +1,57 @@
+/* Coordinated Great Hall render stack: Three.js background + Canvas2D Rive instrument. */
+.hall-atmosphere { z-index:1; mix-blend-mode:normal!important; }
+.hall-three-canvas { position:absolute; z-index:0; inset:0; width:100%; height:100%; opacity:0; transition:opacity 1.4s ease; pointer-events:none; }
+.hall-atmosphere[data-three-ready] .hall-three-canvas { opacity:1; }
+.hall-atmosphere[data-three-ready] .hall-haze { opacity:.2; }
+.hall-atmosphere[data-three-ready] .hall-pines { opacity:.48; transform:translate3d(calc(var(--hall-x) * 7px),calc(var(--hall-y) * 3px),0); }
+.hall-atmosphere>*:not(.hall-three-canvas) { z-index:1; }
+.hall-atmosphere::after { z-index:2; }
+.hall-atmosphere[data-vista-hot]::before { content:""; position:absolute; z-index:2; right:calc(7% + 21px); top:calc(58% + 18px); width:118px; height:118px; border:1px solid rgba(234,209,150,.22); border-radius:50%; box-shadow:0 0 42px rgba(214,195,151,.12),inset 0 0 22px rgba(214,195,151,.09); animation:vista-scan 2.8s linear infinite; pointer-events:none; }
+.hall-vista-control { position:absolute; z-index:4; top:58%; right:max(36px,calc((100vw - 1320px) / 2)); display:grid; width:132px; min-height:154px; place-items:center; padding:11px 10px 12px; overflow:hidden; border:1px solid rgba(214,195,151,.28); border-radius:66px 66px 14px 14px; background:radial-gradient(circle at 50% 42%,rgba(194,162,92,.13),transparent 44%),linear-gradient(180deg,rgba(13,18,15,.32),rgba(13,18,15,.78)); color:var(--paper); box-shadow:0 20px 50px rgba(0,0,0,.36),inset 0 0 28px rgba(214,195,151,.04); backdrop-filter:blur(7px); cursor:pointer; isolation:isolate; transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .35s ease,box-shadow .35s ease,background .35s ease; }
+.hall-vista-control::before,.hall-vista-control::after { content:""; position:absolute; z-index:-1; top:31px; width:88px; height:88px; border-radius:50%; pointer-events:none; }
+.hall-vista-control::before { border:1px solid rgba(214,195,151,.28); box-shadow:0 0 0 8px rgba(214,195,151,.025),0 0 0 9px rgba(214,195,151,.1); animation:vista-orbit 18s linear infinite; }
+.hall-vista-control::after { top:40px; width:70px; height:70px; border:1px dashed rgba(220,107,50,.32); animation:vista-orbit 12s linear infinite reverse; }
+.hall-vista-control:hover,.hall-vista-control:focus-visible,.hall-vista-control[aria-pressed="true"] { transform:translateY(-5px) scale(1.025); border-color:rgba(239,208,139,.74); background:radial-gradient(circle at 50% 42%,rgba(220,107,50,.19),transparent 48%),linear-gradient(180deg,rgba(13,18,15,.42),rgba(13,18,15,.88)); box-shadow:0 23px 65px rgba(0,0,0,.48),0 0 32px rgba(214,195,151,.16),inset 0 0 30px rgba(214,195,151,.07); outline:none; }
+.hall-vista-control:focus-visible { box-shadow:0 0 0 3px rgba(214,195,151,.42),0 23px 65px rgba(0,0,0,.5),0 0 34px rgba(214,195,151,.2); }
+.hall-vista-kicker,.hall-vista-label { position:relative; z-index:2; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:1.2px; text-shadow:0 2px 8px #000; }
+.hall-vista-kicker { align-self:start; color:rgba(214,195,151,.75); font-size:6px; }
+.hall-vista-label { align-self:end; color:#e9dec0; font-size:6px; font-weight:700; }
+.hall-rive-canvas { position:absolute; z-index:1; top:25px; left:50%; width:96px; height:96px; transform:translateX(-50%); border-radius:50%; opacity:0; filter:grayscale(1) sepia(1) saturate(1.35) brightness(.54) contrast(1.22) drop-shadow(0 0 12px rgba(214,195,151,.18)); -webkit-mask-image:radial-gradient(circle,#000 0 47%,rgba(0,0,0,.88) 57%,transparent 70%); mask-image:radial-gradient(circle,#000 0 47%,rgba(0,0,0,.88) 57%,transparent 70%); pointer-events:none; transition:opacity .8s ease,filter .35s ease; }
+.hall-atmosphere[data-rive-ready]+.hall-vista-control .hall-rive-canvas { opacity:.7; }
+.hall-atmosphere[data-rive-ready]+.hall-vista-control:hover .hall-rive-canvas,.hall-atmosphere[data-rive-ready]+.hall-vista-control[aria-pressed="true"] .hall-rive-canvas { opacity:.9; filter:grayscale(1) sepia(1) saturate(1.65) brightness(.66) contrast(1.25) drop-shadow(0 0 16px rgba(239,193,105,.35)); }
+.hall-vista-reticle { position:absolute; z-index:2; top:42px; left:50%; width:62px; height:62px; transform:translateX(-50%); border:1px solid rgba(214,195,151,.34); border-radius:50%; background:radial-gradient(circle,rgba(238,210,145,.9) 0 1px,transparent 2px 10px,rgba(214,195,151,.24) 11px 12px,transparent 13px),repeating-conic-gradient(from 0deg,rgba(214,195,151,.28) 0 1deg,transparent 1deg 30deg),radial-gradient(circle,rgba(16,21,17,.8),rgba(11,15,12,.93)); box-shadow:inset 0 0 18px rgba(214,195,151,.08),0 0 16px rgba(0,0,0,.38); pointer-events:none; transition:transform .45s ease,border-color .35s ease; }
+.hall-vista-reticle::before,.hall-vista-reticle::after { content:""; position:absolute; top:50%; left:50%; background:linear-gradient(90deg,transparent,rgba(214,195,151,.5),transparent); transform:translate(-50%,-50%); }
+.hall-vista-reticle::before { width:42px; height:1px; }
+.hall-vista-reticle::after { width:1px; height:42px; background:linear-gradient(transparent,rgba(214,195,151,.5),transparent); }
+.hall-vista-control:hover .hall-vista-reticle,.hall-vista-control[aria-pressed="true"] .hall-vista-reticle { transform:translateX(-50%) rotate(30deg) scale(1.05); border-color:rgba(239,193,105,.68); }
+.hall-atmosphere[data-rive-fallback]+.hall-vista-control::after { background:radial-gradient(circle,rgba(214,195,151,.28) 0 2px,transparent 3px),conic-gradient(from 0deg,transparent,rgba(214,195,151,.26),transparent 22%); }
+.hall-vista-control[aria-pressed="true"]::before { border-style:dashed; animation-duration:7s; }
+.hall-vista-control[aria-pressed="true"]::after { border-color:rgba(243,166,93,.72); animation-duration:4s; }
+@keyframes vista-orbit { to { transform:rotate(360deg); } }
+@keyframes vista-scan { to { transform:rotate(360deg) scale(1.08); opacity:.25; } }
+@media (max-width:800px) {
+  .hall-vista-control { top:22px; right:18px; width:112px; min-height:132px; padding:9px; border-radius:50% 50% 11px 11px; }
+  .hall-rive-canvas { top:21px; width:84px; height:84px; }
+  .hall-vista-control::before { top:28px; width:78px; height:78px; }
+  .hall-vista-control::after { top:36px; width:62px; height:62px; }
+  .hall-vista-reticle { top:34px; width:48px; height:48px; }
+  .hall-vista-reticle::before { width:32px; }
+  .hall-vista-reticle::after { height:32px; }
+  .hall-atmosphere[data-vista-hot]::before { display:none; }
+}
+@media (max-width:460px) {
+  .hall-vista-control { right:12px; width:86px; min-height:102px; opacity:.84; }
+  .hall-vista-kicker { display:none; }
+  .hall-rive-canvas { top:8px; width:68px; height:68px; }
+  .hall-vista-control::before { top:14px; width:62px; height:62px; }
+  .hall-vista-control::after { top:22px; width:46px; height:46px; }
+  .hall-vista-reticle { top:25px; width:38px; height:38px; }
+  .hall-vista-reticle::before { width:25px; }
+  .hall-vista-reticle::after { height:25px; }
+  .hall-vista-label { font-size:6px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .hall-three-canvas { transition:none; }
+  .hall-vista-control,.hall-vista-control:hover,.hall-vista-control:focus-visible,.hall-vista-control[aria-pressed="true"] { transform:none; transition:none; }
+  .hall-vista-control::before,.hall-vista-control::after,.hall-atmosphere[data-vista-hot]::before { animation:none; }
+}
