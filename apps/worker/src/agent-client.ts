@@ -11,7 +11,7 @@ export class HabitatAgentClient {
     const summaries = await this.getJson(this.urlFor("/v1/servers"), isServerSummaryArray);
     return Promise.all(summaries.map(async ({ key }) => {
       try {
-        const status = await this.getJson(this.urlFor(`/v1/servers/${key}/status`), isAgentServerStatus);
+        const status = await this.getJson(this.urlFor(`/v1/servers/${key}/status`), isAgentServerStatus, 12_000);
         return { key, status };
       } catch {
         return { key, status: null };
@@ -33,11 +33,11 @@ export class HabitatAgentClient {
     return body;
   }
 
-  private async getJson<T>(url: URL, isExpected: (value: unknown) => value is T): Promise<T> {
+  private async getJson<T>(url: URL, isExpected: (value: unknown) => value is T, timeoutMs = 5_000): Promise<T> {
     const response = await this.request(url, {
       headers: { authorization: `Bearer ${this.token}`, accept: "application/json" },
       redirect: "error",
-      signal: AbortSignal.timeout(5_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (!response.ok) throw new Error("Agent returned an unexpected status.");
     const body: unknown = await response.json();
