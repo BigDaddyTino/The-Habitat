@@ -114,8 +114,9 @@ Last updated: 2026-08-10
 - [x] Agent-side fixed allow-list for `start`, `stop`, `restart`, and `update`; no request can provide a command, path, argument, or service name
 - [x] Admin-only, typed-confirmation command queue with worker dispatch and append-only command lifecycle audits
 - [x] Install and individually verify start/stop/restart behavior for all six MartServ102 game services and update behavior for Valheim
+- [x] Replace the initial command-shell wrappers with direct executable ownership; 7 Days to Die process exit and Palworld native REST shutdown verified end to end
 - [x] Persisted command queue, admin confirmation surface, worker dispatch, and command audit trail
-- [ ] Replace the initial command-shell wrappers with direct executable ownership and repeat lifecycle verification, including proof that no configured process remains after stop
+- [ ] Repeat direct-wrapper lifecycle verification for Valheim, Enshrouded, Project Zomboid, and Dragonwilds before broadly enabling portal control
 
 ## Phase 13 - Production Hardening
 
