@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, utimes, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import test from "node:test";
-import { parseLegacyHistory, parseLegacyHistoryEvents } from "./history.js";
+import type { AgentLegacyHistorySource } from "@habitat/shared";
+import type { AgentServerConfiguration } from "./config.js";
+import { correlateValheimSteamIdentities, parseLegacyHistory, parseLegacyHistoryEvents, readLegacyHistory } from "./history.js";
 
 test("Valheim legacy parser credits only paired Steam sessions", () => {
   const items = parseLegacyHistory("VALHEIM_LOG", [
@@ -13,6 +18,48 @@ test("Valheim legacy parser credits only paired Steam sessions", () => {
   assert.equal(items[0]?.durationSeconds, 2_700);
   assert.equal(items[1]?.kind, "PARTICIPATION");
   assert.equal(items[1]?.durationSeconds, null);
+});
+
+test("Valheim correlates only one-to-one Steam and character join timestamps", () => {
+  const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
+    "08/10/2026 20:00:00: Got connection SteamID 76561198000000000",
+    "08/10/2026 20:45:00: Closing socket 76561198000000000",
+  ].join("\n"));
+  const chronicleJoinAt = new Date(new Date(steamEvidence[0]!.occurredAt).getTime() + 5_000).toISOString();
+  const chronicleContents = `${chronicleJoinAt}\tPLAYER\tOld Guard\tentered the Habitat records system.`;
+  const sources: AgentLegacyHistorySource[] = [
+    { kind: "VALHEIM_LOG", label: "server", available: true, truncated: false, filesScanned: 1, evidence: steamEvidence, events: [] },
+    { kind: "HABITAT_CHRONICLE_LOG", label: "chronicle", available: true, truncated: false, filesScanned: 1, evidence: parseLegacyHistory("HABITAT_CHRONICLE_LOG", chronicleContents), events: parseLegacyHistoryEvents("HABITAT_CHRONICLE_LOG", chronicleContents) },
+  ];
+  const correlated = correlateValheimSteamIdentities(sources);
+  const chronicle = correlated.find((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  assert.equal(chronicle?.evidence[0]?.externalAccountId, "76561198000000000");
+  assert.equal(chronicle?.events[0]?.externalAccountId, "76561198000000000");
+
+  const ambiguous = correlateValheimSteamIdentities([
+    { ...sources[0]!, evidence: [...steamEvidence, { ...steamEvidence[0]!, externalAccountId: "76561198000000001", providerKey: "76561198000000001" }] },
+    sources[1]!,
+  ]).find((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  assert.equal(ambiguous?.events[0]?.externalAccountId, null);
+});
+
+test("bounded directory scans prioritize the newest log tails", async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), "habitat-history-"));
+  try {
+    const oldPath = path.join(directory, "old.log");
+    const newPath = path.join(directory, "new.log");
+    await writeFile(oldPath, `${"x".repeat(2_000)}\n[2026.08.10-15.22.38:902] Player ID Steam_76561198000000000 authenticated\n`);
+    await writeFile(newPath, `${"x".repeat(2_000)}\n[2026.08.11-15.22.38:902] Player ID Steam_76561198000000001 authenticated\n`);
+    await utimes(oldPath, new Date("2026-08-10T00:00:00Z"), new Date("2026-08-10T00:00:00Z"));
+    await utimes(newPath, new Date("2026-08-11T00:00:00Z"), new Date("2026-08-11T00:00:00Z"));
+    const server = { key: "test", displayName: "Test", processName: "test", history: [{ kind: "STEAM_PLATFORM_LOG", label: "logs", path: directory, maxBytes: 1_024 }] } as AgentServerConfiguration;
+    const history = await readLegacyHistory(server);
+    assert.equal(history.sources[0]?.truncated, true);
+    assert.equal(history.sources[0]?.filesScanned, 1);
+    assert.equal(history.sources[0]?.evidence[0]?.externalAccountId, "76561198000000001");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 
 test("generic Steam log evidence requires an explicit player activity marker", () => {

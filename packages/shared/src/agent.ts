@@ -53,6 +53,15 @@ export type AgentPlayerObservation = {
   externalAccountId?: string;
 };
 
+const unstableProviderKeys = new Set(["none", "null", "unknown", "n/a", "na", "0", "-"]);
+
+/** Rejects provider placeholders that look syntactically valid but cannot identify a player. */
+export function isStablePlayerProviderKey(value: unknown): value is string {
+  return typeof value === "string"
+    && /^[A-Za-z0-9._:-]{1,160}$/.test(value)
+    && !unstableProviderKeys.has(value.trim().toLocaleLowerCase("en-US"));
+}
+
 export type AgentQueryObservation = {
   attempted: boolean;
   reachable: boolean | null;

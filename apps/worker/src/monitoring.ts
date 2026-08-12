@@ -1,5 +1,5 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import type { AgentPlayerObservation, AgentServerStatus, ServerState } from "@habitat/shared";
+import { isStablePlayerProviderKey, type AgentPlayerObservation, type AgentServerStatus, type ServerState } from "@habitat/shared";
 import { evaluateAchievementsForEvent } from "./achievements.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
@@ -123,8 +123,11 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
       const decision = normalizeServerState(effectiveDesiredState, status);
       const version = status.query?.version ?? status.executable?.version ?? null;
       const stateChanged = server.actualState !== decision.state;
-      const namedPlayers = Array.isArray(status.query?.players) ? status.query.players : null;
-      const palworldKnownPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.knownPlayers) ? status.query.knownPlayers : null;
+      const rawNamedPlayers = Array.isArray(status.query?.players) ? status.query.players : null;
+      const namedPlayers = rawNamedPlayers?.every((player) => isStablePlayerProviderKey(player.providerKey)) ? rawNamedPlayers : null;
+      const palworldKnownPlayers = server.gameType === "PALWORLD" && Array.isArray(status.query?.knownPlayers)
+        ? status.query.knownPlayers.filter((player) => isStablePlayerProviderKey(player.providerKey))
+        : null;
       const details = {
         source: "HABITAT_AGENT",
         agentKey: status.key,

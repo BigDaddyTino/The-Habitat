@@ -49,7 +49,7 @@ For Palworld, use `"type": "palworld"`, `"host": "127.0.0.1"`, and `"port": 8212
 
 ## Legacy History Sources
 
-Archived history is opt-in per server. Every source path must be an inspected, absolute local Windows path in the ignored `agent.config.json`; clients cannot provide or override a path. The agent reads at most the configured `maxBytes`, scans at most 100 non-recursive `.log`, `.txt`, or `.jsonl` files, returns at most 5,000 normalized evidence records, and never returns raw log lines.
+Archived history is opt-in per server. Every source path must be an inspected, absolute local Windows path in the ignored `agent.config.json`; clients cannot provide or override a path. The agent reads at most the configured `maxBytes`, scans at most 100 non-recursive `.log`, `.txt`, or `.jsonl` files, prioritizes the newest files and each file's newest complete lines, returns at most 5,000 normalized evidence records, and never returns raw log lines.
 
 ```json
 "history": [
@@ -63,10 +63,11 @@ Archived history is opt-in per server. Every source path must be an inspected, a
 ```
 
 - `VALHEIM_LOG` reconstructs a timed session only from a timestamped `Got connection SteamID` paired with its later `Closing socket`. An unmatched connection becomes participation evidence without playtime.
+- When `VALHEIM_LOG` and `HABITAT_CHRONICLE_LOG` are both configured, the agent can attach a SteamID64 to a Chronicle character only when their join timestamps form a mutually unique one-to-one match within 30 seconds. Ambiguous names or timestamps remain separate and require review.
 - `STEAM_PLATFORM_LOG` records conservative participation evidence only when a timestamp, SteamID64, and explicit player activity marker occur on the same line. It never estimates session time.
 - `HABITAT_SESSION_JSONL` accepts a controlled migration export with `externalProvider: "STEAM"`, `externalAccountId`, ISO `occurredAt`, optional ISO `endedAt`, and optional `displayName`. Use it only for an inspected export from a source whose semantics are known.
 
-The worker rescans these sources every six hours by default. `HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS` can set an interval from five minutes to 24 hours. Database dedupe keys make replay safe.
+The worker rescans these sources every six hours by default. `HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS` can set an interval from five minutes to 24 hours. Database dedupe keys make replay safe. Run `pnpm check:connections` after deployment; the audit fails if any required identity source is missing, unavailable, or truncated.
 
 ## Install
 

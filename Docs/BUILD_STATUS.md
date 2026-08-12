@@ -156,7 +156,11 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Cinematic event parity pass with generated, alpha-matted bear/raven/UFO plates; phase-aware color grading; exterior-window feathering; balcony-rail depth occlusion; synchronized elapsed-event animation; photographic storm, comet, celestial, aurora, and branched-lightning composites; and Chrome desktop/mobile visual QA
 - [x] Great Hall encounter professionalization pass with correct intrinsic asset geometry, eager rare-event loading, articulated flock/UFO/bear motion, responsive scene anchors, feathered depth masks, event-driven room bounce lighting, deterministic visual-QA frames, and an automated all-encounter animation contract
 - [x] Verified Steam OpenID linking and automatic SteamID64 identity ownership without administrator approval
+- [x] Steam callback ownership attachment now queues reward reconciliation for every exact-ID match and explicitly reports a zero-character match without guessing from Steam library ownership or character names
 - [x] Idempotent legacy-history import from fixed, agent-configured log sources with bounded reads and no request-supplied paths
+- [x] Legacy identity ingestion rejects placeholder provider keys such as `None` at the agent, worker, and database boundaries; the duplicate placeholder `Crazyred_19` identity and its two zero-duration events were removed after a successful backup while the real provider-key identity was preserved
+- [x] Bounded directory scans now prioritize newest files and complete log tails; Valheim Chronicle-to-Steam correlation requires mutually unique one-to-one join timestamps and reassigns replayed evidence without duplicating events
+- [x] Previously missed verified-identity reconciliation jobs were backfilled and completed for the three affected historical Tino identities
 - [x] Reconstructed Valheim sessions from paired Steam connect/disconnect timestamps, plus conservative Steam-ID participation evidence for other supported logs
 - [x] Automatic Steam ownership for recovered identities, retroactive verified-visit achievement evaluation, and a separate Old Guard legacy achievement for non-timed evidence
 - [x] Cross-game and public-Steam persona reconciliation replaces Enshrouded `Steam ######` fallbacks and rewrites matching historical Chronicle actor labels without altering verified ownership
@@ -180,6 +184,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies
 - [x] Replay-safe historical catalogue reconciliation for claimed members with retroactive rewards and suppressed Discord announcements
 - [x] Live bounded history sources deployed on MartServ102: Valheim HabitatCore Chronicle, Project Zomboid named Steam connections, Enshrouded accepted Steam sessions, 7 Days persistent-player XML, and Dragonwilds session logs
+- [ ] MartServ102 Valheim WinSW `VALHEIM_LOG` activation remains pending an elevated run of `configure-history-sources.ps1`; the connection audit now fails loudly until that exact-ID source is live and untruncated
 - [x] Recovered unclaimed rosters and Chronicle events imported without premature XP: 6 Valheim names, 4 Project Zomboid names, 4 Enshrouded Steam identities, and 2 named 7 Days Steam identities
 - [x] Palworld official game-data snapshot support enabled for the next normal server start, adding offline player actors to the roster without treating them as currently online
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed

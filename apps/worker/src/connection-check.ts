@@ -1,6 +1,7 @@
 import { getPrismaClient } from "@habitat/db/client";
 import { resolveMarvelRivalsProvider } from "@habitat/shared";
 import { checkAgentHealth } from "./agent-health.js";
+import { HabitatAgentClient } from "./agent-client.js";
 import { loadWorkerConfiguration } from "./config.js";
 
 type CheckState = "PASS" | "FAIL" | "SKIP";
@@ -62,8 +63,35 @@ async function main() {
       if (!health.healthy) throw new Error(`authenticated health probe failed (${health.reason})`);
       return `authenticated health probe passed; agent version ${health.health.version}`;
     });
+    await check("Legacy identity sources", async () => {
+      const histories = await new HabitatAgentClient(workerConfiguration!.agentUrl, workerConfiguration!.agentToken).readLegacyHistories();
+      const expectedSources = new Map<string, string[]>([
+        ["valheim", ["HABITAT_CHRONICLE_LOG", "VALHEIM_LOG"]],
+        ["enshrouded", ["ENSHROUDED_LOG"]],
+        ["project-zomboid", ["PROJECT_ZOMBOID_LOG"]],
+        ["7-days-to-die", ["SEVEN_DAYS_PLAYERS_XML"]],
+        ["dragonwilds", ["DRAGONWILDS_LOG"]],
+      ]);
+      const failures: string[] = [];
+      for (const [serverKey, kinds] of expectedSources) {
+        const history = histories.find((candidate) => candidate.key === serverKey);
+        if (!history) {
+          failures.push(`${serverKey}: history endpoint unavailable`);
+          continue;
+        }
+        for (const kind of kinds) {
+          const sources = history.sources.filter((source) => source.kind === kind);
+          if (sources.length === 0) failures.push(`${serverKey}: missing ${kind}`);
+          else if (!sources.some((source) => source.available)) failures.push(`${serverKey}: ${kind} unavailable`);
+          else if (sources.some((source) => source.truncated)) failures.push(`${serverKey}: ${kind} scan truncated`);
+        }
+      }
+      if (failures.length) throw new Error(failures.join("; "));
+      return `${expectedSources.size} server history configurations expose every required, untruncated identity source`;
+    });
   } else {
     skip("Private game agent", "worker configuration is invalid");
+    skip("Legacy identity sources", "worker configuration is invalid");
   }
 
   let origin: URL | null = null;

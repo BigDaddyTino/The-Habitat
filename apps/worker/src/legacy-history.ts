@@ -44,7 +44,7 @@ async function importEvidence(
   const identity = await ensureIdentity(transaction, server, item);
 
   const dedupeKey = `legacy:${server.id}:${sourceKind}:${item.sourceRecordHash}`;
-  const existing = await transaction.legacyPlayerEvidence.findUnique({ where: { dedupeKey }, select: { id: true } });
+  const existing = await transaction.legacyPlayerEvidence.findUnique({ where: { dedupeKey }, select: { id: true, playerIdentityId: true } });
   const evidence = existing ?? await transaction.legacyPlayerEvidence.create({
     data: {
       serverId: server.id,
@@ -61,6 +61,10 @@ async function importEvidence(
     },
     select: { id: true },
   });
+  if (existing && existing.playerIdentityId !== identity.id) {
+    await transaction.legacyPlayerEvidence.update({ where: { id: existing.id }, data: { playerIdentityId: identity.id } });
+    await removeEmptyUnclaimedIdentity(transaction, existing.playerIdentityId);
+  }
 
   if (item.kind === "SESSION" && item.endedAt && item.durationSeconds !== null) {
     const joinEvent = await transaction.serverEvent.upsert({
@@ -77,7 +81,7 @@ async function importEvidence(
         dedupeKey: `legacy-join:${server.id}:${item.sourceRecordHash}`,
         metadata: { evidenceId: evidence.id, sourceKind, durationSeconds: item.durationSeconds },
       },
-      update: {},
+      update: { playerIdentityId: identity.id, actorText: item.displayName },
     });
     await transaction.serverEvent.upsert({
       where: { dedupeKey: `legacy-left:${server.id}:${item.sourceRecordHash}` },
@@ -94,7 +98,7 @@ async function importEvidence(
         dedupeKey: `legacy-left:${server.id}:${item.sourceRecordHash}`,
         metadata: { evidenceId: evidence.id, sourceKind, durationSeconds: item.durationSeconds },
       },
-      update: {},
+      update: { playerIdentityId: identity.id, actorText: item.displayName, valueNumber: item.durationSeconds },
     });
     await evaluateAchievementsForEvent(transaction, joinEvent.id);
     await evaluateRecordsForEvent(transaction, joinEvent.id);
@@ -114,8 +118,14 @@ async function importHistoricalEvent(
 ) {
   const identity = await ensureIdentity(transaction, server, item);
   const dedupeKey = `legacy-event:${server.id}:${sourceKind}:${item.sourceRecordHash}`;
-  const existing = await transaction.serverEvent.findUnique({ where: { dedupeKey }, select: { id: true } });
-  if (existing) return false;
+  const existing = await transaction.serverEvent.findUnique({ where: { dedupeKey }, select: { id: true, playerIdentityId: true } });
+  if (existing) {
+    if (existing.playerIdentityId !== identity.id) {
+      await transaction.serverEvent.update({ where: { id: existing.id }, data: { playerIdentityId: identity.id, actorText: item.displayName } });
+      if (existing.playerIdentityId) await removeEmptyUnclaimedIdentity(transaction, existing.playerIdentityId);
+    }
+    return false;
+  }
   await transaction.serverEvent.create({
     data: {
       serverId: server.id,
@@ -132,6 +142,20 @@ async function importHistoricalEvent(
     },
   });
   return true;
+}
+
+async function removeEmptyUnclaimedIdentity(transaction: Prisma.TransactionClient, identityId: string) {
+  const identity = await transaction.playerIdentity.findUnique({
+    where: { id: identityId },
+    select: {
+      userId: true,
+      reconciliation: { select: { id: true } },
+      _count: { select: { events: true, claims: true, recordHolders: true, recordHistory: true, legacyEvidence: true } },
+    },
+  });
+  if (!identity || identity.userId || identity.reconciliation) return;
+  if (Object.values(identity._count).some((count) => count > 0)) return;
+  await transaction.playerIdentity.deleteMany({ where: { id: identityId, userId: null } });
 }
 
 async function ensureIdentity(

@@ -10,7 +10,8 @@ const valheimJoin = /\bGot connection SteamID\s+(7656119\d{10})\b/i;
 const valheimLeave = /\bClosing socket\s+(7656119\d{10})\b/i;
 
 export async function readLegacyHistory(server: AgentServerConfiguration): Promise<AgentLegacyHistory> {
-  const sources = await Promise.all((server.history ?? []).map(readSource));
+  const parsedSources = await Promise.all((server.history ?? []).map(readSource));
+  const sources = server.key === "valheim" ? correlateValheimSteamIdentities(parsedSources) : parsedSources;
   return { key: server.key, scannedAt: new Date().toISOString(), sources };
 }
 
@@ -24,16 +25,17 @@ async function readSource(configuration: NonNullable<AgentServerConfiguration["h
     let filesScanned = 0;
     for (const file of files.slice(0, 100)) {
       if (remainingBytes <= 0) { truncated = true; break; }
-      const fileStats = await stat(file);
-      const bytesToRead = Math.min(fileStats.size, remainingBytes);
-      if (bytesToRead < fileStats.size) truncated = true;
-      const handle = await open(file, "r");
+      const bytesToRead = Math.min(file.size, remainingBytes);
+      const startOffset = Math.max(0, file.size - bytesToRead);
+      if (bytesToRead < file.size) truncated = true;
+      const handle = await open(file.path, "r");
       const buffer = Buffer.alloc(bytesToRead);
-      try { await handle.read(buffer, 0, bytesToRead, 0); } finally { await handle.close(); }
-      const contents = buffer.toString("utf8");
+      try { await handle.read(buffer, 0, bytesToRead, startOffset); } finally { await handle.close(); }
+      let contents = buffer.toString("utf8");
+      if (startOffset > 0) contents = contents.replace(/^[^\r\n]*(?:\r?\n|$)/, "");
       remainingBytes -= bytesToRead;
       filesScanned += 1;
-      const parsed = parseSource(configuration.kind, contents, file);
+      const parsed = parseSource(configuration.kind, contents, file.path);
       evidence.push(...parsed.evidence);
       events.push(...parsed.events);
       if (evidence.length >= 5_000 || events.length >= 5_000) { truncated = true; break; }
@@ -44,15 +46,74 @@ async function readSource(configuration: NonNullable<AgentServerConfiguration["h
   }
 }
 
-async function resolveSourceFiles(configuredPath: string): Promise<string[]> {
+async function resolveSourceFiles(configuredPath: string): Promise<Array<{ path: string; size: number; modifiedAt: number }>> {
   const sourceStats = await stat(configuredPath);
-  if (sourceStats.isFile()) return [configuredPath];
+  if (sourceStats.isFile()) return [{ path: configuredPath, size: sourceStats.size, modifiedAt: sourceStats.mtimeMs }];
   if (!sourceStats.isDirectory()) return [];
   const entries = await readdir(configuredPath, { withFileTypes: true });
-  return entries
+  const files = await Promise.all(entries
     .filter((entry) => entry.isFile() && /\.(?:log|txt|jsonl)$/i.test(entry.name))
-    .map((entry) => path.join(configuredPath, entry.name))
-    .sort((left, right) => left.localeCompare(right));
+    .map(async (entry) => {
+      const filePath = path.join(configuredPath, entry.name);
+      const fileStats = await stat(filePath);
+      return { path: filePath, size: fileStats.size, modifiedAt: fileStats.mtimeMs };
+    }));
+  return files.sort((left, right) => right.modifiedAt - left.modifiedAt || right.path.localeCompare(left.path));
+}
+
+const valheimCorrelationWindowMs = 30_000;
+
+/**
+ * Valheim's server log proves Steam ownership while HabitatCore records the
+ * visible character name. Correlate only mutually unique join timestamps, then
+ * require a one-to-one SteamID/name mapping across the complete bounded scan.
+ */
+export function correlateValheimSteamIdentities(sources: AgentLegacyHistorySource[]): AgentLegacyHistorySource[] {
+  const steamStarts = sources
+    .filter((source) => source.available && source.kind === "VALHEIM_LOG")
+    .flatMap((source) => source.evidence)
+    .filter((item) => item.externalProvider === "STEAM" && item.externalAccountId)
+    .map((item) => ({ steamId: item.externalAccountId!, occurredAt: new Date(item.occurredAt).getTime() }));
+  const chronicleJoins = sources
+    .filter((source) => source.available && source.kind === "HABITAT_CHRONICLE_LOG")
+    .flatMap((source) => source.events)
+    .filter((item) => item.eventType === "PLAYER_JOINED")
+    .map((item) => ({ displayName: item.displayName, occurredAt: new Date(item.occurredAt).getTime() }));
+  if (steamStarts.length === 0 || chronicleJoins.length === 0) return sources;
+
+  const nameToSteamIds = new Map<string, Set<string>>();
+  const steamIdToNames = new Map<string, Set<string>>();
+  for (const chronicle of chronicleJoins) {
+    const steamCandidates = steamStarts.filter((item) => Math.abs(item.occurredAt - chronicle.occurredAt) <= valheimCorrelationWindowMs);
+    if (steamCandidates.length !== 1) continue;
+    const steam = steamCandidates[0]!;
+    const chronicleCandidates = chronicleJoins.filter((item) => Math.abs(item.occurredAt - steam.occurredAt) <= valheimCorrelationWindowMs);
+    if (chronicleCandidates.length !== 1) continue;
+    const normalizedName = chronicle.displayName.trim().toLocaleLowerCase("en-US");
+    const steamIds = nameToSteamIds.get(normalizedName) ?? new Set<string>();
+    steamIds.add(steam.steamId);
+    nameToSteamIds.set(normalizedName, steamIds);
+    const names = steamIdToNames.get(steam.steamId) ?? new Set<string>();
+    names.add(normalizedName);
+    steamIdToNames.set(steam.steamId, names);
+  }
+
+  const verifiedMapping = new Map<string, string>();
+  for (const [name, steamIds] of nameToSteamIds) {
+    if (steamIds.size !== 1) continue;
+    const steamId = [...steamIds][0]!;
+    if (steamIdToNames.get(steamId)?.size === 1) verifiedMapping.set(name, steamId);
+  }
+  if (verifiedMapping.size === 0) return sources;
+
+  const enrich = <T extends AgentLegacyPlayerEvidence | AgentLegacyPlayerEvent>(item: T): T => {
+    const normalizedName = item.displayName?.trim().toLocaleLowerCase("en-US");
+    const steamId = normalizedName ? verifiedMapping.get(normalizedName) : null;
+    return steamId ? { ...item, providerKey: steamId, externalProvider: "STEAM", externalAccountId: steamId } : item;
+  };
+  return sources.map((source) => source.kind === "HABITAT_CHRONICLE_LOG"
+    ? { ...source, evidence: source.evidence.map(enrich), events: source.events.map(enrich) }
+    : source);
 }
 
 export function parseLegacyHistory(kind: AgentLegacyHistorySource["kind"], contents: string, sourcePath?: string): AgentLegacyPlayerEvidence[] {

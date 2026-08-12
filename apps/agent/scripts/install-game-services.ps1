@@ -97,7 +97,19 @@ foreach ($game in $games) {
 
   $agentServer = $agentConfiguration.servers | Where-Object { $_.key -eq $game.Key } | Select-Object -First 1
   $agentServer | Add-Member -NotePropertyName control -NotePropertyValue ([pscustomobject]@{ serviceName = $game.ServiceName; updateServiceName = $game.UpdateServiceName; timeoutMs = [Math]::Min(($game.StopTimeoutSeconds + 30) * 1000, 300000) }) -Force
+  if ($game.Key -eq "valheim") {
+    $history = @($agentServer.history)
+    if ($null -eq ($history | Where-Object { $_.kind -eq "VALHEIM_LOG" })) {
+      $history += [pscustomobject]@{
+        kind = "VALHEIM_LOG"
+        label = "Valheim Steam session logs"
+        path = (Join-Path $gameRoot "logs")
+        maxBytes = 33554432
+      }
+      $agentServer | Add-Member -NotePropertyName history -NotePropertyValue $history -Force
+    }
+  }
 }
 
-$agentConfiguration | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $agentConfigurationPath -Encoding utf8
+[System.IO.File]::WriteAllText($agentConfigurationPath, ($agentConfiguration | ConvertTo-Json -Depth 20), [System.Text.UTF8Encoding]::new($false))
 Write-Output "Generated and installed 12 local Habitat services. They are manual-start by design; restart HabitatAgent before portal control is enabled."

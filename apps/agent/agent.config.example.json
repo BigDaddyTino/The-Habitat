@@ -10,6 +10,12 @@
           "label": "HabitatCore Chronicle",
           "path": "C:\\ValheimServer\\BepInEx\\config\\HabitatCore\\chronicle.log",
           "maxBytes": 33554432
+        },
+        {
+          "kind": "VALHEIM_LOG",
+          "label": "Valheim Steam session logs",
+          "path": "C:\\The Habitat\\apps\\agent\\game-services\\valheim\\logs",
+          "maxBytes": 33554432
         }
       ]
     }

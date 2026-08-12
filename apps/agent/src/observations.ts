@@ -3,7 +3,7 @@ import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import path from "node:path";
 import { GameDig } from "gamedig";
-import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentPlayerObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
+import { isStablePlayerProviderKey, type AgentDiskObservation, type AgentExecutableObservation, type AgentLogObservation, type AgentPlayerObservation, type AgentProcessObservation, type AgentQueryObservation } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
@@ -135,7 +135,7 @@ export function parsePalworldKnownPlayers(value: unknown): AgentPlayerObservatio
     if (!isRecord(actor) || actor.UnitType !== "Player") continue;
     const providerKey = typeof actor.InstanceID === "string" ? actor.InstanceID.trim() : "";
     const displayName = typeof actor.NickName === "string" ? actor.NickName.trim() : "";
-    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(providerKey) || displayName.length < 1 || displayName.length > 80) continue;
+    if (!isStablePlayerProviderKey(providerKey) || displayName.length < 1 || displayName.length > 80) continue;
     const steamId = extractSteamId64(actor, providerKey);
     players.set(providerKey, { providerKey, displayName, ...(steamId ? { externalProvider: "STEAM" as const, externalAccountId: steamId } : {}) });
     if (players.size >= 500) break;
@@ -150,7 +150,7 @@ export function parsePalworldPlayers(players: Array<{ name?: unknown; raw?: unkn
     const raw = isRecord(player.raw) ? player.raw : null;
     const providerKey = typeof raw?.playerId === "string" ? raw.playerId.trim() : "";
     const displayName = typeof player.name === "string" ? player.name.trim() : typeof raw?.name === "string" ? raw.name.trim() : "";
-    if (!/^[A-Za-z0-9._:-]{1,160}$/.test(providerKey) || displayName.length < 1 || displayName.length > 80 || providerKeys.has(providerKey)) return null;
+    if (!isStablePlayerProviderKey(providerKey) || displayName.length < 1 || displayName.length > 80 || providerKeys.has(providerKey)) return null;
     providerKeys.add(providerKey);
     const steamId = extractSteamId64(raw, providerKey);
     parsed.push({ providerKey, displayName, ...(steamId ? { externalProvider: "STEAM" as const, externalAccountId: steamId } : {}) });

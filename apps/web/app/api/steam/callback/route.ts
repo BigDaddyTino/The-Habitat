@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { hasRequiredRole } from "@/lib/permissions";
 import { publicUrl } from "@/lib/public-url";
+import { attachVerifiedSteamIdentities } from "@/lib/steam-identity-link";
 import { verifySteamOpenId } from "@/lib/steam-openid";
 
 const db = getPrismaClient();
@@ -45,15 +46,13 @@ export async function GET(request: Request) {
       create: { userId: session.user.id, platform: "STEAM", handle: steamId, profileUrl: `https://steamcommunity.com/profiles/${steamId}`, providerAccountId: steamId, verifiedAt: now },
       update: { handle: steamId, profileUrl: `https://steamcommunity.com/profiles/${steamId}`, providerAccountId: steamId, verifiedAt: now },
     });
-    const identities = await transaction.playerIdentity.updateMany({ where: { externalProvider: "STEAM", externalAccountId: steamId, userId: null }, data: { userId: session.user.id, verifiedAt: now } });
-    await transaction.playerIdentityClaim.updateMany({ where: { userId: session.user.id, status: "PENDING", playerIdentity: { externalProvider: "STEAM", externalAccountId: steamId } }, data: { status: "APPROVED", resolvedAt: now, resolvedByUserId: session.user.id, resolutionNote: "Automatically verified by linked SteamID64." } });
-    await transaction.playerIdentityClaim.updateMany({ where: { userId: { not: session.user.id }, status: "PENDING", playerIdentity: { externalProvider: "STEAM", externalAccountId: steamId } }, data: { status: "REJECTED", resolvedAt: now, resolutionNote: "Identity ownership was verified through a linked Steam account." } });
-    await transaction.auditLog.create({ data: { actorUserId: session.user.id, action: "STEAM_ACCOUNT_VERIFIED", entityType: "UserSocialAccount", entityId: account.id, after: { provider: "STEAM", identitiesLinked: identities.count } } });
-    return identities.count;
+    const identitiesLinked = await attachVerifiedSteamIdentities(transaction, session.user.id, steamId, now);
+    await transaction.auditLog.create({ data: { actorUserId: session.user.id, action: "STEAM_ACCOUNT_VERIFIED", entityType: "UserSocialAccount", entityId: account.id, after: { provider: "STEAM", identitiesLinked } } });
+    return identitiesLinked;
   }).catch(() => null);
   if (linkedCount === null) return profileRedirect(request, "invalid");
   revalidatePath("/profile");
   revalidatePath("/profile/identities");
   revalidatePath("/admin/claims");
-  return profileRedirect(request, linkedCount > 0 ? `connected-${linkedCount}` : "connected");
+  return profileRedirect(request, `connected-${linkedCount}`);
 }

@@ -16,7 +16,7 @@ Run these steps on MartServ102 from an elevated PowerShell session.
 
 The installer generates direct WinSW service definitions for all six games in `apps/agent/game-services/<key>/`. Each game service owns its known executable directly; each update service owns its known SteamCMD invocation directly. Their executable paths, working directories, Steam application IDs, and known launch flags come from the inspected dedicated-server commands. The Valheim password remains only in ignored local configuration and the generated local service XML.
 
-The installer adds the corresponding `control` block to each matching entry in the ignored `agent.config.json`; do not copy service names or script paths into tracked files.
+The installer adds the corresponding `control` block to each matching entry in the ignored `agent.config.json`. It also allow-lists the generated Valheim WinSW log directory as `VALHEIM_LOG`, which is required to correlate exact Steam sessions with HabitatCore's name-based Chronicle. Do not copy service names or script paths into tracked files.
 
 ## Install
 
@@ -29,6 +29,15 @@ Restart-Service HabitatAgent
 ```
 
 The game and update services are installed with manual startup. This prevents all six games from unexpectedly starting at Windows boot.
+
+For an existing installation that predates the Valheim source, run the fixed-path updater from an elevated MartServ102 session:
+
+```powershell
+Set-Location "C:\The Habitat\apps\agent"
+.\scripts\configure-history-sources.ps1 -InstallRoot (Get-Location)
+```
+
+The updater can add only the known WinSW Valheim log directory under the supplied agent installation. It restarts `HabitatAgent` after a change; verify the result from MartServ101 with `pnpm check:connections`.
 
 To replace an earlier Habitat service installation, use `-Replace` only after every matching game process has been confirmed stopped. A stopped wrapper alone is insufficient: check the configured executable process as well.
 

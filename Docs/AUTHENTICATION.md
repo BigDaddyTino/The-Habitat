@@ -43,7 +43,7 @@ Members can begin the Steam connection flow from their profile. The callback val
 
 Steam's OpenID `realm`, `return_to`, callback comparison, and final profile redirect all derive from `AUTH_URL`, never from the reverse proxy's internal request URL. This keeps the entire round trip on `https://habitat.martinobear.com`.
 
-A verified Steam connection automatically attaches matching unclaimed Steam-backed identities. Admin claim approval remains available for identities that cannot be proved this way. Both paths enqueue idempotent reconciliation of attached verified history into playtime, XP, quests, achievements, rewards, profile totals, and leaderboards.
+A verified Steam connection automatically attaches only unclaimed identities carrying that exact SteamID64. A Steam library entry or a similar character name is not ownership proof. The profile callback reports how many exact identities were attached and directs zero-match members to the reviewed character-claim flow. Admin claim approval remains available for name-only identities that cannot be proved automatically. Both ownership paths enqueue idempotent reconciliation of attached verified history into playtime, XP, quests, achievements, rewards, profile totals, and leaderboards.
 
 ## Observed and unclaimed players
 
@@ -59,4 +59,4 @@ The Admin Suite member command center can change roles, suspend or reactivate an
 
 ## Operator connection audit
 
-Run `pnpm check:connections` from the repository root after changing credentials, callback registrations, proxy routing, or provider configuration. The read-only audit verifies the database, authenticated private agent, public application origin, Auth.js provider metadata, Steam callback construction and Web API key, Discord bot/application ownership, registered Discord OAuth callback, configured Discord guild access, and the selected Marvel Rivals provider. It reports configuration state and record counts without printing secrets, tokens, member identifiers, guild identifiers, or database credentials.
+Run `pnpm check:connections` from the repository root after changing credentials, callback registrations, proxy routing, history sources, or provider configuration. The read-only audit verifies the database, authenticated private agent, required game-specific legacy identity sources, public application origin, Auth.js provider metadata, Steam callback construction and Web API key, Discord bot/application ownership, registered Discord OAuth callback, configured Discord guild access, and the selected Marvel Rivals provider. A missing, unavailable, or truncated required history source fails the audit. It reports configuration state and record counts without printing secrets, tokens, member identifiers, guild identifiers, or database credentials.

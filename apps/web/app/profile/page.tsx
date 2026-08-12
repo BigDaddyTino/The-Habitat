@@ -14,9 +14,15 @@ import { disableSteamEnrichment, disconnectSteam, enableSteamEnrichment, equipCo
 const db = getPrismaClient();
 const avatarPresets = ["/images/avatars/campfire.svg", "/images/avatars/raven.svg", "/images/avatars/mountain.svg", "/images/avatars/ufo.svg"];
 
-export default async function ProfilePage() {
+type ProfileSearchParams = Promise<{ steam?: string | string[] }>;
+
+export default async function ProfilePage({ searchParams }: { searchParams: ProfileSearchParams }) {
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) redirect("/sign-in");
+  const steamParamValue = (await searchParams).steam;
+  const steamStatus = Array.isArray(steamParamValue) ? steamParamValue[0] : steamParamValue;
+  const connectedMatch = steamStatus?.match(/^connected-(\d+)$/);
+  const linkedIdentityCount = connectedMatch ? Number.parseInt(connectedMatch[1] ?? "0", 10) : null;
   const [member, identities, titles, rewards, xpTotal, clubProfiles] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: session.user.id }, select: { name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true, socialAccounts: { include: { steamProfile: { include: { libraryGames: { where: { isCurrent: true }, include: { app: { select: { appId: true, name: true, iconHash: true } } }, orderBy: { playtimeMinutes: "desc" } }, achievementSyncs: { select: { status: true, definitionCount: true, achievedCount: true, lastSuccessfulAt: true } } } } }, orderBy: { platform: "asc" } } } }),
     db.playerIdentity.findMany({ where: { userId: session.user.id }, include: { server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } } }, orderBy: { displayName: "asc" } }),
@@ -63,6 +69,8 @@ export default async function ProfilePage() {
     </div>
 
     <div className="profile-heading"><div><p className="eyebrow">Connected accounts</p><h2>Your gaming identity</h2></div></div>
+    {linkedIdentityCount !== null ? <div className="steam-link-notice success"><strong>Steam verification complete.</strong><span>{linkedIdentityCount > 0 ? `${linkedIdentityCount} exact server ${linkedIdentityCount === 1 ? "identity was" : "identities were"} attached to your account.` : <>No server identity carrying this exact Steam ID has been observed yet. Name-only legacy characters are never guessed; <Link href="/profile/identities">submit a character claim</Link> for administrator review.</>}</span></div> : null}
+    {steamStatus === "invalid" || steamStatus === "expired" || steamStatus === "conflict" ? <div className="steam-link-notice error"><strong>Steam verification was not completed.</strong><span>{steamStatus === "conflict" ? "That Steam account is already linked to another Habitat member." : steamStatus === "expired" ? "The Steam verification request expired. Start the connection again." : "Steam returned a response that could not be verified. Start the connection again."}</span></div> : null}
     <div className="account-kit"><div><p>Verified Steam ownership can automatically attach matching game identities. Other services remain optional profile links and never imply live presence.</p><div className="steam-connect">{steamAccount ? <><span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span><form action={disconnectSteam}><button type="submit">Disconnect Steam</button></form></> : <Link href="/api/steam/connect">Verify with Steam</Link>}</div><SocialAccountForm /></div><div className="social-list">{member.socialAccounts.length === 0 ? <span>No optional accounts added yet.</span> : member.socialAccounts.map((account) => <article key={account.id}><div><strong>{socialPlatformLabels[account.platform]} {account.verifiedAt ? <BadgeCheck aria-label="Verified" size={12} /> : null}</strong><span>{account.handle}</span></div>{account.profileUrl ? <a href={account.profileUrl} rel="noreferrer" target="_blank" aria-label={`Open ${account.platform} profile`}><ExternalLink size={15} /></a> : null}{account.verifiedAt ? null : <form action={removeSocialAccount}><input name="accountId" type="hidden" value={account.id} /><button type="submit">Remove</button></form>}</article>)}</div></div>
 
     {steamAccount ? <section className="steam-enrichment-panel">
