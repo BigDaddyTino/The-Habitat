@@ -63,6 +63,12 @@ test("treats unsupported and private Steam achievement responses as terminal pro
   assert.equal(parseSteamPlayerAchievements({ playerstats: { success: false, error: "Profile is not public" } }).status, "PRIVATE");
 });
 
+test("maps achievement-only HTTP authorization denial to an account access restriction", async () => {
+  const forbidden: SteamFetch = async () => ({ ok: false, status: 403, headers: { get: () => null }, json: async () => ({}) });
+  const result = await import("@habitat/shared").then(({ fetchSteamPlayerAchievements }) => fetchSteamPlayerAchievements("76561198000000000", 10, "profile-valid-key", forbidden));
+  assert.equal(result.status, "ACCESS_RESTRICTED");
+});
+
 test("Steam achievement work prioritizes recently played games", () => {
   const older = { appId: 1, name: "Old", iconHash: null, playtimeMinutes: 50_000, playtimeTwoWeeksMinutes: null, lastPlayedAt: "2025-01-01T00:00:00.000Z" };
   const recent = { appId: 2, name: "Recent", iconHash: null, playtimeMinutes: 10, playtimeTwoWeeksMinutes: 10, lastPlayedAt: "2026-08-12T00:00:00.000Z" };

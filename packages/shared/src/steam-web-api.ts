@@ -55,7 +55,7 @@ export type SteamUserAchievementData = {
 };
 
 export type SteamPlayerAchievementsResult = {
-  status: "READY" | "PRIVATE" | "UNSUPPORTED";
+  status: "READY" | "PRIVATE" | "UNSUPPORTED" | "ACCESS_RESTRICTED";
   achievements: SteamUserAchievementData[];
 };
 
@@ -245,5 +245,13 @@ export async function fetchSteamAchievementSchema(appId: number, apiKey: string,
 
 export async function fetchSteamPlayerAchievements(steamId: string, appId: number, apiKey: string, fetcher?: SteamFetch): Promise<SteamPlayerAchievementsResult> {
   if (!/^7656119\d{10}$/.test(steamId) || !Number.isSafeInteger(appId) || appId < 1) throw new SteamWebApiError("INVALID_RESPONSE", "The Steam player-achievement request was invalid.");
-  return parseSteamPlayerAchievements(await requestSteamJson("ISteamUserStats", "GetPlayerAchievements", 1, { steamid: steamId, appid: String(appId), l: "english", format: "json" }, apiKey, fetcher));
+  try {
+    return parseSteamPlayerAchievements(await requestSteamJson("ISteamUserStats", "GetPlayerAchievements", 1, { steamid: steamId, appid: String(appId), l: "english", format: "json" }, apiKey, fetcher));
+  } catch (error) {
+    // A key that already succeeded for the verified profile/library can still be
+    // denied by this separately scoped endpoint. Treat that as retained-data
+    // access restriction, not as a bad key or an endlessly retryable app error.
+    if (error instanceof SteamWebApiError && error.code === "UNAUTHORIZED") return { status: "ACCESS_RESTRICTED", achievements: [] };
+    throw error;
+  }
 }

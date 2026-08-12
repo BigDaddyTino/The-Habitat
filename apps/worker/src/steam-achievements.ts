@@ -71,6 +71,14 @@ export async function syncSteamAchievements(): Promise<{ enabled: boolean; check
       if (!await reserveProviderRequests("STEAM", 1, dailyBudget)) throw new BudgetExhaustedError("The Steam daily request budget is exhausted.");
       await db.steamAchievementSync.update({ where: { id: job.id }, data: { lastAttemptedAt: now } });
       const progress = await fetchSteamPlayerAchievements(steamId, job.steamAppId, apiKey);
+      if (progress.status === "ACCESS_RESTRICTED") {
+        const restrictedCount = await db.steamAchievementSync.updateMany({
+          where: { steamProfileId: job.steamProfileId, status: { not: "UNSUPPORTED" } },
+          data: { status: "PRIVATE", lastAttemptedAt: now, nextAttemptAt: new Date(now.getTime() + PRIVATE_RECHECK_MS), consecutiveFailures: 0, syncError: "Steam accepted profile and library access but did not authorize player-achievement access. Cached progress was retained." },
+        });
+        privateProfiles += restrictedCount.count;
+        break;
+      }
       if (progress.status === "UNSUPPORTED") {
         await db.steamAchievementSync.update({ where: { id: job.id }, data: { status: "UNSUPPORTED", lastAttemptedAt: now, nextAttemptAt: null, consecutiveFailures: 0, syncError: null, definitionCount: 0, achievedCount: 0 } });
         unsupported += 1;

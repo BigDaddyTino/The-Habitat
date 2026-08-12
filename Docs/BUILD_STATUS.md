@@ -191,6 +191,9 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Activity-backed achievement and record engines, exact evidence links, Discord outbox support, and privacy-filtered Chronicle projection implemented
 - [x] Six additive migrations applied after a successful backup; bounded hosted-source backfill reconciled 30 of 30 eligible sources and a replay projected zero duplicates
 - [x] Cross-game reward/record catalogue seeded behind `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false` pending real-provider shadow evaluation
-- [ ] Live Steam profile/library/achievement contract and UI verification awaits `STEAM_WEB_API_KEY` plus a published `STEAM_DATA_STORAGE_COUNTRY`
-- [ ] Live Marvel match pagination, convergence, privacy, quota, and retention verification awaits `MARVEL_RIVALS_API_KEY` and consenting test profiles
+- [x] Steam API key accepted by the non-personal supported-interface contract check; `STEAM_DATA_STORAGE_COUNTRY=US` is published by the privacy route
+- [x] Consenting live member profile and owned library synchronized with last-good retention; 259 visible games and Steam-reported playtime cached without creating Habitat XP
+- [x] Steam achievement API denial is classified as an account-level access restriction and defers the whole queue instead of retrying every app
+- [ ] Live Steam achievement progress remains unavailable because Steam returns HTTP 403 for the consenting account on both documented achievement hosts
+- [ ] Live Marvel match pagination, convergence, privacy, quota, and retention verification awaits provider recovery, `MARVEL_RIVALS_API_KEY`, and consenting test profiles
 - [ ] Cross-game consumers remain intentionally disabled until live-provider fixtures and shadow-award/record comparisons pass review
