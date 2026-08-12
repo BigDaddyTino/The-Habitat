@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck, BarChart3, Crown, Gamepad2, RefreshCw, Shield, Swords, Unlink, UserRound, UsersRound } from "lucide-react";
+import { Activity, ArrowLeft, BadgeCheck, BarChart3, Crown, Gamepad2, RefreshCw, Shield, Swords, Unlink, UserRound, UsersRound } from "lucide-react";
 import { auth } from "@/auth";
 import { MarvelRivalsLinkForm } from "@/components/marvel-rivals-link-form";
 import { getClubGameBySlug } from "@/lib/club-games";
 import { getGameDispatches } from "@/lib/game-news";
 import { getPrismaClient } from "@habitat/db/client";
-import { disconnectMarvelRivalsProfile, refreshMarvelRivalsProfile } from "./actions";
+import { disconnectMarvelRivalsProfile, refreshMarvelRivalsProfile, updateMarvelRivalsVisibility } from "./actions";
 
 const db = getPrismaClient();
 
@@ -21,7 +21,7 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
 
   const session = await auth();
   const memberId = session?.user?.id && session.user.isActive ? session.user.id : null;
-  const [profiles, ownProfile, dispatches] = await Promise.all([
+  const [profiles, ownProfile, dispatches, recentMatches, matchCoverage] = await Promise.all([
     db.clubGameProfile.findMany({
       where: { gameType: "MARVEL_RIVALS", displayPublic: true },
       orderBy: [{ rankScore: "desc" }, { displayName: "asc" }],
@@ -31,11 +31,17 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
         user: { select: { username: true, displayName: true, name: true, socialAccounts: { where: { platform: "STEAM", verifiedAt: { not: null } }, select: { id: true }, take: 1 } } },
       },
     }),
-    memberId ? db.clubGameProfile.findUnique({ where: { userId_gameType: { userId: memberId, gameType: "MARVEL_RIVALS" } } }) : null,
+    memberId ? db.clubGameProfile.findUnique({ where: { userId_gameType: { userId: memberId, gameType: "MARVEL_RIVALS" } }, include: { snapshots: { orderBy: { sampledAt: "asc" }, select: { sampledAt: true, rankName: true, rankScore: true } }, matchParticipants: { orderBy: { match: { occurredAt: "desc" } }, take: 10, include: { match: true, heroPerformances: true } } } }) : null,
     getGameDispatches(slug),
+    db.clubGameMatch.findMany({ where: { gameType: "MARVEL_RIVALS", participants: { some: { clubGameProfile: { displayPublic: true } } } }, orderBy: { occurredAt: "desc" }, take: 18, include: { participants: { where: { clubGameProfile: { displayPublic: true } }, include: { clubGameProfile: { select: { id: true, displayName: true, user: { select: { username: true, displayName: true, name: true } } } }, heroPerformances: { take: 2 } } } } }),
+    db.clubGameMatch.aggregate({ where: { gameType: "MARVEL_RIVALS", participants: { some: { clubGameProfile: { displayPublic: true } } } }, _count: { id: true }, _min: { occurredAt: true }, _max: { occurredAt: true } }),
   ]);
   const squad = profiles.slice(0, game.squadSize);
   const providerReady = Boolean(process.env.MARVEL_RIVALS_API_KEY?.trim());
+  const recentWins = ownProfile?.matchParticipants.filter((participant) => participant.result === "WIN").length ?? 0;
+  const sharedMatches = recentMatches.filter((match) => match.participants.length > 1);
+  const firstRank = ownProfile?.snapshots.find((snapshot) => snapshot.rankScore !== null);
+  const latestRank = [...(ownProfile?.snapshots ?? [])].reverse().find((snapshot) => snapshot.rankScore !== null);
 
   return <section className={`page-shell club-room-page club-${game.accent}`}>
     <Link className="club-room-back" href="/games#club-rooms"><ArrowLeft aria-hidden="true" size={15} /> All games</Link>
@@ -84,13 +90,18 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
       </aside>
     </div>
 
+    <section className="rivals-match-room">
+      <div className="rivals-match-heading"><div><p className="eyebrow"><Activity aria-hidden="true" size={13} /> Provider-tracked activity</p><h2>Recent form</h2></div><span>{matchCoverage._count.id.toLocaleString()} tracked matches{matchCoverage._min.occurredAt ? ` · since ${matchCoverage._min.occurredAt.toLocaleDateString()}` : ""}</span></div>
+      {recentMatches.length ? <div className="rivals-match-layout"><div className="rivals-match-feed">{recentMatches.slice(0, 10).map((match) => <article key={match.id}><time dateTime={match.occurredAt.toISOString()}>{when(match.occurredAt)}</time><div>{match.participants.map((participant) => { const memberName = participant.clubGameProfile.user.displayName ?? participant.clubGameProfile.user.name ?? participant.clubGameProfile.displayName; const hero = participant.heroPerformances[0]?.heroName; const content = <><strong>{memberName}</strong><span className={`match-result ${participant.result.toLowerCase()}`}>{participant.result}</span><small>{hero ? `${hero} · ` : ""}{participant.kills ?? "—"}/{participant.deaths ?? "—"}/{participant.assists ?? "—"}{participant.mvp ? " · MVP" : participant.svp ? " · SVP" : ""}</small></>; return participant.clubGameProfile.user.username ? <Link href={`/members/${participant.clubGameProfile.user.username}`} key={participant.id}>{content}</Link> : <div key={participant.id}>{content}</div>; })}</div><footer>{match.durationSeconds ? `${Math.round(match.durationSeconds / 60)} min · ` : ""}{match.seasonKey ? `Season ${match.seasonKey} · ` : ""}{match.providerMatchId}</footer></article>)}</div><aside><p className="eyebrow">Shared Habitat matches</p><strong>{sharedMatches.length}</strong><span>among the newest {recentMatches.length}</span><p>Matching provider match IDs prove co-participation. They do not prove a premade party, and members with private or unsynced profiles are not counted.</p></aside></div> : <div className="chronicle-empty"><p>No provider-tracked matches yet.</p><span>{providerReady ? "The worker will ingest bounded recent history for linked public profiles." : "Match history remains offline until a private provider key is configured and validated."}</span></div>}
+    </section>
+
     <section className="rivals-account-panel">
       <div className="rivals-account-copy">
         <p className="eyebrow">Your seat at the table</p>
         <h2>{ownProfile ? ownProfile.displayName : "Link your Rivals profile"}</h2>
-        {ownProfile ? <><p><span className="member-linked-mark"><Shield aria-hidden="true" size={12} /> Member-linked</span> {ownProfile.rankName ?? "Unranked"}{ownProfile.playerLevel ? ` · Level ${ownProfile.playerLevel}` : ""}</p><small>{ownProfile.lastSyncedAt ? `Updated ${when(ownProfile.lastSyncedAt)}` : "Awaiting first stat refresh"}{ownProfile.syncStatus !== "READY" ? ` · ${ownProfile.syncStatus.toLowerCase()}` : ""}</small></> : <p>Steam verifies who you are in Habitat. Rivals uses a separate in-game UID, so this connection is member-linked—not an ownership claim.</p>}
+        {ownProfile ? <><p><span className="member-linked-mark"><Shield aria-hidden="true" size={12} /> Member-linked</span> {ownProfile.rankName ?? "Unranked"}{ownProfile.playerLevel ? ` · Level ${ownProfile.playerLevel}` : ""}</p><small>{ownProfile.lastSyncedAt ? `Stats updated ${when(ownProfile.lastSyncedAt)}` : "Awaiting first stat refresh"}{ownProfile.syncStatus !== "READY" ? ` · ${ownProfile.syncStatus.toLowerCase()}` : ""} · matches {ownProfile.matchStatus.toLowerCase()}</small>{ownProfile.matchHistoryGapDetected ? <small className="rivals-coverage-warning">A provider-history gap was detected. Cumulative facts remain labeled as partial; streak awards are paused.</small> : null}{ownProfile.matchParticipants.length ? <div className="member-recent-form"><span>Last {ownProfile.matchParticipants.length}</span><div>{ownProfile.matchParticipants.map((participant) => <i className={participant.result.toLowerCase()} key={participant.id}>{participant.result === "WIN" ? "W" : participant.result === "LOSS" ? "L" : "—"}</i>)}</div><strong>{recentWins}-{ownProfile.matchParticipants.length - recentWins} tracked form</strong>{firstRank?.rankScore !== null && firstRank?.rankScore !== undefined && latestRank?.rankScore !== null && latestRank?.rankScore !== undefined ? <em>{latestRank.rankScore - firstRank.rankScore >= 0 ? "+" : ""}{latestRank.rankScore - firstRank.rankScore} rating across {ownProfile.snapshots.length} snapshots</em> : null}</div> : null}</> : <p>Steam verifies who you are in Habitat. Rivals uses a separate in-game UID, so this connection is member-linked—not an ownership claim.</p>}
       </div>
-      {memberId ? ownProfile ? <div className="rivals-profile-actions"><form action={refreshMarvelRivalsProfile}><button type="submit"><RefreshCw aria-hidden="true" size={14} /> Refresh stats</button></form><form action={disconnectMarvelRivalsProfile}><button className="quiet" type="submit"><Unlink aria-hidden="true" size={14} /> Disconnect</button></form></div> : <MarvelRivalsLinkForm providerReady={providerReady} /> : <Link className="rivals-sign-in" href="/sign-in">Sign in to link a profile</Link>}
+      {memberId ? ownProfile ? <div className="rivals-profile-actions"><form action={refreshMarvelRivalsProfile}><button type="submit"><RefreshCw aria-hidden="true" size={14} /> Refresh stats</button></form><form action={updateMarvelRivalsVisibility}><label className="rivals-public-toggle"><input defaultChecked={ownProfile.displayPublic} name="displayPublic" type="checkbox" /> Share provider profile and match evidence</label><button type="submit">Save privacy</button></form><form action={disconnectMarvelRivalsProfile}><button className="quiet" type="submit"><Unlink aria-hidden="true" size={14} /> Disconnect and delete provider data</button></form></div> : <MarvelRivalsLinkForm providerReady={providerReady} /> : <Link className="rivals-sign-in" href="/sign-in">Sign in to link a profile</Link>}
     </section>
 
     <section className="dispatch-strip club-dispatches">

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Award, BadgeCheck, ExternalLink, MapPinned, Trophy } from "lucide-react";
+import { Award, BadgeCheck, ExternalLink, Gamepad2, MapPinned, Trophy } from "lucide-react";
 import { getPrismaClient } from "@habitat/db/client";
 import { progressionForXp, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
@@ -18,7 +18,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
     where: { username: username.toLowerCase(), isActive: true },
     select: {
       name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true,
-      socialAccounts: { where: { displayPublic: true }, orderBy: { platform: "asc" } },
+      socialAccounts: { where: { displayPublic: true }, include: { steamProfile: { include: { libraryGames: { where: { isCurrent: true }, include: { app: { select: { name: true } } }, orderBy: { playtimeMinutes: "desc" } }, achievementSyncs: { select: { status: true, achievedCount: true } } } } }, orderBy: { platform: "asc" } },
       titles: { where: { equipped: true }, include: { title: true }, take: 1 },
       playerIdentities: { select: { id: true, gameType: true, displayName: true, server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } }, legacyEvidence: { select: { durationSeconds: true } } }, orderBy: { displayName: "asc" } },
       achievements: { include: { achievement: true }, orderBy: { awardedAt: "desc" } },
@@ -36,6 +36,11 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const title = member.titles[0]?.title.name;
   const ownerName = member.displayName ?? member.name ?? "Habitat member";
   const cabinetItems: CabinetItem[] = member.unlockedRewards.map((entry) => ({ id: entry.id, code: entry.reward.code, name: entry.reward.name, description: entry.reward.description, kind: entry.reward.kind as CabinetItem["kind"], rarity: entry.reward.achievement.rarity as AchievementRarity, achievementName: entry.reward.achievement.name, unlockedAt: entry.unlockedAt.toISOString() }));
+  const publicSteam = member.socialAccounts.find((account) => account.platform === "STEAM" && account.steamProfile?.displayPublic)?.steamProfile ?? null;
+  const steamGames = publicSteam?.libraryGames ?? [];
+  const steamMinutes = steamGames.reduce((total, game) => total + game.playtimeMinutes, 0);
+  const publicSteamAchievements = publicSteam?.achievementSyncs.filter((scan) => scan.status === "READY").reduce((total, scan) => total + scan.achievedCount, 0) ?? 0;
+  const publicSteamCoverage = publicSteam?.achievementSyncs.filter((scan) => scan.status === "READY" || scan.status === "UNSUPPORTED").length ?? 0;
 
   return <section className={`page-shell public-profile layout-${layout}`}>
     <div className="public-profile-hero"><div className={`member-avatar avatar-border-${border}`}><img src={member.image ?? fallbackAvatar} alt={`${ownerName} avatar`} /></div><div><p className="eyebrow">Level {progression.level} Habitat member · @{member.username}</p><h1>{ownerName}</h1><p className="public-title">{title ?? "Habitat member"}</p><p>{member.bio ?? "No field notes left for the lodge yet."}</p></div></div>
@@ -47,6 +52,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       <article><Trophy aria-hidden="true" size={19} /><p className="eyebrow">Trophy record</p><h2>Recent awards</h2>{member.achievements.length ? <ul>{member.achievements.slice(0, 5).map((award) => <li key={award.id}><strong>{award.achievement.name}</strong><span>{award.achievement.rarity.replaceAll("_", " ")}</span></li>)}</ul> : <p>The shelf is waiting for verified milestones.</p>}</article>
       <article><Award aria-hidden="true" size={19} /><p className="eyebrow">Physical collection</p><h2>Cabinet pieces</h2>{member.unlockedRewards.length ? <ul>{member.unlockedRewards.slice(0, 6).map((unlock) => <li key={unlock.id}><BadgeCheck aria-hidden="true" size={14} /><strong>{unlock.reward.name}</strong><span>{unlock.reward.kind.toLowerCase()} · {unlock.reward.achievement.rarity.replaceAll("_", " ")}</span></li>)}</ul> : <p>No cabinet pieces unlocked yet.</p>}</article>
     </div>
-    {member.socialAccounts.length ? <section className="member-links"><p className="eyebrow">Optional external links</p><div>{member.socialAccounts.map((account) => account.profileUrl ? <a href={account.profileUrl} key={account.id} rel="noreferrer" target="_blank">{socialPlatformLabels[account.platform]} <span>{account.handle}</span><ExternalLink aria-hidden="true" size={14} /></a> : <span key={account.id}>{socialPlatformLabels[account.platform]} <strong>{account.handle}</strong></span>)}</div><small>External handles are member-provided. The Habitat does not infer online status from them.</small></section> : null}
+    {publicSteam ? <section className="public-steam-history"><div><Gamepad2 aria-hidden="true" size={20} /><div><p className="eyebrow">Steam-reported gaming history</p><h2>{publicSteam.personaName ?? "Verified Steam account"}</h2></div></div><dl><div><dt>Visible games</dt><dd>{publicSteam.libraryStatus === "READY" ? steamGames.length.toLocaleString() : "—"}</dd></div><div><dt>Visible playtime</dt><dd>{publicSteam.libraryStatus === "READY" ? `${Math.floor(steamMinutes / 60).toLocaleString()}h` : "—"}</dd></div><div><dt>Achievements</dt><dd>{publicSteam.achievementSyncs.length ? publicSteamAchievements.toLocaleString() : "—"}</dd></div><div><dt>Last successful sync</dt><dd>{publicSteam.libraryLastSuccessfulAt?.toLocaleDateString() ?? "Pending"}</dd></div></dl>{publicSteam.libraryStatus === "READY" && steamGames.length ? <ul>{steamGames.slice(0, 5).map((game) => <li key={game.id}><strong>{game.app.name}</strong><span>{Math.round(game.playtimeMinutes / 60).toLocaleString()}h</span></li>)}</ul> : <p>The member has shared this section, but Steam has not exposed a visible library.</p>}<small>Steam-reported data can be incomplete because of privacy and provider coverage. Achievement coverage is {publicSteamCoverage} of {publicSteam.achievementSyncs.length} queued visible games. It does not contribute Habitat XP.</small></section> : null}
+    {member.socialAccounts.length ? <section className="member-links"><p className="eyebrow">Optional external links</p><div>{member.socialAccounts.map((account) => account.profileUrl ? <a href={account.profileUrl} key={account.id} rel="noreferrer" target="_blank">{socialPlatformLabels[account.platform]} <span>{account.platform === "STEAM" ? account.steamProfile?.personaName ?? "Verified account" : account.handle}</span><ExternalLink aria-hidden="true" size={14} /></a> : <span key={account.id}>{socialPlatformLabels[account.platform]} <strong>{account.handle}</strong></span>)}</div><small>Steam identity is verified through OpenID. Other external handles are member-provided, and The Habitat does not infer online status from them.</small></section> : null}
   </section>;
 }

@@ -21,6 +21,21 @@ Run a worker cycle after changing private agent configuration or a history sourc
 
 Review configured worlds, agent health, and Chronicle output afterward. Do not infer that a new query/log source is good merely because the process starts.
 
+## Steam and Club provider rollout
+
+Provider keys are optional and server-side. An absent key is the supported rollback path: cached rows remain available, no provider requests are made, and hosted monitoring continues. Never add keys to Git or browser-visible configuration.
+
+Before enabling either provider:
+
+1. Publish the `/privacy` notice and set `STEAM_DATA_STORAGE_COUNTRY` before Steam retrieval.
+2. Add the private key to the ignored root `.env`, retain conservative daily budgets, and leave `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false`.
+3. Restart `HabitatWorker`, run one bounded cycle, and inspect sanitized status/error fields—never log keys or raw upstream responses.
+4. Verify public, private, malformed, timeout, and rate-limit behavior with consenting accounts. For Marvel, verify newest-first pagination overlap and two-profile shared-match convergence.
+5. Compare source counts to normalized `GameActivity` counts and review shadow achievement/record results.
+6. Only after review, set `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=true`, rerun `pnpm --filter @habitat/db seed`, and restart the worker.
+
+To stop new external calls, remove the relevant key and restart the worker. To disable new activity-backed awards and records while retaining evidence, set the consumer flag false, rerun the seed, and restart. Member disconnect actions delete the relevant cached provider boundary; they do not delete hosted-world evidence.
+
 ## Server operations
 
 Admins submit typed-confirmed `start`, `stop`, `restart`, or `update` requests. They are persisted, audited, and dispatched by the worker only to agent-configured named Windows services.

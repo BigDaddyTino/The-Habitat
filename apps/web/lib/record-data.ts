@@ -15,7 +15,7 @@ export async function getRecordHallData(hall: RecordHall, filters: RecordHallFil
   const where: Prisma.RecordDefinitionWhereInput = {
     hall,
     enabled: true,
-    ...(filters.gameType ? { OR: [{ gameType: null }, { gameType: filters.gameType }] } : {}),
+    ...(filters.gameType ? { gameKey: null, OR: [{ gameType: null }, { gameType: filters.gameType }] } : {}),
     ...(filters.player ? { currentHolder: { is: { holderName: filters.player } } } : {}),
   };
   const [definitions, holders] = await Promise.all([

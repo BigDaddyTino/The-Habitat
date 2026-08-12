@@ -1,11 +1,15 @@
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import {
+  parseActivityCountRule,
+  parseActivityValueSumRule,
+  parseDistinctActivityGameRule,
   parseDistinctGameEventCountRule,
   parseEventCountRule,
   parseGameEventCountRule,
   parseLegacyEvidenceCountRule,
   parseLevelReachedRule,
+  parseOrderedActivityStreakRule,
   progressionForXp,
   rarityPresentation,
   type AchievementRarity,
@@ -32,6 +36,12 @@ export default async function AchievementsPage() {
   const visitsByGame = new Map(gameVisits.map((entry) => [entry.gameType, entry._count._all]));
   const totalVisits = gameVisits.reduce((total, entry) => total + entry._count._all, 0);
   const level = progressionForXp(xpTotal._sum.amount ?? 0).level;
+  const streakRules = definitions.flatMap((definition) => definition.ruleType === "ORDERED_ACTIVITY_STREAK" ? [parseOrderedActivityStreakRule(definition.ruleConfig)] : []).filter((rule): rule is NonNullable<typeof rule> => Boolean(rule));
+  const streakTypes = [...new Set(streakRules.flatMap((rule) => [rule.successActivityType, ...rule.breakActivityTypes]))];
+  const [activityGroups, streakActivities] = userId ? await Promise.all([
+    db.gameActivity.groupBy({ by: ["activityType", "gameKey", "sourceConfidence"], where: { userId }, _count: { _all: true }, _sum: { valueNumber: true } }),
+    streakTypes.length ? db.gameActivity.findMany({ where: { userId, activityType: { in: streakTypes }, sourceConfidence: { gte: Math.min(...streakRules.map((rule) => rule.minimumConfidence)) }, OR: [{ gameKey: { not: "MARVEL_RIVALS" } }, { sourceClubMatchParticipant: { is: { clubGameProfile: { is: { matchHistoryGapDetected: false } } } } }] }, orderBy: [{ occurredAt: "asc" }, { id: "asc" }], select: { activityType: true, gameKey: true, sourceConfidence: true } }) : Promise.resolve([]),
+  ]) : [[], []];
 
   const entries: AchievementArchiveEntry[] = definitions.map((definition) => {
     const awardedAt = awards.get(definition.id) ?? null;
@@ -53,6 +63,18 @@ export default async function AchievementsPage() {
     } else if (userId && definition.ruleType === "LEVEL_REACHED") {
       const rule = parseLevelReachedRule(definition.ruleConfig);
       if (rule) { progress = level; target = rule.level; }
+    } else if (userId && (definition.ruleType === "ACTIVITY_COUNT" || definition.ruleType === "SHARED_ACTIVITY_COUNT")) {
+      const rule = parseActivityCountRule(definition.ruleConfig);
+      if (rule) { progress = activityGroups.filter((group) => group.activityType === rule.activityType && group.sourceConfidence >= rule.minimumConfidence && (!definition.gameKey || group.gameKey === definition.gameKey)).reduce((sum, group) => sum + group._count._all, 0); target = rule.threshold; }
+    } else if (userId && definition.ruleType === "ACTIVITY_VALUE_SUM") {
+      const rule = parseActivityValueSumRule(definition.ruleConfig);
+      if (rule) { progress = Math.trunc(activityGroups.filter((group) => group.activityType === rule.activityType && group.sourceConfidence >= rule.minimumConfidence && (!definition.gameKey || group.gameKey === definition.gameKey)).reduce((sum, group) => sum + (group._sum.valueNumber ?? 0), 0)); target = rule.threshold; }
+    } else if (userId && definition.ruleType === "DISTINCT_ACTIVITY_GAME_COUNT") {
+      const rule = parseDistinctActivityGameRule(definition.ruleConfig);
+      if (rule) { progress = new Set(activityGroups.filter((group) => group.activityType === rule.activityType && group.sourceConfidence >= rule.minimumConfidence && group._count._all > 0).map((group) => group.gameKey)).size; target = rule.threshold; }
+    } else if (userId && definition.ruleType === "ORDERED_ACTIVITY_STREAK") {
+      const rule = parseOrderedActivityStreakRule(definition.ruleConfig);
+      if (rule) { progress = longestStreak(streakActivities.filter((activity) => activity.sourceConfidence >= rule.minimumConfidence && (!definition.gameKey || activity.gameKey === definition.gameKey)).map((activity) => activity.activityType), rule.successActivityType, new Set(rule.breakActivityTypes)); target = rule.threshold; }
     }
     const concealed = definition.isSecret && !earnedByUser;
     return {
@@ -75,4 +97,14 @@ export default async function AchievementsPage() {
   }).sort((left, right) => Number(right.earned) - Number(left.earned) || rarityPresentation[right.rarity].rank - rarityPresentation[left.rarity].rank || left.name.localeCompare(right.name));
 
   return <section className="page-shell achievement-page"><AchievementArchive entries={entries} /></section>;
+}
+
+function longestStreak(activities: string[], success: string, breakers: Set<string>) {
+  let current = 0;
+  let longest = 0;
+  for (const activity of activities) {
+    if (activity === success) { current += 1; longest = Math.max(longest, current); }
+    else if (breakers.has(activity)) current = 0;
+  }
+  return longest;
 }

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { Prisma } from "@habitat/db/client";
 import { parseEventCountRule, parseGameEventCountRule } from "@habitat/shared";
-import { evaluateAchievementsForEvent } from "./achievements.js";
+import { evaluateAchievementsForActivity, evaluateAchievementsForEvent } from "./achievements.js";
 
 test("replaying a qualifying event awards a non-repeatable achievement once", async () => {
   const awards = new Map<string, unknown>();
@@ -51,4 +51,21 @@ test("high visit thresholds and game-specific rules remain bounded and explicit"
   assert.deepEqual(parseEventCountRule({ eventType: "PLAYER_JOINED", threshold: 500 }), { eventType: "PLAYER_JOINED", threshold: 500 });
   assert.deepEqual(parseGameEventCountRule({ eventType: "PLAYER_JOINED", gameType: "PALWORLD", threshold: 15 }), { eventType: "PLAYER_JOINED", gameType: "PALWORLD", threshold: 15 });
   assert.equal(parseGameEventCountRule({ eventType: "PLAYER_JOINED", gameType: "NOT_A_GAME", threshold: 15 }), null);
+});
+
+test("activity-backed achievements retain their exact evidence and replay once", async () => {
+  const awards = new Map<string, { sourceActivityId?: string }>();
+  const activity = { id: "77777777-7777-7777-7777-777777777777", userId: "44444444-4444-4444-4444-444444444444", gameKey: "MARVEL_RIVALS", activityType: "MATCH_WON", occurredAt: new Date("2026-08-12T10:00:00.000Z"), user: { id: "44444444-4444-4444-4444-444444444444", displayName: "HabitatTino", name: null, username: "tino" } };
+  const transaction = {
+    gameActivity: { findUnique: async () => activity, count: async () => 1 },
+    achievementDefinition: { findMany: async () => [{ id: "88888888-8888-8888-8888-888888888888", name: "First Rival Down", rarity: "COMMON", isRepeatable: false, gameKey: "MARVEL_RIVALS", ruleType: "ACTIVITY_COUNT", ruleConfig: { activityType: "MATCH_WON", threshold: 1, minimumConfidence: 90 } }] },
+    playerAchievement: { upsert: async ({ where, create }: { where: { dedupeKey: string }; create: { sourceActivityId?: string } }) => { if (!awards.has(where.dedupeKey)) awards.set(where.dedupeKey, create); return { id: "99999999-9999-9999-9999-999999999999" }; } },
+    achievementReward: { findMany: async () => [] },
+    userAchievementReward: { upsert: async () => ({}) },
+    userTitle: { upsert: async () => ({}) },
+  } as unknown as Prisma.TransactionClient;
+  await evaluateAchievementsForActivity(transaction, activity.id);
+  await evaluateAchievementsForActivity(transaction, activity.id);
+  assert.equal(awards.size, 1);
+  assert.equal([...awards.values()][0]?.sourceActivityId, activity.id);
 });

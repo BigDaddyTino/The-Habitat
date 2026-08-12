@@ -4,6 +4,7 @@ import "./globals.css";
 import { HabitatHeader } from "@/components/habitat-header";
 import { ProgressionToasts } from "@/components/progression-toasts";
 import { auth } from "@/auth";
+import Link from "next/link";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -35,6 +36,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body className={`${display.variable} ${sans.variable} ${mono.variable}`}>
         <HabitatHeader />
         <main>{children}</main>
+        <footer className="site-footer"><span>The Habitat · Private clubhouse</span><Link href="/privacy">Privacy &amp; provider data</Link></footer>
         <ProgressionToasts enabled={Boolean(session?.user?.isActive)} />
       </body>
     </html>

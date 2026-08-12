@@ -8,6 +8,12 @@ Expand The Habitat's existing gamer identity system into a broader **Gamer Profi
 
 **Verdict: achievable, with the gates and schema corrections in this section.** The product direction fits the repository, but the original version of this plan treated several provider-dependent features as guaranteed and understated the changes needed in the Chronicle, achievement, and record evidence models.
 
+### Execution checkpoint — August 12, 2026
+
+The provider-disabled implementation is deployed to the local Habitat database: consent/privacy controls, Steam profile/library/achievement queues, Marvel match ingestion, daily budgets, normalized activity evidence, activity-backed achievement/record engines, Discord evidence, and Chronicle receipts are built. Six additive migrations were backed up and applied; the bounded hosted backfill reconciled 30 of 30 eligible sources and an immediate replay produced no duplicates.
+
+`STEAM_WEB_API_KEY` and `MARVEL_RIVALS_API_KEY` are not configured. Consequently, no claim is made that live provider contracts, Marvel pagination/retention, shared-match convergence, real account privacy behavior, or production call volumes have passed. Cross-game consumers are seeded disabled behind `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false` until those live fixtures and shadow comparisons are reviewed. Steam published game stats remain deferred because no allow-listed game-specific stat contract has been validated.
+
 | Capability | Readiness | Required condition |
 | --- | --- | --- |
 | Steam profile and public library | Ready to build | Explicit member opt-in, Steam privacy handling, and a published Habitat privacy policy |

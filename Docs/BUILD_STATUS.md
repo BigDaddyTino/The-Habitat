@@ -179,3 +179,18 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Persistent Rivals profile records and stat snapshots added with a private-key server action and a bounded, sequential six-hour worker refresh; private/error states retain the last good figures
 - [x] Marvel Rivals official Steam announcements now feed the same compact news and patch-note rail used by hosted game dossiers
 - [ ] Live Marvel Rivals profile linking awaits a private `MARVEL_RIVALS_API_KEY`; the room remains functional and accurately reports the integration as offline until configured
+
+## Steam and Club Provider Expansion
+
+- [x] Separate Steam enrichment consent, privacy notice, visibility controls, deletion cascade, cached profile/library models, and independent profile/library sync state
+- [x] Bounded Steam profile, owned-game, and per-app achievement synchronization with strict parsers, timeouts, last-good retention, terminal unsupported states, and a persistent daily request budget
+- [x] Marvel profile refresh hardened with deterministic snapshots, retry metadata, private/error preservation, and a persistent daily request budget
+- [x] Cursor-overlap Marvel match ingestion, participant-level results, supported hero performance, recent form, rank snapshots, tracked-since language, and shared-match coverage caveats
+- [x] Marvel provider consent now starts private; visibility is member-controlled and disconnect cascades provider matches, activities, activity-backed awards/records, and notifications
+- [x] Normalized cross-game `GameActivity` evidence layer added without replacing or fabricating `ServerEvent` rows
+- [x] Activity-backed achievement and record engines, exact evidence links, Discord outbox support, and privacy-filtered Chronicle projection implemented
+- [x] Six additive migrations applied after a successful backup; bounded hosted-source backfill reconciled 30 of 30 eligible sources and a replay projected zero duplicates
+- [x] Cross-game reward/record catalogue seeded behind `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false` pending real-provider shadow evaluation
+- [ ] Live Steam profile/library/achievement contract and UI verification awaits `STEAM_WEB_API_KEY` plus a published `STEAM_DATA_STORAGE_COUNTRY`
+- [ ] Live Marvel match pagination, convergence, privacy, quota, and retention verification awaits `MARVEL_RIVALS_API_KEY` and consenting test profiles
+- [ ] Cross-game consumers remain intentionally disabled until live-provider fixtures and shadow-award/record comparisons pass review

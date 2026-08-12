@@ -9,7 +9,10 @@ import { importLegacyHistory } from "./legacy-history.js";
 import { reconcileProgression } from "./progression.js";
 import { reconcileAchievementCatalog } from "./achievements.js";
 import { reconcilePendingIdentityRewards } from "./identity-reconciliation.js";
-import { syncMarvelRivalsProfiles } from "./marvel-rivals.js";
+import { syncMarvelRivalsMatches, syncMarvelRivalsProfiles } from "./marvel-rivals.js";
+import { syncSteamEnrichment } from "./steam-enrichment.js";
+import { syncSteamAchievements } from "./steam-achievements.js";
+import { projectGameActivities } from "./game-activities.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -25,6 +28,7 @@ async function main(): Promise<void> {
   let discordBot: Awaited<ReturnType<typeof startDiscordBot>> = null;
   let shuttingDown = false;
   let nextHistoryScanAt = 0;
+  let nextProviderScanAt = 0;
 
   const dispatchCommands = async () => {
     const commands = await dispatchAuthorizedServerCommands(commandRepository, agent);
@@ -44,6 +48,33 @@ async function main(): Promise<void> {
     console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
     if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
     if (identityRewards > 0) console.info(`Habitat identity rewards: ${identityRewards} claimed identity histories reconciled.`);
+    if (Date.now() >= nextProviderScanAt) {
+      try {
+        const steam = await syncSteamEnrichment();
+        if (steam.enabled && (steam.profilesChecked > 0 || steam.librariesChecked > 0)) console.info(`Habitat Steam: ${steam.profilesUpdated}/${steam.profilesChecked} profiles and ${steam.librariesUpdated}/${steam.librariesChecked} libraries refreshed; ${steam.failed} deferred.`);
+        const achievements = await syncSteamAchievements();
+        if (achievements.enabled && achievements.checked > 0) console.info(`Habitat Steam achievements: ${achievements.updated}/${achievements.checked} app scans refreshed, ${achievements.unsupported} unsupported, ${achievements.privateProfiles} private, ${achievements.failed} failed${achievements.budgetExhausted ? ", daily budget exhausted" : ""}.`);
+      } catch (error) {
+        console.warn("Habitat Steam enrichment failed. Hosted monitoring remains available.");
+        console.error("[worker] Steam enrichment failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        const profiles = await syncMarvelRivalsProfiles();
+        const matches = await syncMarvelRivalsMatches();
+        if (profiles.enabled && (profiles.checked > 0 || matches.checked > 0)) console.info(`Habitat Marvel Rivals: ${profiles.updated}/${profiles.checked} profiles refreshed and ${matches.matchesSeen} match rows observed across ${matches.checked} profiles; ${profiles.failed + matches.failed} deferred.`);
+      } catch (error) {
+        console.warn("Habitat Marvel Rivals refresh failed. Hosted monitoring remains available.");
+        console.error("[worker] Marvel Rivals refresh failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        const projected = await projectGameActivities();
+        if (projected.serverSources > 0 || projected.clubSources > 0) console.info(`Habitat activity projection: ${projected.activities} activities from ${projected.serverSources} hosted and ${projected.clubSources} Club Game sources.`);
+      } catch (error) {
+        console.warn("Habitat activity projection failed. Source evidence remains intact for replay.");
+        console.error("[worker] activity projection failed:", error instanceof Error ? error.message : String(error));
+      }
+      nextProviderScanAt = Date.now() + configuration.providerScanIntervalMs;
+    }
     if (Date.now() >= nextHistoryScanAt) {
       try {
         const history = await importLegacyHistory(agent);
@@ -65,13 +96,6 @@ async function main(): Promise<void> {
       } catch (error) {
         console.warn("Habitat achievement reconciliation failed. Live monitoring remains available.");
         console.error("[worker] achievement reconciliation failed:", error instanceof Error ? error.message : String(error));
-      }
-      try {
-        const rivals = await syncMarvelRivalsProfiles();
-        if (rivals.enabled && rivals.checked > 0) console.info(`Habitat Marvel Rivals: ${rivals.updated} profiles refreshed, ${rivals.failed} deferred.`);
-      } catch (error) {
-        console.warn("Habitat Marvel Rivals refresh failed. Other monitoring remains available.");
-        console.error("[worker] Marvel Rivals refresh failed:", error instanceof Error ? error.message : String(error));
       }
       nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
     }

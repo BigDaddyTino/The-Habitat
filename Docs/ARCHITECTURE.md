@@ -34,7 +34,7 @@ There is no browser-to-agent proxy, generic command endpoint, arbitrary shell, a
 | Package | Responsibility |
 | --- | --- |
 | `apps/web` | Next.js App Router, Auth.js, member/admin surfaces, local APIs, avatar serving, Great Hall, Three.js/Rive reward presentation |
-| `apps/worker` | Agent polling, normalized persistence, legacy-history imports, Steam persona/name reconciliation, XP/quest/reward evaluation, Discord outbox, command dispatch |
+| `apps/worker` | Agent polling, normalized persistence, legacy-history imports, bounded Steam/Club provider sync, cross-game activity projection, XP/quest/reward/record evaluation, Discord outbox, command dispatch |
 | `apps/agent` | Windows process/query/log observation, bounded history extraction, and fixed allow-listed named-service actions |
 | `packages/db` | Prisma schema, migrations, seed data, generated client |
 | `packages/shared` | Server states, agent contracts, progression, reward, achievement, and record domain types |
@@ -42,6 +42,8 @@ There is no browser-to-agent proxy, generic command endpoint, arbitrary shell, a
 ## Data and truth boundaries
 
 - Registry and UI definition data can be seeded, but runtime state is live only after the worker persists an agent observation.
+- `ServerEvent` remains the hosted-world source of truth. `GameActivity` is a replay-safe evidence bridge for hosted and Club Game facts; it never fabricates a server or server event for external provider data.
+- Steam library and achievement history is enrichment only and cannot create Habitat XP. Activity-backed consumers require allow-listed provenance and stay feature-gated until provider shadow evaluation passes.
 - Unsupported game metrics are omitted instead of estimated.
 - `SLEEPING` means intentionally stopped and is distinct from `DOWN_UNEXPECTEDLY`; unavailable monitoring produces `UNKNOWN`, not an invented outage.
 - Historical evidence is normalized and deduplicated. Timestamp-paired verified sessions can contribute playtime and XP after ownership is established; sightings without verified duration remain visible but do not create XP.

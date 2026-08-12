@@ -10,6 +10,7 @@ export type WorkerConfiguration = {
   agentToken: string;
   pollIntervalMs: number;
   historyScanIntervalMs: number;
+  providerScanIntervalMs: number;
 };
 
 export function loadWorkerConfiguration(environment = process.env): WorkerConfiguration {
@@ -21,7 +22,8 @@ export function loadWorkerConfiguration(environment = process.env): WorkerConfig
   const agentUrl = parseAgentUrl(environment.HABITAT_AGENT_URL ?? "");
   const pollIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_POLL_INTERVAL_MS, "HABITAT_WORKER_POLL_INTERVAL_MS", 5_000, 300_000, 15_000);
   const historyScanIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS, "HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS", 300_000, 86_400_000, 21_600_000);
-  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs };
+  const providerScanIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS, "HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS", 60_000, 3_600_000, 300_000);
+  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs, providerScanIntervalMs };
 }
 
 function parseIntervalMs(rawValue: string | undefined, variableName: string, minimum: number, maximum: number, fallback: number): number {

@@ -3,5 +3,7 @@ export * from "./achievements";
 export * from "./records";
 export * from "./progression";
 export * from "./marvel-rivals";
+export * from "./steam-web-api";
+export * from "./game-activity";
 export * from "./rewards";
 export * from "./worlds";

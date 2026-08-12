@@ -6,6 +6,7 @@ import { createPrismaClient } from "../src/client";
 dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../.env") });
 
 const prisma = createPrismaClient();
+const crossGameConsumersEnabled = process.env.HABITAT_CROSS_GAME_CONSUMERS_ENABLED === "true";
 
 const servers = [
   { slug: "7-days-to-die", displayName: "7 Days to Die", gameType: "SEVEN_DAYS_TO_DIE", worldName: "Navezgane After Hours", maxPlayers: 12, adapterType: "gamedig", description: "The blood moon has been rescheduled for maintenance.", capabilities: { status: true, playerCount: true, playerNames: false, version: true, ping: true, deaths: false, kills: false, chat: false, adminControl: false } },
@@ -56,6 +57,12 @@ const achievements = [
   { slug: "respiratory-optional", name: "Respiratory Optional", description: "Make 15 verified visits to Enshrouded. Clean air continues to be treated as premium content.", secretDescription: "Something persistent is moving through the Shroud.", icon: "FLAME", gameType: "ENSHROUDED", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "ENSHROUDED", threshold: 15 }, isSecret: true, points: 105 },
   { slug: "dragon-under-control", name: "Dragon? Under Control.", description: "Make 15 verified visits to Dragonwilds. The question mark is part of the official safety statement.", secretDescription: "The Wild Country incident report ends with a question mark.", icon: "SHIELD", gameType: "DRAGONWILDS", rarity: "EPIC", category: "World Mastery", ruleType: "GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", gameType: "DRAGONWILDS", threshold: 15 }, isSecret: true, points: 105 },
   { slug: "do-not-tap-the-glass", name: "Do Not Tap the Glass", description: "Click the bear during a live Great Hall encounter. It objected loudly.", secretDescription: "The Great Hall window occasionally looks back.", icon: "BEAR", rarity: "EPIC", category: "Secret", ruleType: "WEB_INTERACTION", ruleConfig: { interaction: "HALL_BEAR_CLICK" }, isSecret: true, points: 125 },
+  { slug: "rivals-first-win", name: "First Rival Down", description: "Win a verified Marvel Rivals match after linking your profile.", gameKey: "MARVEL_RIVALS", rarity: "COMMON", category: "Marvel Rivals", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MATCH_WON", threshold: 1, minimumConfidence: 90 }, points: 15, enabled: crossGameConsumersEnabled },
+  { slug: "menace-to-the-multiverse", name: "Menace to the Multiverse", description: "Record 10,000 verified eliminations across supported games.", rarity: "LEGENDARY", category: "Combat", ruleType: "ACTIVITY_VALUE_SUM", ruleConfig: { version: 1, activityType: "KILLS_RECORDED", threshold: 10_000, minimumConfidence: 90 }, points: 300, enabled: crossGameConsumersEnabled },
+  { slug: "ride-or-die", name: "Ride or Die", description: "Play 500 verified matches with another linked Habitat member.", gameKey: "MARVEL_RIVALS", rarity: "LEGENDARY", category: "Social", ruleType: "SHARED_ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "SHARED_MATCH_PLAYED", threshold: 500, minimumConfidence: 90 }, points: 300, enabled: crossGameConsumersEnabled },
+  { slug: "main-character-energy", name: "Main Character Energy", description: "Earn MVP in 100 verified Marvel Rivals matches.", gameKey: "MARVEL_RIVALS", rarity: "EPIC", category: "Marvel Rivals", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MVP_EARNED", threshold: 100, minimumConfidence: 90 }, points: 175, enabled: crossGameConsumersEnabled },
+  { slug: "professional-victim", name: "Professional Victim", description: "Record 5,000 verified deaths across supported games. Persistence counts.", rarity: "EPIC", category: "Endurance", ruleType: "ACTIVITY_VALUE_SUM", ruleConfig: { version: 1, activityType: "DEATHS_RECORDED", threshold: 5_000, minimumConfidence: 90 }, points: 160, enabled: crossGameConsumersEnabled },
+  { slug: "on-a-heater", name: "On a Heater", description: "Win 10 verified Marvel Rivals matches in a row without a loss or draw.", gameKey: "MARVEL_RIVALS", rarity: "EPIC", category: "Marvel Rivals", ruleType: "ORDERED_ACTIVITY_STREAK", ruleConfig: { version: 1, successActivityType: "MATCH_WON", breakActivityTypes: ["MATCH_LOST", "MATCH_DRAWN"], threshold: 10, minimumConfidence: 90 }, points: 190, enabled: crossGameConsumersEnabled },
 ] as const;
 
 const titles = [
@@ -147,6 +154,9 @@ const records = [
   { slug: "most-verified-visits", title: "Most Verified Visits", description: "The most recorded, verified player joins across all Habitat worlds.", hall: "LEGENDS", category: "Community", valueLabel: "verified visits", ruleType: "PLAYER_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
   { slug: "most-worlds-touched", title: "Most Worlds Touched", description: "The most distinct Habitat games joined with a verified identity.", hall: "LEGENDS", category: "Exploration", valueLabel: "games explored", ruleType: "DISTINCT_GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
   { slug: "most-achievements", title: "Most Achievements", description: "The highest verified achievement count in the Habitat.", hall: "LEGENDS", category: "Achievement", valueLabel: "achievements earned", ruleType: "ACHIEVEMENT_COUNT", ruleConfig: {} },
+  { slug: "most-rivals-wins", title: "Most Marvel Rivals Wins", description: "The highest verified Marvel Rivals win count among linked Habitat members.", hall: "LEGENDS", gameKey: "MARVEL_RIVALS", category: "Marvel Rivals", valueLabel: "wins", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MATCH_WON", minimumConfidence: 90 }, comparison: "MAX", minimumSampleSize: 1, enabled: crossGameConsumersEnabled },
+  { slug: "most-rivals-eliminations", title: "Most Marvel Rivals Eliminations", description: "The highest verified total eliminations from cached Marvel Rivals match history.", hall: "LEGENDS", gameKey: "MARVEL_RIVALS", category: "Marvel Rivals", valueLabel: "eliminations", ruleType: "ACTIVITY_VALUE_SUM", ruleConfig: { version: 1, activityType: "KILLS_RECORDED", minimumConfidence: 90 }, comparison: "MAX", minimumSampleSize: 1, enabled: crossGameConsumersEnabled },
+  { slug: "most-rivals-mvps", title: "Most Marvel Rivals MVPs", description: "The highest verified Marvel Rivals MVP count among linked Habitat members.", hall: "LEGENDS", gameKey: "MARVEL_RIVALS", category: "Marvel Rivals", valueLabel: "MVP awards", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MVP_EARNED", minimumConfidence: 90 }, comparison: "MAX", minimumSampleSize: 1, enabled: crossGameConsumersEnabled },
 ] as const;
 
 async function main() {
@@ -174,13 +184,14 @@ async function main() {
         secretDescription: "secretDescription" in achievement ? achievement.secretDescription : null,
         icon: "icon" in achievement ? achievement.icon : null,
         gameType: "gameType" in achievement ? achievement.gameType : null,
+        gameKey: "gameKey" in achievement ? achievement.gameKey : null,
         rarity: achievement.rarity,
         category: achievement.category,
         ruleType: achievement.ruleType,
         ruleConfig: achievement.ruleConfig,
         isSecret: "isSecret" in achievement ? achievement.isSecret : false,
         points: achievement.points,
-        enabled: true,
+        enabled: "enabled" in achievement ? achievement.enabled : true,
       },
     });
   }
@@ -211,7 +222,10 @@ async function main() {
         valueLabel: record.valueLabel,
         ruleType: record.ruleType,
         ruleConfig: record.ruleConfig,
-        enabled: true,
+        gameKey: "gameKey" in record ? record.gameKey : null,
+        comparison: "comparison" in record ? record.comparison : "MAX",
+        minimumSampleSize: "minimumSampleSize" in record ? record.minimumSampleSize : 1,
+        enabled: "enabled" in record ? record.enabled : true,
       },
     });
   }

@@ -2,23 +2,27 @@ import { REST, Routes } from "discord.js";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 
 export type DiscordNotificationInput = {
-  serverEventId: string;
+  serverEventId?: string;
+  gameActivityId?: string;
   kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "WAKE_REQUEST";
   content: string;
 };
 
 export async function queueDiscordNotification(transaction: Prisma.TransactionClient, input: DiscordNotificationInput) {
+  if (Boolean(input.serverEventId) === Boolean(input.gameActivityId)) throw new Error("A Discord notification requires exactly one evidence source.");
+  const evidenceKey = input.serverEventId ?? input.gameActivityId!;
   const configurations = await transaction.discordGuildConfig.findMany({ where: { notificationsEnabled: true, announcementChannelId: { not: null } } });
   for (const configuration of configurations) {
     if (!configurationAllows(configuration, input.kind)) continue;
     await transaction.discordNotification.upsert({
-      where: { dedupeKey: `discord:${configuration.id}:${input.serverEventId}:${input.kind}` },
+      where: { dedupeKey: `discord:${configuration.id}:${evidenceKey}:${input.kind}` },
       create: {
         configId: configuration.id,
         serverEventId: input.serverEventId,
+        gameActivityId: input.gameActivityId,
         kind: input.kind,
         content: clampDiscordContent(input.content),
-        dedupeKey: `discord:${configuration.id}:${input.serverEventId}:${input.kind}`,
+        dedupeKey: `discord:${configuration.id}:${evidenceKey}:${input.kind}`,
       },
       update: {},
     });

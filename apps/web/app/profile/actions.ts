@@ -89,6 +89,48 @@ export async function disconnectSteam() {
   revalidatePath("/profile");
 }
 
+export async function enableSteamEnrichment(formData: FormData) {
+  const user = await requireRole("USER");
+  if (formData.get("consent") !== "on") throw new Error("Consent is required before Steam enrichment can be enabled.");
+  const account = await db.userSocialAccount.findFirst({ where: { userId: user.id, platform: "STEAM", verifiedAt: { not: null }, providerAccountId: { not: null } }, select: { id: true } });
+  if (!account) throw new Error("Verify a Steam account before enabling enrichment.");
+  const now = new Date();
+  await db.$transaction(async (transaction) => {
+    const profile = await transaction.steamProfile.upsert({
+      where: { socialAccountId: account.id },
+      create: { socialAccountId: account.id, enrichmentEnabledAt: now, profileNextAttemptAt: now, libraryNextAttemptAt: now },
+      update: { enrichmentEnabledAt: now, profileNextAttemptAt: now, libraryNextAttemptAt: now },
+    });
+    await transaction.auditLog.create({ data: { actorUserId: user.id, action: "STEAM_ENRICHMENT_ENABLED", entityType: "SteamProfile", entityId: profile.id, after: { consentedAt: now.toISOString(), displayPublic: profile.displayPublic } } });
+  });
+  revalidatePath("/profile");
+}
+
+export async function disableSteamEnrichment() {
+  const user = await requireRole("USER");
+  const profile = await db.steamProfile.findFirst({ where: { socialAccount: { is: { userId: user.id, platform: "STEAM" } } }, select: { id: true, _count: { select: { libraryGames: true } } } });
+  if (!profile) return;
+  await db.$transaction([
+    db.steamProfile.delete({ where: { id: profile.id } }),
+    db.auditLog.create({ data: { actorUserId: user.id, action: "STEAM_ENRICHMENT_DISABLED_AND_DELETED", entityType: "SteamProfile", entityId: profile.id, before: { cachedLibraryGames: profile._count.libraryGames } } }),
+  ]);
+  revalidatePath("/profile");
+}
+
+export async function updateSteamEnrichmentVisibility(formData: FormData) {
+  const user = await requireRole("USER");
+  const displayPublic = formData.get("displayPublic") === "on";
+  const profile = await db.steamProfile.findFirst({ where: { socialAccount: { is: { userId: user.id, platform: "STEAM" } } }, select: { id: true } });
+  if (!profile) throw new Error("Steam enrichment is not enabled.");
+  await db.$transaction([
+    db.steamProfile.update({ where: { id: profile.id }, data: { displayPublic } }),
+    db.auditLog.create({ data: { actorUserId: user.id, action: "STEAM_ENRICHMENT_VISIBILITY_UPDATED", entityType: "SteamProfile", entityId: profile.id, after: { displayPublic } } }),
+  ]);
+  revalidatePath("/profile");
+  const member = await db.user.findUnique({ where: { id: user.id }, select: { username: true } });
+  if (member?.username) revalidatePath(`/members/${member.username}`);
+}
+
 export async function equipCosmetic(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = cosmeticSchema.safeParse({ kind: formData.get("kind"), code: formData.get("code") });

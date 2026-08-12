@@ -11,6 +11,13 @@ HABITAT_AGENT_URL=http://<MartServ102 private LAN IP>:4317
 HABITAT_AGENT_TOKEN=<the same token used by the MartServ102 agent>
 HABITAT_WORKER_POLL_INTERVAL_MS=15000
 HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS=21600000
+HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS=300000
+STEAM_WEB_API_KEY=<optional private key>
+STEAM_DATA_STORAGE_COUNTRY=<required before Steam enrichment runs>
+STEAM_WEB_API_DAILY_REQUEST_BUDGET=5000
+MARVEL_RIVALS_API_KEY=<optional private key>
+MARVEL_RIVALS_DAILY_REQUEST_BUDGET=2500
+HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false
 ```
 
 The worker rejects public, HTTPS, credentialed, or path-bearing agent URLs. Its token stays in `.env`; it is not typed into a PowerShell variable for normal operation.
@@ -29,6 +36,8 @@ The first successful cycle creates live runtime entries, metric samples, and ini
 When a server configured as `SLEEPING` is observed with a verified running process, the worker automatically promotes its desired state to `ONLINE`. No routine admin edit is needed when a server comes online. A later missing process is `DOWN_UNEXPECTEDLY` unless the Habitat initiated the stop or receives another trusted shutdown signal.
 
 The same worker also performs bounded history imports, name/persona reconciliation, XP/quest/achievement/record evaluation, reward reconciliation after claims, Discord outbox delivery when configured, and audited command dispatch. These jobs use replay-safe database dedupe keys; they still require real, configured sources before producing game-specific data.
+
+Provider scans have their own due time and do not delay the hosted monitoring loop. Missing keys disable only that provider. Steam enrichment runs only for a verified Steam account whose member separately opted in, and it also requires the configured storage-country disclosure. Both providers reserve requests against PostgreSQL-backed UTC-day budgets before calling upstream APIs. Keep `HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false` until real provider data has been shadow-reviewed; setting it true requires rerunning the database seed and restarting the worker.
 
 ## Windows Service
 
