@@ -20,6 +20,39 @@ test("Valheim legacy parser credits only paired Steam sessions", () => {
   assert.equal(items[1]?.durationSeconds, null);
 });
 
+test("Valheim character spawns name their paired Steam session without guessing concurrent joins", () => {
+  const items = parseLegacyHistory("VALHEIM_LOG", [
+    "[Info   : Unity Log] 08/11/2026 17:46:46: Got connection SteamID 76561199202467550",
+    "[Info   : Unity Log] 08/11/2026 17:47:06: Got character ZDOID from Meriwether : 2117579024:18",
+    "[Info   : Unity Log] 08/11/2026 20:55:11: Closing socket 76561199202467550",
+    "[Info   : Unity Log] 08/11/2026 21:00:00: Got connection SteamID 76561198000000001",
+    "[Info   : Unity Log] 08/11/2026 21:00:05: Got connection SteamID 76561198000000002",
+    "[Info   : Unity Log] 08/11/2026 21:00:40: Got character ZDOID from Ambiguous One : 111:1",
+    "[Info   : Unity Log] 08/11/2026 21:00:50: Got character ZDOID from Ambiguous Two : 112:1",
+  ].join("\n"));
+  const named = items.find((item) => item.externalAccountId === "76561199202467550");
+  assert.equal(named?.kind, "SESSION");
+  assert.equal(named?.displayName, "Meriwether");
+  assert.ok(items.filter((item) => item.externalAccountId !== "76561199202467550").every((item) => item.displayName === null));
+});
+
+test("Valheim character names observed in the server log enrich chronicle history directly", () => {
+  const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
+    "[Info   : Unity Log] 08/11/2026 17:46:46: Got connection SteamID 76561199202467550",
+    "[Info   : Unity Log] 08/11/2026 17:47:06: Got character ZDOID from Meriwether : 2117579024:18",
+    "[Info   : Unity Log] 08/11/2026 20:55:11: Closing socket 76561199202467550",
+  ].join("\n"));
+  const chronicleContents = "2026-08-12T20:48:22.388Z\tDEATH\tMeriwether\tfell in the swamp.";
+  const sources: AgentLegacyHistorySource[] = [
+    { kind: "VALHEIM_LOG", label: "server", available: true, truncated: false, filesScanned: 1, evidence: steamEvidence, events: [] },
+    { kind: "HABITAT_CHRONICLE_LOG", label: "chronicle", available: true, truncated: false, filesScanned: 1, evidence: parseLegacyHistory("HABITAT_CHRONICLE_LOG", chronicleContents), events: parseLegacyHistoryEvents("HABITAT_CHRONICLE_LOG", chronicleContents) },
+  ];
+  const chronicle = correlateValheimSteamIdentities(sources).find((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  assert.equal(chronicle?.events[0]?.eventType, "PLAYER_DIED");
+  assert.equal(chronicle?.events[0]?.externalAccountId, "76561199202467550");
+  assert.equal(chronicle?.evidence[0]?.externalAccountId, "76561199202467550");
+});
+
 test("Valheim correlates only one-to-one Steam and character join timestamps", () => {
   const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
     "08/10/2026 20:00:00: Got connection SteamID 76561198000000000",

@@ -8,6 +8,8 @@ const steamIdPattern = /\b(?:steam[_ :])?(7656119\d{10})\b/i;
 const relevantSteamLine = /\b(join(?:ed|ing)?|connect(?:ed|ion|ing)?|login|log in|authenticated|player[ _-]?id)\b/i;
 const valheimJoin = /\bGot connection SteamID\s+(7656119\d{10})\b/i;
 const valheimLeave = /\bClosing socket\s+(7656119\d{10})\b/i;
+const valheimCharacterSpawn = /\bGot character ZDOID from (.{1,80}?) : -?\d+:-?\d+/i;
+const valheimSpawnPairWindowMs = 120_000;
 
 export async function readLegacyHistory(server: AgentServerConfiguration): Promise<AgentLegacyHistory> {
   const parsedSources = await Promise.all((server.history ?? []).map(readSource));
@@ -65,37 +67,44 @@ const valheimCorrelationWindowMs = 30_000;
 
 /**
  * Valheim's server log proves Steam ownership while HabitatCore records the
- * visible character name. Correlate only mutually unique join timestamps, then
+ * visible character name. Prefer direct SteamID/character pairings observed in
+ * the server log itself, fall back to mutually unique join timestamps, then
  * require a one-to-one SteamID/name mapping across the complete bounded scan.
  */
 export function correlateValheimSteamIdentities(sources: AgentLegacyHistorySource[]): AgentLegacyHistorySource[] {
-  const steamStarts = sources
+  const valheimEvidence = sources
     .filter((source) => source.available && source.kind === "VALHEIM_LOG")
     .flatMap((source) => source.evidence)
-    .filter((item) => item.externalProvider === "STEAM" && item.externalAccountId)
-    .map((item) => ({ steamId: item.externalAccountId!, occurredAt: new Date(item.occurredAt).getTime() }));
+    .filter((item) => item.externalProvider === "STEAM" && item.externalAccountId);
+  const steamStarts = valheimEvidence.map((item) => ({ steamId: item.externalAccountId!, occurredAt: new Date(item.occurredAt).getTime() }));
+  const directPairs = valheimEvidence
+    .filter((item) => item.displayName)
+    .map((item) => ({ steamId: item.externalAccountId!, normalizedName: item.displayName!.trim().toLocaleLowerCase("en-US") }));
   const chronicleJoins = sources
     .filter((source) => source.available && source.kind === "HABITAT_CHRONICLE_LOG")
     .flatMap((source) => source.events)
     .filter((item) => item.eventType === "PLAYER_JOINED")
     .map((item) => ({ displayName: item.displayName, occurredAt: new Date(item.occurredAt).getTime() }));
-  if (steamStarts.length === 0 || chronicleJoins.length === 0) return sources;
+  if (directPairs.length === 0 && (steamStarts.length === 0 || chronicleJoins.length === 0)) return sources;
 
   const nameToSteamIds = new Map<string, Set<string>>();
   const steamIdToNames = new Map<string, Set<string>>();
+  const addPair = (normalizedName: string, steamId: string) => {
+    const steamIds = nameToSteamIds.get(normalizedName) ?? new Set<string>();
+    steamIds.add(steamId);
+    nameToSteamIds.set(normalizedName, steamIds);
+    const names = steamIdToNames.get(steamId) ?? new Set<string>();
+    names.add(normalizedName);
+    steamIdToNames.set(steamId, names);
+  };
+  for (const pair of directPairs) addPair(pair.normalizedName, pair.steamId);
   for (const chronicle of chronicleJoins) {
     const steamCandidates = steamStarts.filter((item) => Math.abs(item.occurredAt - chronicle.occurredAt) <= valheimCorrelationWindowMs);
     if (steamCandidates.length !== 1) continue;
     const steam = steamCandidates[0]!;
     const chronicleCandidates = chronicleJoins.filter((item) => Math.abs(item.occurredAt - steam.occurredAt) <= valheimCorrelationWindowMs);
     if (chronicleCandidates.length !== 1) continue;
-    const normalizedName = chronicle.displayName.trim().toLocaleLowerCase("en-US");
-    const steamIds = nameToSteamIds.get(normalizedName) ?? new Set<string>();
-    steamIds.add(steam.steamId);
-    nameToSteamIds.set(normalizedName, steamIds);
-    const names = steamIdToNames.get(steam.steamId) ?? new Set<string>();
-    names.add(normalizedName);
-    steamIdToNames.set(steam.steamId, names);
+    addPair(chronicle.displayName.trim().toLocaleLowerCase("en-US"), steam.steamId);
   }
 
   const verifiedMapping = new Map<string, string>();
@@ -278,28 +287,53 @@ function parseHabitatChronicleLog(contents: string): { evidence: AgentLegacyPlay
 
 function parseValheimLog(contents: string): AgentLegacyPlayerEvidence[] {
   const evidence: AgentLegacyPlayerEvidence[] = [];
-  const openSessions = new Map<string, Array<{ occurredAt: string; record: string }>>();
+  const openSessions = new Map<string, Array<{ occurredAt: string; record: string; displayName: string | null }>>();
+  // A Steam connection is followed by that player's first "Got character ZDOID"
+  // spawn. Pair them only while exactly one connection is awaiting its character,
+  // and never against respawns of an already-named character.
+  const awaitingCharacter: Array<{ steamId: string; occurredAtMs: number }> = [];
+  const spawnedNames = new Set<string>();
   for (const line of contents.split(/\r?\n/)) {
     const occurredAt = parseLineTimestamp(line);
     if (!occurredAt) continue;
     const joined = valheimJoin.exec(line);
     if (joined?.[1]) {
       const pending = openSessions.get(joined[1]) ?? [];
-      pending.push({ occurredAt, record: line });
+      pending.push({ occurredAt, record: line, displayName: null });
       openSessions.set(joined[1], pending);
+      awaitingCharacter.push({ steamId: joined[1], occurredAtMs: new Date(occurredAt).getTime() });
+      continue;
+    }
+    const spawned = valheimCharacterSpawn.exec(line);
+    if (spawned?.[1]) {
+      const displayName = spawned[1].trim();
+      const spawnedAtMs = new Date(occurredAt).getTime();
+      while (awaitingCharacter.length > 0 && spawnedAtMs - awaitingCharacter[0]!.occurredAtMs > valheimSpawnPairWindowMs) awaitingCharacter.shift();
+      if (!isSafeDisplayName(displayName) || spawnedNames.has(displayName.toLocaleLowerCase("en-US"))) continue;
+      if (awaitingCharacter.length === 1) {
+        const candidate = awaitingCharacter.shift()!;
+        const pending = openSessions.get(candidate.steamId);
+        const session = pending?.[pending.length - 1];
+        if (session && session.displayName === null) session.displayName = displayName;
+        spawnedNames.add(displayName.toLocaleLowerCase("en-US"));
+      } else if (awaitingCharacter.length > 1) {
+        awaitingCharacter.length = 0;
+      }
       continue;
     }
     const left = valheimLeave.exec(line);
     if (!left?.[1]) continue;
+    const awaitingIndex = awaitingCharacter.findIndex((candidate) => candidate.steamId === left[1]);
+    if (awaitingIndex >= 0) awaitingCharacter.splice(awaitingIndex, 1);
     const pending = openSessions.get(left[1]);
     const joinedSession = pending?.shift();
     if (!joinedSession) continue;
     const durationSeconds = Math.floor((new Date(occurredAt).getTime() - new Date(joinedSession.occurredAt).getTime()) / 1_000);
     if (durationSeconds < 0 || durationSeconds > 7 * 24 * 60 * 60) continue;
-    evidence.push(makeEvidence("SESSION", left[1], joinedSession.occurredAt, occurredAt, durationSeconds, `${joinedSession.record}\n${line}`));
+    evidence.push({ ...makeEvidence("SESSION", left[1], joinedSession.occurredAt, occurredAt, durationSeconds, `${joinedSession.record}\n${line}`), displayName: joinedSession.displayName });
   }
   for (const [steamId, pending] of openSessions) {
-    for (const session of pending) evidence.push(makeEvidence("PARTICIPATION", steamId, session.occurredAt, null, null, session.record));
+    for (const session of pending) evidence.push({ ...makeEvidence("PARTICIPATION", steamId, session.occurredAt, null, null, session.record), displayName: session.displayName });
   }
   return evidence;
 }
