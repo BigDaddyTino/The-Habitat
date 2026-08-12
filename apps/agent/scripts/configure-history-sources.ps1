@@ -27,7 +27,11 @@ if ($null -eq $valheimServer) {
   throw "Agent configuration does not contain the valheim server."
 }
 
-$history = @($valheimServer.history)
+$history = @()
+$historyProperty = $valheimServer.PSObject.Properties['history']
+if ($null -ne $historyProperty -and $null -ne $historyProperty.Value) {
+  $history = @($historyProperty.Value | Where-Object { $null -ne $_ })
+}
 $existingSource = $history | Where-Object { $_.kind -eq "VALHEIM_LOG" } | Select-Object -First 1
 if ($null -eq $existingSource) {
   $history += [pscustomobject]@{

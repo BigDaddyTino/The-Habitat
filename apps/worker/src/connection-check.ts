@@ -84,6 +84,7 @@ async function main() {
           if (sources.length === 0) failures.push(`${serverKey}: missing ${kind}`);
           else if (!sources.some((source) => source.available)) failures.push(`${serverKey}: ${kind} unavailable`);
           else if (sources.some((source) => source.truncated)) failures.push(`${serverKey}: ${kind} scan truncated`);
+          else if (sources.every((source) => source.evidence.length === 0 && source.events.length === 0)) failures.push(`${serverKey}: ${kind} is readable but parsed zero player records (log format may not match the parser)`);
         }
       }
       if (failures.length) throw new Error(failures.join("; "));

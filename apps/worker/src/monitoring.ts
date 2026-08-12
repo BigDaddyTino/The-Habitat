@@ -317,8 +317,8 @@ async function synchronizeNamedPlayerPresence(transaction: PresenceTransaction, 
       ? { externalProvider: "STEAM" as const, externalAccountId: player.externalAccountId }
       : null;
     const identity = await transaction.playerIdentity.upsert({
-      where: { gameType_providerKey: { gameType: "PALWORLD", providerKey: player.providerKey } },
-      create: { gameType: "PALWORLD", providerKey: player.providerKey, displayName: player.displayName, serverId: server.id, ...(externalIdentity ?? {}) },
+      where: { gameType_providerKey: { gameType: server.gameType as never, providerKey: player.providerKey } },
+      create: { gameType: server.gameType as never, providerKey: player.providerKey, displayName: player.displayName, serverId: server.id, ...(externalIdentity ?? {}) },
       update: { displayName: player.displayName, serverId: server.id, ...(externalIdentity ?? {}) },
       select: { id: true, userId: true },
     });

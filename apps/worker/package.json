@@ -10,6 +10,7 @@
     "check:connections": "tsx src/connection-check.ts",
     "reconcile-achievements": "tsx src/reconcile-achievements.ts",
     "reconcile-identity-names": "tsx src/reconcile-identity-names.ts",
+    "cleanup-duplicate-joins": "tsx src/cleanup-duplicate-joins.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test src/*.test.ts"

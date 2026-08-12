@@ -67,7 +67,12 @@ async function importEvidence(
   }
 
   if (item.kind === "SESSION" && item.endedAt && item.durationSeconds !== null) {
-    const joinEvent = await transaction.serverEvent.upsert({
+    // The same physical join can be recorded by two sources: the game's own log
+    // (this SESSION) and the HabitatCore chronicle. Once identity correlation has
+    // attached both to one identity, keep the chronicle join instead of doubling it.
+    const existingJoin = await transaction.serverEvent.findUnique({ where: { dedupeKey: `legacy-join:${server.id}:${item.sourceRecordHash}` }, select: { id: true } });
+    const chronicleJoin = existingJoin ? null : await findCrossSourceJoin(transaction, server.id, identity.id, new Date(item.occurredAt), "HABITAT_NATIVE_HISTORY");
+    const joinEvent = chronicleJoin ?? await transaction.serverEvent.upsert({
       where: { dedupeKey: `legacy-join:${server.id}:${item.sourceRecordHash}` },
       create: {
         serverId: server.id,
@@ -126,6 +131,7 @@ async function importHistoricalEvent(
     }
     return false;
   }
+  if (item.eventType === "PLAYER_JOINED" && await findCrossSourceJoin(transaction, server.id, identity.id, new Date(item.occurredAt), "LEGACY_HISTORY_IMPORT")) return false;
   await transaction.serverEvent.create({
     data: {
       serverId: server.id,
@@ -142,6 +148,22 @@ async function importHistoricalEvent(
     },
   });
   return true;
+}
+
+/** Matches the agent's Valheim chronicle/Steam-log correlation window. */
+const crossSourceJoinWindowMs = 30_000;
+
+async function findCrossSourceJoin(transaction: Prisma.TransactionClient, serverId: string, playerIdentityId: string, occurredAt: Date, source: string) {
+  return transaction.serverEvent.findFirst({
+    where: {
+      serverId,
+      playerIdentityId,
+      eventType: "PLAYER_JOINED",
+      source,
+      occurredAt: { gte: new Date(occurredAt.getTime() - crossSourceJoinWindowMs), lte: new Date(occurredAt.getTime() + crossSourceJoinWindowMs) },
+    },
+    select: { id: true },
+  });
 }
 
 async function removeEmptyUnclaimedIdentity(transaction: Prisma.TransactionClient, identityId: string) {

@@ -184,9 +184,10 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies
 - [x] Replay-safe historical catalogue reconciliation for claimed members with retroactive rewards and suppressed Discord announcements
 - [x] Live bounded history sources deployed on MartServ102: Valheim HabitatCore Chronicle, Project Zomboid named Steam connections, Enshrouded accepted Steam sessions, 7 Days persistent-player XML, and Dragonwilds session logs
-- [ ] MartServ102 Valheim WinSW `VALHEIM_LOG` activation remains pending an elevated run of `configure-history-sources.ps1`; the connection audit now fails loudly until that exact-ID source is live and untruncated
+- [x] MartServ102 Valheim WinSW `VALHEIM_LOG` activated and verified untruncated through the authenticated connection audit; the first replay recovered 18 Steam-backed records and 16 timed sessions, and an immediate second replay inserted zero duplicates
 - [x] Recovered unclaimed rosters and Chronicle events imported without premature XP: 6 Valheim names, 4 Project Zomboid names, 4 Enshrouded Steam identities, and 2 named 7 Days Steam identities
-- [x] Palworld official game-data snapshot support enabled for the next normal server start, adding offline player actors to the roster without treating them as currently online
+- [x] Palworld official game-data snapshot support enabled and bounded without treating returned actors as currently online; live verification currently returns zero player actors, so this moment-in-time world snapshot is not represented as complete persisted legacy history
+- [ ] Durable Palworld legacy-player recovery remains a real coverage gap: there is no configured historical source, and safe save-file extraction is still required for characters absent from the live player and game-data snapshots
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
 - [ ] Dragonwilds retained dedicated-server logs contain no player-session lines yet; the deployed collector will ingest authenticated account/name join and leave signals when real sessions occur
