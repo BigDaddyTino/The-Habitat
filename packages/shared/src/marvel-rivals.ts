@@ -11,10 +11,22 @@ export type MarvelRivalsProfileData = {
   uid: string;
   displayName: string;
   isPrivate: boolean;
+  /**
+   * False when the provider answered successfully but holds no career
+   * aggregates. Cumulative fields stay null in that case so an absent career
+   * is never displayed as a genuine zero.
+   */
+  hasCareerData: boolean;
   playerLevel: number | null;
   rankName: string | null;
   peakRankName: string | null;
   rankScore: number | null;
+  /** Best rating the provider has ever recorded, across all reported seasons. */
+  peakRankScore: number | null;
+  /** Competitive wins summed from per-season ranked records. */
+  rankedWins: number | null;
+  /** Number of seasons the provider reports a competitive record for. */
+  rankedSeasons: number | null;
   totalMatches: number | null;
   totalWins: number | null;
   overallKd: number | null;
@@ -156,16 +168,24 @@ export function parseMarvelRivalsProfile(payload: unknown): MarvelRivalsProfileD
     .slice(0, 3);
   const updates = asRecord(root.updates);
 
+  const totalMatches = asNumber(overall.total_matches);
+  const totalWins = asNumber(overall.total_wins);
+  const hasCareerData = Boolean((totalMatches ?? 0) > 0 || (totalWins ?? 0) > 0 || heroes.length > 0 || kills > 0 || deaths > 0);
+
   return {
     uid,
     displayName,
     isPrivate: root.isPrivate === true || player.isPrivate === true,
+    hasCareerData,
     playerLevel: asNumber(player.level),
     rankName: asString(rank.rank) ?? asString(latestRank?.rank),
     peakRankName: asString(root.peak_rank) ?? null,
     rankScore: asNumber(latestRank?.points) ?? asNumber(latestRank?.score_progression && asRecord(latestRank.score_progression).total_score),
-    totalMatches: asNumber(overall.total_matches),
-    totalWins: asNumber(overall.total_wins),
+    peakRankScore: null,
+    rankedWins: null,
+    rankedSeasons: null,
+    totalMatches: hasCareerData ? totalMatches : null,
+    totalWins: hasCareerData ? totalWins : null,
     overallKd: ratio(kills, deaths),
     overallKda: ratio(kills + assists, deaths),
     topHeroes: heroes,

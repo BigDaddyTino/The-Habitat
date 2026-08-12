@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { isValidMarvelRivalsQuery, MarvelRivalsApiError, resolveMarvelRivalsProvider, type MarvelRivalsProfileData, type MarvelRivalsProvider } from "@habitat/shared";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/authorization";
+import { getClubGameBySlug } from "@/lib/club-games";
 import { createHash } from "node:crypto";
 
 const db = getPrismaClient();
@@ -17,6 +18,9 @@ function errorMessage(error: unknown) {
   return "The profile could not be linked right now. Nothing was changed.";
 }
 
+/** Explains an empty career overview without implying the member never played. */
+const noProviderCareerDataMessage = "The stats provider holds no career overview for this profile yet. Ranked season records are shown where available.";
+
 function profileFields(profile: MarvelRivalsProfileData, refreshIntervalMs: number) {
   const now = new Date();
   const providerUpdatedAt = profile.providerUpdatedAt ? new Date(profile.providerUpdatedAt) : null;
@@ -27,12 +31,15 @@ function profileFields(profile: MarvelRivalsProfileData, refreshIntervalMs: numb
     lastSyncedAt: now,
     nextAttemptAt: new Date(now.getTime() + refreshIntervalMs),
     consecutiveFailures: 0,
-    syncStatus: "READY" as const,
-    syncError: null,
+    syncStatus: profile.hasCareerData ? ("READY" as const) : ("NO_PROVIDER_DATA" as const),
+    syncError: profile.hasCareerData ? null : noProviderCareerDataMessage,
     playerLevel: profile.playerLevel,
     rankName: profile.rankName,
     peakRankName: profile.peakRankName,
     rankScore: profile.rankScore,
+    peakRankScore: profile.peakRankScore,
+    rankedWins: profile.rankedWins,
+    rankedSeasons: profile.rankedSeasons,
     totalMatches: profile.totalMatches,
     totalWins: profile.totalWins,
     overallKd: profile.overallKd,
@@ -88,10 +95,49 @@ export async function linkMarvelRivalsProfile(_previous: RivalsLinkState, formDa
     ]);
     revalidatePath(roomPath);
     revalidatePath("/profile");
-    return { status: "success", message: `${result.displayName} is now on the Assembly Room board.` };
+    // Linking alone neither publishes stats nor seats the member: both are
+    // separate, explicit choices, so the message must not claim otherwise.
+    return { status: "success", message: `${result.displayName} is linked and private. Share your stats or take a squad seat below whenever you want to.` };
   } catch (error) {
     return { status: "error", message: errorMessage(error) };
   }
+}
+
+export type SeatState = { status: "idle" | "success" | "error"; message: string };
+
+/**
+ * Squad seats are claimed by hand and released the same way. Occupying a seat is
+ * deliberately independent of stat visibility so a member can share numbers
+ * without joining the roster, or hold a seat while keeping stats private.
+ */
+export async function claimSquadSeat(): Promise<void> {
+  const user = await requireRole("USER");
+  const game = getClubGameBySlug("marvel-rivals");
+  if (!game) return;
+  await db.$transaction(async (transaction) => {
+    const profile = await transaction.clubGameProfile.findUnique({ where: { userId_gameType: { userId: user.id, gameType: "MARVEL_RIVALS" } }, select: { id: true, rosterSeatClaimedAt: true } });
+    if (!profile || profile.rosterSeatClaimedAt) return;
+    const seated = await transaction.clubGameProfile.count({ where: { gameType: "MARVEL_RIVALS", rosterSeatClaimedAt: { not: null } } });
+    if (seated >= game.squadSize) return;
+    const claimedAt = new Date();
+    await transaction.clubGameProfile.update({ where: { id: profile.id }, data: { rosterSeatClaimedAt: claimedAt } });
+    await transaction.auditLog.create({ data: { actorUserId: user.id, action: "CLUB_GAME_SEAT_CLAIMED", entityType: "ClubGameProfile", entityId: profile.id, after: { gameType: "MARVEL_RIVALS", rosterSeatClaimedAt: claimedAt.toISOString() } } });
+  });
+  revalidatePath(roomPath);
+  revalidatePath("/profile");
+}
+
+export async function releaseSquadSeat(): Promise<void> {
+  const user = await requireRole("USER");
+  const profile = await db.clubGameProfile.findUnique({ where: { userId_gameType: { userId: user.id, gameType: "MARVEL_RIVALS" } }, select: { id: true, rosterSeatClaimedAt: true } });
+  const heldSince = profile?.rosterSeatClaimedAt;
+  if (!profile || !heldSince) return;
+  await db.$transaction(async (transaction) => {
+    await transaction.clubGameProfile.update({ where: { id: profile.id }, data: { rosterSeatClaimedAt: null } });
+    await transaction.auditLog.create({ data: { actorUserId: user.id, action: "CLUB_GAME_SEAT_RELEASED", entityType: "ClubGameProfile", entityId: profile.id, before: { rosterSeatClaimedAt: heldSince.toISOString() }, after: { rosterSeatClaimedAt: null } } });
+  });
+  revalidatePath(roomPath);
+  revalidatePath("/profile");
 }
 
 export async function updateMarvelRivalsVisibility(formData: FormData): Promise<void> {

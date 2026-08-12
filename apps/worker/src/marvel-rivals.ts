@@ -66,6 +66,9 @@ function dateOrNull(value: string | null) {
   return Number.isNaN(result.getTime()) ? null : result;
 }
 
+/** Explains an empty career overview without implying the member never played. */
+export const NO_PROVIDER_CAREER_DATA_MESSAGE = "The stats provider holds no career overview for this profile yet. Ranked season records are shown where available.";
+
 function profileFields(profile: MarvelRivalsProfileData, now: Date, refreshIntervalMs: number) {
   return {
     displayName: profile.displayName,
@@ -73,12 +76,15 @@ function profileFields(profile: MarvelRivalsProfileData, now: Date, refreshInter
     lastSyncedAt: now,
     nextAttemptAt: new Date(now.getTime() + refreshIntervalMs),
     consecutiveFailures: 0,
-    syncStatus: "READY" as const,
-    syncError: null,
+    syncStatus: profile.hasCareerData ? ("READY" as const) : ("NO_PROVIDER_DATA" as const),
+    syncError: profile.hasCareerData ? null : NO_PROVIDER_CAREER_DATA_MESSAGE,
     playerLevel: profile.playerLevel,
     rankName: profile.rankName,
     peakRankName: profile.peakRankName,
     rankScore: profile.rankScore,
+    peakRankScore: profile.peakRankScore,
+    rankedWins: profile.rankedWins,
+    rankedSeasons: profile.rankedSeasons,
     totalMatches: profile.totalMatches,
     totalWins: profile.totalWins,
     overallKd: profile.overallKd,

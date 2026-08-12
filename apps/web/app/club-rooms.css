@@ -131,9 +131,11 @@
 .rivals-link-form button:disabled { border-color:#4b4d46; background:#20231f; color:#777b73; cursor:not-allowed; }
 .rivals-form-message { grid-column:1/-1; margin:2px 0 0; color:#aaa99d; font-size:10px; }
 .rivals-form-message.success { color:#aabf98; }.rivals-form-message.error { color:#d2a184; }
-.rivals-profile-actions { display:flex; justify-content:flex-end; gap:8px; }
+.rivals-profile-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; }
 .rivals-profile-actions form { margin:0; }
 .rivals-profile-actions button.quiet { border-color:#4e524c; background:#151915; color:#9b9d92; }
+.rivals-seat-control { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; }
+.rivals-seat-state { display:inline-flex; align-items:center; gap:5px; color:#aaa99d; font-size:10px; }
 .rivals-sign-in { justify-self:end; }
 .club-dispatches { margin-top:14px; margin-bottom:14px; }
 
@@ -180,6 +182,8 @@
   .rivals-form-message { grid-column:auto; }
   .rivals-profile-actions { align-items:stretch; flex-direction:column; }
   .rivals-profile-actions button,.rivals-sign-in { width:100%; justify-self:stretch; }
+  .rivals-seat-control { align-items:flex-start; flex-direction:column; }
+  .rivals-seat-control form { width:100%; }
   .club-room-status { align-items:flex-start; flex-direction:column; }
 }
 

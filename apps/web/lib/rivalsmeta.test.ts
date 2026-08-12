@@ -73,6 +73,10 @@ test("normalizes a rivalsmeta profile into the shared Rivals shape", () => {
   assert.deepEqual(profile.topHeroes[0], { name: "Rocket Raccoon", matches: 34, wins: 20, kills: 89, deaths: 28, assists: 145 });
   assert.equal(profile.topHeroes[1]?.name, "Thor");
   assert.equal(profile.providerUpdatedAt, new Date(1_786_248_769 * 1_000).toISOString());
+  assert.equal(profile.hasCareerData, true);
+  assert.equal(profile.rankedWins, 293);
+  assert.equal(profile.rankedSeasons, 2);
+  assert.equal(profile.peakRankScore, 5_401);
 });
 
 test("treats restricted career settings as a private profile", async () => {
@@ -80,6 +84,55 @@ test("treats restricted career settings as a private profile", async () => {
   assert.equal(parseRivalsmetaProfile(payload).isPrivate, true);
   const fetcher: RivalsmetaFetch = async () => ({ status: 200, ok: true, json: async () => payload });
   await assert.rejects(() => fetchRivalsmetaProfile("670067075", fetcher), (error: unknown) => error instanceof MarvelRivalsApiError && error.code === "PRIVATE");
+});
+
+test("detects the per-scope career visibility flags the provider actually sends", () => {
+  // Real payloads suffix these flags per data scope and use 2 for friends-only,
+  // so an unsuffixed, zero-only check silently passed restricted profiles.
+  const friendsOnly = profilePayload({ career_settings: { BattleHistoryIsVisibleToOther: 2, CareerOverviewIsVisibleToOther_1: 2, CareerHeroDataIsVisibleToOther_2: 2 } });
+  assert.equal(parseRivalsmetaProfile(friendsOnly).isPrivate, true);
+  const partiallyHidden = profilePayload({ career_settings: { TimelineIsVisibleToOther: 1, BattleHistoryIsVisibleToOther: 1, CareerOverviewIsVisibleToOther_1: 1, CareerHeroDataIsVisibleToOther_4: 0 } });
+  assert.equal(parseRivalsmetaProfile(partiallyHidden).isPrivate, true);
+  const fullyPublic = profilePayload({ career_settings: { TimelineIsVisibleToOther: 1, BattleHistoryIsVisibleToOther: 1, CareerOverviewIsVisibleToOther_1: 1, CareerHeroDataIsVisibleToOther_1: 1 } });
+  assert.equal(parseRivalsmetaProfile(fullyPublic).isPrivate, false);
+});
+
+test("keeps an unpulled career null instead of reporting it as zeroes", () => {
+  // The provider answers 200 with every aggregate at 0 and empty hero maps for
+  // players whose career it has never pulled. That absence must not read as a
+  // genuine record of zero matches, while season records stay usable.
+  const payload = profilePayload({
+    stats: { total_matches: 0, total_wins: 0, ranked: { total_kills: 0, total_assists: 0, total_deaths: 0 }, unranked: { total_kills: 0, total_assists: 0, total_deaths: 0 } },
+    heroes_ranked: {},
+    heroes_unranked: {},
+  });
+  const profile = parseRivalsmetaProfile(payload);
+  assert.equal(profile.hasCareerData, false);
+  assert.equal(profile.totalMatches, null);
+  assert.equal(profile.totalWins, null);
+  assert.deepEqual(profile.topHeroes, []);
+  assert.equal(profile.rankedWins, 293);
+  assert.equal(profile.rankName, "Grandmaster III");
+});
+
+test("reads season records wrapped in the rank_game envelope", () => {
+  const payload = profilePayload({
+    player: {
+      _id: 670067075,
+      info_update_time: 1_734_877_968,
+      info: {
+        aid: "670067075",
+        name: "LodgeBear",
+        level: 29,
+        rank_game_season: { "1001002": { rank_game: { level: 5, rank_score: 3_428.01, max_level: 5, max_rank_score: 3_440.89, update_time: 1_736_731_050, win_count: 29 } } },
+      },
+    },
+  });
+  const profile = parseRivalsmetaProfile(payload);
+  assert.equal(profile.rankedWins, 29);
+  assert.equal(profile.rankedSeasons, 1);
+  assert.equal(profile.peakRankScore, 3_441);
+  assert.equal(profile.rankName, "Silver II");
 });
 
 test("maps the competitive ladder levels the way rivalsmeta renders them", () => {

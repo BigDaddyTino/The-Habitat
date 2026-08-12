@@ -68,27 +68,52 @@ const epochTime = (value: unknown): string | null => {
 const sum = (values: Array<number | null>) => values.reduce<number>((total, value) => total + (value ?? 0), 0);
 const ratio = (numerator: number, denominator: number) => denominator > 0 ? Number((numerator / denominator).toFixed(2)) : numerator > 0 ? numerator : null;
 
-type SeasonRank = { level: number | null; rankScore: number | null; maxLevel: number | null; updateTime: number };
+type SeasonRank = { level: number | null; rankScore: number | null; maxLevel: number | null; maxRankScore: number | null; winCount: number | null; updateTime: number };
 
+/**
+ * Season entries arrive either as JSON strings or objects, and sometimes wrapped
+ * in a `rank_game` envelope. Each carries the competitive record for one season.
+ */
 function parseSeasonRanks(rankGameSeason: unknown): SeasonRank[] {
   return Object.values(asRecord(rankGameSeason)).map((entry): SeasonRank | null => {
     let parsed: unknown = entry;
     if (typeof entry === "string") {
       try { parsed = JSON.parse(entry); } catch { return null; }
     }
-    const record = asRecord(parsed);
+    let record = asRecord(parsed);
+    if (record.rank_game !== undefined) record = asRecord(record.rank_game);
     const updateTime = asNumber(record.update_time);
     if (updateTime === null) return null;
-    return { level: asNumber(record.level), rankScore: asNumber(record.rank_score), maxLevel: asNumber(record.max_level), updateTime };
+    return {
+      level: asNumber(record.level),
+      rankScore: asNumber(record.rank_score),
+      maxLevel: asNumber(record.max_level),
+      maxRankScore: asNumber(record.max_rank_score),
+      winCount: asNumber(record.win_count),
+      updateTime,
+    };
   }).filter((entry): entry is SeasonRank => entry !== null);
 }
 
-/** rivalsmeta only includes career_settings when the player restricts visibility in-game. */
+/**
+ * rivalsmeta only includes career_settings when the player restricts visibility
+ * in-game, and the real payload names those flags per data scope
+ * (`CareerOverviewIsVisibleToOther_1`, `..._2`, `CareerHeroDataIsVisibleToOther_4`,
+ * plus a bare `BattleHistoryIsVisibleToOther`). Only the value 1 means "visible
+ * to everyone"; 0 (nobody) and 2 (friends only) both keep the provider from
+ * publishing career data, so either counts as restricted.
+ */
+const restrictedVisibilityPrefixes = ["CareerOverviewIsVisibleToOther", "BattleHistoryIsVisibleToOther", "CareerHeroDataIsVisibleToOther"];
+
 function isRivalsmetaProfilePrivate(root: JsonRecord): boolean {
   if (root.career_settings === null || root.career_settings === undefined) return false;
   const settings = asRecord(root.career_settings);
-  return [settings.CareerOverviewIsVisibleToOther, settings.BattleHistoryIsVisibleToOther, settings.CareerHeroDataIsVisibleToOther]
-    .some((flag) => asNumber(flag) === 0);
+  return Object.entries(settings)
+    .filter(([key]) => restrictedVisibilityPrefixes.some((prefix) => key.startsWith(prefix)))
+    .some(([, flag]) => {
+      const value = asNumber(flag);
+      return value !== null && value !== 1;
+    });
 }
 
 export function parseRivalsmetaProfile(payload: unknown): MarvelRivalsProfileData {
@@ -127,19 +152,39 @@ export function parseRivalsmetaProfile(payload: unknown): MarvelRivalsProfileDat
     }
   }
 
+  const topHeroes = [...heroTotals.values()].sort((left, right) => right.matches - left.matches).slice(0, 3);
+  const totalMatches = asNumber(stats.total_matches);
+  const totalWins = asNumber(stats.total_wins);
+  // The provider serves a successful response for players whose career data it
+  // has never pulled: every aggregate reads 0 and the hero maps are empty. That
+  // is an absence of data, not a record of zero matches played, so the
+  // cumulative fields stay null and callers can say so plainly.
+  const hasCareerData = Boolean((totalMatches ?? 0) > 0 || (totalWins ?? 0) > 0 || topHeroes.length > 0 || kills > 0 || deaths > 0);
+  // Per-season competitive records survive even when career aggregates do not,
+  // so a member with no career overview still gets real, attributable numbers.
+  const rankedWins = seasons.reduce<number | null>((total, season) => season.winCount === null ? total : (total ?? 0) + season.winCount, null);
+  const peakRankScore = seasons.reduce<number | null>((peak, season) => {
+    const candidate = season.maxRankScore ?? season.rankScore;
+    return candidate !== null && (peak === null || candidate > peak) ? candidate : peak;
+  }, null);
+
   return {
     uid,
     displayName,
     isPrivate: isRivalsmetaProfilePrivate(root),
+    hasCareerData,
     playerLevel: asNumber(info.level),
     rankName: rivalsmetaRankName(current?.level ?? null),
     peakRankName: rivalsmetaRankName(peakLevel),
     rankScore: current ? asRoundedInteger(current.rankScore) : null,
-    totalMatches: asNumber(stats.total_matches),
-    totalWins: asNumber(stats.total_wins),
+    peakRankScore: asRoundedInteger(peakRankScore),
+    rankedWins,
+    rankedSeasons: seasons.length > 0 ? seasons.length : null,
+    totalMatches: hasCareerData ? totalMatches : null,
+    totalWins: hasCareerData ? totalWins : null,
     overallKd: ratio(kills, deaths),
     overallKda: ratio(kills + assists, deaths),
-    topHeroes: [...heroTotals.values()].sort((left, right) => right.matches - left.matches).slice(0, 3),
+    topHeroes,
     providerUpdatedAt: epochTime(player.last_history_update) ?? epochTime(player.info_update_time),
   };
 }

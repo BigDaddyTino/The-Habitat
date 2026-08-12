@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Activity, ArrowLeft, BadgeCheck, BarChart3, Crown, Gamepad2, RefreshCw, Shield, Swords, Unlink, UserRound, UsersRound } from "lucide-react";
+import { Activity, ArrowLeft, BadgeCheck, BarChart3, Crown, Gamepad2, LogOut, RefreshCw, Shield, Swords, Unlink, UserRound, UsersRound } from "lucide-react";
 import { auth } from "@/auth";
 import { MarvelRivalsLinkForm } from "@/components/marvel-rivals-link-form";
 import { getClubGameBySlug } from "@/lib/club-games";
 import { getGameDispatches } from "@/lib/game-news";
 import { getPrismaClient } from "@habitat/db/client";
 import { resolveMarvelRivalsProvider } from "@habitat/shared";
-import { disconnectMarvelRivalsProfile, refreshMarvelRivalsProfile, updateMarvelRivalsVisibility } from "./actions";
+import { claimSquadSeat, disconnectMarvelRivalsProfile, refreshMarvelRivalsProfile, releaseSquadSeat, updateMarvelRivalsVisibility } from "./actions";
 
 const db = getPrismaClient();
 
 function when(value: Date) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(value);
+}
+
+/** Renders provider sync states as prose instead of leaking enum spelling. */
+function syncStateLabel(status: string) {
+  return status === "NO_PROVIDER_DATA" ? "has no provider career data" : status.toLowerCase().replaceAll("_", " ");
 }
 
 export default async function ClubGameDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -22,13 +27,24 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
 
   const session = await auth();
   const memberId = session?.user?.id && session.user.isActive ? session.user.id : null;
-  const [profiles, ownProfile, dispatches, recentMatches, matchCoverage, ownSteamAccount] = await Promise.all([
+  const [profiles, seatedProfiles, ownProfile, dispatches, recentMatches, matchCoverage, ownSteamAccount] = await Promise.all([
     db.clubGameProfile.findMany({
       where: { gameType: "MARVEL_RIVALS", displayPublic: true },
       orderBy: [{ rankScore: "desc" }, { displayName: "asc" }],
       take: 24,
       select: {
-        id: true, displayName: true, platform: true, rankName: true, rankScore: true, totalMatches: true, totalWins: true, lastSyncedAt: true,
+        id: true, displayName: true, platform: true, rankName: true, rankScore: true, rankedWins: true, totalMatches: true, totalWins: true, lastSyncedAt: true,
+        user: { select: { username: true, displayName: true, name: true, socialAccounts: { where: { platform: "STEAM", verifiedAt: { not: null } }, select: { id: true }, take: 1 } } },
+      },
+    }),
+    // Seats are held only by an explicit claim, in claim order. A seated member
+    // who keeps stats private is shown by name without their provider numbers.
+    db.clubGameProfile.findMany({
+      where: { gameType: "MARVEL_RIVALS", rosterSeatClaimedAt: { not: null } },
+      orderBy: [{ rosterSeatClaimedAt: "asc" }],
+      take: game.squadSize,
+      select: {
+        id: true, displayName: true, rankName: true, displayPublic: true, rosterSeatClaimedAt: true,
         user: { select: { username: true, displayName: true, name: true, socialAccounts: { where: { platform: "STEAM", verifiedAt: { not: null } }, select: { id: true }, take: 1 } } },
       },
     }),
@@ -39,7 +55,9 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
     memberId ? db.userSocialAccount.findFirst({ where: { userId: memberId, platform: "STEAM", verifiedAt: { not: null } }, select: { id: true } }) : null,
   ]);
   const steamLinked = Boolean(ownSteamAccount);
-  const squad = profiles.slice(0, game.squadSize);
+  const squad = seatedProfiles;
+  const seatsRemaining = game.squadSize - squad.length;
+  const holdsSeat = Boolean(ownProfile?.rosterSeatClaimedAt);
   const providerReady = Boolean(resolveMarvelRivalsProvider(process.env));
   const recentWins = ownProfile?.matchParticipants.filter((participant) => participant.result === "WIN").length ?? 0;
   const sharedMatches = recentMatches.filter((match) => match.participants.length > 1);
@@ -70,12 +88,12 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
           {Array.from({ length: game.squadSize }, (_, index) => {
             const profile = squad[index];
             if (!profile) return <div className="open" key={`open-${index}`}><UserRound aria-hidden="true" size={18} /><span>Open seat</span></div>;
-            const memberName = profile.user.displayName ?? profile.user.name ?? profile.displayName;
-            const content = <><strong>{memberName}</strong><span>{profile.displayName} · {profile.rankName ?? "Unranked"}</span>{profile.user.socialAccounts.length ? <small><BadgeCheck aria-hidden="true" size={10} /> Steam member</small> : null}</>;
+            const memberName = profile.user.displayName ?? profile.user.name ?? (profile.displayPublic ? profile.displayName : "Habitat member");
+            const content = <><strong>{memberName}</strong><span>{profile.displayPublic ? `${profile.displayName} · ${profile.rankName ?? "Unranked"}` : "Stats kept private"}</span>{profile.user.socialAccounts.length ? <small><BadgeCheck aria-hidden="true" size={10} /> Steam member</small> : null}</>;
             return profile.user.username ? <Link className="filled" href={`/members/${profile.user.username}`} key={profile.id}>{content}</Link> : <div className="filled" key={profile.id}>{content}</div>;
           })}
         </div>
-        <p className="club-board-empty">The board fills from linked member profiles. It is not a live party or presence list.</p>
+        <p className="club-board-empty">Members take a seat by hand and can leave it at any time. Seats are never assigned automatically, and this is not a live party or presence list.</p>
       </section>
 
       <aside className="club-board-side">
@@ -83,7 +101,7 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
           <Crown aria-hidden="true" size={20} />
           <p className="eyebrow">Member standings</p>
           <h2>{profiles.length ? "Assembly rank" : "No challengers yet"}</h2>
-          {profiles.length ? <ol>{profiles.slice(0, 5).map((profile, index) => <li key={profile.id}><b>{index + 1}</b><span><strong>{profile.displayName}</strong><small>{profile.rankName ?? "Unranked"}</small></span><em>{profile.totalWins ?? "—"} W</em></li>)}</ol> : <p>Connect a public Rivals profile to open the board.</p>}
+          {profiles.length ? <ol>{profiles.slice(0, 5).map((profile, index) => <li key={profile.id}><b>{index + 1}</b><span><strong>{profile.displayName}</strong><small>{profile.rankName ?? "Unranked"}</small></span><em>{profile.totalWins !== null ? `${profile.totalWins} W` : profile.rankedWins !== null ? `${profile.rankedWins} ranked W` : "—"}</em></li>)}</ol> : <p>Connect a public Rivals profile to open the board.</p>}
         </article>
         <article>
           <BarChart3 aria-hidden="true" size={20} />
@@ -102,9 +120,18 @@ export default async function ClubGameDetailPage({ params }: { params: Promise<{
       <div className="rivals-account-copy">
         <p className="eyebrow">Your seat at the table</p>
         <h2>{ownProfile ? ownProfile.displayName : "Link your Rivals profile"}</h2>
-        {ownProfile ? <><p><span className="member-linked-mark"><Shield aria-hidden="true" size={12} /> Member-linked</span> {ownProfile.rankName ?? "Unranked"}{ownProfile.playerLevel ? ` · Level ${ownProfile.playerLevel}` : ""}</p><small>{ownProfile.lastSyncedAt ? `Stats updated ${when(ownProfile.lastSyncedAt)}` : "Awaiting first stat refresh"}{ownProfile.syncStatus !== "READY" ? ` · ${ownProfile.syncStatus.toLowerCase()}` : ""} · matches {ownProfile.matchStatus.toLowerCase()}</small>{ownProfile.matchHistoryGapDetected ? <small className="rivals-coverage-warning">A provider-history gap was detected. Cumulative facts remain labeled as partial; streak awards are paused.</small> : null}{!steamLinked ? <small className="rivals-coverage-warning">No verified Steam account is linked, so stats refresh once a day. <Link href="/profile">Link Steam</Link> and Habitat refreshes hourly while Steam shows you in the game, plus one more pass after you stop.</small> : null}{ownProfile.matchParticipants.length ? <div className="member-recent-form"><span>Last {ownProfile.matchParticipants.length}</span><div>{ownProfile.matchParticipants.map((participant) => <i className={participant.result.toLowerCase()} key={participant.id}>{participant.result === "WIN" ? "W" : participant.result === "LOSS" ? "L" : "—"}</i>)}</div><strong>{recentWins}-{ownProfile.matchParticipants.length - recentWins} tracked form</strong>{firstRank?.rankScore !== null && firstRank?.rankScore !== undefined && latestRank?.rankScore !== null && latestRank?.rankScore !== undefined ? <em>{latestRank.rankScore - firstRank.rankScore >= 0 ? "+" : ""}{latestRank.rankScore - firstRank.rankScore} rating across {ownProfile.snapshots.length} snapshots</em> : null}</div> : null}</> : <p>Steam verifies who you are in Habitat. Rivals uses a separate in-game UID, so this connection is member-linked—not an ownership claim.</p>}
+        {ownProfile ? <><p><span className="member-linked-mark"><Shield aria-hidden="true" size={12} /> Member-linked</span> {ownProfile.rankName ?? "Unranked"}{ownProfile.playerLevel ? ` · Level ${ownProfile.playerLevel}` : ""}{ownProfile.peakRankName && ownProfile.peakRankName !== ownProfile.rankName ? ` · peak ${ownProfile.peakRankName}` : ""}</p><small>{ownProfile.lastSyncedAt ? `Habitat last fetched ${when(ownProfile.lastSyncedAt)}` : "Awaiting first stat refresh"}{ownProfile.providerUpdatedAt ? ` · provider data from ${when(ownProfile.providerUpdatedAt)}` : ""} · matches {syncStateLabel(ownProfile.matchStatus)}</small>{ownProfile.rankedWins !== null ? <small>{ownProfile.rankedWins} competitive wins recorded across {ownProfile.rankedSeasons ?? 1} ranked {ownProfile.rankedSeasons === 1 ? "season" : "seasons"}{ownProfile.peakRankScore !== null ? `, peak rating ${ownProfile.peakRankScore}` : ""}.</small> : null}{ownProfile.syncStatus === "NO_PROVIDER_DATA" ? <small className="rivals-coverage-warning">{ownProfile.syncError ?? "The stats provider holds no career overview for this profile yet."} Career totals stay blank rather than being shown as zero. This usually clears once the provider pulls your career again; enabling career visibility for everyone in the game&rsquo;s privacy settings is what lets it.</small> : ownProfile.syncStatus !== "READY" ? <small className="rivals-coverage-warning">Career sync {syncStateLabel(ownProfile.syncStatus)}{ownProfile.syncError ? ` — ${ownProfile.syncError}` : ""}</small> : null}{ownProfile.matchHistoryGapDetected ? <small className="rivals-coverage-warning">A provider-history gap was detected. Cumulative facts remain labeled as partial; streak awards are paused.</small> : null}{!steamLinked ? <small className="rivals-coverage-warning">No verified Steam account is linked, so stats refresh once a day. <Link href="/profile">Link Steam</Link> and Habitat refreshes hourly while Steam shows you in the game, plus one more pass after you stop.</small> : null}{ownProfile.matchParticipants.length ? <div className="member-recent-form"><span>Last {ownProfile.matchParticipants.length}</span><div>{ownProfile.matchParticipants.map((participant) => <i className={participant.result.toLowerCase()} key={participant.id}>{participant.result === "WIN" ? "W" : participant.result === "LOSS" ? "L" : "—"}</i>)}</div><strong>{recentWins}-{ownProfile.matchParticipants.length - recentWins} tracked form</strong>{firstRank?.rankScore !== null && firstRank?.rankScore !== undefined && latestRank?.rankScore !== null && latestRank?.rankScore !== undefined ? <em>{latestRank.rankScore - firstRank.rankScore >= 0 ? "+" : ""}{latestRank.rankScore - firstRank.rankScore} rating across {ownProfile.snapshots.length} snapshots</em> : null}</div> : null}</> : <p>Steam verifies who you are in Habitat. Rivals uses a separate in-game UID, so this connection is member-linked—not an ownership claim.</p>}
       </div>
-      {memberId ? ownProfile ? <div className="rivals-profile-actions"><form action={refreshMarvelRivalsProfile}><button type="submit"><RefreshCw aria-hidden="true" size={14} /> Refresh stats</button></form><form action={updateMarvelRivalsVisibility}><label className="rivals-public-toggle"><input defaultChecked={ownProfile.displayPublic} name="displayPublic" type="checkbox" /> Share provider profile and match evidence</label><button type="submit">Save privacy</button></form><form action={disconnectMarvelRivalsProfile}><button className="quiet" type="submit"><Unlink aria-hidden="true" size={14} /> Disconnect and delete provider data</button></form></div> : <MarvelRivalsLinkForm providerReady={providerReady} steamLinked={steamLinked} /> : <Link className="rivals-sign-in" href="/sign-in">Sign in to link a profile</Link>}
+      {memberId ? ownProfile ? <div className="rivals-profile-actions">
+        <form action={refreshMarvelRivalsProfile}><button type="submit"><RefreshCw aria-hidden="true" size={14} /> Refresh stats</button></form>
+        <form action={updateMarvelRivalsVisibility}><label className="rivals-public-toggle"><input defaultChecked={ownProfile.displayPublic} name="displayPublic" type="checkbox" /> Share provider profile and match evidence</label><button type="submit">Save privacy</button></form>
+        <div className="rivals-seat-control">
+          {holdsSeat
+            ? <><span className="rivals-seat-state"><UsersRound aria-hidden="true" size={13} /> You hold a squad seat{ownProfile.rosterSeatClaimedAt ? `, taken ${when(ownProfile.rosterSeatClaimedAt)}` : ""}.</span><form action={releaseSquadSeat}><button type="submit"><LogOut aria-hidden="true" size={14} /> Leave the squad seat</button></form></>
+            : <><span className="rivals-seat-state"><UsersRound aria-hidden="true" size={13} /> {seatsRemaining > 0 ? `You hold no seat. ${seatsRemaining} of ${game.squadSize} ${seatsRemaining === 1 ? "is" : "are"} open.` : "You hold no seat, and the board is full."}</span>{seatsRemaining > 0 ? <form action={claimSquadSeat}><button type="submit"><UserRound aria-hidden="true" size={14} /> Take a squad seat</button></form> : null}</>}
+        </div>
+        <form action={disconnectMarvelRivalsProfile}><button className="quiet" type="submit"><Unlink aria-hidden="true" size={14} /> Disconnect and delete provider data</button></form>
+      </div> : <MarvelRivalsLinkForm providerReady={providerReady} steamLinked={steamLinked} /> : <Link className="rivals-sign-in" href="/sign-in">Sign in to link a profile</Link>}
     </section>
 
     <section className="dispatch-strip club-dispatches">

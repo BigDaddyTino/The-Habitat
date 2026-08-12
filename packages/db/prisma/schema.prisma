@@ -30,6 +30,9 @@ enum ClubProfileSyncStatus {
   READY
   PRIVATE
   ERROR
+  /// The provider answered successfully but holds no career aggregates for the
+  /// player, so cumulative stats stay null instead of being displayed as zero.
+  NO_PROVIDER_DATA
 }
 
 enum ProviderSyncStatus {
@@ -873,6 +876,9 @@ model ClubGameProfile {
   displayName    String                @db.VarChar(80)
   platform       String                @default("PC") @db.VarChar(24)
   displayPublic  Boolean               @default(false)
+  /// Occupying a squad seat is a separate, explicit choice from sharing stats.
+  /// NULL means the member holds no seat; a seat is never assigned automatically.
+  rosterSeatClaimedAt DateTime?
   connectedAt    DateTime              @default(now())
   lastSyncedAt   DateTime?
   lastAttemptedAt DateTime?
@@ -884,6 +890,13 @@ model ClubGameProfile {
   rankName       String?               @db.VarChar(40)
   peakRankName   String?               @db.VarChar(40)
   rankScore      Int?
+  /// Best rating the provider has ever reported, across all seasons.
+  peakRankScore  Int?
+  /// Competitive wins summed from per-season records. These survive even when a
+  /// provider holds no career overview, so they are stored separately from
+  /// totalWins rather than being merged into it.
+  rankedWins     Int?
+  rankedSeasons  Int?
   totalMatches   Int?
   totalWins      Int?
   overallKd      Float?
@@ -913,6 +926,7 @@ model ClubGameProfile {
   @@index([gameType, lastSyncedAt])
   @@index([gameType, nextAttemptAt])
   @@index([gameType, matchNextAttemptAt])
+  @@index([gameType, rosterSeatClaimedAt])
 }
 
 model ClubGameStatSnapshot {
