@@ -268,6 +268,8 @@ model User {
   gameActivities          GameActivity[]
   invitationsSent         Invitation[]                @relation("InvitationSender")
   memberPresence          MemberPresence?
+  memberReferralsSent     MemberReferral[]           @relation("MemberReferralInviter")
+  memberReferralReceived  MemberReferral?             @relation("MemberReferralInvitee")
 }
 
 model Account {
@@ -313,8 +315,25 @@ model Invitation {
   createdAt       DateTime  @default(now())
   invitedByUserId String?   @db.Uuid
   invitedBy       User?     @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  memberReferral  MemberReferral?
 
   @@index([invitedByUserId, createdAt])
+}
+
+model MemberReferral {
+  id             String      @id @default(uuid()) @db.Uuid
+  inviterUserId  String      @db.Uuid
+  invitedUserId  String      @unique @db.Uuid
+  invitationId   String?     @unique @db.Uuid
+  method         String      @db.VarChar(16)
+  codeWeek       String?     @db.VarChar(10)
+  createdAt      DateTime    @default(now())
+  inviter        User        @relation("MemberReferralInviter", fields: [inviterUserId], references: [id], onDelete: Restrict)
+  invitedUser    User        @relation("MemberReferralInvitee", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  invitation     Invitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+
+  @@index([inviterUserId, createdAt])
+  @@index([method, createdAt])
 }
 
 model MemberPresence {

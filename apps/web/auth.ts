@@ -2,8 +2,10 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { getPrismaClient } from "@habitat/db/client";
 import NextAuth from "next-auth";
 import Discord from "next-auth/providers/discord";
+import { cookies } from "next/headers";
 import "@/lib/environment";
 import type { HabitatRole } from "@/lib/permissions";
+import { INVITE_GRANT_COOKIE, readInviteGrant } from "@/lib/weekly-invite-code";
 
 const db = getPrismaClient();
 
@@ -30,6 +32,16 @@ async function availableUsername(userId: string, name: string | null | undefined
     .slice(0, 24) || "member";
   const owner = await db.user.findUnique({ where: { username: base }, select: { id: true } });
   return !owner || owner.id === userId ? base : `${base.slice(0, 17)}-${userId.slice(0, 6)}`;
+}
+
+async function currentCodeReferral() {
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) return null;
+  const token = (await cookies()).get(INVITE_GRANT_COOKIE)?.value;
+  const grant = readInviteGrant(token, secret);
+  if (!grant) return null;
+  const inviter = await db.user.findUnique({ where: { id: grant.inviterUserId }, select: { id: true, isActive: true } });
+  return inviter?.isActive ? grant : null;
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -73,15 +85,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // currently valid unconsumed invitation reactivates the member.
         const pendingInvitation = await db.invitation.findFirst({
           where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
-          select: { id: true, role: true },
+          select: { id: true, role: true, invitedByUserId: true },
         });
-        if (!pendingInvitation) return false;
+        const codeReferral = pendingInvitation ? null : await currentCodeReferral();
+        if (!pendingInvitation && !codeReferral) return false;
 
         const username = existingUser.username ?? await availableUsername(existingUser.id, existingUser.name ?? user.name, email);
-        await db.$transaction([
-          db.user.update({ where: { id: existingUser.id }, data: { role: pendingInvitation.role, isActive: true, username } }),
-          db.invitation.update({ where: { id: pendingInvitation.id }, data: { acceptedAt: new Date() } }),
-        ]);
+        const inviterUserId = pendingInvitation?.invitedByUserId ?? codeReferral?.inviterUserId ?? null;
+        const method = pendingInvitation ? "EMAIL" : "CODE";
+        await db.$transaction(async (transaction) => {
+          await transaction.user.update({ where: { id: existingUser.id }, data: { role: pendingInvitation?.role ?? "USER", isActive: true, username } });
+          if (pendingInvitation) await transaction.invitation.update({ where: { id: pendingInvitation.id }, data: { acceptedAt: new Date() } });
+          if (inviterUserId && inviterUserId !== existingUser.id) {
+            await transaction.memberReferral.upsert({
+              where: { invitedUserId: existingUser.id },
+              create: { inviterUserId, invitedUserId: existingUser.id, invitationId: pendingInvitation?.id, method, codeWeek: codeReferral?.codeWeek },
+              update: {},
+            });
+            await transaction.auditLog.create({ data: { actorUserId: inviterUserId, action: `MEMBER_JOINED_BY_${method}_INVITATION`, entityType: "User", entityId: existingUser.id, after: { method, codeWeek: codeReferral?.codeWeek ?? null } } });
+          }
+        });
         return true;
       }
 
@@ -89,7 +112,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
         select: { id: true },
       });
-      return Boolean(invitation);
+      return Boolean(invitation || await currentCodeReferral());
     },
     async session({ session, user }) {
       if (!session.user) return session;
@@ -116,23 +139,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async createUser({ user }) {
       if (!user.id || !user.email) return;
 
+      const userId = user.id;
       const email = normalizedEmail(user.email);
-      const username = await availableUsername(user.id, user.name, email);
+      const username = await availableUsername(userId, user.name, email);
       if (isBootstrapAdmin(email)) {
-        await db.user.update({ where: { id: user.id }, data: { role: "ADMIN", isActive: true, username } });
+        await db.user.update({ where: { id: userId }, data: { role: "ADMIN", isActive: true, username } });
         return;
       }
 
       const invitation = await db.invitation.findFirst({
         where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
-        select: { id: true, role: true },
+        select: { id: true, role: true, invitedByUserId: true },
       });
-      if (!invitation) return;
+      const codeReferral = invitation ? null : await currentCodeReferral();
+      if (!invitation && !codeReferral) return;
 
-      await db.$transaction([
-        db.user.update({ where: { id: user.id }, data: { role: invitation.role, isActive: true, username } }),
-        db.invitation.update({ where: { id: invitation.id }, data: { acceptedAt: new Date() } }),
-      ]);
+      const inviterUserId = invitation?.invitedByUserId ?? codeReferral?.inviterUserId ?? null;
+      const method = invitation ? "EMAIL" : "CODE";
+      await db.$transaction(async (transaction) => {
+        await transaction.user.update({ where: { id: userId }, data: { role: invitation?.role ?? "USER", isActive: true, username } });
+        if (invitation) await transaction.invitation.update({ where: { id: invitation.id }, data: { acceptedAt: new Date() } });
+        if (inviterUserId && inviterUserId !== userId) {
+          await transaction.memberReferral.create({ data: { inviterUserId, invitedUserId: userId, invitationId: invitation?.id, method, codeWeek: codeReferral?.codeWeek } });
+          await transaction.auditLog.create({ data: { actorUserId: inviterUserId, action: `MEMBER_JOINED_BY_${method}_INVITATION`, entityType: "User", entityId: userId, after: { method, codeWeek: codeReferral?.codeWeek ?? null } } });
+        }
+      });
     },
   },
 });

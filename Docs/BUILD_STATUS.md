@@ -26,6 +26,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Role-boundary tests and unauthenticated direct API denial verified
 - [x] Discord OAuth application configured; end-to-end owner login verified and bootstrap setting removed
 - [x] Active-member invitation flow, exact Discord-email guidance, friendly OAuth denial handling, automatic member callsigns, and audited standard-role grants
+- [x] Distinct Monday-rotating member invite codes with signed short-lived redemption, Discord verification, permanent inviter-to-member attribution, and audit records
 
 ## Phase 3 - Server Registry and Basic UI
 

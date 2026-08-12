@@ -11,6 +11,10 @@ Auth.js uses Discord with database sessions. An unknown Discord user is denied b
 
 Every active Habitat member can create a standard `USER` invitation from the Members page. The invited email must be the exact email returned by Discord OAuth. Invitations expire after 14 days, can be reissued by another active member, and are recorded in the audit log. Members cannot grant `ADMIN` access.
 
+Every active member also receives a distinct weekly invite code. Codes are generated from the member ID, the Monday-based `America/New_York` week, and the server-side auth secret; they rotate every Monday and are not stored as reusable plaintext secrets. A guest enters the current code before Discord OAuth. A valid code creates a signed, HTTP-only, 15-minute referral grant, but does not create an account or bypass Discord verification.
+
+When a new Discord account is admitted, `MemberReferral` permanently records the inviter, invited member, method (`EMAIL` or `CODE`), and code week when applicable. A matching audit entry is created with the inviter as actor. Direct email invitations take precedence if a guest also stages a weekly code, preventing ambiguous attribution.
+
 The sign-in page owns the Auth.js error route so an uninvited Discord account receives a specific guest-list explanation instead of a generic access-denied screen.
 
 The bootstrap account becomes active with the `ADMIN` role on its first successful login. Remove `BOOTSTRAP_ADMIN_EMAIL` after that first login. Administrators can manage invitations through the application; there is no public registration route.
