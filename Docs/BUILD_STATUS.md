@@ -173,3 +173,4 @@ This is the implementation source of truth. Checked items are built and locally 
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
 - [ ] Dragonwilds retained dedicated-server logs contain no player-session lines yet; the deployed collector will ingest authenticated account/name join and leave signals when real sessions occur
+- [x] Separate Club Games surface introduced with an animated Marvel Rivals squad room; it is intentionally distinct from managed worlds and displays no fabricated live stats while provider configuration is pending
