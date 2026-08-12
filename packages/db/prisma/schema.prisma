@@ -22,6 +22,16 @@ enum GameType {
   VALHEIM
 }
 
+enum ClubGameType {
+  MARVEL_RIVALS
+}
+
+enum ClubProfileSyncStatus {
+  READY
+  PRIVATE
+  ERROR
+}
+
 enum ServerState {
   ONLINE
   STARTING
@@ -218,6 +228,7 @@ model User {
   xpEntries              UserXpEntry[]
   weeklyQuestProgress    UserWeeklyQuestProgress[]
   identityReconciliations IdentityRewardReconciliation[]
+  clubGameProfiles        ClubGameProfile[]
 }
 
 model Account {
@@ -623,6 +634,56 @@ model UserSocialAccount {
   @@unique([platform, handle])
   @@unique([platform, providerAccountId])
   @@index([userId, displayPublic])
+}
+
+model ClubGameProfile {
+  id             String                @id @default(uuid()) @db.Uuid
+  userId         String                @db.Uuid
+  gameType       ClubGameType
+  providerUid    String                @db.VarChar(32)
+  displayName    String                @db.VarChar(80)
+  platform       String                @default("PC") @db.VarChar(24)
+  displayPublic  Boolean               @default(true)
+  connectedAt    DateTime              @default(now())
+  lastSyncedAt   DateTime?
+  syncStatus     ClubProfileSyncStatus @default(READY)
+  syncError      String?               @db.VarChar(180)
+  playerLevel    Int?
+  rankName       String?               @db.VarChar(40)
+  peakRankName   String?               @db.VarChar(40)
+  rankScore      Int?
+  totalMatches   Int?
+  totalWins      Int?
+  overallKd      Float?
+  overallKda     Float?
+  topHeroes      Json?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots      ClubGameStatSnapshot[]
+
+  @@unique([userId, gameType])
+  @@unique([gameType, providerUid])
+  @@index([gameType, rankScore])
+  @@index([gameType, lastSyncedAt])
+}
+
+model ClubGameStatSnapshot {
+  id           String          @id @default(uuid()) @db.Uuid
+  profileId    String          @db.Uuid
+  sampleKey    String          @unique @db.VarChar(96)
+  sampledAt    DateTime        @default(now())
+  source       String          @db.VarChar(40)
+  rankName     String?         @db.VarChar(40)
+  rankScore    Int?
+  totalMatches Int?
+  totalWins    Int?
+  overallKd    Float?
+  overallKda   Float?
+  topHeroes    Json?
+  profile      ClubGameProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, sampledAt])
 }
 
 model SteamLinkNonce {

@@ -8,6 +8,7 @@ export type GameDispatch = {
 };
 
 const steamAppIds: Record<string, number> = {
+  "marvel-rivals": 2767030,
   "7-days-to-die": 251570,
   "project-zomboid": 108600,
   dragonwilds: 3270700,
@@ -21,6 +22,10 @@ type SteamNewsResponse = { appnews?: { newsitems?: SteamNewsItem[] } };
 
 function plainText(value: string) {
   return value.replace(/<[^>]*>/g, " ").replace(/\\[rn]/g, " ").replace(/\s+/g, " ").trim().slice(0, 180);
+}
+
+function isPatchNote(item: SteamNewsItem) {
+  return Boolean(item.tags?.includes("patchnotes") || /patch notes?|balance (?:post|adjustment)|version \d+/i.test(item.title ?? ""));
 }
 
 /** Pulls a small, server-cached, game-specific announcement set. No client-side tracking or feed key is used. */
@@ -37,7 +42,7 @@ export async function getGameDispatches(serverSlug: string): Promise<GameDispatc
     const items = data.appnews?.newsitems ?? [];
     return items
       .filter((item) => item.gid && item.title && item.url && item.date && item.feedname === "steam_community_announcements")
-      .sort((left, right) => Number(right.tags?.includes("patchnotes")) - Number(left.tags?.includes("patchnotes")) || (right.date ?? 0) - (left.date ?? 0))
+      .sort((left, right) => Number(isPatchNote(right)) - Number(isPatchNote(left)) || (right.date ?? 0) - (left.date ?? 0))
       .slice(0, 3)
       .map((item) => ({
         id: item.gid!,
@@ -45,7 +50,7 @@ export async function getGameDispatches(serverSlug: string): Promise<GameDispatc
         summary: plainText(item.contents ?? ""),
         publishedAt: new Date(item.date! * 1_000),
         url: item.url!,
-        kind: item.tags?.includes("patchnotes") ? "Patch notes" : "News",
+        kind: isPatchNote(item) ? "Patch notes" : "News",
       }));
   } catch {
     return [];

@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-11
+Last updated: 2026-08-12
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -173,5 +173,9 @@ This is the implementation source of truth. Checked items are built and locally 
 - [ ] Telemetry-only, game-specific event collectors: staged behind private agent authentication and per-game backup/validation gates; no gameplay-changing mods deployed
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
 - [ ] Dragonwilds retained dedicated-server logs contain no player-session lines yet; the deployed collector will ingest authenticated account/name join and leave signals when real sessions occur
-- [x] Unified Games hub now presents hosted worlds and Club Rooms under one clubhouse hierarchy; Marvel Rivals is surfaced in the Great Hall with a lodge-styled squad room and no fabricated stats while profile linking is pending
+- [x] Unified Games hub now presents hosted worlds and Club Rooms under one clubhouse hierarchy; Marvel Rivals is surfaced in the Great Hall with a cinematic lodge war-room image and an honest six-seat member board
 - [x] Header navigation consolidated around Great Hall, Games, Chronicle, and a compact Progress menu; Game Night and the Departure Board now live in the Games hub
+- [x] Marvel Rivals member-link model added: Steam remains the verified Habitat identity while the separately entered public Rivals UID is explicitly labeled member-linked, audit logged, and never presented as cryptographic ownership
+- [x] Persistent Rivals profile records and stat snapshots added with a private-key server action and a bounded, sequential six-hour worker refresh; private/error states retain the last good figures
+- [x] Marvel Rivals official Steam announcements now feed the same compact news and patch-note rail used by hosted game dossiers
+- [ ] Live Marvel Rivals profile linking awaits a private `MARVEL_RIVALS_API_KEY`; the room remains functional and accurately reports the integration as offline until configured

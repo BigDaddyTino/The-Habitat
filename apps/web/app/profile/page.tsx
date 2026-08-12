@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BadgeCheck, Check, ExternalLink, ImagePlus, Medal, Palette, Sparkles, Trophy } from "lucide-react";
+import { BadgeCheck, Check, ExternalLink, Gamepad2, ImagePlus, Medal, Palette, Sparkles, Trophy } from "lucide-react";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { progressionForXp, type AchievementRarity } from "@habitat/shared";
@@ -16,12 +16,13 @@ const manualSocialPlatforms = socialPlatforms.filter((platform) => platform !== 
 export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) redirect("/sign-in");
-  const [member, identities, titles, rewards, xpTotal] = await Promise.all([
+  const [member, identities, titles, rewards, xpTotal, clubProfiles] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: session.user.id }, select: { name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true, socialAccounts: { orderBy: { platform: "asc" } } } }),
     db.playerIdentity.findMany({ where: { userId: session.user.id }, include: { server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } } }, orderBy: { displayName: "asc" } }),
     db.userTitle.findMany({ where: { userId: session.user.id }, include: { title: true }, orderBy: [{ equipped: "desc" }, { awardedAt: "desc" }] }),
     db.userAchievementReward.findMany({ where: { userId: session.user.id }, include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } }, orderBy: { unlockedAt: "desc" } }),
     db.userXpEntry.aggregate({ where: { userId: session.user.id }, _sum: { amount: true } }),
+    db.clubGameProfile.findMany({ where: { userId: session.user.id }, orderBy: { connectedAt: "asc" } }),
   ]);
   const progression = progressionForXp(xpTotal._sum.amount ?? 0);
   const recordedEvents = identities.reduce((total, identity) => total + identity._count.events, 0);
@@ -55,6 +56,9 @@ export default async function ProfilePage() {
 
     <div className="profile-heading"><div><p className="eyebrow">Connected accounts</p><h2>Your gaming identity</h2></div></div>
     <div className="account-kit"><div><p>Verified Steam ownership can automatically attach matching game identities. Other services remain optional profile links and never imply live presence.</p><div className="steam-connect">{steamAccount ? <><span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span><form action={disconnectSteam}><button type="submit">Disconnect Steam</button></form></> : <Link href="/api/steam/connect">Verify with Steam</Link>}</div><form action={addSocialAccount} className="social-add"><select aria-label="Platform" name="platform" defaultValue="TWITCH">{manualSocialPlatforms.map((platform) => <option key={platform} value={platform}>{socialPlatformLabels[platform]}</option>)}</select><input name="handle" placeholder="Handle or gamer tag" required /><button type="submit">Add link</button></form></div><div className="social-list">{member.socialAccounts.length === 0 ? <span>No optional accounts added yet.</span> : member.socialAccounts.map((account) => <article key={account.id}><div><strong>{socialPlatformLabels[account.platform]} {account.verifiedAt ? <BadgeCheck aria-label="Verified" size={12} /> : null}</strong><span>{account.handle}</span></div>{account.profileUrl ? <a href={account.profileUrl} rel="noreferrer" target="_blank" aria-label={`Open ${account.platform} profile`}><ExternalLink size={15} /></a> : null}{account.verifiedAt ? null : <form action={removeSocialAccount}><input name="accountId" type="hidden" value={account.id} /><button type="submit">Remove</button></form>}</article>)}</div></div>
+
+    <div className="profile-heading"><div><p className="eyebrow">Club profiles</p><h2>Rooms you have joined</h2></div><Link className="primary-link" href="/club-games/marvel-rivals">Open Assembly Room</Link></div>
+    {clubProfiles.length ? <div className="club-profile-list">{clubProfiles.map((profile) => <Link href="/club-games/marvel-rivals" key={profile.id}><Gamepad2 aria-hidden="true" size={18} /><div><strong>Marvel Rivals · {profile.displayName}</strong><span>Member-linked · {profile.rankName ?? "Unranked"}{profile.lastSyncedAt ? ` · Updated ${profile.lastSyncedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span></div><ExternalLink aria-hidden="true" size={14} /></Link>)}</div> : <div className="chronicle-empty"><p>No club profiles linked.</p><span>Join a Club Room to put your stats and callsign on its member board.</span></div>}
 
     <div className="profile-heading"><div><p className="eyebrow">Claimed identities</p><h2>Your worlds</h2></div><Link className="primary-link" href="/profile/identities">Claim an identity</Link></div>
     {identities.length === 0 ? <div className="chronicle-empty"><p>No verified identities yet.</p><span>Submit a claim once your game identity has been observed by a supported adapter.</span></div> : <div className="identity-grid">{identities.map((identity) => <Link className="identity-card identity-card-link" href={`/chronicle/identity/${identity.id}`} key={identity.id}><p className="eyebrow">{identity.server?.displayName ?? identity.gameType.replaceAll("_", " ")}</p><h2>{identity.displayName}</h2><p>{identity.server?.worldName ?? "Habitat identity"}</p><span>{identity._count.events} recorded events · Open Chronicle</span></Link>)}</div>}

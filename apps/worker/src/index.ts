@@ -9,6 +9,7 @@ import { importLegacyHistory } from "./legacy-history.js";
 import { reconcileProgression } from "./progression.js";
 import { reconcileAchievementCatalog } from "./achievements.js";
 import { reconcilePendingIdentityRewards } from "./identity-reconciliation.js";
+import { syncMarvelRivalsProfiles } from "./marvel-rivals.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -64,6 +65,13 @@ async function main(): Promise<void> {
       } catch (error) {
         console.warn("Habitat achievement reconciliation failed. Live monitoring remains available.");
         console.error("[worker] achievement reconciliation failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        const rivals = await syncMarvelRivalsProfiles();
+        if (rivals.enabled && rivals.checked > 0) console.info(`Habitat Marvel Rivals: ${rivals.updated} profiles refreshed, ${rivals.failed} deferred.`);
+      } catch (error) {
+        console.warn("Habitat Marvel Rivals refresh failed. Other monitoring remains available.");
+        console.error("[worker] Marvel Rivals refresh failed:", error instanceof Error ? error.message : String(error));
       }
       nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
     }
