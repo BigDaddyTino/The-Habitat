@@ -21,9 +21,23 @@ const SKY_PARTICLE_COLOR: Record<GreatHallAtmosphere["sky"], number> = {
   night: 0xbfd4ff,
 };
 
+const RAVEN_PLATES = ["one", "two", "three", "four", "five"] as const;
+
 type NetworkInformation = { saveData?: boolean };
 const hallPreviewEncounters = new Set<GreatHallAtmosphere["encounter"]>(["birds", "bear", "ufo", "comet", "aurora", "fireflies", "eclipse", "blood-moon", "lightning", "storm"]);
 const hallPreviewSkies = new Set<GreatHallAtmosphere["sky"]>(["sunrise", "midday", "sunset", "night"]);
+const hallPreviewProgress: Record<Exclude<GreatHallAtmosphere["encounter"], "none">, number> = {
+  birds: 0.42,
+  bear: 0.5,
+  ufo: 0.48,
+  comet: 0.5,
+  aurora: 0.5,
+  fireflies: 0.5,
+  eclipse: 0.5,
+  "blood-moon": 0.5,
+  lightning: 0.63,
+  storm: 0.5,
+};
 type BearResponse = {
   awarded: boolean;
   alreadyEarned: boolean;
@@ -91,9 +105,10 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
         ? new URLSearchParams(window.location.search).get("hallPreview") as GreatHallAtmosphere["encounter"] | null
         : null;
       if (preview && hallPreviewEncounters.has(preview)) {
+        const previewEncounter = preview as Exclude<GreatHallAtmosphere["encounter"], "none">;
         const requestedSky = new URLSearchParams(window.location.search).get("hallSky") as GreatHallAtmosphere["sky"] | null;
         const sky = requestedSky && hallPreviewSkies.has(requestedSky) ? requestedSky : next.sky;
-        setAtmosphere({ ...next, sky, encounter: preview, encounterKey: `visual-preview:${sky}:${preview}`, encounterDurationSeconds: 45, encounterProgress: 0.5 });
+        setAtmosphere({ ...next, sky, encounter: previewEncounter, encounterKey: `visual-preview:${sky}:${previewEncounter}`, encounterDurationSeconds: 45, encounterProgress: hallPreviewProgress[previewEncounter] });
         return;
       }
       setAtmosphere((current) => {
@@ -330,6 +345,7 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
 
   return <>
     <div ref={atmosphereRef} className={`hall-atmosphere sky-${atmosphere.sky} encounter-${atmosphere.encounter}`} data-encounter={atmosphere.encounter} data-preview={atmosphere.encounterKey?.startsWith("visual-preview:") ? "true" : undefined} style={eventStyle}>
+      <Image className="hall-event-preload" src="/images/hall-events/bear.png" alt="" width={906} height={969} sizes="(max-width: 800px) 250px, 350px" preload aria-hidden="true" />
       <canvas ref={threeCanvasRef} className="hall-three-canvas" aria-hidden="true" />
       <div className="hall-haze" aria-hidden="true" /><div className="hall-stars" aria-hidden="true" /><div className="hall-aurora" aria-hidden="true" />
       <div className="hall-event-window" aria-hidden="true">
@@ -342,16 +358,27 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
           </svg>
         </div>
         <div className="hall-cloud cloud-one" /><div className="hall-cloud cloud-two" />
-        <Image className="hall-ravens" src="/images/hall-events/ravens.png" alt="" width={1686} height={933} sizes="(max-width: 800px) 230px, 320px" />
-        <div className="hall-ufo"><Image src="/images/hall-events/ufo.png" alt="" width={1701} height={925} sizes="280px" /><i /><i /><i /></div>
-        <div className="hall-comet"><i /><i /></div>
+        <div className="hall-ravens">
+          {RAVEN_PLATES.map((raven, index) => <Image className={`hall-raven-plate hall-raven-${raven}`} src="/images/hall-events/ravens.png" alt="" width={1629} height={777} sizes="(max-width: 800px) 280px, 390px" preload={index === 0} key={raven} />)}
+        </div>
+        <div className="hall-ufo">
+          <div className="hall-ufo-haze" />
+          <div className="hall-ufo-beam" />
+          <div className="hall-ufo-craft"><Image src="/images/hall-events/ufo.png" alt="" width={686} height={214} sizes="(max-width: 800px) 190px, 290px" preload /><i /><i /><i /></div>
+        </div>
+        <div className="hall-comet"><i /><i /><span /></div>
         <div className="hall-fireflies">{Array.from({ length: 18 }, (_, index) => <i key={index} />)}</div>
       </div>
-      {atmosphere.encounter === "bear" ? <button className={`hall-bear-encounter ${bearState !== "idle" ? "is-roaring" : ""}`} type="button" onClick={() => { void meetTheBear(); }} aria-label="A black bear is visiting the Great Hall balcony. Tap it before it leaves.">
-        <Image src="/images/hall-events/bear.png" alt="" width={1536} height={1024} sizes="(max-width: 800px) 250px, 350px" />
-        <span>Something is watching</span>
-      </button> : null}
-      <div className="hall-depth-rail" aria-hidden="true" />
+      <div className="hall-scene-bounce" aria-hidden="true" />
+      {atmosphere.encounter === "bear" ? <>
+        <button className={`hall-bear-encounter ${bearState !== "idle" ? "is-roaring" : ""}`} type="button" onClick={() => { void meetTheBear(); }} aria-label="A black bear is visiting the Great Hall balcony. Tap it before it leaves.">
+          <span className="hall-bear-shadow" aria-hidden="true" />
+          <Image src="/images/hall-events/bear.png" alt="" width={906} height={969} sizes="(max-width: 800px) 250px, 350px" />
+          <span className="hall-bear-blink" aria-hidden="true"><i /><i /></span>
+          <span className="hall-bear-caption">Something is watching</span>
+        </button>
+        <div className="hall-depth-rail" aria-hidden="true" />
+      </> : null}
       <div className="hall-glass-reflection" aria-hidden="true" />
     </div>
     <p className="hall-encounter-status" aria-live="polite">{bearMessage}</p>

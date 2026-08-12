@@ -1,5 +1,6 @@
 export type HallSky = "sunrise" | "midday" | "sunset" | "night";
 export type HallEncounter = "none" | "birds" | "bear" | "ufo" | "comet" | "aurora" | "fireflies" | "eclipse" | "blood-moon" | "lightning" | "storm";
+export const HALL_ENCOUNTERS = ["birds", "bear", "ufo", "comet", "aurora", "fireflies", "eclipse", "blood-moon", "lightning", "storm"] as const satisfies ReadonlyArray<Exclude<HallEncounter, "none">>;
 
 export type HallEncounterWindow = {
   encounter: Exclude<HallEncounter, "none">;
@@ -20,7 +21,7 @@ const EASTERN_TIME = "America/New_York";
 const WINDOWS_PER_HOUR = 3;
 const SEGMENT_SECONDS = 20 * 60;
 
-const encounterDuration: Record<Exclude<HallEncounter, "none">, number> = {
+export const HALL_ENCOUNTER_DURATIONS: Record<Exclude<HallEncounter, "none">, number> = {
   birds: 22,
   bear: 45,
   ufo: 18,
@@ -33,7 +34,7 @@ const encounterDuration: Record<Exclude<HallEncounter, "none">, number> = {
   storm: 55,
 };
 
-const encountersBySky: Record<HallSky, Array<Exclude<HallEncounter, "none">>> = {
+export const HALL_ENCOUNTERS_BY_SKY: Record<HallSky, Array<Exclude<HallEncounter, "none">>> = {
   sunrise: ["birds", "bear", "comet", "storm", "lightning", "eclipse"],
   midday: ["birds", "bear", "ufo", "storm", "lightning", "eclipse"],
   sunset: ["birds", "bear", "comet", "fireflies", "storm", "lightning"],
@@ -95,12 +96,12 @@ export function getHallEncounterSchedule(now = new Date()): HallEncounterWindow[
   const sky = getHallSky(parts.hour);
   const hourKey = `${parts.year}-${parts.month}-${parts.day}T${String(parts.hour).padStart(2, "0")}`;
   const random = randomFromSeed(hash(`the-habitat:${hourKey}`));
-  const available = [...encountersBySky[sky]];
+  const available = [...HALL_ENCOUNTERS_BY_SKY[sky]];
 
   return Array.from({ length: WINDOWS_PER_HOUR }, (_, slot) => {
     const encounterIndex = Math.floor(random() * available.length);
     const encounter = available.splice(encounterIndex, 1)[0] ?? "birds";
-    const duration = encounterDuration[encounter];
+    const duration = HALL_ENCOUNTER_DURATIONS[encounter];
     const margin = 90;
     const availableStartRange = SEGMENT_SECONDS - duration - margin * 2;
     const startsAtSecond = slot * SEGMENT_SECONDS + margin + Math.floor(random() * availableStartRange);

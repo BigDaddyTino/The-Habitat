@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
-import { getGreatHallAtmosphere, getHallEncounterSchedule, getHallSky, isCurrentHallEncounter } from "./hall-atmosphere";
+import { getGreatHallAtmosphere, getHallEncounterSchedule, getHallSky, HALL_ENCOUNTERS, HALL_ENCOUNTERS_BY_SKY, HALL_ENCOUNTER_DURATIONS, isCurrentHallEncounter } from "./hall-atmosphere";
 
 test("uses Eastern time for the four Hall sky phases", () => {
   assert.equal(getHallSky(6), "sunrise");
@@ -36,4 +38,20 @@ test("is quiet outside a window and server-verifies an active encounter key", ()
   assert.equal(atmosphere.encounterDurationSeconds, window.endsAtSecond - window.startsAtSecond);
   assert.equal(isCurrentHallEncounter(window.encounter, window.encounterKey, active), true);
   assert.equal(isCurrentHallEncounter(window.encounter, `${window.encounterKey}:forged`, active), false);
+});
+
+test("every encounter has scheduling metadata and a scene-bound animation contract", () => {
+  const css = readFileSync(resolve(process.cwd(), "app/hall-cinematic.css"), "utf8");
+  const allScheduled = new Set(Object.values(HALL_ENCOUNTERS_BY_SKY).flat());
+  assert.deepEqual([...allScheduled].sort(), [...HALL_ENCOUNTERS].sort());
+
+  for (const encounter of HALL_ENCOUNTERS) {
+    assert.ok(HALL_ENCOUNTER_DURATIONS[encounter] >= 10);
+    assert.match(css, new RegExp(`\\.encounter-${encounter.replace("-", "\\-")}\\b`));
+  }
+
+  assert.match(css, /@media \(max-width:800px\)/);
+  assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);
+  assert.match(css, /\.hall-scene-bounce/);
+  assert.match(css, /\.hall-depth-rail/);
 });
