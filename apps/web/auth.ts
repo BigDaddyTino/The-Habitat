@@ -84,7 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // check and the createUser event, the user was created inactive. A
         // currently valid unconsumed invitation reactivates the member.
         const pendingInvitation = await db.invitation.findFirst({
-          where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
+          where: { email, acceptedAt: null, revokedAt: null, expiresAt: { gt: new Date() } },
           select: { id: true, role: true, invitedByUserId: true },
         });
         const codeReferral = pendingInvitation ? null : await currentCodeReferral();
@@ -109,7 +109,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       const invitation = await db.invitation.findFirst({
-        where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
+        where: { email, acceptedAt: null, revokedAt: null, expiresAt: { gt: new Date() } },
         select: { id: true },
       });
       return Boolean(invitation || await currentCodeReferral());
@@ -148,7 +148,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       const invitation = await db.invitation.findFirst({
-        where: { email, acceptedAt: null, expiresAt: { gt: new Date() } },
+        where: { email, acceptedAt: null, revokedAt: null, expiresAt: { gt: new Date() } },
         select: { id: true, role: true, invitedByUserId: true },
       });
       const codeReferral = invitation ? null : await currentCodeReferral();

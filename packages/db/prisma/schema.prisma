@@ -312,12 +312,14 @@ model Invitation {
   role            Role      @default(USER)
   expiresAt       DateTime
   acceptedAt      DateTime?
+  revokedAt       DateTime?
   createdAt       DateTime  @default(now())
   invitedByUserId String?   @db.Uuid
   invitedBy       User?     @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
   memberReferral  MemberReferral?
 
   @@index([invitedByUserId, createdAt])
+  @@index([revokedAt, expiresAt])
 }
 
 model MemberReferral {

@@ -28,7 +28,7 @@ export async function inviteMember(formData: FormData) {
   const invitation = await db.invitation.upsert({
     where: { email },
     create: { email, role: "USER", expiresAt, invitedByUserId: session.user.id },
-    update: { role: "USER", expiresAt, acceptedAt: null, invitedByUserId: session.user.id, createdAt: new Date() },
+    update: { role: "USER", expiresAt, acceptedAt: null, revokedAt: null, invitedByUserId: session.user.id, createdAt: new Date() },
   });
   await db.auditLog.create({
     data: {

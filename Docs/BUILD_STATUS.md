@@ -143,6 +143,8 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Verified-data leaderboards for activity, exploration, and achievement points
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
 - [x] Cinematic public member roster with profile links, live portal status, verified hosted-world presence, member-only browser/device context, and member-driven invitation console
+- [x] Premium Admin Suite command deck with grouped navigation, live operational counts, recent audit signal, and responsive desktop/mobile presentation
+- [x] Audited member management for role changes, suspension/reactivation, database-session revocation, pending-invitation revocation, and referral-lineage review with self/last-admin lockout protections
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
 - [x] Always-cinematic Great Hall with composition-matched sunrise/midday/sunset/night plates tied to America/New_York, a continuously rendered Three.js vista, pointer-depth parallax, adaptive quality, reduced-motion behavior, and an image fallback
 - [x] Deterministic living-window scheduler produces exactly three brief, sky-appropriate encounters per Eastern hour while leaving the Hall quiet most of the time: bird flocks, bear visits, UFOs, comets, aurora, fireflies, eclipse, blood moon, lightning, and storms

@@ -55,7 +55,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       orderBy: [{ role: "desc" }, { createdAt: "asc" }],
     }),
     viewerIsMember ? db.invitation.findMany({
-      where: { invitedByUserId: viewerId!, acceptedAt: null, expiresAt: { gt: now } },
+      where: { invitedByUserId: viewerId!, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
       select: { id: true, email: true, expiresAt: true },
       orderBy: { createdAt: "desc" },
       take: 5,
