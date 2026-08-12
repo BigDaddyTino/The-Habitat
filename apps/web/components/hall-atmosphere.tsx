@@ -34,7 +34,7 @@ type BearResponse = {
     rarity: AchievementRarity;
     category: string;
     points: number;
-    rewards: Array<{ kind: AchievementRewardKind; name: string }>;
+    rewards: Array<{ kind: AchievementRewardKind; code?: string; name: string }>;
   };
 };
 

@@ -9,7 +9,7 @@ type ProgressionResponse = {
   level: number;
   totalXp: number;
   entries: Array<{ id: string; amount: number; description: string }>;
-  achievements: Array<{ id: string; achievement: { name: string; rarity: AchievementRarity; description: string; category: string; points: number; rewards: Array<{ kind: AchievementRewardKind; name: string }> } }>;
+  achievements: Array<{ id: string; achievement: { name: string; rarity: AchievementRarity; description: string; category: string; points: number; rewards: Array<{ kind: AchievementRewardKind; code?: string; name: string }> } }>;
 };
 
 function rarityForLevel(level: number): AchievementRarity {

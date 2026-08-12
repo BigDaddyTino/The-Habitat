@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       where: { slug: achievementSlug, enabled: true, ruleType: "WEB_INTERACTION" },
       select: {
         id: true, name: true, description: true, rarity: true, category: true, points: true,
-        rewards: { select: { id: true, kind: true, name: true, titleDefinitionId: true } },
+        rewards: { select: { id: true, kind: true, code: true, name: true, titleDefinitionId: true } },
       },
     });
     if (!achievement) return null;
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
         rarity: achievement.rarity,
         category: achievement.category,
         points: achievement.points,
-        rewards: achievement.rewards.map(({ kind, name }) => ({ kind, name })),
+        rewards: achievement.rewards.map(({ kind, code, name }) => ({ kind, code, name })),
       },
     };
   });

@@ -7,7 +7,7 @@ export type RewardCeremonyDetail = {
   rarity: AchievementRarity;
   category?: string;
   points?: number;
-  rewards?: Array<{ kind: AchievementRewardKind; name: string }>;
+  rewards?: Array<{ kind: AchievementRewardKind; code?: string; name: string }>;
   kind: "achievement" | "level" | "xp";
 };
 

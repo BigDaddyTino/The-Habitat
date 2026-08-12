@@ -7,6 +7,8 @@ import type { Artboard, File as RiveFile, StateMachineInstance, WrappedRenderer 
 import type { BufferAttribute } from "three";
 import type { RewardCeremonyDetail } from "@/lib/reward-events";
 import { RewardEmblem } from "@/components/reward-emblem";
+import { CollectibleCanvas } from "@/components/collectible-canvas";
+import type { PhysicalRewardKind } from "@/lib/collectible-art";
 
 export function RewardCeremony({ toast, leaving = false }: { toast: RewardCeremonyDetail; leaving?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
@@ -146,12 +148,13 @@ export function RewardCeremony({ toast, leaving = false }: { toast: RewardCeremo
     };
   }, [presentation.ceremony, presentation.color, presentation.glow, toast.id]);
 
-  const emblemKind = toast.rewards?.find((reward) => reward.kind === "TROPHY" || reward.kind === "MEDAL" || reward.kind === "BADGE")?.kind ?? "BADGE";
+  const physicalReward = toast.rewards?.find((reward): reward is typeof reward & { kind: PhysicalRewardKind } => reward.kind === "TROPHY" || reward.kind === "MEDAL" || reward.kind === "BADGE");
+  const emblemKind = physicalReward?.kind ?? "BADGE";
   return <aside className={`reward-ceremony rarity-${toast.rarity.toLowerCase().replaceAll("_", "-")}${leaving ? " is-leaving" : ""}`} ref={rootRef} aria-live={presentation.ceremony === "legendary" ? "assertive" : "polite"}>
     <canvas className="reward-three-canvas" ref={threeCanvasRef} aria-hidden="true" />
     <div className="reward-toast-card">
       <i className="reward-toast-scan" aria-hidden="true" />
-      <div className="reward-toast-sigil"><canvas className="reward-rive-canvas" ref={riveCanvasRef} aria-hidden="true" /><RewardEmblem rarity={toast.rarity} kind={emblemKind} size="large" /></div>
+      <div className="reward-toast-sigil"><canvas className="reward-rive-canvas" ref={riveCanvasRef} aria-hidden="true" />{physicalReward ? <CollectibleCanvas item={{ code: physicalReward.code ?? `unclassified-${physicalReward.kind.toLowerCase()}`, name: physicalReward.name, kind: physicalReward.kind, rarity: toast.rarity, achievementName: toast.title }} className="reward-toast-collectible" /> : <RewardEmblem rarity={toast.rarity} kind={emblemKind} size="large" />}</div>
       <div className="reward-toast-copy"><p className="eyebrow">{headline}</p><strong>{toast.title}</strong><span>{toast.detail}</span>{toast.points ? <small>+{toast.points} achievement points</small> : null}</div>
       <div className="reward-toast-loot">{toast.rewards?.length ? toast.rewards.slice(0, 3).map((reward) => <span key={`${reward.kind}-${reward.name}`}><Trophy aria-hidden="true" size={12} />{reward.name}</span>) : toast.kind === "level" ? <span><Crown aria-hidden="true" size={12} />Milestone reached</span> : toast.kind === "xp" ? <span><Zap aria-hidden="true" size={12} />Verified progress</span> : <span><Sparkles aria-hidden="true" size={12} />Archive updated</span>}</div>
     </div>

@@ -83,3 +83,86 @@
   .reward-emblem,.earned .reward-emblem,.reward-toast-sigil .reward-emblem,.reward-emblem::after,.earned .reward-emblem::after,.reward-toast-sigil .reward-emblem::after,.reward-toast-card,.reward-toast-card::after,.reward-toast-scan::before { animation:none; }
   .achievement-dossier:hover,.achievement-dossier:focus-within { transform:none; }
 }
+
+/* Authored collectible art and inspection bay */
+.reward-emblem>span.has-collectible-art { overflow:hidden; border-color:rgba(var(--rarity-rgb),.76); background-color:#0b0d0b; background-repeat:no-repeat; box-shadow:inset 0 0 12px #0008,0 0 13px rgba(var(--rarity-rgb),.2); }
+.reward-emblem>span.has-collectible-art svg { opacity:0; }
+
+.trophy-cabinet-stage { min-height:650px; background-image:linear-gradient(90deg,transparent 0 69%,rgba(5,8,6,.72) 76%,rgba(5,8,6,.94) 100%),linear-gradient(180deg,rgba(3,5,4,.06),rgba(3,5,4,.27)),url("/images/collectibles/cabinet-interior.png"); background-position:center; background-size:cover; }
+.trophy-cabinet-stage::before { content:"THE HABITAT · VERIFIED COLLECTION · CLICK ANY PIECE TO INSPECT"; text-shadow:0 2px 8px #000; }
+.trophy-cabinet-canvas { z-index:1; }
+.cabinet-fallback { inset:72px 31% 38px 35px; grid-template-columns:repeat(7,1fr); grid-auto-rows:1fr; }
+.cabinet-inspection { width:286px; min-height:288px; pointer-events:auto; }
+.cabinet-inspection button { display:inline-flex; gap:7px; align-items:center; margin-top:14px; border:1px solid rgba(214,195,151,.35); padding:8px 10px; background:#1c211c; color:#e7d7b3; font:inherit; font-family:var(--font-mono); font-size:8px; letter-spacing:.5px; text-transform:uppercase; cursor:zoom-in; }
+.cabinet-inspection button:hover,.cabinet-inspection button:focus-visible { border-color:var(--brass); background:#332a1d; color:#fff3d2; }
+.cabinet-inspection button svg { width:13px; height:13px; }
+.cabinet-index button>svg:last-child { margin-left:2px; opacity:.42; }
+.cabinet-index button:hover>svg:last-child,.cabinet-index button:focus-visible>svg:last-child { opacity:1; }
+
+.collectible-canvas { position:relative; width:100%; height:100%; overflow:hidden; }
+.collectible-canvas canvas { display:block; width:100%; height:100%; opacity:0; transition:opacity .45s ease; }
+.collectible-canvas[data-collectible-ready] canvas { opacity:1; }
+.collectible-canvas-fallback { position:absolute; top:50%; left:50%; display:grid; width:74px; height:74px; place-items:center; transform:translate(-50%,-50%) rotate(-5deg); border:1px solid rgba(var(--rarity-rgb,197,157,89),.4); border-radius:50%; color:#bda879; font-family:var(--font-mono); font-size:8px; letter-spacing:1px; }
+.collectible-canvas[data-collectible-ready] .collectible-canvas-fallback { display:none; }
+.collectible-canvas.is-interactive { cursor:grab; touch-action:none; outline:none; }
+.collectible-canvas.is-interactive.is-dragging { cursor:grabbing; }
+.collectible-canvas.is-interactive:focus-visible { box-shadow:inset 0 0 0 2px var(--rarity); }
+
+.collectible-inspector { position:fixed; z-index:160; inset:0; display:grid; place-items:center; padding:26px; background:radial-gradient(circle at 42% 40%,rgba(var(--rarity-rgb),.13),transparent 31%),rgba(4,7,5,.88); backdrop-filter:blur(18px); animation:collectible-inspector-fade .28s ease both; }
+.collectible-inspector-shell { position:relative; display:grid; grid-template-columns:minmax(0,1.45fr) minmax(290px,.55fr); width:min(1240px,calc(100vw - 52px)); height:min(820px,calc(100vh - 52px)); overflow:hidden; border:1px solid rgba(var(--rarity-rgb),.56); border-top:3px solid var(--rarity); background:linear-gradient(135deg,#171814,#090d0a 62%); box-shadow:0 38px 120px #000,0 0 60px rgba(var(--rarity-rgb),.16); animation:collectible-inspector-enter .62s cubic-bezier(.15,.9,.18,1) both; }
+.collectible-inspector-shell::before { content:"ARCHIVE INSPECTION BAY / AUTHENTICATED OBJECT"; position:absolute; z-index:4; top:16px; left:20px; color:rgba(var(--rarity-rgb),.72); font-family:var(--font-mono); font-size:8px; letter-spacing:1.6px; pointer-events:none; }
+.collectible-inspector-close { position:absolute; z-index:6; top:14px; right:14px; display:grid; width:38px; height:38px; place-items:center; border:1px solid rgba(var(--rarity-rgb),.4); background:#101510df; color:#dcd4c2; cursor:pointer; }
+.collectible-inspector-close:hover,.collectible-inspector-close:focus-visible { border-color:var(--rarity); color:#fff; }
+.collectible-inspector-close svg { width:18px; }
+.collectible-inspector-stage { position:relative; min-width:0; overflow:hidden; background:radial-gradient(circle at 50% 48%,rgba(var(--rarity-rgb),.12),transparent 31%),linear-gradient(145deg,#151712,#080b09); }
+.collectible-inspector-stage::before,.collectible-inspector-stage::after { content:""; position:absolute; z-index:0; pointer-events:none; }
+.collectible-inspector-stage::before { inset:11%; border:1px solid rgba(var(--rarity-rgb),.08); border-radius:50%; box-shadow:inset 0 0 90px rgba(var(--rarity-rgb),.05),0 0 70px rgba(var(--rarity-rgb),.04); }
+.collectible-inspector-stage::after { right:12%; bottom:8%; left:12%; height:1px; background:linear-gradient(90deg,transparent,rgba(var(--rarity-rgb),.35),transparent); box-shadow:0 0 35px rgba(var(--rarity-rgb),.3); }
+.collectible-inspector-stage .collectible-canvas { position:absolute; z-index:2; inset:0; }
+.collectible-inspector-halo { position:absolute; z-index:1; top:50%; left:50%; width:min(58vw,570px); aspect-ratio:1; transform:translate(-50%,-50%); border:1px solid rgba(var(--rarity-rgb),.08); border-radius:50%; background:repeating-radial-gradient(circle,transparent 0 47px,rgba(var(--rarity-rgb),.035) 48px 49px); }
+.collectible-inspector-controls { position:absolute; z-index:4; bottom:22px; left:50%; display:flex; gap:8px; align-items:center; transform:translateX(-50%); color:#8f9389; font-family:var(--font-mono); font-size:8px; letter-spacing:.7px; text-transform:uppercase; white-space:nowrap; pointer-events:none; }
+.collectible-inspector-controls svg { width:14px; color:var(--rarity); }.collectible-inspector-controls span { width:1px; height:13px; margin:0 6px; background:#565d54; }
+.collectible-inspector-copy { position:relative; z-index:3; display:flex; min-width:0; flex-direction:column; justify-content:center; padding:64px 34px 34px; overflow-y:auto; border-left:1px solid rgba(var(--rarity-rgb),.18); background:radial-gradient(circle at 0 45%,rgba(var(--rarity-rgb),.08),transparent 35%),linear-gradient(180deg,#171914,#0d110e); }
+.collectible-inspector-copy .eyebrow { color:var(--rarity); }
+.collectible-inspector-copy h2 { margin-top:10px; color:#fff0cd; font-size:clamp(40px,5vw,70px); line-height:.78; }
+.collectible-inspector-copy>p:not(.eyebrow) { margin-top:20px; color:#b8b7aa; font-size:12px; line-height:1.65; }
+.collectible-inspector-copy blockquote { margin:24px 0 0; padding:14px 0 14px 16px; border-left:2px solid var(--rarity); color:var(--rarity); font-family:var(--font-mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; }
+.collectible-inspector-copy dl { display:grid; gap:13px; margin:25px 0 0; }
+.collectible-inspector-copy dl div { padding-top:11px; border-top:1px solid rgba(var(--rarity-rgb),.14); }
+.collectible-inspector-copy dt { color:#777f76; font-family:var(--font-mono); font-size:8px; text-transform:uppercase; }
+.collectible-inspector-copy dd { margin:5px 0 0; color:#d6d0bd; font-size:10px; line-height:1.4; }
+.collectible-reset-view { display:inline-flex; width:max-content; gap:8px; align-items:center; margin-top:26px; border:1px solid rgba(var(--rarity-rgb),.35); padding:9px 11px; background:#141915; color:#d8d0bc; font:inherit; font-family:var(--font-mono); font-size:8px; text-transform:uppercase; cursor:pointer; }
+.collectible-reset-view:hover,.collectible-reset-view:focus-visible { border-color:var(--rarity); color:#fff; }.collectible-reset-view svg { width:14px; }
+
+.reward-toast-sigil .reward-toast-collectible { position:relative; z-index:2; width:96px; height:108px; filter:drop-shadow(0 8px 16px #000b); }
+.reward-toast-sigil .reward-toast-collectible canvas { transform:scale(1.16); }
+
+@keyframes collectible-inspector-fade { from { opacity:0; } }
+@keyframes collectible-inspector-enter { from { opacity:0; transform:translateY(32px) scale(.72); } }
+
+@media (max-width:900px) {
+  .trophy-cabinet-stage { min-height:600px; background-image:linear-gradient(180deg,transparent 0 63%,rgba(5,8,6,.86) 70%,rgba(5,8,6,.96) 100%),url("/images/collectibles/cabinet-interior.png"); }
+  .cabinet-fallback { right:20px; bottom:200px; }
+  .collectible-inspector-shell { grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr); }
+  .collectible-inspector-copy { padding-right:25px; padding-left:25px; }
+}
+@media (max-width:700px) {
+  .trophy-cabinet-stage,.trophy-cabinet-section.compact .trophy-cabinet-stage { min-height:610px; background-size:auto 66%,auto 66%; background-repeat:no-repeat; background-position:center top; }
+  .cabinet-inspection { top:auto; right:10px; bottom:10px; left:10px; width:auto; min-height:196px; }
+  .cabinet-inspection .reward-emblem { position:absolute; top:12px; right:13px; }
+  .cabinet-fallback { inset:45px 10px 218px; }
+  .collectible-inspector { padding:0; }
+  .collectible-inspector-shell { grid-template-columns:1fr; grid-template-rows:minmax(330px,56vh) minmax(0,1fr); width:100vw; height:100dvh; border-right:0; border-bottom:0; border-left:0; }
+  .collectible-inspector-shell::before { left:13px; max-width:68%; line-height:1.5; }
+  .collectible-inspector-stage { min-height:0; }
+  .collectible-inspector-copy { justify-content:flex-start; padding:25px 20px 36px; border-top:1px solid rgba(var(--rarity-rgb),.2); border-left:0; }
+  .collectible-inspector-copy h2 { padding-right:30px; font-size:44px; }
+  .collectible-inspector-copy>p:not(.eyebrow) { margin-top:14px; }
+  .collectible-inspector-copy blockquote { margin-top:16px; }
+  .collectible-inspector-copy dl { margin-top:17px; }
+  .collectible-inspector-controls { bottom:12px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .collectible-inspector,.collectible-inspector-shell { animation:none; }
+  .collectible-canvas canvas { transition:none; }
+}
