@@ -19,12 +19,15 @@ Configure Discord redirect URIs:
 Keep these root `.env` values untracked:
 
 ```text
+AUTH_URL=https://habitat.martinobear.com
 AUTH_SECRET=<long random secret>
 AUTH_TRUST_HOST=true
 AUTH_DISCORD_ID=<Discord OAuth client ID>
 AUTH_DISCORD_SECRET=<Discord OAuth client secret>
 BOOTSTRAP_ADMIN_EMAIL=<temporary owner email only>
 ```
+
+`AUTH_URL` is the canonical public Habitat origin. It is required in production because Cloudflare Tunnel terminates public HTTPS and forwards to a loopback origin; without it, Auth.js can derive `localhost` as the Discord redirect URI.
 
 ## Steam identity proof
 

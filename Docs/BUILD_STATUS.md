@@ -127,7 +127,13 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Dedicated remotely managed `habitat-martserv101` Cloudflare Tunnel installed as an automatic Windows service on MartServ101
 - [x] `habitat.martinobear.com` published through a proxied tunnel route to the loopback-only `http://127.0.0.1:3000` origin; public HTTPS and certificate verified against both advertised Cloudflare edge addresses
 - [x] Legacy public DNS-only A record removed; no database, agent, game, RCON, file-sharing, or management port was added to the tunnel
-- [ ] Replace MartServDMC's legacy split-horizon A record for `habitat.martinobear.com` with an internal CNAME to the Cloudflare tunnel target so LAN clients stop using the retired internal target
+- [x] MartServDMC's legacy split-horizon A record for `habitat.martinobear.com` removed
+- [x] MartServDMC internal DNS now returns two short-TTL Cloudflare edge A records for `habitat.martinobear.com`; LAN HTTPS verification completed
+- [x] Full backup and restore drill completed and operator-verified
+- [x] MartServ101 reboot, automatic service startup, and application recovery completed and operator-verified
+- [x] MartServ102 reboot, agent recovery, and managed game-service recovery completed and operator-verified
+- [x] Managed restart flows exercised across the deployed Habitat and game services
+- [x] Production Discord OAuth callback pinned to the public Habitat origin and verified against the registered Discord redirect URI
 - [ ] Remaining Phase 13 production-hardening audit intentionally pending
 
 ## Pre-Phase 13 - Community and Great Hall Expansion

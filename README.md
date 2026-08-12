@@ -10,7 +10,7 @@ It combines verified server monitoring and historical game evidence with member 
 - The dashboard reads persisted registry, telemetry, Chronicle, roster, and reward data from PostgreSQL. Seed content is never represented as live telemetry.
 - The worker consumes only the private, authenticated agent API. The public web app never exposes game ports, management APIs, RCON, Telnet, agent routes, or database access.
 - Unclaimed observations are retained and labeled as provisional. They earn no profile benefits until a claim is approved or the owner proves a matching Steam identity; reconciliation then safely attaches the verified history and rewards.
-- Phase 13 production hardening is intentionally the next major phase. See [Build Status](Docs/BUILD_STATUS.md) for the current implementation and remaining work.
+- Phase 13 production hardening is underway. Cloudflare publication, full backup/restore, and both-host reboot recovery are complete; see [Build Status](Docs/BUILD_STATUS.md) for the remaining audit work.
 
 ## Main surfaces
 

@@ -75,7 +75,11 @@ async function recordIfBroken(transaction: Prisma.TransactionClient, definition:
     where: { dedupeKey },
     create: {
       recordDefinitionId: definition.id,
-      ...holderData,
+      userId: holderData.userId,
+      playerIdentityId: holderData.playerIdentityId,
+      holderName: holderData.holderName,
+      valueNumber: holderData.valueNumber,
+      sourceEventId: holderData.sourceEventId,
       priorValue: prior?.valueNumber,
       priorHolderName: prior?.holderName,
       occurredAt: event.occurredAt,

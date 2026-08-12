@@ -41,7 +41,6 @@ export default async function GreatHallPage() {
       <section className="content-shell world-section">
         <div className="section-heading">
           <div><p className="eyebrow">World registry</p><h2>Tonight in the Habitat</h2></div>
-          <p>These world definitions come directly from the Habitat registry. Live telemetry arrives through the agent and worker.</p>
         </div>
         <div className="world-grid">
           {worlds.map((world) => <WorldCard world={world} key={world.slug} />)}

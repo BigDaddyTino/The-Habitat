@@ -83,3 +83,7 @@ git clone "N:\The Habitat\backups\repository\habitat-<stamp>.bundle" "C:\The Hab
 ```
 
 Restore configuration archives by hand. They can contain live secrets. Repository bundles include committed history only; uncommitted files are not a backup.
+
+## Production recovery validation
+
+The owner has completed and accepted the full backup/restore drill. MartServ101 and MartServ102 have both been rebooted, and automatic recovery of the deployed Habitat services, private agent connection, and managed game-service state has been verified. Managed restart flows have also been exercised across the deployed services. Repeat these drills after material service-wrapper, storage, database, or host-startup changes.

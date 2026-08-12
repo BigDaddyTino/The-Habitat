@@ -17,7 +17,7 @@ The live implementation now extends the original plan with Steam OpenID ownershi
 
 ## Remaining validation work
 
-- Phase 13 hardening remains intentionally pending.
+- Phase 13 hardening is underway; Cloudflare publication, full backup/restore, and both-host reboot recovery are complete, while the remaining security and release audit is pending.
 - Verify new telemetry/history collectors with live player activity before relying on their richer game-specific details.
 - Provider-authenticated live social presence and gameplay-changing or client-required mods are not deployed.
 - Dragonwilds player-session evidence awaits real dedicated-server session lines in retained logs.

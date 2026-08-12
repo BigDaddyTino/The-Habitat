@@ -22,15 +22,8 @@ async function main(): Promise<void> {
   const agent = new HabitatAgentClient(configuration.agentUrl, configuration.agentToken);
   const runOnce = process.argv.includes("--once");
   let discordBot: Awaited<ReturnType<typeof startDiscordBot>> = null;
+  let shuttingDown = false;
   let nextHistoryScanAt = 0;
-  if (!runOnce) {
-    try {
-      discordBot = await startDiscordBot();
-    } catch (error) {
-      console.warn("Habitat Discord bot was not started. Monitoring remains available.");
-      console.error("[worker] Discord bot startup failed:", error instanceof Error ? error.message : String(error));
-    }
-  }
 
   const dispatchCommands = async () => {
     const commands = await dispatchAuthorizedServerCommands(commandRepository, agent);
@@ -113,9 +106,19 @@ async function main(): Promise<void> {
   };
   await tick();
   await dispatchTick();
+  // Discord is an optional companion surface. Its gateway connection must never
+  // delay the private agent's live monitoring and roster persistence.
+  void startDiscordBot().then((bot) => {
+    if (shuttingDown) bot?.stop();
+    else discordBot = bot;
+  }).catch((error: unknown) => {
+    console.warn("Habitat Discord bot was not started. Monitoring remains available.");
+    console.error("[worker] Discord bot startup failed:", error instanceof Error ? error.message : String(error));
+  });
   const interval = setInterval(() => { void tick(); }, configuration.pollIntervalMs);
   const dispatchInterval = setInterval(() => { void dispatchTick(); }, configuration.pollIntervalMs);
   const shutdown = () => {
+    shuttingDown = true;
     clearInterval(interval);
     clearInterval(dispatchInterval);
     discordBot?.stop();

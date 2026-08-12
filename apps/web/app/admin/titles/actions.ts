@@ -9,6 +9,7 @@ import { requireRole } from "@/lib/authorization";
 const db = getPrismaClient();
 const titleSchema = z.object({ name: z.string().trim().min(3).max(60), description: z.preprocess((value) => value === "" ? null : value, z.string().trim().max(180).nullable()) });
 const grantSchema = z.object({ titleDefinitionId: z.string().uuid(), userId: z.string().uuid() });
+const editSchema = titleSchema.extend({ id: z.string().uuid(), enabled: z.enum(["true", "false"]).transform((value) => value === "true") });
 
 export async function createTitleDefinition(formData: FormData) {
   const admin = await requireRole("ADMIN");
@@ -36,4 +37,31 @@ export async function grantTitle(formData: FormData) {
   await db.auditLog.create({ data: { actorUserId: admin.id, action: "USER_TITLE_GRANTED", entityType: "UserTitle", entityId: award.id, after: { titleDefinitionId: title.id, userId: recipient.id } } });
   revalidatePath("/admin/titles");
   revalidatePath("/profile");
+}
+
+export async function updateTitleDefinition(formData: FormData) {
+  const admin = await requireRole("ADMIN");
+  const parsed = editSchema.safeParse({ id: formData.get("id"), name: formData.get("name"), description: formData.get("description"), enabled: formData.get("enabled") });
+  if (!parsed.success) throw new Error("Invalid title update.");
+
+  const existing = await db.titleDefinition.findUnique({ where: { id: parsed.data.id }, select: { id: true, slug: true, name: true, description: true, enabled: true } });
+  if (!existing) throw new Error("Title definition was not found.");
+
+  const title = await db.titleDefinition.update({
+    where: { id: existing.id },
+    data: { name: parsed.data.name, description: parsed.data.description, enabled: parsed.data.enabled },
+  });
+  await db.auditLog.create({
+    data: {
+      actorUserId: admin.id,
+      action: "TITLE_DEFINITION_UPDATED",
+      entityType: "TitleDefinition",
+      entityId: title.id,
+      before: { slug: existing.slug, name: existing.name, description: existing.description, enabled: existing.enabled },
+      after: { slug: title.slug, name: title.name, description: title.description, enabled: title.enabled },
+    },
+  });
+  revalidatePath("/admin/titles");
+  revalidatePath("/profile");
+  revalidatePath("/members", "layout");
 }

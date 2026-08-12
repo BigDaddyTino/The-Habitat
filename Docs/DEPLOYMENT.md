@@ -43,7 +43,7 @@ Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:3000/" |
   Select-Object StatusCode
 ```
 
-The authoritative Cloudflare record is tunnel-managed and proxied. MartServDMC currently has a legacy split-horizon A record for `habitat.martinobear.com`; replace it with an internal CNAME to the tunnel target shown in Cloudflare before using the public hostname from the LAN. Merely deleting the record may return `NXDOMAIN` if the internal server remains authoritative for the zone. Do not pin an internal record to a Cloudflare edge IP because those addresses are not application-owned endpoints.
+The authoritative Cloudflare record is tunnel-managed and proxied. MartServDMC also hosts the internal Active Directory DNS zone, so it has two short-TTL A records for `habitat.martinobear.com` matching the current authoritative Cloudflare answers. This allows LAN clients to reach the same proxied tunnel path. Recheck those local records whenever Cloudflare's authoritative answers change; do not create an internal CNAME directly to the `cfargotunnel.com` target.
 
 ## Release verification
 

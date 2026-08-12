@@ -2940,22 +2940,22 @@ feat: add guarded dedicated-server controls
 - [ ] Create production Docker images.
 - [ ] Add non-root container users where possible.
 - [ ] Add health checks.
-- [ ] Add backup scripts.
-- [ ] Add retention job.
+- [x] Add backup scripts.
+- [x] Add retention job.
 - [x] Add Cloudflare hostname.
 - [x] Confirm only web is publicly exposed.
 - [ ] Run dependency audit.
 - [ ] Run authorization tests.
 - [ ] Run Playwright.
 - [ ] Test phone layouts.
-- [ ] Test database restore.
-- [ ] Test MartServ102 reboot.
-- [ ] Test MartServ101 reboot.
+- [x] Test database restore.
+- [x] Test MartServ102 reboot.
+- [x] Test MartServ101 reboot.
 - [ ] Test game crash.
 - [ ] Test sleeping server.
 - [ ] Test agent unavailable.
 - [ ] Test Discord unavailable.
-- [ ] Document recovery.
+- [x] Document recovery.
 
 Commit:
 
@@ -3232,11 +3232,11 @@ V1 is complete when:
 - [ ] Discord status commands work.
 - [ ] Wake requests work.
 - [ ] Polls work.
-- [ ] Database backups work.
+- [x] Database backups work.
 - [ ] Admin health page works.
 - [ ] Mobile layout is excellent.
 - [ ] No game-management API is exposed publicly.
-- [ ] Production recovery is documented.
+- [x] Production recovery is documented.
 
 Server-control actions may ship immediately after V1 if additional validation is needed.
 
