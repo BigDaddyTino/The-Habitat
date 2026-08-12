@@ -1,24 +1,24 @@
 export type ClubGame = {
   slug: string;
   name: string;
+  roomName: string;
   tagline: string;
   description: string;
-  platformNote: string;
-  sourceLabel: string;
   accent: "rivals";
   features: readonly string[];
+  squadSize: number;
 };
 
 const clubGames = [
   {
     slug: "marvel-rivals",
     name: "Marvel Rivals",
-    tagline: "Assemble the six.",
-    description: "The Habitat's competitive squad room. Build a lineup, compare hero pools, and make game night feel like an event.",
-    platformNote: "Most Habitat members play on Steam. Steam proves membership; an opt-in Rivals profile will supply game stats once the adapter is configured.",
-    sourceLabel: "Marvel Rivals API · not connected",
+    roomName: "The Assembly Room",
+    tagline: "Six seats. One bad plan.",
+    description: "The Habitat room for squads, mains, ranks, and match-night bragging rights.",
     accent: "rivals",
-    features: ["Squad finder", "Rank & hero profile", "Match archive", "Club leaderboards"],
+    features: ["Squad board", "Member standings", "Hero mains"],
+    squadSize: 6,
   },
 ] as const satisfies readonly ClubGame[];
 

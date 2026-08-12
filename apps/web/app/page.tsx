@@ -8,6 +8,8 @@ import { getActivePoll } from "@/lib/community-data";
 import { ActivePoll } from "@/components/active-poll";
 import { HallAtmosphere } from "@/components/hall-atmosphere";
 import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
+import { ClubGameCard } from "@/components/club-game-card";
+import { getClubGames } from "@/lib/club-games";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
@@ -18,6 +20,7 @@ export default async function GreatHallPage() {
   const monitorFocus = reportingWorlds[0] ?? null;
   const activePlayers = liveWorlds.reduce((total, world) => total + (world.players ?? 0), 0);
   const atmosphere = getGreatHallAtmosphere();
+  const clubGames = getClubGames();
   return (
     <div className="great-hall">
       <section className={`hall-hero sky-${atmosphere.sky}`}>
@@ -34,7 +37,7 @@ export default async function GreatHallPage() {
             <div><UsersRound aria-hidden="true" /><strong>{activePlayers}</strong><span>players online</span></div>
             <div><ShieldCheck aria-hidden="true" /><strong>{worlds.length}</strong><span>worlds registered</span></div>
           </div>
-          <Link className="primary-link" href="/departure-board">Open departure board <ArrowRight aria-hidden="true" size={17} /></Link>
+          <Link className="primary-link" href="/games">Browse the game rooms <ArrowRight aria-hidden="true" size={17} /></Link>
         </div>
       </section>
 
@@ -45,6 +48,14 @@ export default async function GreatHallPage() {
         <div className="world-grid">
           {worlds.map((world) => <WorldCard world={world} key={world.slug} />)}
         </div>
+      </section>
+
+      <section className="content-shell hall-club-section">
+        <div className="section-heading">
+          <div><p className="eyebrow">The club rooms</p><h2>Not every fight needs our server.</h2></div>
+          <Link href="/games#club-rooms">All games <ArrowRight aria-hidden="true" size={15} /></Link>
+        </div>
+        <div className="club-room-grid">{clubGames.map((game) => <ClubGameCard game={game} key={game.slug} />)}</div>
       </section>
 
       <section className="content-shell lower-grid">

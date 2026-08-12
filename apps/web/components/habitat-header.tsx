@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { Award, Crown, Landmark, LogIn, Map, ScrollText, Settings, Swords, Target, Trophy, UserRound, Vote } from "lucide-react";
+import { Award, Crown, Landmark, LogIn, ScrollText, Settings, Swords, Target, Trophy, UserRound, Vote } from "lucide-react";
 import { auth } from "@/auth";
 
 const navigation = [
   { href: "/", label: "Great Hall", icon: Landmark },
-  { href: "/worlds", label: "Worlds", icon: Map },
-  { href: "/club-games", label: "Club Games", icon: Swords },
-  { href: "/departure-board", label: "Departure Board", icon: Trophy },
+  { href: "/games", label: "Games", icon: Swords },
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
   { href: "/achievements", label: "Achievements", icon: Award },
   { href: "/leaderboards", label: "Leaderboards", icon: Trophy },
