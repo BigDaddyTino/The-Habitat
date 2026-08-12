@@ -9,7 +9,7 @@ import { importLegacyHistory } from "./legacy-history.js";
 import { reconcileProgression } from "./progression.js";
 import { reconcileAchievementCatalog } from "./achievements.js";
 import { reconcilePendingIdentityRewards } from "./identity-reconciliation.js";
-import { syncMarvelRivalsMatches, syncMarvelRivalsProfiles } from "./marvel-rivals.js";
+import { syncMarvelRivalsMatches, syncMarvelRivalsPresence, syncMarvelRivalsProfiles } from "./marvel-rivals.js";
 import { syncSteamEnrichment } from "./steam-enrichment.js";
 import { syncSteamAchievements } from "./steam-achievements.js";
 import { projectGameActivities } from "./game-activities.js";
@@ -59,8 +59,10 @@ async function main(): Promise<void> {
         console.error("[worker] Steam enrichment failed:", error instanceof Error ? error.message : String(error));
       }
       try {
+        const presence = await syncMarvelRivalsPresence();
         const profiles = await syncMarvelRivalsProfiles();
         const matches = await syncMarvelRivalsMatches();
+        if (presence.enabled && presence.playing > 0) console.info(`Habitat Marvel Rivals presence: ${presence.playing}/${presence.checked} linked members in game on Steam.`);
         if (profiles.enabled && (profiles.checked > 0 || matches.checked > 0)) console.info(`Habitat Marvel Rivals: ${profiles.updated}/${profiles.checked} profiles refreshed and ${matches.matchesSeen} match rows observed across ${matches.checked} profiles; ${profiles.failed + matches.failed} deferred.`);
       } catch (error) {
         console.warn("Habitat Marvel Rivals refresh failed. Hosted monitoring remains available.");

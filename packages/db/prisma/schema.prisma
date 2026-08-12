@@ -899,6 +899,8 @@ model ClubGameProfile {
   matchCursorOccurredAt    DateTime?
   matchCursorProviderId    String?            @db.VarChar(80)
   matchHistoryGapDetected  Boolean            @default(false)
+  steamLastPlayingAt       DateTime?
+  steamPresenceCheckedAt   DateTime?
   createdAt      DateTime              @default(now())
   updatedAt      DateTime              @updatedAt
   user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)

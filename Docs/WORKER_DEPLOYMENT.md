@@ -16,11 +16,15 @@ STEAM_WEB_API_KEY=<optional private key>
 STEAM_DATA_STORAGE_COUNTRY=<required before Steam enrichment runs>
 STEAM_WEB_API_DAILY_REQUEST_BUDGET=5000
 MARVEL_RIVALS_API_KEY=<optional private key>
+MARVEL_RIVALS_PROVIDER=<blank | marvelrivalsapi | rivalsmeta | off>
+MARVEL_RIVALS_REFRESH_MINUTES=<blank for defaults: 60 rivalsmeta, 360 official>
 MARVEL_RIVALS_DAILY_REQUEST_BUDGET=2500
 HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false
 ```
 
 The worker rejects public, HTTPS, credentialed, or path-bearing agent URLs. Its token stays in `.env`; it is not typed into a PowerShell variable for normal operation.
+
+When `MARVEL_RIVALS_API_KEY` is blank the worker automatically falls back to the rivalsmeta.com community provider (set `MARVEL_RIVALS_PROVIDER=off` to disable instead). Rivals refreshes are presence-gated and cover only member-linked accounts: a profile pulls once when the member links it, then hourly while the member's verified Steam account shows Marvel Rivals running (plus one pass up to an hour after they stop, since provider data lags live play), with a daily safety pass for everyone else.
 
 ## First Cycle
 

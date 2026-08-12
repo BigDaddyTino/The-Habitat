@@ -7,7 +7,7 @@ import { linkMarvelRivalsProfile, type RivalsLinkState } from "@/app/club-games/
 
 const initialRivalsLinkState: RivalsLinkState = { status: "idle", message: "" };
 
-export function MarvelRivalsLinkForm({ providerReady }: { providerReady: boolean }) {
+export function MarvelRivalsLinkForm({ providerReady, steamLinked = false }: { providerReady: boolean; steamLinked?: boolean }) {
   const [state, action, pending] = useActionState(linkMarvelRivalsProfile, initialRivalsLinkState);
   const [platform, setPlatform] = useState("PC");
   return <form action={action} className="rivals-link-form">
@@ -17,6 +17,7 @@ export function MarvelRivalsLinkForm({ providerReady }: { providerReady: boolean
     <label className="rivals-query-field"><span>Rivals callsign or UID</span><input autoComplete="off" disabled={!providerReady || pending} maxLength={32} name="query" placeholder="Enter your public profile" required /></label>
     <label className="rivals-consent"><input disabled={!providerReady || pending} name="providerConsent" required type="checkbox" /> I consent to Habitat retrieving and retaining my provider-reported profile and match history under the <Link href="/privacy">privacy notice</Link>. My profile starts private.</label>
     <button disabled={!providerReady || pending} type="submit">{pending ? "Checking profile..." : providerReady ? "Claim your seat" : "Linking offline"}</button>
+    {!steamLinked ? <p className="rivals-form-message idle">Tip: <Link href="/profile">link your Steam account</Link> too. Habitat refreshes your Rivals stats hourly while Steam shows you in the game (and once more after you stop); without Steam they refresh daily.</p> : null}
     {state.message ? <p className={`rivals-form-message ${state.status}`} role="status">{state.message}</p> : null}
   </form>;
 }
