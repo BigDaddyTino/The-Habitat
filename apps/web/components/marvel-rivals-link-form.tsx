@@ -1,16 +1,20 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { Gamepad2, Monitor } from "lucide-react";
 import { linkMarvelRivalsProfile, type RivalsLinkState } from "@/app/club-games/[slug]/actions";
 
 const initialRivalsLinkState: RivalsLinkState = { status: "idle", message: "" };
 
 export function MarvelRivalsLinkForm({ providerReady }: { providerReady: boolean }) {
   const [state, action, pending] = useActionState(linkMarvelRivalsProfile, initialRivalsLinkState);
+  const [platform, setPlatform] = useState("PC");
   return <form action={action} className="rivals-link-form">
-    <label>Rivals name or UID<input autoComplete="off" disabled={!providerReady || pending} maxLength={32} name="query" placeholder="Your in-game name" required /></label>
-    <label>Platform<select defaultValue="PC" disabled={!providerReady || pending} name="platform"><option value="PC">PC</option><option value="PLAYSTATION">PlayStation</option><option value="XBOX">Xbox</option></select></label>
-    <button disabled={!providerReady || pending} type="submit">{pending ? "Checking profile..." : providerReady ? "Link profile" : "Linking offline"}</button>
+    <div className="rivals-platform-field"><span>Playing on</span><div className="rivals-platform-switch" role="radiogroup" aria-label="Rivals platform">
+      {[{ id: "PC", label: "PC", icon: Monitor }, { id: "PLAYSTATION", label: "PS", icon: Gamepad2 }, { id: "XBOX", label: "Xbox", icon: Gamepad2 }].map(({ id, label, icon: Icon }) => <label className={platform === id ? "selected" : ""} key={id}><input checked={platform === id} disabled={!providerReady || pending} name="platform" onChange={() => setPlatform(id)} type="radio" value={id} /><Icon aria-hidden="true" size={13} /> {label}</label>)}
+    </div></div>
+    <label className="rivals-query-field"><span>Rivals callsign or UID</span><input autoComplete="off" disabled={!providerReady || pending} maxLength={32} name="query" placeholder="Enter your public profile" required /></label>
+    <button disabled={!providerReady || pending} type="submit">{pending ? "Checking profile..." : providerReady ? "Claim your seat" : "Linking offline"}</button>
     {state.message ? <p className={`rivals-form-message ${state.status}`} role="status">{state.message}</p> : null}
   </form>;
 }

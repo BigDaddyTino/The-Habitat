@@ -6,12 +6,12 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { progressionForXp, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
-import { socialPlatformLabels, socialPlatforms } from "@/lib/social-platforms";
-import { addSocialAccount, disconnectSteam, equipCosmetic, equipTitle, removeSocialAccount, selectAvatarPreset, updateProfile } from "./actions";
+import { SocialAccountForm } from "@/components/social-account-form";
+import { socialPlatformLabels } from "@/lib/social-platforms";
+import { disconnectSteam, equipCosmetic, equipTitle, removeSocialAccount, selectAvatarPreset, updateProfile } from "./actions";
 
 const db = getPrismaClient();
 const avatarPresets = ["/images/avatars/campfire.svg", "/images/avatars/raven.svg", "/images/avatars/mountain.svg", "/images/avatars/ufo.svg"];
-const manualSocialPlatforms = socialPlatforms.filter((platform) => platform !== "STEAM");
 
 export default async function ProfilePage() {
   const session = await auth();
@@ -55,7 +55,7 @@ export default async function ProfilePage() {
     </div>
 
     <div className="profile-heading"><div><p className="eyebrow">Connected accounts</p><h2>Your gaming identity</h2></div></div>
-    <div className="account-kit"><div><p>Verified Steam ownership can automatically attach matching game identities. Other services remain optional profile links and never imply live presence.</p><div className="steam-connect">{steamAccount ? <><span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span><form action={disconnectSteam}><button type="submit">Disconnect Steam</button></form></> : <Link href="/api/steam/connect">Verify with Steam</Link>}</div><form action={addSocialAccount} className="social-add"><select aria-label="Platform" name="platform" defaultValue="TWITCH">{manualSocialPlatforms.map((platform) => <option key={platform} value={platform}>{socialPlatformLabels[platform]}</option>)}</select><input name="handle" placeholder="Handle or gamer tag" required /><button type="submit">Add link</button></form></div><div className="social-list">{member.socialAccounts.length === 0 ? <span>No optional accounts added yet.</span> : member.socialAccounts.map((account) => <article key={account.id}><div><strong>{socialPlatformLabels[account.platform]} {account.verifiedAt ? <BadgeCheck aria-label="Verified" size={12} /> : null}</strong><span>{account.handle}</span></div>{account.profileUrl ? <a href={account.profileUrl} rel="noreferrer" target="_blank" aria-label={`Open ${account.platform} profile`}><ExternalLink size={15} /></a> : null}{account.verifiedAt ? null : <form action={removeSocialAccount}><input name="accountId" type="hidden" value={account.id} /><button type="submit">Remove</button></form>}</article>)}</div></div>
+    <div className="account-kit"><div><p>Verified Steam ownership can automatically attach matching game identities. Other services remain optional profile links and never imply live presence.</p><div className="steam-connect">{steamAccount ? <><span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span><form action={disconnectSteam}><button type="submit">Disconnect Steam</button></form></> : <Link href="/api/steam/connect">Verify with Steam</Link>}</div><SocialAccountForm /></div><div className="social-list">{member.socialAccounts.length === 0 ? <span>No optional accounts added yet.</span> : member.socialAccounts.map((account) => <article key={account.id}><div><strong>{socialPlatformLabels[account.platform]} {account.verifiedAt ? <BadgeCheck aria-label="Verified" size={12} /> : null}</strong><span>{account.handle}</span></div>{account.profileUrl ? <a href={account.profileUrl} rel="noreferrer" target="_blank" aria-label={`Open ${account.platform} profile`}><ExternalLink size={15} /></a> : null}{account.verifiedAt ? null : <form action={removeSocialAccount}><input name="accountId" type="hidden" value={account.id} /><button type="submit">Remove</button></form>}</article>)}</div></div>
 
     <div className="profile-heading"><div><p className="eyebrow">Club profiles</p><h2>Rooms you have joined</h2></div><Link className="primary-link" href="/club-games/marvel-rivals">Open Assembly Room</Link></div>
     {clubProfiles.length ? <div className="club-profile-list">{clubProfiles.map((profile) => <Link href="/club-games/marvel-rivals" key={profile.id}><Gamepad2 aria-hidden="true" size={18} /><div><strong>Marvel Rivals · {profile.displayName}</strong><span>Member-linked · {profile.rankName ?? "Unranked"}{profile.lastSyncedAt ? ` · Updated ${profile.lastSyncedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span></div><ExternalLink aria-hidden="true" size={14} /></Link>)}</div> : <div className="chronicle-empty"><p>No club profiles linked.</p><span>Join a Club Room to put your stats and callsign on its member board.</span></div>}
