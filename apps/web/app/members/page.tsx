@@ -8,6 +8,7 @@ import { WeeklyInviteCode } from "@/components/weekly-invite-code";
 import { progressionForXp } from "@habitat/shared";
 import { isPresenceActive } from "@/lib/member-presence";
 import { weeklyInviteCode } from "@/lib/weekly-invite-code";
+import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
 import { inviteMember } from "./actions";
 import "./members.css";
 
@@ -44,10 +45,10 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
     db.user.findMany({
       where: { isActive: true },
       select: {
-        id: true, name: true, displayName: true, username: true, image: true, role: true, createdAt: true,
+        id: true, name: true, displayName: true, username: true, image: true, avatarBorder: true, role: true, createdAt: true,
         memberPresence: true,
         memberReferralReceived: { select: { method: true, inviter: { select: { name: true, displayName: true, username: true } } } },
-        titles: { where: { equipped: true }, include: { title: { select: { name: true } } }, take: 1 },
+        titles: { where: { equipped: true }, include: { title: { select: { name: true, slug: true } } }, take: 1 },
         xpEntries: { select: { amount: true } },
         achievements: { select: { id: true } },
         playerIdentities: { select: { providerKey: true, serverId: true, displayName: true, server: { select: { displayName: true, worldName: true, playerPresence: { where: { present: true }, select: { providerKey: true } } } } } },
@@ -83,7 +84,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           <div><dt>In a world</dt><dd>{playingCount}</dd></div>
         </dl>
       </div>
-      <div className="members-beacon" aria-hidden="true"><span><Users size={44} /></span><i /><i /><i /><small>Private signal<br />Member verified</small></div>
+      <div className="members-legend-mark" aria-hidden="true"><img alt="" src="/images/ui/members-legendary-standard.png" /><small>Every world leaves a mark.<br />Every member carries the fire.</small></div>
     </section>
 
     <main className="members-body">
@@ -94,8 +95,8 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           const presence = member.memberPresence;
           return <article className={member.active ? "member-roster-card is-active" : "member-roster-card"} key={member.id} style={{ "--card-index": index } as React.CSSProperties}>
             <div className="member-card-rank"><span>{String(index + 1).padStart(2, "0")}</span>{member.role === "ADMIN" ? <Crown aria-label="Administrator" size={15} /> : <ShieldCheck aria-label="Verified member" size={15} />}</div>
-            <div className="member-card-portrait"><img alt={`${name} avatar`} src={member.image ?? fallbackAvatar} /><span className="member-card-glow" /></div>
-            <div className="member-card-copy"><p className="eyebrow">Level {member.progression.level} · {member.titles[0]?.title.name ?? (member.role === "ADMIN" ? "Lodge keeper" : "Habitat member")}</p><h3>{name}</h3>{member.username ? <span className="member-callsign">@{member.username}</span> : null}</div>
+            <div className={`member-card-portrait ${avatarBorderClass(member.avatarBorder)}`}><img alt={`${name} avatar`} src={member.image ?? fallbackAvatar} /><span className="member-card-glow" /></div>
+            <div className="member-card-copy"><p className="eyebrow">Level {member.progression.level} · {member.role === "ADMIN" ? "Lodge keeper" : "Verified member"}</p><h3>{name}</h3><span className={`habitat-title ${titlePlateClass(member.titles[0]?.title.slug, member.role)}`}><span>{member.titles[0]?.title.name ?? (member.role === "ADMIN" ? "Lodge keeper" : "Habitat member")}</span></span>{member.username ? <span className="member-callsign">@{member.username}</span> : null}</div>
             <div className="member-presence-line"><Radio aria-hidden="true" size={14} /><div><strong>{lastSeenLabel(viewerIsMember ? presence?.lastSeenAt ?? null : null, member.active)}</strong>{member.active && presence ? <span>{viewerIsMember ? `Signed in with ${presence.authProvider} · ${presence.browser} on ${presence.platform}` : "Active in The Habitat"}</span> : <span>Not currently active in the portal</span>}</div>{viewerIsMember && member.active && presence?.deviceType === "Mobile" ? <Smartphone aria-label="Mobile device" size={16} /> : viewerIsMember && member.active ? <Laptop aria-label="Desktop device" size={16} /> : null}</div>
             {member.currentWorld ? <div className="member-now-playing"><Gamepad2 aria-hidden="true" size={15} /><span><small>Now in world</small><strong>{member.currentWorld.server?.worldName ?? member.currentWorld.server?.displayName}</strong></span></div> : <div className="member-now-playing quiet"><Gamepad2 aria-hidden="true" size={15} /><span><small>World signal</small><strong>No verified live game presence</strong></span></div>}
             {viewerIsMember && member.memberReferralReceived ? <p className="member-origin"><Users aria-hidden="true" size={13} /> Brought into the lodge by <strong>{member.memberReferralReceived.inviter.displayName ?? member.memberReferralReceived.inviter.name ?? member.memberReferralReceived.inviter.username ?? "a Habitat member"}</strong> · {member.memberReferralReceived.method === "CODE" ? "weekly code" : "email invitation"}</p> : null}

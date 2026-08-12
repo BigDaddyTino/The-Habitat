@@ -32,11 +32,15 @@ function atlasTile(THREE: ThreeModule, source: Three.Texture, atlas: keyof Colle
 function reliefMaterial(THREE: ThreeModule, texture: Three.Texture) {
   return new THREE.ShaderMaterial({
     transparent: true,
-    depthWrite: false,
-    side: THREE.DoubleSide,
+    depthWrite: true,
+    depthTest: true,
+    side: THREE.FrontSide,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
     uniforms: { map: { value: texture }, uvRepeat: { value: texture.repeat.clone() }, uvOffset: { value: texture.offset.clone() } },
     vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-    fragmentShader: `uniform sampler2D map; uniform vec2 uvRepeat; uniform vec2 uvOffset; varying vec2 vUv; void main(){ vec4 tex=texture2D(map,vUv*uvRepeat+uvOffset); float light=max(tex.r,max(tex.g,tex.b)); float alpha=smoothstep(.025,.12,light); vec3 museumLit=pow(tex.rgb,vec3(.86))*1.16; gl_FragColor=vec4(museumLit,alpha); }`,
+    fragmentShader: `uniform sampler2D map; uniform vec2 uvRepeat; uniform vec2 uvOffset; varying vec2 vUv; void main(){ vec4 tex=texture2D(map,vUv*uvRepeat+uvOffset); float light=max(tex.r,max(tex.g,tex.b)); if(light<.035) discard; float alpha=smoothstep(.035,.14,light); vec3 museumLit=pow(tex.rgb,vec3(.86))*1.16; gl_FragColor=vec4(museumLit,alpha); }`,
   });
 }
 

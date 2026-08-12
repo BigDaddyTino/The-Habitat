@@ -6,10 +6,10 @@ import { getPrismaClient } from "@habitat/db/client";
 import { progressionForXp, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
 import { socialPlatformLabels } from "@/lib/social-platforms";
+import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
 
 const db = getPrismaClient();
 const fallbackAvatar = "/images/avatars/campfire.svg";
-const safeBorders = new Set(["ember-ring", "aurora-ring", "ironwood-ring", "mythic-flame-ring", "centurion-ring", "porchlight-ring", "kindling-ring", "solar-flare-ring"]);
 const safeLayouts = new Set(["trophy-case", "veteran-vault", "centurion-hall", "war-room", "weekend-myth"]);
 
 export default async function MemberProfilePage({ params }: { params: Promise<{ username: string }> }) {
@@ -31,9 +31,8 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const legacySeconds = member.playerIdentities.flatMap((identity) => identity.legacyEvidence).reduce((total, evidence) => total + (evidence.durationSeconds ?? 0), 0);
   const legacyRecords = member.playerIdentities.reduce((total, identity) => total + identity.legacyEvidence.length, 0);
   const progression = progressionForXp(member.xpEntries.reduce((total, entry) => total + entry.amount, 0));
-  const border = member.avatarBorder && safeBorders.has(member.avatarBorder) ? member.avatarBorder : "default";
   const layout = member.profileLayout && safeLayouts.has(member.profileLayout) ? member.profileLayout : "field-notes";
-  const title = member.titles[0]?.title.name;
+  const title = member.titles[0]?.title;
   const ownerName = member.displayName ?? member.name ?? "Habitat member";
   const cabinetItems: CabinetItem[] = member.unlockedRewards.map((entry) => ({ id: entry.id, code: entry.reward.code, name: entry.reward.name, description: entry.reward.description, kind: entry.reward.kind as CabinetItem["kind"], rarity: entry.reward.achievement.rarity as AchievementRarity, achievementName: entry.reward.achievement.name, unlockedAt: entry.unlockedAt.toISOString() }));
   const publicSteam = member.socialAccounts.find((account) => account.platform === "STEAM" && account.steamProfile?.displayPublic)?.steamProfile ?? null;
@@ -43,7 +42,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const publicSteamCoverage = publicSteam?.achievementSyncs.filter((scan) => scan.status === "READY" || scan.status === "UNSUPPORTED").length ?? 0;
 
   return <section className={`page-shell public-profile layout-${layout}`}>
-    <div className="public-profile-hero"><div className={`member-avatar avatar-border-${border}`}><img src={member.image ?? fallbackAvatar} alt={`${ownerName} avatar`} /></div><div><p className="eyebrow">Level {progression.level} Habitat member · @{member.username}</p><h1>{ownerName}</h1><p className="public-title">{title ?? "Habitat member"}</p><p>{member.bio ?? "No field notes left for the lodge yet."}</p></div></div>
+    <div className="public-profile-hero"><div className={`member-avatar ${avatarBorderClass(member.avatarBorder)}`}><img src={member.image ?? fallbackAvatar} alt={`${ownerName} avatar`} /></div><div><p className="eyebrow">Level {progression.level} Habitat member · @{member.username}</p><h1>{ownerName}</h1><span className={`habitat-title public-title ${titlePlateClass(title?.slug, "MEMBER")}`}><span>{title?.name ?? "Habitat member"}</span></span><p>{member.bio ?? "No field notes left for the lodge yet."}</p></div></div>
     <dl className="profile-metrics"><div><dt>Habitat level</dt><dd>{progression.level}</dd></div><div><dt>Total XP</dt><dd>{progression.totalXp.toLocaleString()}</dd></div><div><dt>Achievements</dt><dd>{member.achievements.length}</dd></div></dl>
     <div className="level-track compact"><i style={{ width: `${progression.progressPercent}%` }} /><div><span>{progression.currentLevelXp.toLocaleString()} XP this level</span><span>{progression.level === 100 ? "Maximum level" : `${progression.nextLevelXp.toLocaleString()} XP to Level ${progression.level + 1}`}</span><strong>{member.playerIdentities.length} worlds · {legacySeconds > 0 ? `${(legacySeconds / 3_600).toFixed(1)} legacy hours` : "live record"}</strong></div></div>
     <TrophyCabinet compact items={cabinetItems} ownerName={ownerName} />

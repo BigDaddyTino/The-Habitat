@@ -6,10 +6,10 @@ import {
   Map,
   Radio,
   ScrollText,
-  ShieldCheck,
   Users,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { getPrismaClient } from "@habitat/db/client";
 import { requireRole } from "@/lib/authorization";
 
@@ -36,7 +36,7 @@ export default async function AdminPage() {
   return <section className="admin-page admin-overview-page">
     <header className="admin-overview-hero">
       <div><p className="eyebrow">Administrator command deck</p><h1>The lodge,<br /><em>under watch.</em></h1><p>Welcome back, {user.name ?? "keeper"}. Identity, community, and world operations are separated into clear stations. Every control remains authenticated and audit logged.</p></div>
-      <div className="admin-watch-seal" aria-hidden="true"><ShieldCheck size={37} /><span>Private<br />operations</span><i /><i /></div>
+      <div className="admin-command-reliquary" aria-hidden="true"><Image alt="" height={1402} priority src="/images/ui/admin-command-reliquary.png" width={1122} /><span>Authenticated controls<br />Permanent audit trail</span></div>
     </header>
 
     <div className="admin-overview-metrics">

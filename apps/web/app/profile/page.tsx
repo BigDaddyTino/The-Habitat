@@ -8,6 +8,7 @@ import { progressionForXp, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
 import { SocialAccountForm } from "@/components/social-account-form";
 import { socialPlatformLabels } from "@/lib/social-platforms";
+import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
 import { disableSteamEnrichment, disconnectSteam, enableSteamEnrichment, equipCosmetic, equipTitle, removeSocialAccount, selectAvatarPreset, updateProfile, updateSteamEnrichmentVisibility } from "./actions";
 
 const db = getPrismaClient();
@@ -26,7 +27,7 @@ export default async function ProfilePage() {
   ]);
   const progression = progressionForXp(xpTotal._sum.amount ?? 0);
   const recordedEvents = identities.reduce((total, identity) => total + identity._count.events, 0);
-  const equippedTitle = titles.find((title) => title.equipped)?.title.name ?? null;
+  const equippedTitle = titles.find((title) => title.equipped)?.title ?? null;
   const borders = rewards.filter((entry) => entry.reward.kind === "AVATAR_BORDER");
   const layouts = rewards.filter((entry) => entry.reward.kind === "PROFILE_LAYOUT");
   const badges = rewards.filter((entry) => entry.reward.kind === "BADGE");
@@ -46,8 +47,8 @@ export default async function ProfilePage() {
 
   return <section className="page-shell profile-page">
     <div className="profile-command-deck">
-      <div className={`member-avatar avatar-border-${member.avatarBorder ?? "default"}`}><img src={avatar} alt="Your avatar" /></div>
-      <div><p className="eyebrow">Habitat profile</p><h1>{ownerName}</h1><p>{equippedTitle ?? "No title equipped."} Your world record, appearance, and optional links live here.</p></div>
+      <div className={`member-avatar ${avatarBorderClass(member.avatarBorder)}`}><img src={avatar} alt="Your avatar" /></div>
+      <div><p className="eyebrow">Habitat profile</p><h1>{ownerName}</h1>{equippedTitle ? <span className={`habitat-title ${titlePlateClass(equippedTitle.slug)}`}><span>{equippedTitle.name}</span></span> : null}<p>Your world record, appearance, and optional links live here.</p></div>
       {member.username ? <Link className="primary-link" href={`/members/${member.username}`}>View public card <ExternalLink aria-hidden="true" size={15} /></Link> : null}
     </div>
     <dl className="profile-metrics"><div><dt>Habitat level</dt><dd>{progression.level}</dd></div><div><dt>Total XP</dt><dd>{progression.totalXp.toLocaleString()}</dd></div><div><dt>Loot unlocked</dt><dd>{rewards.length}</dd></div></dl>
@@ -88,11 +89,11 @@ export default async function ProfilePage() {
     {identities.length === 0 ? <div className="chronicle-empty"><p>No verified identities yet.</p><span>Submit a claim once your game identity has been observed by a supported adapter.</span></div> : <div className="identity-grid">{identities.map((identity) => <Link className="identity-card identity-card-link" href={`/chronicle/identity/${identity.id}`} key={identity.id}><p className="eyebrow">{identity.server?.displayName ?? identity.gameType.replaceAll("_", " ")}</p><h2>{identity.displayName}</h2><p>{identity.server?.worldName ?? "Habitat identity"}</p><span>{identity._count.events} recorded events · Open Chronicle</span></Link>)}</div>}
 
     <div className="profile-heading"><div><p className="eyebrow">Habitat titles</p><h2>Wear one</h2></div></div>
-    {titles.length === 0 ? <div className="chronicle-empty"><p>No titles have been awarded.</p><span>Titles arrive from verified achievements or an administrator grant.</span></div> : <div className="title-grid">{titles.map((userTitle) => <article className={userTitle.equipped ? "title-card equipped" : "title-card"} key={userTitle.id}><p className="eyebrow">{userTitle.source.toLowerCase()} award</p><h2>{userTitle.title.name}</h2><p>{userTitle.title.description ?? "A Habitat title."}</p><form action={equipTitle}><input name="userTitleId" type="hidden" value={userTitle.id} /><button className={userTitle.equipped ? "icon-action approve" : "icon-action"} disabled={userTitle.equipped} title={userTitle.equipped ? "Equipped title" : "Equip title"} aria-label={userTitle.equipped ? "Equipped title" : `Equip ${userTitle.title.name}`}><Check aria-hidden="true" size={17} /></button></form></article>)}</div>}
+    {titles.length === 0 ? <div className="chronicle-empty"><p>No titles have been awarded.</p><span>Titles arrive from verified achievements or an administrator grant.</span></div> : <div className="title-grid">{titles.map((userTitle) => <article className={userTitle.equipped ? "title-card equipped" : "title-card"} key={userTitle.id}><p className="eyebrow">{userTitle.source.toLowerCase()} award</p><span className={`habitat-title title-card-art ${titlePlateClass(userTitle.title.slug)}`}><span>{userTitle.title.name}</span></span><p>{userTitle.title.description ?? "A Habitat title."}</p><form action={equipTitle}><input name="userTitleId" type="hidden" value={userTitle.id} /><button className={userTitle.equipped ? "icon-action approve" : "icon-action"} disabled={userTitle.equipped} title={userTitle.equipped ? "Equipped title" : "Equip title"} aria-label={userTitle.equipped ? "Equipped title" : `Equip ${userTitle.title.name}`}><Check aria-hidden="true" size={17} /></button></form></article>)}</div>}
 
     <div className="profile-heading"><div><p className="eyebrow">Achievement armory</p><h2>Wear the receipts</h2></div></div>
     {rewards.length === 0 ? <div className="chronicle-empty"><p>The armory is waiting.</p><span>Achievement cosmetics unlock only from verified Chronicle activity.</span></div> : <div className="reward-grid">
-      {borders.map((entry) => <article className="reward-card" key={entry.id}><Palette aria-hidden="true" size={18} /><p className="eyebrow">Avatar border</p><h2>{entry.reward.name}</h2><p>{entry.reward.description}</p><form action={equipCosmetic}><input name="kind" type="hidden" value="AVATAR_BORDER" /><input name="code" type="hidden" value={entry.reward.code} /><button className="save-server" disabled={member.avatarBorder === entry.reward.code} type="submit">{member.avatarBorder === entry.reward.code ? "Equipped" : "Equip"}</button></form></article>)}
+      {borders.map((entry) => <article className="reward-card avatar-border-reward" key={entry.id}><div className={`avatar-frame-preview ${avatarBorderClass(entry.reward.code)}`}><img alt="" src={avatar} /></div><Palette aria-hidden="true" size={18} /><p className="eyebrow">Avatar border</p><h2>{entry.reward.name}</h2><p>{entry.reward.description}</p><form action={equipCosmetic}><input name="kind" type="hidden" value="AVATAR_BORDER" /><input name="code" type="hidden" value={entry.reward.code} /><button className="save-server" disabled={member.avatarBorder === entry.reward.code} type="submit">{member.avatarBorder === entry.reward.code ? "Equipped" : "Equip"}</button></form></article>)}
       {layouts.map((entry) => <article className="reward-card" key={entry.id}><Sparkles aria-hidden="true" size={18} /><p className="eyebrow">Profile layout</p><h2>{entry.reward.name}</h2><p>{entry.reward.description}</p><form action={equipCosmetic}><input name="kind" type="hidden" value="PROFILE_LAYOUT" /><input name="code" type="hidden" value={entry.reward.code} /><button className="save-server" disabled={member.profileLayout === entry.reward.code} type="submit">{member.profileLayout === entry.reward.code ? "Equipped" : "Equip"}</button></form></article>)}
       {badges.map((entry) => <article className="reward-card badge" key={entry.id}><Medal aria-hidden="true" size={18} /><p className="eyebrow">Badge · {entry.reward.achievement.rarity.replaceAll("_", " ")}</p><h2>{entry.reward.name}</h2><p>{entry.reward.description}</p><span><BadgeCheck aria-hidden="true" size={14} /> Unlocked by {entry.reward.achievement.name}</span></article>)}
       {medals.map((entry) => <article className="reward-card medal" key={entry.id}><Medal aria-hidden="true" size={18} /><p className="eyebrow">Medal · {entry.reward.achievement.rarity.replaceAll("_", " ")}</p><h2>{entry.reward.name}</h2><p>{entry.reward.description}</p><span><BadgeCheck aria-hidden="true" size={14} /> Displayed in your cabinet</span></article>)}

@@ -6,6 +6,8 @@ import { ProgressionToasts } from "@/components/progression-toasts";
 import { PresenceHeartbeat } from "@/components/presence-heartbeat";
 import { auth } from "@/auth";
 import Link from "next/link";
+import { AmbientTheme } from "@/components/ambient-theme";
+import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -32,9 +34,11 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const session = await auth();
+  const sky = getGreatHallAtmosphere().sky;
   return (
     <html lang="en">
-      <body className={`${display.variable} ${sans.variable} ${mono.variable}`}>
+      <body className={`${display.variable} ${sans.variable} ${mono.variable}`} data-habitat-sky={sky}>
+        <AmbientTheme initialSky={sky} />
         <HabitatHeader />
         <main>{children}</main>
         <footer className="site-footer"><span>The Habitat · Private clubhouse</span><Link href="/privacy">Privacy &amp; provider data</Link></footer>

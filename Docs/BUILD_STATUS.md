@@ -144,6 +144,8 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
 - [x] Cinematic public member roster with profile links, live portal status, verified hosted-world presence, member-only browser/device context, and member-driven invitation console
 - [x] Premium Admin Suite command deck with grouped navigation, live operational counts, recent audit signal, and responsive desktop/mobile presentation
+- [x] Whole-app Eastern-time ambience pass with sunrise, midday, sunset, and night palettes that coordinate the canvas, panels, typography, header, and lodge imagery while preserving readable contrast and visible sky-state identity across desktop and mobile
+- [x] Generated Habitat-specific member standard and Admin Suite command reliquary overlays, plus illustrated title-plate and avatar-frame atlases applied consistently to roster cards, public profiles, private profiles, and reward selectors
 - [x] Audited member management for role changes, suspension/reactivation, database-session revocation, pending-invitation revocation, and referral-lineage review with self/last-admin lockout protections
 - [x] Achievement reward inventory with automatic titles, selectable avatar borders, profile layout unlocks, and badges
 - [x] Always-cinematic Great Hall with composition-matched sunrise/midday/sunset/night plates tied to America/New_York, a continuously rendered Three.js vista, pointer-depth parallax, adaptive quality, reduced-motion behavior, and an image fallback
@@ -171,6 +173,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Unified rarity-aware reward ceremonies for XP, levels, and every achievement tier, coordinating a Three.js particle scene and Canvas2D Rive state machine from one animation clock
 - [x] Living Three.js trophy cabinet on private and public profiles, filled exclusively from persisted badge, medal, and trophy unlocks with pointer inspection, accessible inventory controls, mobile composition, and non-WebGL fallback
 - [x] Premium collectible-art pass: 28 reward-specific relief designs across 11 badges, 9 medals, and 8 trophies; generated museum-grade cabinet/material artwork; distinct modeled silhouettes, ribbons, pins, bases, and engraved data-backed reverses; smooth click-to-inspect zoom, inertial pointer/touch and keyboard rotation, wheel zoom, mobile inspection bay, and the same 3D reward in earned ceremonies
+- [x] Trophy-cupboard fit-and-finish pass with stable opaque relief rendering, grounded physical mounts, shelf-aligned scale and spacing, removed idle bobbing, and a centered four-column mobile cabinet composition
 - [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 39 catalogue records
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies
 - [x] Replay-safe historical catalogue reconciliation for claimed members with retroactive rewards and suppressed Discord announcements

@@ -25,7 +25,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
   const rootRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState(items.length ? 0 : -1);
   const [inspected, setInspected] = useState<CabinetItem | null>(null);
-  const displayedItems = useMemo(() => items.slice(0, 35), [items]);
+  const displayedItems = useMemo(() => items.slice(0, 28), [items]);
   const selected = selectedIndex >= 0 ? displayedItems[selectedIndex] ?? null : null;
   const closeInspector = useCallback(() => setInspected(null), []);
 
@@ -50,7 +50,9 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
       const scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x080a08, 0.045);
       const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 40);
-      camera.position.set(-0.78, 0.08, 10.4);
+      const narrowCabinet = root.getBoundingClientRect().width < 620;
+      const cameraRestX = narrowCabinet ? 0 : -0.78;
+      camera.position.set(cameraRestX, 0.08, 10.4);
       const webgl = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: (navigator.hardwareConcurrency ?? 8) > 4, powerPreference: "high-performance" });
       renderer = webgl;
       webgl.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
@@ -68,13 +70,17 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
       ember.position.set(-4, -2.5, 2);
       scene.add(ember);
 
-      const columns = 7;
-      const slotCount = Math.max(14, Math.min(35, Math.ceil(Math.max(displayedItems.length, 1) / columns) * columns));
+      const columns = narrowCabinet ? 4 : 7;
+      const slotCount = columns * 4;
       const rowCount = Math.ceil(slotCount / columns);
+      const mountGeometry = new THREE.BoxGeometry(0.58, 0.075, 0.38);
+      const mountMaterial = new THREE.MeshStandardMaterial({ color: 0x4b3826, metalness: 0.48, roughness: 0.46 });
+      geometries.push(mountGeometry);
+      materials.push(mountMaterial);
       for (let index = 0; index < slotCount; index += 1) {
         const row = Math.floor(index / columns);
         const column = index % columns;
-        const x = -3.34 + column * 1.02;
+        const x = -((columns - 1) * 1.02) / 2 + column * 1.02;
         const y = rowCount === 4 ? 2.14 - row * 1.43 : 2.25 - row * (4.5 / Math.max(1, rowCount - 1));
         const item = displayedItems[index];
         if (!item) {
@@ -88,13 +94,18 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         }
         const model = createCollectibleModel(THREE, item, loadedAtlases);
         model.position.set(x, y, 0.12);
-        model.scale.setScalar(item.kind === "TROPHY" ? 0.51 : 0.46);
+        const modelScale = item.kind === "TROPHY" ? 0.46 : item.kind === "MEDAL" ? 0.41 : 0.39;
+        model.scale.setScalar(modelScale);
         model.rotation.y = (index % 3 - 1) * 0.12;
         model.userData.itemIndex = index;
         model.userData.baseY = y;
         model.traverse((child) => { child.userData.itemIndex = index; });
         models.push(model);
         scene.add(model);
+        const mount = new THREE.Mesh(mountGeometry, mountMaterial);
+        mount.position.set(x, y - modelScale - 0.045, -0.13);
+        mount.rotation.x = -0.035;
+        scene.add(mount);
       }
 
       const raycaster = new THREE.Raycaster();
@@ -139,9 +150,9 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
       resize();
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const renderFrame = () => {
-        camera.position.x += (-0.78 + pointer.x * 0.16 - camera.position.x) * 0.035;
+        camera.position.x += (cameraRestX + pointer.x * 0.16 - camera.position.x) * 0.035;
         camera.position.y += (0.08 + pointer.y * 0.1 - camera.position.y) * 0.035;
-        camera.lookAt(-0.35, 0, -0.12);
+        camera.lookAt(narrowCabinet ? 0 : -0.35, 0, -0.12);
         webgl.render(scene, camera);
       };
       if (reduced) { renderStill = renderFrame; renderFrame(); }
@@ -150,7 +161,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         const elapsed = time / 1000;
         models.forEach((model, index) => {
           model.rotation.y += ((index % 3 - 1) * 0.12 + Math.sin(elapsed * 0.48 + index * 0.63) * 0.12 - model.rotation.y) * 0.04;
-          model.position.y = (model.userData.baseY as number) + Math.sin(elapsed * 0.72 + index) * 0.014;
+          model.position.y = model.userData.baseY as number;
         });
         renderFrame();
       });
@@ -176,7 +187,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
     <div className="cabinet-heading"><div><p className="eyebrow">Living collection</p><h2>{ownerName}&apos;s trophy cupboard</h2><p>{items.length ? `${items.length} verified piece${items.length === 1 ? "" : "s"}, each physically modeled from the way it was earned. Select any piece to inspect every side.` : "The cupboard is built. The shelves are waiting for the first verified piece."}</p></div><strong>{items.length}<span>pieces</span></strong></div>
     <div className="trophy-cabinet-stage" ref={rootRef}>
       <canvas aria-label="Interactive three-dimensional trophy cupboard. Select a collectible below for an accessible inspection view." className="trophy-cabinet-canvas" ref={canvasRef} />
-      <div className="cabinet-fallback" aria-hidden="true">{Array.from({ length: Math.max(14, Math.min(35, Math.ceil(Math.max(items.length, 1) / 7) * 7)) }, (_, index) => <i className={items[index] ? `filled rarity-${items[index].rarity.toLowerCase().replaceAll("_", "-")}` : ""} key={index} />)}</div>
+      <div className="cabinet-fallback" aria-hidden="true">{Array.from({ length: 28 }, (_, index) => <i className={items[index] ? `filled rarity-${items[index].rarity.toLowerCase().replaceAll("_", "-")}` : ""} key={index} />)}</div>
       <div className="cabinet-inspection">
         {selected ? <><RewardEmblem rarity={selected.rarity} kind={selected.kind} code={selected.code} size="large" /><p className="eyebrow">{selected.kind} · {rarityPresentation[selected.rarity].label}</p><h3>{selected.name}</h3><p>{selected.description ?? `Unlocked by ${selected.achievementName}.`}</p><small>Unlocked by {selected.achievementName} · {new Date(selected.unlockedAt).toLocaleDateString()}</small><button type="button" onClick={() => setInspected(selected)}><Expand aria-hidden="true" /> Inspect in 3D</button></> : <><Trophy aria-hidden="true" /><p className="eyebrow">Empty cupboard</p><h3>Room for legends</h3><p>Verified medals, badges, and trophies will appear here automatically.</p></>}
       </div>
