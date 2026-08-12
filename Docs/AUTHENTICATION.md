@@ -35,11 +35,13 @@ AUTH_DISCORD_SECRET=<Discord OAuth client secret>
 BOOTSTRAP_ADMIN_EMAIL=<temporary owner email only>
 ```
 
-`AUTH_URL` is the canonical public Habitat origin. It is required in production because Cloudflare Tunnel terminates public HTTPS and forwards to a loopback origin; without it, Auth.js can derive `localhost` as the Discord redirect URI.
+`AUTH_URL` is the canonical public Habitat origin for Auth.js, Steam OpenID, and every absolute application redirect. It is required in production because Cloudflare Tunnel terminates public HTTPS and forwards to a loopback origin; request URLs inside the service can therefore contain `localhost:3000`. Production callback and redirect handling rejects a missing, non-HTTPS, or path-bearing value instead of sending a provider or member browser to that internal address.
 
 ## Steam identity proof
 
 Members can begin the Steam connection flow from their profile. The callback validates the signed Steam OpenID response server-side and records the SteamID64 only after validation succeeds. The browser never submits a trusted SteamID64 directly.
+
+Steam's OpenID `realm`, `return_to`, callback comparison, and final profile redirect all derive from `AUTH_URL`, never from the reverse proxy's internal request URL. This keeps the entire round trip on `https://habitat.martinobear.com`.
 
 A verified Steam connection automatically attaches matching unclaimed Steam-backed identities. Admin claim approval remains available for identities that cannot be proved this way. Both paths enqueue idempotent reconciliation of attached verified history into playtime, XP, quests, achievements, rewards, profile totals, and leaderboards.
 
@@ -54,3 +56,7 @@ Entered Twitch, social, and gaming handles are profile metadata only. They are n
 `VIEWER`, `USER`, and `ADMIN` permissions are enforced on the server. Admin-only surfaces include member management, invitation revocation, claims, title definitions, community/Discord configuration, registry metadata, and server operations. UI visibility is not the authorization boundary.
 
 The Admin Suite member command center can change roles, suspend or reactivate an account, revoke every database session for a member, inspect referral lineage, and revoke pending email invitations. Every mutation creates an `AuditLog` entry. Suspension revokes sessions in the same database transaction. The current administrator cannot alter their own access from this screen, and a serializable last-admin check prevents the final active administrator from being demoted or suspended.
+
+## Operator connection audit
+
+Run `pnpm check:connections` from the repository root after changing credentials, callback registrations, proxy routing, or provider configuration. The read-only audit verifies the database, authenticated private agent, public application origin, Auth.js provider metadata, Steam callback construction and Web API key, Discord bot/application ownership, registered Discord OAuth callback, configured Discord guild access, and the selected Marvel Rivals provider. It reports configuration state and record counts without printing secrets, tokens, member identifiers, guild identifiers, or database credentials.

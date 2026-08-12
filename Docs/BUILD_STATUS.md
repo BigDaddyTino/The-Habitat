@@ -27,6 +27,8 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Discord OAuth application configured; end-to-end owner login verified and bootstrap setting removed
 - [x] Active-member invitation flow, exact Discord-email guidance, friendly OAuth denial handling, automatic member callsigns, and audited standard-role grants
 - [x] Distinct Monday-rotating member invite codes with signed short-lived redemption, Discord verification, permanent inviter-to-member attribution, and audit records
+- [x] Proxy-safe canonical public origin shared by Discord authentication, Steam OpenID, absolute redirects, and same-origin checks; production refuses unsafe origin configuration
+- [x] Repeatable read-only connection audit validates database, private agent authentication, public origin, provider callbacks/credentials, Discord guild access, and club-provider selection without printing secrets
 
 ## Phase 3 - Server Registry and Basic UI
 

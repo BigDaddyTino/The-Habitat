@@ -6,7 +6,7 @@
 
 - Node.js 24 LTS is installed at `C:\Program Files\nodejs`.
 - The repository root `.env` has the production database and Auth.js settings.
-- `AUTH_URL` is set to `https://habitat.martinobear.com` so OAuth callbacks retain the public origin behind Cloudflare Tunnel.
+- `AUTH_URL` is set to `https://habitat.martinobear.com` so Discord OAuth, Steam OpenID, and application redirects retain the public origin behind Cloudflare Tunnel.
 - `HABITAT_AVATAR_STORAGE_PATH` points at the persistent storage volume so a rebuild does not destroy member uploads. See [Operations](OPERATIONS.md).
 - Dependencies are installed and `pnpm test`, `pnpm lint`, `pnpm typecheck`, and the production build succeed.
 - `HabitatWorker.exe` is already present from the worker installation, or a WinSW executable has been placed at `<repository>\HabitatWeb.exe`.
@@ -35,6 +35,8 @@ Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:3000/chronicle" |
 Expected result: `200`. Also verify the Great Hall with a signed-out browser, then a permitted Discord member account, and confirm the page represents unavailable game telemetry as `UNKNOWN` rather than as live data.
 
 For tunnel verification, confirm `Get-Service Cloudflared` reports `Running` with automatic startup and verify `https://habitat.martinobear.com/` from both the LAN and a public resolver. MartServDMC maintains short-TTL local A records matching the current authoritative Cloudflare answers; recheck them if Cloudflare changes its edge response. The Cloudflare dashboard route must remain exactly `HTTP` to `127.0.0.1:3000` with no path restriction.
+
+Run `pnpm check:connections` after deployment. A successful audit confirms that the public callbacks, database, private agent, Steam, Discord application and guild, and configured club provider agree with the deployed environment without exposing their secrets.
 
 ## Update
 

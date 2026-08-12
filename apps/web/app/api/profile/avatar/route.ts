@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { avatarStorageDirectory, resolveAvatarFile, uploadedAvatarFilename } from "@/lib/avatar-storage";
 import { hasRequiredRole } from "@/lib/permissions";
+import { publicUrl } from "@/lib/public-url";
 
 const db = getPrismaClient();
 const maxAvatarBytes = 2 * 1024 * 1024;
@@ -27,22 +28,22 @@ async function removePreviousUpload(image: string | null) {
 
 export async function POST(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(new URL("/sign-in", request.url), 303);
+  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(publicUrl("/sign-in", request.url), 303);
   const formData = await request.formData().catch(() => null);
-  if (!formData) return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
+  if (!formData) return NextResponse.redirect(publicUrl("/profile?avatar=invalid", request.url), 303);
   const upload = formData.get("avatar");
   if (!(upload instanceof File) || upload.size === 0 || upload.size > maxAvatarBytes || !(upload.type in imageTypes)) {
-    return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
+    return NextResponse.redirect(publicUrl("/profile?avatar=invalid", request.url), 303);
   }
   const bytes = new Uint8Array(await upload.arrayBuffer());
   const imageType = imageTypes[upload.type as keyof typeof imageTypes];
-  if (!imageType.magic(bytes)) return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
+  if (!imageType.magic(bytes)) return NextResponse.redirect(publicUrl("/profile?avatar=invalid", request.url), 303);
 
   const directory = avatarStorageDirectory();
   await mkdir(directory, { recursive: true });
   const filename = `${randomUUID()}.${imageType.extension}`;
   const target = path.resolve(directory, filename);
-  if (!target.startsWith(`${directory}${path.sep}`)) return NextResponse.redirect(new URL("/profile?avatar=invalid", request.url), 303);
+  if (!target.startsWith(`${directory}${path.sep}`)) return NextResponse.redirect(publicUrl("/profile?avatar=invalid", request.url), 303);
   await writeFile(target, bytes, { flag: "wx" });
 
   const user = await db.user.findUnique({ where: { id: session.user.id }, select: { image: true } });
@@ -57,5 +58,5 @@ export async function POST(request: Request) {
     throw error;
   }
   await removePreviousUpload(user?.image ?? null);
-  return NextResponse.redirect(new URL("/profile?avatar=uploaded", request.url), 303);
+  return NextResponse.redirect(publicUrl("/profile?avatar=uploaded", request.url), 303);
 }

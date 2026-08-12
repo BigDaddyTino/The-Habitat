@@ -5,19 +5,20 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { hasRequiredRole } from "@/lib/permissions";
+import { publicUrl } from "@/lib/public-url";
 import { verifySteamOpenId } from "@/lib/steam-openid";
 
 const db = getPrismaClient();
 
 function profileRedirect(request: Request, status: string) {
-  const target = new URL("/profile", request.url);
+  const target = publicUrl("/profile", request.url);
   target.searchParams.set("steam", status);
   return NextResponse.redirect(target, 303);
 }
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(new URL("/sign-in", request.url));
+  if (!session?.user?.id || !session.user.isActive || !hasRequiredRole(session.user.role, "USER")) return NextResponse.redirect(publicUrl("/sign-in", request.url));
   const parameters = new URL(request.url).searchParams;
   const state = parameters.get("state");
   if (!state || !/^[a-f0-9]{64}$/.test(state)) return profileRedirect(request, "invalid");
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
   const nonce = await db.steamLinkNonce.findUnique({ where: { stateHash }, select: { id: true, userId: true, expiresAt: true, consumedAt: true } });
   if (!nonce || nonce.userId !== session.user.id || nonce.consumedAt || nonce.expiresAt <= new Date()) return profileRedirect(request, "expired");
 
-  const expectedReturnTo = new URL("/api/steam/callback", request.url);
+  const expectedReturnTo = publicUrl("/api/steam/callback", request.url);
   expectedReturnTo.searchParams.set("state", state);
   if (parameters.get("openid.return_to") !== expectedReturnTo.toString()) return profileRedirect(request, "invalid");
   const steamId = await verifySteamOpenId(parameters).catch(() => null);

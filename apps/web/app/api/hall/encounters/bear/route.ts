@@ -3,19 +3,14 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { isCurrentHallEncounter } from "@/lib/hall-atmosphere";
 import { hasRequiredRole } from "@/lib/permissions";
+import { isPublicOrigin } from "@/lib/public-url";
 
 const db = getPrismaClient();
 const achievementSlug = "do-not-tap-the-glass";
 
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
-  if (origin) {
-    try {
-      if (new URL(origin).origin !== request.nextUrl.origin) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-    } catch {
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
-    }
-  }
+  if (origin && !isPublicOrigin(origin, request.url)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) return NextResponse.json({ error: "unauthorized" }, { status: 401 });

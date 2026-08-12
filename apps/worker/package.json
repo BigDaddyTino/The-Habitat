@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "run-once": "tsx src/index.ts --once",
+    "check:connections": "tsx src/connection-check.ts",
     "reconcile-achievements": "tsx src/reconcile-achievements.ts",
     "reconcile-identity-names": "tsx src/reconcile-identity-names.ts",
     "lint": "tsc --noEmit",
