@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, RadioTower, Swords } from "lucide-react";
+import { ArrowRight, ListChecks, RadioTower, Swords, Vote } from "lucide-react";
 import { ClubGameCard } from "@/components/club-game-card";
 import { WorldCard } from "@/components/world-card";
 import { getClubGames } from "@/lib/club-games";
@@ -13,13 +13,14 @@ export default async function GamesPage() {
       <p className="eyebrow">The game rooms</p>
       <h1>Pick your poison.</h1>
       <p>Private worlds we run and the games we rally around—all under one roof.</p>
-      <div><span><RadioTower aria-hidden="true" size={14} /> {worlds.length} hosted worlds</span><span><Swords aria-hidden="true" size={14} /> {clubGames.length} club room</span></div>
+      <div className="games-hub-counts"><span><RadioTower aria-hidden="true" size={14} /> {worlds.length} hosted worlds</span><span><Swords aria-hidden="true" size={14} /> {clubGames.length} club room</span></div>
+      <div className="games-hub-shortcuts"><Link href="/polls"><Vote aria-hidden="true" size={15} /> Game Night <ArrowRight aria-hidden="true" size={14} /></Link><Link href="/departure-board"><ListChecks aria-hidden="true" size={15} /> Departure Board <ArrowRight aria-hidden="true" size={14} /></Link></div>
     </div>
 
     <section className="games-hub-section">
       <div className="section-heading games-section-heading">
         <div><p className="eyebrow">Hosted here</p><h2>Habitat worlds</h2></div>
-        <Link href="/departure-board">Departure board <ArrowRight aria-hidden="true" size={15} /></Link>
+        <p>Private servers operated by the Habitat.</p>
       </div>
       <div className="world-grid">{worlds.map((world) => <WorldCard key={world.slug} world={world} />)}</div>
     </section>

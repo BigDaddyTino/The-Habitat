@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { Award, Crown, Landmark, LogIn, ScrollText, Settings, Swords, Target, Trophy, UserRound, Vote } from "lucide-react";
+import { Award, ChevronDown, Crown, Landmark, LogIn, ScrollText, Settings, Swords, Target, Trophy, UserRound } from "lucide-react";
 import { auth } from "@/auth";
 
 const navigation = [
   { href: "/", label: "Great Hall", icon: Landmark },
   { href: "/games", label: "Games", icon: Swords },
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
+];
+
+const progressNavigation = [
   { href: "/achievements", label: "Achievements", icon: Award },
   { href: "/leaderboards", label: "Leaderboards", icon: Trophy },
   { href: "/quests", label: "Quests", icon: Target },
   { href: "/hall-of-legends", label: "Halls", icon: Crown },
-  { href: "/polls", label: "Game Night", icon: Vote },
 ];
 
 export async function HabitatHeader() {
@@ -24,13 +26,19 @@ export async function HabitatHeader() {
           <span className="brand-subtitle">God&apos;s Country</span>
         </span>
       </Link>
-      <nav aria-label="Primary navigation">
+      <nav aria-label="Primary navigation" className="primary-nav">
         {navigation.map(({ href, label, icon: Icon }) => (
           <Link href={href} key={href}>
             <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
             {label}
           </Link>
         ))}
+        <details className="nav-cluster">
+          <summary><Crown aria-hidden="true" size={16} strokeWidth={1.8} /> Progress <ChevronDown aria-hidden="true" className="nav-cluster-caret" size={13} /></summary>
+          <div className="nav-cluster-panel">
+            {progressNavigation.map(({ href, label, icon: Icon }) => <Link href={href} key={href}><Icon aria-hidden="true" size={16} /><span>{label}</span></Link>)}
+          </div>
+        </details>
       </nav>
       <div className="header-actions">
         <div className="header-status"><span /> Registry online</div>

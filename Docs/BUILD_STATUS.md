@@ -174,3 +174,4 @@ This is the implementation source of truth. Checked items are built and locally 
 - [ ] Provider-authenticated live presence (for example Twitch) remains intentionally unimplemented; entered handles are never represented as verified or live
 - [ ] Dragonwilds retained dedicated-server logs contain no player-session lines yet; the deployed collector will ingest authenticated account/name join and leave signals when real sessions occur
 - [x] Unified Games hub now presents hosted worlds and Club Rooms under one clubhouse hierarchy; Marvel Rivals is surfaced in the Great Hall with a lodge-styled squad room and no fabricated stats while profile linking is pending
+- [x] Header navigation consolidated around Great Hall, Games, Chronicle, and a compact Progress menu; Game Night and the Departure Board now live in the Games hub
