@@ -3,6 +3,7 @@ import { Cormorant_Garamond, DM_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { HabitatHeader } from "@/components/habitat-header";
 import { ProgressionToasts } from "@/components/progression-toasts";
+import { PresenceHeartbeat } from "@/components/presence-heartbeat";
 import { auth } from "@/auth";
 import Link from "next/link";
 
@@ -37,6 +38,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <HabitatHeader />
         <main>{children}</main>
         <footer className="site-footer"><span>The Habitat · Private clubhouse</span><Link href="/privacy">Privacy &amp; provider data</Link></footer>
+        <PresenceHeartbeat enabled={Boolean(session?.user?.isActive)} />
         <ProgressionToasts enabled={Boolean(session?.user?.isActive)} />
       </body>
     </html>

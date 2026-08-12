@@ -266,6 +266,8 @@ model User {
   identityReconciliations IdentityRewardReconciliation[]
   clubGameProfiles        ClubGameProfile[]
   gameActivities          GameActivity[]
+  invitationsSent         Invitation[]                @relation("InvitationSender")
+  memberPresence          MemberPresence?
 }
 
 model Account {
@@ -303,12 +305,29 @@ model VerificationToken {
 }
 
 model Invitation {
-  id         String    @id @default(uuid()) @db.Uuid
-  email      String    @unique
-  role       Role      @default(USER)
-  expiresAt  DateTime
-  acceptedAt DateTime?
-  createdAt  DateTime  @default(now())
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  role            Role      @default(USER)
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  invitedByUserId String?   @db.Uuid
+  invitedBy       User?     @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([invitedByUserId, createdAt])
+}
+
+model MemberPresence {
+  userId       String   @id @db.Uuid
+  authProvider String   @default("Discord") @db.VarChar(32)
+  deviceType   String   @db.VarChar(32)
+  platform     String   @db.VarChar(64)
+  browser      String   @db.VarChar(64)
+  lastSeenAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lastSeenAt])
 }
 
 model GameServer {

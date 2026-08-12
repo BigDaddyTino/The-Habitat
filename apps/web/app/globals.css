@@ -3,13 +3,15 @@
 @import "./reward-system.css";
 @import "./club-rooms.css";
 
+.auth-error { display:grid; gap:5px; margin:-8px 0 18px; border:1px solid #9d543f; border-left:3px solid var(--ember); padding:13px 14px; background:#321c17; }.auth-error strong { color:#ffe1cd; font-size:12px; }.auth-error span { color:#c9aea0; font-size:11px; line-height:1.5; }
+
 .world-card.state-sleeping { opacity: .62; transition: opacity .18s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .world-card.state-sleeping:hover, .world-card.state-sleeping:focus-within { opacity: .86; }
 
 :root { --ink: #ece7d7; --muted: #9e9e90; --paper: #d6c397; --night: #111412; --panel: #1a201c; --line: #364139; --brass: #b89b5e; --ember: #dc6b32; --moss: #6e9a5b; --danger: #cd5650; }
 * { box-sizing: border-box; }
 html { background: var(--night); }
-body { margin: 0; min-width: 320px; background: var(--night); color: var(--ink); font-family: var(--font-sans), Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+body { margin: 0; min-width: 320px; overflow-x: hidden; background: var(--night); color: var(--ink); font-family: var(--font-sans), Arial, sans-serif; font-size: 15px; line-height: 1.5; }
 a { color: inherit; text-decoration: none; }
 button, a { -webkit-tap-highlight-color: transparent; }
 h1, h2, p { margin: 0; }

@@ -17,6 +17,11 @@ export default function PrivacyPage() {
       <p>Members can separately make their Rivals profile and qualifying evidence visible in the Assembly Room and Chronicle. Disconnecting deletes the member&apos;s provider profile, snapshots, match participants, derived activities, activity-backed awards and record entries, and any matches left without participants. Audit entries retain only the security record of the action.</p>
     </article>
     <article>
+      <h2>Member presence</h2>
+      <p>While an authenticated Habitat page is visible, the portal records a short-lived activity heartbeat plus a broad device type, operating-system family, browser family, and Discord as the sign-in provider. The public Members page treats a heartbeat as active for three minutes; browser, platform, and device details are shown only to active members. The Habitat does not store browsing history, IP addresses, exact device models, or Discord passwords.</p>
+      <p>Hosted-world presence is shown separately and only when verified Habitat server telemetry matches a member&apos;s claimed identity. The Habitat does not infer live presence from Steam, social links, or an unexpired login session.</p>
+    </article>
+    <article>
       <h2>Control, retention, and deletion</h2>
       <p>Members can keep Steam enrichment private, stop enrichment while retaining Steam identity verification, or disconnect Steam entirely. Stopping enrichment deletes the cached Steam profile and library rows and prevents future enrichment. Disconnecting Steam also deletes those cached rows through the same account boundary.</p>
       <p>Hosted-world evidence, rewards, and audit entries have separate integrity and security purposes. They are not removed by disconnecting an external provider.</p>

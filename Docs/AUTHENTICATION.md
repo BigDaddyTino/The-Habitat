@@ -9,6 +9,10 @@ Auth.js uses Discord with database sessions. An unknown Discord user is denied b
 - Their normalized email has an unexpired, unused invitation.
 - Their email exactly matches the temporary `BOOTSTRAP_ADMIN_EMAIL` setting.
 
+Every active Habitat member can create a standard `USER` invitation from the Members page. The invited email must be the exact email returned by Discord OAuth. Invitations expire after 14 days, can be reissued by another active member, and are recorded in the audit log. Members cannot grant `ADMIN` access.
+
+The sign-in page owns the Auth.js error route so an uninvited Discord account receives a specific guest-list explanation instead of a generic access-denied screen.
+
 The bootstrap account becomes active with the `ADMIN` role on its first successful login. Remove `BOOTSTRAP_ADMIN_EMAIL` after that first login. Administrators can manage invitations through the application; there is no public registration route.
 
 Configure Discord redirect URIs:

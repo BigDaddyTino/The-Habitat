@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Award, ChevronDown, Crown, Landmark, LogIn, ScrollText, Settings, Swords, Target, Trophy, UserRound } from "lucide-react";
+import { Award, ChevronDown, Crown, Landmark, LogIn, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
 import { auth } from "@/auth";
 
 const navigation = [
   { href: "/", label: "Great Hall", icon: Landmark },
   { href: "/games", label: "Games", icon: Swords },
   { href: "/chronicle", label: "Chronicle", icon: ScrollText },
+  { href: "/members", label: "Members", icon: Users },
 ];
 
 const progressNavigation = [

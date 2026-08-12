@@ -20,10 +20,22 @@ function isBootstrapAdmin(email: string) {
   return Boolean(bootstrapEmail && normalizedEmail(email) === normalizedEmail(bootstrapEmail));
 }
 
+async function availableUsername(userId: string, name: string | null | undefined, email: string) {
+  const base = (name ?? email.split("@")[0] ?? "member")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 24) || "member";
+  const owner = await db.user.findUnique({ where: { username: base }, select: { id: true } });
+  return !owner || owner.id === userId ? base : `${base.slice(0, 17)}-${userId.slice(0, 6)}`;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "database" },
-  pages: { signIn: "/sign-in" },
+  pages: { signIn: "/sign-in", error: "/sign-in" },
   providers: isDiscordConfigured
     ? [
         Discord({
@@ -51,7 +63,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       const existingUser = await db.user.findUnique({
         where: { email },
-        select: { id: true, isActive: true },
+        select: { id: true, isActive: true, username: true, name: true },
       });
       if (existingUser) {
         if (existingUser.isActive) return true;
@@ -65,8 +77,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         if (!pendingInvitation) return false;
 
+        const username = existingUser.username ?? await availableUsername(existingUser.id, existingUser.name ?? user.name, email);
         await db.$transaction([
-          db.user.update({ where: { id: existingUser.id }, data: { role: pendingInvitation.role, isActive: true } }),
+          db.user.update({ where: { id: existingUser.id }, data: { role: pendingInvitation.role, isActive: true, username } }),
           db.invitation.update({ where: { id: pendingInvitation.id }, data: { acceptedAt: new Date() } }),
         ]);
         return true;
@@ -101,11 +114,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   events: {
     async createUser({ user }) {
-      if (!user.email) return;
+      if (!user.id || !user.email) return;
 
       const email = normalizedEmail(user.email);
+      const username = await availableUsername(user.id, user.name, email);
       if (isBootstrapAdmin(email)) {
-        await db.user.update({ where: { id: user.id }, data: { role: "ADMIN", isActive: true } });
+        await db.user.update({ where: { id: user.id }, data: { role: "ADMIN", isActive: true, username } });
         return;
       }
 
@@ -116,7 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!invitation) return;
 
       await db.$transaction([
-        db.user.update({ where: { id: user.id }, data: { role: invitation.role, isActive: true } }),
+        db.user.update({ where: { id: user.id }, data: { role: invitation.role, isActive: true, username } }),
         db.invitation.update({ where: { id: invitation.id }, data: { acceptedAt: new Date() } }),
       ]);
     },

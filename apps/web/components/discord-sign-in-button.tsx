@@ -7,7 +7,7 @@ export function DiscordSignInButton() {
   return (
     <button className="discord-sign-in" type="button" onClick={() => signIn("discord", { callbackUrl: "/" })}>
       <MessageCircle aria-hidden="true" size={17} />
-      Continue with Discord
+      Join or sign in with Discord
     </button>
   );
 }
