@@ -40,7 +40,23 @@ function reliefMaterial(THREE: ThreeModule, texture: Three.Texture) {
     polygonOffsetUnits: -2,
     uniforms: { map: { value: texture }, uvRepeat: { value: texture.repeat.clone() }, uvOffset: { value: texture.offset.clone() } },
     vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-    fragmentShader: `uniform sampler2D map; uniform vec2 uvRepeat; uniform vec2 uvOffset; varying vec2 vUv; void main(){ vec4 tex=texture2D(map,vUv*uvRepeat+uvOffset); float light=max(tex.r,max(tex.g,tex.b)); if(light<.035) discard; float alpha=smoothstep(.035,.14,light); vec3 museumLit=pow(tex.rgb,vec3(.86))*1.16; gl_FragColor=vec4(museumLit,alpha); }`,
+    fragmentShader: `uniform sampler2D map;
+      uniform vec2 uvRepeat;
+      uniform vec2 uvOffset;
+      varying vec2 vUv;
+      void main() {
+        vec4 tex=texture2D(map,vUv*uvRepeat+uvOffset);
+        float light=max(tex.r,max(tex.g,tex.b));
+        if(light<.035) discard;
+        float alpha=smoothstep(.035,.14,light);
+        vec3 museumLit=pow(tex.rgb,vec3(.82));
+        float luma=dot(museumLit,vec3(.2126,.7152,.0722));
+        museumLit=mix(vec3(luma),museumLit,1.16);
+        museumLit=(museumLit-.5)*1.08+.5;
+        gl_FragColor=vec4(museumLit*1.18,alpha);
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
+      }`,
   });
 }
 
@@ -92,7 +108,7 @@ function reverseTexture(THREE: ThreeModule, item: CollectibleIdentity, inscripti
 }
 
 function metalMaterial(THREE: ThreeModule, color: string, roughness = 0.3) {
-  return new THREE.MeshStandardMaterial({ color, metalness: 0.82, roughness });
+  return new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.035, metalness: 0.82, roughness });
 }
 
 function addMesh(group: Three.Group, geometry: Three.BufferGeometry, material: Three.Material, position: [number, number, number], rotation: [number, number, number] = [0, 0, 0], scale: [number, number, number] = [1, 1, 1]) {
@@ -198,9 +214,6 @@ function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleId
   const enamel = new THREE.MeshStandardMaterial({ color: visual.enamel, metalness: 0.18, roughness: 0.48 });
   const dark = metalMaterial(THREE, "#242621", 0.38);
   trophyBase(THREE, group, metal, accent, enamel);
-  const backingSides = ["deed", "ledger", "armchair", "bear"].includes(visual.form) ? 8 : 48;
-  addMesh(group, new THREE.CylinderGeometry(0.82, 0.82, 0.16, backingSides), dark, [0, 0.13, -0.08], [Math.PI / 2, 0, 0]);
-  addMesh(group, new THREE.TorusGeometry(0.77, 0.035, 9, Math.max(16, backingSides)), accent, [0, 0.13, 0.015]);
 
   if (visual.form === "antler") {
     addMesh(group, new THREE.CylinderGeometry(0.12, 0.16, 0.62, 12), dark, [0, -0.34, 0]);
@@ -249,9 +262,9 @@ function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleId
     [-1, 1].forEach((side) => addMesh(group, new THREE.BoxGeometry(0.08, 1.34, 0.18), dark, [side * 0.64, 0.13, 0.04]));
     [[-0.54, 0.48, -0.7], [0.54, 0.42, 0.72], [-0.48, -0.23, -0.92], [0.5, -0.28, 0.96]].forEach(([x, y, angle]) => addMesh(group, new THREE.ConeGeometry(0.055, 0.38, 3), accent, [x, y, 0.18], [0, 0, angle]));
   }
-  // A museum-lit relief sits in front of the sculpted volume. Its dark ground keys
-  // away in the shader, leaving the authored detail on the physical silhouette.
-  addRelief(THREE, group, tile, 0.14, 0.72, 1.55);
+  // Keep authored detail as a small maker's plaque on the plinth. The prior
+  // full-size relief covered the modeled volume and made trophies read as badges.
+  addRelief(THREE, group, tile, -1.03, 0.431, 0.52);
   addReverse(THREE, group, item, visual.inscription, visual.accent, 0.14, -0.19, 1.38);
 }
 

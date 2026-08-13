@@ -34,18 +34,19 @@ export function CollectibleCanvas({ item, interactive = false, className = "" }:
       webgl.setPixelRatio(Math.min(window.devicePixelRatio || 1, interactive ? 1.8 : 1.35));
       webgl.outputColorSpace = THREE.SRGBColorSpace;
       webgl.toneMapping = THREE.ACESFilmicToneMapping;
-      webgl.toneMappingExposure = 1.18;
+      webgl.toneMappingExposure = 1.26;
       webgl.shadowMap.enabled = interactive;
       webgl.shadowMap.type = THREE.PCFShadowMap;
-      scene.add(new THREE.HemisphereLight(0xf4ddb0, 0x17221d, 2.4));
-      const key = new THREE.SpotLight(0xffd28a, interactive ? 45 : 32, 20, Math.PI / 4, 0.55, 1.3);
+      scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+      scene.add(new THREE.HemisphereLight(0xf8e8c7, 0x18231d, 2.5));
+      const key = new THREE.SpotLight(0xffd99f, interactive ? 50 : 38, 20, Math.PI / 4, 0.55, 1.3);
       key.position.set(-3.2, 4.5, 5.2);
       key.castShadow = interactive;
       scene.add(key);
-      const rim = new THREE.PointLight(0x76b1bd, 19, 14);
+      const rim = new THREE.PointLight(0x83c5d1, 22, 14);
       rim.position.set(3.4, 0.7, -2.2);
       scene.add(rim);
-      const warm = new THREE.PointLight(0xc77c3b, 14, 12);
+      const warm = new THREE.PointLight(0xd78648, 16, 12);
       warm.position.set(1.4, -2.8, 2.8);
       scene.add(warm);
 

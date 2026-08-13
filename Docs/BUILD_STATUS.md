@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -179,6 +179,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Unified rarity-aware reward ceremonies for XP, levels, and every achievement tier, coordinating a Three.js particle scene and Canvas2D Rive state machine from one animation clock
 - [x] Living Three.js trophy cabinet on private and public profiles, filled exclusively from persisted badge, medal, and trophy unlocks with pointer inspection, accessible inventory controls, mobile composition, and non-WebGL fallback
 - [x] Premium collectible-art pass: 28 reward-specific relief designs across 11 badges, 9 medals, and 8 trophies; generated museum-grade cabinet/material artwork; distinct modeled silhouettes, ribbons, pins, bases, and engraved data-backed reverses; smooth click-to-inspect zoom, inertial pointer/touch and keyboard rotation, wheel zoom, mobile inspection bay, and the same 3D reward in earned ceremonies
+- [x] Trophy-cabinet legibility pass: trophy-first inventory ordering, larger angled trophy silhouettes, relief art moved off the sculpted volume, neutral museum lighting isolated from Eastern sky grading, and exact alpha-backed avatar frames without blend-mode haze or animated geometry drift
 - [x] Trophy-cupboard fit-and-finish pass with stable opaque relief rendering, grounded physical mounts, shelf-aligned scale and spacing, removed idle bobbing, and a centered four-column mobile cabinet composition
 - [x] Interactive filtered achievement archive with server-side secret redaction, verified progress bars, rarity presentation, reward previews, and 39 catalogue records
 - [x] Expanded verified achievement catalogue: progression, legacy, exploration, extreme return-visit milestones, humorous secrets, and six per-game mastery records with titles, borders, layouts, badges, medals, and trophies

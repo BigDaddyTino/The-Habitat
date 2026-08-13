@@ -25,7 +25,12 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
   const rootRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState(items.length ? 0 : -1);
   const [inspected, setInspected] = useState<CabinetItem | null>(null);
-  const displayedItems = useMemo(() => items.slice(0, 28), [items]);
+  const displayedItems = useMemo(() => {
+    const kindRank: Record<CabinetItem["kind"], number> = { TROPHY: 0, MEDAL: 1, BADGE: 2 };
+    return [...items]
+      .sort((left, right) => kindRank[left.kind] - kindRank[right.kind] || Date.parse(right.unlockedAt) - Date.parse(left.unlockedAt))
+      .slice(0, 28);
+  }, [items]);
   const selected = selectedIndex >= 0 ? displayedItems[selectedIndex] ?? null : null;
   const closeInspector = useCallback(() => setInspected(null), []);
 
@@ -58,15 +63,16 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
       webgl.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
       webgl.outputColorSpace = THREE.SRGBColorSpace;
       webgl.toneMapping = THREE.ACESFilmicToneMapping;
-      webgl.toneMappingExposure = 1.06;
-      scene.add(new THREE.HemisphereLight(0xf5d9a7, 0x111813, 1.85));
-      const key = new THREE.SpotLight(0xffc875, 38, 20, Math.PI / 3.2, 0.6, 1.2);
+      webgl.toneMappingExposure = 1.2;
+      scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+      scene.add(new THREE.HemisphereLight(0xf8e6c4, 0x18221c, 2.05));
+      const key = new THREE.SpotLight(0xffd79a, 44, 20, Math.PI / 3.2, 0.6, 1.2);
       key.position.set(-2.7, 5.8, 5.6);
       scene.add(key);
-      const rim = new THREE.PointLight(0x668fa0, 18, 15);
+      const rim = new THREE.PointLight(0x79b4c2, 22, 15);
       rim.position.set(4.8, 1.8, 2.6);
       scene.add(rim);
-      const ember = new THREE.PointLight(0xb85c2e, 12, 12);
+      const ember = new THREE.PointLight(0xd2763f, 14, 12);
       ember.position.set(-4, -2.5, 2);
       scene.add(ember);
 
@@ -94,9 +100,9 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         }
         const model = createCollectibleModel(THREE, item, loadedAtlases);
         model.position.set(x, y, 0.12);
-        const modelScale = item.kind === "TROPHY" ? 0.46 : item.kind === "MEDAL" ? 0.41 : 0.39;
+        const modelScale = item.kind === "TROPHY" ? 0.58 : item.kind === "MEDAL" ? 0.41 : 0.37;
         model.scale.setScalar(modelScale);
-        model.rotation.y = (index % 3 - 1) * 0.12;
+        model.rotation.y = item.kind === "TROPHY" ? (index % 2 ? 0.24 : -0.24) : (index % 3 - 1) * 0.12;
         model.userData.itemIndex = index;
         model.userData.baseY = y;
         model.traverse((child) => { child.userData.itemIndex = index; });
@@ -160,7 +166,8 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         if (disposed || !visible) return;
         const elapsed = time / 1000;
         models.forEach((model, index) => {
-          model.rotation.y += ((index % 3 - 1) * 0.12 + Math.sin(elapsed * 0.48 + index * 0.63) * 0.12 - model.rotation.y) * 0.04;
+          const restRotation = displayedItems[index]?.kind === "TROPHY" ? (index % 2 ? 0.24 : -0.24) : (index % 3 - 1) * 0.12;
+          model.rotation.y += (restRotation + Math.sin(elapsed * 0.48 + index * 0.63) * (displayedItems[index]?.kind === "TROPHY" ? 0.18 : 0.12) - model.rotation.y) * 0.04;
           model.position.y = model.userData.baseY as number;
         });
         renderFrame();
@@ -192,7 +199,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         {selected ? <><RewardEmblem rarity={selected.rarity} kind={selected.kind} code={selected.code} size="large" /><p className="eyebrow">{selected.kind} · {rarityPresentation[selected.rarity].label}</p><h3>{selected.name}</h3><p>{selected.description ?? `Unlocked by ${selected.achievementName}.`}</p><small>Unlocked by {selected.achievementName} · {new Date(selected.unlockedAt).toLocaleDateString()}</small><button type="button" onClick={() => setInspected(selected)}><Expand aria-hidden="true" /> Inspect in 3D</button></> : <><Trophy aria-hidden="true" /><p className="eyebrow">Empty cupboard</p><h3>Room for legends</h3><p>Verified medals, badges, and trophies will appear here automatically.</p></>}
       </div>
     </div>
-    {items.length ? <div className="cabinet-index" aria-label="Trophy cupboard inventory">{items.map((item, index) => { const Icon = kindIcon[item.kind]; return <button aria-pressed={selectedIndex === index} key={item.id} onPointerEnter={() => setSelectedIndex(index)} onFocus={() => setSelectedIndex(index)} onClick={() => { setSelectedIndex(index); setInspected(item); }} type="button"><Icon aria-hidden="true" size={14} /><span>{item.name}</span><Expand aria-hidden="true" size={11} /></button>; })}</div> : null}
+    {displayedItems.length ? <div className="cabinet-index" aria-label="Trophy cupboard inventory">{displayedItems.map((item, index) => { const Icon = kindIcon[item.kind]; return <button aria-pressed={selectedIndex === index} key={item.id} onPointerEnter={() => setSelectedIndex(index)} onFocus={() => setSelectedIndex(index)} onClick={() => { setSelectedIndex(index); setInspected(item); }} type="button"><Icon aria-hidden="true" size={14} /><span><small>{item.kind}</small>{item.name}</span><Expand aria-hidden="true" size={11} /></button>; })}</div> : null}
     {inspected ? <CollectibleInspector item={inspected} onClose={closeInspector} /> : null}
   </section>;
 }
