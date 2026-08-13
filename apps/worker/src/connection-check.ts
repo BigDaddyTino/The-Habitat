@@ -1,5 +1,5 @@
 import { getPrismaClient } from "@habitat/db/client";
-import { resolveMarvelRivalsProvider } from "@habitat/shared";
+import { fetchTwitchAppToken, resolveMarvelRivalsProvider } from "@habitat/shared";
 import { checkAgentHealth } from "./agent-health.js";
 import { HabitatAgentClient } from "./agent-client.js";
 import { loadWorkerConfiguration } from "./config.js";
@@ -167,6 +167,22 @@ async function main() {
       }
       const callbackState = process.env.AUTH_DISCORD_ID?.trim() === applicationId ? "OAuth callback registered" : "OAuth uses a separate Discord application";
       return `token and application match; ${callbackState}; ${guilds.length} configured guild(s) reachable`;
+    });
+  }
+
+  const twitchClientId = process.env.TWITCH_CLIENT_ID?.trim();
+  const twitchClientSecret = process.env.TWITCH_CLIENT_SECRET?.trim();
+  const twitchMode = process.env.TWITCH_INTEGRATION?.trim().toLowerCase();
+  if (twitchMode === "off" || twitchMode === "disabled" || twitchMode === "none") {
+    skip("Twitch provider", "integration is intentionally disabled");
+  } else if (!twitchClientId && !twitchClientSecret) {
+    skip("Twitch provider", "client credentials are intentionally not configured");
+  } else {
+    await check("Twitch provider", async () => {
+      if (!twitchClientId || !twitchClientSecret) throw new Error("Twitch client credentials are incomplete.");
+      await fetchTwitchAppToken(twitchClientId, twitchClientSecret);
+      const channels = await db.twitchChannel.count();
+      return `client credentials accepted; ${channels} verified channel(s)`;
     });
   }
 

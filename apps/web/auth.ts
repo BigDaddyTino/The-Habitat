@@ -5,6 +5,7 @@ import Discord from "next-auth/providers/discord";
 import { cookies } from "next/headers";
 import "@/lib/environment";
 import type { HabitatRole } from "@/lib/permissions";
+import { hasRequiredRole } from "@/lib/permissions";
 import { INVITE_GRANT_COOKIE, readInviteGrant } from "@/lib/weekly-invite-code";
 
 const db = getPrismaClient();
@@ -40,8 +41,11 @@ async function currentCodeReferral() {
   const token = (await cookies()).get(INVITE_GRANT_COOKIE)?.value;
   const grant = readInviteGrant(token, secret);
   if (!grant) return null;
-  const inviter = await db.user.findUnique({ where: { id: grant.inviterUserId }, select: { id: true, isActive: true } });
-  return inviter?.isActive ? grant : null;
+  const inviter = await db.user.findUnique({
+    where: { id: grant.inviterUserId },
+    select: { id: true, isActive: true, role: true },
+  });
+  return inviter?.isActive && hasRequiredRole(inviter.role, "USER") ? grant : null;
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({

@@ -28,6 +28,15 @@ function isPatchNote(item: SteamNewsItem) {
   return Boolean(item.tags?.includes("patchnotes") || /patch notes?|balance (?:post|adjustment)|version \d+/i.test(item.title ?? ""));
 }
 
+function isSafeNewsUrl(value: string | undefined) {
+  if (!value) return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /** Pulls a small, server-cached, game-specific announcement set. No client-side tracking or feed key is used. */
 export async function getGameDispatches(serverSlug: string): Promise<GameDispatch[]> {
   const appId = steamAppIds[serverSlug];
@@ -36,12 +45,13 @@ export async function getGameDispatches(serverSlug: string): Promise<GameDispatc
     const response = await fetch(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=${appId}&count=16&maxlength=240&format=json`, {
       next: { revalidate: 3_600 },
       headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(5_000),
     });
     if (!response.ok) return [];
     const data = await response.json() as SteamNewsResponse;
     const items = data.appnews?.newsitems ?? [];
     return items
-      .filter((item) => item.gid && item.title && item.url && item.date && item.feedname === "steam_community_announcements")
+      .filter((item) => item.gid && item.title && isSafeNewsUrl(item.url) && item.date && item.feedname === "steam_community_announcements")
       .sort((left, right) => Number(isPatchNote(right)) - Number(isPatchNote(left)) || (right.date ?? 0) - (left.date ?? 0))
       .slice(0, 3)
       .map((item) => ({

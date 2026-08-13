@@ -127,6 +127,7 @@ function Add-Step {
 # 1. PostgreSQL. Dumped inside the container, then copied out, so the custom-format
 #    stream is never mangled by PowerShell redirection.
 $databaseFile = Join-Path $databaseDirectory "habitat-$stamp.dump"
+$containerPath = $null
 try {
   $running = @(& docker ps --filter "name=^/$PostgresContainer$" --filter "status=running" --format "{{.Names}}")
   if ($LASTEXITCODE -ne 0 -or $running.Count -eq 0) { throw "Container '$PostgresContainer' is not running." }
@@ -135,16 +136,21 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "pg_dump exited with $LASTEXITCODE." }
   & docker cp "$($PostgresContainer):$containerPath" $databaseFile
   if ($LASTEXITCODE -ne 0) { throw "docker cp exited with $LASTEXITCODE." }
-  & docker exec $PostgresContainer rm -f $containerPath | Out-Null
   $size = (Get-Item -LiteralPath $databaseFile).Length
   Add-Step -Name "database" -Status "ok" -Detail ("{0:N1} MB" -f ($size / 1MB)) -Bytes $size -Path $databaseFile
 } catch {
   Add-Step -Name "database" -Status "failed" -Detail $_.Exception.Message
+} finally {
+  if ($containerPath) {
+    & docker exec $PostgresContainer rm -f $containerPath | Out-Null
+    $global:LASTEXITCODE = 0
+  }
 }
 
 # 2. Untracked configuration. These files carry live secrets, so they stay on the
 #    local volume and are never pushed anywhere.
 $configFile = Join-Path $configDirectory "config-$stamp.zip"
+$staging = $null
 try {
   $staging = Join-Path ([System.IO.Path]::GetTempPath()) "habitat-config-$stamp"
   [void] (New-Item -ItemType Directory -Path $staging -Force)
@@ -157,11 +163,14 @@ try {
   }
   if ($captured -eq 0) { throw "No configuration files were found under $repository." }
   Compress-Archive -Path (Join-Path $staging "*") -DestinationPath $configFile -CompressionLevel Optimal -Force
-  Remove-Item -LiteralPath $staging -Recurse -Force
   $size = (Get-Item -LiteralPath $configFile).Length
   Add-Step -Name "config" -Status "ok" -Detail "$captured files" -Bytes $size -Path $configFile
 } catch {
   Add-Step -Name "config" -Status "failed" -Detail $_.Exception.Message
+} finally {
+  if ($staging -and (Test-Path -LiteralPath $staging)) {
+    Remove-Item -LiteralPath $staging -Recurse -Force
+  }
 }
 
 # 3. Application history. A bundle restores with `git clone`, so the portal can be

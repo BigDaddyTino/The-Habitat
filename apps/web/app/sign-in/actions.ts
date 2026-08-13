@@ -16,7 +16,10 @@ export async function redeemInviteCode(formData: FormData) {
   const secret = process.env.AUTH_SECRET;
   if (!parsed.success || !secret) redirect("/sign-in?code=invalid");
 
-  const members = await db.user.findMany({ where: { isActive: true }, select: { id: true } });
+  const members = await db.user.findMany({
+    where: { isActive: true, role: { in: ["USER", "ADMIN"] } },
+    select: { id: true },
+  });
   const referral = resolveWeeklyInviteCode(parsed.data, members, secret);
   if (!referral) redirect("/sign-in?code=invalid");
 

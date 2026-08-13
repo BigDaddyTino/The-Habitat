@@ -10,6 +10,7 @@ import { isPresenceActive } from "@/lib/member-presence";
 import { weeklyInviteCode } from "@/lib/weekly-invite-code";
 import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
 import { inviteMember } from "./actions";
+import { hasRequiredRole } from "@/lib/permissions";
 import "./members.css";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,8 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
   const session = await auth();
   const viewerId = session?.user?.id && session.user.isActive ? session.user.id : null;
   const viewerIsMember = Boolean(viewerId);
-  const memberInviteCode = viewerId && process.env.AUTH_SECRET ? weeklyInviteCode(viewerId, process.env.AUTH_SECRET) : null;
+  const viewerCanInvite = Boolean(viewerId && hasRequiredRole(session?.user?.role, "USER"));
+  const memberInviteCode = viewerCanInvite && viewerId && process.env.AUTH_SECRET ? weeklyInviteCode(viewerId, process.env.AUTH_SECRET) : null;
   const { invite } = await searchParams;
   const inviteMessage = invite ? inviteMessages[invite] : null;
   const now = new Date();
@@ -55,7 +57,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
       },
       orderBy: [{ role: "desc" }, { createdAt: "asc" }],
     }),
-    viewerIsMember ? db.invitation.findMany({
+    viewerCanInvite ? db.invitation.findMany({
       where: { invitedByUserId: viewerId!, acceptedAt: null, revokedAt: null, expiresAt: { gt: now } },
       select: { id: true, email: true, expiresAt: true },
       orderBy: { createdAt: "desc" },
@@ -107,14 +109,14 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
 
       <section className="member-invite-panel" id="invite">
         <div className="invite-seal"><MailPlus aria-hidden="true" size={30} /><span>Pass the<br />torch</span></div>
-        <div className="invite-copy"><p className="eyebrow">Every member can grow the circle</p><h2>Bring someone into the lodge.</h2><p>Enter the exact email tied to their Discord account. Their invitation grants standard member access for 14 days; Discord verifies the person at the door.</p></div>
-        {viewerIsMember ? <div className="invite-console">
+        <div className="invite-copy"><p className="eyebrow">Trusted members can grow the circle</p><h2>Bring someone into the lodge.</h2><p>Enter the exact email tied to their Discord account. Their invitation grants standard member access for 14 days; Discord verifies the person at the door.</p></div>
+        {viewerCanInvite ? <div className="invite-console">
           {memberInviteCode ? <WeeklyInviteCode code={memberInviteCode} /> : null}
           <div className="invite-method-divider"><span>or invite by Discord email</span></div>
           <form action={inviteMember}><label htmlFor="member-email">Discord account email</label><div><input autoComplete="email" id="member-email" name="email" placeholder="friend@example.com" required type="email" /><button type="submit">Send invitation <span aria-hidden="true">→</span></button></div></form>
           {inviteMessage ? <p className={`invite-result ${inviteMessage.tone}`} role="status">{inviteMessage.text}</p> : null}
           {myInvitations.length ? <div className="pending-invites"><span>Awaiting arrival</span>{myInvitations.map((invitation) => <p key={invitation.id}><strong>{invitation.email}</strong><small>expires {invitation.expiresAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</small></p>)}</div> : null}
-        </div> : <div className="invite-console invite-locked"><ShieldCheck aria-hidden="true" size={20} /><p>Invitations are entrusted to active Habitat members.</p><Link href="/sign-in">Member sign in <span aria-hidden="true">→</span></Link></div>}
+        </div> : <div className="invite-console invite-locked"><ShieldCheck aria-hidden="true" size={20} /><p>Invitations are entrusted to members with standard or administrator access.</p>{viewerIsMember ? null : <Link href="/sign-in">Member sign in <span aria-hidden="true">→</span></Link>}</div>}
       </section>
       <p className="presence-footnote">Portal activity is reported only while an authenticated Habitat page is visible. Device details are visible only to members. Game presence appears only from verified Habitat server telemetry; external services are never guessed.</p>
     </main>

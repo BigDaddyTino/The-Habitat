@@ -217,3 +217,21 @@ This is the implementation source of truth. Checked items are built and locally 
 - [ ] Live Steam achievement progress remains unavailable because Steam returns HTTP 403 for the consenting account on both documented achievement hosts
 - [ ] Live Marvel match pagination, convergence, privacy, quota, and retention verification awaits provider recovery, `MARVEL_RIVALS_API_KEY`, and consenting test profiles
 - [ ] Cross-game consumers remain intentionally disabled until live-provider fixtures and shadow-award/record comparisons pass review
+
+## 2026-08-13 - Repository Audit and Safe Hardening
+
+- [x] Completed a repository-wide architecture, security, dependency, data-flow, migration, integration, performance, and cleanup audit; see `Docs/AUDIT_2026-08-13.md`
+- [x] Closed the member-invitation role gap end to end: only `USER` and `ADMIN` members can render, create, resolve, or sign in through member invitations
+- [x] Made invitation creation and its audit record atomic
+- [x] Resolved all five baseline production dependency advisories with workspace-level PostCSS and Sharp resolutions; the production audit now reports zero advisories
+- [x] Added baseline HSTS, content-type, frame, referrer, and browser-permission response headers in web configuration without claiming deployment
+- [x] Bounded game-news fetches to five seconds and rejected non-HTTPS provider links
+- [x] Added Twitch credential verification to the sanitized operator connection audit
+- [x] Changed all tracked WinSW service templates from unbounded append logs to 10 MB/date rolling logs with 14-file retention
+- [x] Hardened backup failure cleanup for container dumps and staged secret configuration
+- [x] Revalidated sequential typecheck, 125 tests, lint, optimized production build, XML syntax, PowerShell syntax, dependency audit, and connection checks
+- [ ] Define and deploy a backed-up `ServerMetricSample` retention/downsampling policy; the audit measured 96,221 samples in less than three days and intentionally deleted none
+- [ ] Capture a real Dragonwilds player-session fixture and validate the parser; the readable live source still contains zero parseable player records
+- [ ] Add sequential CI gates and stage a report-only CSP with Auth.js/Rive/Three.js desktop and mobile coverage
+- [ ] Convert the remaining administrative mutation/audit pairs to transactions
+- [ ] Deploy the tracked web/service hardening through the private release process and verify production headers and installed WinSW rollover configuration
