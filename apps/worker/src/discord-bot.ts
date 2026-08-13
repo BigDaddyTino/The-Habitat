@@ -1,8 +1,15 @@
-import { ChatInputCommandInteraction, Client, Events, GatewayIntentBits, MessageFlags, REST, Routes, SlashCommandBuilder } from "discord.js";
+import { ActivityType, ChatInputCommandInteraction, Client, Events, GatewayIntentBits, MessageFlags, REST, Routes, SlashCommandBuilder, type Activity, type Presence, type VoiceState } from "discord.js";
 import { getPrismaClient } from "@habitat/db/client";
 import { queueDiscordNotification } from "./discord-notifications.js";
 
 const db = getPrismaClient();
+
+/** Schema limits for the member-authored text Discord reports. */
+const STREAM_URL_LIMIT = 300;
+const ACTIVITY_NAME_LIMIT = 120;
+const ACTIVITY_DETAIL_LIMIT = 200;
+const CHANNEL_NAME_LIMIT = 120;
+const DISCORD_SNOWFLAKE = /^\d{1,20}$/;
 
 const commands = [
   new SlashCommandBuilder().setName("habitat").setDescription("Show the Habitat's current world status."),
@@ -20,6 +27,17 @@ export type DiscordBotHandle = { stop(): void };
 export async function startDiscordBot(environment = process.env): Promise<DiscordBotHandle | null> {
   const token = environment.DISCORD_BOT_TOKEN?.trim();
   const applicationId = environment.DISCORD_APPLICATION_ID?.trim();
+  // GuildPresences is a privileged intent that must be enabled in the Discord
+  // Developer Portal, so streaming detection is off unless it is asked for.
+  const presenceEnabled = environment.HABITAT_DISCORD_PRESENCE?.trim().toLowerCase() === "on";
+  console.info(`[discord-bot] Discord streaming detection is ${presenceEnabled ? "ON; privileged presence, member and voice intents will be requested" : "OFF; set HABITAT_DISCORD_PRESENCE=on to enable it"}.`);
+  // Presence and voice events only fire on change, so a row left behind by a
+  // dead process would claim a member is streaming forever. Every startup begins
+  // from "nobody is streaming" and re-derives the truth from Discord below.
+  // With detection off Habitat genuinely has no knowledge, and no knowledge must
+  // never render as live.
+  await clearStreamSignals("startup");
+
   if (!token || !applicationId) return null;
 
   const configurations = await db.discordGuildConfig.findMany({ where: { commandsEnabled: true }, select: { guildId: true } });
@@ -34,14 +52,195 @@ export async function startDiscordBot(environment = process.env): Promise<Discor
     }
   }
 
-  const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  const client = await connectDiscordClient(token, presenceEnabled);
+  return {
+    stop: () => {
+      // Best effort: the next startup clears the signals again anyway.
+      void clearStreamSignals("shutdown");
+      client.destroy();
+    },
+  };
+}
+
+function createDiscordClient(presenceEnabled: boolean): Client {
+  const client = new Client({
+    intents: presenceEnabled
+      ? [GatewayIntentBits.Guilds, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates]
+      : [GatewayIntentBits.Guilds],
+  });
   client.on(Events.InteractionCreate, (interaction) => {
     if (interaction.isChatInputCommand()) void handleCommand(interaction).catch((error: unknown) => {
       console.error("[discord-bot] command handler rejected unexpectedly:", error instanceof Error ? error.message : String(error));
     });
   });
-  await client.login(token);
-  return { stop: () => client.destroy() };
+  if (!presenceEnabled) return client;
+  client.once(Events.ClientReady, (ready) => {
+    void reconcileCachedStreamSignals(ready).catch((error: unknown) => {
+      console.error("[discord-bot] cached streaming signals could not be reconciled:", error instanceof Error ? error.message : String(error));
+    });
+  });
+  client.on(Events.PresenceUpdate, (previous, presence) => {
+    // Presence fires for every status and game change in the guild. Only a
+    // stream starting, a stream stopping, or an uncached previous state can
+    // change a signal, so nothing else reaches the database.
+    if (previous && !streamingActivity(previous.activities) && !streamingActivity(presence.activities)) return;
+    void recordPresenceSignal(presence).catch((error: unknown) => {
+      console.error("[discord-bot] presence signal could not be recorded:", error instanceof Error ? error.message : String(error));
+    });
+  });
+  client.on(Events.VoiceStateUpdate, (previous, state) => {
+    // Mutes, joins and leaves by members who were not screen sharing cannot
+    // change a Go Live signal.
+    if (previous.streaming !== true && state.streaming !== true) return;
+    void recordVoiceSignal(state).catch((error: unknown) => {
+      console.error("[discord-bot] voice streaming signal could not be recorded:", error instanceof Error ? error.message : String(error));
+    });
+  });
+  return client;
+}
+
+/**
+ * Logs in, and survives a portal where the privileged intents were never
+ * enabled: Discord refuses the connection outright, so Habitat reconnects
+ * without them rather than losing slash commands and monitoring.
+ */
+async function connectDiscordClient(token: string, presenceEnabled: boolean): Promise<Client> {
+  const client = createDiscordClient(presenceEnabled);
+  try {
+    await client.login(token);
+    return client;
+  } catch (error) {
+    client.destroy();
+    if (!presenceEnabled || !isDisallowedIntentsError(error)) throw error;
+    console.warn("[discord-bot] Discord rejected the privileged intents, so streaming detection is disabled for this run. Enable Presence Intent and Server Members Intent in the Discord Developer Portal, then restart the worker.");
+    const fallback = createDiscordClient(false);
+    await fallback.login(token);
+    return fallback;
+  }
+}
+
+function isDisallowedIntentsError(error: unknown): boolean {
+  const code = error && typeof error === "object" && "code" in error ? (error as { code?: unknown }).code : undefined;
+  const description = error instanceof Error ? `${error.name} ${error.message}` : String(error);
+  return code === "DisallowedIntents" || code === 4014 || /disallowed intent|privileged intent/i.test(description);
+}
+
+type StreamSignalKind = "PRESENCE_ACTIVITY" | "VOICE_GO_LIVE";
+type StreamSignalFields = {
+  streamUrl: string | null;
+  activityName: string | null;
+  activityDetail: string | null;
+  guildId: string | null;
+  channelId: string | null;
+  channelName: string | null;
+  startedAt: Date | null;
+};
+
+function clampSignalText(value: string | null | undefined, maximumLength: number): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed.slice(0, maximumLength) : null;
+}
+
+function streamingActivity(activities: readonly Activity[]): Activity | null {
+  return activities.find((activity) => activity.type === ActivityType.Streaming) ?? null;
+}
+
+/**
+ * Resolves the Habitat member behind a Discord user through the Auth.js account
+ * link. A Discord user without a Habitat account is ignored; signals never
+ * create members.
+ */
+async function habitatUserId(discordUserId: string): Promise<string | null> {
+  if (!DISCORD_SNOWFLAKE.test(discordUserId)) return null;
+  const account = await db.account.findUnique({
+    where: { provider_providerAccountId: { provider: "discord", providerAccountId: discordUserId } },
+    select: { userId: true, user: { select: { isActive: true } } },
+  });
+  return account?.user.isActive ? account.userId : null;
+}
+
+async function startStreamSignal(userId: string, kind: StreamSignalKind, fields: StreamSignalFields) {
+  const observedAt = new Date();
+  const existing = await db.discordStreamSignal.findUnique({ where: { userId }, select: { streaming: true, kind: true, startedAt: true } });
+  // Repeated events for a stream already being reported must not keep resetting
+  // when it began.
+  const continuing = existing?.streaming === true && existing.kind === kind;
+  const startedAt = (continuing ? existing.startedAt : null) ?? fields.startedAt ?? observedAt;
+  const data = { kind, streaming: true, ...fields, startedAt, observedAt };
+  await db.discordStreamSignal.upsert({ where: { userId }, create: { userId, ...data }, update: data });
+}
+
+/** Only the kind that reported a stream may retract it: one row per member is shared by both kinds. */
+async function stopStreamSignal(userId: string, kind: StreamSignalKind) {
+  await db.discordStreamSignal.updateMany({ where: { userId, kind }, data: { streaming: false, observedAt: new Date() } });
+}
+
+async function clearStreamSignals(reason: "startup" | "shutdown") {
+  try {
+    const cleared = await db.discordStreamSignal.updateMany({ where: { streaming: true }, data: { streaming: false, observedAt: new Date() } });
+    if (cleared.count > 0) console.info(`[discord-bot] ${cleared.count} Discord streaming signal(s) cleared on ${reason}; Discord streaming state is re-observed, never remembered across restarts.`);
+  } catch (error) {
+    console.error(`[discord-bot] Discord streaming signals could not be cleared on ${reason}:`, error instanceof Error ? error.message : String(error));
+  }
+}
+
+/**
+ * Discord delivers presences and voice states with the initial guild payload, so
+ * a restart can rebuild what is true right now instead of trusting whatever was
+ * true when the previous process died.
+ */
+async function reconcileCachedStreamSignals(client: Client<true>) {
+  let recorded = 0;
+  for (const guild of client.guilds.cache.values()) {
+    for (const presence of guild.presences.cache.values()) {
+      if (streamingActivity(presence.activities) && await recordPresenceSignal(presence)) recorded += 1;
+    }
+    for (const state of guild.voiceStates.cache.values()) {
+      if (state.streaming === true && await recordVoiceSignal(state)) recorded += 1;
+    }
+  }
+  console.info(`[discord-bot] Discord streaming detection ready: ${recorded} linked member${recorded === 1 ? "" : "s"} observed streaming right now.`);
+}
+
+/** A "Streaming" presence activity carries a self-reported URL Habitat never trusts as proof. */
+async function recordPresenceSignal(presence: Presence): Promise<boolean> {
+  const userId = await habitatUserId(presence.userId);
+  if (!userId) return false;
+  const activity = streamingActivity(presence.activities);
+  if (!activity) {
+    await stopStreamSignal(userId, "PRESENCE_ACTIVITY");
+    return false;
+  }
+  await startStreamSignal(userId, "PRESENCE_ACTIVITY", {
+    streamUrl: clampSignalText(activity.url, STREAM_URL_LIMIT),
+    activityName: clampSignalText(activity.name, ACTIVITY_NAME_LIMIT),
+    activityDetail: clampSignalText(activity.details ?? activity.state, ACTIVITY_DETAIL_LIMIT),
+    guildId: clampSignalText(presence.guild?.id, 40),
+    channelId: null,
+    channelName: null,
+    startedAt: activity.timestamps?.start ?? activity.createdAt,
+  });
+  return true;
+}
+
+/** Go Live screen sharing inside a Habitat voice channel. */
+async function recordVoiceSignal(state: VoiceState): Promise<boolean> {
+  const userId = await habitatUserId(state.id);
+  if (!userId) return false;
+  if (state.streaming !== true) {
+    await stopStreamSignal(userId, "VOICE_GO_LIVE");
+    return false;
+  }
+  await startStreamSignal(userId, "VOICE_GO_LIVE", {
+    streamUrl: null,
+    activityName: null,
+    activityDetail: null,
+    guildId: clampSignalText(state.guild?.id, 40),
+    channelId: clampSignalText(state.channelId, 40),
+    channelName: clampSignalText(state.channel?.name, CHANNEL_NAME_LIMIT),
+    startedAt: null,
+  });
+  return true;
 }
 
 async function handleCommand(interaction: ChatInputCommandInteraction) {

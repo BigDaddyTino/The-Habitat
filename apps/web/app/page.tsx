@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Flame, ShieldCheck, UsersRound } from "lucide-react";
+import { ArrowRight, Circle, Flame, ShieldCheck, UsersRound } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { ChronicleFeed } from "@/components/chronicle-feed";
 import { WorldCard } from "@/components/world-card";
@@ -10,6 +10,7 @@ import { HallAtmosphere } from "@/components/hall-atmosphere";
 import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
 import { ClubGameCard } from "@/components/club-game-card";
 import { getClubGames } from "@/lib/club-games";
+import { getLiveStreamSummary } from "@/lib/stream-showcase";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
@@ -21,6 +22,7 @@ export default async function GreatHallPage() {
   const activePlayers = liveWorlds.reduce((total, world) => total + (world.players ?? 0), 0);
   const atmosphere = getGreatHallAtmosphere();
   const clubGames = getClubGames();
+  const liveStreams = await getLiveStreamSummary();
   return (
     <div className="great-hall">
       <section className={`hall-hero sky-${atmosphere.sky}`}>
@@ -38,6 +40,14 @@ export default async function GreatHallPage() {
             <div><ShieldCheck aria-hidden="true" /><strong>{worlds.length}</strong><span>worlds registered</span></div>
           </div>
           <Link className="primary-link" href="/games">Browse the game rooms <ArrowRight aria-hidden="true" size={17} /></Link>
+          {liveStreams.liveCount > 0 ? <div className="hall-live-strip">
+            <span className="stream-live-pip"><Circle aria-hidden="true" size={7} /> On air</span>
+            <div>
+              <strong>{liveStreams.topDisplayName ?? "A member"} is streaming</strong>
+              <small>{liveStreams.liveCount === 1 ? "One channel live right now" : `${liveStreams.liveCount} channels live right now`}</small>
+            </div>
+            <Link href="/streams">Open the broadcast wing <ArrowRight aria-hidden="true" size={14} /></Link>
+          </div> : null}
         </div>
       </section>
 

@@ -4,13 +4,20 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 export type DiscordNotificationInput = {
   serverEventId?: string;
   gameActivityId?: string;
-  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "WAKE_REQUEST";
+  /**
+   * Identifies evidence that is not a ServerEvent or GameActivity row. A Twitch
+   * broadcast is evidenced by its own provider stream id, and the key is what
+   * makes the announcement fire exactly once per broadcast.
+   */
+  evidenceKey?: string;
+  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "WAKE_REQUEST" | "STREAM_WENT_LIVE";
   content: string;
 };
 
 export async function queueDiscordNotification(transaction: Prisma.TransactionClient, input: DiscordNotificationInput) {
-  if (Boolean(input.serverEventId) === Boolean(input.gameActivityId)) throw new Error("A Discord notification requires exactly one evidence source.");
-  const evidenceKey = input.serverEventId ?? input.gameActivityId!;
+  const evidenceKeys = [input.serverEventId, input.gameActivityId, input.evidenceKey].filter((value): value is string => Boolean(value));
+  if (evidenceKeys.length !== 1) throw new Error("A Discord notification requires exactly one evidence source.");
+  const evidenceKey = evidenceKeys[0];
   const configurations = await transaction.discordGuildConfig.findMany({ where: { notificationsEnabled: true, announcementChannelId: { not: null } } });
   for (const configuration of configurations) {
     if (!configurationAllows(configuration, input.kind)) continue;
@@ -65,6 +72,9 @@ function configurationAllows(configuration: { notifyServerOnline: boolean; notif
   if (kind === "SERVER_OUTAGE") return configuration.notifyServerOutage;
   if (kind === "RECORD_BROKEN") return configuration.notifyRecordBroken;
   if (kind === "WAKE_REQUEST") return configuration.notifyWakeRequest;
+  // Going live has no per-guild toggle column yet, so it follows the guild's
+  // master notificationsEnabled switch, which the query above already applied.
+  if (kind === "STREAM_WENT_LIVE") return true;
   return configuration.notifyLegendaryAchievement;
 }
 

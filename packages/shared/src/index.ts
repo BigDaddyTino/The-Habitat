@@ -6,6 +6,8 @@ export * from "./marvel-rivals";
 export * from "./marvel-rivals-provider";
 export * from "./rivalsmeta";
 export * from "./steam-web-api";
+export * from "./twitch";
+export * from "./twitch-provider";
 export * from "./game-activity";
 export * from "./rewards";
 export * from "./worlds";

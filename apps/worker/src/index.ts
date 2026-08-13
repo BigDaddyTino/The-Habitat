@@ -11,6 +11,7 @@ import { reconcileAchievementCatalog } from "./achievements.js";
 import { reconcilePendingIdentityRewards } from "./identity-reconciliation.js";
 import { syncMarvelRivalsMatches, syncMarvelRivalsPresence, syncMarvelRivalsProfiles } from "./marvel-rivals.js";
 import { syncSteamEnrichment } from "./steam-enrichment.js";
+import { syncTwitchChannelMetadata, syncTwitchLiveStatus } from "./twitch.js";
 import { syncSteamAchievements } from "./steam-achievements.js";
 import { projectGameActivities } from "./game-activities.js";
 
@@ -69,6 +70,15 @@ async function main(): Promise<void> {
         console.error("[worker] Marvel Rivals refresh failed:", error instanceof Error ? error.message : String(error));
       }
       try {
+        // Live status is time-sensitive, so it rides the frequent provider scan.
+        // The module still honours its own Twitch poll interval internally.
+        const twitch = await syncTwitchLiveStatus();
+        if (twitch.enabled && twitch.polled > 0) console.info(`Habitat Twitch: ${twitch.live}/${twitch.polled} showcase channels live, ${twitch.started} broadcast${twitch.started === 1 ? "" : "s"} started, ${twitch.ended} ended, ${twitch.failed} deferred.`);
+      } catch (error) {
+        console.warn("Habitat Twitch live sync failed. Hosted monitoring remains available.");
+        console.error("[worker] Twitch live sync failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
         const projected = await projectGameActivities();
         if (projected.serverSources > 0 || projected.clubSources > 0) console.info(`Habitat activity projection: ${projected.activities} activities from ${projected.serverSources} hosted and ${projected.clubSources} Club Game sources.`);
       } catch (error) {
@@ -91,6 +101,13 @@ async function main(): Promise<void> {
       } catch (error) {
         console.warn("Habitat progression reconciliation failed. Live monitoring remains available.");
         console.error("[worker] progression reconciliation failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        const channels = await syncTwitchChannelMetadata();
+        if (channels.enabled && channels.checked > 0) console.info(`Habitat Twitch channels: ${channels.updated}/${channels.checked} channel profiles refreshed, ${channels.failed} deferred.`);
+      } catch (error) {
+        console.warn("Habitat Twitch channel refresh failed. Live stream status remains available.");
+        console.error("[worker] Twitch channel refresh failed:", error instanceof Error ? error.message : String(error));
       }
       try {
         const users = await reconcileAchievementCatalog();

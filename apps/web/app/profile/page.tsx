@@ -4,32 +4,37 @@ import { redirect } from "next/navigation";
 import { BadgeCheck, Check, ExternalLink, Gamepad2, ImagePlus, Medal, Palette, Sparkles, Trophy } from "lucide-react";
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
-import { progressionForXp, type AchievementRarity } from "@habitat/shared";
+import { progressionForXp, twitchChannelUrl, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
 import { SocialAccountForm } from "@/components/social-account-form";
 import { socialPlatformLabels } from "@/lib/social-platforms";
 import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
+import { twitchLinkNotice } from "@/lib/twitch-link";
+import { disconnectTwitchChannel, updateTwitchShowcaseVisibility } from "@/app/streams/actions";
 import { disableSteamEnrichment, disconnectSteam, enableSteamEnrichment, equipCosmetic, equipTitle, removeSocialAccount, selectAvatarPreset, updateProfile, updateSteamEnrichmentVisibility } from "./actions";
 
 const db = getPrismaClient();
 const avatarPresets = ["/images/avatars/campfire.svg", "/images/avatars/raven.svg", "/images/avatars/mountain.svg", "/images/avatars/ufo.svg"];
 
-type ProfileSearchParams = Promise<{ steam?: string | string[] }>;
+type ProfileSearchParams = Promise<{ steam?: string | string[]; twitch?: string | string[] }>;
 
 export default async function ProfilePage({ searchParams }: { searchParams: ProfileSearchParams }) {
   const session = await auth();
   if (!session?.user?.id || !session.user.isActive) redirect("/sign-in");
-  const steamParamValue = (await searchParams).steam;
+  const linkStatuses = await searchParams;
+  const steamParamValue = linkStatuses.steam;
   const steamStatus = Array.isArray(steamParamValue) ? steamParamValue[0] : steamParamValue;
   const connectedMatch = steamStatus?.match(/^connected-(\d+)$/);
   const linkedIdentityCount = connectedMatch ? Number.parseInt(connectedMatch[1] ?? "0", 10) : null;
-  const [member, identities, titles, rewards, xpTotal, clubProfiles] = await Promise.all([
+  const twitchNotice = twitchLinkNotice(linkStatuses.twitch);
+  const [member, identities, titles, rewards, xpTotal, clubProfiles, twitchChannel] = await Promise.all([
     db.user.findUniqueOrThrow({ where: { id: session.user.id }, select: { name: true, username: true, displayName: true, image: true, bio: true, avatarBorder: true, profileLayout: true, socialAccounts: { include: { steamProfile: { include: { libraryGames: { where: { isCurrent: true }, include: { app: { select: { appId: true, name: true, iconHash: true } } }, orderBy: { playtimeMinutes: "desc" } }, achievementSyncs: { select: { status: true, definitionCount: true, achievedCount: true, lastSuccessfulAt: true } } } } }, orderBy: { platform: "asc" } } } }),
     db.playerIdentity.findMany({ where: { userId: session.user.id }, include: { server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } } }, orderBy: { displayName: "asc" } }),
     db.userTitle.findMany({ where: { userId: session.user.id }, include: { title: true }, orderBy: [{ equipped: "desc" }, { awardedAt: "desc" }] }),
     db.userAchievementReward.findMany({ where: { userId: session.user.id }, include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } }, orderBy: { unlockedAt: "desc" } }),
     db.userXpEntry.aggregate({ where: { userId: session.user.id }, _sum: { amount: true } }),
     db.clubGameProfile.findMany({ where: { userId: session.user.id }, orderBy: { connectedAt: "asc" } }),
+    db.twitchChannel.findUnique({ where: { userId: session.user.id }, select: { id: true, login: true, displayName: true, showcaseEnabled: true, isLive: true, lastLiveAt: true, connectedAt: true } }),
   ]);
   const progression = progressionForXp(xpTotal._sum.amount ?? 0);
   const recordedEvents = identities.reduce((total, identity) => total + identity._count.events, 0);
@@ -50,6 +55,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
   const steamAchievementsEarned = steamAchievementScans.filter((scan) => scan.status === "READY").reduce((total, scan) => total + scan.achievedCount, 0);
   const recentlyPlayed = [...steamGames].filter((game) => game.lastPlayedAt).sort((left, right) => (right.lastPlayedAt?.getTime() ?? 0) - (left.lastPlayedAt?.getTime() ?? 0)).slice(0, 5);
   const ownerName = member.displayName ?? member.name ?? "Habitat member";
+  const twitchChannelLink = twitchChannel ? twitchChannelUrl(twitchChannel.login) : null;
 
   return <section className="page-shell profile-page">
     <div className="profile-command-deck">
@@ -89,6 +95,10 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
         <div className="steam-enrichment-controls"><form action={updateSteamEnrichmentVisibility}><label><input defaultChecked={steamProfile.displayPublic} name="displayPublic" type="checkbox" /> Show this Steam gaming-history section on my public Habitat card.</label><button type="submit">Save visibility</button></form><form action={disableSteamEnrichment}><button type="submit">Stop enrichment and delete cached Steam data</button></form></div>
       </>}
     </section> : null}
+
+    <div className="profile-heading"><div><p className="eyebrow">Twitch showcase</p><h2>{twitchChannel?.displayName ?? "Your channel"}</h2></div><Link className="primary-link" href="/streams">Open the showcase <ExternalLink aria-hidden="true" size={15} /></Link></div>
+    {twitchNotice ? <div className={`steam-link-notice ${twitchNotice.tone}`}><strong>{twitchNotice.heading}</strong><span>{twitchNotice.detail}</span></div> : null}
+    <div className="account-kit"><div><p>Verifying with Twitch only proves you own the channel; being featured in the public streaming showcase is a separate opt-in you can switch off whenever you like.</p><div className="steam-connect">{twitchChannel ? <><span><BadgeCheck aria-hidden="true" size={15} /> Twitch verified · {twitchChannel.login}</span>{twitchChannelLink ? <a href={twitchChannelLink} rel="noreferrer" target="_blank">Open channel <ExternalLink aria-hidden="true" size={14} /></a> : null}<form action={disconnectTwitchChannel}><button type="submit">Disconnect Twitch</button></form></> : <Link href="/api/twitch/connect">Verify with Twitch</Link>}</div>{twitchChannel ? <form action={updateTwitchShowcaseVisibility}><label><input defaultChecked={twitchChannel.showcaseEnabled} name="showcaseEnabled" type="checkbox" /> Feature this channel in the public streaming showcase, including while I am live.</label><button className="save-server" type="submit">Save showcase choice</button></form> : <small>Verification opens a Twitch authorization prompt, records nothing but your channel identity, and never posts on your behalf.</small>}</div><div className="social-list">{twitchChannel ? <><article><div><strong>Showcase</strong><span>{twitchChannel.showcaseEnabled ? "Opted in · listed publicly" : "Opt-in off · verified but hidden"}</span></div></article><article><div><strong>Live state</strong><span>{twitchChannel.isLive ? "Twitch reports this channel live" : twitchChannel.lastLiveAt ? `Last live ${twitchChannel.lastLiveAt.toLocaleDateString()}` : "No broadcast observed yet"}</span></div></article><article><div><strong>Verified</strong><span>{twitchChannel.connectedAt.toLocaleDateString()}</span></div></article></> : <span>No Twitch channel verified yet.</span>}</div></div>
 
     <div className="profile-heading"><div><p className="eyebrow">Club profiles</p><h2>Rooms you have joined</h2></div><Link className="primary-link" href="/club-games/marvel-rivals">Open Assembly Room</Link></div>
     {clubProfiles.length ? <div className="club-profile-list">{clubProfiles.map((profile) => <Link href="/club-games/marvel-rivals" key={profile.id}><Gamepad2 aria-hidden="true" size={18} /><div><strong>Marvel Rivals · {profile.displayName}</strong><span>Member-linked · {profile.rankName ?? "Unranked"}{profile.lastSyncedAt ? ` · Updated ${profile.lastSyncedAt.toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span></div><ExternalLink aria-hidden="true" size={14} /></Link>)}</div> : <div className="chronicle-empty"><p>No club profiles linked.</p><span>Join a Club Room to put your stats and callsign on its member board.</span></div>}

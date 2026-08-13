@@ -197,6 +197,17 @@ enum DiscordNotificationKind {
   LEGENDARY_ACHIEVEMENT
   WAKE_REQUEST
   WEEKLY_CHRONICLE
+  STREAM_WENT_LIVE
+}
+
+/// How a Discord streaming signal was observed. Discord presence is a hint that
+/// a member is broadcasting, never proof of what they are broadcasting, so it is
+/// recorded separately from the authoritative Twitch live state.
+enum DiscordStreamKind {
+  /// A "Streaming" presence activity, which carries a self-reported channel URL.
+  PRESENCE_ACTIVITY
+  /// Go Live screen sharing inside a Habitat voice channel.
+  VOICE_GO_LIVE
 }
 
 enum WakeRequestStatus {
@@ -264,6 +275,9 @@ model User {
   socialAccounts         UserSocialAccount[]
   unlockedRewards        UserAchievementReward[]
   steamLinkNonces        SteamLinkNonce[]
+  twitchLinkNonces       TwitchLinkNonce[]
+  twitchChannel          TwitchChannel?
+  discordStreamSignal    DiscordStreamSignal?
   xpEntries              UserXpEntry[]
   weeklyQuestProgress    UserWeeklyQuestProgress[]
   identityReconciliations IdentityRewardReconciliation[]
@@ -714,6 +728,7 @@ model UserSocialAccount {
   updatedAt         DateTime       @updatedAt
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   steamProfile      SteamProfile?
+  twitchChannel     TwitchChannel?
 
   @@unique([userId, platform])
   @@unique([platform, handle])
@@ -1012,6 +1027,120 @@ model ClubGameMatchHeroPerformance {
 
   @@unique([participantId, providerHeroId])
   @@index([providerHeroId])
+}
+
+/// A verified Twitch channel. Rows exist only for members who completed the
+/// Twitch OAuth flow, so a handle can never be typed in to impersonate a
+/// streamer. Live state here is authoritative: it comes from Twitch Helix.
+///
+/// Database-enforced in migration 20260813001500 and NOT expressible here:
+/// CHECK "TwitchChannel_offline_has_no_live_facts" keeps currentStreamId,
+/// currentViewerCount, and liveSince NULL whenever isLive is false, so an
+/// offline channel can never display a stale audience count.
+model TwitchChannel {
+  id                   String             @id @default(uuid()) @db.Uuid
+  socialAccountId      String             @unique @db.Uuid
+  userId               String             @unique @db.Uuid
+  twitchUserId         String             @unique @db.VarChar(40)
+  login                String             @db.VarChar(40)
+  displayName          String             @db.VarChar(80)
+  profileImageUrl      String?            @db.VarChar(500)
+  offlineImageUrl      String?            @db.VarChar(500)
+  broadcasterType      String?            @db.VarChar(20)
+  channelDescription   String?            @db.VarChar(500)
+  /// Appearing in the public showcase is an explicit, revocable choice that is
+  /// kept separate from verifying the account.
+  showcaseEnabled      Boolean            @default(false)
+  connectedAt          DateTime           @default(now())
+  isLive               Boolean            @default(false)
+  liveSince            DateTime?
+  currentStreamId      String?            @db.VarChar(40)
+  currentTitle         String?            @db.VarChar(200)
+  currentGameName      String?            @db.VarChar(120)
+  currentViewerCount   Int?
+  /// Twitch serves a templated thumbnail URL containing {width}/{height}.
+  thumbnailUrlTemplate String?            @db.VarChar(500)
+  lastLiveAt           DateTime?
+  followerCount        Int?
+  syncStatus           ProviderSyncStatus @default(PENDING)
+  syncError            String?            @db.VarChar(180)
+  lastSyncedAt         DateTime?
+  lastAttemptedAt      DateTime?
+  metadataNextAttemptAt DateTime?
+  consecutiveFailures  Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  socialAccount        UserSocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions             StreamSession[]
+
+  @@index([showcaseEnabled, isLive])
+  @@index([isLive, currentViewerCount])
+  @@index([showcaseEnabled, lastLiveAt])
+}
+
+/// One observed broadcast. Rows are opened when Twitch first reports a stream id
+/// live and closed when it stops appearing, so durations and peak viewers are
+/// only ever what was actually observed.
+///
+/// Database-enforced in migration 20260813001500 and NOT expressible here:
+/// CHECK "StreamSession_ends_after_start" and
+/// CHECK "StreamSession_peak_viewers_nonnegative".
+model StreamSession {
+  id               String        @id @default(uuid()) @db.Uuid
+  channelId        String        @db.Uuid
+  providerStreamId String        @db.VarChar(40)
+  title            String?       @db.VarChar(200)
+  gameName         String?       @db.VarChar(120)
+  startedAt        DateTime
+  endedAt          DateTime?
+  lastObservedAt   DateTime
+  peakViewerCount  Int?
+  observationCount Int           @default(1)
+  thumbnailUrl     String?       @db.VarChar(500)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  channel          TwitchChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, providerStreamId])
+  @@index([channelId, startedAt])
+  @@index([endedAt, startedAt])
+}
+
+/// A Discord-observed broadcasting hint for a member. Discord reports that a
+/// member is streaming and a self-reported URL; it never proves the destination,
+/// so this is displayed as a Discord signal and never as verified live state.
+model DiscordStreamSignal {
+  id             String            @id @default(uuid()) @db.Uuid
+  userId         String            @unique @db.Uuid
+  kind           DiscordStreamKind
+  streaming      Boolean           @default(false)
+  /// Self-reported by the member's Discord client; treated as untrusted text.
+  streamUrl      String?           @db.VarChar(300)
+  activityName   String?           @db.VarChar(120)
+  activityDetail String?           @db.VarChar(200)
+  guildId        String?           @db.VarChar(40)
+  channelId      String?           @db.VarChar(40)
+  channelName    String?           @db.VarChar(120)
+  startedAt      DateTime?
+  observedAt     DateTime
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([streaming, observedAt])
+}
+
+model TwitchLinkNonce {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  stateHash  String    @unique @db.VarChar(64)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
 }
 
 model SteamLinkNonce {

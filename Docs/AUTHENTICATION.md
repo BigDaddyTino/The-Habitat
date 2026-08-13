@@ -49,7 +49,21 @@ A verified Steam connection automatically attaches only unclaimed identities car
 
 The system keeps server observations even when nobody owns them yet. They can appear in rosters, server details, Chronicle entries, and leaderboards with explicit provisional/unclaimed labeling. They do not receive profile benefits or XP until an approved claim or verified Steam attachment establishes ownership.
 
-Entered Twitch, social, and gaming handles are profile metadata only. They are not evidence of account ownership, playtime, presence, or live status. Provider-authenticated live-presence integrations remain intentionally unimplemented.
+Entered Twitch, social, and gaming handles are profile metadata only. They are not evidence of account ownership, playtime, presence, or live status. A typed handle never places a channel on the streaming showcase; only the verified Twitch connection below can do that.
+
+## Twitch channel proof and the streaming showcase
+
+Members start the Twitch connection from their profile. The flow is OAuth 2.0 authorization code: `/api/twitch/connect` stores only the SHA-256 hash of a random 32-byte `state` in `TwitchLinkNonce` with a ten-minute expiry, and `/api/twitch/callback` exchanges the code, identifies the authorizing account through Helix `/helix/users`, then revokes the member token immediately. Habitat keeps no member Twitch token; all later polling uses an app access token that identifies Habitat rather than a member.
+
+The redirect URI is derived from `AUTH_URL` by a single shared helper used by both routes, so the authorize request and the code exchange are byte-identical. Twitch requires an exact registered match, so `https://<public origin>/api/twitch/callback` must be registered on the Twitch application.
+
+Nonce consumption happens inside the write transaction, guarded on the unconsumed and unexpired window, and the transaction aborts unless exactly one row was consumed. A replayed callback therefore writes nothing. A Twitch identity belongs to exactly one member: the callback refuses before writing if another member already holds that Twitch user id on a channel row or on a `UserSocialAccount`, or already holds that login as a handle.
+
+Verifying ownership is deliberately separate from being featured. `TwitchChannel.showcaseEnabled` defaults to false on first connect, is never altered by re-verifying, and changes only through the member's own showcase toggle. Disconnecting deletes the channel, its observed sessions, and the Twitch social account in one audited transaction.
+
+Live state on `/streams` comes only from the Twitch API, and only for verified, opted-in channels. A channel absent from the Helix streams response is offline; that absence is the authoritative signal. A database check constraint keeps the live columns NULL whenever a channel is not live, so an offline channel cannot display a stale audience count. When Twitch credentials are absent the showcase states that live status is unavailable rather than implying nobody is streaming.
+
+Discord streaming presence is a separate, weaker signal and is labeled as such. It requires the privileged `GUILD_PRESENCES` intent and stays off unless `HABITAT_DISCORD_PRESENCE=on`. Discord reports that a member is broadcasting plus a URL their own client supplied; that URL is untrusted text, so it becomes a link only when it resolves over HTTPS to that member's own verified channel, and is otherwise shown as an unverified destination that is not linked. Signals are cleared on bot startup and shutdown, because presence events fire only on change and a stale flag would otherwise read as "live" forever.
 
 ## Roles
 
