@@ -144,6 +144,7 @@ This is the implementation source of truth. Checked items are built and locally 
 
 - [x] Verified-data leaderboards for activity, exploration, and achievement points
 - [x] Member-customizable public profile cards, optional gaming/social handles, avatar presets, and controlled image uploads
+- [x] Private member profile command-center redesign with a cinematic identity header, anchored task navigation, grouped identity/world/connection/collection chapters, explicit provider privacy states, responsive mobile layouts, and reduced-motion support while preserving every existing profile control
 - [x] Cinematic public member roster with profile links, live portal status, verified hosted-world presence, member-only browser/device context, and member-driven invitation console
 - [x] Premium Admin Suite command deck with grouped navigation, live operational counts, recent audit signal, and responsive desktop/mobile presentation
 - [x] Whole-app Eastern-time ambience pass with sunrise, midday, sunset, and night palettes that coordinate the canvas, panels, typography, header, and lodge imagery while preserving readable contrast and visible sky-state identity across desktop and mobile
