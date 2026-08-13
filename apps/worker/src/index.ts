@@ -1,5 +1,6 @@
 import { HabitatAgentClient } from "./agent-client.js";
 import { loadWorkerConfiguration } from "./config.js";
+import { initialCycleLogState, nextCycleLog } from "./cycle-log.js";
 import { createPostgresMonitoringRepository, runMonitoringCycle } from "./monitoring.js";
 import { getPrismaClient } from "@habitat/db/client";
 import { startDiscordBot } from "./discord-bot.js";
@@ -30,6 +31,7 @@ async function main(): Promise<void> {
   let shuttingDown = false;
   let nextHistoryScanAt = 0;
   let nextProviderScanAt = 0;
+  let cycleLogState = initialCycleLogState;
 
   const dispatchCommands = async () => {
     const commands = await dispatchAuthorizedServerCommands(commandRepository, agent);
@@ -46,7 +48,11 @@ async function main(): Promise<void> {
       console.warn("Habitat Discord delivery failed. Monitoring remains available.");
       console.error("[worker] Discord delivery failed:", error instanceof Error ? error.message : String(error));
     }
-    console.info(`Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`);
+    // Folded rather than printed every 15 seconds: an unchanged cycle summary
+    // otherwise buries the lines that report real events.
+    const cycleLog = nextCycleLog(cycleLogState, `Habitat worker cycle: ${result.observed} observed, ${result.unknown} unknown, ${result.ignored} ignored, agent ${result.agentAvailable ? "available" : "unavailable"}.`, Date.now());
+    cycleLogState = cycleLog.state;
+    if (cycleLog.message) console.info(cycleLog.message);
     if (notifications?.enabled && (notifications.sent > 0 || notifications.failed > 0)) console.info(`Habitat Discord delivery: ${notifications.sent} sent, ${notifications.failed} failed.`);
     if (identityRewards > 0) console.info(`Habitat identity rewards: ${identityRewards} claimed identity histories reconciled.`);
     if (Date.now() >= nextProviderScanAt) {

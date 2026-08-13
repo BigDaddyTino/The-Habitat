@@ -23,7 +23,9 @@ $env:Path = "C:\Program Files\nodejs;$env:Path"
 Get-Service HabitatWeb
 ```
 
-The installer copies the existing `HabitatWorker.exe` WinSW wrapper to the ignored local `HabitatWeb.exe` when needed, creates the ignored `HabitatWeb.xml` with the resolved repository working directory, configures automatic startup, and writes local service logs to `web-logs`.
+The installer copies the existing `HabitatWorker.exe` WinSW wrapper to the ignored local `HabitatWeb.exe` when needed, creates the ignored `HabitatWeb.xml` with the resolved repository working directory, configures automatic startup, and writes local service logs to `<repository>\web-logs`.
+
+The template's `<logpath>` is deliberately absolute, built from `{{INSTALL_ROOT}}`. WinSW resolves a *relative* `logpath` against the service process's working directory, which is `C:\Windows\System32` for a LocalSystem service, so a relative value silently writes `HabitatWeb.out.log` and `HabitatWeb.err.log` into `C:\Windows\System32\web-logs` while only the wrapper log lands beside the executable. WinSW's `<sizeThreshold>` is in kilobytes, so the intended 10 MB is `10240`.
 
 ## Verify
 

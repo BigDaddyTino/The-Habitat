@@ -52,7 +52,13 @@ Set-Location "<repository>"
 .\apps\worker\scripts\install-worker.ps1 -InstallRoot (Get-Location)
 ```
 
-The service reads the persistent root `.env` automatically. It has no inbound firewall rule or listening port. Its logs are local-only in `worker-logs`.
+The service reads the persistent root `.env` automatically. It has no inbound firewall rule or listening port. Its logs are local-only in `<repository>\worker-logs`: `HabitatWorker.out.log` holds application output, `HabitatWorker.err.log` holds errors, and `HabitatWorker.wrapper.log` holds WinSW's own service log. Rotation is size and date based, rolling at 10 MB and keeping 14 files.
+
+The `<logpath>` in the service template is deliberately absolute, built from `{{INSTALL_ROOT}}`. WinSW resolves a *relative* `logpath` against the service process's working directory, which is `C:\Windows\System32` for a LocalSystem service. A relative value therefore writes `HabitatWorker.out.log` and `HabitatWorker.err.log` into `C:\Windows\System32\worker-logs` while only the wrapper log lands beside the executable, which reads exactly like "the application produces no logs". If application output ever appears to vanish, check that path before suspecting the log mode: the log mode is not the usual cause.
+
+Note also that WinSW's `<sizeThreshold>` is expressed in **kilobytes**, so the intended 10 MB is `10240`, not `10485760`.
+
+The per-cycle summary line is folded rather than printed every 15 seconds. A line is written when the summary changes, on the first cycle after a restart, and on a 30-minute heartbeat; the count of identical cycles folded since the previous line is reported on that line, so nothing is hidden. A state change — an agent going unavailable, a world count moving — is therefore always logged the moment it happens, and steady-state operation stays quiet enough to read.
 
 To remove it without deleting the local configuration or logs:
 
