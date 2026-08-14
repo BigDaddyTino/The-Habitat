@@ -3,6 +3,7 @@ import { collectibleVisuals } from "./collectible-art";
 export type SeasonRuleType = "PLAY_SECONDS" | "JOIN_COUNT" | "DISTINCT_GAME_COUNT" | "BOSS_KILL_COUNT";
 export type SeasonQuestScope = "PERSONAL" | "TEAM";
 export type SeasonStatus = "UPCOMING" | "ACTIVE" | "COMPLETED";
+export type SeasonClockState = { status: SeasonStatus; isEnabled: boolean; startsAt: Date; endsAt: Date };
 
 export const seasonRuleTypes: SeasonRuleType[] = ["PLAY_SECONDS", "JOIN_COUNT", "DISTINCT_GAME_COUNT", "BOSS_KILL_COUNT"];
 
@@ -34,13 +35,24 @@ export function seasonContentEditability(status: SeasonStatus): SeasonContentEdi
   return { structural: true, measurable: true, presentation: true, reason: "This season has not started, so its content is fully editable." };
 }
 
+/// The worker persists status on its cadence, but authorization cannot leave an
+/// edit window open between the scheduled instant and the next worker pass.
+export function effectiveSeasonStatus(season: SeasonClockState, now = new Date()): SeasonStatus {
+  if (season.status === "COMPLETED") return "COMPLETED";
+  // Disabled drafts are inert even if their provisional dates have passed.
+  if (!season.isEnabled) return season.status;
+  if (now >= season.endsAt) return "COMPLETED";
+  if (now >= season.startsAt) return "ACTIVE";
+  return "UPCOMING";
+}
+
 export type SeasonGoalDraft = { ruleType: SeasonRuleType; gameType: string | null; threshold: number; scope?: SeasonQuestScope };
 
 /// Rejects goals the reconciler could never satisfy. These are not style notes:
 /// each one is a target that would sit at zero, or below its threshold, forever.
 export function seasonGoalProblems(goal: SeasonGoalDraft): string[] {
   const problems: string[] = [];
-  if (goal.ruleType === "DISTINCT_GAME_COUNT" && goal.gameType) {
+  if (goal.ruleType === "DISTINCT_GAME_COUNT" && goal.gameType && goal.threshold > 1) {
     problems.push("A distinct-game goal restricted to one game can only ever reach 1. Remove the game restriction or choose another rule.");
   }
   if (goal.ruleType === "DISTINCT_GAME_COUNT" && goal.threshold > 6) {
@@ -79,4 +91,14 @@ export function playSecondsFromHours(hours: number): number {
 
 export function hoursFromPlaySeconds(seconds: number): number {
   return Math.round((seconds / 3_600) * 100) / 100;
+}
+
+/// Builder inputs use hours for playtime and whole counts for every other rule.
+/// The worker and database continue to use seconds, so no stored contract moves.
+export function seasonThresholdInputValue(ruleType: SeasonRuleType, threshold: number): number {
+  return ruleType === "PLAY_SECONDS" ? hoursFromPlaySeconds(threshold) : threshold;
+}
+
+export function normalizeSeasonThreshold(ruleType: SeasonRuleType, input: number): number {
+  return ruleType === "PLAY_SECONDS" ? playSecondsFromHours(input) : Math.round(input);
 }

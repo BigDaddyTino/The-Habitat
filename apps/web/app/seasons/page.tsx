@@ -32,7 +32,7 @@ export default async function SeasonsPage({ searchParams }: { searchParams: Prom
   const now = new Date();
   const [current, archive] = await Promise.all([
     db.season.findFirst({
-      where: { isEnabled: true, status: { in: ["ACTIVE", "UPCOMING"] } }, orderBy: { startsAt: "asc" },
+      where: { isEnabled: true, status: { in: ["ACTIVE", "UPCOMING"] }, endsAt: { gt: now } }, orderBy: { startsAt: "asc" },
       include: { _count: { select: { memberships: true } }, quests: { where: { enabled: true }, include: { teamProgress: true }, orderBy: { sortOrder: "asc" } }, expeditions: { orderBy: { sortOrder: "asc" } } },
     }),
     db.season.findMany({ where: { isEnabled: true, status: "COMPLETED" }, orderBy: { endsAt: "desc" }, take: 8, include: { chronicle: { select: { id: true } }, _count: { select: { memberships: true } } } }),

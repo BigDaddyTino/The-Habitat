@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { AlertTriangle, ChevronLeft, Compass, Info, Palette, Pencil, Plus, Target, Trash2, Trophy, Users } from "lucide-react";
 import { getPrismaClient } from "@habitat/db/client";
 import { requireRole } from "@/lib/authorization";
-import { hoursFromPlaySeconds, seasonContentEditability, seasonGoalProblems, seasonGoalWarnings, seasonRuleCopy, seasonRuleTypes, trophyArtwork, type SeasonRuleType } from "@/lib/season-content";
+import { CollectibleCanvas } from "@/components/collectible-canvas";
+import { SeasonBuilderSubmit, SeasonGoalFields } from "@/components/season-builder-controls";
+import { effectiveSeasonStatus, seasonContentEditability, seasonGoalProblems, seasonGoalWarnings, seasonRuleCopy, trophyArtwork, type SeasonRuleType } from "@/lib/season-content";
 import { createSeasonExpedition, createSeasonQuest, removeSeasonExpedition, removeSeasonQuest, removeSeasonTrophy, updateSeasonExpedition, updateSeasonQuest, upsertSeasonTrophy } from "../content-actions";
 
 export const dynamic = "force-dynamic";
@@ -18,14 +20,6 @@ const games = [
   { value: "VALHEIM", label: "Valheim" },
 ];
 const rarities = ["COMMON", "UNCOMMON", "RARE", "EPIC", "LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"];
-
-function RuleOptions() {
-  return <>{seasonRuleTypes.map((rule) => <option key={rule} value={rule}>{seasonRuleCopy[rule].label} ({seasonRuleCopy[rule].unit})</option>)}</>;
-}
-
-function ThresholdHint({ ruleType, threshold }: { ruleType: SeasonRuleType; threshold: number }) {
-  return <small>{seasonRuleCopy[ruleType].measures}{ruleType === "PLAY_SECONDS" ? ` Currently ${hoursFromPlaySeconds(threshold).toLocaleString()} hours.` : ""}</small>;
-}
 
 function GoalNotes({ ruleType, gameType, threshold }: { ruleType: SeasonRuleType; gameType: string | null; threshold: number }) {
   const notes = [...seasonGoalProblems({ ruleType, gameType, threshold }), ...seasonGoalWarnings({ ruleType, gameType, threshold })];
@@ -47,23 +41,43 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
   });
   if (!season) notFound();
 
-  const editability = seasonContentEditability(season.status);
+  const effectiveStatus = effectiveSeasonStatus(season);
+  const editability = seasonContentEditability(effectiveStatus);
   const nextQuestOrder = season.quests.reduce((highest, quest) => Math.max(highest, quest.sortOrder + 1), 0);
   const nextExpeditionOrder = season.expeditions.reduce((highest, expedition) => Math.max(highest, expedition.sortOrder + 1), 0);
   const commemorative = season.trophies.find((trophy) => trophy.kind === "COMMEMORATIVE") ?? null;
   const founding = season.trophies.find((trophy) => trophy.kind === "FOUNDING_MEMBER") ?? null;
+  const personalQuestCount = season.quests.filter((quest) => quest.scope === "PERSONAL").length;
+  const teamQuestCount = season.quests.length - personalQuestCount;
+  const expeditionGameCount = new Set(season.expeditions.map((expedition) => expedition.gameType)).size;
+  const expectedTrophies = season.ordinal === 1 ? 2 : 1;
+  const readySteps = [season.quests.length > 0, season.expeditions.length > 0, Boolean(commemorative), season.ordinal !== 1 || Boolean(founding)];
+  const readyCount = readySteps.filter(Boolean).length;
 
   return <section className="page-shell season-build">
     <Link className="season-build-back" href="/admin/seasons"><ChevronLeft aria-hidden="true" size={15} /> All seasons</Link>
-    <div className="page-intro">
-      <p className="eyebrow">Season {String(season.ordinal).padStart(2, "0")} · {season.theme} · {season.isEnabled ? season.status : "DISABLED"}</p>
-      <h1>{season.name}</h1>
-      <p>{season.description}</p>
+    <div className="season-build-hero">
+      <div className="page-intro">
+        <p className="eyebrow">Season {String(season.ordinal).padStart(2, "0")} · {season.theme} · {season.isEnabled ? effectiveStatus : "DISABLED"}</p>
+        <h1>{season.name}</h1>
+        <p>{season.description}</p>
+      </div>
+      <div aria-label={`${readyCount} of ${readySteps.length} builder checks complete`} className="season-build-readiness">
+        <span>Builder readiness</span><strong>{readyCount}<i>/{readySteps.length}</i></strong>
+        <div>{readySteps.map((ready, index) => <i className={ready ? "ready" : ""} key={index} />)}</div>
+        <small>{readyCount === readySteps.length ? "The full season package is configured." : "Finish the unlit stations before launch."}</small>
+      </div>
     </div>
 
     <p className={`season-build-editability ${editability.structural ? "open" : "locked"}`}><Info aria-hidden="true" size={15} /><span>{editability.reason}</span></p>
 
-    <div className="season-build-heading"><div><p className="eyebrow">Personal and team goals</p><h2>Quests</h2></div><span><Target aria-hidden="true" size={14} /> {season.quests.length} configured</span></div>
+    <nav aria-label="Season builder sections" className="season-build-nav">
+      <a href="#quests"><Target aria-hidden="true" size={14} /><span>Quests</span><strong>{personalQuestCount} personal · {teamQuestCount} team</strong></a>
+      <a href="#expeditions"><Compass aria-hidden="true" size={14} /><span>Expeditions</span><strong>{season.expeditions.length} routes · {expeditionGameCount} games</strong></a>
+      <a href="#trophies"><Trophy aria-hidden="true" size={14} /><span>Trophies</span><strong>{season.trophies.length} / {expectedTrophies} configured</strong></a>
+    </nav>
+
+    <div className="season-build-heading" id="quests"><div><p className="eyebrow">Personal and team goals</p><h2>Quests</h2></div><span><Target aria-hidden="true" size={14} /> {season.quests.length} configured</span></div>
     {season.quests.length === 0 ? <p className="season-build-empty">No quests yet. A season with no quests scores raw verified playtime only.</p> : <div className="season-build-list">
       {season.quests.map((quest) => <details key={quest.id}>
         <summary>
@@ -80,9 +94,7 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
           <label className="field-wide">Name<input defaultValue={quest.name} maxLength={100} minLength={3} name="name" required /></label>
           <label className="field-wide">Description<textarea defaultValue={quest.description} maxLength={240} minLength={10} name="description" required rows={2} /></label>
           <label>Scope<select defaultValue={quest.scope} disabled={!editability.measurable} name="scope"><option value="PERSONAL">Personal — each member separately</option><option value="TEAM">Team — the whole roster together</option></select></label>
-          <label>Rule<select defaultValue={quest.ruleType} disabled={!editability.measurable} name="ruleType"><RuleOptions /></select></label>
-          <label>Game<select defaultValue={quest.gameType ?? "ANY"} disabled={!editability.measurable} name="gameType"><option value="ANY">Any Habitat game</option>{games.map((game) => <option key={game.value} value={game.value}>{game.label}</option>)}</select></label>
-          <label>Threshold<input defaultValue={quest.threshold} min={1} name="threshold" required type="number" /><ThresholdHint ruleType={quest.ruleType as SeasonRuleType} threshold={quest.threshold} /></label>
+          <SeasonGoalFields defaultGame={quest.gameType} defaultRule={quest.ruleType as SeasonRuleType} defaultThreshold={quest.threshold} games={games} measurementLocked={!editability.measurable} />
           <label>Season XP reward<input defaultValue={quest.xpReward} disabled={!editability.measurable} min={1} name="xpReward" required type="number" /></label>
           <label>Order<input defaultValue={quest.sortOrder} min={0} name="sortOrder" required type="number" /></label>
           <label>Availability<select defaultValue={String(quest.enabled)} name="enabled"><option value="true">Live on the board</option><option value="false">Off — hidden and not reconciled</option></select></label>
@@ -92,9 +104,9 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
             <input name="gameType" type="hidden" value={quest.gameType ?? "ANY"} />
             <input name="xpReward" type="hidden" value={quest.xpReward} />
           </> : null}
-          <footer><button className="save-server" type="submit"><Pencil aria-hidden="true" size={14} /> Save quest</button></footer>
+          <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Saving quest…"><Pencil aria-hidden="true" size={14} /> Save quest</SeasonBuilderSubmit></footer>
         </form>
-        {editability.structural ? <form action={removeSeasonQuest} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={quest.id} /><button type="submit"><Trash2 aria-hidden="true" size={13} /> Remove this quest</button></form> : null}
+        {editability.structural ? <form action={removeSeasonQuest} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={quest.id} /><SeasonBuilderSubmit pendingLabel="Removing quest…"><Trash2 aria-hidden="true" size={13} /> Remove this quest</SeasonBuilderSubmit></form> : null}
       </details>)}
     </div>}
 
@@ -104,15 +116,13 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
       <label className="field-wide">Name<input maxLength={100} minLength={3} name="name" placeholder="Field Hours" required /></label>
       <label className="field-wide">Description<textarea maxLength={240} minLength={10} name="description" placeholder="Bank ten hours of verified play across the season." required rows={2} /></label>
       <label>Scope<select defaultValue="PERSONAL" name="scope"><option value="PERSONAL">Personal — each member separately</option><option value="TEAM">Team — the whole roster together</option></select></label>
-      <label>Rule<select defaultValue="PLAY_SECONDS" name="ruleType"><RuleOptions /></select></label>
-      <label>Game<select defaultValue="ANY" name="gameType"><option value="ANY">Any Habitat game</option>{games.map((game) => <option key={game.value} value={game.value}>{game.label}</option>)}</select></label>
-      <label>Threshold<input defaultValue={36_000} min={1} name="threshold" required type="number" /><small>Playtime is in seconds: 36,000 is ten hours.</small></label>
+      <SeasonGoalFields defaultGame={null} defaultRule="PLAY_SECONDS" defaultThreshold={36_000} games={games} />
       <label>Season XP reward<input defaultValue={300} min={1} name="xpReward" required type="number" /></label>
       <label>Order<input defaultValue={nextQuestOrder} min={0} name="sortOrder" required type="number" /></label>
-      <footer><button className="save-server" type="submit"><Plus aria-hidden="true" size={14} /> Add quest</button></footer>
+      <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Adding quest…"><Plus aria-hidden="true" size={14} /> Add quest</SeasonBuilderSubmit></footer>
     </form> : null}
 
-    <div className="season-build-heading"><div><p className="eyebrow">Per-game cooperative routes</p><h2>Expeditions</h2></div><span><Compass aria-hidden="true" size={14} /> {season.expeditions.length} configured</span></div>
+    <div className="season-build-heading" id="expeditions"><div><p className="eyebrow">Per-game cooperative routes</p><h2>Expeditions</h2></div><span><Compass aria-hidden="true" size={14} /> {season.expeditions.length} configured</span></div>
     {season.expeditions.length === 0 ? <p className="season-build-empty">No expeditions yet. Expeditions are whole-roster goals tied to one game.</p> : <div className="season-build-list">
       {season.expeditions.map((expedition) => <details key={expedition.id}>
         <summary>
@@ -128,14 +138,12 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
           <input name="id" type="hidden" value={expedition.id} />
           <label className="field-wide">Name<input defaultValue={expedition.name} maxLength={100} minLength={3} name="name" required /></label>
           <label className="field-wide">Description<textarea defaultValue={expedition.description} maxLength={240} minLength={10} name="description" required rows={2} /></label>
-          <label>Game<select defaultValue={expedition.gameType} disabled={!editability.measurable} name="gameType">{games.map((game) => <option key={game.value} value={game.value}>{game.label}</option>)}</select></label>
-          <label>Rule<select defaultValue={expedition.ruleType} disabled={!editability.measurable} name="ruleType"><RuleOptions /></select></label>
-          <label>Threshold<input defaultValue={expedition.threshold} min={1} name="threshold" required type="number" /><ThresholdHint ruleType={expedition.ruleType as SeasonRuleType} threshold={expedition.threshold} /></label>
+          <SeasonGoalFields defaultGame={expedition.gameType} defaultRule={expedition.ruleType as SeasonRuleType} defaultThreshold={expedition.threshold} gameRequired games={games} measurementLocked={!editability.measurable} />
           <label>Order<input defaultValue={expedition.sortOrder} min={0} name="sortOrder" required type="number" /></label>
           {!editability.measurable ? <><input name="gameType" type="hidden" value={expedition.gameType} /><input name="ruleType" type="hidden" value={expedition.ruleType} /></> : null}
-          <footer><button className="save-server" type="submit"><Pencil aria-hidden="true" size={14} /> Save expedition</button></footer>
+          <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Saving expedition…"><Pencil aria-hidden="true" size={14} /> Save expedition</SeasonBuilderSubmit></footer>
         </form>
-        {editability.structural ? <form action={removeSeasonExpedition} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={expedition.id} /><button type="submit"><Trash2 aria-hidden="true" size={13} /> Remove this expedition</button></form> : null}
+        {editability.structural ? <form action={removeSeasonExpedition} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={expedition.id} /><SeasonBuilderSubmit pendingLabel="Removing expedition…"><Trash2 aria-hidden="true" size={13} /> Remove this expedition</SeasonBuilderSubmit></form> : null}
       </details>)}
     </div>}
 
@@ -144,14 +152,12 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
       <input name="seasonId" type="hidden" value={season.id} />
       <label className="field-wide">Name<input maxLength={100} minLength={3} name="name" placeholder="Navezgane Night Watch" required /></label>
       <label className="field-wide">Description<textarea maxLength={240} minLength={10} name="description" placeholder="Make thirty verified community visits to the blood-moon country." required rows={2} /></label>
-      <label>Game<select defaultValue="SEVEN_DAYS_TO_DIE" name="gameType">{games.map((game) => <option key={game.value} value={game.value}>{game.label}</option>)}</select></label>
-      <label>Rule<select defaultValue="JOIN_COUNT" name="ruleType"><RuleOptions /></select></label>
-      <label>Threshold<input defaultValue={30} min={1} name="threshold" required type="number" /></label>
+      <SeasonGoalFields defaultGame="SEVEN_DAYS_TO_DIE" defaultRule="JOIN_COUNT" defaultThreshold={30} gameRequired games={games} />
       <label>Order<input defaultValue={nextExpeditionOrder} min={0} name="sortOrder" required type="number" /></label>
-      <footer><button className="save-server" type="submit"><Plus aria-hidden="true" size={14} /> Add expedition</button></footer>
+      <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Adding expedition…"><Plus aria-hidden="true" size={14} /> Add expedition</SeasonBuilderSubmit></footer>
     </form> : null}
 
-    <div className="season-build-heading"><div><p className="eyebrow">Permanent cabinet pieces</p><h2>Trophies</h2></div><span><Trophy aria-hidden="true" size={14} /> {season.trophies.length} of 2</span></div>
+    <div className="season-build-heading" id="trophies"><div><p className="eyebrow">Permanent cabinet pieces</p><h2>Trophies</h2></div><span><Trophy aria-hidden="true" size={14} /> {season.trophies.length} of {expectedTrophies}</span></div>
     <p className="season-build-empty">A season awards at most one commemorative piece and, in season 1 only, the founding reward. Both go to members who bank {season.trophyXpRequirement.toLocaleString()} season XP.</p>
     <div className="season-build-trophies">
       {([{ kind: "COMMEMORATIVE" as const, trophy: commemorative, title: "Commemorative", note: "Awarded to every qualifying member when the season closes." },
@@ -161,6 +167,7 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
           const configurable = kind === "COMMEMORATIVE" || season.ordinal === 1;
           return <article className={trophy ? `rarity-${trophy.rarity.toLowerCase().replaceAll("_", "-")}` : ""} key={kind}>
             <header><div><p className="eyebrow">{title}</p><h3>{trophy?.name ?? "Not configured"}</h3></div><Trophy aria-hidden="true" size={18} /></header>
+            {trophy ? <div className="season-build-trophy-preview"><CollectibleCanvas interactive item={{ code: trophy.code, name: trophy.name, kind: "TROPHY", rarity: trophy.rarity, achievementName: `Season ${season.ordinal} · ${season.name}` }} /></div> : <div className="season-build-trophy-missing"><Trophy aria-hidden="true" size={24} /><span>Awaiting a permanent shelf piece</span></div>}
             <p>{trophy?.description ?? note}</p>
             {artwork ? <p className={`season-build-artwork ${artwork.authored ? "authored" : ""}`}><Palette aria-hidden="true" size={13} /><span>{artwork.note}</span></p> : null}
             {trophy ? <p className="season-build-meta-line">{trophy._count.unlocks} member{trophy._count.unlocks === 1 ? "" : "s"} hold this piece · code <code>{trophy.code}</code></p> : null}
@@ -173,9 +180,9 @@ export default async function AdminSeasonBuilderPage({ params }: { params: Promi
                 <label className="field-wide">Description<textarea defaultValue={trophy?.description ?? ""} maxLength={180} minLength={10} name="description" required rows={2} /></label>
                 <label className="field-wide">Artwork code<input defaultValue={trophy?.code ?? ""} maxLength={64} minLength={3} name="code" pattern="[a-z0-9-]+" required /><small>Lowercase, numbers, and hyphens. Codes with authored 3D artwork render as their own piece; anything else uses the generic trophy form.</small></label>
                 <label>Rarity<select defaultValue={trophy?.rarity ?? "LEGENDARY"} name="rarity">{rarities.map((value) => <option key={value} value={value}>{value.replaceAll("_", " ")}</option>)}</select></label>
-                <footer><button className="save-server" type="submit"><Trophy aria-hidden="true" size={14} /> Save trophy</button></footer>
+                <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Saving trophy…"><Trophy aria-hidden="true" size={14} /> Save trophy</SeasonBuilderSubmit></footer>
               </form>
-              {trophy && editability.structural && trophy._count.unlocks === 0 ? <form action={removeSeasonTrophy} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={trophy.id} /><button type="submit"><Trash2 aria-hidden="true" size={13} /> Remove this trophy</button></form> : null}
+              {trophy && editability.structural && trophy._count.unlocks === 0 ? <form action={removeSeasonTrophy} className="season-build-remove"><input name="seasonId" type="hidden" value={season.id} /><input name="id" type="hidden" value={trophy.id} /><SeasonBuilderSubmit pendingLabel="Removing trophy…"><Trash2 aria-hidden="true" size={13} /> Remove this trophy</SeasonBuilderSubmit></form> : null}
             </details> : null}
           </article>;
         })}

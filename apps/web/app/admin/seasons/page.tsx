@@ -3,6 +3,8 @@ import { AlertTriangle, CalendarClock, CheckCircle2, Compass, Hammer, Pencil, Pl
 import { getPrismaClient } from "@habitat/db/client";
 import { seasonEndFor } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
+import { SeasonBuilderSubmit } from "@/components/season-builder-controls";
+import { effectiveSeasonStatus } from "@/lib/season-content";
 import { seasonLaunchReadiness } from "@/lib/season-launch";
 import { launchSeason, scheduleSeason, updateSeasonSettings } from "./actions";
 import { createSeason } from "./content-actions";
@@ -19,11 +21,13 @@ function isoDate(value: Date) {
 export default async function AdminSeasonsPage() {
   await requireRole("ADMIN");
   const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
   const seasons = await db.season.findMany({
     orderBy: { ordinal: "asc" },
     include: { _count: { select: { memberships: true, quests: true, expeditions: true, trophies: true, xpEntries: true } } },
   });
-  const running = seasons.find((season) => season.isEnabled && season.status === "ACTIVE" && season.endsAt > now) ?? null;
+  const running = seasons.find((season) => effectiveSeasonStatus(season, now) === "ACTIVE") ?? null;
 
   return <section className="page-shell">
     <div className="page-intro"><p className="eyebrow">Habitat administration</p><h1>Seasons</h1><p>Launch, reschedule, and tune the optional three-month goal layer. Nothing here touches lifetime XP, levels, achievements, titles, records, or any trophy already earned.</p></div>
@@ -38,22 +42,23 @@ export default async function AdminSeasonsPage() {
       <label>Opens on (UTC)<input defaultValue={isoDate(seasonEndFor(now))} name="startsOn" required type="date" /></label>
       <label>Community XP goal<input defaultValue={12_000} min={1} name="communityXpGoal" required step={100} type="number" /></label>
       <label>Trophy XP requirement<input defaultValue={1_500} min={0} name="trophyXpRequirement" required step={100} type="number" /></label>
-      <footer><button className="save-server" type="submit"><Plus aria-hidden="true" size={15} /> Create season</button></footer>
+      <footer><SeasonBuilderSubmit className="save-server" pendingLabel="Creating season…"><Plus aria-hidden="true" size={15} /> Create season</SeasonBuilderSubmit></footer>
     </form>
 
     {running ? <div className="season-admin-running"><CheckCircle2 aria-hidden="true" size={17} /><div><strong>{running.name} is running.</strong><span>Closes {running.endsAt.toLocaleDateString("en-US", dateOptions)}. The worker reconciles verified activity and closes the season on its own; only one season runs at a time.</span></div><Link href="/seasons">View the board</Link></div> : null}
 
     {seasons.map((season) => {
-      const readiness = seasonLaunchReadiness({ status: season.status, trophyCount: season._count.trophies, questCount: season._count.quests, expeditionCount: season._count.expeditions, xpEntryCount: season._count.xpEntries });
+      const effectiveStatus = effectiveSeasonStatus(season, now);
+      const readiness = seasonLaunchReadiness({ status: effectiveStatus, trophyCount: season._count.trophies, questCount: season._count.quests, expeditionCount: season._count.expeditions, xpEntryCount: season._count.xpEntries });
       // Only the reasons an administrator can still act on are worth showing; a
       // running or closed season is already labelled by its own state chip.
-      const notices = [...readiness.blockers.filter(() => season.status === "UPCOMING"), ...readiness.warnings];
+      const notices = [...readiness.blockers.filter(() => effectiveStatus === "UPCOMING"), ...readiness.warnings];
       const projectedEnd = seasonEndFor(now);
 
-      return <article className={`season-admin-card status-${season.status.toLowerCase()}`} key={season.id}>
+      return <article className={`season-admin-card status-${effectiveStatus.toLowerCase()}`} key={season.id}>
         <header>
           <div><p className="eyebrow">Season {String(season.ordinal).padStart(2, "0")} · {season.theme}</p><h2><Link href={`/admin/seasons/${season.slug}`}>{season.name}</Link></h2></div>
-          <span className={`season-admin-state ${season.status.toLowerCase()}`}>{season.isEnabled ? season.status : "DISABLED"}</span>
+          <span className={`season-admin-state ${effectiveStatus.toLowerCase()}`}>{season.isEnabled ? effectiveStatus : "DISABLED"}</span>
         </header>
         <p className="season-admin-window"><CalendarClock aria-hidden="true" size={14} /> {season.startsAt.toLocaleDateString("en-US", dateOptions)} — {season.endsAt.toLocaleDateString("en-US", dateOptions)}{season.completedAt ? <> · closed {season.completedAt.toLocaleDateString("en-US", dateOptions)}</> : null}</p>
         <dl className="season-admin-counts">
@@ -68,21 +73,21 @@ export default async function AdminSeasonsPage() {
 
         <Link className="season-admin-build-link" href={`/admin/seasons/${season.slug}`}><Hammer aria-hidden="true" size={14} /> Build quests, expeditions, and trophies</Link>
 
-        {season.status === "UPCOMING" ? <div className="season-admin-actions">
+        {effectiveStatus === "UPCOMING" ? <div className="season-admin-actions">
           <form action={launchSeason}>
             <input name="seasonId" type="hidden" value={season.id} />
             <div><strong>Launch now</strong><small>Opens the window at the moment you press this, closing {projectedEnd.toLocaleDateString("en-US", dateOptions)}. Activity recorded before the launch is not credited.</small></div>
-            <button className="save-server" disabled={!readiness.launchable || Boolean(running)} type="submit"><Rocket aria-hidden="true" size={15} /> Launch {season.name}</button>
+            <SeasonBuilderSubmit className="save-server" disabled={!readiness.launchable || Boolean(running)} pendingLabel="Launching season…"><Rocket aria-hidden="true" size={15} /> Launch {season.name}</SeasonBuilderSubmit>
           </form>
           <form action={scheduleSeason}>
             <input name="seasonId" type="hidden" value={season.id} />
-            <div><strong>Or schedule a start</strong><small>The close date is always exactly three calendar months later, matching the database constraint.</small></div>
-            <label>Opens on (UTC)<input defaultValue={isoDate(season.startsAt)} name="startsOn" required type="date" /></label>
-            <button className="save-server" disabled={!readiness.launchable} type="submit"><CalendarClock aria-hidden="true" size={15} /> Reschedule</button>
+            <div><strong>Or schedule and publish</strong><small>The season becomes visible as upcoming and opens automatically on this date. Its close is exactly three calendar months later.</small></div>
+            <label>Opens on (UTC)<input defaultValue={isoDate(season.startsAt > tomorrow ? season.startsAt : tomorrow)} min={isoDate(tomorrow)} name="startsOn" required type="date" /></label>
+            <SeasonBuilderSubmit className="save-server" disabled={!readiness.launchable} pendingLabel="Scheduling season…"><CalendarClock aria-hidden="true" size={15} /> Reschedule</SeasonBuilderSubmit>
           </form>
         </div> : null}
 
-        {season.status === "COMPLETED"
+        {effectiveStatus === "COMPLETED"
           ? <p className="season-admin-frozen"><Trophy aria-hidden="true" size={14} /> Closed and chronicled. A published season keeps the goals it was judged against. <Link href={`/seasons/${season.slug}/chronicle`}>Open the chronicle</Link></p>
           : <details className="season-admin-editor">
               <summary><Pencil aria-hidden="true" size={14} /> Edit goals and presentation</summary>
@@ -93,8 +98,9 @@ export default async function AdminSeasonsPage() {
                 <label className="field-wide">Description<textarea defaultValue={season.description} maxLength={400} minLength={10} name="description" required rows={3} /></label>
                 <label>Community XP goal<input defaultValue={season.communityXpGoal} min={1} name="communityXpGoal" required step={100} type="number" /></label>
                 <label>Trophy XP requirement<input defaultValue={season.trophyXpRequirement} min={0} name="trophyXpRequirement" required step={100} type="number" /><small>Season XP a member must bank to receive the shelf. Zero awards every enrolled member.</small></label>
-                <label>Availability<select defaultValue={String(season.isEnabled)} name="isEnabled"><option value="true">Enabled — visible and reconciled</option><option value="false">Disabled — hidden, and the worker leaves it alone</option></select></label>
-                <button className="save-server" type="submit"><Pencil aria-hidden="true" size={15} /> Save season</button>
+                <label>Availability<select defaultValue={String(season.isEnabled)} disabled={effectiveStatus === "ACTIVE"} name="isEnabled"><option disabled={!season.isEnabled && season.startsAt <= now} value="true">Enabled — visible and reconciled</option><option value="false">Disabled — hidden, and the worker leaves it alone</option></select><small>{effectiveStatus === "ACTIVE" ? "A running season stays enabled until the worker closes and chronicles it." : !season.isEnabled && season.startsAt <= now ? "Its draft date has passed. Use Schedule or Launch now before enabling it." : "Drafts may stay hidden until their full package is ready."}</small></label>
+                {effectiveStatus === "ACTIVE" ? <input name="isEnabled" type="hidden" value="true" /> : null}
+                <SeasonBuilderSubmit className="save-server" pendingLabel="Saving season…"><Pencil aria-hidden="true" size={15} /> Save season</SeasonBuilderSubmit>
               </form>
             </details>}
       </article>;

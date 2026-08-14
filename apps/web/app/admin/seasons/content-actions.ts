@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { seasonEndFor } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
-import { seasonContentEditability, seasonGoalProblems, seasonSlugFrom } from "@/lib/season-content";
+import { effectiveSeasonStatus, seasonContentEditability, seasonGoalProblems, seasonSlugFrom } from "@/lib/season-content";
 
 const db = getPrismaClient();
 
@@ -63,11 +63,12 @@ function seasonPaths(slug?: string) {
 /// Content edits are permitted by the season's own state, re-read inside the
 /// transaction so a stale form cannot slip past the rules the page rendered.
 async function requireEditable(transaction: Prisma.TransactionClient, seasonId: string, level: "structural" | "measurable" | "presentation") {
-  const season = await transaction.season.findUnique({ where: { id: seasonId }, select: { id: true, slug: true, ordinal: true, status: true } });
+  const season = await transaction.season.findUnique({ where: { id: seasonId }, select: { id: true, slug: true, ordinal: true, status: true, isEnabled: true, startsAt: true, endsAt: true } });
   if (!season) throw new Error("That season no longer exists.");
-  const editability = seasonContentEditability(season.status);
+  const status = effectiveSeasonStatus(season);
+  const editability = seasonContentEditability(status);
   if (!editability[level]) throw new Error(editability.reason);
-  return season;
+  return { ...season, status };
 }
 
 async function uniqueSlug(transaction: Prisma.TransactionClient, kind: "quest" | "expedition", seasonId: string, name: string) {

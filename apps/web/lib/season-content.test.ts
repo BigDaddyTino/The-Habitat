@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { hoursFromPlaySeconds, playSecondsFromHours, seasonContentEditability, seasonGoalProblems, seasonGoalWarnings, seasonRuleCopy, seasonRuleTypes, seasonSlugFrom, trophyArtwork } from "./season-content";
+import { effectiveSeasonStatus, hoursFromPlaySeconds, normalizeSeasonThreshold, playSecondsFromHours, seasonContentEditability, seasonGoalProblems, seasonGoalWarnings, seasonRuleCopy, seasonRuleTypes, seasonSlugFrom, seasonThresholdInputValue, trophyArtwork } from "./season-content";
 
 test("an unstarted season is fully editable, a running one only in presentation", () => {
   const upcoming = seasonContentEditability("UPCOMING");
@@ -12,6 +12,14 @@ test("an unstarted season is fully editable, a running one only in presentation"
   for (const status of ["UPCOMING", "ACTIVE", "COMPLETED"] as const) assert.ok(seasonContentEditability(status).reason.length > 20);
 });
 
+test("editability follows the enabled season clock before the worker persists status", () => {
+  const now = new Date("2026-10-01T00:00:00.000Z");
+  const window = { status: "UPCOMING" as const, startsAt: new Date("2026-09-01T00:00:00.000Z"), endsAt: new Date("2026-12-01T00:00:00.000Z") };
+  assert.equal(effectiveSeasonStatus({ ...window, isEnabled: true }, now), "ACTIVE");
+  assert.equal(effectiveSeasonStatus({ ...window, isEnabled: false }, now), "UPCOMING");
+  assert.equal(effectiveSeasonStatus({ ...window, isEnabled: true }, new Date("2026-12-01T00:00:00.000Z")), "COMPLETED");
+});
+
 test("a distinct-game goal pinned to one game is rejected as unreachable", () => {
   // measureSeasonRule filters events to that game first, so the count can only
   // ever be 1 -- a threshold above that would sit unmet for the whole season.
@@ -19,6 +27,7 @@ test("a distinct-game goal pinned to one game is rejected as unreachable", () =>
   assert.equal(problems.length, 1);
   assert.match(problems[0], /only ever reach 1/);
   assert.deepEqual(seasonGoalProblems({ ruleType: "DISTINCT_GAME_COUNT", gameType: null, threshold: 3 }), []);
+  assert.deepEqual(seasonGoalProblems({ ruleType: "DISTINCT_GAME_COUNT", gameType: "PALWORLD", threshold: 1 }), []);
 });
 
 test("a distinct-game goal beyond the Habitat's six games is rejected", () => {
@@ -71,4 +80,7 @@ test("playtime converts between the stored seconds and the hours an admin thinks
   assert.equal(playSecondsFromHours(10), 36_000);
   assert.equal(hoursFromPlaySeconds(36_000), 10);
   assert.equal(hoursFromPlaySeconds(playSecondsFromHours(1.5)), 1.5);
+  assert.equal(seasonThresholdInputValue("PLAY_SECONDS", 5_400), 1.5);
+  assert.equal(normalizeSeasonThreshold("PLAY_SECONDS", 1.5), 5_400);
+  assert.equal(normalizeSeasonThreshold("JOIN_COUNT", 12.4), 12);
 });

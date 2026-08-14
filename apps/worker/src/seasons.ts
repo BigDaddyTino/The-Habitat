@@ -173,8 +173,8 @@ export async function closeSeason(transaction: Prisma.TransactionClient, season:
   // The shelf is earned inside the window, not handed out for enrolling. A
   // member who never reached the bar closes the season with their lifetime
   // record untouched and no commemorative piece.
-  const qualified = new Set(totals.filter((entry) => (entry._sum.amount ?? 0) >= season.trophyXpRequirement).map((entry) => entry.userId));
-  const recipients = memberships.filter((membership) => qualified.has(membership.userId));
+  const totalsByUser = new Map(totals.map((entry) => [entry.userId, entry._sum.amount ?? 0]));
+  const recipients = memberships.filter((membership) => (totalsByUser.get(membership.userId) ?? 0) >= season.trophyXpRequirement);
   await transaction.seasonChronicle.upsert({
     where: { seasonId: season.id },
     create: { seasonId: season.id, generatedAt: now, snapshot: { version: 2, communityXp, memberCount: memberships.length, trophyXpRequirement: season.trophyXpRequirement, qualifiedCount: recipients.length, contributors, expeditions: expeditions.map((expedition) => ({ ...expedition, completedAt: expedition.completedAt?.toISOString() ?? null })), quests: quests.map((quest) => ({ name: quest.name, scope: quest.scope, completions: quest.scope === "TEAM" ? Number(Boolean(quest.teamProgress?.completedAt)) : quest.personalProgress.length })) } },

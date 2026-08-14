@@ -9,7 +9,8 @@ type Metric = "xp" | "quests";
 export default async function SeasonalLeaderboardsPage({ searchParams }: { searchParams: Promise<{ metric?: string | string[] }> }) {
   const requested = (await searchParams).metric;
   const metric: Metric = (Array.isArray(requested) ? requested[0] : requested) === "quests" ? "quests" : "xp";
-  const season = await db.season.findFirst({ where: { isEnabled: true, status: { in: ["ACTIVE", "UPCOMING"] } }, orderBy: { startsAt: "asc" }, include: { memberships: { include: { user: { select: { displayName: true, name: true, username: true } } } } } })
+  const now = new Date();
+  const season = await db.season.findFirst({ where: { isEnabled: true, status: { in: ["ACTIVE", "UPCOMING"] }, endsAt: { gt: now } }, orderBy: { startsAt: "asc" }, include: { memberships: { include: { user: { select: { displayName: true, name: true, username: true } } } } } })
     ?? await db.season.findFirst({ where: { isEnabled: true, status: "COMPLETED" }, orderBy: { endsAt: "desc" }, include: { memberships: { include: { user: { select: { displayName: true, name: true, username: true } } } } } });
   if (!season) return <section className="page-shell leaderboard-page"><div className="page-intro"><p className="eyebrow">Seasonal standings</p><h1>No season is enabled.</h1><p>The permanent leaderboard remains available while the seasonal board is dormant.</p></div></section>;
 

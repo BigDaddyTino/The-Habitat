@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { seasonEndFor } from "@habitat/shared";
-import { seasonLaunchReadiness, type SeasonLaunchState } from "./season-launch";
+import { seasonAvailabilityProblems, seasonLaunchReadiness, seasonScheduleProblems, type SeasonLaunchState } from "./season-launch";
 
 const ready: SeasonLaunchState = { status: "UPCOMING", trophyCount: 2, questCount: 5, expeditionCount: 6, xpEntryCount: 0 };
 
@@ -46,4 +46,19 @@ test("a launch window always lands on a date the season CHECK constraint accepts
   assert.equal(seasonEndFor(new Date("2026-08-14T20:31:07.412Z")).toISOString(), "2026-11-14T20:31:07.412Z");
   assert.equal(seasonEndFor(new Date("2026-11-30T09:15:00.000Z")).toISOString(), "2027-02-28T09:15:00.000Z");
   assert.equal(seasonEndFor(new Date("2026-12-31T00:00:00.000Z")).toISOString(), "2027-03-31T00:00:00.000Z");
+});
+
+test("scheduling never back-credits a past opening", () => {
+  const now = new Date("2026-08-14T16:00:00.000Z");
+  assert.equal(seasonScheduleProblems(new Date("2026-08-15T00:00:00.000Z"), now).length, 0);
+  assert.match(seasonScheduleProblems(new Date("2026-08-14T00:00:00.000Z"), now)[0] ?? "", /Launch now/);
+  assert.equal(seasonScheduleProblems(new Date("invalid"), now).length, 1);
+});
+
+test("a running season cannot be disabled before its worker closes it", () => {
+  assert.equal(seasonAvailabilityProblems("ACTIVE", false).length, 1);
+  assert.deepEqual(seasonAvailabilityProblems("ACTIVE", true), []);
+  assert.deepEqual(seasonAvailabilityProblems("UPCOMING", false), []);
+  assert.equal(seasonAvailabilityProblems("UPCOMING", true, { wasEnabled: false, startsAt: new Date("2026-08-14T00:00:00.000Z"), now: new Date("2026-08-14T12:00:00.000Z") }).length, 1);
+  assert.deepEqual(seasonAvailabilityProblems("UPCOMING", true, { wasEnabled: false, startsAt: new Date("2026-08-15T00:00:00.000Z"), now: new Date("2026-08-14T12:00:00.000Z") }), []);
 });

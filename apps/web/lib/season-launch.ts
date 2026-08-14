@@ -31,3 +31,15 @@ export function seasonLaunchReadiness(season: SeasonLaunchState): SeasonLaunchRe
 
   return { launchable: blockers.length === 0, blockers, warnings };
 }
+
+export function seasonScheduleProblems(startsAt: Date, now = new Date()): string[] {
+  if (!Number.isFinite(startsAt.getTime())) return ["Choose a valid season start date."];
+  if (startsAt <= now) return ["A scheduled season must open in the future. Use Launch now to open a season without back-crediting earlier activity."];
+  return [];
+}
+
+export function seasonAvailabilityProblems(status: SeasonLaunchState["status"], isEnabled: boolean, draft?: { wasEnabled: boolean; startsAt: Date; now?: Date }): string[] {
+  if (status === "ACTIVE" && !isEnabled) return ["A running season must stay enabled until the worker closes and chronicles it."];
+  if (isEnabled && draft && !draft.wasEnabled && draft.startsAt <= (draft.now ?? new Date())) return ["This draft's opening time has passed. Reschedule it into the future or use Launch now so earlier activity is not back-credited."];
+  return [];
+}

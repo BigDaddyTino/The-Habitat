@@ -158,6 +158,29 @@ test("only members who bank the season XP bar take the shelf home", async () => 
   assert.equal(snapshot.trophyXpRequirement, 5_000);
 });
 
+test("a zero trophy bar includes enrolled members who have no XP ledger row", async () => {
+  const quietMemberId = "bbbbbbbb-0000-0000-0000-000000000003";
+  const trophyId = "ffffffff-0000-0000-0000-000000000001";
+  const unlocked: Array<{ userId: string; trophyId: string }> = [];
+  let qualifiedCount = -1;
+  const transaction = {
+    seasonMembership: { findMany: async () => [{ userId: memberId }, { userId: quietMemberId }] },
+    seasonXpEntry: { groupBy: async () => [] },
+    seasonExpedition: { findMany: async () => [] },
+    seasonQuestDefinition: { findMany: async () => [] },
+    seasonTrophy: { findMany: async () => [{ id: trophyId, kind: "COMMEMORATIVE" }] },
+    user: { findMany: async () => [] },
+    seasonChronicle: { upsert: async ({ create }: { create: { snapshot: { qualifiedCount: number } } }) => { qualifiedCount = create.snapshot.qualifiedCount; return create; } },
+    userSeasonTrophy: { createMany: async ({ data }: { data: Array<{ userId: string; trophyId: string }> }) => { unlocked.push(...data); return { count: data.length }; } },
+    season: { update: async () => season },
+  } as unknown as Prisma.TransactionClient;
+
+  await closeSeason(transaction, { ...season, trophyXpRequirement: 0 }, new Date("2026-12-01T00:00:00.000Z"));
+
+  assert.equal(qualifiedCount, 2);
+  assert.deepEqual(unlocked.map(({ userId, trophyId: unlockedTrophyId }) => ({ userId, trophyId: unlockedTrophyId })), [{ userId: memberId, trophyId }, { userId: quietMemberId, trophyId }]);
+});
+
 test("a season window follows Postgres month arithmetic rather than JavaScript overflow", () => {
   assert.equal(seasonEndFor(new Date("2026-09-01T00:00:00.000Z")).toISOString(), "2026-12-01T00:00:00.000Z");
   assert.equal(seasonEndFor(new Date("2026-11-30T00:00:00.000Z")).toISOString(), "2027-02-28T00:00:00.000Z");
