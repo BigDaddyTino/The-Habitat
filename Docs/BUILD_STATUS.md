@@ -74,6 +74,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Authenticated member claim requests and admin-only, audit-logged approval or rejection flow
 - [x] Profile identity cards and protected admin claim-review route
 - [x] Admin-managed title definitions and grants; members can equip one earned title at a time
+- [x] Pre-claim impact preview measured by projecting the claimant's progression with and without the candidate identity through the live rule engine
+- [x] Merge-conflict detection covering ownership races, contradicting Steam proof, competing claimants, duplicate character names, prior revocations, and overlapping sessions, with typed confirmation past severe conflicts
+- [x] Append-only `IdentityOwnershipTransaction` ledger recording every ownership transition with its projected and applied impact, backfilled for pre-existing ownership
+- [x] Administrator rollback that detaches an identity and reverses playtime XP plus no-longer-earned identity/level achievements, rewards, titles, award events, and record holdings in one transaction without touching unrelated activity or web awards
+- [x] Identity dossier with ownership history, claim history, audit trail, and evidence provenance by source, confidence, and window
+- [x] Administrator member data export as audit-logged JSON that declares its profile/identity/progression scope, excludes credentials, and states its own truncation
+- [x] Unlink consequences shown before confirmation on both administrator rollback and member Steam disconnect
+- [ ] Apply `20260814143000_preserve_identity_ownership_history` so deleting an identity cannot cascade-delete its permanent ownership ledger
 - [ ] Live claim and approval verification with a newly observed Palworld identity
 - [ ] Discord identity and additional verified game-stat sections
 

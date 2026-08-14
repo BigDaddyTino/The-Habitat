@@ -3,6 +3,7 @@ import {
   Ban,
   Clock3,
   Crown,
+  FileJson,
   KeyRound,
   Mail,
   Radio,
@@ -185,6 +186,7 @@ export default async function AdminMembersPage({
           <form action={updateMemberRole}><input name="memberId" type="hidden" value={member.id} /><label>Access level<select defaultValue={member.role} disabled={isSelf} name="role"><option value="VIEWER">Viewer</option><option value="USER">Member</option><option value="ADMIN">Administrator</option></select></label><button disabled={isSelf} type="submit">Save role</button></form>
           <div className="admin-member-actions">
             {member.username ? <Link href={`/members/${member.username}`}>Open profile</Link> : <span>Profile pending</span>}
+            <a download href={`/api/admin/members/${member.id}/export`} title="Download this member's profile, identity, progression, provider-link, referral, record, and associated evidence data as JSON"><FileJson aria-hidden="true" size={14} /> Export data</a>
             <form action={revokeMemberSessions}><input name="memberId" type="hidden" value={member.id} /><button disabled={isSelf || member.sessions.length === 0} title="Sign this member out of every browser" type="submit"><KeyRound aria-hidden="true" size={14} /> Revoke sessions</button></form>
             <form action={setMemberActive}><input name="memberId" type="hidden" value={member.id} /><input name="active" type="hidden" value={member.isActive ? "false" : "true"} /><button className={member.isActive ? "danger" : "restore"} disabled={isSelf} type="submit">{member.isActive ? <Ban aria-hidden="true" size={14} /> : <RotateCcw aria-hidden="true" size={14} />}{member.isActive ? "Suspend" : "Reactivate"}</button></form>
           </div>

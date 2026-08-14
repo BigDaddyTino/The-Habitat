@@ -23,6 +23,9 @@
 - Steam ownership is accepted only after server-side Steam OpenID validation.
 - Avatar uploads are magic-byte checked, stored under generated UUID names, and served through a path-restricted route when external storage is configured.
 - User-entered social handles are unverified metadata and are never treated as a live provider connection.
+- Identity ownership changes are previewed, conflict-checked, written to an append-only ownership ledger, and reversible. Approval past a severe conflict and every rollback require a typed confirmation, and conflicts are re-detected inside the write transaction so a stale preview cannot authorise a change.
+- Provider identifiers are never rendered on claim surfaces; those views report only whether proof exists and whether it matches.
+- The scoped member profile/identity/progression export is administrator-only, audit logged, `no-store`, declares what it does and does not include, and excludes OAuth tokens, session tokens, verification tokens, and link nonces by construction rather than by filtering.
 
 ## Agent and command boundary
 

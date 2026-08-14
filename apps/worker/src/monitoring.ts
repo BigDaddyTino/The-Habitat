@@ -1,4 +1,5 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
+import { grantIdentityOwnership } from "@habitat/identity";
 import { isStablePlayerProviderKey, type AgentPlayerObservation, type AgentServerStatus, type ServerState } from "@habitat/shared";
 import { evaluateAchievementsForEvent } from "./achievements.js";
 import { evaluateRecordsForEvent } from "./records.js";
@@ -363,12 +364,17 @@ async function synchronizePalworldKnownPlayers(transaction: PresenceTransaction,
 export async function autoLinkVerifiedSteamIdentity(transaction: PresenceTransaction, identityId: string, steamId: string, observedAt: Date) {
   const account = await transaction.userSocialAccount.findFirst({ where: { platform: "STEAM", providerAccountId: steamId, verifiedAt: { not: null } }, select: { userId: true } });
   if (!account) return;
-  const assigned = await transaction.playerIdentity.updateMany({ where: { id: identityId, userId: null, externalProvider: "STEAM", externalAccountId: steamId }, data: { userId: account.userId, verifiedAt: observedAt } });
-  if (assigned.count !== 1) return;
-  await transaction.identityRewardReconciliation.upsert({ where: { playerIdentityId: identityId }, create: { playerIdentityId: identityId, userId: account.userId }, update: { userId: account.userId, completedAt: null, lastError: null } });
+  const identity = await transaction.playerIdentity.findFirst({ where: { id: identityId, userId: null, externalProvider: "STEAM", externalAccountId: steamId }, select: { id: true } });
+  if (!identity) return;
+  await grantIdentityOwnership(transaction, {
+    playerIdentityId: identity.id,
+    userId: account.userId,
+    actorUserId: null,
+    source: "WORKER_AUTO_LINK",
+    reason: "Ownership proved by an observed SteamID64 matching a verified Habitat account.",
+  }, observedAt);
   await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: account.userId, status: "PENDING" }, data: { status: "APPROVED", resolvedAt: observedAt, resolvedByUserId: account.userId, resolutionNote: "Automatically verified by linked SteamID64." } });
   await transaction.playerIdentityClaim.updateMany({ where: { playerIdentityId: identityId, userId: { not: account.userId }, status: "PENDING" }, data: { status: "REJECTED", resolvedAt: observedAt, resolutionNote: "Identity ownership was verified through a linked Steam account." } });
-  await transaction.auditLog.create({ data: { actorUserId: account.userId, action: "STEAM_IDENTITY_AUTO_LINKED", entityType: "PlayerIdentity", entityId: identityId, after: { provider: "STEAM", verification: "OPENID" } } });
 }
 
 async function createPalworldPresenceEvent(transaction: PresenceTransaction, server: MonitoredServer, player: { providerKey: string; displayName: string }, playerIdentityId: string | null, eventType: "PLAYER_JOINED" | "PLAYER_LEFT", observedAt: Date, priorObservedAt?: Date, sessionStartedAt?: Date) {

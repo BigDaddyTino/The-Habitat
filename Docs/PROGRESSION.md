@@ -16,6 +16,8 @@ Anonymous observations, unpaired sightings, entered social handles, Steam global
 
 Every XP grant is an append-only `UserXpEntry` with a database-unique dedupe key. Level is calculated from the ledger, not kept as mutable profile state.
 
+The single exception is administrator ownership rollback. `VERIFIED_PLAYTIME` entries are cumulative deltas recomputed from total verified seconds, and the ledger carries a database `CHECK` that every amount is positive, so a reversal cannot post a negative compensating row. Detaching an identity therefore drops the newest playtime entries until the remaining sum no longer exceeds the recomputed target and re-adds any remainder under the same cumulative dedupe key. Quest XP is never touched this way. What was removed is recorded on the `IdentityOwnershipTransaction` reversal row, so the ownership ledger — not the XP ledger — is the audit trail for a rollback.
+
 Levels 10, 25, 50, 75, and 100 award milestone achievements through the same reward pipeline as other achievements. Rewards can include selectable titles, avatar borders, profile layouts, badges, medals, trophies, and rarity-aware ceremonies. Reconciliation is idempotent, so historical imports and worker retries cannot duplicate XP or inventory.
 
 ## Presentation

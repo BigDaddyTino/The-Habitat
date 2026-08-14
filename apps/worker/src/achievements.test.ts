@@ -29,6 +29,7 @@ test("replaying a qualifying event awards a non-repeatable achievement once", as
       findMany: async () => [{ id: "55555555-5555-5555-5555-555555555555", slug: "welcome-to-gods-country", name: "Welcome to God's Country", rarity: "COMMON", points: 10, isRepeatable: false, ruleType: "EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED", threshold: 1 } }],
     },
     recordDefinition: { findMany: async () => [] },
+    playerIdentity: { findMany: async () => [{ id: sourceEvent.playerIdentity.id, verifiedAt: new Date("2026-08-01T00:00:00.000Z") }] },
     playerAchievement: {
       upsert: async ({ where, create }: { where: { dedupeKey: string }; create: unknown }) => {
         if (!awards.has(where.dedupeKey)) awards.set(where.dedupeKey, create);

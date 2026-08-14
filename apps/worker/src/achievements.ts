@@ -1,5 +1,6 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import { parseActivityCountRule, parseActivityStatThresholdRule, parseActivityValueSumRule, parseDistinctActivityGameRule, parseDistinctGameEventCountRule, parseEventCountRule, parseGameEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, parseOrderedActivityStreakRule, progressionForXp } from "@habitat/shared";
+import { currentIdentityScope, isActivityEligible, isIdentityEligible } from "@habitat/identity";
+import { parseLevelReachedRule, progressionForXp } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
 import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
@@ -10,9 +11,10 @@ export async function evaluateAchievementsForEvent(transaction: Prisma.Transacti
   const event = await transaction.serverEvent.findUnique({ where: { id: eventId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
   if (!event?.playerIdentity?.userId || event.eventType !== "PLAYER_JOINED") return;
 
-  const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true } });
+  const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true, ruleType: { in: ["EVENT_COUNT", "GAME_EVENT_COUNT", "DISTINCT_GAME_EVENT_COUNT"] } } });
+  const scope = await currentIdentityScope(transaction, event.playerIdentity.userId);
   for (const definition of definitions) {
-    const eligible = await isEligible(transaction, definition, event.playerIdentity.userId);
+    const eligible = await isIdentityEligible(transaction, definition, scope);
     if (!eligible) continue;
     await awardAchievement(transaction, definition, { userId: event.playerIdentity.userId, playerIdentityId: event.playerIdentity.id, displayName: event.playerIdentity.displayName, serverId: event.serverId, gameType: event.gameType, occurredAt: event.occurredAt, sourceEventId: event.id, repeatKey: event.id, source: "ACHIEVEMENT_ENGINE", suppressNotifications: options.suppressNotifications });
   }
@@ -22,11 +24,9 @@ export async function evaluateAchievementsForLegacyEvidence(transaction: Prisma.
   const evidence = await transaction.legacyPlayerEvidence.findUnique({ where: { id: evidenceId }, include: { playerIdentity: { select: { id: true, userId: true, displayName: true } } } });
   if (!evidence?.playerIdentity.userId) return;
   const definitions = await transaction.achievementDefinition.findMany({ where: { enabled: true, ruleType: "LEGACY_EVIDENCE_COUNT" } });
+  const scope = await currentIdentityScope(transaction, evidence.playerIdentity.userId);
   for (const definition of definitions) {
-    const rule = parseLegacyEvidenceCountRule(definition.ruleConfig);
-    if (!rule) continue;
-    const count = await transaction.legacyPlayerEvidence.count({ where: { playerIdentity: { is: { userId: evidence.playerIdentity.userId } } } });
-    if (count < rule.threshold) continue;
+    if (!await isIdentityEligible(transaction, definition, scope)) continue;
     await awardAchievement(transaction, definition, { userId: evidence.playerIdentity.userId, playerIdentityId: evidence.playerIdentity.id, displayName: evidence.playerIdentity.displayName, serverId: evidence.serverId, gameType: evidence.gameType, occurredAt: evidence.occurredAt, sourceEventId: null, repeatKey: evidence.id, source: "LEGACY_HISTORY_IMPORT", suppressNotifications: options.suppressNotifications });
   }
 }
@@ -64,55 +64,6 @@ export async function evaluateAchievementsForActivity(transaction: Prisma.Transa
     await unlockAchievementRewards(transaction, { achievementDefinitionId: definition.id, userId: activity.userId, playerAchievementId: award.id });
     if (!options.suppressNotifications && ["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { gameActivityId: activity.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
   }
-}
-
-async function isActivityEligible(transaction: Prisma.TransactionClient, definition: { ruleType: string; ruleConfig: unknown; gameKey: string | null }, userId: string) {
-  const gameScope = definition.gameKey ? { gameKey: definition.gameKey } : {};
-  if (definition.ruleType === "ACTIVITY_COUNT" || definition.ruleType === "SHARED_ACTIVITY_COUNT") {
-    const rule = parseActivityCountRule(definition.ruleConfig);
-    if (!rule) return false;
-    return await transaction.gameActivity.count({ where: { userId, activityType: rule.activityType, sourceConfidence: { gte: rule.minimumConfidence }, ...gameScope } }) >= rule.threshold;
-  }
-  if (definition.ruleType === "ACTIVITY_VALUE_SUM") {
-    const rule = parseActivityValueSumRule(definition.ruleConfig);
-    if (!rule) return false;
-    const value = await transaction.gameActivity.aggregate({ where: { userId, activityType: rule.activityType, sourceConfidence: { gte: rule.minimumConfidence }, ...gameScope }, _sum: { valueNumber: true } });
-    return (value._sum.valueNumber ?? 0) >= rule.threshold;
-  }
-  if (definition.ruleType === "DISTINCT_ACTIVITY_GAME_COUNT") {
-    const rule = parseDistinctActivityGameRule(definition.ruleConfig);
-    if (!rule) return false;
-    const games = await transaction.gameActivity.findMany({ where: { userId, activityType: rule.activityType, sourceConfidence: { gte: rule.minimumConfidence } }, distinct: ["gameKey"], select: { gameKey: true } });
-    return games.length >= rule.threshold;
-  }
-  if (definition.ruleType === "ORDERED_ACTIVITY_STREAK") {
-    const rule = parseOrderedActivityStreakRule(definition.ruleConfig);
-    if (!rule) return false;
-    const continuityGuard = definition.gameKey === "MARVEL_RIVALS" ? { sourceClubMatchParticipant: { is: { clubGameProfile: { is: { matchHistoryGapDetected: false } } } } } : {};
-    const activities = await transaction.gameActivity.findMany({ where: { userId, activityType: { in: [rule.successActivityType, ...rule.breakActivityTypes] }, sourceConfidence: { gte: rule.minimumConfidence }, ...gameScope, ...continuityGuard }, orderBy: [{ occurredAt: "asc" }, { id: "asc" }], select: { activityType: true } });
-    let current = 0;
-    let longest = 0;
-    for (const activity of activities) {
-      if (activity.activityType === rule.successActivityType) {
-        current += 1;
-        longest = Math.max(longest, current);
-      } else current = 0;
-    }
-    return longest >= rule.threshold;
-  }
-  if (definition.ruleType === "ACTIVITY_STAT_THRESHOLD") {
-    const rule = parseActivityStatThresholdRule(definition.ruleConfig);
-    if (!rule) return false;
-    const where = { userId, activityType: rule.activityType, sourceConfidence: { gte: rule.minimumConfidence }, valueNumber: { not: null }, ...gameScope };
-    let value: number | null = null;
-    if (rule.aggregation === "LATEST") value = (await transaction.gameActivity.findFirst({ where, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { valueNumber: true } }))?.valueNumber ?? null;
-    else {
-      const aggregate = await transaction.gameActivity.aggregate({ where, _max: { valueNumber: true }, _min: { valueNumber: true } });
-      value = rule.aggregation === "MAX" ? aggregate._max.valueNumber : aggregate._min.valueNumber;
-    }
-    return value !== null && (rule.comparison === "GTE" ? value >= rule.threshold : value <= rule.threshold);
-  }
-  return false;
 }
 
 /** Replays only each member's latest verified evidence to make newly seeded rules retroactive. */
@@ -209,26 +160,4 @@ async function unlockAchievementRewards(
       });
     }
   }
-}
-
-async function isEligible(transaction: Prisma.TransactionClient, definition: { ruleType: string; ruleConfig: unknown }, userId: string) {
-  if (definition.ruleType === "EVENT_COUNT") {
-    const rule = parseEventCountRule(definition.ruleConfig);
-    if (!rule) return false;
-    const count = await transaction.serverEvent.count({ where: { playerIdentity: { is: { userId } }, eventType: rule.eventType } });
-    return count >= rule.threshold;
-  }
-  if (definition.ruleType === "DISTINCT_GAME_EVENT_COUNT") {
-    const rule = parseDistinctGameEventCountRule(definition.ruleConfig);
-    if (!rule) return false;
-    const games = await transaction.serverEvent.findMany({ where: { playerIdentity: { is: { userId } }, eventType: rule.eventType }, distinct: ["gameType"], select: { gameType: true } });
-    return games.length >= rule.threshold;
-  }
-  if (definition.ruleType === "GAME_EVENT_COUNT") {
-    const rule = parseGameEventCountRule(definition.ruleConfig);
-    if (!rule) return false;
-    const count = await transaction.serverEvent.count({ where: { playerIdentity: { is: { userId } }, eventType: rule.eventType, gameType: rule.gameType } });
-    return count >= rule.threshold;
-  }
-  return false;
 }

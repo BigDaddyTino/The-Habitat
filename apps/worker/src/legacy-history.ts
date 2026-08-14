@@ -261,7 +261,9 @@ async function removeEmptyUnclaimedIdentity(transaction: Prisma.TransactionClien
     select: {
       userId: true,
       reconciliation: { select: { id: true } },
-      _count: { select: { events: true, claims: true, recordHolders: true, recordHistory: true, legacyEvidence: true } },
+      // An ownership ledger row is permanent history even after rollback. An
+      // otherwise-empty identity that carries one must never be garbage-collected.
+      _count: { select: { events: true, claims: true, recordHolders: true, recordHistory: true, legacyEvidence: true, ownershipLedger: true } },
     },
   });
   if (!identity || identity.userId || identity.reconciliation) return;

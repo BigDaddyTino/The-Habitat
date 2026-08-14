@@ -72,6 +72,9 @@ importers:
       '@habitat/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@habitat/identity':
+        specifier: workspace:*
+        version: link:../../packages/identity
       '@habitat/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -178,6 +181,9 @@ importers:
       '@habitat/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@habitat/identity':
+        specifier: workspace:*
+        version: link:../../packages/identity
       '@habitat/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -258,6 +264,25 @@ importers:
       prisma:
         specifier: 7.9.1
         version: 7.9.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.11
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/identity:
+    dependencies:
+      '@habitat/db':
+        specifier: workspace:*
+        version: link:../db
+      '@habitat/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.13.3
       tsx:
         specifier: ^4.21.0
         version: 4.23.11

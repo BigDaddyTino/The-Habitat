@@ -78,13 +78,32 @@ export async function removeSocialAccount(formData: FormData) {
   revalidatePath("/profile");
 }
 
-export async function disconnectSteam() {
+export async function disconnectSteam(formData: FormData) {
   const user = await requireRole("USER");
-  const account = await db.userSocialAccount.findFirst({ where: { userId: user.id, platform: "STEAM", verifiedAt: { not: null } }, select: { id: true } });
+  // Disconnecting leaves already-attached identities in place, so the member is
+  // shown that consequence and has to acknowledge it before the proof is removed.
+  if (formData.get("acknowledged") !== "on") throw new Error("Acknowledge the disconnect consequences before removing Steam verification.");
+  const account = await db.userSocialAccount.findFirst({
+    where: { userId: user.id, platform: "STEAM", verifiedAt: { not: null } },
+    select: { id: true, steamProfile: { select: { id: true, _count: { select: { libraryGames: true, userAchievements: true } } } } },
+  });
   if (!account) return;
   await db.$transaction([
     db.userSocialAccount.delete({ where: { id: account.id } }),
-    db.auditLog.create({ data: { actorUserId: user.id, action: "STEAM_ACCOUNT_DISCONNECTED", entityType: "UserSocialAccount", entityId: account.id, before: { provider: "STEAM" } } }),
+    db.auditLog.create({
+      data: {
+        actorUserId: user.id,
+        action: "STEAM_ACCOUNT_DISCONNECTED",
+        entityType: "UserSocialAccount",
+        entityId: account.id,
+        before: {
+          provider: "STEAM",
+          enrichmentDeleted: Boolean(account.steamProfile),
+          cachedLibraryGamesDeleted: account.steamProfile?._count.libraryGames ?? 0,
+          cachedAchievementRowsDeleted: account.steamProfile?._count.userAchievements ?? 0,
+        },
+      },
+    }),
   ]);
   revalidatePath("/profile");
 }
