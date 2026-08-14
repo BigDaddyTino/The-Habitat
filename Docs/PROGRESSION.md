@@ -37,3 +37,12 @@ ledger, not a synthetic counter. Closing is replay-safe: the worker snapshots a
 season Chronicle, issues persisted commemorative trophies, adds the first-season
 founding reward, and marks the season complete. Those rewards stay on the
 physical seasonal shelf in the trophy cabinet after future seasons begin.
+
+Seasonal trophies are earned, not granted for enrolling. Each season carries a
+`trophyXpRequirement` (1,500 season XP for First Light); at closure only members
+whose own season ledger cleared that bar receive the commemorative piece and, in
+the first season, the Founder's Lantern. Progress toward the bar is visible on
+`/seasons` and `/leaderboards/season` for the whole season, and the closing
+Chronicle records the requirement alongside how many members met it. Missing the
+bar costs a member nothing permanent: lifetime XP, level, achievements, titles,
+records, and previously earned trophies are untouched either way.

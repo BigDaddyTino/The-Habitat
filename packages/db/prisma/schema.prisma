@@ -763,6 +763,10 @@ model Season {
   endsAt            DateTime
   status            SeasonStatus              @default(UPCOMING)
   communityXpGoal   Int
+  /// Season XP a member must personally bank inside the window to receive that
+  /// season's commemorative trophies at closure. Zero means every enrolled
+  /// member qualifies. Enrollment alone never earns the shelf.
+  trophyXpRequirement Int                     @default(1500)
   isEnabled         Boolean                   @default(true)
   completedAt       DateTime?
   createdAt         DateTime                  @default(now())

@@ -10,6 +10,8 @@ export type SeasonChronicleStory = {
   theme: string;
   communityXp: number;
   memberCount: number;
+  trophyXpRequirement: number;
+  qualifiedCount: number;
   contributors: Array<{ userId: string; name: string; username: string | null; xp: number }>;
   expeditions: Array<{ name: string; gameType: string; progress: number; threshold: number; completedAt: string | null }>;
   quests: Array<{ name: string; scope: string; completions: number }>;
@@ -27,6 +29,6 @@ export function SeasonChronicle({ story }: { story: SeasonChronicleStory }) {
     <div className="season-film-beat beat-two"><Users aria-hidden="true" /><p>{story.memberCount} expedition members</p><strong>{completedExpeditions} / {story.expeditions.length}</strong><span>game expeditions completed</span></div>
     <section className="season-film-expeditions"><p className="eyebrow">The routes we marked</p><div>{story.expeditions.map((expedition) => <article className={expedition.completedAt ? "complete" : ""} key={expedition.name}><span>{expedition.gameType.replaceAll("_", " ")}</span><strong>{expedition.name}</strong><small>{expedition.progress.toLocaleString()} / {expedition.threshold.toLocaleString()}</small></article>)}</div></section>
     <section className="season-film-roll"><p className="eyebrow">The names in the ledger</p><h2>{top ? `${top.name} led the trail.` : "The ledger stayed quiet."}</h2><ol>{story.contributors.slice(0, 8).map((entry, index) => <li key={entry.userId}><span>{String(index + 1).padStart(2, "0")}</span>{entry.username ? <Link href={`/members/${entry.username}`}>{entry.name}</Link> : <strong>{entry.name}</strong>}<b>{entry.xp.toLocaleString()} XP</b></li>)}</ol></section>
-    <footer className="season-film-finale"><Trophy aria-hidden="true" /><p>The chronicle closes. The shelf remains.</p><h2>{story.ordinal === 1 ? "Founders of the First Light" : `Veterans of ${story.seasonName}`}</h2><span>Lifetime levels · achievements · records · permanent commemorative trophies</span><Link href="/seasons">Return to the expedition board</Link></footer>
+    <footer className="season-film-finale"><Trophy aria-hidden="true" /><p>The chronicle closes. The shelf remains.</p><h2>{story.ordinal === 1 ? "Founders of the First Light" : `Veterans of ${story.seasonName}`}</h2>{story.trophyXpRequirement > 0 ? <i>{story.qualifiedCount} of {story.memberCount} members cleared the {story.trophyXpRequirement.toLocaleString()} season XP bar and took the shelf home.</i> : null}<span>Lifetime levels · achievements · records · permanent commemorative trophies</span><Link href="/seasons">Return to the expedition board</Link></footer>
   </section>;
 }

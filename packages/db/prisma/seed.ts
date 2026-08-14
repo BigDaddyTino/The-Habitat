@@ -163,6 +163,11 @@ const foundingSeason = {
   startsAt: new Date("2026-09-01T00:00:00.000Z"),
   endsAt: new Date("2026-12-01T00:00:00.000Z"),
   communityXpGoal: 12_000,
+  // Quest completion pays 1,660 across the five First Light quests, so the bar
+  // sits just under a member who finished their trail plus roughly sixty hours
+  // of verified play. Out of reach for a last-day enrollment, reachable for
+  // anyone who actually ran the season.
+  trophyXpRequirement: 1_500,
 } as const;
 
 const foundingSeasonQuests = [
@@ -245,7 +250,7 @@ async function main() {
   const season = await prisma.season.upsert({
     where: { slug: foundingSeason.slug },
     create: foundingSeason,
-    update: { name: foundingSeason.name, description: foundingSeason.description, theme: foundingSeason.theme, startsAt: foundingSeason.startsAt, endsAt: foundingSeason.endsAt, communityXpGoal: foundingSeason.communityXpGoal, isEnabled: true },
+    update: { name: foundingSeason.name, description: foundingSeason.description, theme: foundingSeason.theme, startsAt: foundingSeason.startsAt, endsAt: foundingSeason.endsAt, communityXpGoal: foundingSeason.communityXpGoal, trophyXpRequirement: foundingSeason.trophyXpRequirement, isEnabled: true },
   });
   for (const quest of foundingSeasonQuests) {
     await prisma.seasonQuestDefinition.upsert({

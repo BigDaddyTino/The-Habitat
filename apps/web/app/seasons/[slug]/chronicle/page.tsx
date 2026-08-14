@@ -21,7 +21,9 @@ function parseStory(season: { seasonName: string; ordinal: number; theme: string
   const contributors = Array.isArray(snapshot.contributors) ? snapshot.contributors.map(record).map((entry) => ({ userId: text(entry.userId), name: text(entry.name) || "Habitat member", username: text(entry.username) || null, xp: number(entry.xp) })).filter((entry) => entry.userId) : [];
   const expeditions = Array.isArray(snapshot.expeditions) ? snapshot.expeditions.map(record).map((entry) => ({ name: text(entry.name), gameType: text(entry.gameType), progress: number(entry.progress), threshold: number(entry.threshold), completedAt: text(entry.completedAt) || null })).filter((entry) => entry.name) : [];
   const quests = Array.isArray(snapshot.quests) ? snapshot.quests.map(record).map((entry) => ({ name: text(entry.name), scope: text(entry.scope), completions: number(entry.completions) })).filter((entry) => entry.name) : [];
-  return { ...season, communityXp: number(snapshot.communityXp), memberCount: number(snapshot.memberCount), contributors, expeditions, quests };
+  // Version 1 snapshots predate the earned-shelf bar; they report no requirement
+  // rather than inventing one the season never actually enforced.
+  return { ...season, communityXp: number(snapshot.communityXp), memberCount: number(snapshot.memberCount), trophyXpRequirement: number(snapshot.trophyXpRequirement), qualifiedCount: number(snapshot.qualifiedCount), contributors, expeditions, quests };
 }
 
 export default async function SeasonChroniclePage({ params }: { params: Promise<{ slug: string }> }) {

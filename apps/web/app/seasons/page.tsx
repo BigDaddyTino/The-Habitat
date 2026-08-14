@@ -17,13 +17,23 @@ function ProgressRail({ value, goal, label }: { value: number; goal: number; lab
   return <div className="season-progress" aria-label={`${label}: ${progress.percent.toFixed(1)} percent complete`}><i><span style={{ width: `${progress.percent}%` }} /></i><div><span>{value.toLocaleString()} / {goal.toLocaleString()}</span><strong>{progress.complete ? "Complete" : `${Math.ceil(goal - value).toLocaleString()} remaining`}</strong></div></div>;
 }
 
-export default async function SeasonsPage() {
+// joinSeason redirects back here with the outcome. Without this map the notice
+// query parameter is set and then silently dropped, leaving an enrolling member
+// with no confirmation and a rejected one with no explanation.
+const notices: Record<string, { tone: "ok" | "warn"; message: string }> = {
+  joined: { tone: "ok", message: "You're on the roster. Verified activity inside the season window reconciles automatically." },
+  "season-unavailable": { tone: "warn", message: "That season is no longer open for enrollment." },
+};
+
+export default async function SeasonsPage({ searchParams }: { searchParams: Promise<{ notice?: string | string[] }> }) {
+  const requestedNotice = (await searchParams).notice;
+  const notice = notices[Array.isArray(requestedNotice) ? requestedNotice[0] ?? "" : requestedNotice ?? ""] ?? null;
   const session = await auth();
   const now = new Date();
   const [current, archive] = await Promise.all([
     db.season.findFirst({
       where: { isEnabled: true, status: { in: ["ACTIVE", "UPCOMING"] } }, orderBy: { startsAt: "asc" },
-      include: { memberships: { select: { userId: true } }, quests: { where: { enabled: true }, include: { teamProgress: true }, orderBy: { sortOrder: "asc" } }, expeditions: { orderBy: { sortOrder: "asc" } } },
+      include: { _count: { select: { memberships: true } }, quests: { where: { enabled: true }, include: { teamProgress: true }, orderBy: { sortOrder: "asc" } }, expeditions: { orderBy: { sortOrder: "asc" } } },
     }),
     db.season.findMany({ where: { isEnabled: true, status: "COMPLETED" }, orderBy: { endsAt: "desc" }, take: 8, include: { chronicle: { select: { id: true } }, _count: { select: { memberships: true } } } }),
   ]);
@@ -31,13 +41,16 @@ export default async function SeasonsPage() {
 
   const phase = seasonPhase(current, now);
   const userId = session?.user?.isActive ? session.user.id : null;
-  const isMember = Boolean(userId && current.memberships.some((entry) => entry.userId === userId));
-  const [communityXp, personalXp, personalProgress] = await Promise.all([
+  const [membership, communityXp, personalXp, personalProgress] = await Promise.all([
+    userId ? db.seasonMembership.findUnique({ where: { seasonId_userId: { seasonId: current.id, userId } }, select: { id: true } }) : Promise.resolve(null),
     db.seasonXpEntry.aggregate({ where: { seasonId: current.id }, _sum: { amount: true } }),
     userId ? db.seasonXpEntry.aggregate({ where: { seasonId: current.id, userId }, _sum: { amount: true } }) : Promise.resolve({ _sum: { amount: null } }),
     userId ? db.userSeasonQuestProgress.findMany({ where: { userId, quest: { seasonId: current.id } }, select: { questId: true, progress: true, completedAt: true } }) : Promise.resolve([]),
   ]);
+  const isMember = Boolean(membership);
   const communityTotal = communityXp._sum.amount ?? 0;
+  const personalTotal = personalXp._sum.amount ?? 0;
+  const trophyProgress = boundedProgress(personalTotal, current.trophyXpRequirement);
   const personalByQuest = new Map(personalProgress.map((entry) => [entry.questId, entry]));
   const dateOptions = { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" } as const;
   const personalQuests = current.quests.filter((quest) => quest.scope === "PERSONAL");
@@ -49,17 +62,26 @@ export default async function SeasonsPage() {
       <div className="season-crest" aria-label={`Season ${current.ordinal}`}><span>S{current.ordinal}</span><i /></div>
     </header>
 
+    {notice ? <p className={`season-notice ${notice.tone}`} role="status">{notice.tone === "ok" ? <CheckCircle2 aria-hidden="true" size={15} /> : <LockKeyhole aria-hidden="true" size={15} />}{notice.message}</p> : null}
+
     <aside className="season-permanence"><ShieldCheck aria-hidden="true" /><div><strong>Your permanent record does not reset.</strong><span>Lifetime level, XP, achievements, titles, records, and prior trophies remain permanent. Seasonal XP is a separate three-month ledger for fresh goals.</span></div></aside>
 
     <section className="community-objective">
       <div className="community-objective-heading"><div><p className="eyebrow">Cooperative objective</p><h2>Raise the lodge standard</h2><p>Every enrolled member&apos;s verified playtime and completed quests feeds the same community bar.</p></div><strong>{communityTotal.toLocaleString()}<span>community XP</span></strong></div>
       <ProgressRail value={communityTotal} goal={current.communityXpGoal} label="Community season XP" />
-      <footer><span><Users aria-hidden="true" size={14} /> {current.memberships.length} enrolled</span><Link href="/leaderboards/season">Open seasonal standings</Link></footer>
+      <footer><span><Users aria-hidden="true" size={14} /> {current._count.memberships} enrolled</span><Link href="/leaderboards/season">Open seasonal standings</Link></footer>
     </section>
 
     <div className="season-membership-card">
-      {isMember ? <><CheckCircle2 aria-hidden="true" /><div><p className="eyebrow">Expedition member</p><h2>You&apos;re on the roster.</h2><p>Your in-window verified activity is reconciled automatically. You currently hold <strong>{(personalXp._sum.amount ?? 0).toLocaleString()} seasonal XP</strong>.</p></div></> : <><Sparkles aria-hidden="true" /><div><p className="eyebrow">Optional participation</p><h2>{phase === "UPCOMING" ? "Reserve your place." : "Join the expedition."}</h2><p>Joining adds seasonal goals; it does not change, spend, or replace any lifetime progress.</p>{userId ? <form action={joinSeason}><input type="hidden" name="seasonId" value={current.id} /><button type="submit">Enlist for {current.name}</button></form> : <Link href="/sign-in">Sign in to enlist</Link>}</div></>}
+      {isMember ? <><CheckCircle2 aria-hidden="true" /><div><p className="eyebrow">Expedition member</p><h2>You&apos;re on the roster.</h2><p>Your in-window verified activity is reconciled automatically. You currently hold <strong>{personalTotal.toLocaleString()} seasonal XP</strong>.</p></div></> : <><Sparkles aria-hidden="true" /><div><p className="eyebrow">Optional participation</p><h2>{phase === "UPCOMING" ? "Reserve your place." : "Join the expedition."}</h2><p>Joining adds seasonal goals; it does not change, spend, or replace any lifetime progress.</p>{userId ? <form action={joinSeason}><input type="hidden" name="seasonId" value={current.id} /><button type="submit">Enlist for {current.name}</button></form> : <Link href="/sign-in">Sign in to enlist</Link>}</div></>}
     </div>
+
+    {isMember && current.trophyXpRequirement > 0 ? <section className={`trophy-eligibility ${trophyProgress.complete ? "earned" : ""}`}>
+      <div><p className="eyebrow">Seasonal shelf eligibility</p><h2>{trophyProgress.complete ? "The shelf is yours." : "Earn the seasonal shelf."}</h2><p>{trophyProgress.complete
+        ? `You have passed the ${current.trophyXpRequirement.toLocaleString()} season XP bar. ${current.name}'s commemorative trophy${current.ordinal === 1 ? " and the Founder's Lantern are" : " is"} reserved for you at closure, and stays permanently once awarded.`
+        : `Commemorative trophies are earned, not granted for enrolling. Bank ${current.trophyXpRequirement.toLocaleString()} season XP before ${current.endsAt.toLocaleDateString("en-US", dateOptions)} to receive ${current.name}'s shelf piece${current.ordinal === 1 ? " and the Founder's Lantern" : ""}.`}</p></div>
+      <div><ProgressRail value={personalTotal} goal={current.trophyXpRequirement} label="Seasonal trophy eligibility" /><small>{trophyProgress.complete ? <><Trophy aria-hidden="true" size={13} /> Qualified</> : <><Award aria-hidden="true" size={13} /> {(current.trophyXpRequirement - personalTotal).toLocaleString()} season XP to qualify</>}</small></div>
+    </section> : null}
 
     <div className="season-section-heading"><div><p className="eyebrow">Per-game cooperative routes</p><h2>Seasonal expeditions</h2></div><Compass aria-hidden="true" /></div>
     <div className="expedition-grid">{current.expeditions.map((expedition) => <article className={expedition.completedAt ? "complete" : ""} key={expedition.id}><div><Flame aria-hidden="true" /><p className="eyebrow">{gameNames[expedition.gameType] ?? expedition.gameType.replaceAll("_", " ")}</p></div><h3>{expedition.name}</h3><p>{expedition.description}</p><ProgressRail value={expedition.progress} goal={expedition.threshold} label={expedition.name} /><small>{formatGoal(expedition.ruleType, expedition.progress)} / {formatGoal(expedition.ruleType, expedition.threshold)} verified</small></article>)}</div>
@@ -70,7 +92,7 @@ export default async function SeasonsPage() {
     <div className="season-section-heading"><div><p className="eyebrow">The lodge pulls together</p><h2>Team quests</h2></div><Users aria-hidden="true" /></div>
     <div className="season-quest-grid team">{teamQuests.map((quest) => <article className={quest.teamProgress?.completedAt ? "complete" : ""} key={quest.id}><p className="eyebrow">Team · {quest.ruleType.replaceAll("_", " ")}</p><h3>{quest.name}</h3><p>{quest.description}</p><ProgressRail value={quest.teamProgress?.progress ?? 0} goal={quest.threshold} label={quest.name} /><footer><span>{formatGoal(quest.ruleType, quest.teamProgress?.progress ?? 0)} / {formatGoal(quest.ruleType, quest.threshold)}</span><strong><Zap aria-hidden="true" size={13} /> {quest.xpReward} XP each</strong></footer></article>)}</div>
 
-    <section className="season-reward-preview"><Award aria-hidden="true" /><div><p className="eyebrow">Permanent cabinet record</p><h2>The seasonal shelf stays.</h2><p>When the season closes, enrolled members receive its commemorative trophy. Members who complete the first season also carry the Founder&apos;s Lantern permanently.</p></div><Trophy aria-hidden="true" /></section>
+    <section className="season-reward-preview"><Award aria-hidden="true" /><div><p className="eyebrow">Permanent cabinet record</p><h2>The seasonal shelf stays.</h2><p>{current.trophyXpRequirement > 0 ? <>When the season closes, every member who banked at least <strong>{current.trophyXpRequirement.toLocaleString()} season XP</strong> receives its commemorative trophy{current.ordinal === 1 ? <>, and the same bar carries the Founder&apos;s Lantern</> : null}. Enrolling alone does not earn the shelf; the pieces awarded stay permanently.</> : <>When the season closes, enrolled members receive its commemorative trophy{current.ordinal === 1 ? <>, along with the Founder&apos;s Lantern</> : null}. Awarded pieces stay permanently.</>}</p></div><Trophy aria-hidden="true" /></section>
     {archive.length ? <section className="season-archive"><div className="season-section-heading"><div><p className="eyebrow">Permanent record</p><h2>Past chronicles</h2></div></div><div>{archive.map((season) => <Link href={`/seasons/${season.slug}/chronicle`} key={season.id}><span>Season {season.ordinal}</span><strong>{season.name}</strong><small>{season._count.memberships} members · {season.chronicle ? "Chronicle available" : "Chronicle processing"}</small></Link>)}</div></section> : null}
   </section>;
 }

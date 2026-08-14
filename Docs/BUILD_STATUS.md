@@ -321,3 +321,23 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Added a reduced-motion-aware cinematic season Chronicle and a seeded First Light configuration that creates no memberships, progress, XP, or fabricated live activity
 - [x] Backed up the live local database, applied migration `20260814230000_add_seasons_and_community_expeditions`, and reran the idempotent seed; service deployment remains a separate private release step
 - [x] Replaced both seasonal trophy fallbacks with authored Legendary 3D heirlooms: a gilded ironwood First Light battle-standard and an internally lit Founder's Lantern, each with unique geometry, materials, front seal, reverse inscription, subtle motion, and localhost-only visual QA
+
+## 2026-08-14 - Seasons hardening pass
+
+- [x] Split the season reconciliation pass out of one long interactive transaction into bounded per-member, cooperative, and closure transactions with explicit timeouts; a whole-roster pass had been running several hundred sequential queries against Prisma's default five-second budget, where a `P2028` would have silently stopped all season reconciliation behind a warning line
+- [x] Excluded completed seasons from per-event season progression, so a backfilled or legacy-imported event landing inside a closed window can no longer add season XP or move expedition progress behind an already-published Chronicle snapshot
+- [x] Deferred cooperative goals to the periodic pass for legacy history replays, which had been rescanning the entire roster's season window once per imported row; live events still recompute expeditions and team quests immediately
+- [x] Replaced the per-member team-quest XP fan-out and the closure trophy fan-out with ledger-checked `createMany`, removing one no-op upsert per member per cycle
+- [x] Matched `isThreeMonthSeason` to the Postgres `INTERVAL '3 months'` CHECK constraint; naive JavaScript month addition overflowed month-end starts (30 Nov became 2 Mar rather than 28 Feb), so no month-end season could satisfy both the helper and the database
+- [x] Rendered the `notice` outcome that `joinSeason` redirects with; enrollment success and rejection had both been silently discarded by the seasons page
+- [x] Stopped loading every membership row on the seasons page to answer "am I enrolled" and "how many members", using a counted relation and one keyed lookup
+- [x] Added season reconciler tests covering replay safety across playtime, personal and team XP, closed-season exclusion, legacy-replay deferral, and month-end window arithmetic
+- [x] Full workspace verification after the pass: typecheck, lint, 209 tests, and production build all green
+
+## 2026-08-14 - Earned seasonal shelf
+
+- [x] Added `Season.trophyXpRequirement` (migration `20260815010000`, default and First Light value 1,500) so commemorative trophies and the Founder's Lantern are earned inside the window rather than granted for enrolling; zero disables the bar for a season that wants none. The bar sits just above finishing all five First Light quests (1,660 XP together) plus roughly sixty hours of verified play, out of reach for a last-day enrollment and reachable for anyone who ran the season
+- [x] Closure now awards only members whose own season ledger cleared the bar, and the Chronicle snapshot (version 2) records the requirement and how many members met it
+- [x] Made eligibility trackable while the season runs: a live progress rail and exact remaining-XP figure on `/seasons` for enrolled members, a shelf-qualified marker per row plus a qualified-of-enrolled count on `/leaderboards/season`, and the cleared-the-bar line in the closing Chronicle
+- [x] Corrected the reward copy, which had promised the shelf to every enrolled member and implied a completion bar that did not exist
+- [x] Full workspace verification after the pass: typecheck, lint, 210 tests, and production build all green
