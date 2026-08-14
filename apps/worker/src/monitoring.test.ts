@@ -2,9 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import type { Prisma } from "@habitat/db/client";
-import { autoLinkVerifiedSteamIdentity, runMonitoringCycle, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
+import { autoLinkVerifiedSteamIdentity, crossedWorldGatheringThreshold, runMonitoringCycle, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
 
-const valheim: MonitoredServer = { id: "server-1", slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN", playerPresenceInitialized: false, lastStateChangeAt: null };
+const valheim: MonitoredServer = { id: "server-1", slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN", playerCount: null, playerPresenceInitialized: false, lastStateChangeAt: null };
+
+test("a world gathering is only a measured crossing of five players", () => {
+  assert.equal(crossedWorldGatheringThreshold(4, 5), true);
+  assert.equal(crossedWorldGatheringThreshold(2, 7), true);
+  assert.equal(crossedWorldGatheringThreshold(5, 6), false);
+  assert.equal(crossedWorldGatheringThreshold(null, 5), false);
+  assert.equal(crossedWorldGatheringThreshold(4, null), false);
+});
 const status: AgentServerStatus = {
   key: "valheim",
   observedAt: new Date().toISOString(),

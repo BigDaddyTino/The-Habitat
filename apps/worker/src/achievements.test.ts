@@ -60,7 +60,10 @@ test("activity-backed achievements retain their exact evidence and replay once",
   const transaction = {
     gameActivity: { findUnique: async () => activity, count: async () => 1 },
     achievementDefinition: { findMany: async () => [{ id: "88888888-8888-8888-8888-888888888888", name: "First Rival Down", rarity: "COMMON", isRepeatable: false, gameKey: "MARVEL_RIVALS", ruleType: "ACTIVITY_COUNT", ruleConfig: { activityType: "MATCH_WON", threshold: 1, minimumConfidence: 90 } }] },
-    playerAchievement: { upsert: async ({ where, create }: { where: { dedupeKey: string }; create: { sourceActivityId?: string } }) => { if (!awards.has(where.dedupeKey)) awards.set(where.dedupeKey, create); return { id: "99999999-9999-9999-9999-999999999999" }; } },
+    playerAchievement: {
+      findUnique: async ({ where }: { where: { dedupeKey: string } }) => awards.has(where.dedupeKey) ? { id: "99999999-9999-9999-9999-999999999999" } : null,
+      upsert: async ({ where, create }: { where: { dedupeKey: string }; create: { sourceActivityId?: string } }) => { if (!awards.has(where.dedupeKey)) awards.set(where.dedupeKey, create); return { id: "99999999-9999-9999-9999-999999999999" }; },
+    },
     achievementReward: { findMany: async () => [] },
     userAchievementReward: { upsert: async () => ({}) },
     userTitle: { upsert: async () => ({}) },

@@ -10,7 +10,7 @@ export type DiscordNotificationInput = {
    * makes the announcement fire exactly once per broadcast.
    */
   evidenceKey?: string;
-  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "WAKE_REQUEST" | "STREAM_WENT_LIVE" | "OPERATIONS_ALERT";
+  kind: "SERVER_ONLINE" | "SERVER_SLEEPING" | "SERVER_OUTAGE" | "RECORD_BROKEN" | "LEGENDARY_ACHIEVEMENT" | "BOSS_KILLED" | "WORLD_GATHERING" | "WAKE_REQUEST" | "STREAM_WENT_LIVE" | "OPERATIONS_ALERT";
   content: string;
 };
 
@@ -101,6 +101,10 @@ function configurationAllows(configuration: { notifyServerOnline: boolean; notif
   if (kind === "RECORD_BROKEN") return configuration.notifyRecordBroken;
   if (kind === "WAKE_REQUEST") return configuration.notifyWakeRequest;
   if (kind === "OPERATIONS_ALERT") return configuration.notifyOperationalAlert;
+  // Boss and gathering notices are sparse, verified clubhouse moments. They
+  // follow the guild's master outbound-notice switch without adding more
+  // configuration columns.
+  if (kind === "BOSS_KILLED" || kind === "WORLD_GATHERING") return true;
   // Going live has no per-guild toggle column yet, so it follows the guild's
   // master notificationsEnabled switch, which the query above already applied.
   if (kind === "STREAM_WENT_LIVE") return true;

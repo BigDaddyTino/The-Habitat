@@ -58,6 +58,17 @@
 .reward-toast-copy { position:relative; z-index:1; align-self:center; min-width:0; }.reward-toast-copy .eyebrow { margin:0 0 5px; color:var(--rarity); }.reward-toast-copy strong { display:block; color:#fff1cf; font-family:var(--font-display); font-size:27px; line-height:.92; }.reward-toast-copy>span { display:block; margin-top:8px; color:#b8b9af; font-size:10px; line-height:1.45; }.reward-toast-copy small { display:block; margin-top:8px; color:var(--rarity); font-family:var(--font-mono); font-size:9px; text-transform:uppercase; }
 .reward-toast-loot { position:relative; z-index:1; grid-column:1/-1; display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; padding-top:10px; border-top:1px solid rgba(var(--rarity-rgb),.18); }.reward-toast-loot span { display:inline-flex; gap:5px; align-items:center; border:1px solid rgba(var(--rarity-rgb),.2); padding:4px 6px; color:#cbc9bb; font-family:var(--font-mono); font-size:9px; text-transform:uppercase; }
 .reward-ceremony.rarity-legendary .reward-toast-card,.reward-ceremony.rarity-questionable-life-choice .reward-toast-card { min-height:184px; border-width:1px 1px 1px 4px; background:radial-gradient(circle at 14% 40%,rgba(var(--rarity-rgb),.22),transparent 31%),linear-gradient(125deg,rgba(55,37,20,.98),rgba(24,18,22,.98) 62%,rgba(12,18,15,.98)); }
+.reward-ceremony::before,.reward-ceremony::after{content:"";position:absolute;opacity:0;pointer-events:none}
+.reward-ceremony.rarity-legendary::before,.reward-ceremony.rarity-questionable-life-choice::before{inset:-38%;background:repeating-conic-gradient(from 12deg at 78% 82%,transparent 0 8deg,rgba(var(--rarity-rgb),.045) 9deg 11deg,transparent 12deg 25deg);mix-blend-mode:screen;animation:reward-cinematic-rays 13s linear both}
+.reward-ceremony.rarity-legendary::after,.reward-ceremony.rarity-questionable-life-choice::after{inset:0;background:radial-gradient(circle at calc(100% - 120px) calc(100% - 105px),rgba(var(--rarity-rgb),.18),transparent 18%);animation:reward-cinematic-flash 1.7s ease-out both}
+.reward-ceremony.kind-world .reward-toast-card{border-top:2px solid rgba(var(--rarity-rgb),.85);background:radial-gradient(circle at 10% 42%,rgba(var(--rarity-rgb),.25),transparent 28%),linear-gradient(120deg,rgba(42,31,18,.985),rgba(16,19,16,.985) 64%)}
+.reward-ceremony.kind-world .reward-toast-card::before{content:"LIVE LAYER / CONFIDENCE 100";position:absolute;top:-18px;right:9px;border:1px solid rgba(var(--rarity-rgb),.44);border-bottom:0;padding:3px 7px;background:#121510;color:rgba(var(--rarity-rgb),.9);font-family:var(--font-mono);font-size:6px;letter-spacing:1.1px}
+.reward-ceremony.kind-world.is-preview .reward-toast-card::before{content:"VISUAL PREVIEW / NO EVENT RECORDED"}
+.reward-ceremony.kind-world .reward-toast-sigil::before,.reward-ceremony.kind-world .reward-toast-sigil::after{content:"";position:absolute;z-index:0;inset:4px;border:1px solid rgba(var(--rarity-rgb),.26);border-radius:50%;animation:reward-world-orbit 8s linear infinite}
+.reward-ceremony.kind-world .reward-toast-sigil::after{inset:13px;border-style:dashed;animation-direction:reverse;animation-duration:5s}
+.reward-ceremony.rarity-legendary .reward-toast-card{box-shadow:0 28px 95px #000e,0 0 0 1px rgba(var(--rarity-rgb),.17),0 0 65px rgba(var(--rarity-rgb),.31);animation:reward-legendary-enter .82s cubic-bezier(.12,.92,.18,1)}
+.reward-ceremony.rarity-legendary .reward-toast-copy strong{color:#fff7dc;text-shadow:0 0 22px rgba(var(--rarity-rgb),.35)}
+.reward-ceremony.rarity-legendary .reward-toast-scan::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-35%;width:22%;transform:skewX(-17deg);background:linear-gradient(90deg,transparent,rgba(255,248,215,.2),transparent);animation:reward-legendary-sweep 3.2s 1s ease-in-out infinite}
 
 @keyframes reward-emblem-breathe { 50% { transform:translateY(-2px) scale(1.035); } }
 @keyframes reward-emblem-glow { 50% { opacity:1; } }
@@ -65,6 +76,11 @@
 @keyframes reward-toast-glow { 50% { opacity:1; } }
 @keyframes reward-toast-leave { to { opacity:0; transform:translate3d(35px,12px,0) scale(.96); } }
 @keyframes reward-scan { to { transform:translateX(-35%); } }
+@keyframes reward-cinematic-rays{0%{opacity:0;transform:rotate(-5deg) scale(.86)}12%{opacity:1}100%{opacity:.3;transform:rotate(23deg) scale(1.08)}}
+@keyframes reward-cinematic-flash{0%{opacity:0}8%{opacity:1}28%{opacity:.16}100%{opacity:0}}
+@keyframes reward-world-orbit{to{transform:rotate(360deg)}}
+@keyframes reward-legendary-enter{0%{opacity:0;transform:translate3d(115%,22px,0) scale(.7) rotateY(-16deg)}58%{transform:translate3d(-8px,0,0) scale(1.025) rotateY(1deg)}100%{opacity:1;transform:none}}
+@keyframes reward-legendary-sweep{0%,35%{left:-35%;opacity:0}55%{opacity:1}85%,100%{left:115%;opacity:0}}
 
 @media (max-width:900px) {
   .achievement-command { grid-template-columns:1fr; }.achievement-command dl { width:100%; grid-template-columns:repeat(3,minmax(0,1fr)); }.achievement-archive-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -77,10 +93,10 @@
   .achievement-command { padding:25px 18px; }.achievement-command h1 { font-size:clamp(34px,11vw,59px); }.achievement-command dl { grid-template-columns:repeat(3,minmax(0,1fr)); }.achievement-command dl div { min-width:0; min-height:78px; padding:11px 8px; }.achievement-command dt { overflow-wrap:anywhere; }.achievement-command dd { font-size:27px; }
   .achievement-filter>span { width:100%; margin:3px 0 0; }.achievement-archive-grid { grid-template-columns:1fr; }.achievement-dossier { min-height:360px; }
   .cabinet-heading { align-items:start; }.cabinet-heading h2 { font-size:34px; }.cabinet-heading>strong { font-size:35px; }.trophy-cabinet-stage,.trophy-cabinet-section.compact .trophy-cabinet-stage { min-height:500px; }.cabinet-fallback { inset:54px 20px 205px; gap:3px 7px; }.cabinet-inspection { right:12px; bottom:12px; left:12px; width:auto; min-height:180px; padding:15px; }.cabinet-inspection .reward-emblem { position:absolute; top:12px; right:14px; transform:scale(.68); transform-origin:top right; }.cabinet-inspection h3 { max-width:70%; }.cabinet-heading>div>p:last-child { font-size:10px; }
-  .reward-toast-card { right:12px; bottom:12px; grid-template-columns:72px 1fr; width:calc(100vw - 24px); min-height:145px; padding:13px; }.reward-toast-sigil { width:68px; height:88px; transform:scale(.82); }.reward-toast-copy strong { font-size:23px; }.reward-toast-copy>span { font-size:9px; }
+  .reward-toast-card { right:12px; bottom:12px; left:12px; grid-template-columns:72px 1fr; width:auto; min-height:145px; padding:13px; }.reward-toast-sigil { width:68px; height:88px; transform:scale(.82); }.reward-toast-copy strong { font-size:23px; }.reward-toast-copy>span { font-size:9px; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .reward-emblem,.earned .reward-emblem,.reward-toast-sigil .reward-emblem,.reward-emblem::after,.earned .reward-emblem::after,.reward-toast-sigil .reward-emblem::after,.reward-toast-card,.reward-toast-card::after,.reward-toast-scan::before { animation:none; }
+  .reward-emblem,.earned .reward-emblem,.reward-toast-sigil .reward-emblem,.reward-emblem::after,.earned .reward-emblem::after,.reward-toast-sigil .reward-emblem::after,.reward-toast-card,.reward-toast-card::after,.reward-toast-scan::before,.reward-toast-scan::after,.reward-ceremony::before,.reward-ceremony::after,.reward-toast-sigil::before,.reward-toast-sigil::after { animation:none; }
   .achievement-dossier:hover,.achievement-dossier:focus-within { transform:none; }
 }
 

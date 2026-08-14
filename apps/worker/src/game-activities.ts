@@ -3,6 +3,7 @@ import type { GameActivityType, HabitatGameKey } from "@habitat/shared";
 import { evaluateAchievementsForActivity } from "./achievements.js";
 import { evaluateRecordsForActivity } from "./records.js";
 import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
+import { queueDiscordNotification } from "./discord-notifications.js";
 
 const PROJECTOR_STARTED_AT = new Date();
 
@@ -31,7 +32,14 @@ export function activitySpecsForMatchParticipant(input: { result: string; kills:
   return specs;
 }
 
-async function projectServerEvent(transaction: Prisma.TransactionClient, event: { id: string; gameType: string; eventType: string; occurredAt: Date; receivedAt: Date; valueNumber: number | null; valueText: string | null; source: string; sourceConfidence: number; playerIdentity: { userId: string | null } | null }) {
+async function projectServerEvent(transaction: Prisma.TransactionClient, event: { id: string; gameType: string; eventType: string; occurredAt: Date; receivedAt: Date; valueNumber: number | null; valueText: string | null; source: string; sourceConfidence: number; actorText: string | null; server: { displayName: string }; playerIdentity: { userId: string | null } | null }) {
+  if (event.eventType === "BOSS_KILLED" && event.sourceConfidence === 100 && event.receivedAt >= PROJECTOR_STARTED_AT) {
+    await queueDiscordNotification(transaction, {
+      serverEventId: event.id,
+      kind: "BOSS_KILLED",
+      content: `A server-wide boss fell in **${event.server.displayName}**${event.actorText ? ` to **${event.actorText}**` : ""}. The Chronicle has raised a trophy.`,
+    });
+  }
   if (!event.playerIdentity?.userId) return 0;
   const specs = activitySpecsForServerEvent(event.eventType, event.valueNumber);
   for (const spec of specs) {
@@ -70,7 +78,7 @@ export async function projectGameActivities(): Promise<{ serverSources: number; 
       where: { eventType: { in: ["PLAYER_JOINED", "PLAYER_DIED", "PLAYER_KILLED", "BOSS_KILLED"] }, playerIdentity: { is: { userId: { not: null } } }, gameActivities: { none: {} } },
       orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
       take: 200,
-      select: { id: true, gameType: true, eventType: true, occurredAt: true, receivedAt: true, valueNumber: true, valueText: true, source: true, sourceConfidence: true, playerIdentity: { select: { userId: true } } },
+      select: { id: true, gameType: true, eventType: true, occurredAt: true, receivedAt: true, valueNumber: true, valueText: true, source: true, sourceConfidence: true, actorText: true, server: { select: { displayName: true } }, playerIdentity: { select: { userId: true } } },
     }),
     db.clubGameMatchParticipant.findMany({
       where: { gameActivities: { none: {} } },

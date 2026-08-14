@@ -14,6 +14,7 @@ export type MonitoredServer = {
   gameType: string;
   desiredState: ServerState;
   actualState: ServerState;
+  playerCount: number | null;
   playerPresenceInitialized: boolean;
   lastStateChangeAt: Date | null;
 };
@@ -100,7 +101,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
     async findBySlug(slug) {
       const server = await db.gameServer.findUnique({
         where: { slug },
-        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true, playerCount: true } } },
       });
       return server ? toMonitoredServer(server) : null;
     },
@@ -110,7 +111,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
           lastQueryAt: { not: null },
           runtimeState: { is: { processRunning: { not: null } } },
         },
-        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true } } },
+        select: { id: true, slug: true, displayName: true, gameType: true, desiredState: true, actualState: true, lastStateChangeAt: true, runtimeState: { select: { details: true, playerCount: true } } },
       });
       return servers.map(toMonitoredServer);
     },
@@ -210,6 +211,30 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
             if (notification) await queueDiscordNotification(transaction, { serverEventId: event.id, ...notification });
           }
         }
+        const currentPlayerCount = status.query?.playerCount ?? null;
+        if (crossedWorldGatheringThreshold(server.playerCount, currentPlayerCount)) {
+          const dedupeKey = `gathering:${server.id}:${observedAt.toISOString()}`;
+          const event = await transaction.serverEvent.upsert({
+            where: { dedupeKey },
+            create: {
+              serverId: server.id,
+              gameType: server.gameType as never,
+              eventType: "WORLD_GATHERING",
+              occurredAt: observedAt,
+              valueNumber: currentPlayerCount,
+              source: "HABITAT_AGENT",
+              sourceConfidence: 100,
+              dedupeKey,
+              metadata: { threshold: worldGatheringThreshold, previousPlayerCount: server.playerCount, playerCount: currentPlayerCount },
+            },
+            update: {},
+          });
+          await queueDiscordNotification(transaction, {
+            serverEventId: event.id,
+            kind: "WORLD_GATHERING",
+            content: `The Great Hall is stirring: **${currentPlayerCount} players** are gathered in **${server.displayName}**.`,
+          });
+        }
         if (status.log?.available && status.log.lastSaveAt) {
           await transaction.serverEvent.upsert({
             where: { dedupeKey: `dragonwilds-save:${server.id}:${status.log.lastSaveAt}` },
@@ -304,8 +329,15 @@ function shouldAnnounceTransition(eventType: NonNullable<ReturnType<typeof chron
   return previousState === "SLEEPING" || previousState === "DOWN_UNEXPECTEDLY" || previousState === "STOPPING" || previousState === "STARTING";
 }
 
-function toMonitoredServer(server: { id: string; slug: string; displayName: string; gameType: string; desiredState: string; actualState: string; lastStateChangeAt: Date | null; runtimeState: { details: unknown } | null }): MonitoredServer {
-  return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details), lastStateChangeAt: server.lastStateChangeAt };
+function toMonitoredServer(server: { id: string; slug: string; displayName: string; gameType: string; desiredState: string; actualState: string; lastStateChangeAt: Date | null; runtimeState: { details: unknown; playerCount?: number | null } | null }): MonitoredServer {
+  return { id: server.id, slug: server.slug, displayName: server.displayName, gameType: server.gameType, desiredState: server.desiredState as ServerState, actualState: server.actualState as ServerState, playerCount: server.runtimeState?.playerCount ?? null, playerPresenceInitialized: hasPlayerPresenceBaseline(server.runtimeState?.details), lastStateChangeAt: server.lastStateChangeAt };
+}
+
+export const worldGatheringThreshold = 5;
+
+/** A missing baseline is not a crossing and therefore cannot create a ceremony. */
+export function crossedWorldGatheringThreshold(previous: number | null, current: number | null): boolean {
+  return previous !== null && current !== null && previous < worldGatheringThreshold && current >= worldGatheringThreshold;
 }
 
 async function synchronizeNamedPlayerPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date, emitPalworldChronicleEvents: boolean) {

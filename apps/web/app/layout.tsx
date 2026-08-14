@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <main>{children}</main>
         <footer className="site-footer"><span>The Habitat · Private clubhouse</span><Link href="/privacy">Privacy &amp; provider data</Link></footer>
         <PresenceHeartbeat enabled={Boolean(session?.user?.isActive)} />
-        <ProgressionToasts enabled={Boolean(session?.user?.isActive)} />
+        <ProgressionToasts enabled={Boolean(session?.user?.isActive)} initialLiveCursor={new Date().toISOString()} />
       </body>
     </html>
   );

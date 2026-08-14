@@ -55,6 +55,7 @@ export const collectibleVisuals: Record<string, CollectibleVisual> = {
   "dusty-ledger": visual({ atlas: "trophy", tile: 5, form: "ledger", metal: "#806a4b", accent: "#c9ad78", enamel: "#28251f", inscription: "TEN OLD CHAPTERS AUTHENTICATED." }),
   "centurion-monument": visual({ atlas: "trophy", tile: 6, form: "centurion", metal: "#d2a44f", accent: "#ffd983", enamel: "#32221d", inscription: "LEVEL ONE HUNDRED. ENTERED IN HISTORY." }),
   "window-bear": visual({ atlas: "trophy", tile: 7, form: "bear", metal: "#9b7147", accent: "#d8ae73", enamel: "#2c221c", inscription: "YOU TAPPED. IT OBJECTED." }),
+  "bossbreaker-reliquary": visual({ atlas: "trophy", tile: 6, form: "boss-reliquary", metal: "#9f6d36", accent: "#f0c873", enamel: "#241815", inscription: "THE WORLD STOOD. THE BOSS DID NOT." }),
 };
 
 const fallbackByKind: Record<PhysicalRewardKind, CollectibleVisual> = {

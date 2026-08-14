@@ -104,7 +104,7 @@ export type AgentLegacyPlayerEvidence = {
   sourceRecordHash: string;
 };
 
-export const agentLegacyEventTypes = ["PLAYER_JOINED", "PLAYER_LEFT", "PLAYER_DIED", "ACHIEVEMENT_EARNED", "RECORD_BROKEN"] as const;
+export const agentLegacyEventTypes = ["PLAYER_JOINED", "PLAYER_LEFT", "PLAYER_DIED", "BOSS_KILLED", "ACHIEVEMENT_EARNED", "RECORD_BROKEN"] as const;
 export type AgentLegacyEventType = typeof agentLegacyEventTypes[number];
 
 export type AgentLegacyPlayerEvent = {

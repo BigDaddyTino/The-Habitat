@@ -286,3 +286,17 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Pinned the service XML to a validated absolute Node 24.19+ executable and explicit Agent working directory
 - [x] Corrected all generated game/update service logs to 10 MB, midnight rolling, and 14-file retention; added the missing midnight roll trigger to the Agent, worker, and web templates
 - [ ] Deploy the corrected Agent with `update-agent.ps1`; replace the twelve generated game/update services only during a controlled window after confirming every game process is stopped
+
+## 2026-08-14 - Habitat Live Layer
+
+- [x] Added one shared, typed live-event contract projected exclusively from confidence-100 `ServerEvent` evidence; the authenticated browser feed is bounded, cursor-based, private/no-store, and introduces no public service or port
+- [x] Connected verified world starts to matching Great Hall portal ignition and verified unexpected stops to a distinct portal sputter treatment; intentional `SLEEPING` remains visually and semantically separate
+- [x] Added a five-player threshold crossing event that requires a known prior player count, records a Chronicle entry, warms and populates the Hall, and queues a replay-safe Discord notice
+- [x] Added allow-listed HabitatCore `BOSS` ingestion, Chronicle presentation, server-wide trophy ceremony, Discord notice, and a verified-identity Bossbreaker achievement with a persisted trophy reward
+- [x] Connected top-tier persisted achievement events to a temporary Great Hall constellation and routed all five live moments through the existing Three.js/Rive cinematic ceremony renderer with reduced-motion fallbacks
+- [x] Completed the Live Layer cinematic polish pass: a self-contained transparent vector antler/mountain Legendary constellation crest, celestial orbit and impact-light choreography, warm gathering silhouettes and firelight, an authored boss reliquary rise, multi-ring portal ignition, crash-only portal core sputter, full-screen Legendary ceremony rays, and a bespoke rotating 3D Bossbreaker Reliquary; all effects have responsive and reduced-motion presentations
+- [x] Audited every Live Layer image reference and visual anchor in-browser at desktop and 390px mobile widths; removed the rejected fringe-contaminated raster crest, corrected the mobile toast viewport overflow and Three.js ceremony center, and added regression coverage for asset transparency, anchors, sleeping-state isolation, and mobile placement
+- [x] Added localhost-only visual QA routes for Hall, portal, and toast choreography. Every preview is explicitly marked as a visual preview/no event recorded and never enters Chronicle, progression, telemetry, or Discord
+- [x] Added live projection, threshold, and boss parser coverage; strict shared/worker/web typechecks, agent and worker tests, web tests, and web lint pass locally
+- [x] Restored and verified the loopback HabitatWeb service on the new build after validation; the web projection detects installed event enum values, so this staged rollout does not represent the unapplied gathering migration as available
+- [ ] Apply migration `20260814170000_add_habitat_live_layer`, rerun the idempotent seed, and deploy the agent and worker builds through the private release process before representing the Live Layer as active in production

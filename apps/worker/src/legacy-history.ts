@@ -6,6 +6,7 @@ import { autoLinkVerifiedSteamIdentity } from "./monitoring.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { processProgressionForEvent } from "./progression.js";
 import { reconcileSteamIdentityNames } from "./steam-personas.js";
+import { queueDiscordNotification } from "./discord-notifications.js";
 
 export type LegacyHistoryReader = { readLegacyHistories(): Promise<AgentLegacyHistory[]> };
 export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; namesReconciled: number; ignored: number; failed: number };
@@ -15,7 +16,7 @@ export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<
   const histories = await reader.readLegacyHistories();
   const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, namesReconciled: 0, ignored: 0, failed: 0 };
   for (const history of histories) {
-    const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true, slug: true } });
+    const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true, slug: true, displayName: true } });
     if (!server) { result.ignored += 1; continue; }
     result.servers += 1;
     const scannedAt = parseScanTimestamp(history.scannedAt);
@@ -125,7 +126,7 @@ function parseScanTimestamp(value: string): Date {
 
 async function importEvidence(
   transaction: Prisma.TransactionClient,
-  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"] },
+  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"]; displayName?: string },
   sourceKind: string,
   sourceLabel: string,
   item: AgentLegacyPlayerEvidence,
@@ -205,7 +206,7 @@ async function importEvidence(
 
 async function importHistoricalEvent(
   transaction: Prisma.TransactionClient,
-  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"] },
+  server: { id: string; gameType: Prisma.LegacyPlayerEvidenceCreateInput["gameType"]; displayName?: string },
   sourceKind: string,
   sourceLabel: string,
   item: AgentLegacyPlayerEvent,
@@ -221,7 +222,7 @@ async function importHistoricalEvent(
     return false;
   }
   if (item.eventType === "PLAYER_JOINED" && await findCrossSourceJoin(transaction, server.id, identity.id, new Date(item.occurredAt), "LEGACY_HISTORY_IMPORT")) return false;
-  await transaction.serverEvent.create({
+  const event = await transaction.serverEvent.create({
     data: {
       serverId: server.id,
       gameType: server.gameType,
@@ -236,6 +237,13 @@ async function importHistoricalEvent(
       metadata: { sourceKind, sourceLabel, recovered: true },
     },
   });
+  if (item.eventType === "BOSS_KILLED") {
+    await queueDiscordNotification(transaction, {
+      serverEventId: event.id,
+      kind: "BOSS_KILLED",
+      content: `A server-wide boss fell in **${server.displayName ?? server.gameType.replaceAll("_", " ")}** to **${item.displayName}**. The Chronicle has raised a trophy.`,
+    });
+  }
   return true;
 }
 

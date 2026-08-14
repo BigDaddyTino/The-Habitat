@@ -15,7 +15,7 @@ export function RewardCeremony({ toast, leaving = false }: { toast: RewardCeremo
   const threeCanvasRef = useRef<HTMLCanvasElement>(null);
   const riveCanvasRef = useRef<HTMLCanvasElement>(null);
   const presentation = rarityPresentation[toast.rarity];
-  const headline = toast.kind === "achievement" ? `${presentation.label} achievement` : toast.kind === "level" ? "Habitat level increased" : "Verified XP recorded";
+  const headline = toast.preview ? "Cinematic visual preview" : toast.kind === "achievement" ? `${presentation.label} achievement` : toast.kind === "level" ? "Habitat level increased" : toast.kind === "world" ? `${presentation.label} live event` : "Verified XP recorded";
 
   useEffect(() => {
     const root = rootRef.current;
@@ -102,7 +102,10 @@ export function RewardCeremony({ toast, leaving = false }: { toast: RewardCeremo
         threeRenderer.setSize(window.innerWidth, window.innerHeight, false);
         camera.aspect = window.innerWidth / Math.max(1, window.innerHeight); camera.updateProjectionMatrix();
         const mobile = window.innerWidth < 700;
-        particles.position.set(mobile ? 0 : 2.8, mobile ? -1.9 : -1.55, 0);
+        particles.position.set(mobile ? -0.95 : 2.8, mobile ? -2.36 : -1.55, 0);
+        particles.scale.setScalar(mobile ? 0.68 : 1);
+        ring.scale.setScalar(mobile ? 0.62 : 1);
+        core.scale.setScalar(mobile ? 0.68 : 1);
         ring.position.copy(particles.position); core.position.copy(particles.position);
       };
       resize(); window.addEventListener("resize", resize);
@@ -150,13 +153,13 @@ export function RewardCeremony({ toast, leaving = false }: { toast: RewardCeremo
 
   const physicalReward = toast.rewards?.find((reward): reward is typeof reward & { kind: PhysicalRewardKind } => reward.kind === "TROPHY" || reward.kind === "MEDAL" || reward.kind === "BADGE");
   const emblemKind = physicalReward?.kind ?? "BADGE";
-  return <aside className={`reward-ceremony rarity-${toast.rarity.toLowerCase().replaceAll("_", "-")}${leaving ? " is-leaving" : ""}`} ref={rootRef} aria-live={presentation.ceremony === "legendary" ? "assertive" : "polite"}>
+  return <aside className={`reward-ceremony kind-${toast.kind} rarity-${toast.rarity.toLowerCase().replaceAll("_", "-")}${toast.preview ? " is-preview" : ""}${leaving ? " is-leaving" : ""}`} ref={rootRef} aria-live={toast.preview ? "off" : presentation.ceremony === "legendary" ? "assertive" : "polite"}>
     <canvas className="reward-three-canvas" ref={threeCanvasRef} aria-hidden="true" />
     <div className="reward-toast-card">
       <i className="reward-toast-scan" aria-hidden="true" />
       <div className="reward-toast-sigil"><canvas className="reward-rive-canvas" ref={riveCanvasRef} aria-hidden="true" />{physicalReward ? <CollectibleCanvas item={{ code: physicalReward.code ?? `unclassified-${physicalReward.kind.toLowerCase()}`, name: physicalReward.name, kind: physicalReward.kind, rarity: toast.rarity, achievementName: toast.title }} className="reward-toast-collectible" /> : <RewardEmblem rarity={toast.rarity} kind={emblemKind} size="large" />}</div>
       <div className="reward-toast-copy"><p className="eyebrow">{headline}</p><strong>{toast.title}</strong><span>{toast.detail}</span>{toast.points ? <small>+{toast.points} achievement points</small> : null}</div>
-      <div className="reward-toast-loot">{toast.rewards?.length ? toast.rewards.slice(0, 3).map((reward) => <span key={`${reward.kind}-${reward.name}`}><Trophy aria-hidden="true" size={12} />{reward.name}</span>) : toast.kind === "level" ? <span><Crown aria-hidden="true" size={12} />Milestone reached</span> : toast.kind === "xp" ? <span><Zap aria-hidden="true" size={12} />Verified progress</span> : <span><Sparkles aria-hidden="true" size={12} />Archive updated</span>}</div>
+      <div className="reward-toast-loot">{toast.rewards?.length ? toast.rewards.slice(0, 3).map((reward) => <span key={`${reward.kind}-${reward.name}`}><Trophy aria-hidden="true" size={12} />{reward.name}</span>) : toast.kind === "level" ? <span><Crown aria-hidden="true" size={12} />Milestone reached</span> : toast.kind === "xp" ? <span><Zap aria-hidden="true" size={12} />Verified progress</span> : toast.kind === "world" ? <span><Sparkles aria-hidden="true" size={12} />Verified Chronicle event</span> : <span><Sparkles aria-hidden="true" size={12} />Archive updated</span>}</div>
     </div>
   </aside>;
 }

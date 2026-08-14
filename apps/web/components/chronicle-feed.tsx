@@ -10,6 +10,8 @@ import type { ChronicleEventView } from "@/lib/world-data";
 const chronicleSymbolRules: Array<[RegExp, string]> = [
   [/ set a new record: /, "record"],
   [/ earned /, "achievement"],
+  [/ defeated|a boss /, "achievement"],
+  [/ players gathered /, "join"],
   [/ joined /, "join"],
   [/ stopped unexpectedly\.$/, "death"],
 ];

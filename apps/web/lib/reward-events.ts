@@ -8,7 +8,8 @@ export type RewardCeremonyDetail = {
   category?: string;
   points?: number;
   rewards?: Array<{ kind: AchievementRewardKind; code?: string; name: string }>;
-  kind: "achievement" | "level" | "xp";
+  kind: "achievement" | "level" | "xp" | "world";
+  preview?: boolean;
 };
 
 export const rewardPreviewEvent = "habitat:reward-preview";

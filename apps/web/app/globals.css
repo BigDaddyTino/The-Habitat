@@ -12,6 +12,33 @@
 
 .world-card.state-sleeping { opacity: .62; transition: opacity .18s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .world-card.state-sleeping:hover, .world-card.state-sleeping:focus-within { opacity: .86; }
+.world-card { position:relative; isolation:isolate; overflow:hidden; }
+.world-card>*:not(.world-portal-reaction){position:relative;z-index:2}
+.world-portal-reaction { position:absolute; z-index:0; top:50%; left:83%; width:310px; aspect-ratio:1; transform:translate(-50%,-50%); border-radius:50%; opacity:0; filter:saturate(1.12); pointer-events:none; }
+.world-portal-reaction::before,.world-portal-reaction::after{content:"";position:absolute;inset:12%;border-radius:50%;background:repeating-conic-gradient(from 12deg,transparent 0 13deg,color-mix(in srgb,var(--accent) 66%,#fff) 14deg 14.5deg,transparent 15deg 31deg);-webkit-mask-image:radial-gradient(circle,transparent 0 66%,#000 67% 69%,transparent 70%);mask-image:radial-gradient(circle,transparent 0 66%,#000 67% 69%,transparent 70%)}
+.world-portal-reaction::after{inset:20%;animation-direction:reverse;animation-duration:8s}
+.world-portal-reaction i { position:absolute; inset:34%; border:1px solid color-mix(in srgb,var(--accent) 80%,#fff); border-radius:50%; box-shadow:0 0 18px color-mix(in srgb,var(--accent) 70%,transparent),inset 0 0 16px color-mix(in srgb,var(--accent) 35%,transparent); animation:portal-ring 2.2s ease-out infinite; }
+.world-portal-reaction i:nth-child(2){inset:29%;animation-delay:-.42s}.world-portal-reaction i:nth-child(3){inset:24%;animation-delay:-.84s}.world-portal-reaction i:nth-child(4){inset:19%;animation-delay:-1.26s}.world-portal-reaction i:nth-child(5){inset:14%;animation-delay:-1.68s}
+.world-portal-reaction b{position:absolute;inset:38%;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fff8d9,#f6bd62 9%,#dc6b32 23%,#4c261a99 45%,transparent 69%);box-shadow:0 0 42px #f2a54d88;animation:portal-core 1.35s ease-in-out infinite alternate}
+.world-portal-caption{position:absolute!important;z-index:3!important;right:12px;bottom:12px;border:1px solid #e3b56266;padding:5px 7px;background:#16130dde;color:#f1d18d;font-family:var(--font-mono);font-size:7px;letter-spacing:.65px;text-transform:uppercase;box-shadow:0 8px 20px #0008;animation:portal-caption-in .6s .2s ease-out both}
+.world-card.live-portal-ignite { border-color:#efb45e; box-shadow:0 0 0 1px #efb45e55,0 18px 46px #de7b324f,inset -45px 0 70px #db783017; }
+.world-card.live-portal-ignite .world-portal-reaction { opacity:.94; background:radial-gradient(circle,#fff5cc59 0 4%,#f3b55832 11%,#dc78311c 27%,transparent 61%); animation:portal-ignite 9s linear infinite; }
+.world-card.live-portal-ignite::after{content:"";position:absolute;z-index:1;inset:-80% -30%;transform:rotate(22deg);background:linear-gradient(90deg,transparent 40%,#ffe4a11a 49%,transparent 58%);animation:portal-light-sweep 3.8s ease-in-out infinite;pointer-events:none}
+.world-card.state-down-unexpectedly { border-color:#8b3d37; background:radial-gradient(circle at 85% 12%,#b93b2815,transparent 35%),var(--panel); }
+.world-card.state-down-unexpectedly .world-portal-reaction,.world-card.live-portal-sputter .world-portal-reaction { opacity:.68; background:repeating-conic-gradient(from 15deg,#d64d3233 0 3deg,transparent 3deg 34deg); animation:portal-sputter .72s steps(2,end) infinite; }
+.world-card.state-down-unexpectedly .world-portal-reaction i,.world-card.live-portal-sputter .world-portal-reaction i { border-color:#d95a45; box-shadow:0 0 18px #d5413388; }
+.world-card.state-down-unexpectedly .world-portal-reaction b,.world-card.live-portal-sputter .world-portal-reaction b{background:radial-gradient(circle,#ffd2c3,#d6523d 13%,#541a18 31%,transparent 66%);box-shadow:0 0 31px #d5413388;animation:portal-core-fail .63s steps(2,end) infinite}
+.world-card.state-down-unexpectedly .world-portal-caption,.world-card.live-portal-sputter .world-portal-caption{border-color:#bd554b80;color:#ef9c8f;background:#21100ee8}
+/* Sleeping worlds stay calm and dim. Only an unexpected outage sputters. */
+.world-card.state-sleeping .world-portal-reaction{display:none}
+@keyframes portal-ignite{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes portal-ring{0%{opacity:.8;transform:scale(.58)}85%,100%{opacity:0;transform:scale(1.08)}}
+@keyframes portal-core{to{opacity:.72;transform:scale(1.16)}}
+@keyframes portal-core-fail{0%,100%{opacity:.22;transform:scale(.7)}35%{opacity:1;transform:scale(1.18)}55%{opacity:.12}72%{opacity:.78;transform:scale(.9)}}
+@keyframes portal-light-sweep{0%,35%{transform:translateX(-45%) rotate(22deg);opacity:0}55%{opacity:1}80%,100%{transform:translateX(42%) rotate(22deg);opacity:0}}
+@keyframes portal-caption-in{from{opacity:0;transform:translateY(8px)}}
+@keyframes portal-sputter{0%,100%{opacity:.18;transform:translate(-50%,-50%) scale(.96) rotate(-2deg)}35%{opacity:.8;transform:translate(-50%,-50%) scale(1.04) rotate(2deg)}55%{opacity:.28}70%{opacity:.7}}
+@media(prefers-reduced-motion:reduce){.world-card.live-portal-ignite .world-portal-reaction,.world-card.live-portal-ignite::after,.world-card.state-down-unexpectedly .world-portal-reaction,.world-card.live-portal-sputter .world-portal-reaction,.world-portal-reaction::before,.world-portal-reaction::after,.world-portal-reaction i,.world-portal-reaction b,.world-portal-caption{animation:none}.world-card.live-portal-ignite .world-portal-reaction{opacity:.62}.world-card.state-down-unexpectedly .world-portal-reaction,.world-card.live-portal-sputter .world-portal-reaction{opacity:.42}}
 
 :root { --ink: #ece7d7; --muted: #9e9e90; --paper: #d6c397; --night: #111412; --panel: #1a201c; --line: #364139; --brass: #b89b5e; --ember: #dc6b32; --moss: #6e9a5b; --danger: #cd5650; }
 * { box-sizing: border-box; }

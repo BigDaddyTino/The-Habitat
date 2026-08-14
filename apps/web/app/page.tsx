@@ -27,7 +27,7 @@ export default async function GreatHallPage() {
     <div className="great-hall">
       <section className={`hall-hero sky-${atmosphere.sky}`}>
         <div className={`hero-image hero-image-${atmosphere.sky}`} aria-hidden="true" />
-        <HallAtmosphere {...atmosphere} />
+        <HallAtmosphere {...atmosphere} activePlayers={activePlayers} />
         <div className="hero-shade" aria-hidden="true" />
         <div className="hero-content content-shell">
           <p className="eyebrow">Private operations center</p>

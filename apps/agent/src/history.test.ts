@@ -158,6 +158,7 @@ test("Habitat Chronicle recovers native players separately from their game event
     "2026-08-09T21:09:47.9275202Z\tRECORD\tBamor\tset a personal longest-life record: 2h 3m.",
     "2026-08-10T20:55:20.3707719Z\tPLAYER\tSchlotzsky\tentered the Habitat records system.",
     "2026-08-10T21:17:33.3836665Z\tACHIEVEMENT\tSchlotzsky\tunlocked LOGGED IN AND IMMEDIATELY DIED.",
+    "2026-08-10T22:17:33.3836665Z\tBOSS\tSchlotzsky\tdefeated The Elder.",
     "2026-08-10T21:17:33.3836665Z\tSERVER\t\tHabitat Core started.",
   ].join("\n");
   const evidence = parseLegacyHistory("HABITAT_CHRONICLE_LOG", contents);
@@ -165,8 +166,9 @@ test("Habitat Chronicle recovers native players separately from their game event
   assert.equal(evidence.length, 2);
   assert.equal(evidence[0]?.externalAccountId, null);
   assert.match(evidence[0]?.providerKey ?? "", /^native:[a-f0-9]{32}$/);
-  assert.deepEqual(events.map((event) => event.eventType), ["PLAYER_JOINED", "PLAYER_DIED", "RECORD_BROKEN", "PLAYER_JOINED", "ACHIEVEMENT_EARNED"]);
-  assert.equal(events.at(-1)?.valueText, "unlocked LOGGED IN AND IMMEDIATELY DIED.");
+  assert.deepEqual(events.map((event) => event.eventType), ["PLAYER_JOINED", "PLAYER_DIED", "RECORD_BROKEN", "PLAYER_JOINED", "ACHIEVEMENT_EARNED", "BOSS_KILLED"]);
+  assert.equal(events.at(-2)?.valueText, "unlocked LOGGED IN AND IMMEDIATELY DIED.");
+  assert.equal(events.at(-1)?.valueText, "defeated The Elder.");
 });
 
 test("Project Zomboid parser recovers the Steam identity and visible player name", () => {

@@ -32,6 +32,8 @@ Supported source kinds are:
 
 The worker rescans configured sources on the configured interval, deduplicates normalized evidence, and creates retained roster/Chronicle data. Only measured, timestamp-paired sessions with verified ownership qualify as playtime for XP. Other evidence can remain visible, earn history-specific achievements where explicitly defined, and become attributable once ownership is proven.
 
+HabitatCore Chronicle sources may also emit an allow-listed `BOSS` row (`timestamp<TAB>BOSS<TAB>actor<TAB>detail`). The agent normalizes it to `BOSS_KILLED`; arbitrary event names or unstructured game output are not accepted as boss evidence.
+
 ## Service control
 
 Control capabilities are independent from observations. The agent accepts only `start`, `stop`, `restart`, and `update` for server keys with a configured named Windows service and update service. The admin portal queues a typed-confirmed, audited command; the worker dispatches it; the agent verifies service/process state. No adapter accepts a browser-provided process, path, argument, service name, or arbitrary command.

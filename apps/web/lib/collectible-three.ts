@@ -252,6 +252,21 @@ function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleId
     [-1, 1].forEach((side) => addMesh(group, new THREE.BoxGeometry(0.58, 1.18, 0.16), page, [side * 0.31, -0.03, 0], [0, side * -0.12, side * 0.05]));
     addTube(THREE, group, [[-0.62, 0.38, 0.15], [0, 0.1, 0.27], [0.62, 0.38, 0.15]], 0.045, dark);
     for (let index = 0; index < 10; index += 1) addMesh(group, new THREE.BoxGeometry(0.12, 0.055, 0.04), metal, [0.69, 0.48 - index * 0.09, 0.04]);
+  } else if (visual.form === "boss-reliquary") {
+    const relic = new THREE.MeshStandardMaterial({ color: "#8e2f24", emissive: "#d24a31", emissiveIntensity: 1.25, metalness: 0.32, roughness: 0.16 });
+    addMesh(group, new THREE.CylinderGeometry(0.24, 0.38, 0.64, 12), dark, [0, -0.35, 0]);
+    addMesh(group, new THREE.OctahedronGeometry(0.34, 1), relic, [0, 0.28, 0.02], [0.12, 0, Math.PI / 4]);
+    addMesh(group, new THREE.TorusGeometry(0.54, 0.045, 10, 48), accent, [0, 0.28, 0], [Math.PI / 2, 0, 0]);
+    addMesh(group, new THREE.TorusGeometry(0.54, 0.035, 10, 48), metal, [0, 0.28, 0], [Math.PI / 2, Math.PI / 2, 0]);
+    [-1, 1].forEach((side) => {
+      addTube(THREE, group, [[side * 0.17, -0.15, 0], [side * 0.45, 0.22, 0], [side * 0.62, 0.68, 0]], 0.055, metal);
+      addTube(THREE, group, [[side * 0.39, 0.17, 0], [side * 0.72, 0.35, 0]], 0.035, accent);
+      addMesh(group, new THREE.ConeGeometry(0.09, 0.42, 7), accent, [side * 0.57, 0.79, 0], [0, 0, side * -0.22]);
+    });
+    for (let index = 0; index < 5; index += 1) {
+      const angle = (index / 5) * Math.PI * 2;
+      addMesh(group, new THREE.SphereGeometry(0.045, 12, 8), accent, [Math.cos(angle) * 0.51, 0.28 + Math.sin(angle) * 0.51, 0.08]);
+    }
   } else if (visual.form === "centurion") {
     addMesh(group, new THREE.SphereGeometry(0.55, 32, 18, 0, Math.PI * 2, 0, Math.PI * 0.62), metal, [0, 0.15, 0], [0, 0, Math.PI]);
     addMesh(group, new THREE.BoxGeometry(0.14, 0.7, 0.54), accent, [0, -0.05, 0.32]);

@@ -15,6 +15,56 @@
 .hall-event-window>* { pointer-events:none; }
 .hall-hero .hero-content { pointer-events:none; }
 .hall-hero .hero-content a,.hall-hero .hero-content button { pointer-events:auto; }
+
+/* Verified live-event overlays. They are inert until the authenticated bridge
+   dispatches a confidence-100 Chronicle projection. */
+.hall-live-impact,.hall-live-constellation,.hall-live-crowd,.hall-live-trophy,.hall-live-announcement{position:absolute;z-index:7;opacity:0;pointer-events:none}
+.hall-live-impact{inset:0;z-index:6;background:radial-gradient(circle at 74% 28%,#fff0bd45,transparent 13%),linear-gradient(108deg,transparent 40%,#f4bd6630 54%,transparent 68%);mix-blend-mode:screen}
+.live-constellation .hall-live-impact,.live-trophy-ceremony .hall-live-impact{animation:live-impact-flash 1.8s cubic-bezier(.16,.8,.2,1) both}
+
+.hall-live-constellation{top:-2%;right:1.5%;bottom:25%;left:42%;display:grid;place-items:center;perspective:800px;filter:drop-shadow(0 0 14px #f4d78d66)}
+.hall-live-constellation::before,.hall-live-constellation::after{content:"";position:absolute;top:50%;left:50%;width:min(37vw,430px);aspect-ratio:1;transform:translate(-50%,-50%);border:1px solid #f2d28d31;border-radius:50%;box-shadow:inset 0 0 42px #f1b45313,0 0 34px #f1b45310}
+.hall-live-constellation::after{width:min(29vw,330px);border-style:dashed;animation:live-celestial-orbit 18s linear infinite}
+.hall-live-constellation-crest{position:relative;width:min(49vw,630px);height:auto;opacity:.96;mix-blend-mode:screen;filter:brightness(1.28) saturate(.72) sepia(.12) drop-shadow(0 0 18px #f2c46faa);transform:translateZ(0)}
+.hall-live-starfield{position:absolute;inset:0}
+.hall-live-starfield i{position:absolute;width:4px;aspect-ratio:1;border-radius:50%;background:#fff6cf;box-shadow:0 0 10px 3px #eebc55;animation:live-star-pulse 1.8s ease-in-out infinite alternate}
+.hall-live-starfield i:nth-child(1){left:9%;top:58%}.hall-live-starfield i:nth-child(2){left:18%;top:25%;animation-delay:-.3s}.hall-live-starfield i:nth-child(3){left:31%;top:43%;animation-delay:-.9s}.hall-live-starfield i:nth-child(4){left:44%;top:17%;animation-delay:-1.2s}.hall-live-starfield i:nth-child(5){left:57%;top:29%;animation-delay:-.5s}.hall-live-starfield i:nth-child(6){left:72%;top:18%;animation-delay:-1.4s}.hall-live-starfield i:nth-child(7){left:89%;top:48%;animation-delay:-.1s}.hall-live-starfield i:nth-child(8){left:82%;top:76%;animation-delay:-.8s}.hall-live-starfield i:nth-child(9){left:63%;top:69%;animation-delay:-1.5s}.hall-live-starfield i:nth-child(10){left:48%;top:82%;animation-delay:-.4s}.hall-live-starfield i:nth-child(11){left:27%;top:74%;animation-delay:-1.1s}.hall-live-starfield i:nth-child(12){left:13%;top:84%;animation-delay:-.7s}.hall-live-starfield i:nth-child(13){left:38%;top:53%;animation-delay:-1.3s}.hall-live-starfield i:nth-child(14){left:53%;top:46%;animation-delay:-.2s}.hall-live-starfield i:nth-child(15){left:75%;top:52%;animation-delay:-1s}.hall-live-starfield i:nth-child(16){left:50%;top:8%;animation-delay:-.6s}
+.live-constellation .hall-live-constellation{animation:live-constellation 12s cubic-bezier(.16,.8,.2,1) both}
+
+.hall-live-crowd{inset:auto 0 0;height:42%;overflow:hidden;background:radial-gradient(circle at 58% 65%,#ffd27a55 0 1px,transparent 8px),radial-gradient(circle at 75% 53%,#ffd27a4c 0 1px,transparent 7px),radial-gradient(circle at 89% 69%,#ffd27a52 0 1px,transparent 8px),radial-gradient(ellipse at 70% 75%,#f3a63f4a,transparent 49%),linear-gradient(0deg,#030504c9,transparent 54%)}
+.hall-live-crowd::before{content:"";position:absolute;right:3%;bottom:4%;width:67%;height:22%;border-top:2px solid #95683280;background:linear-gradient(180deg,#5b3c2194,#160f0bcc);box-shadow:0 -3px 21px #f1a6421f,0 13px 28px #000c;transform:perspective(180px) rotateX(28deg)}
+.hall-live-firelight{position:absolute;right:8%;bottom:-18%;width:62%;height:92%;border-radius:50%;background:radial-gradient(ellipse,#ffb34235 0 11%,#dd71301d 28%,transparent 67%);filter:blur(13px);animation:live-firelight 2.4s ease-in-out infinite alternate}
+.hall-live-crowd i{position:absolute;bottom:-11%;width:7%;height:55%;border:1px solid #9b67371f;border-radius:44% 44% 12% 12%;background:linear-gradient(96deg,#090b09,#25231b 55%,#090b09);box-shadow:inset 9px 16px 22px #d98b2d26,-5px -7px 17px #d88c3021,0 -8px 20px #000c;transform-origin:bottom;animation:live-crowd-breathe 4.2s ease-in-out infinite alternate}
+.hall-live-crowd i::before{content:"";position:absolute;top:-17%;left:21%;width:58%;aspect-ratio:1;border:1px solid #a66b351f;border-radius:48%;background:linear-gradient(125deg,#28251d,#0c0f0c 65%);box-shadow:inset -3px 3px 6px #bd71332b,0 -3px 12px #e2963124}
+.hall-live-crowd i:nth-of-type(1){left:34%;height:38%}.hall-live-crowd i:nth-of-type(2){left:42%;height:51%;animation-delay:-1.7s}.hall-live-crowd i:nth-of-type(3){left:50%;height:44%;animation-delay:-.8s}.hall-live-crowd i:nth-of-type(4){left:59%;height:60%;animation-delay:-2.4s}.hall-live-crowd i:nth-of-type(5){left:68%;height:47%;animation-delay:-1.2s}.hall-live-crowd i:nth-of-type(6){left:76%;height:56%;animation-delay:-3.1s}.hall-live-crowd i:nth-of-type(7){left:84%;height:43%;animation-delay:-.4s}.hall-live-crowd i:nth-of-type(8){left:91%;height:53%;animation-delay:-2s}.hall-live-crowd i:nth-of-type(9){left:97%;height:39%;animation-delay:-2.8s}
+.hall-is-busy .hall-live-crowd{opacity:.75}.live-hall-crowd .hall-live-crowd{animation:live-crowd-arrive 15s ease-in-out both}
+
+.hall-live-trophy{right:7%;bottom:31%;display:grid;width:170px;height:222px;place-items:center;perspective:700px;filter:drop-shadow(0 22px 24px #000c)}
+.hall-live-trophy::before{content:"";position:absolute;right:3%;bottom:3%;left:3%;height:29px;border:1px solid #bf914955;background:linear-gradient(180deg,#76522c,#241a11 70%);box-shadow:0 5px 0 #120d09,0 0 38px #e6a94d31;transform:perspective(120px) rotateX(28deg)}
+.hall-live-trophy-rays{position:absolute;inset:-30%;background:repeating-conic-gradient(from 8deg,transparent 0 11deg,#edc7770b 12deg 14deg,transparent 15deg 31deg);filter:blur(.4px);animation:live-reliquary-rays 24s linear infinite}
+.hall-live-trophy>i{position:relative;display:grid;width:82px;height:112px;place-items:center;border:1px solid #f2d18770;border-radius:44% 44% 13% 13%;background:linear-gradient(110deg,#3c2818,#e0b45f 30%,#6a4321 62%,#edcd82);box-shadow:inset 0 0 0 5px #1d1710,inset 0 0 25px #fff0a43b,0 0 34px #dc9c3d66;transform-style:preserve-3d}
+.hall-live-trophy>i::before,.hall-live-trophy>i::after{content:"";position:absolute;top:17px;width:44px;height:58px;border:6px solid #bb8a44;border-top:0;border-radius:0 0 50% 50%}
+.hall-live-trophy>i::before{right:64%;transform:rotate(15deg)}.hall-live-trophy>i::after{left:64%;transform:rotate(-15deg)}
+.hall-live-trophy b{display:block;width:31px;aspect-ratio:1;transform:rotate(45deg);border:1px solid #fff2b1;background:radial-gradient(circle at 35% 30%,#fff,#f0b654 24%,#7d2d1f 58%,#27100d);box-shadow:0 0 18px #ffc968,0 0 38px #c3412d80;animation:live-relic-heart 1.8s ease-in-out infinite}
+.hall-live-trophy small{position:absolute;right:0;bottom:-5px;left:0;color:#f2dda8;font-family:var(--font-mono);font-size:7px;font-weight:700;letter-spacing:1.25px;text-align:center;text-transform:uppercase;text-shadow:0 2px 6px #000}
+.live-trophy-ceremony .hall-live-trophy{animation:live-trophy 12s cubic-bezier(.16,.8,.2,1) both}
+
+.hall-live-announcement{z-index:9;right:clamp(18px,4vw,62px);bottom:clamp(92px,17%,132px);display:grid;min-width:min(350px,43vw);padding:11px 15px 13px 18px;border:1px solid #e2bd6d6b;border-left:3px solid #e7bd64;background:linear-gradient(100deg,#15130ee8,#272016cf);box-shadow:0 18px 50px #000c,0 0 34px #dda24a1c;backdrop-filter:blur(12px)}
+.hall-live-announcement span{color:#ddb96d;font-family:var(--font-mono);font-size:7px;letter-spacing:1.45px;text-transform:uppercase}.hall-live-announcement strong{margin-top:3px;color:#fff0ca;font-family:var(--font-display);font-size:clamp(18px,2vw,27px);font-weight:600;line-height:.95}.hall-live-announcement i{position:absolute;right:12px;bottom:7px;left:18px;height:1px;transform-origin:left;background:linear-gradient(90deg,#dcae56,transparent)}
+.hall-live-announcement.is-live{animation:live-announcement 9s cubic-bezier(.16,.8,.2,1) both}.hall-live-announcement.is-live i{animation:live-announcement-rule 7s .7s linear both}
+
+@keyframes live-impact-flash{0%{opacity:0}5%{opacity:.95}18%{opacity:.14}36%{opacity:.38}100%{opacity:0}}
+@keyframes live-constellation{0%,100%{opacity:0;transform:scale(.76) rotateX(13deg);filter:blur(9px)}10%{opacity:.2}18%,78%{opacity:.9;transform:scale(1) rotateX(0);filter:blur(0) drop-shadow(0 0 14px #f4d78d66)}48%{opacity:1;filter:drop-shadow(0 0 29px #f4d78dcc)}}
+@keyframes live-celestial-orbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes live-star-pulse{to{opacity:.35;transform:scale(.58)}}
+@keyframes live-crowd-arrive{0%,100%{opacity:0;transform:translateY(28%)}12%,82%{opacity:.76;transform:none}}
+@keyframes live-crowd-breathe{to{transform:translateY(-2.5%) rotate(.35deg)}}
+@keyframes live-firelight{to{opacity:.58;transform:scale(1.08) translateY(-2%)}}
+@keyframes live-trophy{0%,100%{opacity:0;transform:translateY(55px) scale(.68) rotateY(-28deg);filter:blur(7px)}14%,80%{opacity:1;transform:none;filter:drop-shadow(0 22px 24px #000c)}}
+@keyframes live-reliquary-rays{to{transform:rotate(360deg)}}
+@keyframes live-relic-heart{50%{transform:rotate(45deg) scale(1.12);box-shadow:0 0 28px #ffd682,0 0 52px #d54d348f}}
+@keyframes live-announcement{0%,100%{opacity:0;transform:translateX(35px);clip-path:inset(0 0 0 100%)}12%,76%{opacity:1;transform:none;clip-path:inset(0)}}
+@keyframes live-announcement-rule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .hall-depth-rail { position:absolute; z-index:6!important; inset:0; background-image:var(--hall-event-image); background-position:center; background-size:cover; clip-path:polygon(43% 60%,100% 56%,100% 75%,43% 76%); -webkit-mask-image:linear-gradient(180deg,transparent 55%,#000 61%,#000 72%,transparent 78%); mask-image:linear-gradient(180deg,transparent 55%,#000 61%,#000 72%,transparent 78%); pointer-events:none; }
 .hall-glass-reflection { position:absolute; z-index:7!important; inset:0; opacity:.12; background:linear-gradient(112deg,transparent 46%,rgba(219,230,220,.08) 54%,transparent 62%); clip-path:polygon(43.5% 4%,96.5% 0,97% 69%,43.5% 69%); mix-blend-mode:screen; pointer-events:none; animation:hall-glass-breathe 13s ease-in-out infinite alternate; }
 .hall-scene-bounce { position:absolute; z-index:4; inset:0; opacity:0; pointer-events:none; mix-blend-mode:screen; }
@@ -169,9 +219,17 @@
   .hall-bear-blink { top:33%; }
   .hall-encounter-status { right:16px; bottom:18px; max-width:190px; font-size:9px; }
   .hall-atmosphere.encounter-eclipse .hall-event-window .hall-eclipse,.hall-atmosphere.encounter-blood-moon .hall-event-window .hall-blood-moon { right:21%; }
+  .hall-live-constellation { top:2%; right:2%; bottom:30%; left:20%; }
+  .hall-live-constellation-crest { width:min(72vw,510px); }
+  .hall-live-constellation::before { width:min(57vw,330px); }.hall-live-constellation::after { width:min(45vw,270px); }
+  .hall-live-crowd { height:35%; }.hall-live-crowd i { width:10%; }.hall-live-crowd i:nth-of-type(1) { left:24%; }.hall-live-crowd i:nth-of-type(2) { left:34%; }.hall-live-crowd i:nth-of-type(3) { left:44%; }.hall-live-crowd i:nth-of-type(4) { left:54%; }.hall-live-crowd i:nth-of-type(5) { left:64%; }.hall-live-crowd i:nth-of-type(6) { left:74%; }.hall-live-crowd i:nth-of-type(7) { left:84%; }.hall-live-crowd i:nth-of-type(8) { left:94%; }.hall-live-crowd i:nth-of-type(9) { display:none; }
+  .hall-live-trophy { right:2%; bottom:38%; width:124px; height:170px; transform-origin:bottom right; }.hall-live-trophy>i { width:62px; height:88px; }.hall-live-trophy>i::before,.hall-live-trophy>i::after { top:15px; width:32px; height:43px; }.hall-live-trophy small { font-size:6px; letter-spacing:.8px; }
+  .hall-live-announcement { top:28px; right:12px; bottom:auto; left:auto; width:min(230px,67vw); min-width:0; padding:8px 10px 10px 12px; }.hall-live-announcement strong { font-size:16px; }
 }
 
 @media (prefers-reduced-motion:reduce) {
+  .live-constellation .hall-live-constellation,.live-hall-crowd .hall-live-crowd,.live-trophy-ceremony .hall-live-trophy,.hall-live-announcement.is-live{animation:none!important;opacity:.72;transform:none;clip-path:none}
+  .hall-live-impact,.hall-live-constellation::after,.hall-live-starfield i,.hall-live-firelight,.hall-live-crowd i,.hall-live-trophy-rays,.hall-live-trophy b,.hall-live-announcement i{animation:none!important}
   .hall-three-canvas { transition:none; }
   .hall-glass-reflection,.hall-stars,.hall-scene-bounce,.hall-ravens,.hall-raven-plate,.hall-ufo,.hall-ufo-craft,.hall-ufo-haze,.hall-ufo-beam,.hall-ufo i,.hall-comet,.hall-comet::after,.hall-comet span,.hall-eclipse,.hall-blood-moon,.hall-storm,.hall-storm::before,.hall-storm::after,.hall-storm i,.hall-lightning,.hall-aurora,.hall-fireflies,.hall-fireflies i,.hall-bear-encounter,.hall-bear-encounter img,.hall-bear-blink,.hall-bear-encounter.is-roaring img,.hall-bear-encounter.is-roaring::after { animation:none!important; }
   .hall-atmosphere.encounter-birds .hall-event-window .hall-ravens { left:62%; top:9%; opacity:.94; transform:scale(.82); filter:brightness(1.2) saturate(.7) drop-shadow(0 7px 7px rgba(0,0,0,.28)); }

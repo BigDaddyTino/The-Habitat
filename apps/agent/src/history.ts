@@ -268,7 +268,7 @@ function parseHabitatChronicleLog(contents: string): { evidence: AgentLegacyPlay
     const displayName = rawName.trim();
     const detail = detailParts.join(" ").trim();
     if (!isSafeDisplayName(displayName) || !detail || detail.length > 240) continue;
-    const eventType = kind === "PLAYER" ? "PLAYER_JOINED" : kind === "DEATH" ? "PLAYER_DIED" : kind === "ACHIEVEMENT" ? "ACHIEVEMENT_EARNED" : kind === "RECORD" ? "RECORD_BROKEN" : null;
+    const eventType = kind === "PLAYER" ? "PLAYER_JOINED" : kind === "DEATH" ? "PLAYER_DIED" : kind === "BOSS" ? "BOSS_KILLED" : kind === "ACHIEVEMENT" ? "ACHIEVEMENT_EARNED" : kind === "RECORD" ? "RECORD_BROKEN" : null;
     if (!eventType) continue;
     const occurredAt = new Date(timestamp).toISOString();
     const providerKey = nativeProviderKey(displayName);

@@ -56,13 +56,14 @@ export async function evaluateAchievementsForActivity(transaction: Prisma.Transa
     if (!await isActivityEligible(transaction, definition, activity.userId)) continue;
     const displayName = activity.user.displayName ?? activity.user.name ?? activity.user.username ?? "Habitat member";
     const dedupeKey = `achievement:${definition.id}:${activity.userId}:${definition.isRepeatable ? activity.id : "once"}`;
+    const existingAward = await transaction.playerAchievement.findUnique({ where: { dedupeKey }, select: { id: true } });
     const award = await transaction.playerAchievement.upsert({
       where: { dedupeKey },
       create: { userId: activity.userId, achievementDefinitionId: definition.id, sourceActivityId: activity.id, awardedAt: activity.occurredAt, dedupeKey },
       update: {},
     });
     await unlockAchievementRewards(transaction, { achievementDefinitionId: definition.id, userId: activity.userId, playerAchievementId: award.id });
-    if (!options.suppressNotifications && ["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { gameActivityId: activity.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
+    if (!existingAward && !options.suppressNotifications && ["LEGENDARY", "QUESTIONABLE_LIFE_CHOICE"].includes(definition.rarity)) await queueDiscordNotification(transaction, { gameActivityId: activity.id, kind: "LEGENDARY_ACHIEVEMENT", content: `**${displayName}** earned a top-tier Habitat achievement: **${definition.name}**.` });
   }
 }
 

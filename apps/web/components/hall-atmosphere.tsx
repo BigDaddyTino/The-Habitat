@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import type { AchievementRarity, AchievementRewardKind } from "@habitat/shared";
+import { habitatLiveBrowserEvent, type AchievementRarity, type AchievementRewardKind, type HabitatLiveReactionKind, type VerifiedHabitatLiveEvent } from "@habitat/shared";
 import type { BufferGeometry, Group, Material, PerspectiveCamera, Points, Scene, Texture, WebGLRenderer } from "three";
 import { getGreatHallAtmosphere, type GreatHallAtmosphere } from "@/lib/hall-atmosphere";
 import { previewReward } from "@/lib/reward-events";
@@ -26,6 +26,12 @@ const RAVEN_PLATES = ["one", "two", "three", "four", "five"] as const;
 type NetworkInformation = { saveData?: boolean };
 const hallPreviewEncounters = new Set<GreatHallAtmosphere["encounter"]>(["birds", "bear", "ufo", "comet", "aurora", "fireflies", "eclipse", "blood-moon", "lightning", "storm"]);
 const hallPreviewSkies = new Set<GreatHallAtmosphere["sky"]>(["sunrise", "midday", "sunset", "night"]);
+const livePreviewReactions = new Set<HabitatLiveReactionKind>(["CONSTELLATION", "TROPHY_CEREMONY", "HALL_CROWD"]);
+const liveReactionHeadlines: Record<Extract<HabitatLiveReactionKind, "CONSTELLATION" | "TROPHY_CEREMONY" | "HALL_CROWD">, string> = {
+  CONSTELLATION: "A legend enters the sky",
+  TROPHY_CEREMONY: "The reliquary remembers",
+  HALL_CROWD: "The hall answers the gathering",
+};
 const hallPreviewProgress: Record<Exclude<GreatHallAtmosphere["encounter"], "none">, number> = {
   birds: 0.42,
   bear: 0.5,
@@ -89,12 +95,13 @@ function playBearRoar() {
   window.setTimeout(() => { void context.close(); }, 2_000);
 }
 
-export function HallAtmosphere(initial: GreatHallAtmosphere) {
+export function HallAtmosphere({ activePlayers = 0, ...initial }: GreatHallAtmosphere & { activePlayers?: number }) {
   const atmosphereRef = useRef<HTMLDivElement>(null);
   const threeCanvasRef = useRef<HTMLCanvasElement>(null);
   const claimedBearRef = useRef<string | null>(null);
   const atmosphereSynchronizedRef = useRef(false);
   const [atmosphere, setAtmosphere] = useState(initial);
+  const [liveReaction, setLiveReaction] = useState<{ id: string; kind: HabitatLiveReactionKind } | null>(null);
   const [bearFeedback, setBearFeedback] = useState<{ key: string | null; status: "roaring" | "awarded" | "remembered" | "signed-out" | "missed" } | null>(null);
   const bearState = bearFeedback?.key === atmosphere.encounterKey ? bearFeedback.status : "idle";
 
@@ -122,6 +129,27 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
     tick();
     const interval = window.setInterval(tick, 1_000);
     return () => window.clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    let timeout: number | undefined;
+    const react = (browserEvent: Event) => {
+      const event = (browserEvent as CustomEvent<VerifiedHabitatLiveEvent>).detail;
+      if (!["CONSTELLATION", "TROPHY_CEREMONY", "HALL_CROWD"].includes(event.reaction.kind)) return;
+      setLiveReaction({ id: event.id, kind: event.reaction.kind });
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => setLiveReaction(null), event.reaction.durationMs);
+    };
+    window.addEventListener(habitatLiveBrowserEvent, react);
+    return () => { window.removeEventListener(habitatLiveBrowserEvent, react); window.clearTimeout(timeout); };
+  }, []);
+
+  useEffect(() => {
+    if (!["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) return;
+    const requested = new URLSearchParams(window.location.search).get("livePreview")?.toUpperCase().replaceAll("-", "_") as HabitatLiveReactionKind | undefined;
+    if (!requested || !livePreviewReactions.has(requested)) return;
+    const previewFrame = window.requestAnimationFrame(() => setLiveReaction({ id: `visual-preview:live:${requested}`, kind: requested }));
+    return () => window.cancelAnimationFrame(previewFrame);
   }, []);
 
   useEffect(() => {
@@ -342,12 +370,23 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
     "--event-delay": `${-(atmosphere.encounterProgress * eventDuration)}s`,
     "--hall-event-image": `url(${SKY_IMAGE[atmosphere.sky]})`,
   } as CSSProperties;
+  const hallLiveHeadline = liveReaction && liveReaction.kind in liveReactionHeadlines
+    ? liveReactionHeadlines[liveReaction.kind as keyof typeof liveReactionHeadlines]
+    : null;
+  const isVisualPreview = atmosphere.encounterKey?.startsWith("visual-preview:") || liveReaction?.id.startsWith("visual-preview:");
 
   return <>
-    <div ref={atmosphereRef} className={`hall-atmosphere sky-${atmosphere.sky} encounter-${atmosphere.encounter}`} data-encounter={atmosphere.encounter} data-preview={atmosphere.encounterKey?.startsWith("visual-preview:") ? "true" : undefined} style={eventStyle}>
+    <div ref={atmosphereRef} className={`hall-atmosphere sky-${atmosphere.sky} encounter-${atmosphere.encounter}${activePlayers >= 5 || liveReaction?.kind === "HALL_CROWD" ? " hall-is-busy" : ""}${liveReaction ? ` live-${liveReaction.kind.toLowerCase().replaceAll("_", "-")}` : ""}`} data-encounter={atmosphere.encounter} data-live-event={liveReaction?.id} data-preview={isVisualPreview ? "true" : undefined} style={eventStyle}>
       <Image className="hall-event-preload" src="/images/hall-events/bear.png" alt="" width={906} height={969} sizes="(max-width: 800px) 250px, 350px" preload aria-hidden="true" />
       <canvas ref={threeCanvasRef} className="hall-three-canvas" aria-hidden="true" />
       <div className="hall-haze" aria-hidden="true" /><div className="hall-stars" aria-hidden="true" /><div className="hall-aurora" aria-hidden="true" />
+      <div className="hall-live-impact" aria-hidden="true" />
+      <div className="hall-live-constellation" aria-hidden="true">
+        <Image className="hall-live-constellation-crest" src="/images/live-layer/legendary-constellation-crest.svg" alt="" width={1200} height={675} sizes="(max-width: 800px) 74vw, 48vw" loading="eager" />
+        <span className="hall-live-starfield">{Array.from({ length: 16 }, (_, index) => <i key={index} />)}</span>
+      </div>
+      <div className="hall-live-crowd" aria-hidden="true"><span className="hall-live-firelight" />{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</div>
+      <div className="hall-live-trophy" aria-hidden="true"><span className="hall-live-trophy-rays" /><i><b /></i><small>Bossbreaker Reliquary</small></div>
       <div className="hall-event-window" aria-hidden="true">
         <div className="hall-eclipse" /><div className="hall-blood-moon" />
         <div className="hall-storm"><i /><i /><i /></div>
@@ -381,6 +420,7 @@ export function HallAtmosphere(initial: GreatHallAtmosphere) {
       </> : null}
       <div className="hall-glass-reflection" aria-hidden="true" />
     </div>
+    {hallLiveHeadline ? <div className="hall-live-announcement is-live" aria-hidden="true"><span>{isVisualPreview ? "Visual effect preview" : "Verified Habitat event"}</span><strong>{hallLiveHeadline}</strong><i /></div> : null}
     <p className="hall-encounter-status" aria-live="polite">{bearMessage}</p>
   </>;
 }

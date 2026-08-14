@@ -26,7 +26,7 @@ export type WorldView = {
 export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string; sourceHref: string; permalinkHref: string };
 
 export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
-export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "ACHIEVEMENT_EARNED", "RECORD_BROKEN", "WAKE_REQUESTED", "WAKE_APPROVED", "WORLD_SAVED"] as const;
+export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "BOSS_KILLED", "WORLD_GATHERING", "ACHIEVEMENT_EARNED", "RECORD_BROKEN", "WAKE_REQUESTED", "WAKE_APPROVED", "WORLD_SAVED"] as const;
 export const chronicleReactionTypes = ["SKULL", "FIRE", "FACEPALM", "CROWN", "SKILL_ISSUE"] as const;
 
 export type ChronicleGameType = (typeof chronicleGameTypes)[number];
@@ -53,6 +53,8 @@ export const chronicleEventLabels: Record<ChronicleEventType, string> = {
   SERVER_UPDATED: "Update cycle",
   PLAYER_JOINED: "Player joined",
   PLAYER_LEFT: "Player left",
+  BOSS_KILLED: "Boss defeated",
+  WORLD_GATHERING: "World gathering",
   ACHIEVEMENT_EARNED: "Achievement earned",
   RECORD_BROKEN: "Record broken",
   WAKE_REQUESTED: "Wake requested",
@@ -139,6 +141,18 @@ export function isChronicleEventType(value: string | undefined): value is Chroni
   return Boolean(value && chronicleEventTypes.includes(value as ChronicleEventType));
 }
 
+/** Keeps a staged web rollout compatible until the additive enum migration lands. */
+export async function getAvailableChronicleEventTypes(): Promise<ReadonlyArray<ChronicleEventType>> {
+  const rows = await db.$queryRaw<Array<{ value: string }>>`
+    SELECT enumlabel AS value
+    FROM pg_enum
+    JOIN pg_type ON pg_type.oid = pg_enum.enumtypid
+    WHERE pg_type.typname = 'ServerEventType'
+  `;
+  const installed = new Set(rows.map((row) => row.value));
+  return chronicleEventTypes.filter((eventType) => installed.has(eventType));
+}
+
 export async function getChronicleEvents({ limit = 50, gameType, eventType, playerIdentityId }: ChronicleQuery = {}): Promise<ChronicleEventView[]> {
   const take = Math.min(Math.max(limit, 1), 100);
   const includeActivities = !gameType && !playerIdentityId;
@@ -191,6 +205,8 @@ function chronicleText(eventType: string, world: string, actorText: string | nul
   if (eventType === "SERVER_CRASHED") return `${world} stopped unexpectedly.`;
   if (eventType === "PLAYER_JOINED" && actorText) return `${actorText} joined ${world}.`;
   if (eventType === "PLAYER_LEFT" && actorText) return `${actorText} left ${world}.`;
+  if (eventType === "BOSS_KILLED") return `${actorText ? `${actorText} helped defeat` : "The server defeated"} a boss in ${world}${valueText ? `: ${valueText}` : ""}.`;
+  if (eventType === "WORLD_GATHERING") return `Five or more players gathered in ${world}.`;
   if (eventType === "ACHIEVEMENT_EARNED" && actorText && valueText) return `${actorText} earned ${valueText}.`;
   if (eventType === "RECORD_BROKEN" && actorText && valueText) return `${actorText} set a new record: ${valueText}.`;
   if (eventType === "WAKE_REQUESTED" && actorText) return `${actorText} asked to light ${world}.`;
