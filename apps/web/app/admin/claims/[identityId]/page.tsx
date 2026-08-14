@@ -51,16 +51,19 @@ export default async function IdentityDossierPage({ params, searchParams }: { pa
   const activeGrant = ledger.find((entry) => entry.action === "GRANT" && entry.status === "APPLIED");
 
   return <section className="admin-page">
-    <div className="admin-page-heading">
-      <p className="eyebrow"><Link className="dossier-back" href="/admin/claims"><ArrowLeft aria-hidden="true" size={14} />Claim and identity safety</Link></p>
-      <h1>{identity.displayName}</h1>
-      <p>{formatGame(identity.gameType)} · {identity.server?.displayName ?? "no registered world"}{identity.server?.worldName ? ` · ${identity.server.worldName}` : ""}</p>
-    </div>
+    <header className="admin-page-heading">
+      <div>
+        <p className="eyebrow"><Link className="dossier-back" href="/admin/claims"><ArrowLeft aria-hidden="true" size={14} />Claim and identity safety</Link></p>
+        <h1>{identity.displayName}</h1>
+        <p>{formatGame(identity.gameType)} · {identity.server?.displayName ?? "no registered world"}{identity.server?.worldName ? ` · ${identity.server.worldName}` : ""}</p>
+      </div>
+      <div className="admin-heading-mark" aria-hidden="true"><ShieldCheck size={31} /><span>Identity<br />dossier</span></div>
+    </header>
 
     {notice && claimCenterNotices[notice] && <p className="admin-flash success">{claimCenterNotices[notice]}</p>}
     {error && <p className="admin-flash error">{claimCenterErrors[error] ?? "That action could not be completed."}</p>}
 
-    <div className="admin-stat-grid">
+    <div className="admin-stat-grid claim-stat-grid">
       <div><span>Current owner</span><strong>{identity.user ? formatMemberName(identity.user) : "Unclaimed"}</strong></div>
       <div><span>Ownership proved</span><strong>{formatTimestamp(identity.verifiedAt)}</strong></div>
       <div><span>Provider proof</span><strong>{provenance?.hasProviderProof ? `${provenance.providerName} on file` : "None"}</strong></div>

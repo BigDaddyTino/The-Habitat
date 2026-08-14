@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Check, FileSearch, History, RotateCcw, X } from "lucide-react";
+import { Check, FileSearch, History, RotateCcw, ShieldCheck, X } from "lucide-react";
 import { getPrismaClient } from "@habitat/db/client";
 import { detectClaimConflicts, hasBlockingConflict, previewOwnershipChange, requiresTypedConfirmation } from "@habitat/identity";
 import { requireRole } from "@/lib/authorization";
@@ -51,16 +51,19 @@ export default async function AdminClaimsPage({ searchParams }: { searchParams: 
   }));
 
   return <section className="admin-page">
-    <div className="admin-page-heading">
-      <p className="eyebrow">Habitat administration</p>
-      <h1>Claim and identity safety</h1>
-      <p>A claim rewrites history: it attaches every observed session, XP, achievement, reward, and record standing an identity carries. Read the measured impact and the conflict list before approving. Every grant is reversible from the identity dossier.</p>
-    </div>
+    <header className="admin-page-heading">
+      <div>
+        <p className="eyebrow">Habitat administration</p>
+        <h1>Claim and identity safety</h1>
+        <p>A claim rewrites history: it attaches every observed session, XP, achievement, reward, and record standing an identity carries. Read the measured impact and the conflict list before approving. Every grant is reversible from the identity dossier.</p>
+      </div>
+      <div className="admin-heading-mark" aria-hidden="true"><ShieldCheck size={31} /><span>Ownership<br />control</span></div>
+    </header>
 
     {notice && claimCenterNotices[notice] && <p className="admin-flash success">{claimCenterNotices[notice]}</p>}
     {error && <p className="admin-flash error">{claimCenterErrors[error] ?? "That action could not be completed."}</p>}
 
-    <div className="admin-stat-grid">
+    <div className="admin-stat-grid claim-stat-grid">
       <div><span>Pending review</span><strong>{pendingTotal}</strong></div>
       <div><span>Owned identities</span><strong>{ownedIdentities}</strong></div>
       <div><span>Unclaimed identities</span><strong>{unclaimedIdentities}</strong></div>

@@ -185,7 +185,7 @@
 
 .profile-identity-workbench { grid-template-columns: minmax(0, 1.18fr) minmax(320px, .82fr); gap: 1px; border: 1px solid #4b5149; background: #4b5149; }
 .profile-command-center .profile-identity-workbench .server-editor,
-.profile-command-center .profile-identity-workbench .avatar-station { border: 0; padding: 27px; background: linear-gradient(145deg, #1a211c, #121713); }
+.profile-command-center .profile-identity-workbench .avatar-station { min-width: 0; border: 0; padding: 27px; background: linear-gradient(145deg, #1a211c, #121713); }
 .profile-command-center .profile-form { display: grid; align-content: start; gap: 13px; }
 .profile-command-center .profile-form .save-server { justify-self: start; min-width: 150px; justify-content: center; }
 .profile-station-heading { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
