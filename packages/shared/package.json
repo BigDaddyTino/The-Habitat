@@ -5,6 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./agent": "./src/agent.ts",
+    "./telemetry-config": "./src/telemetry-config.ts",
     "./worlds": "./src/worlds.ts"
   },
   "scripts": {

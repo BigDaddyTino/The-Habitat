@@ -3,7 +3,8 @@ import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import path from "node:path";
 import { GameDig } from "gamedig";
-import { isStablePlayerProviderKey, type AgentDiskObservation, type AgentExecutableObservation, type AgentLogObservation, type AgentPlayerObservation, type AgentProcessObservation, type AgentQueryObservation } from "@habitat/shared";
+import { isStablePlayerProviderKey } from "@habitat/shared/agent";
+import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentPlayerObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
 const execFileAsync = promisify(execFile);
