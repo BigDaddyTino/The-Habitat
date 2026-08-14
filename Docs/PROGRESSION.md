@@ -23,3 +23,17 @@ Levels 10, 25, 50, 75, and 100 award milestone achievements through the same rew
 ## Presentation
 
 Profiles show level bars, equipped rewards, selectable inventory, claimed identities, and an earned-only trophy cabinet. Achievement ceremonies coordinate a Three.js particle scene and Canvas2D Rive state machine from one clock, with a reduced-motion-aware alternative and non-WebGL fallback.
+## Seasons
+
+Seasons are an optional three-calendar-month goal layer. They never reset or
+subtract from `UserXpEntry`, Habitat level, achievements, titles, records, or
+previous rewards. A member explicitly joins through `/seasons`; the worker then
+reconciles only source-confidence-100 activity inside that season's half-open
+time window into a separate `SeasonXpEntry` ledger.
+
+Each season can carry personal quests, whole-lodge team quests, and one or more
+per-game expeditions. Community XP is the sum of the enrolled members' season
+ledger, not a synthetic counter. Closing is replay-safe: the worker snapshots a
+season Chronicle, issues persisted commemorative trophies, adds the first-season
+founding reward, and marks the season complete. Those rewards stay on the
+physical seasonal shelf in the trophy cabinet after future seasons begin.

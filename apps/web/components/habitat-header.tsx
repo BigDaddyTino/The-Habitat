@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, ChevronDown, Crown, Landmark, LogIn, Radio, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
+import { Award, CalendarRange, ChevronDown, Crown, Landmark, LogIn, Radio, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
 import { auth } from "@/auth";
 import { getLiveStreamSummary } from "@/lib/stream-showcase";
 
@@ -14,6 +14,7 @@ const progressNavigation = [
   { href: "/achievements", label: "Achievements", icon: Award },
   { href: "/leaderboards", label: "Leaderboards", icon: Trophy },
   { href: "/quests", label: "Quests", icon: Target },
+  { href: "/seasons", label: "Seasons", icon: CalendarRange },
   { href: "/hall-of-legends", label: "Halls", icon: Crown },
 ];
 

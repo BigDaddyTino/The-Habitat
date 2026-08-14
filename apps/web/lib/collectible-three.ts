@@ -143,6 +143,185 @@ function addReverse(THREE: ThreeModule, group: Three.Group, item: CollectibleIde
   addMesh(group, new THREE.CircleGeometry(size / 2, 48), material, [0, y, z], [0, Math.PI, 0]);
 }
 
+type LegendaryGlow = { material: Three.MeshStandardMaterial; base: number; amplitude: number };
+type LegendaryRig = { glows: LegendaryGlow[]; flame?: Three.Object3D; halo?: Three.Object3D; rays?: Three.Object3D[] };
+
+function seasonSealTexture(THREE: ThreeModule, item: CollectibleIdentity, form: "first-light-standard" | "founders-lantern") {
+  const canvas = document.createElement("canvas");
+  canvas.width = 768;
+  canvas.height = 512;
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+  const background = context.createLinearGradient(0, 0, 768, 512);
+  background.addColorStop(0, "#101914");
+  background.addColorStop(0.52, form === "first-light-standard" ? "#26331e" : "#21170f");
+  background.addColorStop(1, "#080b09");
+  context.fillStyle = background;
+  context.fillRect(0, 0, 768, 512);
+  context.strokeStyle = "#d5aa57";
+  context.lineWidth = 14;
+  context.strokeRect(22, 22, 724, 468);
+  context.lineWidth = 3;
+  context.strokeRect(43, 43, 682, 426);
+  context.save();
+  context.translate(384, 207);
+  context.strokeStyle = "#ffe3a0";
+  context.fillStyle = "#d98a3e";
+  context.lineCap = "round";
+  if (form === "first-light-standard") {
+    context.beginPath();
+    context.arc(0, 18, 76, Math.PI, Math.PI * 2);
+    context.fill();
+    context.lineWidth = 10;
+    for (let index = 0; index < 9; index += 1) {
+      const angle = Math.PI + index * Math.PI / 8;
+      context.beginPath();
+      context.moveTo(Math.cos(angle) * 96, 18 + Math.sin(angle) * 96);
+      context.lineTo(Math.cos(angle) * 130, 18 + Math.sin(angle) * 130);
+      context.stroke();
+    }
+    context.strokeStyle = "#8fb286";
+    context.lineWidth = 13;
+    context.beginPath();
+    context.moveTo(-144, 56);
+    context.lineTo(-62, -8);
+    context.lineTo(-4, 49);
+    context.lineTo(55, -23);
+    context.lineTo(148, 56);
+    context.stroke();
+  } else {
+    context.lineWidth = 13;
+    context.strokeRect(-84, -88, 168, 184);
+    context.beginPath();
+    context.moveTo(-84, -88);
+    context.lineTo(-48, -135);
+    context.lineTo(48, -135);
+    context.lineTo(84, -88);
+    context.stroke();
+    context.beginPath();
+    context.arc(0, -124, 78, Math.PI, 0);
+    context.stroke();
+    context.fillStyle = "#ff9c43";
+    context.beginPath();
+    context.moveTo(0, 65);
+    context.bezierCurveTo(-67, 12, -12, -10, 0, -75);
+    context.bezierCurveTo(67, -9, 28, 39, 0, 65);
+    context.fill();
+    context.fillStyle = "#ffe6a5";
+    context.font = "700 76px Georgia, serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText("H", 0, 3);
+  }
+  context.restore();
+  context.textAlign = "center";
+  context.fillStyle = "#f3dfac";
+  context.font = "700 42px Georgia, serif";
+  context.fillText(item.name.toUpperCase(), 384, 394);
+  context.fillStyle = "#bfa66f";
+  context.font = "600 17px ui-monospace, monospace";
+  context.fillText(form === "first-light-standard" ? "SEASON I · IRONWOOD DAWN" : "FOUNDING MEMBER · FIRST FIRE", 384, 435);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+function addSeasonSeal(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, form: "first-light-standard" | "founders-lantern", y: number, z: number, width: number, height: number) {
+  const texture = seasonSealTexture(THREE, item, form);
+  if (!texture) return;
+  const material = new THREE.MeshStandardMaterial({ map: texture, metalness: 0.34, roughness: 0.42 });
+  addMesh(group, new THREE.PlaneGeometry(width, height), material, [0, y, z]);
+}
+
+function bannerShape(THREE: ThreeModule, inset = 0) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.58 + inset, 0.62 - inset);
+  shape.lineTo(0.58 - inset, 0.62 - inset);
+  shape.lineTo(0.58 - inset, -0.24 + inset);
+  shape.lineTo(0.27, -0.53 + inset);
+  shape.lineTo(0, -0.33 + inset);
+  shape.lineTo(-0.27, -0.53 + inset);
+  shape.lineTo(-0.58 + inset, -0.24 + inset);
+  shape.closePath();
+  return shape;
+}
+
+function buildFirstLightStandard(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, metal: Three.Material, accent: Three.Material) {
+  const ironwood = new THREE.MeshPhysicalMaterial({ color: "#321b0e", metalness: 0.1, roughness: 0.52, clearcoat: 0.36, clearcoatRoughness: 0.42 });
+  const cloth = new THREE.MeshPhysicalMaterial({ color: "#173126", metalness: 0.08, roughness: 0.48, clearcoat: 0.12, side: THREE.DoubleSide });
+  const sun = new THREE.MeshStandardMaterial({ color: "#e6a54f", emissive: "#ff9a3c", emissiveIntensity: 0.72, metalness: 0.54, roughness: 0.18 });
+  const ember = new THREE.MeshStandardMaterial({ color: "#ffd98a", emissive: "#ff8f32", emissiveIntensity: 0.9, metalness: 0.36, roughness: 0.16 });
+  addMesh(group, new THREE.BoxGeometry(1.36, 0.13, 0.88), ironwood, [0, -1.07, 0]);
+  addMesh(group, new THREE.CylinderGeometry(0.075, 0.1, 1.92, 16), ironwood, [0, 0.08, -0.15]);
+  addMesh(group, new THREE.CylinderGeometry(0.06, 0.06, 1.42, 16), accent, [0, 0.64, -0.13], [0, 0, Math.PI / 2]);
+  addMesh(group, new THREE.CylinderGeometry(0.095, 0.095, 0.12, 20), metal, [0, -0.64, -0.15]);
+  addMesh(group, new THREE.ConeGeometry(0.16, 0.48, 8), accent, [0, 1.18, -0.15]);
+  addMesh(group, new THREE.OctahedronGeometry(0.13, 1), ember, [0, 0.97, -0.15], [0, Math.PI / 4, 0]);
+  const outer = new THREE.ExtrudeGeometry(bannerShape(THREE), { depth: 0.1, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.035, bevelThickness: 0.025, curveSegments: 20 });
+  addMesh(group, outer, accent, [0, 0.2, -0.1]);
+  const inner = new THREE.ExtrudeGeometry(bannerShape(THREE, 0.065), { depth: 0.06, bevelEnabled: true, bevelSegments: 2, bevelSize: 0.02, bevelThickness: 0.015, curveSegments: 20 });
+  addMesh(group, inner, cloth, [0, 0.2, 0.025]);
+  const sunDisc = addMesh(group, new THREE.CircleGeometry(0.2, 48), sun, [0, 0.39, 0.118]);
+  addMesh(group, new THREE.TorusGeometry(0.25, 0.022, 8, 48), accent, [0, 0.39, 0.12]);
+  const rays: Three.Object3D[] = [];
+  for (let index = 0; index < 12; index += 1) {
+    const angle = index * Math.PI / 6;
+    const ray = addMesh(group, new THREE.BoxGeometry(0.025, 0.16, 0.025), accent, [Math.cos(angle) * 0.33, 0.39 + Math.sin(angle) * 0.33, 0.125], [0, 0, angle - Math.PI / 2]);
+    rays.push(ray);
+  }
+  addTube(THREE, group, [[-0.44, -0.04, 0.13], [-0.2, 0.13, 0.14], [0, -0.01, 0.14], [0.22, 0.17, 0.14], [0.45, -0.04, 0.13]], 0.024, metal);
+  [-1, 1].forEach((side) => {
+    addTube(THREE, group, [[side * 0.55, 0.66, -0.08], [side * 0.65, 0.25, -0.04], [side * 0.58, -0.2, -0.02]], 0.026, accent);
+    addMesh(group, new THREE.ConeGeometry(0.07, 0.25, 8), metal, [side * 0.58, -0.37, -0.02]);
+  });
+  addSeasonSeal(THREE, group, item, "first-light-standard", -1.055, 0.447, 0.75, 0.5);
+  group.userData.legendaryRig = { glows: [{ material: sun, base: 0.72, amplitude: 0.22 }, { material: ember, base: 0.9, amplitude: 0.28 }], halo: sunDisc, rays } satisfies LegendaryRig;
+}
+
+function buildFoundersLantern(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, metal: Three.Material, accent: Three.Material) {
+  const iron = new THREE.MeshStandardMaterial({ color: "#161b18", metalness: 0.9, roughness: 0.24 });
+  const agedGold = new THREE.MeshStandardMaterial({ color: "#b47a32", emissive: "#6e3515", emissiveIntensity: 0.12, metalness: 0.92, roughness: 0.2 });
+  const outerFlame = new THREE.MeshStandardMaterial({ color: "#ff8d32", emissive: "#ff5d20", emissiveIntensity: 1.7, metalness: 0.05, roughness: 0.12, transparent: true, opacity: 0.9 });
+  const innerFlame = new THREE.MeshStandardMaterial({ color: "#fff0ad", emissive: "#ffc75d", emissiveIntensity: 2.2, metalness: 0, roughness: 0.08 });
+  const glass = new THREE.MeshPhysicalMaterial({ color: "#f0a64f", emissive: "#b84c1e", emissiveIntensity: 0.28, metalness: 0, roughness: 0.08, transmission: 0.72, thickness: 0.14, transparent: true, opacity: 0.42, side: THREE.DoubleSide });
+  addMesh(group, new THREE.BoxGeometry(1.36, 0.13, 0.88), new THREE.MeshPhysicalMaterial({ color: "#29170d", metalness: 0.08, roughness: 0.5, clearcoat: 0.38 }), [0, -1.07, 0]);
+  addMesh(group, new THREE.CylinderGeometry(0.22, 0.36, 0.33, 8), agedGold, [0, -0.54, 0]);
+  addMesh(group, new THREE.CylinderGeometry(0.43, 0.43, 0.78, 8, 1, true), glass, [0, 0.05, 0]);
+  [-0.38, 0.46].forEach((y) => {
+    addMesh(group, new THREE.TorusGeometry(0.45, 0.045, 10, 8), agedGold, [0, y, 0], [Math.PI / 2, 0, Math.PI / 8]);
+    addMesh(group, new THREE.CylinderGeometry(0.48, 0.48, 0.055, 8), iron, [0, y, 0]);
+  });
+  for (let index = 0; index < 8; index += 1) {
+    const angle = index * Math.PI / 4 + Math.PI / 8;
+    addMesh(group, new THREE.CylinderGeometry(0.027, 0.027, 0.84, 8), iron, [Math.cos(angle) * 0.43, 0.04, Math.sin(angle) * 0.43]);
+  }
+  addMesh(group, new THREE.ConeGeometry(0.58, 0.42, 8), iron, [0, 0.69, 0], [0, Math.PI / 8, 0]);
+  addMesh(group, new THREE.CylinderGeometry(0.12, 0.18, 0.18, 8), agedGold, [0, 0.94, 0]);
+  addMesh(group, new THREE.OctahedronGeometry(0.12, 1), innerFlame, [0, 1.08, 0], [0, Math.PI / 4, 0]);
+  addTube(THREE, group, [[-0.34, 0.91, 0], [-0.48, 1.28, 0], [0, 1.5, 0], [0.48, 1.28, 0], [0.34, 0.91, 0]], 0.04, iron);
+  addTube(THREE, group, [[-0.28, 0.92, 0.02], [-0.36, 1.22, 0.02], [0, 1.36, 0.02], [0.36, 1.22, 0.02], [0.28, 0.92, 0.02]], 0.018, accent);
+  const flame = new THREE.Group();
+  flame.userData.THREE = THREE;
+  addMesh(flame, new THREE.SphereGeometry(0.18, 24, 14), outerFlame, [0, -0.08, 0], [0, 0, 0], [1, 1.25, 1]);
+  addMesh(flame, new THREE.ConeGeometry(0.19, 0.62, 10), outerFlame, [0, 0.16, 0], [0, 0, 0], [1, 1, 0.82]);
+  addMesh(flame, new THREE.OctahedronGeometry(0.13, 2), innerFlame, [0, 0.02, 0.02], [0, 0.4, 0], [0.75, 1.65, 0.75]);
+  flame.position.y = 0.02;
+  group.add(flame);
+  const light = new THREE.PointLight(0xff8e3b, 5.2, 4.2, 1.5);
+  light.position.set(0, 0.05, 0.12);
+  group.add(light);
+  // The founder H is solid metal mounted on the front cage, not painted glass.
+  addMesh(group, new THREE.BoxGeometry(0.055, 0.39, 0.045), accent, [-0.13, 0.05, 0.47]);
+  addMesh(group, new THREE.BoxGeometry(0.055, 0.39, 0.045), accent, [0.13, 0.05, 0.47]);
+  addMesh(group, new THREE.BoxGeometry(0.27, 0.055, 0.045), accent, [0, 0.05, 0.47]);
+  for (let index = 0; index < 4; index += 1) {
+    const angle = index * Math.PI / 2 + Math.PI / 4;
+    addMesh(group, new THREE.OctahedronGeometry(0.055, 1), innerFlame, [Math.cos(angle) * 0.39, 0.69, Math.sin(angle) * 0.39], [0, angle, 0]);
+  }
+  addSeasonSeal(THREE, group, item, "founders-lantern", -1.055, 0.447, 0.75, 0.5);
+  group.userData.legendaryRig = { glows: [{ material: outerFlame, base: 1.7, amplitude: 0.42 }, { material: innerFlame, base: 2.2, amplitude: 0.5 }, { material: glass, base: 0.28, amplitude: 0.11 }], flame } satisfies LegendaryRig;
+}
+
 function buildBadge(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture | null) {
   const visual = getCollectibleVisual(item);
   const metal = metalMaterial(THREE, visual.metal, 0.28);
@@ -217,7 +396,11 @@ function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleId
   const dark = metalMaterial(THREE, "#242621", 0.38);
   trophyBase(THREE, group, metal, accent, enamel);
 
-  if (visual.form === "antler") {
+  if (visual.form === "first-light-standard") {
+    buildFirstLightStandard(THREE, group, item, metal, accent);
+  } else if (visual.form === "founders-lantern") {
+    buildFoundersLantern(THREE, group, item, metal, accent);
+  } else if (visual.form === "antler") {
     addMesh(group, new THREE.CylinderGeometry(0.12, 0.16, 0.62, 12), dark, [0, -0.34, 0]);
     [-1, 1].forEach((side) => {
       addTube(THREE, group, [[0, -0.2, 0], [side * 0.28, 0.14, 0], [side * 0.48, 0.62, 0], [side * 0.67, 0.98, 0]], 0.055, accent);
@@ -282,7 +465,22 @@ function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleId
   // Keep authored detail as a small maker's plaque on the plinth. The prior
   // full-size relief covered the modeled volume and made trophies read as badges.
   addRelief(THREE, group, tile, -1.03, 0.431, 0.52);
-  addReverse(THREE, group, item, visual.inscription, visual.accent, 0.14, -0.19, 1.38);
+  const seasonalHeirloom = visual.form === "first-light-standard" || visual.form === "founders-lantern";
+  addReverse(THREE, group, item, visual.inscription, visual.accent, seasonalHeirloom ? -1.03 : 0.14, seasonalHeirloom ? -0.441 : -0.19, seasonalHeirloom ? 0.66 : 1.38);
+}
+
+export function animateCollectibleModel(model: Three.Object3D, elapsed: number, reducedMotion = false) {
+  const rig = model.userData.legendaryRig as LegendaryRig | undefined;
+  if (!rig) return;
+  const pulse = reducedMotion ? 0.45 : (Math.sin(elapsed * 2.15) + 1) / 2;
+  rig.glows.forEach((glow, index) => { glow.material.emissiveIntensity = glow.base + glow.amplitude * (index % 2 ? 1 - pulse : pulse); });
+  if (rig.flame) {
+    const flicker = reducedMotion ? 1 : 1 + Math.sin(elapsed * 5.7) * 0.045 + Math.sin(elapsed * 9.1) * 0.018;
+    rig.flame.scale.set(1 / Math.sqrt(flicker), flicker, 1 / Math.sqrt(flicker));
+    if (!reducedMotion) rig.flame.rotation.y = Math.sin(elapsed * 1.4) * 0.08;
+  }
+  if (rig.halo && !reducedMotion) rig.halo.scale.setScalar(1 + Math.sin(elapsed * 1.65) * 0.035);
+  rig.rays?.forEach((ray, index) => { ray.scale.y = reducedMotion ? 1 : 0.9 + Math.sin(elapsed * 2 + index * 0.55) * 0.1; });
 }
 
 export function createCollectibleModel(THREE: ThreeModule, item: CollectibleIdentity, atlases: Partial<CollectibleAtlases>) {
@@ -304,6 +502,7 @@ export function createCollectibleModel(THREE: ThreeModule, item: CollectibleIden
   const root = new THREE.Group();
   root.add(group);
   root.userData.item = item;
+  root.userData.legendaryRig = group.userData.legendaryRig;
   return root;
 }
 

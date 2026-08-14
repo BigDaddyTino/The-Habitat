@@ -311,3 +311,13 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Flagged each live event with whether the requesting viewer is its verified actor, so a member's own Legendary is no longer staged twice — once by the clubhouse broadcast and once by their progression feed. The Hall constellation still fires for the earner
 - [x] Took every idle Live Layer overlay out of the box tree instead of leaving it transparent; roughly thirty infinite decorative animations had been running permanently on the Great Hall and world grids. A sleeping card now makes an exception for a verified ignition, which its stale rendered state had been suppressing
 - [x] Full workspace verification after the pass: typecheck, lint, 203 tests, and production build all green
+
+## 2026-08-14 - Seasons and Community Expeditions
+
+- [x] Added optional, exact three-calendar-month seasons as a separate persisted progression layer; lifetime XP, levels, achievements, titles, records, and prior rewards are never reset or rewritten
+- [x] Added explicit member enrollment, replay-safe verified-playtime season XP, a cooperative community XP bar, personal quests, whole-lodge team quests, and per-game expedition progress
+- [x] Added seasonal leaderboard scope and metric tabs without removing the lifetime standings or admitting unclaimed identities into opt-in season totals
+- [x] Added replay-safe season closure with an immutable Chronicle snapshot, permanent commemorative trophies, a first-season Founder's Lantern, and a dedicated physical seasonal shelf in private and public trophy cabinets
+- [x] Added a reduced-motion-aware cinematic season Chronicle and a seeded First Light configuration that creates no memberships, progress, XP, or fabricated live activity
+- [x] Backed up the live local database, applied migration `20260814230000_add_seasons_and_community_expeditions`, and reran the idempotent seed; service deployment remains a separate private release step
+- [x] Replaced both seasonal trophy fallbacks with authored Legendary 3D heirlooms: a gilded ironwood First Light battle-standard and an internally lit Founder's Lantern, each with unique geometry, materials, front seal, reverse inscription, subtle motion, and localhost-only visual QA

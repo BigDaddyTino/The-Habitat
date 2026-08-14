@@ -170,6 +170,35 @@ enum WeeklyQuestRuleType {
   DISTINCT_GAME_COUNT
 }
 
+enum SeasonStatus {
+  UPCOMING
+  ACTIVE
+  COMPLETED
+}
+
+enum SeasonRuleType {
+  PLAY_SECONDS
+  JOIN_COUNT
+  DISTINCT_GAME_COUNT
+  BOSS_KILL_COUNT
+}
+
+enum SeasonQuestScope {
+  PERSONAL
+  TEAM
+}
+
+enum SeasonXpSource {
+  VERIFIED_PLAYTIME
+  PERSONAL_QUEST
+  TEAM_QUEST
+}
+
+enum SeasonTrophyKind {
+  COMMEMORATIVE
+  FOUNDING_MEMBER
+}
+
 enum AchievementRewardKind {
   TITLE
   AVATAR_BORDER
@@ -336,6 +365,10 @@ model User {
   discordStreamSignal    DiscordStreamSignal?
   xpEntries              UserXpEntry[]
   weeklyQuestProgress    UserWeeklyQuestProgress[]
+  seasonMemberships      SeasonMembership[]
+  seasonXpEntries        SeasonXpEntry[]
+  seasonQuestProgress    UserSeasonQuestProgress[]
+  seasonTrophies         UserSeasonTrophy[]
   identityReconciliations IdentityRewardReconciliation[]
   clubGameProfiles        ClubGameProfile[]
   gameActivities          GameActivity[]
@@ -713,6 +746,163 @@ model UserWeeklyQuestProgress {
 
   @@unique([userId, selectionId])
   @@index([userId, completedAt])
+}
+
+/// Seasons are an optional, time-bounded goal layer. They never own or mutate
+/// lifetime XP, achievements, records, titles, or their source evidence.
+/// Migration 20260814230000 enforces a positive community goal and an exact
+/// three-calendar-month window.
+model Season {
+  id                String                    @id @default(uuid()) @db.Uuid
+  slug              String                    @unique @db.VarChar(80)
+  ordinal           Int                       @unique
+  name              String                    @db.VarChar(100)
+  description       String                    @db.VarChar(400)
+  theme             String                    @db.VarChar(80)
+  startsAt          DateTime
+  endsAt            DateTime
+  status            SeasonStatus              @default(UPCOMING)
+  communityXpGoal   Int
+  isEnabled         Boolean                   @default(true)
+  completedAt       DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  memberships       SeasonMembership[]
+  xpEntries         SeasonXpEntry[]
+  quests            SeasonQuestDefinition[]
+  expeditions       SeasonExpedition[]
+  trophies          SeasonTrophy[]
+  chronicle         SeasonChronicle?
+
+  @@index([isEnabled, status, startsAt])
+  @@index([endsAt])
+}
+
+model SeasonMembership {
+  id        String   @id @default(uuid()) @db.Uuid
+  seasonId String   @db.Uuid
+  userId   String   @db.Uuid
+  joinedAt DateTime @default(now())
+  season   Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, userId])
+  @@index([userId, joinedAt])
+}
+
+model SeasonQuestDefinition {
+  id               String                      @id @default(uuid()) @db.Uuid
+  seasonId         String                      @db.Uuid
+  slug             String                      @db.VarChar(80)
+  name             String                      @db.VarChar(100)
+  description      String                      @db.VarChar(240)
+  scope            SeasonQuestScope
+  gameType         GameType?
+  ruleType         SeasonRuleType
+  threshold        Int
+  xpReward         Int
+  sortOrder        Int                         @default(0)
+  enabled          Boolean                     @default(true)
+  season           Season                      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  personalProgress UserSeasonQuestProgress[]
+  teamProgress     SeasonTeamQuestProgress?
+
+  @@unique([seasonId, slug])
+  @@index([seasonId, scope, sortOrder])
+}
+
+model UserSeasonQuestProgress {
+  id          String                @id @default(uuid()) @db.Uuid
+  userId      String                @db.Uuid
+  questId     String                @db.Uuid
+  progress    Int                   @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime              @updatedAt
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest       SeasonQuestDefinition @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questId])
+  @@index([userId, completedAt])
+}
+
+model SeasonTeamQuestProgress {
+  id          String                @id @default(uuid()) @db.Uuid
+  questId     String                @unique @db.Uuid
+  progress    Int                   @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime              @updatedAt
+  quest       SeasonQuestDefinition @relation(fields: [questId], references: [id], onDelete: Cascade)
+}
+
+model SeasonExpedition {
+  id          String         @id @default(uuid()) @db.Uuid
+  seasonId    String         @db.Uuid
+  slug        String         @db.VarChar(80)
+  gameType    GameType
+  name        String         @db.VarChar(100)
+  description String         @db.VarChar(240)
+  ruleType    SeasonRuleType
+  threshold   Int
+  progress    Int            @default(0)
+  completedAt DateTime?
+  sortOrder   Int            @default(0)
+  season      Season         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, slug])
+  @@index([seasonId, sortOrder])
+}
+
+model SeasonXpEntry {
+  id            String         @id @default(uuid()) @db.Uuid
+  seasonId      String         @db.Uuid
+  userId        String         @db.Uuid
+  serverEventId String?        @db.Uuid
+  source        SeasonXpSource
+  amount        Int
+  description   String         @db.VarChar(160)
+  earnedAt      DateTime       @default(now())
+  dedupeKey     String         @unique @db.VarChar(220)
+  season        Season         @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  serverEvent   ServerEvent?   @relation(fields: [serverEventId], references: [id], onDelete: SetNull)
+
+  @@index([seasonId, earnedAt])
+  @@index([seasonId, userId, earnedAt])
+}
+
+model SeasonTrophy {
+  id          String             @id @default(uuid()) @db.Uuid
+  seasonId    String             @db.Uuid
+  kind        SeasonTrophyKind
+  code        String             @db.VarChar(64)
+  name        String             @db.VarChar(80)
+  description String             @db.VarChar(180)
+  rarity      AchievementRarity  @default(EPIC)
+  season      Season             @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  unlocks     UserSeasonTrophy[]
+
+  @@unique([seasonId, kind])
+  @@unique([seasonId, code])
+}
+
+model UserSeasonTrophy {
+  id         String       @id @default(uuid()) @db.Uuid
+  userId     String       @db.Uuid
+  trophyId   String       @db.Uuid
+  unlockedAt DateTime     @default(now())
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trophy     SeasonTrophy @relation(fields: [trophyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trophyId])
+  @@index([userId, unlockedAt])
+}
+
+model SeasonChronicle {
+  id          String   @id @default(uuid()) @db.Uuid
+  seasonId    String   @unique @db.Uuid
+  generatedAt DateTime @default(now())
+  snapshot    Json
+  season      Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
 }
 
 model TitleDefinition {
@@ -1346,6 +1536,7 @@ model ServerEvent {
   reactions            ChronicleReaction[]
   discordNotifications DiscordNotification[]
   xpEntries            UserXpEntry[]
+  seasonXpEntries      SeasonXpEntry[]
   gameActivities       GameActivity[]
 
   @@index([serverId, occurredAt])

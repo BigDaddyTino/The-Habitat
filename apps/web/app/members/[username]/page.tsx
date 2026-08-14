@@ -70,6 +70,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
       playerIdentities: { select: { id: true, gameType: true, displayName: true, server: { select: { displayName: true, worldName: true } }, _count: { select: { events: true } }, legacyEvidence: { select: { durationSeconds: true } } }, orderBy: { displayName: "asc" } },
       achievements: { include: { achievement: true }, orderBy: { awardedAt: "desc" } },
       unlockedRewards: { where: { reward: { kind: { in: ["BADGE", "MEDAL", "TROPHY"] } } }, include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } }, orderBy: { unlockedAt: "desc" } },
+      seasonTrophies: { include: { trophy: { include: { season: { select: { ordinal: true, name: true } } } } }, orderBy: { unlockedAt: "desc" } },
       xpEntries: { select: { amount: true } },
     },
   }), auth()]);
@@ -94,7 +95,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const layout = member.profileLayout && safeLayouts.has(member.profileLayout) ? member.profileLayout : "field-notes";
   const title = member.titles[0]?.title;
   const ownerName = member.displayName ?? member.name ?? "Habitat member";
-  const cabinetItems: CabinetItem[] = member.unlockedRewards.map((entry) => ({ id: entry.id, code: entry.reward.code, name: entry.reward.name, description: entry.reward.description, kind: entry.reward.kind as CabinetItem["kind"], rarity: entry.reward.achievement.rarity as AchievementRarity, achievementName: entry.reward.achievement.name, unlockedAt: entry.unlockedAt.toISOString() }));
+  const cabinetItems: CabinetItem[] = member.unlockedRewards.map((entry) => ({ id: entry.id, code: entry.reward.code, name: entry.reward.name, description: entry.reward.description, kind: entry.reward.kind as CabinetItem["kind"], rarity: entry.reward.achievement.rarity as AchievementRarity, achievementName: entry.reward.achievement.name, unlockedAt: entry.unlockedAt.toISOString() })).concat(member.seasonTrophies.map((entry) => ({ id: entry.id, code: entry.trophy.code, name: entry.trophy.name, description: entry.trophy.description, kind: "TROPHY" as const, rarity: entry.trophy.rarity as AchievementRarity, achievementName: `Season ${entry.trophy.season.ordinal} · ${entry.trophy.season.name}`, unlockedAt: entry.unlockedAt.toISOString(), seasonal: true })));
   const publicSteam = member.socialAccounts.find((account) => account.platform === "STEAM" && account.steamProfile?.displayPublic)?.steamProfile ?? null;
   const steamGames = publicSteam?.libraryGames ?? [];
   const steamMinutes = steamGames.reduce((total, game) => total + game.playtimeMinutes, 0);

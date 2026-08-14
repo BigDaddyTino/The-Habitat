@@ -5,7 +5,7 @@ import { BadgeCheck, Expand, Medal, Trophy } from "lucide-react";
 import { rarityPresentation, type AchievementRarity } from "@habitat/shared";
 import { CollectibleInspector } from "@/components/collectible-inspector";
 import { RewardEmblem } from "@/components/reward-emblem";
-import { createCollectibleModel, disposeCollectibleModel, loadCollectibleAtlases } from "@/lib/collectible-three";
+import { animateCollectibleModel, createCollectibleModel, disposeCollectibleModel, loadCollectibleAtlases } from "@/lib/collectible-three";
 
 export type CabinetItem = {
   id: string;
@@ -16,6 +16,7 @@ export type CabinetItem = {
   rarity: AchievementRarity;
   achievementName: string;
   unlockedAt: string;
+  seasonal?: boolean;
 };
 
 const kindIcon = { BADGE: BadgeCheck, MEDAL: Medal, TROPHY: Trophy } as const;
@@ -28,7 +29,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
   const displayedItems = useMemo(() => {
     const kindRank: Record<CabinetItem["kind"], number> = { TROPHY: 0, MEDAL: 1, BADGE: 2 };
     return [...items]
-      .sort((left, right) => kindRank[left.kind] - kindRank[right.kind] || Date.parse(right.unlockedAt) - Date.parse(left.unlockedAt))
+      .sort((left, right) => Number(Boolean(right.seasonal)) - Number(Boolean(left.seasonal)) || kindRank[left.kind] - kindRank[right.kind] || Date.parse(right.unlockedAt) - Date.parse(left.unlockedAt))
       .slice(0, 28);
   }, [items]);
   const selected = selectedIndex >= 0 ? displayedItems[selectedIndex] ?? null : null;
@@ -166,6 +167,7 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
         if (disposed || !visible) return;
         const elapsed = time / 1000;
         models.forEach((model, index) => {
+          animateCollectibleModel(model, elapsed, reduced);
           const restRotation = displayedItems[index]?.kind === "TROPHY" ? (index % 2 ? 0.24 : -0.24) : (index % 3 - 1) * 0.12;
           model.rotation.y += (restRotation + Math.sin(elapsed * 0.48 + index * 0.63) * (displayedItems[index]?.kind === "TROPHY" ? 0.18 : 0.12) - model.rotation.y) * 0.04;
           model.position.y = model.userData.baseY as number;
@@ -193,10 +195,11 @@ export function TrophyCabinet({ items, ownerName, compact = false }: { items: Ca
   return <section className={`trophy-cabinet-section ${compact ? "compact" : ""}`}>
     <div className="cabinet-heading"><div><p className="eyebrow">Living collection</p><h2>{ownerName}&apos;s trophy cupboard</h2><p>{items.length ? `${items.length} verified piece${items.length === 1 ? "" : "s"}, each physically modeled from the way it was earned. Select any piece to inspect every side.` : "The cupboard is built. The shelves are waiting for the first verified piece."}</p></div><strong>{items.length}<span>pieces</span></strong></div>
     <div className="trophy-cabinet-stage" ref={rootRef}>
+      {displayedItems.some((item) => item.seasonal) ? <div className="cabinet-seasonal-shelf" aria-hidden="true"><span>Seasonal shelf</span><strong>Permanent commemoratives</strong></div> : null}
       <canvas aria-label="Interactive three-dimensional trophy cupboard. Select a collectible below for an accessible inspection view." className="trophy-cabinet-canvas" ref={canvasRef} />
       <div className="cabinet-fallback" aria-hidden="true">{Array.from({ length: 28 }, (_, index) => <i className={items[index] ? `filled rarity-${items[index].rarity.toLowerCase().replaceAll("_", "-")}` : ""} key={index} />)}</div>
       <div className="cabinet-inspection">
-        {selected ? <><RewardEmblem rarity={selected.rarity} kind={selected.kind} code={selected.code} size="large" /><p className="eyebrow">{selected.kind} · {rarityPresentation[selected.rarity].label}</p><h3>{selected.name}</h3><p>{selected.description ?? `Unlocked by ${selected.achievementName}.`}</p><small>Unlocked by {selected.achievementName} · {new Date(selected.unlockedAt).toLocaleDateString()}</small><button type="button" onClick={() => setInspected(selected)}><Expand aria-hidden="true" /> Inspect in 3D</button></> : <><Trophy aria-hidden="true" /><p className="eyebrow">Empty cupboard</p><h3>Room for legends</h3><p>Verified medals, badges, and trophies will appear here automatically.</p></>}
+        {selected ? <><RewardEmblem rarity={selected.rarity} kind={selected.kind} code={selected.code} size="large" /><p className="eyebrow">{selected.seasonal ? "Seasonal shelf · " : ""}{selected.kind} · {rarityPresentation[selected.rarity].label}</p><h3>{selected.name}</h3><p>{selected.description ?? `Unlocked by ${selected.achievementName}.`}</p><small>Unlocked by {selected.achievementName} · {new Date(selected.unlockedAt).toLocaleDateString()}</small><button type="button" onClick={() => setInspected(selected)}><Expand aria-hidden="true" /> Inspect in 3D</button></> : <><Trophy aria-hidden="true" /><p className="eyebrow">Empty cupboard</p><h3>Room for legends</h3><p>Verified medals, badges, and trophies will appear here automatically.</p></>}
       </div>
     </div>
     {displayedItems.length ? <div className="cabinet-index" aria-label="Trophy cupboard inventory">{displayedItems.map((item, index) => { const Icon = kindIcon[item.kind]; return <button aria-pressed={selectedIndex === index} key={item.id} onPointerEnter={() => setSelectedIndex(index)} onFocus={() => setSelectedIndex(index)} onClick={() => { setSelectedIndex(index); setInspected(item); }} type="button"><Icon aria-hidden="true" size={14} /><span><small>{item.kind}</small>{item.name}</span><Expand aria-hidden="true" size={11} /></button>; })}</div> : null}

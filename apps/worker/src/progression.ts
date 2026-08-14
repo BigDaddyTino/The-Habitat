@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import { utcWeekWindow, verifiedPlaytimeXp } from "@habitat/shared";
 import { evaluateLevelAchievementsForUser } from "./achievements.js";
+import { processSeasonProgressionForEvent, reconcileSeasons } from "./seasons.js";
 
 const questCount = 4;
 const verifiedSessionSources = ["PALWORLD_REST", "LEGACY_HISTORY_IMPORT"];
@@ -34,6 +35,7 @@ export async function processProgressionForEvent(transaction: Prisma.Transaction
     await awardAccumulatedPlaytimeXp(transaction, event.playerIdentity.userId, event.id, event.occurredAt);
   }
   await evaluateLevelAchievementsForUser(transaction, event.playerIdentity.userId, achievementContext);
+  await processSeasonProgressionForEvent(transaction, event.id, now);
 
   const { weekStart, endsAt } = utcWeekWindow(now);
   if (event.occurredAt < weekStart || event.occurredAt >= endsAt) return;
@@ -75,6 +77,7 @@ export async function reconcileProgression(now = new Date()) {
     await db.$transaction((transaction) => processProgressionForEvent(transaction, latest.id, now));
     reconciled += 1;
   }
+  await reconcileSeasons(now);
   return reconciled;
 }
 

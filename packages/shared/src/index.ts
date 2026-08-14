@@ -2,6 +2,7 @@ export * from "./agent";
 export * from "./achievements";
 export * from "./records";
 export * from "./progression";
+export * from "./seasons";
 export * from "./marvel-rivals";
 export * from "./marvel-rivals-provider";
 export * from "./rivalsmeta";

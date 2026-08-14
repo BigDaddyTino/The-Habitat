@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { levelForXp, progressionForXp, utcWeekWindow, verifiedPlaytimeXp, xpRequiredForLevel } from "@habitat/shared";
+import { boundedProgress, isThreeMonthSeason, levelForXp, progressionForXp, seasonPhase, utcWeekWindow, verifiedPlaytimeXp, xpRequiredForLevel } from "@habitat/shared";
 import { selectWeeklyQuestRotation } from "./progression.js";
 
 test("the 100-level curve is steep, monotonic, and takes over one million XP", () => {
@@ -34,4 +34,13 @@ test("weekly quest rotation is deterministic and always includes each activity f
   assert.deepEqual(first, selectWeeklyQuestRotation(definitions, week));
   assert.equal(first.length, 4);
   assert.deepEqual(new Set(first.map((quest) => quest.ruleType)), new Set(["PLAY_SECONDS", "JOIN_COUNT", "DISTINCT_GAME_COUNT"]));
+});
+
+test("a season is a separate exact three-month window with bounded community progress", () => {
+  const window = { startsAt: new Date("2026-09-01T00:00:00.000Z"), endsAt: new Date("2026-12-01T00:00:00.000Z") };
+  assert.equal(isThreeMonthSeason(window), true);
+  assert.equal(seasonPhase(window, new Date("2026-08-31T23:59:59.000Z")), "UPCOMING");
+  assert.equal(seasonPhase(window, new Date("2026-09-01T00:00:00.000Z")), "ACTIVE");
+  assert.equal(seasonPhase(window, new Date("2026-12-01T00:00:00.000Z")), "COMPLETED");
+  assert.deepEqual(boundedProgress(15_000, 12_000), { value: 15_000, goal: 12_000, percent: 100, complete: true });
 });

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { getCollectibleVisual, type CollectibleIdentity } from "@/lib/collectible-art";
-import { createCollectibleModel, disposeCollectibleModel, loadCollectibleAtlases } from "@/lib/collectible-three";
+import { animateCollectibleModel, createCollectibleModel, disposeCollectibleModel, loadCollectibleAtlases } from "@/lib/collectible-three";
 
 export function CollectibleCanvas({ item, interactive = false, className = "" }: { item: CollectibleIdentity; interactive?: boolean; className?: string }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -139,6 +139,7 @@ export function CollectibleCanvas({ item, interactive = false, className = "" }:
         }
         model.rotation.x += (rotation.x - model.rotation.x) * Math.min(1, delta * 12);
         model.rotation.y += (rotation.y - model.rotation.y) * Math.min(1, delta * 12);
+        animateCollectibleModel(model, time / 1000, reduced);
         camera.position.z += (distance - camera.position.z) * Math.min(1, delta * 9);
         camera.lookAt(0, 0, 0);
         webgl.render(scene, camera);

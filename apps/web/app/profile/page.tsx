@@ -58,7 +58,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
   const linkedIdentityCount = connectedMatch ? Number.parseInt(connectedMatch[1] ?? "0", 10) : null;
   const twitchNotice = twitchLinkNotice(linkStatuses.twitch);
 
-  const [member, identities, titles, rewards, xpTotal, clubProfiles, twitchChannel] = await Promise.all([
+  const [member, identities, titles, rewards, seasonTrophies, xpTotal, clubProfiles, twitchChannel] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: session.user.id },
       select: {
@@ -97,6 +97,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
       include: { reward: { include: { achievement: { select: { name: true, rarity: true } } } } },
       orderBy: { unlockedAt: "desc" },
     }),
+    db.userSeasonTrophy.findMany({ where: { userId: session.user.id }, include: { trophy: { include: { season: { select: { ordinal: true, name: true } } } } }, orderBy: { unlockedAt: "desc" } }),
     db.userXpEntry.aggregate({ where: { userId: session.user.id }, _sum: { amount: true } }),
     db.clubGameProfile.findMany({ where: { userId: session.user.id }, orderBy: { connectedAt: "asc" } }),
     db.twitchChannel.findUnique({
@@ -122,7 +123,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
     rarity: entry.reward.achievement.rarity as AchievementRarity,
     achievementName: entry.reward.achievement.name,
     unlockedAt: entry.unlockedAt.toISOString(),
-  }));
+  })).concat(seasonTrophies.map((entry) => ({ id: entry.id, code: entry.trophy.code, name: entry.trophy.name, description: entry.trophy.description, kind: "TROPHY" as const, rarity: entry.trophy.rarity as AchievementRarity, achievementName: `Season ${entry.trophy.season.ordinal} · ${entry.trophy.season.name}`, unlockedAt: entry.unlockedAt.toISOString(), seasonal: true })));
   const avatar = member.image ?? avatarPresets[0];
   const steamAccount = member.socialAccounts.find((account) => account.platform === "STEAM" && account.verifiedAt);
   const steamUnlink = steamAccount ? await summarizeSteamUnlink(db, session.user.id) : null;

@@ -66,6 +66,12 @@ export const collectibleVisuals: Record<string, CollectibleVisual> = {
   // tile until the atlas gains a ninth sprite. Its bespoke 3D reliquary is the
   // authored form and stands on its own.
   "bossbreaker-reliquary": visual({ atlas: "trophy", tile: null, form: "boss-reliquary", metal: "#9f6d36", accent: "#f0c873", enamel: "#241815", inscription: "THE WORLD STOOD. THE BOSS DID NOT." }),
+  // Seasonal heirlooms are modeled end to end and deliberately carry no atlas
+  // tile. Their front seals, silhouettes, reverse inscriptions, and animation
+  // rigs are authored in collectible-three rather than borrowed from another
+  // trophy's relief artwork.
+  "first-light-standard": visual({ atlas: "trophy", tile: null, form: "first-light-standard", metal: "#9d6b2f", accent: "#ffe29a", enamel: "#14251e", inscription: "WE RAISED THE FIRST LIGHT TOGETHER." }),
+  "founders-lantern": visual({ atlas: "trophy", tile: null, form: "founders-lantern", metal: "#7f5428", accent: "#ffd77b", enamel: "#111b17", inscription: "THE FIRST FIRE STILL KNOWS YOUR NAME." }),
 };
 
 const fallbackByKind: Record<PhysicalRewardKind, CollectibleVisual> = {

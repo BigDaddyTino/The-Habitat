@@ -152,6 +152,36 @@ const weeklyQuests = [
   { slug: "genre-confusion", name: "Genre Confusion", description: "Visit three different Habitat games this week.", ruleType: "DISTINCT_GAME_COUNT", threshold: 3, xpReward: 1_000, icon: "COMPASS" },
 ] as const;
 
+// Product configuration only: this establishes the first optional season and
+// its goals. It does not create memberships, progress, XP, or live activity.
+const foundingSeason = {
+  slug: "first-light",
+  ordinal: 1,
+  name: "First Light",
+  description: "Three months of fresh objectives across every Habitat world, built on top of the permanent record rather than in place of it.",
+  theme: "Ironwood Dawn",
+  startsAt: new Date("2026-09-01T00:00:00.000Z"),
+  endsAt: new Date("2026-12-01T00:00:00.000Z"),
+  communityXpGoal: 12_000,
+} as const;
+
+const foundingSeasonQuests = [
+  { slug: "personal-field-hours", name: "Field Hours", description: "Bank ten hours of verified play across the season.", scope: "PERSONAL", ruleType: "PLAY_SECONDS", threshold: 36_000, xpReward: 300, sortOrder: 0 },
+  { slug: "personal-open-door", name: "Keep the Door Moving", description: "Make twenty verified visits during the season.", scope: "PERSONAL", ruleType: "JOIN_COUNT", threshold: 20, xpReward: 240, sortOrder: 1 },
+  { slug: "personal-trail-map", name: "Mark Three Trails", description: "Visit three distinct Habitat games before the season closes.", scope: "PERSONAL", ruleType: "DISTINCT_GAME_COUNT", threshold: 3, xpReward: 320, sortOrder: 2 },
+  { slug: "team-long-watch", name: "The Long Watch", description: "As a lodge, record one hundred verified play hours.", scope: "TEAM", ruleType: "PLAY_SECONDS", threshold: 360_000, xpReward: 450, sortOrder: 3 },
+  { slug: "team-open-house", name: "Open House", description: "As a lodge, make two hundred verified visits across the Habitat.", scope: "TEAM", ruleType: "JOIN_COUNT", threshold: 200, xpReward: 350, sortOrder: 4 },
+] as const;
+
+const foundingSeasonExpeditions = [
+  { slug: "navezgane-night-watch", gameType: "SEVEN_DAYS_TO_DIE", name: "Navezgane Night Watch", description: "Make thirty verified community visits to the blood-moon country.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 0 },
+  { slug: "knox-neighborhood-watch", gameType: "PROJECT_ZOMBOID", name: "Knox Neighborhood Watch", description: "Make thirty verified community visits to Knox Country.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 1 },
+  { slug: "wild-country-survey", gameType: "DRAGONWILDS", name: "Wild Country Survey", description: "Make thirty verified community visits to the Wild Country.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 2 },
+  { slug: "embervale-lantern-run", gameType: "ENSHROUDED", name: "Embervale Lantern Run", description: "Make thirty verified community visits through the Shroud.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 3 },
+  { slug: "preserve-rounds", gameType: "PALWORLD", name: "Preserve Rounds", description: "Make thirty verified community visits to Habitat Preserve.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 4 },
+  { slug: "valhalla-voyage", gameType: "VALHEIM", name: "Valhalla Voyage", description: "Make thirty verified community visits to the northern coast.", ruleType: "JOIN_COUNT", threshold: 30, sortOrder: 5 },
+] as const;
+
 const records = [
   { slug: "most-verified-visits", title: "Most Verified Visits", description: "The most recorded, verified player joins across all Habitat worlds.", hall: "LEGENDS", category: "Community", valueLabel: "verified visits", ruleType: "PLAYER_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
   { slug: "most-worlds-touched", title: "Most Worlds Touched", description: "The most distinct Habitat games joined with a verified identity.", hall: "LEGENDS", category: "Exploration", valueLabel: "games explored", ruleType: "DISTINCT_GAME_EVENT_COUNT", ruleConfig: { eventType: "PLAYER_JOINED" } },
@@ -211,6 +241,35 @@ async function main() {
   }
   for (const quest of weeklyQuests) {
     await prisma.weeklyQuestDefinition.upsert({ where: { slug: quest.slug }, create: quest, update: { name: quest.name, description: quest.description, ruleType: quest.ruleType, threshold: quest.threshold, xpReward: quest.xpReward, icon: quest.icon, enabled: true } });
+  }
+  const season = await prisma.season.upsert({
+    where: { slug: foundingSeason.slug },
+    create: foundingSeason,
+    update: { name: foundingSeason.name, description: foundingSeason.description, theme: foundingSeason.theme, startsAt: foundingSeason.startsAt, endsAt: foundingSeason.endsAt, communityXpGoal: foundingSeason.communityXpGoal, isEnabled: true },
+  });
+  for (const quest of foundingSeasonQuests) {
+    await prisma.seasonQuestDefinition.upsert({
+      where: { seasonId_slug: { seasonId: season.id, slug: quest.slug } },
+      create: { seasonId: season.id, ...quest },
+      update: { name: quest.name, description: quest.description, scope: quest.scope, ruleType: quest.ruleType, threshold: quest.threshold, xpReward: quest.xpReward, sortOrder: quest.sortOrder, enabled: true },
+    });
+  }
+  for (const expedition of foundingSeasonExpeditions) {
+    await prisma.seasonExpedition.upsert({
+      where: { seasonId_slug: { seasonId: season.id, slug: expedition.slug } },
+      create: { seasonId: season.id, ...expedition },
+      update: { gameType: expedition.gameType, name: expedition.name, description: expedition.description, ruleType: expedition.ruleType, threshold: expedition.threshold, sortOrder: expedition.sortOrder },
+    });
+  }
+  for (const trophy of [
+    { kind: "COMMEMORATIVE" as const, code: "first-light-standard", name: "First Light Standard", description: "A gilded ironwood standard raised permanently for Habitat's first seasonal expedition.", rarity: "LEGENDARY" as const },
+    { kind: "FOUNDING_MEMBER" as const, code: "founders-lantern", name: "Founder's Lantern", description: "A living-flame heirloom reserved forever for the members of Habitat's founding season.", rarity: "LEGENDARY" as const },
+  ]) {
+    await prisma.seasonTrophy.upsert({
+      where: { seasonId_kind: { seasonId: season.id, kind: trophy.kind } },
+      create: { seasonId: season.id, ...trophy },
+      update: { code: trophy.code, name: trophy.name, description: trophy.description, rarity: trophy.rarity },
+    });
   }
   for (const record of records) {
     await prisma.recordDefinition.upsert({

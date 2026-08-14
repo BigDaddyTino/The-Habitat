@@ -21,3 +21,16 @@ test("every authored relief points at a tile the atlas actually contains", () =>
     assert.ok(visual.tile < grid.columns * grid.rows, `${code} points past the ${visual.atlas} atlas`);
   }
 });
+
+test("season heirlooms have distinct bespoke forms and borrow no atlas relief", () => {
+  const standard = collectibleVisuals["first-light-standard"];
+  const lantern = collectibleVisuals["founders-lantern"];
+  assert.ok(standard);
+  assert.ok(lantern);
+  assert.equal(standard.tile, null);
+  assert.equal(lantern.tile, null);
+  assert.equal(standard.form, "first-light-standard");
+  assert.equal(lantern.form, "founders-lantern");
+  assert.notEqual(standard.inscription, lantern.inscription);
+  assert.notEqual(standard.enamel, lantern.enamel);
+});

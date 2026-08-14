@@ -179,8 +179,11 @@
   .collectible-inspector-copy blockquote { margin-top:16px; }
   .collectible-inspector-copy dl { margin-top:17px; }
   .collectible-inspector-controls { bottom:12px; }
+  .season-trophy-qa>header h1 { font-size:clamp(44px,13vw,58px)!important; line-height:.78; }
 }
 @media (prefers-reduced-motion:reduce) {
   .collectible-inspector,.collectible-inspector-shell { animation:none; }
   .collectible-canvas canvas { transition:none; }
 }
+.cabinet-seasonal-shelf{position:absolute;z-index:3;top:48px;left:22px;display:grid;padding:8px 12px;border:1px solid #bc9553;background:#16130dd9;box-shadow:0 5px 20px #0008;pointer-events:none}.cabinet-seasonal-shelf span{color:#e1bd70;font-family:var(--font-display);font-size:18px;line-height:1}.cabinet-seasonal-shelf strong{color:#9d927b;font-family:var(--font-mono);font-size:6px;letter-spacing:1px;text-transform:uppercase}
+.season-trophy-qa{padding-top:58px;padding-bottom:90px}.season-trophy-qa>header{max-width:800px;margin-bottom:28px}.season-trophy-qa>header h1{font-size:clamp(66px,9vw,112px);line-height:.72;text-transform:uppercase}.season-trophy-qa>header>p:last-child{margin-top:20px;color:var(--muted)}.season-trophy-qa>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.season-trophy-qa article{position:relative;padding:20px;border:1px solid rgba(var(--rarity-rgb),.35);border-top:2px solid var(--rarity);background:radial-gradient(circle at 50% 35%,rgba(var(--rarity-rgb),.11),transparent 34%),linear-gradient(145deg,#1d1a13,#0c110e);box-shadow:0 24px 55px #0006}.season-trophy-qa-stage{height:620px;margin:-10px -10px 18px;border-bottom:1px solid rgba(var(--rarity-rgb),.18);background:radial-gradient(circle at 50% 50%,#b8632430,transparent 35%)}.season-trophy-qa article h2{font-size:42px}.season-trophy-qa article>span{display:block;margin-top:8px;color:var(--muted);font-size:10px}@media(max-width:760px){.season-trophy-qa>div{grid-template-columns:1fr}.season-trophy-qa-stage{height:470px}.season-trophy-qa article h2{font-size:34px}}
