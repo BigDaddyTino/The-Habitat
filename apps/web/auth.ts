@@ -6,9 +6,20 @@ import { cookies } from "next/headers";
 import "@/lib/environment";
 import type { HabitatRole } from "@/lib/permissions";
 import { hasRequiredRole } from "@/lib/permissions";
+import { publicOrigin } from "@/lib/public-url";
 import { INVITE_GRANT_COOKIE, readInviteGrant } from "@/lib/weekly-invite-code";
 
 const db = getPrismaClient();
+
+// Auth.js rewrites each request's origin from AUTH_URL, but when AUTH_URL is
+// missing it silently keeps the incoming URL instead. Behind the tunnel that is
+// a loopback address, so Discord would be handed
+// http://127.0.0.1:3000/api/auth/callback/discord and sign-in would break in a
+// way that looks like a provider problem. publicOrigin() throws on a missing,
+// non-HTTPS, or path-bearing value, so asserting it here turns that silent
+// misconfiguration into a refusal to boot. Development is left alone: there,
+// inferring the origin from the request is legitimate.
+if (process.env.NODE_ENV === "production") publicOrigin();
 
 export const isDiscordConfigured = Boolean(
   process.env.AUTH_DISCORD_ID && process.env.AUTH_DISCORD_SECRET,

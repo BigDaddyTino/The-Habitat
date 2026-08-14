@@ -121,7 +121,9 @@ export default async function StreamsPage() {
                   width={672}
                 />
               : featured.thumbnailUrl
-                ? <a href={featured.channelUrl ?? "#"} rel="noreferrer" target="_blank"><img alt={`${featured.displayName} stream preview`} src={featured.thumbnailUrl} /></a>
+                ? featured.channelUrl
+                  ? <a href={featured.channelUrl} rel="noreferrer" target="_blank"><img alt={`${featured.displayName} stream preview`} src={featured.thumbnailUrl} /></a>
+                  : <img alt={`${featured.displayName} stream preview`} src={featured.thumbnailUrl} />
                 : <div className="stream-card-frame-empty" aria-hidden="true"><Tv size={30} /></div>}
           </div>
           <div className="stream-stage-caption">

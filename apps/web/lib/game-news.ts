@@ -28,7 +28,21 @@ function isPatchNote(item: SteamNewsItem) {
   return Boolean(item.tags?.includes("patchnotes") || /patch notes?|balance (?:post|adjustment)|version \d+/i.test(item.title ?? ""));
 }
 
-function isSafeNewsUrl(value: string | undefined) {
+/**
+ * Requires HTTPS, which is what rejects the dangerous shapes (`javascript:`,
+ * plain HTTP, unparseable strings).
+ *
+ * Deliberately NOT host-allowlisted. Steam's ISteamNews feed serves community
+ * announcements from its CDN — every announcement for every configured app
+ * currently arrives as `https://steamstore-a.akamaihd.net/...`, not from
+ * steamcommunity.com or steampowered.com. An allowlist of the obvious Steam
+ * domains silently drops every dispatch, and Valve can move the CDN host
+ * whenever it likes, so the allowlist would keep failing closed and empty. The
+ * URL comes from Valve's own HTTPS API for a specific appid and is rendered with
+ * rel="noreferrer" on an explicit member click, so the residual risk is far
+ * smaller than a feed that quietly shows nothing.
+ */
+export function isSafeNewsUrl(value: string | undefined) {
   if (!value) return false;
   try {
     return new URL(value).protocol === "https:";
