@@ -81,6 +81,29 @@ Set-Location "<repository>\apps\agent"
 
 The installer writes the ignored local `.env`, creates an empty config when needed, creates the source-limited firewall rule, and installs the `HabitatAgent` WinSW service. It refuses non-private bind/source addresses, missing Node/WinSW artifacts, short tokens, and duplicate services.
 
+## Updating An Installed Agent
+
+The service runs compiled output (`<arguments>dist\index.js</arguments>`), not TypeScript sources, so pulling changes is not enough on its own. A pull followed only by a restart keeps executing the previous build. From the repository root on MartServ102:
+
+```powershell
+git pull
+pnpm install --frozen-lockfile
+pnpm --filter @habitat/agent build
+Restart-Service HabitatAgent
+```
+
+`HabitatAgent` exists only on MartServ102. Running `Start-Service HabitatAgent` on MartServ101 fails with "Cannot find any service with service name 'HabitatAgent'" because MartServ101 hosts only `HabitatWeb` and `HabitatWorker`. To inspect or control it from MartServ101 without signing in to MartServ102, use an elevated prompt:
+
+```powershell
+sc.exe \\<MartServ102 private LAN IP> query HabitatAgent
+sc.exe \\<MartServ102 private LAN IP> stop HabitatAgent
+sc.exe \\<MartServ102 private LAN IP> start HabitatAgent
+```
+
+A brief agent restart does not flap world state: the worker debounces an unreachable agent for two consecutive cycles before recording `UNKNOWN`.
+
+Agent logs live in `<repository>\apps\agent\logs` via the template's `%BASE%\logs` path. `%BASE%` is WinSW's own directory; a relative `logpath` would instead resolve against the service process's working directory, which is `C:\Windows\System32` for a LocalSystem service, and the application log would silently land in `C:\Windows\System32\logs`. An agent installed before that template fix still carries the relative value in its already-copied `HabitatAgent.xml`, so correct it in place and restart.
+
 ## Verify And Remove
 
 From MartServ101, call `/health` using the configured token. A valid response is minimal host-health data only. A missing token receives `401`; a source outside the configured allow list receives `403`.
