@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Award, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, RadioTower, Users } from "lucide-react";
+import { Activity, Award, CalendarRange, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, RadioTower, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const groups = [
@@ -18,6 +18,7 @@ const groups = [
   { label: "Clubhouse", items: [
     { href: "/admin/community", label: "Community", icon: Flame },
     { href: "/admin/titles", label: "Titles", icon: Award },
+    { href: "/admin/seasons", label: "Seasons", icon: CalendarRange },
     { href: "/admin/discord", label: "Discord", icon: MessageCircle },
   ] },
 ];

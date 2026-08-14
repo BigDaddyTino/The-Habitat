@@ -46,3 +46,17 @@ the first season, the Founder's Lantern. Progress toward the bar is visible on
 Chronicle records the requirement alongside how many members met it. Missing the
 bar costs a member nothing permanent: lifetime XP, level, achievements, titles,
 records, and previously earned trophies are untouched either way.
+
+Seasons are created, built, and launched from `/admin/seasons` rather than by
+editing the seed. An administrator drafts a season disabled and unstarted, builds
+its quests, expeditions, and trophies at `/admin/seasons/[slug]`, then opens it
+immediately or schedules a start; the close date is always recomputed to the
+exact three-calendar-month window the database enforces, and a season carrying no
+trophies cannot be launched because closing it would award nothing.
+
+How much of a season may change depends on its state. Unstarted, everything is
+editable. Running, only wording, difficulty, ordering, and availability move —
+scope, rule, game, and reward are frozen so enrolled members are not re-judged
+against a goal they did not sign up for. Completed, nothing changes. A quest that
+has awarded season XP is never removed, and a trophy a member already holds is
+never withdrawn.

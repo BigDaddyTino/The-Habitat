@@ -341,3 +341,26 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Made eligibility trackable while the season runs: a live progress rail and exact remaining-XP figure on `/seasons` for enrolled members, a shelf-qualified marker per row plus a qualified-of-enrolled count on `/leaderboards/season`, and the cleared-the-bar line in the closing Chronicle
 - [x] Corrected the reward copy, which had promised the shelf to every enrolled member and implied a completion bar that did not exist
 - [x] Full workspace verification after the pass: typecheck, lint, 210 tests, and production build all green
+
+## 2026-08-14 - Admin season launch
+
+- [x] Added `/admin/seasons` behind the existing `requireRole("ADMIN")` wing, with a Clubhouse nav entry: launch a scheduled season immediately, reschedule its opening date, and edit its name, theme, description, community XP goal, trophy XP bar, and availability
+- [x] Launching opens the window at the launch instant rather than at midnight, so no activity recorded before an administrator pressed the button is credited; the close date is always computed with `seasonEndFor`, which mirrors the Postgres `INTERVAL '3 months'` CHECK
+- [x] Refused launches that could not work: a season with no trophies would award nothing at closure, a season already holding seasonal XP would strand that ledger, and a running or completed season is never reopened. A season with no quests or expeditions launches but says it will score raw playtime only
+- [x] Enforced one season at a time through an interval-overlap check inside the launch transaction, so a stale page or double submit cannot open two overlapping seasons
+- [x] Froze completed seasons against edits; their Chronicle already publishes the goals and trophy bar they were judged against
+- [x] Shared the launch decision between the button and the server guard through `lib/season-launch.ts` so the two can never disagree, and audited every launch, reschedule, and settings change to `AuditLog`
+- [x] Verified all three window shapes an administrator can produce (launch-now, a month-end reschedule, a 31st) against the live CHECK constraint inside rolled-back transactions; all accepted, First Light row unchanged
+- [x] Full workspace verification after the pass: typecheck, lint, 217 tests, and production build all green
+
+## 2026-08-14 - Season content builder
+
+- [x] Added `/admin/seasons/[slug]`, a full authoring surface for a season's quests, personal/team scope, per-game expeditions, and its two trophies; season content no longer requires editing the database seed
+- [x] Added season creation from `/admin/seasons`. A drafted season is created disabled and unstarted with the next free ordinal and a slug derived from its name, so its goals and trophies are built before it can ever reach the board
+- [x] Staged editability by season state: an unstarted season is fully editable, a running season keeps wording, difficulty, ordering, and availability adjustable while scope, rule, game, and reward are frozen so enrolled members are not re-judged mid-season, and a completed season is immutable. The rule is re-read inside every write transaction, so a stale form cannot slip past it
+- [x] Refused goals the reconciler could never satisfy: a distinct-game goal restricted to one game can only ever reach 1, and one above six exceeds the Habitat. Boss-kill and sub-ten-minute playtime goals warn without blocking
+- [x] Protected the ledger and the cabinet: a quest that has awarded season XP cannot be removed, and a trophy any member already holds is never withdrawn
+- [x] Held the founding reward to season 1, where the worker actually awards it, rather than offering a piece that would never be handed out
+- [x] Reported trophy artwork honestly — a code with authored 3D work says so, and an invented code states it will render with the generic trophy form until artwork is added
+- [x] Verified the builder against the live schema inside a rolled-back transaction: a full season with two quests, an expedition, and both trophies wrote cleanly, and the database independently refused a duplicate trophy kind, a duplicate quest slug, and a zero threshold. Nothing persisted
+- [x] Full workspace verification after the pass: typecheck, lint, 226 tests, and production build all green
