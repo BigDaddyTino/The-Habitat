@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && node scripts/verify-build.mjs",
     "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",

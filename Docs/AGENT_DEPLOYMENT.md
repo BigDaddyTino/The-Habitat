@@ -92,6 +92,8 @@ pnpm --filter @habitat/agent build
 Restart-Service HabitatAgent
 ```
 
+The build compiles and then loads every emitted module under bare `node` (`scripts/verify-build.mjs`), because the agent is the only workspace that runs compiled output on plain `node`: the worker runs under tsx and the web app is bundled, and both accept module specifiers that Node itself rejects. A value import from `@habitat/shared` must therefore name a subpath export whose target has no extensionless relative imports of its own, such as `@habitat/shared/agent` rather than `@habitat/shared`, whose `index.ts` re-exports `./agent` without an extension and fails to resolve at runtime. Type-only imports are erased at compile time and may use any specifier. The check fails the build on the build machine instead of crash-looping the installed service, which is how an unloadable build reached MartServ102 on 2026-08-13.
+
 `HabitatAgent` exists only on MartServ102. Running `Start-Service HabitatAgent` on MartServ101 fails with "Cannot find any service with service name 'HabitatAgent'" because MartServ101 hosts only `HabitatWeb` and `HabitatWorker`. To inspect or control it from MartServ101 without signing in to MartServ102, use an elevated prompt:
 
 ```powershell

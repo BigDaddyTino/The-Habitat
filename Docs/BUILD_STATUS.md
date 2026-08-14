@@ -256,3 +256,13 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Tightened the Pulse layout with content-sized desktop grids, an explicit missing-collector state, and an accessible compact mobile navigation that does not overflow a 390px viewport
 - [x] Accounted for Next's already-loaded `node:http`: the web app exports native Next request spans and the collector derives request/error metrics from them, avoiding a production TS preload solely for duplicate counters; see `Docs/OBSERVABILITY.md`
 - [ ] Set an operations channel on `/admin/discord` to actually receive Pulse alerts; none is configured, so alerting is currently inert by design
+
+## 2026-08-14 - Agent Deployment Recovery
+
+- [x] Established that MartServ102 was still executing the 2026-08-11 agent build: the Valheim Steam identity correlation, rotated-log offset handling, the `sc.exe` kill timer, the `400 invalid_request_body` response, and the telemetry bootstrap were all committed but unreachable by the running service
+- [x] Diagnosed the 2026-08-13 crash loop from the agent error log: the agent is the only workspace that runs compiled output on bare `node`, and its new value imports from `@habitat/shared` reached the extensionless relative re-exports in that package, which tsx and the bundler accept but Node rejects
+- [x] Exposed `@habitat/shared/agent` and `@habitat/shared/telemetry-config` as subpath exports, matching the existing `./worlds` pattern, and pointed the agent value imports at them without touching the specifiers the web app and worker rely on
+- [x] Added `apps/agent/scripts/verify-build.mjs` to the agent build so every emitted module is loaded under bare `node`; neither the tsx test run nor `tsc` exercises that resolver, which is why an unloadable build shipped
+- [x] Installed the missing OpenTelemetry dependencies on MartServ102 and refreshed the installed `HabitatAgent.xml` from the tracked template, correcting a relative `logpath` that sent application output to `C:\Windows\System32\logs`, a `sizeThreshold` of 10485760 KB rather than the intended 10 MB, and `keepFiles` 5 rather than 14
+- [x] Verified live on MartServ102: clean start with an empty error log, telemetry dormant with no endpoint configured, the allow list rejecting the agent host itself, and the Valheim scan attributing 7 Chronicle character records to SteamID64 and naming 7 archived sessions where the previous build attributed none
+- [ ] Move the historical agent output left in `C:\Windows\System32\logs` by the earlier relative `logpath`, including the 2026-08-13 crash evidence, once it is no longer needed for reference
