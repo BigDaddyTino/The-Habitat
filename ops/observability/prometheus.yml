@@ -1,0 +1,19 @@
+# Prometheus scrapes the collector rather than the applications themselves, so
+# the three Habitat services never have to expose a metrics port of their own.
+
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: habitat-otel-collector
+    static_configs:
+      - targets: ["otel-collector:8889"]
+  # The collector's own health, so a silent pipeline is distinguishable from a
+  # quiet installation.
+  - job_name: otel-collector-internal
+    static_configs:
+      - targets: ["otel-collector:8888"]
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

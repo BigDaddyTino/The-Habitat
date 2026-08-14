@@ -1,0 +1,23 @@
+apiVersion: 1
+
+# Provisioned so a rebuilt Grafana comes back with working data sources rather
+# than an empty install somebody has to reconfigure from memory.
+datasources:
+  - name: Habitat metrics
+    type: prometheus
+    uid: habitat-prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: 30s
+
+  - name: Habitat traces
+    type: tempo
+    uid: habitat-tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      # Lets a slow span jump straight to the metrics for the same service.
+      tracesToMetrics:
+        datasourceUid: habitat-prometheus

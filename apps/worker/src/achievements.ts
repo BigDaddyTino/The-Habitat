@@ -2,6 +2,7 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import { parseActivityCountRule, parseActivityStatThresholdRule, parseActivityValueSumRule, parseDistinctActivityGameRule, parseDistinctGameEventCountRule, parseEventCountRule, parseGameEventCountRule, parseLegacyEvidenceCountRule, parseLevelReachedRule, parseOrderedActivityStreakRule, progressionForXp } from "@habitat/shared";
 import { evaluateRecordsForEvent } from "./records.js";
 import { queueDiscordNotification } from "./discord-notifications.js";
+import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
 
 type AchievementEvaluationOptions = { suppressNotifications?: boolean };
 
@@ -120,7 +121,8 @@ export async function reconcileAchievementCatalog() {
   const users = await db.user.findMany({ where: { isActive: true }, select: { id: true } });
   let reconciled = 0;
   for (const user of users) {
-    const [joinEvent, legacyEvidence, progressionEvent, activity] = await Promise.all([
+    try {
+      const [joinEvent, legacyEvidence, progressionEvent, activity] = await Promise.all([
       db.serverEvent.findFirst({ where: { eventType: "PLAYER_JOINED", playerIdentity: { is: { userId: user.id } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { id: true } }),
       db.legacyPlayerEvidence.findFirst({ where: { playerIdentity: { is: { userId: user.id } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { id: true } }),
       db.serverEvent.findFirst({
@@ -130,19 +132,23 @@ export async function reconcileAchievementCatalog() {
       }),
       db.gameActivity.findFirst({ where: { userId: user.id }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], select: { id: true } }),
     ]);
-    await db.$transaction(async (transaction) => {
-      if (joinEvent) await evaluateAchievementsForEvent(transaction, joinEvent.id, { suppressNotifications: true });
-      if (legacyEvidence) await evaluateAchievementsForLegacyEvidence(transaction, legacyEvidence.id, { suppressNotifications: true });
-      if (progressionEvent?.playerIdentity?.userId) await evaluateLevelAchievementsForUser(transaction, user.id, {
-        id: progressionEvent.id,
-        serverId: progressionEvent.serverId,
-        gameType: progressionEvent.gameType,
-        occurredAt: progressionEvent.occurredAt,
-        playerIdentity: { id: progressionEvent.playerIdentity.id, displayName: progressionEvent.playerIdentity.displayName },
-      }, { suppressNotifications: true });
-      if (activity) await evaluateAchievementsForActivity(transaction, activity.id, { suppressNotifications: true });
-    });
-    reconciled += 1;
+      await db.$transaction(async (transaction) => {
+        if (joinEvent) await evaluateAchievementsForEvent(transaction, joinEvent.id, { suppressNotifications: true });
+        if (legacyEvidence) await evaluateAchievementsForLegacyEvidence(transaction, legacyEvidence.id, { suppressNotifications: true });
+        if (progressionEvent?.playerIdentity?.userId) await evaluateLevelAchievementsForUser(transaction, user.id, {
+          id: progressionEvent.id,
+          serverId: progressionEvent.serverId,
+          gameType: progressionEvent.gameType,
+          occurredAt: progressionEvent.occurredAt,
+          playerIdentity: { id: progressionEvent.playerIdentity.id, displayName: progressionEvent.playerIdentity.displayName },
+        }, { suppressNotifications: true });
+        if (activity) await evaluateAchievementsForActivity(transaction, activity.id, { suppressNotifications: true });
+      });
+      await resolveEvaluationFailures("ACHIEVEMENT_CATALOG", [user.id]);
+      reconciled += 1;
+    } catch (error) {
+      await recordEvaluationFailure({ kind: "ACHIEVEMENT_CATALOG", scope: "catalog-reconciliation", reference: user.id, error });
+    }
   }
   return reconciled;
 }

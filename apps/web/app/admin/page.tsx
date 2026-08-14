@@ -21,7 +21,7 @@ export default async function AdminPage() {
   const user = await requireRole("ADMIN");
   const now = new Date();
   const presenceCutoff = new Date(now.getTime() - 2 * 60 * 1000);
-  const [memberCount, onlineCount, invitations, claims, wakeRequests, activePolls, attentionWorlds, recentAudits] = await Promise.all([
+  const [memberCount, onlineCount, invitations, claims, wakeRequests, activePolls, attentionWorlds, recentAudits, pulseSignals] = await Promise.all([
     db.user.count({ where: { isActive: true } }),
     db.memberPresence.count({ where: { lastSeenAt: { gte: presenceCutoff }, user: { isActive: true } } }),
     db.invitation.count({ where: { acceptedAt: null, revokedAt: null, expiresAt: { gt: now } } }),
@@ -30,8 +30,14 @@ export default async function AdminPage() {
     db.serverPoll.count({ where: { status: "ACTIVE", closesAt: { gt: now } } }),
     db.gameServer.findMany({ where: { enabled: true, actualState: { in: ["DOWN_UNEXPECTEDLY", "UNKNOWN"] } }, select: { id: true, displayName: true, actualState: true }, orderBy: { displayName: "asc" } }),
     db.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, select: { id: true, action: true, entityType: true, createdAt: true, actor: { select: { displayName: true, name: true, email: true } } } }),
+    db.pulseSignal.findMany({ select: { status: true } }),
   ]);
   const reviewCount = invitations + claims + wakeRequests;
+  // The card reports only what has actually been evaluated; an installation whose
+  // worker has never run says so rather than claiming everything is well.
+  const failingSignals = pulseSignals.filter((signal) => signal.status === "CRITICAL" || signal.status === "WARN").length;
+  const pulseSignal = pulseSignals.length === 0 ? "Never evaluated" : failingSignals === 0 ? `${pulseSignals.length} signals healthy` : `${failingSignals} of ${pulseSignals.length} signals need attention`;
+  const pulseTone: "brass" | "moss" | "ember" = pulseSignals.length === 0 ? "brass" : failingSignals === 0 ? "moss" : "ember";
 
   return <section className="admin-page admin-overview-page">
     <header className="admin-overview-hero">
@@ -51,6 +57,7 @@ export default async function AdminPage() {
       <CommandStation eyebrow="Hosted worlds" href="/admin/operations" icon={Radio} title="World operations" copy="Observe real agent telemetry and dispatch only allow-listed lifecycle controls." signal={attentionWorlds.length ? `${attentionWorlds.length} need attention` : "No critical signals"} tone={attentionWorlds.length ? "ember" : "moss"} />
       <CommandStation eyebrow="Registry" href="/admin/servers" icon={Map} title="World registry" copy="Maintain public world labels and explicit control eligibility without exposing infrastructure." signal="Configuration station" />
       <CommandStation eyebrow="Community" href="/admin/community" icon={Flame} title="The gathering" copy="Review wake requests and run the single, deliberate game-night ballot." signal={`${wakeRequests} wake requests · ${activePolls} polls`} />
+      <CommandStation eyebrow="Observability" href="/admin/pulse" icon={Activity} title="Habitat Pulse" copy="Tunnel, process freshness, collectors, backups, ingestion and the reward pipeline, each evaluated and dated." signal={pulseSignal} tone={pulseTone} />
     </div>
 
     <section className="admin-audit-panel">

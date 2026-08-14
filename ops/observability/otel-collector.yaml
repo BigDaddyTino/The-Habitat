@@ -1,0 +1,85 @@
+# Habitat's OpenTelemetry Collector.
+#
+# This is the seam that keeps the product free of any monitoring vendor: the web
+# app, the worker and the agent only ever speak OTLP to this process, and where
+# the data goes afterwards is decided here. Swapping Tempo and Prometheus for a
+# hosted backend is an edit to the exporters below and nothing else.
+#
+# The container publishes its ports on 127.0.0.1 only (see docker-compose.yml).
+# Telemetry carries request paths and host names, so it is treated as private
+# operational data, exactly like the database.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Bounded before anything else in the pipeline: a telemetry backlog must never
+  # be the reason the host runs out of memory.
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 320
+    spike_limit_mib: 80
+  batch:
+    timeout: 5s
+    send_batch_size: 512
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      # Container-to-container on a private compose network.
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    # Without this, service.name and deployment.environment.name are dropped and
+    # every metric from all three services looks identical.
+    resource_to_telemetry_conversion:
+      enabled: true
+
+connectors:
+  # Turn the spans every service already emits into bounded request/error/rate
+  # metrics. This is especially useful for PostgreSQL instrumentation, which
+  # intentionally emits spans rather than a second application-side counter.
+  spanmetrics:
+    histogram:
+      unit: s
+    dimensions:
+      - name: db.system.name
+      - name: db.system
+      - name: db.operation.name
+      - name: db.operation
+    aggregation_cardinality_limit: 2000
+    metrics_flush_interval: 15s
+    resource_metrics_key_attributes:
+      - service.name
+      - telemetry.sdk.language
+      - telemetry.sdk.name
+
+service:
+  telemetry:
+    logs:
+      level: warn
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                # Prometheus runs in a separate Compose container. The host-side
+                # port remains loopback-only in docker-compose.yml.
+                host: 0.0.0.0
+                port: 8888
+                without_units: true
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp/tempo, spanmetrics]
+    metrics:
+      receivers: [otlp, spanmetrics]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]

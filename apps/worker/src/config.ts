@@ -11,6 +11,8 @@ export type WorkerConfiguration = {
   pollIntervalMs: number;
   historyScanIntervalMs: number;
   providerScanIntervalMs: number;
+  /** How often Habitat Pulse re-evaluates operational signals. */
+  pulseIntervalMs: number;
 };
 
 export function loadWorkerConfiguration(environment = process.env): WorkerConfiguration {
@@ -23,7 +25,10 @@ export function loadWorkerConfiguration(environment = process.env): WorkerConfig
   const pollIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_POLL_INTERVAL_MS, "HABITAT_WORKER_POLL_INTERVAL_MS", 5_000, 300_000, 15_000);
   const historyScanIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS, "HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS", 300_000, 86_400_000, 21_600_000);
   const providerScanIntervalMs = parseIntervalMs(environment.HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS, "HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS", 60_000, 3_600_000, 300_000);
-  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs, providerScanIntervalMs };
+  // Pulse reaches the public origin and the agent on every evaluation, so it runs
+  // on its own slower cadence rather than riding the 15-second monitoring cycle.
+  const pulseIntervalMs = parseIntervalMs(environment.HABITAT_PULSE_INTERVAL_MS, "HABITAT_PULSE_INTERVAL_MS", 30_000, 3_600_000, 60_000);
+  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs, providerScanIntervalMs, pulseIntervalMs };
 }
 
 function parseIntervalMs(rawValue: string | undefined, variableName: string, minimum: number, maximum: number, fallback: number): number {

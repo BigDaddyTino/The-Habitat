@@ -198,6 +198,9 @@ enum DiscordNotificationKind {
   WAKE_REQUEST
   WEEKLY_CHRONICLE
   STREAM_WENT_LIVE
+  /// Operational health, never community news. Delivered only to a guild's
+  /// explicitly configured operations channel, never the announcement channel.
+  OPERATIONS_ALERT
 }
 
 /// How a Discord streaming signal was observed. Discord presence is a hint that
@@ -237,6 +240,32 @@ enum ServerCommandStatus {
   SUCCEEDED
   FAILED
   TIMED_OUT
+}
+
+/// The three long-running Habitat processes that report a heartbeat.
+enum HabitatService {
+  WEB
+  WORKER
+  AGENT
+}
+
+/// UNKNOWN is deliberately its own state rather than a flavour of failure: a
+/// signal nobody has been able to evaluate must never be painted green, and
+/// must never be alerted on as though it were a confirmed outage.
+enum PulseStatus {
+  OK
+  WARN
+  CRITICAL
+  UNKNOWN
+}
+
+enum PulseCategory {
+  DELIVERY
+  SERVICES
+  COLLECTION
+  DATA
+  PROVIDERS
+  PIPELINE
 }
 
 model User {
@@ -401,6 +430,7 @@ model GameServer {
   wakeRequests         WakeRequest[]
   pollOptions          ServerPollOption[]
   commands             ServerCommand[]
+  collectorSources     CollectorSourceState[]
 }
 
 model ServerRuntimeState {
@@ -1288,6 +1318,10 @@ model DiscordGuildConfig {
   id                         String                @id @default(uuid()) @db.Uuid
   guildId                    String                @unique
   announcementChannelId      String?
+  /// Private operations channel. Habitat Pulse alerts carry infrastructure
+  /// detail, so they are delivered here and never to the community
+  /// announcement channel. Leaving it blank keeps operational alerting off.
+  operationsChannelId        String?
   commandsEnabled            Boolean               @default(true)
   notificationsEnabled       Boolean               @default(true)
   notifyServerOnline         Boolean               @default(true)
@@ -1296,6 +1330,7 @@ model DiscordGuildConfig {
   notifyRecordBroken         Boolean               @default(true)
   notifyLegendaryAchievement Boolean               @default(true)
   notifyWakeRequest          Boolean               @default(true)
+  notifyOperationalAlert     Boolean               @default(true)
   createdAt                  DateTime              @default(now())
   updatedAt                  DateTime              @updatedAt
   notifications              DiscordNotification[]
@@ -1418,6 +1453,11 @@ model DiscordNotification {
   serverEventId String?                 @db.Uuid
   gameActivityId String?                @db.Uuid
   kind          DiscordNotificationKind
+  /// Explicit delivery target captured when the notification was queued. Null
+  /// means the guild's announcement channel. Operational alerts always carry
+  /// their own operations channel so a later configuration change can never
+  /// redirect infrastructure detail into a community channel.
+  channelId     String?                 @db.VarChar(40)
   content       String
   dedupeKey     String                  @unique
   queuedAt      DateTime                @default(now())
@@ -1471,4 +1511,101 @@ model AuditLog {
   actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Operational observability (Habitat Pulse)
+//
+// Everything below records how the installation itself is behaving. None of it
+// is member-facing: the Pulse view is an administrator surface, and the rows
+// here deliberately hold no infrastructure addresses or secrets.
+// ---------------------------------------------------------------------------
+
+/// One row per long-running Habitat process. The row is upserted on a fixed
+/// cadence, so freshness — not the value of any field — is what proves the
+/// service is alive. `intervalMs` is stored with the beat so a reader can judge
+/// staleness against the writer's own cadence instead of a guessed constant.
+///
+/// Database-enforced in migration 20260813200000 and NOT expressible here:
+/// CHECK "ServiceHeartbeat_interval_is_sane".
+model ServiceHeartbeat {
+  service    HabitatService @id
+  instanceId String         @db.VarChar(80)
+  hostname   String         @db.VarChar(120)
+  version    String         @db.VarChar(40)
+  startedAt  DateTime
+  observedAt DateTime
+  intervalMs Int
+  detail     Json?
+  updatedAt  DateTime       @updatedAt
+}
+
+/// The evaluated state of a single Pulse signal, written by the worker each
+/// cycle and read by the admin view. Storing the evaluation (rather than
+/// recomputing it in the page) keeps what administrators see and what Discord
+/// was told about in permanent agreement.
+///
+/// Database-enforced in migration 20260813200000 and NOT expressible here:
+/// CHECK "PulseSignal_ok_has_last_ok_at" — a signal reporting OK must carry the
+/// timestamp of that OK observation, so a green tile can never be undated.
+model PulseSignal {
+  key            String       @id @db.VarChar(60)
+  category       PulseCategory
+  status         PulseStatus
+  summary        String       @db.VarChar(240)
+  detail         Json?
+  observedAt     DateTime
+  /// When the current status was first observed. Reset only on a real change,
+  /// so "critical for 3 hours" is distinguishable from "critical since the last
+  /// cycle".
+  statusSince    DateTime
+  lastOkAt       DateTime?
+  notifiedStatus PulseStatus?
+  notifiedAt     DateTime?
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status, observedAt])
+}
+
+/// Per-world, per-source collector health. A source that is readable but parses
+/// nothing is a distinct and more dangerous failure than one that is missing,
+/// so both the scan outcome and the record yield are recorded.
+///
+/// Database-enforced in migration 20260813200000 and NOT expressible here:
+/// CHECK "CollectorSourceState_counts_nonnegative" and
+/// CHECK "CollectorSourceState_unavailable_yields_nothing".
+model CollectorSourceState {
+  serverId        String     @db.Uuid
+  sourceKind      String     @db.VarChar(60)
+  label           String     @db.VarChar(120)
+  available       Boolean    @default(false)
+  truncated       Boolean    @default(false)
+  lastScanAt      DateTime
+  /// Newest scan that both read the source and parsed at least one record.
+  lastYieldAt     DateTime?
+  /// `occurredAt` of the newest record the source has ever yielded.
+  lastRecordAt    DateTime?
+  recordsLastScan Int        @default(0)
+  importedLastScan Int       @default(0)
+  lastError       String?    @db.VarChar(240)
+  server          GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@id([serverId, sourceKind])
+  @@index([lastScanAt])
+}
+
+/// A reward pipeline evaluation that threw. These used to abort an entire
+/// import cycle silently; recording them lets one poisoned record be skipped
+/// and still be visible, replayable, and countable on the Pulse view.
+model EvaluationFailure {
+  id         String   @id @default(uuid()) @db.Uuid
+  kind       String   @db.VarChar(40)
+  scope      String   @db.VarChar(120)
+  reference  String?  @db.VarChar(200)
+  message    String   @db.VarChar(300)
+  occurredAt DateTime @default(now())
+  resolvedAt DateTime?
+
+  @@index([occurredAt])
+  @@index([kind, resolvedAt, occurredAt])
 }

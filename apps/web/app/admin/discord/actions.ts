@@ -12,6 +12,9 @@ const configurationSchema = z.object({
   id: z.string().uuid().optional(),
   guildId: snowflake,
   announcementChannelId: z.preprocess((value) => value === "" ? null : value, snowflake.nullable()),
+  // Operational alerts are only delivered when this is set, so leaving it blank
+  // is the supported way to keep infrastructure detail out of Discord entirely.
+  operationsChannelId: z.preprocess((value) => value === "" ? null : value, snowflake.nullable()),
   commandsEnabled: z.boolean(),
   notificationsEnabled: z.boolean(),
   notifyServerOnline: z.boolean(),
@@ -20,6 +23,7 @@ const configurationSchema = z.object({
   notifyRecordBroken: z.boolean(),
   notifyLegendaryAchievement: z.boolean(),
   notifyWakeRequest: z.boolean(),
+  notifyOperationalAlert: z.boolean(),
 });
 
 export async function saveDiscordConfiguration(formData: FormData) {
@@ -28,6 +32,7 @@ export async function saveDiscordConfiguration(formData: FormData) {
     id: formData.get("id") || undefined,
     guildId: formData.get("guildId"),
     announcementChannelId: formData.get("announcementChannelId"),
+    operationsChannelId: formData.get("operationsChannelId"),
     commandsEnabled: formData.get("commandsEnabled") === "on",
     notificationsEnabled: formData.get("notificationsEnabled") === "on",
     notifyServerOnline: formData.get("notifyServerOnline") === "on",
@@ -36,6 +41,7 @@ export async function saveDiscordConfiguration(formData: FormData) {
     notifyRecordBroken: formData.get("notifyRecordBroken") === "on",
     notifyLegendaryAchievement: formData.get("notifyLegendaryAchievement") === "on",
     notifyWakeRequest: formData.get("notifyWakeRequest") === "on",
+    notifyOperationalAlert: formData.get("notifyOperationalAlert") === "on",
   });
   if (!parsed.success) throw new Error("Discord configuration must use valid Discord server and channel IDs.");
   // The form's record id is only used to validate an existing configuration;

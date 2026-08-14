@@ -1,0 +1,98 @@
+/*
+ * Habitat Pulse.
+ *
+ * Status is carried by an icon and a written label as well as colour, so the
+ * page still reads correctly to anyone who cannot separate the moss green from
+ * the ember. Nothing here animates except the single live pip, which stops
+ * entirely under prefers-reduced-motion.
+ */
+
+.pulse-page {
+  --pulse-ok: #7f9a6d;
+  --pulse-warn: #d09b52;
+  --pulse-critical: #cc6a52;
+  --pulse-unknown: #7d8580;
+}
+
+.pulse-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; overflow: hidden; border: 1px solid #504831; padding: 42px 46px; background: radial-gradient(circle at 88% 40%, #b89b5e14, transparent 30%), linear-gradient(125deg, #1e1d18, #151b17 62%); }
+.pulse-hero h1 { color: #e9dfc6; font-size: clamp(58px, 8vw, 96px); line-height: .7; text-transform: uppercase; }
+.pulse-hero h1 em { color: var(--brass); font-weight: 500; }
+.pulse-hero > div:first-child > p:last-child { max-width: 660px; margin-top: 24px; color: #a9ac9f; font-size: 13px; line-height: 1.75; }
+
+.pulse-headline { display: grid; min-width: 232px; grid-template-columns: auto 1fr auto; gap: 4px 11px; align-items: center; border: 1px solid #4a5148; padding: 20px 22px; background: #12171400; }
+.pulse-headline strong { color: #e8dec4; font-family: var(--font-display); font-size: 27px; font-weight: 600; }
+.pulse-headline span { grid-column: 1 / -1; color: #838b81; font-family: var(--font-mono); font-size: 8px; letter-spacing: .6px; text-transform: uppercase; }
+.pulse-headline .pulse-refresh { grid-row: 1; }
+.pulse-headline.tone-ok { border-color: #4d6144; background: #17201622; }
+.pulse-headline.tone-warn { border-color: #7a6134; background: #2119112e; }
+.pulse-headline.tone-critical { border-color: #7d4536; background: #21100d33; }
+
+.pulse-stale-banner { display: flex; gap: 12px; align-items: flex-start; margin: 15px 0 0; border: 1px solid #7a6134; border-left-width: 3px; padding: 15px 18px; background: #1f1810; color: #d8c9a6; font-size: 12px; line-height: 1.65; }
+.pulse-stale-banner svg { flex: none; margin-top: 2px; color: var(--pulse-warn); }
+
+.pulse-group { margin-top: 40px; }
+.pulse-group-heading { display: flex; gap: 14px; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--admin-hairline); padding-bottom: 11px; margin-bottom: 18px; }
+.pulse-group-heading .eyebrow { margin: 0; }
+.pulse-note { color: #6f776e; font-family: var(--font-mono); font-size: 8px; letter-spacing: .5px; text-transform: uppercase; }
+.pulse-chip { border: 1px solid #4a5148; padding: 4px 9px; color: #a8b0a5; font-family: var(--font-mono); font-size: 8px; letter-spacing: .7px; text-transform: uppercase; }
+.pulse-chip.tone-ok { border-color: #4d6144; color: var(--pulse-ok); }
+.pulse-chip.tone-warn { border-color: #7a6134; color: var(--pulse-warn); }
+.pulse-chip.tone-critical { border-color: #7d4536; color: var(--pulse-critical); }
+
+.pulse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(322px, 1fr)); gap: 1px; background: var(--admin-hairline); }
+.pulse-tile { display: flex; flex-direction: column; gap: 10px; border-left: 2px solid transparent; padding: 19px 21px 16px; background: #141a16; }
+.pulse-tile header { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
+.pulse-tile h2 { color: #e5dcc4; font-family: var(--font-display); font-size: 19px; font-weight: 600; letter-spacing: .2px; }
+.pulse-age { color: #6f776e; font-family: var(--font-mono); font-size: 8px; letter-spacing: .5px; text-transform: uppercase; }
+.pulse-summary { color: #cfd2c6; font-size: 13px; line-height: 1.6; }
+.pulse-description { color: #808877; font-size: 11px; line-height: 1.65; }
+.pulse-remedy { border-left: 1px solid #5f5537; padding-left: 11px; color: #b7a880; font-size: 11px; font-style: italic; line-height: 1.6; }
+.pulse-tile footer { display: flex; gap: 14px; flex-wrap: wrap; margin-top: auto; padding-top: 10px; border-top: 1px solid #ffffff08; color: #6b736a; font-family: var(--font-mono); font-size: 8px; letter-spacing: .4px; text-transform: uppercase; }
+
+.pulse-tile.tone-ok { border-left-color: var(--pulse-ok); }
+.pulse-tile.tone-ok header > svg { color: var(--pulse-ok); }
+.pulse-tile.tone-warn { border-left-color: var(--pulse-warn); background: #191712; }
+.pulse-tile.tone-warn header > svg { color: var(--pulse-warn); }
+.pulse-tile.tone-critical { border-left-color: var(--pulse-critical); background: #1c1310; }
+.pulse-tile.tone-critical header > svg { color: var(--pulse-critical); }
+.pulse-tile.tone-unknown { border-left-color: #4c534c; }
+.pulse-tile.tone-unknown header > svg, .pulse-tile.tone-unknown h2 { color: var(--pulse-unknown); }
+/* A stale verdict is dimmed rather than hidden: it was true when it was written. */
+.pulse-tile.stale { opacity: .72; }
+.pulse-tile.stale .pulse-age { color: var(--pulse-warn); }
+
+.pulse-worlds { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 1px; background: var(--admin-hairline); }
+.pulse-world { padding: 18px 20px; background: #141a16; }
+.pulse-world header { display: flex; gap: 9px; align-items: center; margin-bottom: 13px; }
+.pulse-world header svg { color: var(--brass); }
+.pulse-world h3 { color: #e2d8bf; font-family: var(--font-display); font-size: 17px; font-weight: 600; }
+.pulse-world ul { display: grid; gap: 9px; }
+.pulse-world li { border-left: 2px solid #4c534c; padding: 9px 0 9px 13px; }
+.pulse-world li.tone-ok { border-left-color: var(--pulse-ok); }
+.pulse-world li.tone-warn { border-left-color: var(--pulse-warn); }
+.pulse-world li.tone-critical { border-left-color: var(--pulse-critical); }
+.pulse-world li > div:first-child { display: flex; gap: 9px; align-items: baseline; }
+.pulse-world li strong { color: #ddd4bd; font-size: 12px; }
+.pulse-world li > div:first-child span { color: #6b736a; font-family: var(--font-mono); font-size: 8px; letter-spacing: .4px; }
+.pulse-source-facts { display: flex; gap: 13px; flex-wrap: wrap; margin-top: 5px; color: #7f877d; font-family: var(--font-mono); font-size: 8px; letter-spacing: .4px; text-transform: uppercase; }
+.pulse-source-note { margin-top: 6px; color: #b79b74; font-size: 11px; line-height: 1.55; }
+.pulse-world-missing { display: flex; gap: 8px; align-items: center; border-left: 2px solid var(--pulse-unknown); padding: 10px 12px; color: #929a90; font-size: 11px; line-height: 1.55; }
+.pulse-world-missing svg { flex: none; color: var(--pulse-unknown); }
+
+.pulse-failures { display: grid; gap: 1px; background: var(--admin-hairline); }
+.pulse-failures li { padding: 14px 18px; background: #141a16; }
+.pulse-failures li > div:first-child { display: flex; gap: 10px; align-items: baseline; }
+.pulse-failures strong { color: #d9b39a; font-family: var(--font-mono); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; }
+.pulse-failures li > div:first-child span { color: #97a08f; font-size: 12px; }
+.pulse-failures p { margin-top: 6px; color: #a9ada0; font-size: 12px; line-height: 1.6; }
+.pulse-failure-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: baseline; margin-top: 7px; }
+.pulse-failure-meta code { overflow: hidden; max-width: 100%; color: #6f776e; font-family: var(--font-mono); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.pulse-failure-meta time { color: #6b736a; font-family: var(--font-mono); font-size: 8px; letter-spacing: .4px; text-transform: uppercase; }
+
+.pulse-empty { border: 1px dashed #3d453d; padding: 20px 22px; color: #838b81; font-size: 12px; line-height: 1.7; }
+
+@media (max-width: 900px) {
+  .pulse-hero { grid-template-columns: 1fr; padding: 32px 24px; }
+  .pulse-headline { min-width: 0; }
+  .pulse-grid, .pulse-worlds { grid-template-columns: 1fr; }
+}

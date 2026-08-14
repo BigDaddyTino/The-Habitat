@@ -34,7 +34,7 @@ There is no browser-to-agent proxy, generic command endpoint, arbitrary shell, a
 | Package | Responsibility |
 | --- | --- |
 | `apps/web` | Next.js App Router, Auth.js, member/admin surfaces, local APIs, avatar serving, Great Hall, Three.js/Rive reward presentation |
-| `apps/worker` | Agent polling, normalized persistence, legacy-history imports, bounded Steam/Club provider sync, cross-game activity projection, XP/quest/reward/record evaluation, Discord outbox, command dispatch |
+| `apps/worker` | Agent polling, normalized persistence, legacy-history imports, bounded Steam/Club provider sync, cross-game activity projection, XP/quest/reward/record evaluation, Discord outbox, command dispatch, Habitat Pulse signal evaluation |
 | `apps/agent` | Windows process/query/log observation, bounded history extraction, and fixed allow-listed named-service actions |
 | `packages/db` | Prisma schema, migrations, seed data, generated client |
 | `packages/shared` | Server states, agent contracts, progression, reward, achievement, and record domain types |
@@ -48,6 +48,8 @@ There is no browser-to-agent proxy, generic command endpoint, arbitrary shell, a
 - `SLEEPING` means intentionally stopped and is distinct from `DOWN_UNEXPECTEDLY`; unavailable monitoring produces `UNKNOWN`, not an invented outage.
 - Historical evidence is normalized and deduplicated. Timestamp-paired verified sessions can contribute playtime and XP after ownership is established; sightings without verified duration remain visible but do not create XP.
 - Profile rewards are ledger-backed and reconciliation is idempotent. Claiming an unowned identity can safely change a member's totals, achievements, titles, and standings because the history is replayed through the same dedupe-protected pipeline.
+- Habitat Pulse follows the same rule as world state: a signal nobody could evaluate is `UNKNOWN`, never healthy and never alerted on. The worker is the sole evaluator and stores its verdicts, so the admin view and any Discord alert are the same judgement rather than two independent guesses. Because the worker cannot report its own death, the view recomputes process freshness from `ServiceHeartbeat` and dates every other signal as stale when the worker's beat stops.
+- OpenTelemetry is additive and severable in both directions: Pulse never reads the telemetry backend, and the backend never decides a Pulse verdict. Pulse works on a fresh clone with nothing but Postgres.
 
 ## Great Hall and rewards
 

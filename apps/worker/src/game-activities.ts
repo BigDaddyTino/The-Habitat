@@ -2,6 +2,7 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import type { GameActivityType, HabitatGameKey } from "@habitat/shared";
 import { evaluateAchievementsForActivity } from "./achievements.js";
 import { evaluateRecordsForActivity } from "./records.js";
+import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
 
 const PROJECTOR_STARTED_AT = new Date();
 
@@ -79,7 +80,21 @@ export async function projectGameActivities(): Promise<{ serverSources: number; 
     }),
   ]);
   let activities = 0;
-  for (const event of events) activities += await db.$transaction((transaction) => projectServerEvent(transaction, { ...event, gameType: event.gameType as HabitatGameKey }));
-  for (const participant of participants) activities += await db.$transaction((transaction) => projectMatchParticipant(transaction, participant));
+  for (const event of events) {
+    try {
+      activities += await db.$transaction((transaction) => projectServerEvent(transaction, { ...event, gameType: event.gameType as HabitatGameKey }));
+      await resolveEvaluationFailures("ACTIVITY_PROJECTION", [event.id]);
+    } catch (error) {
+      await recordEvaluationFailure({ kind: "ACTIVITY_PROJECTION", scope: "server-event", reference: event.id, error });
+    }
+  }
+  for (const participant of participants) {
+    try {
+      activities += await db.$transaction((transaction) => projectMatchParticipant(transaction, participant));
+      await resolveEvaluationFailures("ACTIVITY_PROJECTION", [participant.id]);
+    } catch (error) {
+      await recordEvaluationFailure({ kind: "ACTIVITY_PROJECTION", scope: "club-match", reference: participant.id, error });
+    }
+  }
   return { serverSources: events.length, clubSources: participants.length, activities };
 }

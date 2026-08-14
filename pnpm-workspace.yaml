@@ -10,6 +10,9 @@ allowBuilds:
   '@prisma/engines': true
   esbuild: true
   prisma: true
+  # Pulled in by the OpenTelemetry OTLP exporters. Habitat exports over OTLP/HTTP
+  # with JSON encoding, so protobufjs' postinstall CLI setup is never needed.
+  protobufjs: false
   sharp: true
   unrs-resolver: true
 

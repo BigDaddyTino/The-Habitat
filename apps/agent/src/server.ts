@@ -7,8 +7,8 @@ import { readLegacyHistory } from "./history.js";
 import { observeServer } from "./observations.js";
 import { hasValidAgentToken, normalizeRemoteAddress } from "./security.js";
 import { ServiceControlError, WindowsServiceController } from "./service-control.js";
+import { agentVersion as version } from "./version.js";
 
-const version = "0.1.0";
 const agentServerActions = ["start", "stop", "restart", "update"] as const;
 
 export function createAgentServer(configuration: AgentConfiguration) {

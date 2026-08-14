@@ -20,5 +20,84 @@ services:
     volumes:
       - habitat_postgres_data:/var/lib/postgresql
 
+  # -------------------------------------------------------------------------
+  # Operational observability.
+  #
+  # The three Habitat services speak OTLP to the collector and know nothing
+  # about what is behind it, which is the point of choosing OpenTelemetry: this
+  # whole block can be replaced with a hosted backend without touching a line of
+  # application code. Every port is published on 127.0.0.1 only — traces carry
+  # request paths and host names, so they are private operational data, treated
+  # exactly like the database.
+  #
+  # Telemetry is inert until HABITAT_OTEL_EXPORTER_OTLP_ENDPOINT is set in .env.
+  # -------------------------------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.140.1
+    container_name: habitat-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./ops/observability/otel-collector.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+    depends_on:
+      - tempo
+
+  tempo:
+    image: grafana/tempo:2.9.1
+    container_name: habitat-tempo
+    restart: unless-stopped
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    user: "0:0"
+    volumes:
+      - ./ops/observability/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - habitat_tempo_data:/var/tempo
+    expose:
+      - "3200"
+      - "4317"
+
+  prometheus:
+    image: prom/prometheus:v3.7.3
+    container_name: habitat-prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.listen-address=0.0.0.0:9090"
+    volumes:
+      - ./ops/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - habitat_prometheus_data:/prometheus
+    expose:
+      - "9090"
+
+  grafana:
+    image: grafana/grafana:12.3.1
+    container_name: habitat-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${HABITAT_GRAFANA_PASSWORD:?Set HABITAT_GRAFANA_PASSWORD in .env}
+      # Reachable only over the loopback publish below, but anonymous access and
+      # sign-up are still refused so a forwarded port never becomes an open door.
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+    volumes:
+      - ./ops/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - habitat_grafana_data:/var/lib/grafana
+    ports:
+      # 3000 belongs to the Next.js app, and this host already relays 3001 to
+      # WSL, so the published port is configurable rather than assumed free.
+      - "127.0.0.1:${HABITAT_GRAFANA_PORT:-3009}:3000"
+    depends_on:
+      - prometheus
+      - tempo
+
 volumes:
   habitat_postgres_data:
+  habitat_tempo_data:
+  habitat_prometheus_data:
+  habitat_grafana_data:

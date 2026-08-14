@@ -1,37 +1,126 @@
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import type { AgentLegacyHistory, AgentLegacyPlayerEvent, AgentLegacyPlayerEvidence } from "@habitat/shared";
 import { evaluateAchievementsForEvent, evaluateAchievementsForLegacyEvidence } from "./achievements.js";
+import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
 import { autoLinkVerifiedSteamIdentity } from "./monitoring.js";
 import { evaluateRecordsForEvent } from "./records.js";
 import { processProgressionForEvent } from "./progression.js";
 import { reconcileSteamIdentityNames } from "./steam-personas.js";
 
 export type LegacyHistoryReader = { readLegacyHistories(): Promise<AgentLegacyHistory[]> };
-export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; namesReconciled: number; ignored: number };
+export type LegacyImportResult = { servers: number; evidenceImported: number; eventsImported: number; sessionsImported: number; namesReconciled: number; ignored: number; failed: number };
 
 export async function importLegacyHistory(reader: LegacyHistoryReader): Promise<LegacyImportResult> {
   const db = getPrismaClient();
   const histories = await reader.readLegacyHistories();
-  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, namesReconciled: 0, ignored: 0 };
+  const result: LegacyImportResult = { servers: 0, evidenceImported: 0, eventsImported: 0, sessionsImported: 0, namesReconciled: 0, ignored: 0, failed: 0 };
   for (const history of histories) {
-    const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true } });
+    const server = await db.gameServer.findUnique({ where: { slug: history.key }, select: { id: true, gameType: true, slug: true } });
     if (!server) { result.ignored += 1; continue; }
     result.servers += 1;
+    const scannedAt = parseScanTimestamp(history.scannedAt);
     for (const source of history.sources) {
-      if (!source.available) continue;
-      for (const item of source.evidence) {
-        const imported = await db.$transaction((transaction) => importEvidence(transaction, server, source.kind, source.label, item));
-        if (imported.created) result.evidenceImported += 1;
-        if (imported.created && item.kind === "SESSION") result.sessionsImported += 1;
+      let imported = 0;
+      let failures = 0;
+      let lastError: string | null = null;
+      if (source.available) {
+        for (const item of source.evidence) {
+          try {
+            const outcome = await db.$transaction((transaction) => importEvidence(transaction, server, source.kind, source.label, item));
+            await resolveEvaluationFailures("LEGACY_EVIDENCE", [item.sourceRecordHash], `${server.slug}:${source.kind}`);
+            if (outcome.created) {
+              result.evidenceImported += 1;
+              imported += 1;
+              if (item.kind === "SESSION") result.sessionsImported += 1;
+            }
+          } catch (error) {
+            // One poisoned record used to abort the entire scan for every world.
+            // It is now skipped, counted, and left visible on Habitat Pulse.
+            failures += 1;
+            lastError = error instanceof Error ? error.message : String(error);
+            await recordEvaluationFailure({ kind: "LEGACY_EVIDENCE", scope: `${server.slug}:${source.kind}`, reference: item.sourceRecordHash, error });
+          }
+        }
+        for (const item of source.events) {
+          try {
+            const created = await db.$transaction((transaction) => importHistoricalEvent(transaction, server, source.kind, source.label, item));
+            await resolveEvaluationFailures("LEGACY_EVENT", [item.sourceRecordHash], `${server.slug}:${source.kind}`);
+            if (created) {
+              result.eventsImported += 1;
+              imported += 1;
+            }
+          } catch (error) {
+            failures += 1;
+            lastError = error instanceof Error ? error.message : String(error);
+            await recordEvaluationFailure({ kind: "LEGACY_EVENT", scope: `${server.slug}:${source.kind}`, reference: item.sourceRecordHash, error });
+          }
+        }
       }
-      for (const item of source.events) {
-        const imported = await db.$transaction((transaction) => importHistoricalEvent(transaction, server, source.kind, source.label, item));
-        if (imported) result.eventsImported += 1;
-      }
+      result.failed += failures;
+      await recordCollectorSourceState(server.id, source, scannedAt, imported, lastError);
     }
+    const sourceKinds = history.sources.map((source) => source.kind);
+    await db.collectorSourceState.deleteMany({ where: { serverId: server.id, ...(sourceKinds.length ? { sourceKind: { notIn: sourceKinds } } : {}) } });
   }
   result.namesReconciled = await reconcileSteamIdentityNames();
   return result;
+}
+
+/**
+ * Persists what this scan saw for one world's source.
+ *
+ * A source that is readable but parses nothing is recorded as such rather than
+ * as a success, because a silently broken parser is indistinguishable from an
+ * empty log unless the yield is written down. `lastYieldAt` therefore only
+ * advances when the source both opened and produced records.
+ */
+async function recordCollectorSourceState(
+  serverId: string,
+  source: AgentLegacyHistory["sources"][number],
+  scannedAt: Date,
+  importedLastScan: number,
+  lastError: string | null,
+): Promise<void> {
+  const recordsLastScan = source.available ? source.evidence.length + source.events.length : 0;
+  const newestRecordAt = newestOccurrence(source);
+  const state = {
+    label: source.label.slice(0, 120),
+    available: source.available,
+    truncated: source.truncated,
+    lastScanAt: scannedAt,
+    recordsLastScan,
+    importedLastScan,
+    lastError: lastError ? lastError.slice(0, 240) : null,
+  };
+  const advanced = {
+    ...(recordsLastScan > 0 ? { lastYieldAt: scannedAt } : {}),
+    ...(newestRecordAt ? { lastRecordAt: newestRecordAt } : {}),
+  };
+  try {
+    await getPrismaClient().collectorSourceState.upsert({
+      where: { serverId_sourceKind: { serverId, sourceKind: source.kind } },
+      create: { serverId, sourceKind: source.kind, ...state, ...advanced },
+      update: { ...state, ...advanced },
+    });
+  } catch (error) {
+    // Collector bookkeeping must never be the reason an import fails.
+    console.error("[legacy-history] could not record collector state:", error instanceof Error ? error.message : String(error));
+  }
+}
+
+function newestOccurrence(source: AgentLegacyHistory["sources"][number]): Date | null {
+  let newest: number | null = null;
+  for (const item of [...source.evidence, ...source.events]) {
+    const occurred = Date.parse(item.occurredAt);
+    if (Number.isNaN(occurred)) continue;
+    if (newest === null || occurred > newest) newest = occurred;
+  }
+  return newest === null ? null : new Date(newest);
+}
+
+function parseScanTimestamp(value: string): Date {
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? new Date() : new Date(parsed);
 }
 
 async function importEvidence(

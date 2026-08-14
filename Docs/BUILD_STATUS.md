@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-13
+Last updated: 2026-08-14
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -236,3 +236,23 @@ This is the implementation source of truth. Checked items are built and locally 
 - [ ] Add sequential CI gates and stage a report-only CSP with Auth.js/Rive/Three.js desktop and mobile coverage
 - [ ] Convert the remaining administrative mutation/audit pairs to transactions
 - [ ] Deploy the tracked web/service hardening through the private release process and verify production headers and installed WinSW rollover configuration
+
+## 2026-08-14 - Operational Observability
+
+- [x] Added `/admin/pulse`, a private administrator view of twelve evaluated signals: tunnel reachability, web/worker/agent freshness, per-world collector health, last database backup, event-ingestion lag, event volume against the installation's own baseline, Discord and Twitch provider state, failed pipeline evaluations, and stuck claim reconciliations
+- [x] Made the worker the sole evaluator and persisted every verdict to `PulseSignal`, so the admin view and any Discord alert always report the same judgement of the same facts
+- [x] Recomputed web and worker liveness in the view from `ServiceHeartbeat` rather than trusting the worker to report its own death; a stale worker dims and dates every other signal instead of leaving a wall of green
+- [x] Treated an unevaluable signal as `UNKNOWN`, never green and never alertable, and treated a readable collector source that parses zero records as a failure rather than a quiet day
+- [x] Added heartbeats to the web and worker processes carrying their own declared cadence, so freshness is judged against the writer's interval instead of a guessed constant
+- [x] Added per-world, per-source `CollectorSourceState` recorded by the history scan, and `EvaluationFailure` so one poisoned record is skipped and stays visible instead of silently aborting a whole import cycle
+- [x] Routed Habitat Pulse alerts to a guild's explicit `operationsChannelId` only, with no fallback to the community announcement channel, one alert per transition, and one recovery note; a queue that reached nobody is not recorded as notified
+- [x] Instrumented the web app, worker and agent with OpenTelemetry over OTLP, dormant unless an endpoint is configured, refusing endpoints that carry credentials, a query or a fragment
+- [x] Added a loopback-only collector, Tempo, Prometheus and provisioned Grafana to `docker-compose.yml`, with the backend replaceable by editing exporters alone
+- [x] Verified live: traces from `habitat-web` and `habitat-worker` in Tempo, worker metrics in Prometheus, all twelve signals evaluating, and Pulse independently detecting the known Dragonwilds parser failure
+- [x] Audited and hardened Pulse alert transitions: `UNKNOWN` can neither alert nor send a false recovery, notification state requires durable outbox evidence, and orphaned markers from the earlier build self-repair
+- [x] Expanded `EvaluationFailure` coverage to legacy import, activity projection, catalog reconciliation, and identity reconciliation, with per-record isolation, deduplication, and automatic resolution after a successful replay
+- [x] Made backup health verify the recorded dump path and exact non-zero size, made Twitch health enforce its configured poll cadence, and made enabled worlds with no history collector visible in the breakdown without miscounting them as failed configured sources
+- [x] Added an early worker telemetry bootstrap so `pg` and HTTP dependencies load after instrumentation, restored collector self-metrics for Prometheus, derived web request metrics from Next spans, and corrected the database-rate dashboard query
+- [x] Tightened the Pulse layout with content-sized desktop grids, an explicit missing-collector state, and an accessible compact mobile navigation that does not overflow a 390px viewport
+- [x] Accounted for Next's already-loaded `node:http`: the web app exports native Next request spans and the collector derives request/error metrics from them, avoiding a production TS preload solely for duplicate counters; see `Docs/OBSERVABILITY.md`
+- [ ] Set an operations channel on `/admin/discord` to actually receive Pulse alerts; none is configured, so alerting is currently inert by design

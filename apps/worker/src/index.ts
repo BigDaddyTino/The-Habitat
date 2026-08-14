@@ -15,19 +15,28 @@ import { syncSteamEnrichment } from "./steam-enrichment.js";
 import { syncTwitchChannelMetadata, syncTwitchLiveStatus } from "./twitch.js";
 import { syncSteamAchievements } from "./steam-achievements.js";
 import { projectGameActivities } from "./game-activities.js";
+import { recordServiceHeartbeat } from "./heartbeat.js";
+import { runPulseCycle } from "./pulse.js";
+import { startWorkerTelemetry } from "./telemetry.js";
+import { workerVersion } from "./version.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
+export { workerVersion } from "./version.js";
 
 export const workerPhase = "live-monitoring-ready";
 
 async function main(): Promise<void> {
   const configuration = loadWorkerConfiguration();
+  const telemetry = await startWorkerTelemetry();
   const repository = createPostgresMonitoringRepository();
   const commandRepository = createPostgresServerCommandRepository();
   const agent = new HabitatAgentClient(configuration.agentUrl, configuration.agentToken);
   const runOnce = process.argv.includes("--once");
   let discordBot: Awaited<ReturnType<typeof startDiscordBot>> = null;
+  // The bot is started without blocking monitoring, so Pulse needs to know the
+  // difference between "still connecting" and "did not start".
+  let discordConnecting = true;
   let shuttingDown = false;
   let nextHistoryScanAt = 0;
   let nextProviderScanAt = 0;
@@ -38,8 +47,25 @@ async function main(): Promise<void> {
     if (commands.dispatched > 0) console.info(`Habitat server commands: ${commands.succeeded} succeeded, ${commands.failed} failed.`);
   };
 
+  // Habitat Pulse judges worker freshness from this beat, so it is written on
+  // every cycle before anything that could throw and skip it.
+  const beat = async (result: { observed: number; unknown: number; agentAvailable: boolean } | null) => {
+    try {
+      await recordServiceHeartbeat("WORKER", configuration.pollIntervalMs, workerVersion, {
+        observed: result?.observed ?? null,
+        unknown: result?.unknown ?? null,
+        agentAvailable: result?.agentAvailable ?? null,
+        discordGateway: discordBot ? discordBot.status().ready : null,
+        telemetry: telemetry.enabled,
+      });
+    } catch (error) {
+      console.error("[worker] heartbeat could not be recorded:", error instanceof Error ? error.message : String(error));
+    }
+  };
+
   const run = async () => {
     const result = await runMonitoringCycle(repository, agent);
+    await beat(result);
     const identityRewards = await reconcilePendingIdentityRewards();
     let notifications: Awaited<ReturnType<typeof dispatchPendingDiscordNotifications>> | null = null;
     try {
@@ -126,11 +152,28 @@ async function main(): Promise<void> {
     }
   };
 
+  const pulse = async () => {
+    const result = await runPulseCycle({
+      agentUrl: configuration.agentUrl,
+      agentToken: configuration.agentToken,
+      historyScanIntervalMs: configuration.historyScanIntervalMs,
+      discordStatus: discordBot ? discordBot.status() : null,
+      discordConnecting,
+    });
+    if (result.changed > 0 || result.alerts > 0 || result.overall !== "OK") {
+      console.info(`Habitat Pulse: overall ${result.overall.toLowerCase()} across ${result.evaluated} signals, ${result.changed} changed, ${result.alerts} alert(s) queued.`);
+    }
+  };
+
   if (runOnce) {
     try {
       await run();
       await dispatchCommands();
+      // A single pass never starts the gateway, so there is nothing to wait for.
+      discordConnecting = false;
+      await pulse();
     } finally {
+      await telemetry.stop();
       await getPrismaClient().$disconnect();
     }
     return;
@@ -171,15 +214,33 @@ async function main(): Promise<void> {
   }).catch((error: unknown) => {
     console.warn("Habitat Discord bot was not started. Monitoring remains available.");
     console.error("[worker] Discord bot startup failed:", error instanceof Error ? error.message : String(error));
+  }).finally(() => {
+    discordConnecting = false;
   });
+  let pulsing = false;
+  const pulseTick = async () => {
+    if (pulsing) return;
+    pulsing = true;
+    try {
+      await pulse();
+    } catch (error) {
+      // Observability failing must never take monitoring down with it.
+      console.error("[worker] pulse evaluation failed:", error instanceof Error ? error.message : String(error));
+    } finally {
+      pulsing = false;
+    }
+  };
+  await pulseTick();
   const interval = setInterval(() => { void tick(); }, configuration.pollIntervalMs);
   const dispatchInterval = setInterval(() => { void dispatchTick(); }, configuration.pollIntervalMs);
+  const pulseInterval = setInterval(() => { void pulseTick(); }, configuration.pulseIntervalMs);
   const shutdown = () => {
     shuttingDown = true;
     clearInterval(interval);
     clearInterval(dispatchInterval);
+    clearInterval(pulseInterval);
     discordBot?.stop();
-    void getPrismaClient().$disconnect().finally(() => process.exit(0));
+    void telemetry.stop().finally(() => getPrismaClient().$disconnect().finally(() => process.exit(0)));
   };
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);

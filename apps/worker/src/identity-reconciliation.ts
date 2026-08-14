@@ -1,6 +1,7 @@
 import { getPrismaClient } from "@habitat/db/client";
 import { evaluateAchievementsForEvent, evaluateAchievementsForLegacyEvidence } from "./achievements.js";
 import { processProgressionForEvent } from "./progression.js";
+import { recordEvaluationFailure, resolveEvaluationFailures } from "./evaluation-failures.js";
 
 const verifiedSessionSources = ["PALWORLD_REST", "LEGACY_HISTORY_IMPORT"];
 
@@ -30,9 +31,11 @@ export async function reconcilePendingIdentityRewards(limit = 20) {
         await transaction.identityRewardReconciliation.update({ where: { id: job.id }, data: { completedAt: new Date(), attempts: { increment: 1 }, lastError: null } });
         await transaction.auditLog.create({ data: { actorUserId: job.userId, action: "PLAYER_IDENTITY_REWARDS_RECONCILED", entityType: "PlayerIdentity", entityId: identity.id, after: { reconciliationJobId: job.id } } });
       });
+      await resolveEvaluationFailures("IDENTITY_RECONCILIATION", [job.id]);
       completed += 1;
     } catch (error) {
       await db.identityRewardReconciliation.update({ where: { id: job.id }, data: { attempts: { increment: 1 }, lastError: error instanceof Error ? error.message.slice(0, 180) : "unknown_reconciliation_error" } });
+      await recordEvaluationFailure({ kind: "IDENTITY_RECONCILIATION", scope: `identity:${job.playerIdentityId}`, reference: job.id, error });
     }
   }
   return completed;

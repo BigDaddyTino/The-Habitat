@@ -3,7 +3,7 @@
   <name>Habitat Worker</name>
   <description>Private MartServ101 monitoring worker for The Habitat.</description>
   <executable>node.exe</executable>
-  <arguments>apps\worker\node_modules\tsx\dist\cli.mjs apps\worker\src\index.ts</arguments>
+  <arguments>apps\worker\node_modules\tsx\dist\cli.mjs apps\worker\src\bootstrap.ts</arguments>
   <workingdirectory>{{INSTALL_ROOT}}</workingdirectory>
   <!-- Absolute on purpose. WinSW resolves a relative logpath against the service
        process's working directory, which is C:\Windows\System32 for a LocalSystem

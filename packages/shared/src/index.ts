@@ -11,3 +11,5 @@ export * from "./twitch-provider";
 export * from "./game-activity";
 export * from "./rewards";
 export * from "./worlds";
+export * from "./pulse";
+export * from "./telemetry-config";

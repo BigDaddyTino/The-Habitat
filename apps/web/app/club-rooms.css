@@ -204,5 +204,7 @@
 @media (max-width:800px) { .rivals-match-heading { align-items:flex-start; flex-direction:column; }.rivals-match-layout { grid-template-columns:1fr; }.rivals-match-feed>article { grid-template-columns:1fr; }.rivals-match-feed footer { grid-column:auto; } }
 
 @media (max-width:420px) {
-  .site-header nav.primary-nav>a,.site-header nav.primary-nav .nav-cluster summary { gap:3px; padding-right:3px; padding-left:3px; font-size:9px; }
+  .site-header>nav.primary-nav { justify-content:center; gap:5px; }
+  .site-header nav.primary-nav>a,.site-header nav.primary-nav .nav-cluster summary { justify-content:center; width:42px; min-height:42px; padding:8px; }
+  .site-header nav.primary-nav .nav-label,.site-header nav.primary-nav .nav-cluster-caret { display:none; }
 }

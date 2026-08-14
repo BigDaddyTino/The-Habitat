@@ -21,6 +21,33 @@ Run a worker cycle after changing private agent configuration or a history sourc
 
 Review configured worlds, agent health, and Chronicle output afterward. Do not infer that a new query/log source is good merely because the process starts.
 
+## Habitat Pulse
+
+`/admin/pulse` is the first place to look when something feels wrong. It reports
+tunnel reachability, web/worker/agent freshness, per-world collector health, the
+last database backup, event-ingestion lag and volume, Discord and Twitch
+provider state, failed pipeline evaluations, and stuck claim reconciliations —
+each one evaluated by the worker, dated, and stored, so the page and any Discord
+alert always agree.
+
+Read it with three habits:
+
+- **Unknown is not green.** A signal that could not be evaluated says so.
+- **Check the worker tile first.** Everything except the process tiles is only
+  as fresh as the worker; a stale worker dims the rest of the page and dates it.
+- **A collector that parsed zero records is a failure, not a quiet day.** That is
+  what a parser whose pattern stopped matching looks like.
+
+Alerts reach Discord only when a guild has an operations channel set on
+`/admin/discord`. There is no fallback to the announcement channel.
+
+A successful database-backup tile means both that the summary reports success
+and that the dump file still exists beneath the configured backup root with the
+recorded non-zero size. Moving or deleting the dump makes the next Pulse cycle
+fail the signal even if `latest.json` was left behind.
+
+Full reference, including the OpenTelemetry stack: `Docs/OBSERVABILITY.md`.
+
 ## Steam and Club provider rollout
 
 Provider keys are optional and server-side. An absent key is the supported rollback path: cached rows remain available, no provider requests are made, and hosted monitoring continues. Never add keys to Git or browser-visible configuration.
@@ -64,7 +91,7 @@ HABITAT_BACKUP_PATH=N:\The Habitat\backups
 | `backups\config\` | Zipped untracked configuration; treat as secret material |
 | `backups\repository\` | `git bundle` snapshots of committed application history |
 | `backups\avatars\` | Mirror of the live avatar directory |
-| `backups\latest.json` | Machine-readable result of the latest backup run |
+| `backups\latest.json` | Machine-readable result of the latest backup run — read by Habitat Pulse |
 | `backups\backup-log.txt` | Appended backup summary |
 
 When avatar storage is outside the repository, `/member-avatars/<file>` serves only generated UUID filenames after upload magic-byte validation. It cannot address arbitrary filesystem paths.

@@ -13,7 +13,7 @@ $serviceExecutable = Join-Path $root "HabitatWorker.exe"
 $serviceTemplate = Join-Path $root "apps\worker\service\HabitatWorker.xml.template"
 $serviceXml = Join-Path $root "HabitatWorker.xml"
 
-foreach ($required in @((Join-Path $root "apps\worker\src\index.ts"), (Join-Path $root "apps\worker\node_modules\tsx\dist\cli.mjs"), $serviceExecutable, $serviceTemplate, (Join-Path $root ".env"))) {
+foreach ($required in @((Join-Path $root "apps\worker\src\bootstrap.ts"), (Join-Path $root "apps\worker\src\index.ts"), (Join-Path $root "apps\worker\node_modules\tsx\dist\cli.mjs"), $serviceExecutable, $serviceTemplate, (Join-Path $root ".env"))) {
   if (-not (Test-Path -LiteralPath $required)) { throw "Missing required worker artifact: $required" }
 }
 if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) { throw "Node.js 24 LTS must be installed and available as node.exe." }

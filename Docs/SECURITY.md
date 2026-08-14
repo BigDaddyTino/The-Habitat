@@ -5,6 +5,16 @@
 - Cloudflare Tunnel may expose only the loopback-bound `HabitatWeb` application.
 - PostgreSQL, the Habitat Agent, game query ports, RCON/Telnet, Palworld REST, game-management APIs, SMB, WinRM, Docker, and Windows service-control interfaces are never public.
 - The MartServ102 agent binds to one configured private address, requires a bearer token, and accepts only configured private source addresses.
+- The OpenTelemetry collector, Tempo, Prometheus, and Grafana publish on `127.0.0.1` only. Traces carry request paths and host names, so telemetry is private operational data and is treated exactly like the database.
+- Exporting telemetry from the agent would mean publishing the collector on the private network rather than loopback. That is a deliberate, separate decision; left alone the agent emits nothing and opens no outbound connection.
+
+## Observability boundary
+
+- `GET /api/pulse` is the only intentionally public observability surface. It exists so the tunnel can be proven from outside the network, and answers with nothing but `{"service":"habitat-web","status":"ok"}` — no version, build, uptime, or anything else that would help fingerprint the installation.
+- `/admin/pulse` and every signal it renders require `ADMIN`.
+- Habitat Pulse alerts carry infrastructure detail, so they are delivered only to a guild's explicitly configured operations channel. There is no fallback to the community announcement channel, and the delivery target is captured when the notice is queued so a later configuration change cannot redirect one.
+- A configured OTLP endpoint carrying credentials, a query string, or a fragment is refused rather than silently stripped; credentials in a telemetry URL end up in logs and process listings. Authentication belongs in `HABITAT_OTEL_EXPORTER_OTLP_HEADERS`.
+- `PulseSignal`, `ServiceHeartbeat`, `CollectorSourceState`, and `EvaluationFailure` hold operational facts only — no secrets, and no infrastructure addresses.
 
 ## Application boundary
 

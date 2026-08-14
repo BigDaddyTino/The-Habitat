@@ -22,7 +22,10 @@ const commands = [
   new SlashCommandBuilder().setName("poll").setDescription("Show the active Habitat game-night poll."),
 ].map((command) => command.toJSON());
 
-export type DiscordBotHandle = { stop(): void };
+/** What Habitat Pulse needs to describe the gateway without reaching into discord.js. */
+export type DiscordBotStatus = { ready: boolean; presenceEnabled: boolean; guilds: number };
+
+export type DiscordBotHandle = { stop(): void; status(): DiscordBotStatus };
 
 export async function startDiscordBot(environment = process.env): Promise<DiscordBotHandle | null> {
   const token = environment.DISCORD_BOT_TOKEN?.trim();
@@ -52,8 +55,10 @@ export async function startDiscordBot(environment = process.env): Promise<Discor
     }
   }
 
-  const client = await connectDiscordClient(token, presenceEnabled);
+  const connection = await connectDiscordClient(token, presenceEnabled);
+  const client = connection.client;
   return {
+    status: () => ({ ready: client.isReady(), presenceEnabled: connection.presenceActive, guilds: client.guilds.cache.size }),
     stop: () => {
       // Best effort: the next startup clears the signals again anyway.
       void clearStreamSignals("shutdown");
@@ -104,18 +109,19 @@ function createDiscordClient(presenceEnabled: boolean): Client {
  * enabled: Discord refuses the connection outright, so Habitat reconnects
  * without them rather than losing slash commands and monitoring.
  */
-async function connectDiscordClient(token: string, presenceEnabled: boolean): Promise<Client> {
+async function connectDiscordClient(token: string, presenceEnabled: boolean): Promise<{ client: Client; presenceActive: boolean }> {
   const client = createDiscordClient(presenceEnabled);
   try {
     await client.login(token);
-    return client;
+    return { client, presenceActive: presenceEnabled };
   } catch (error) {
     client.destroy();
     if (!presenceEnabled || !isDisallowedIntentsError(error)) throw error;
     console.warn("[discord-bot] Discord rejected the privileged intents, so streaming detection is disabled for this run. Enable Presence Intent and Server Members Intent in the Discord Developer Portal, then restart the worker.");
     const fallback = createDiscordClient(false);
     await fallback.login(token);
-    return fallback;
+    // Reported as inactive so Pulse shows what is really running, not what was asked for.
+    return { client: fallback, presenceActive: false };
   }
 }
 

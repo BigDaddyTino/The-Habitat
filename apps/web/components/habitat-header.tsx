@@ -30,18 +30,18 @@ export async function HabitatHeader() {
       </Link>
       <nav aria-label="Primary navigation" className="primary-nav">
         {navigation.map(({ href, label, icon: Icon }) => (
-          <Link href={href} key={href}>
+          <Link href={href} key={href} aria-label={label}>
             <Icon aria-hidden="true" size={16} strokeWidth={1.8} />
-            {label}
+            <span className="nav-label">{label}</span>
           </Link>
         ))}
-        <Link href="/streams">
+        <Link href="/streams" aria-label={liveStreams.liveCount > 0 ? `Streams, ${liveStreams.liveCount} live` : "Streams"}>
           {liveStreams.liveCount > 0
-            ? <span className="nav-live-flag"><i aria-hidden="true" />{liveStreams.liveCount} Live</span>
-            : <><Radio aria-hidden="true" size={16} strokeWidth={1.8} /> Streams</>}
+            ? <span className="nav-live-flag"><i aria-hidden="true" /><span className="nav-label">{liveStreams.liveCount} Live</span></span>
+            : <><Radio aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Streams</span></>}
         </Link>
         <details className="nav-cluster">
-          <summary><Crown aria-hidden="true" size={16} strokeWidth={1.8} /> Progress <ChevronDown aria-hidden="true" className="nav-cluster-caret" size={13} /></summary>
+          <summary aria-label="Progress navigation"><Crown aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Progress</span><ChevronDown aria-hidden="true" className="nav-cluster-caret" size={13} /></summary>
           <div className="nav-cluster-panel">
             {progressNavigation.map(({ href, label, icon: Icon }) => <Link href={href} key={href}><Icon aria-hidden="true" size={16} /><span>{label}</span></Link>)}
           </div>
