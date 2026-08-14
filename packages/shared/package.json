@@ -5,11 +5,18 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./agent": "./src/agent.ts",
-    "./telemetry-config": "./src/telemetry-config.ts",
+    "./agent": {
+      "types": "./src/agent.ts",
+      "default": "./dist/agent.js"
+    },
+    "./telemetry-config": {
+      "types": "./src/telemetry-config.ts",
+      "default": "./dist/telemetry-config.js"
+    },
     "./worlds": "./src/worlds.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },

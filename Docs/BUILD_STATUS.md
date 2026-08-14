@@ -261,8 +261,20 @@ This is the implementation source of truth. Checked items are built and locally 
 
 - [x] Established that MartServ102 was still executing the 2026-08-11 agent build: the Valheim Steam identity correlation, rotated-log offset handling, the `sc.exe` kill timer, the `400 invalid_request_body` response, and the telemetry bootstrap were all committed but unreachable by the running service
 - [x] Diagnosed the 2026-08-13 crash loop from the agent error log: the agent is the only workspace that runs compiled output on bare `node`, and its new value imports from `@habitat/shared` reached the extensionless relative re-exports in that package, which tsx and the bundler accept but Node rejects
-- [x] Exposed `@habitat/shared/agent` and `@habitat/shared/telemetry-config` as subpath exports, matching the existing `./worlds` pattern, and pointed the agent value imports at them without touching the specifiers the web app and worker rely on
+- [x] Exposed `@habitat/shared/agent` and `@habitat/shared/telemetry-config` as focused subpath exports and pointed the agent value imports at them without touching the specifiers the web app and worker rely on
 - [x] Added `apps/agent/scripts/verify-build.mjs` to the agent build so every emitted module is loaded under bare `node`; neither the tsx test run nor `tsc` exercises that resolver, which is why an unloadable build shipped
 - [x] Installed the missing OpenTelemetry dependencies on MartServ102 and refreshed the installed `HabitatAgent.xml` from the tracked template, correcting a relative `logpath` that sent application output to `C:\Windows\System32\logs`, a `sizeThreshold` of 10485760 KB rather than the intended 10 MB, and `keepFiles` 5 rather than 14
 - [x] Verified live on MartServ102: clean start with an empty error log, telemetry dormant with no endpoint configured, the allow list rejecting the agent host itself, and the Valheim scan attributing 7 Chronicle character records to SteamID64 and naming 7 archived sessions where the previous build attributed none
 - [ ] Move the historical agent output left in `C:\Windows\System32\logs` by the earlier relative `logpath`, including the 2026-08-13 crash evidence, once it is no longer needed for reference
+
+## 2026-08-14 - Agent Review Corrections
+
+- [x] Prevented Valheim character-name reuse from being suppressed: sequential Steam sessions now retain both observed name pairings, making the mapping ambiguous and leaving Chronicle identity native instead of assigning the first account
+- [x] Refused Valheim identity correlation whenever either required source set is unavailable or truncated, because a partial scan cannot prove a one-to-one mapping
+- [x] Added regression coverage for reused names and incomplete correlation sources
+- [x] Replaced in-place Agent compilation with a staged build that stamps a Git/CI build identifier, verifies output under bare Node, preserves the current `dist` on failure, and retains the previous verified artifact for rollback
+- [x] Compiled the Agent's shared runtime subpaths to JavaScript before its build, removing the service's runtime dependence on TypeScript source and pnpm symlink resolution
+- [x] Added a checked elevated updater that uses fast-forward-only pulls, refuses tracked uncommitted changes, stops on native command failure, refreshes the installed WinSW XML, probes the protected local health route, and restores the previous XML/build if the new service does not stay healthy
+- [x] Pinned the service XML to a validated absolute Node 24.19+ executable and explicit Agent working directory
+- [x] Corrected all generated game/update service logs to 10 MB, midnight rolling, and 14-file retention; added the missing midnight roll trigger to the Agent, worker, and web templates
+- [ ] Deploy the corrected Agent with `update-agent.ps1`; replace the twelve generated game/update services only during a controlled window after confirming every game process is stopped

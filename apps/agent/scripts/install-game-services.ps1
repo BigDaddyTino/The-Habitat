@@ -55,9 +55,10 @@ function Write-ServiceXml([string] $xmlPath, [string] $id, [string] $name, [stri
 $environmentXml
   <logpath>$(Escape-Xml $logPath)</logpath>
   <log mode="roll-by-size-time">
-    <sizeThreshold>10485760</sizeThreshold>
-    <keepFiles>5</keepFiles>
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>14</keepFiles>
     <pattern>yyyyMMdd</pattern>
+    <autoRollAtTime>00:00:00</autoRollAtTime>
   </log>
   <stoptimeout>$($stopTimeoutSeconds)sec</stoptimeout>
   <onfailure action="none" />

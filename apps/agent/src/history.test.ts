@@ -53,6 +53,42 @@ test("Valheim character names observed in the server log enrich chronicle histor
   assert.equal(chronicle?.evidence[0]?.externalAccountId, "76561199202467550");
 });
 
+test("Valheim refuses to assign a reused character name to either Steam account", () => {
+  const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
+    "08/11/2026 10:00:00: Got connection SteamID 76561198000000001",
+    "08/11/2026 10:00:05: Got character ZDOID from SharedName : 1:1",
+    "08/11/2026 10:10:00: Closing socket 76561198000000001",
+    "08/11/2026 11:00:00: Got connection SteamID 76561198000000002",
+    "08/11/2026 11:00:05: Got character ZDOID from SharedName : 2:2",
+    "08/11/2026 11:10:00: Closing socket 76561198000000002",
+  ].join("\n"));
+  assert.deepEqual(steamEvidence.map((item) => item.displayName), ["SharedName", "SharedName"]);
+
+  const chronicleContents = "2026-08-11T15:30:00.000Z\tDEATH\tSharedName\tfell.";
+  const sources: AgentLegacyHistorySource[] = [
+    { kind: "VALHEIM_LOG", label: "server", available: true, truncated: false, filesScanned: 1, evidence: steamEvidence, events: [] },
+    { kind: "HABITAT_CHRONICLE_LOG", label: "chronicle", available: true, truncated: false, filesScanned: 1, evidence: parseLegacyHistory("HABITAT_CHRONICLE_LOG", chronicleContents), events: parseLegacyHistoryEvents("HABITAT_CHRONICLE_LOG", chronicleContents) },
+  ];
+  const chronicle = correlateValheimSteamIdentities(sources).find((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  assert.equal(chronicle?.events[0]?.externalAccountId, null);
+  assert.equal(chronicle?.evidence[0]?.externalAccountId, null);
+});
+
+test("Valheim correlation stays native when either source scan is incomplete", () => {
+  const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
+    "08/11/2026 10:00:00: Got connection SteamID 76561198000000001",
+    "08/11/2026 10:00:05: Got character ZDOID from Old Guard : 1:1",
+    "08/11/2026 10:10:00: Closing socket 76561198000000001",
+  ].join("\n"));
+  const chronicleContents = "2026-08-11T15:30:00.000Z\tDEATH\tOld Guard\tfell.";
+  const sources: AgentLegacyHistorySource[] = [
+    { kind: "VALHEIM_LOG", label: "server", available: true, truncated: true, filesScanned: 1, evidence: steamEvidence, events: [] },
+    { kind: "HABITAT_CHRONICLE_LOG", label: "chronicle", available: true, truncated: false, filesScanned: 1, evidence: parseLegacyHistory("HABITAT_CHRONICLE_LOG", chronicleContents), events: parseLegacyHistoryEvents("HABITAT_CHRONICLE_LOG", chronicleContents) },
+  ];
+  const chronicle = correlateValheimSteamIdentities(sources).find((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  assert.equal(chronicle?.events[0]?.externalAccountId, null);
+});
+
 test("Valheim correlates only one-to-one Steam and character join timestamps", () => {
   const steamEvidence = parseLegacyHistory("VALHEIM_LOG", [
     "08/10/2026 20:00:00: Got connection SteamID 76561198000000000",

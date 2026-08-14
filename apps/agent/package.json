@@ -4,11 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "pnpm --filter @habitat/shared build",
     "dev": "tsx watch src/index.ts",
-    "build": "tsc -p tsconfig.build.json && node scripts/verify-build.mjs",
+    "prebuild": "pnpm --filter @habitat/shared build",
+    "build": "node scripts/build.mjs",
     "start": "node dist/index.js",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "pretest": "pnpm --filter @habitat/shared build",
     "test": "tsx --test src/*.test.ts"
   },
   "dependencies": {

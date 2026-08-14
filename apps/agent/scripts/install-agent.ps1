@@ -23,13 +23,24 @@ $serviceXml = Join-Path $agentRoot "HabitatAgent.xml"
 $configuration = Join-Path $agentRoot "agent.config.json"
 $environmentFile = Join-Path $agentRoot ".env"
 
-foreach ($required in @((Join-Path $agentRoot "dist\index.js"), $serviceExecutable, $serviceTemplate)) {
+foreach ($required in @((Join-Path $agentRoot "dist\index.js"), (Join-Path $agentRoot "dist\version.js"), $serviceExecutable, $serviceTemplate)) {
   if (-not (Test-Path -LiteralPath $required)) { throw "Missing required agent artifact: $required" }
+}
+if ([System.IO.File]::ReadAllText((Join-Path $agentRoot "dist\version.js")) -match '\+dev";') {
+  throw "The Agent build is unstamped. Run pnpm --filter @habitat/agent build before installing."
 }
 if ([string]::IsNullOrWhiteSpace($env:HABITAT_AGENT_TOKEN) -or $env:HABITAT_AGENT_TOKEN.Trim().Length -lt 32 -or $env:HABITAT_AGENT_TOKEN.Contains("`r") -or $env:HABITAT_AGENT_TOKEN.Contains("`n")) {
   throw "Set HABITAT_AGENT_TOKEN to a single-line secret of at least 32 characters before installing."
 }
-if (-not (Get-Command node.exe -ErrorAction SilentlyContinue)) { throw "Node.js 24 LTS must be installed and available as node.exe." }
+$nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
+if (-not $nodeCommand) { throw "Node.js 24 LTS must be installed and available as node.exe." }
+$nodeExecutable = $nodeCommand.Source
+$nodeVersionText = & $nodeExecutable -p "process.versions.node"
+if ($LASTEXITCODE -ne 0) { throw "Unable to determine the installed Node.js version." }
+$nodeVersion = [version]$nodeVersionText.Trim()
+if ($nodeVersion.Major -ne 24 -or $nodeVersion -lt [version]"24.19.0") {
+  throw "Habitat Agent requires Node.js >=24.19.0 and <25; found $nodeVersion."
+}
 if (Get-Service -Name "HabitatAgent" -ErrorAction SilentlyContinue) { throw "The HabitatAgent service already exists. Use uninstall-agent.ps1 first." }
 
 if (-not (Test-Path -LiteralPath $configuration)) {
@@ -68,7 +79,10 @@ foreach ($entry in $managedValues.GetEnumerator()) { $environmentLines += "$($en
 $environmentLines += $preservedLines
 # WriteAllLines emits UTF-8 without a BOM, which dotenv requires for the first key.
 [System.IO.File]::WriteAllLines($environmentFile, [string[]]$environmentLines)
-Copy-Item -LiteralPath $serviceTemplate -Destination $serviceXml -Force
+$serviceContents = [System.IO.File]::ReadAllText($serviceTemplate)
+$serviceContents = $serviceContents.Replace("{{NODE_EXE}}", [Security.SecurityElement]::Escape($nodeExecutable)).Replace("{{AGENT_ROOT}}", [Security.SecurityElement]::Escape($agentRoot))
+if ($serviceContents.Contains("{{")) { throw "The HabitatAgent service template contains an unresolved placeholder." }
+[System.IO.File]::WriteAllText($serviceXml, $serviceContents, [System.Text.UTF8Encoding]::new($false))
 & (Join-Path $PSScriptRoot "set-agent-firewall.ps1") -AgentBindIp $AgentBindIp -MartServ101Ip $MartServ101Ip -Port $Port
 & $serviceExecutable install
 & $serviceExecutable start

@@ -72,16 +72,22 @@ const valheimCorrelationWindowMs = 30_000;
  * require a one-to-one SteamID/name mapping across the complete bounded scan.
  */
 export function correlateValheimSteamIdentities(sources: AgentLegacyHistorySource[]): AgentLegacyHistorySource[] {
-  const valheimEvidence = sources
-    .filter((source) => source.available && source.kind === "VALHEIM_LOG")
+  const valheimSources = sources.filter((source) => source.kind === "VALHEIM_LOG");
+  const chronicleSources = sources.filter((source) => source.kind === "HABITAT_CHRONICLE_LOG");
+  // A partial source cannot prove that a display name or Steam account is
+  // unique across the retained evidence. Leave it native until a complete scan
+  // can establish the one-to-one relationship.
+  if (valheimSources.some((source) => !source.available || source.truncated)
+    || chronicleSources.some((source) => !source.available || source.truncated)) return sources;
+
+  const valheimEvidence = valheimSources
     .flatMap((source) => source.evidence)
     .filter((item) => item.externalProvider === "STEAM" && item.externalAccountId);
   const steamStarts = valheimEvidence.map((item) => ({ steamId: item.externalAccountId!, occurredAt: new Date(item.occurredAt).getTime() }));
   const directPairs = valheimEvidence
     .filter((item) => item.displayName)
     .map((item) => ({ steamId: item.externalAccountId!, normalizedName: item.displayName!.trim().toLocaleLowerCase("en-US") }));
-  const chronicleJoins = sources
-    .filter((source) => source.available && source.kind === "HABITAT_CHRONICLE_LOG")
+  const chronicleJoins = chronicleSources
     .flatMap((source) => source.events)
     .filter((item) => item.eventType === "PLAYER_JOINED")
     .map((item) => ({ displayName: item.displayName, occurredAt: new Date(item.occurredAt).getTime() }));
@@ -292,7 +298,11 @@ function parseValheimLog(contents: string): AgentLegacyPlayerEvidence[] {
   // spawn. Pair them only while exactly one connection is awaiting its character,
   // and never against respawns of an already-named character.
   const awaitingCharacter: Array<{ steamId: string; occurredAtMs: number }> = [];
-  const spawnedNames = new Set<string>();
+  // A character name is active only for its paired Steam session. Keeping this
+  // scoped to active sessions distinguishes a respawn from a later account
+  // reusing the same visible name; the latter must be retained so correlation
+  // can see the conflict and refuse to guess an owner.
+  const activeCharacterOwners = new Map<string, string>();
   for (const line of contents.split(/\r?\n/)) {
     const occurredAt = parseLineTimestamp(line);
     if (!occurredAt) continue;
@@ -309,13 +319,14 @@ function parseValheimLog(contents: string): AgentLegacyPlayerEvidence[] {
       const displayName = spawned[1].trim();
       const spawnedAtMs = new Date(occurredAt).getTime();
       while (awaitingCharacter.length > 0 && spawnedAtMs - awaitingCharacter[0]!.occurredAtMs > valheimSpawnPairWindowMs) awaitingCharacter.shift();
-      if (!isSafeDisplayName(displayName) || spawnedNames.has(displayName.toLocaleLowerCase("en-US"))) continue;
+      const normalizedName = displayName.toLocaleLowerCase("en-US");
+      if (!isSafeDisplayName(displayName) || activeCharacterOwners.has(normalizedName)) continue;
       if (awaitingCharacter.length === 1) {
         const candidate = awaitingCharacter.shift()!;
         const pending = openSessions.get(candidate.steamId);
         const session = pending?.[pending.length - 1];
         if (session && session.displayName === null) session.displayName = displayName;
-        spawnedNames.add(displayName.toLocaleLowerCase("en-US"));
+        activeCharacterOwners.set(normalizedName, candidate.steamId);
       } else if (awaitingCharacter.length > 1) {
         awaitingCharacter.length = 0;
       }
@@ -328,6 +339,10 @@ function parseValheimLog(contents: string): AgentLegacyPlayerEvidence[] {
     const pending = openSessions.get(left[1]);
     const joinedSession = pending?.shift();
     if (!joinedSession) continue;
+    if (joinedSession.displayName) {
+      const normalizedName = joinedSession.displayName.toLocaleLowerCase("en-US");
+      if (activeCharacterOwners.get(normalizedName) === left[1]) activeCharacterOwners.delete(normalizedName);
+    }
     const durationSeconds = Math.floor((new Date(occurredAt).getTime() - new Date(joinedSession.occurredAt).getTime()) / 1_000);
     if (durationSeconds < 0 || durationSeconds > 7 * 24 * 60 * 60) continue;
     evidence.push({ ...makeEvidence("SESSION", left[1], joinedSession.occurredAt, occurredAt, durationSeconds, `${joinedSession.record}\n${line}`), displayName: joinedSession.displayName });

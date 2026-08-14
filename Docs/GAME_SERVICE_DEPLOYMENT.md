@@ -30,6 +30,8 @@ Restart-Service HabitatAgent
 
 The game and update services are installed with manual startup. This prevents all six games from unexpectedly starting at Windows boot.
 
+Generated game and update logs roll at 10 MB and midnight and retain 14 rolled files. Existing generated XML is not changed by a repository pull; rerun the installer with `-Replace` only after confirming every matching game process is stopped to deploy a corrected log policy.
+
 For an existing installation that predates the Valheim source, run the fixed-path updater from an elevated MartServ102 session:
 
 ```powershell
