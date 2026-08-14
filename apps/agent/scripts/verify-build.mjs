@@ -29,10 +29,12 @@ import { pathToFileURL } from "node:url";
 const entrypoint = "index.js";
 const staticSpecifier = /(?:^|\n)\s*(?:import|export)\b[^"';]*?from\s*["']([^"']+)["']/g;
 
-const distDirectory = path.resolve(import.meta.dirname, "..", "dist");
+const distDirectory = process.argv[2]
+  ? path.resolve(process.argv[2])
+  : path.resolve(import.meta.dirname, "..", "dist");
 const failures = [];
 
-const compiled = (await readdir(distDirectory).catch(() => [])).filter((name) => name.endsWith(".js"));
+const compiled = await collectCompiledModules(distDirectory).catch(() => []);
 if (compiled.length === 0) {
   console.error(`Bare-Node check found no compiled output in ${distDirectory}. Run the TypeScript build first.`);
   process.exit(1);
@@ -42,8 +44,19 @@ if (!compiled.includes(entrypoint)) {
   process.exit(1);
 }
 
+const versionSource = await readFile(path.join(distDirectory, "version.js"), "utf8").catch(() => "");
+if (!versionSource || /\+dev["']/.test(versionSource)) {
+  console.error("Bare-Node check found an unstamped Agent version. Run the staged build rather than tsc directly.");
+  process.exit(1);
+}
+
 for (const name of compiled) {
   if (name === entrypoint) continue;
+  const source = await readFile(path.join(distDirectory, name), "utf8");
+  if (/from\s*["']@habitat\/shared(?:\/|["'])/.test(source)) {
+    failures.push(`${name}: production output still imports the shared workspace package instead of its staged JavaScript copy`);
+    continue;
+  }
   await load(pathToFileURL(path.join(distDirectory, name)).href, name);
 }
 
@@ -72,4 +85,15 @@ async function load(target, label) {
     const detail = error instanceof Error ? `${error.code ? `${error.code}: ` : ""}${error.message}` : String(error);
     failures.push(`${label}: ${detail}`);
   }
+}
+
+async function collectCompiledModules(directory, relativeDirectory = "") {
+  const entries = await readdir(path.join(directory, relativeDirectory), { withFileTypes: true });
+  const modules = [];
+  for (const entry of entries) {
+    const relativePath = path.join(relativeDirectory, entry.name);
+    if (entry.isDirectory()) modules.push(...await collectCompiledModules(directory, relativePath));
+    else if (entry.isFile() && entry.name.endsWith(".js")) modules.push(relativePath);
+  }
+  return modules.sort();
 }

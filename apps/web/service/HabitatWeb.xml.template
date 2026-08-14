@@ -15,6 +15,7 @@
     <sizeThreshold>10240</sizeThreshold>
     <keepFiles>14</keepFiles>
     <pattern>yyyyMMdd</pattern>
+    <autoRollAtTime>00:00:00</autoRollAtTime>
   </log>
   <env name="NODE_ENV" value="production" />
   <stoptimeout>20sec</stoptimeout>

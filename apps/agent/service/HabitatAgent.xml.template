@@ -2,19 +2,16 @@
   <id>HabitatAgent</id>
   <name>Habitat Agent</name>
   <description>Private MartServ102 monitoring service for The Habitat.</description>
-  <executable>node.exe</executable>
+  <executable>{{NODE_EXE}}</executable>
   <arguments>dist\index.js</arguments>
-  <!-- %BASE% is WinSW's own directory, i.e. the agent root. A relative logpath is
-       resolved against the service process's working directory instead, which is
-       C:\Windows\System32 for a LocalSystem service, so stdout and stderr land
-       there while only the wrapper log appears beside the executable. The
-       installer copies this template verbatim, so no placeholder is available. -->
-  <logpath>%BASE%\logs</logpath>
+  <workingdirectory>{{AGENT_ROOT}}</workingdirectory>
+  <logpath>{{AGENT_ROOT}}\logs</logpath>
   <!-- sizeThreshold is in KB, not bytes: 10240 KB is the intended 10 MB. -->
   <log mode="roll-by-size-time">
     <sizeThreshold>10240</sizeThreshold>
     <keepFiles>14</keepFiles>
     <pattern>yyyyMMdd</pattern>
+    <autoRollAtTime>00:00:00</autoRollAtTime>
   </log>
   <env name="NODE_ENV" value="production" />
   <stoptimeout>15sec</stoptimeout>

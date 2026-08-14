@@ -63,7 +63,7 @@ Archived history is opt-in per server. Every source path must be an inspected, a
 ```
 
 - `VALHEIM_LOG` reconstructs a timed session only from a timestamped `Got connection SteamID` paired with its later `Closing socket`. An unmatched connection becomes participation evidence without playtime.
-- When `VALHEIM_LOG` and `HABITAT_CHRONICLE_LOG` are both configured, the agent can attach a SteamID64 to a Chronicle character only when their join timestamps form a mutually unique one-to-one match within 30 seconds. Ambiguous names or timestamps remain separate and require review.
+- When `VALHEIM_LOG` and `HABITAT_CHRONICLE_LOG` are both configured, the agent can attach a SteamID64 to a Chronicle character only from a direct, unambiguous Steam-session/character pairing or mutually unique join timestamps within 30 seconds. Reused names, ambiguous timestamps, and unavailable or truncated source sets remain separate and require review.
 - `STEAM_PLATFORM_LOG` records conservative participation evidence only when a timestamp, SteamID64, and explicit player activity marker occur on the same line. It never estimates session time.
 - `HABITAT_SESSION_JSONL` accepts a controlled migration export with `externalProvider: "STEAM"`, `externalAccountId`, ISO `occurredAt`, optional ISO `endedAt`, and optional `displayName`. Use it only for an inspected export from a source whose semantics are known.
 
@@ -79,20 +79,22 @@ Set-Location "<repository>\apps\agent"
 .\scripts\install-agent.ps1 -InstallRoot (Get-Location) -AgentBindIp "<MartServ102 private LAN IP>" -MartServ101Ip "<MartServ101 private LAN IP>"
 ```
 
-The installer writes the ignored local `.env`, creates an empty config when needed, creates the source-limited firewall rule, and installs the `HabitatAgent` WinSW service. It refuses non-private bind/source addresses, missing Node/WinSW artifacts, short tokens, and duplicate services.
+The installer writes the ignored local `.env`, creates an empty config when needed, creates the source-limited firewall rule, and installs the `HabitatAgent` WinSW service with an absolute, validated Node executable and working directory. It refuses unsupported Node versions, non-private bind/source addresses, missing Node/WinSW artifacts, short tokens, and duplicate services.
 
 ## Updating An Installed Agent
 
-The service runs compiled output (`<arguments>dist\index.js</arguments>`), not TypeScript sources, so pulling changes is not enough on its own. A pull followed only by a restart keeps executing the previous build. From the repository root on MartServ102:
+The service runs compiled JavaScript (`<arguments>dist\index.js</arguments>`), so pulling changes is not enough on its own. From an elevated prompt on MartServ102, use the checked updater rather than entering pull/build/restart as independent PowerShell commands:
 
 ```powershell
-git pull
-pnpm install --frozen-lockfile
-pnpm --filter @habitat/agent build
-Restart-Service HabitatAgent
+Set-Location "<repository>\apps\agent"
+.\scripts\update-agent.ps1 -InstallRoot (Get-Location)
 ```
 
-The build compiles and then loads every emitted module under bare `node` (`scripts/verify-build.mjs`), because the agent is the only workspace that runs compiled output on plain `node`: the worker runs under tsx and the web app is bundled, and both accept module specifiers that Node itself rejects. A value import from `@habitat/shared` must therefore name a subpath export whose target has no extensionless relative imports of its own, such as `@habitat/shared/agent` rather than `@habitat/shared`, whose `index.ts` re-exports `./agent` without an extension and fails to resolve at runtime. Type-only imports are erased at compile time and may use any specifier. The check fails the build on the build machine instead of crash-looping the installed service, which is how an unloadable build reached MartServ102 on 2026-08-13.
+The updater uses `git pull --ff-only`, checks every native exit code, installs the frozen lockfile, and builds before touching the service. Use `-SkipPull` only when the desired source revision is already checked out locally.
+
+The Agent build first compiles its two shared runtime subpaths to JavaScript, then compiles into `dist.building`, stamps `version.js` with the package version and Git commit, and loads every emitted Agent module under bare `node` (`scripts/verify-build.mjs`). Only verified staging output replaces `dist`; the prior artifact remains in `dist.previous` for updater rollback. This both removes runtime TypeScript loading from the service and prevents a failed compiler/resolver check from damaging the installed artifact. Type-only imports may continue to use the shared source entry because they are erased.
+
+After a successful build, the updater renders the service template with the validated absolute Node and Agent paths, restarts the service, and probes the local protected health route for the expected unauthenticated rejection. It refuses tracked uncommitted changes so the stamped commit remains truthful. If restart or the health probe fails, it restores the previous XML and build, attempts to restart the prior service, and retains the failed output for diagnosis.
 
 `HabitatAgent` exists only on MartServ102. Running `Start-Service HabitatAgent` on MartServ101 fails with "Cannot find any service with service name 'HabitatAgent'" because MartServ101 hosts only `HabitatWeb` and `HabitatWorker`. To inspect or control it from MartServ101 without signing in to MartServ102, use an elevated prompt:
 
@@ -104,7 +106,7 @@ sc.exe \\<MartServ102 private LAN IP> start HabitatAgent
 
 A brief agent restart does not flap world state: the worker debounces an unreachable agent for two consecutive cycles before recording `UNKNOWN`.
 
-Agent logs live in `<repository>\apps\agent\logs` via the template's `%BASE%\logs` path. `%BASE%` is WinSW's own directory; a relative `logpath` would instead resolve against the service process's working directory, which is `C:\Windows\System32` for a LocalSystem service, and the application log would silently land in `C:\Windows\System32\logs`. An agent installed before that template fix still carries the relative value in its already-copied `HabitatAgent.xml`, so correct it in place and restart.
+Agent logs live in `<repository>\apps\agent\logs` via an absolute path rendered by the installer/updater. Logs roll at 10 MB and midnight and retain 14 rolled files. An agent installed before that template fix still carries its already-copied value; running `update-agent.ps1` refreshes it safely.
 
 ## Verify And Remove
 

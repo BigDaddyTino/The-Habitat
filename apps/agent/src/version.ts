@@ -1,2 +1,5 @@
-/** Reported on /health and in telemetry resources so a stale deployment is identifiable. */
-export const agentVersion = "0.1.0";
+/**
+ * Replaced in staged output by scripts/build.mjs with package version plus a
+ * Git/CI build identifier. Source-mode tests and development remain explicit.
+ */
+export const agentVersion = "0.1.0+dev";

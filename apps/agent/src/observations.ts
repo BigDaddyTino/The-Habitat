@@ -3,7 +3,7 @@ import { open } from "node:fs/promises";
 import { promisify } from "node:util";
 import path from "node:path";
 import { GameDig } from "gamedig";
-import { isStablePlayerProviderKey } from "@habitat/shared/agent";
+import { isStablePlayerProviderKey } from "./shared/agent.js";
 import type { AgentDiskObservation, AgentExecutableObservation, AgentLogObservation, AgentPlayerObservation, AgentProcessObservation, AgentQueryObservation } from "@habitat/shared";
 import type { AgentServerConfiguration } from "./config.js";
 
