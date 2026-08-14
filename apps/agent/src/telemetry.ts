@@ -6,7 +6,7 @@ import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { AlwaysOnSampler, TraceIdRatioBasedSampler } from "@opentelemetry/sdk-trace";
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from "@opentelemetry/semantic-conventions";
-import { resolveTelemetryConfiguration } from "@habitat/shared";
+import { resolveTelemetryConfiguration } from "@habitat/shared/telemetry-config";
 import { agentVersion } from "./version.js";
 
 /**
