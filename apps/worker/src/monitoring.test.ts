@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { AgentServerStatus, ServerState } from "@habitat/shared";
 import type { Prisma } from "@habitat/db/client";
-import { autoLinkVerifiedSteamIdentity, crossedWorldGatheringThreshold, runMonitoringCycle, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
+import { autoLinkVerifiedSteamIdentity, crossedWorldGatheringThreshold, runMonitoringCycle, worldGatheringCooldownMs, worldGatheringDedupeKey, type MonitoredServer, type MonitoringRepository } from "./monitoring.js";
 
 const valheim: MonitoredServer = { id: "server-1", slug: "valheim", displayName: "Valheim", gameType: "VALHEIM", desiredState: "ONLINE", actualState: "UNKNOWN", playerCount: null, playerPresenceInitialized: false, lastStateChangeAt: null };
 
@@ -12,6 +12,15 @@ test("a world gathering is only a measured crossing of five players", () => {
   assert.equal(crossedWorldGatheringThreshold(5, 6), false);
   assert.equal(crossedWorldGatheringThreshold(null, 5), false);
   assert.equal(crossedWorldGatheringThreshold(4, null), false);
+});
+
+test("a group sitting on the threshold cannot re-announce every cycle", () => {
+  const observedAt = new Date("2026-08-14T18:00:00.000Z");
+  const fifteenSecondsLater = new Date(observedAt.getTime() + 15_000);
+  const afterCooldown = new Date(observedAt.getTime() + worldGatheringCooldownMs);
+  assert.equal(worldGatheringDedupeKey("server-1", observedAt), worldGatheringDedupeKey("server-1", fifteenSecondsLater));
+  assert.notEqual(worldGatheringDedupeKey("server-1", observedAt), worldGatheringDedupeKey("server-1", afterCooldown));
+  assert.notEqual(worldGatheringDedupeKey("server-1", observedAt), worldGatheringDedupeKey("server-2", observedAt));
 });
 const status: AgentServerStatus = {
   key: "valheim",

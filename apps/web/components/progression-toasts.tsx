@@ -75,7 +75,10 @@ export function ProgressionToasts({ enabled, initialLiveCursor }: { enabled: boo
         seen.add(event.id);
         window.dispatchEvent(new CustomEvent<VerifiedHabitatLiveEvent>(habitatLiveBrowserEvent, { detail: event }));
       }
-      enqueue(fresh.map((event) => ({ id: `live-${event.id}`, ...event.ceremony })));
+      // The Hall still reacts to your own legend, but the toast is left to the
+      // progression feed, which reports the same award with your own framing.
+      const broadcast = fresh.filter((event) => !(event.kind === "LEGENDARY_EARNED" && event.viewerIsActor));
+      enqueue(broadcast.map((event) => ({ id: `live-${event.id}`, ...event.ceremony })));
       cursor = batch.cursor;
     };
     void poll();

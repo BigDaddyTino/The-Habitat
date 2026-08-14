@@ -13,7 +13,14 @@ export type CollectibleIdentity = {
 
 export type CollectibleVisual = {
   atlas: "badge" | "medal" | "trophy";
-  tile: number;
+  /**
+   * Index into the atlas relief sheet, or null when this collectible has no
+   * authored sprite of its own. Every tile in an atlas belongs to exactly one
+   * collectible; borrowing another's index would present a different trophy's
+   * artwork as this one's, so an unauthored collectible renders its modeled or
+   * icon form instead until a sprite is drawn for it.
+   */
+  tile: number | null;
   form: string;
   metal: string;
   accent: string;
@@ -55,7 +62,10 @@ export const collectibleVisuals: Record<string, CollectibleVisual> = {
   "dusty-ledger": visual({ atlas: "trophy", tile: 5, form: "ledger", metal: "#806a4b", accent: "#c9ad78", enamel: "#28251f", inscription: "TEN OLD CHAPTERS AUTHENTICATED." }),
   "centurion-monument": visual({ atlas: "trophy", tile: 6, form: "centurion", metal: "#d2a44f", accent: "#ffd983", enamel: "#32221d", inscription: "LEVEL ONE HUNDRED. ENTERED IN HISTORY." }),
   "window-bear": visual({ atlas: "trophy", tile: 7, form: "bear", metal: "#9b7147", accent: "#d8ae73", enamel: "#2c221c", inscription: "YOU TAPPED. IT OBJECTED." }),
-  "bossbreaker-reliquary": visual({ atlas: "trophy", tile: 6, form: "boss-reliquary", metal: "#9f6d36", accent: "#f0c873", enamel: "#241815", inscription: "THE WORLD STOOD. THE BOSS DID NOT." }),
+  // The trophy sheet is a full 4x2 of authored reliefs, so this one carries no
+  // tile until the atlas gains a ninth sprite. Its bespoke 3D reliquary is the
+  // authored form and stands on its own.
+  "bossbreaker-reliquary": visual({ atlas: "trophy", tile: null, form: "boss-reliquary", metal: "#9f6d36", accent: "#f0c873", enamel: "#241815", inscription: "THE WORLD STOOD. THE BOSS DID NOT." }),
 };
 
 const fallbackByKind: Record<PhysicalRewardKind, CollectibleVisual> = {

@@ -213,7 +213,7 @@ export function createPostgresMonitoringRepository(): MonitoringRepository {
         }
         const currentPlayerCount = status.query?.playerCount ?? null;
         if (crossedWorldGatheringThreshold(server.playerCount, currentPlayerCount)) {
-          const dedupeKey = `gathering:${server.id}:${observedAt.toISOString()}`;
+          const dedupeKey = worldGatheringDedupeKey(server.id, observedAt);
           const event = await transaction.serverEvent.upsert({
             where: { dedupeKey },
             create: {
@@ -338,6 +338,20 @@ export const worldGatheringThreshold = 5;
 /** A missing baseline is not a crossing and therefore cannot create a ceremony. */
 export function crossedWorldGatheringThreshold(previous: number | null, current: number | null): boolean {
   return previous !== null && current !== null && previous < worldGatheringThreshold && current >= worldGatheringThreshold;
+}
+
+export const worldGatheringCooldownMs = 6 * 60 * 60_000;
+
+/**
+ * A crossing is an edge, so a group sitting on the boundary crosses it again
+ * every time one player steps out and back in. Bucketing the dedupe key by a
+ * cooldown window makes the repeat crossings resolve to the same ServerEvent
+ * row, which the upsert leaves untouched and the notification outbox therefore
+ * refuses a second time. Deriving this from the timestamp rather than worker
+ * memory keeps it stable across restarts.
+ */
+export function worldGatheringDedupeKey(serverId: string, observedAt: Date): string {
+  return `gathering:${serverId}:${Math.floor(observedAt.getTime() / worldGatheringCooldownMs)}`;
 }
 
 async function synchronizeNamedPlayerPresence(transaction: PresenceTransaction, server: MonitoredServer, players: AgentPlayerObservation[], observedAt: Date, emitPalworldChronicleEvents: boolean) {

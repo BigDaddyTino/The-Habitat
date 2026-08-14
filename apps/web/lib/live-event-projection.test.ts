@@ -42,3 +42,17 @@ test("only top-tier achievements form a constellation", () => {
   assert.equal(legendary?.reaction.kind, "CONSTELLATION");
   assert.equal(rare, null);
 });
+
+test("the broadcast marks an event as the viewer's own only for that viewer", () => {
+  const owned = source("BOSS_KILLED", { playerIdentity: { userId: "user-1" } });
+  assert.equal(projectVerifiedHabitatLiveEvent(owned, undefined, "user-1")?.viewerIsActor, true);
+  assert.equal(projectVerifiedHabitatLiveEvent(owned, undefined, "user-2")?.viewerIsActor, false);
+  assert.equal(projectVerifiedHabitatLiveEvent(owned, undefined, null)?.viewerIsActor, false);
+  assert.equal(projectVerifiedHabitatLiveEvent(owned)?.viewerIsActor, false);
+});
+
+test("an unclaimed actor is never mistaken for the viewer", () => {
+  const unclaimed = source("BOSS_KILLED", { playerIdentity: { userId: null } });
+  assert.equal(projectVerifiedHabitatLiveEvent(unclaimed, undefined, "user-1")?.viewerIsActor, false);
+  assert.equal(projectVerifiedHabitatLiveEvent(source("BOSS_KILLED"), undefined, "user-1")?.viewerIsActor, false);
+});

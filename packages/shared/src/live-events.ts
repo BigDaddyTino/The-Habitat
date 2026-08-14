@@ -49,6 +49,14 @@ export type VerifiedHabitatLiveEvent = {
   reaction: { kind: HabitatLiveReactionKind; durationMs: number };
   ceremony: HabitatLiveCeremony;
   playerCount?: number;
+  /**
+   * True when the signed-in viewer is the verified actor behind this event. The
+   * viewer already receives their own awards through their progression feed, so
+   * this lets the clubhouse-wide broadcast stand down from repeating a ceremony
+   * the earner is about to be shown personally. It is resolved per request and
+   * never describes anyone but the viewer it was sent to.
+   */
+  viewerIsActor: boolean;
 };
 
 export type HabitatLiveEventBatch = {

@@ -1351,6 +1351,10 @@ model ServerEvent {
   @@index([serverId, occurredAt])
   @@index([eventType, occurredAt])
   @@index([playerIdentityId, occurredAt])
+  /// Serves the live-event feed, which every open tab polls for the arrival
+  /// tail. Ordered by arrival rather than occurrence because a recovered event
+  /// occurred long ago but is news the moment it lands.
+  @@index([receivedAt, id])
 }
 
 model GameActivity {

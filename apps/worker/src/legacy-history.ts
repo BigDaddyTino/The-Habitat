@@ -237,7 +237,7 @@ async function importHistoricalEvent(
       metadata: { sourceKind, sourceLabel, recovered: true },
     },
   });
-  if (item.eventType === "BOSS_KILLED") {
+  if (item.eventType === "BOSS_KILLED" && isAnnounceableBossKill(new Date(item.occurredAt))) {
     await queueDiscordNotification(transaction, {
       serverEventId: event.id,
       kind: "BOSS_KILLED",
@@ -245,6 +245,23 @@ async function importHistoricalEvent(
     });
   }
   return true;
+}
+
+/**
+ * A history import recovers the whole log, so the first scan that ever sees
+ * `BOSS` lines discovers every past kill at once. Recovering them into the
+ * Chronicle is correct; announcing them is not, because months of history would
+ * arrive in the announcement channel as breaking news. Only a kill that is still
+ * fresh at import time is announced. The consequence is deliberate: if the
+ * collector is down past this window, those kills land in the Chronicle silently.
+ */
+export const bossAnnouncementFreshnessMs = 30 * 60_000;
+
+export function isAnnounceableBossKill(occurredAt: Date, now = new Date()): boolean {
+  const age = now.getTime() - occurredAt.getTime();
+  // An unparseable timestamp, and one far enough ahead of the clock to be a
+  // source error rather than skew, are both treated as unannounceable.
+  return Number.isFinite(age) && age < bossAnnouncementFreshnessMs && age > -bossAnnouncementFreshnessMs;
 }
 
 /** Matches the agent's Valheim chronicle/Steam-log correlation window. */

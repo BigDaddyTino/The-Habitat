@@ -1,6 +1,7 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import type { ServerState } from "@habitat/shared";
+import { filterToInstalledServerEventTypes } from "@/lib/server-event-types";
 
 const db = getPrismaClient();
 
@@ -143,14 +144,7 @@ export function isChronicleEventType(value: string | undefined): value is Chroni
 
 /** Keeps a staged web rollout compatible until the additive enum migration lands. */
 export async function getAvailableChronicleEventTypes(): Promise<ReadonlyArray<ChronicleEventType>> {
-  const rows = await db.$queryRaw<Array<{ value: string }>>`
-    SELECT enumlabel AS value
-    FROM pg_enum
-    JOIN pg_type ON pg_type.oid = pg_enum.enumtypid
-    WHERE pg_type.typname = 'ServerEventType'
-  `;
-  const installed = new Set(rows.map((row) => row.value));
-  return chronicleEventTypes.filter((eventType) => installed.has(eventType));
+  return filterToInstalledServerEventTypes(chronicleEventTypes);
 }
 
 export async function getChronicleEvents({ limit = 50, gameType, eventType, playerIdentityId }: ChronicleQuery = {}): Promise<ChronicleEventView[]> {

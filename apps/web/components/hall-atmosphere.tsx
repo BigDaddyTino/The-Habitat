@@ -382,7 +382,10 @@ export function HallAtmosphere({ activePlayers = 0, ...initial }: GreatHallAtmos
       <div className="hall-haze" aria-hidden="true" /><div className="hall-stars" aria-hidden="true" /><div className="hall-aurora" aria-hidden="true" />
       <div className="hall-live-impact" aria-hidden="true" />
       <div className="hall-live-constellation" aria-hidden="true">
-        <Image className="hall-live-constellation-crest" src="/images/live-layer/legendary-constellation-crest.svg" alt="" width={1200} height={675} sizes="(max-width: 800px) 74vw, 48vw" loading="eager" />
+        {/* The optimizer rejects SVG unless images.dangerouslyAllowSVG is set globally, which
+            would relax the policy for every remote image. The crest is a local authored vector
+            with nothing to optimize, so it is served directly instead. */}
+        <Image className="hall-live-constellation-crest" src="/images/live-layer/legendary-constellation-crest.svg" alt="" width={1200} height={675} sizes="(max-width: 800px) 74vw, 48vw" loading="eager" unoptimized />
         <span className="hall-live-starfield">{Array.from({ length: 16 }, (_, index) => <i key={index} />)}</span>
       </div>
       <div className="hall-live-crowd" aria-hidden="true"><span className="hall-live-firelight" />{Array.from({ length: 9 }, (_, index) => <i key={index} />)}</div>

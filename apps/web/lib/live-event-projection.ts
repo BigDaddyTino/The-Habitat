@@ -17,6 +17,7 @@ export type LiveSourceEvent = {
   source: string;
   sourceConfidence: number;
   server: { id: string; slug: string; displayName: string; gameType: string };
+  playerIdentity?: { userId: string | null } | null;
 };
 
 export type LiveAchievementDefinition = {
@@ -28,6 +29,13 @@ export type LiveAchievementDefinition = {
   rewards: Array<{ kind: AchievementRewardKind; code: string; name: string }>;
 };
 
+/**
+ * The only source event types the projection can turn into a live moment. The
+ * feed query is narrowed to these so unrelated verified traffic — every join,
+ * death and save — cannot crowd a batch out and delay a real ceremony.
+ */
+export const projectableLiveEventTypes = ["SERVER_STARTED", "SERVER_CRASHED", "WORLD_GATHERING", "BOSS_KILLED", "ACHIEVEMENT_EARNED"] as const;
+
 export function achievementSlugFromMetadata(metadata: unknown): string | null {
   if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
   const value = (metadata as Record<string, unknown>).achievementSlug;
@@ -35,8 +43,9 @@ export function achievementSlugFromMetadata(metadata: unknown): string | null {
 }
 
 /** Maps only confidence-100 source rows onto the allow-listed cinematic contract. */
-export function projectVerifiedHabitatLiveEvent(event: LiveSourceEvent, achievement?: LiveAchievementDefinition): VerifiedHabitatLiveEvent | null {
+export function projectVerifiedHabitatLiveEvent(event: LiveSourceEvent, achievement?: LiveAchievementDefinition, viewerUserId?: string | null): VerifiedHabitatLiveEvent | null {
   if (event.sourceConfidence !== 100) return null;
+  const actorUserId = event.playerIdentity?.userId ?? null;
   const base = {
     id: event.id,
     occurredAt: event.occurredAt.toISOString(),
@@ -44,6 +53,7 @@ export function projectVerifiedHabitatLiveEvent(event: LiveSourceEvent, achievem
     world: { id: event.server.id, slug: event.server.slug, name: event.server.displayName, gameType: event.server.gameType },
     actor: event.actorText,
     evidence: { source: event.source, confidence: 100 as const },
+    viewerIsActor: Boolean(viewerUserId) && actorUserId === viewerUserId,
   };
 
   if (event.eventType === "SERVER_STARTED") return {

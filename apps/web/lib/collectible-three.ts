@@ -16,7 +16,8 @@ export async function loadCollectibleAtlases(THREE: ThreeModule, only?: keyof ty
   return Object.fromEntries(entries) as Partial<CollectibleAtlases>;
 }
 
-function atlasTile(THREE: ThreeModule, source: Three.Texture, atlas: keyof CollectibleAtlases, index: number) {
+function atlasTile(THREE: ThreeModule, source: Three.Texture, atlas: keyof CollectibleAtlases, index: number | null) {
+  if (index === null) return null;
   const texture = source.clone();
   const grid = collectibleAtlasGrid[atlas];
   const column = index % grid.columns;
@@ -128,7 +129,8 @@ function addTube(THREE: ThreeModule, group: Three.Group, points: Array<[number, 
   return addMesh(group, new THREE.TubeGeometry(curve, 28, radius, 8, false), material, [0, 0, 0]);
 }
 
-function addRelief(THREE: ThreeModule, group: Three.Group, texture: Three.Texture, y: number, z: number, size: number, rotationY = 0) {
+function addRelief(THREE: ThreeModule, group: Three.Group, texture: Three.Texture | null, y: number, z: number, size: number, rotationY = 0) {
+  if (!texture) return;
   const material = reliefMaterial(THREE, texture);
   const mesh = addMesh(group, new THREE.PlaneGeometry(size, size), material, [0, y, z], [0, rotationY, 0]);
   mesh.renderOrder = 3;
@@ -141,7 +143,7 @@ function addReverse(THREE: ThreeModule, group: Three.Group, item: CollectibleIde
   addMesh(group, new THREE.CircleGeometry(size / 2, 48), material, [0, y, z], [0, Math.PI, 0]);
 }
 
-function buildBadge(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture) {
+function buildBadge(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture | null) {
   const visual = getCollectibleVisual(item);
   const metal = metalMaterial(THREE, visual.metal, 0.28);
   const accent = metalMaterial(THREE, visual.accent, 0.2);
@@ -176,7 +178,7 @@ function buildBadge(THREE: ThreeModule, group: Three.Group, item: CollectibleIde
   }
 }
 
-function buildMedal(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture) {
+function buildMedal(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture | null) {
   const visual = getCollectibleVisual(item);
   const metal = metalMaterial(THREE, visual.metal, 0.26);
   const accent = metalMaterial(THREE, visual.accent, 0.2);
@@ -207,7 +209,7 @@ function trophyBase(THREE: ThreeModule, group: Three.Group, metal: Three.Materia
   addMesh(group, new THREE.BoxGeometry(0.94, 0.14, 0.58), accent, [0, -0.68, 0]);
 }
 
-function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture) {
+function buildTrophy(THREE: ThreeModule, group: Three.Group, item: CollectibleIdentity, tile: Three.Texture | null) {
   const visual = getCollectibleVisual(item);
   const metal = metalMaterial(THREE, visual.metal, 0.27);
   const accent = metalMaterial(THREE, visual.accent, 0.2);

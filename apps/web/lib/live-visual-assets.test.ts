@@ -27,7 +27,14 @@ test("every Live Layer visual remains connected to an authored anchor", async ()
   assert.match(hall, /legendary-constellation-crest\.svg/);
   for (const selector of [".hall-live-constellation", ".hall-live-crowd", ".hall-live-trophy", ".hall-live-announcement"]) assert.match(hallCss, new RegExp(selector.replace(".", "\\.")));
   assert.match(cards, /world-portal-reaction/);
-  assert.match(globalCss, /\.world-card\.state-sleeping \.world-portal-reaction\{display:none\}/);
+  assert.match(globalCss, /\.world-card\.state-sleeping:not\(\.live-portal-ignite\) \.world-portal-reaction\{display:none\}/);
+  // The layers must start out of the box tree, not merely transparent, or their
+  // infinite decorative loops run on every idle page.
+  assert.match(globalCss, /\.world-portal-reaction \{[^}]*display:none;/);
+  assert.match(hallCss, /\.hall-live-impact,\.hall-live-constellation,\.hall-live-crowd,\.hall-live-trophy,\.hall-live-announcement\{[^}]*display:none;/);
+  for (const activated of [".live-constellation .hall-live-constellation", ".live-hall-crowd .hall-live-crowd", ".hall-is-busy .hall-live-crowd", ".live-trophy-ceremony .hall-live-trophy", ".hall-live-announcement.is-live"]) {
+    assert.match(hallCss, new RegExp(`${activated.replaceAll(".", "\\.")}\\{display:(block|grid)`), `${activated} must restore its display`);
+  }
   assert.match(globalCss, /\.world-card\.live-portal-sputter/);
   assert.match(rewards, /kind-\$\{toast\.kind\}/);
   assert.match(rewardCss, /\.reward-ceremony\.kind-world/);
