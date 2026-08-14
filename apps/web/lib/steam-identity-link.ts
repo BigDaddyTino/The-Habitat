@@ -1,4 +1,5 @@
 import type { Prisma } from "@habitat/db/client";
+import { grantIdentityOwnership } from "@habitat/identity";
 
 /** Attaches every exact SteamID match and queues its already-recorded history for replay. */
 export async function attachVerifiedSteamIdentities(transaction: Prisma.TransactionClient, userId: string, steamId: string, verifiedAt: Date) {
@@ -9,17 +10,13 @@ export async function attachVerifiedSteamIdentities(transaction: Prisma.Transact
   if (identities.length === 0) return 0;
 
   const identityIds = identities.map((identity) => identity.id);
-  const assigned = await transaction.playerIdentity.updateMany({
-    where: { id: { in: identityIds }, userId: null, externalProvider: "STEAM", externalAccountId: steamId },
-    data: { userId, verifiedAt },
-  });
-  if (assigned.count !== identityIds.length) throw new Error("A Steam identity changed ownership during verification.");
-
   for (const playerIdentityId of identityIds) {
-    await transaction.identityRewardReconciliation.upsert({
-      where: { playerIdentityId },
-      create: { playerIdentityId, userId },
-      update: { userId, completedAt: null, lastError: null },
+    await grantIdentityOwnership(transaction, {
+      playerIdentityId,
+      userId,
+      actorUserId: userId,
+      source: "STEAM_VERIFICATION",
+      reason: "Ownership proved by linked SteamID64.",
     });
   }
   await transaction.playerIdentityClaim.updateMany({

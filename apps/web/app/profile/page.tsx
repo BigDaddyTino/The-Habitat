@@ -28,6 +28,7 @@ import { SocialAccountForm } from "@/components/social-account-form";
 import { socialPlatformLabels } from "@/lib/social-platforms";
 import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
 import { twitchLinkNotice } from "@/lib/twitch-link";
+import { describeSteamUnlink, summarizeSteamUnlink } from "@/lib/steam-unlink";
 import { disconnectTwitchChannel, updateTwitchShowcaseVisibility } from "@/app/streams/actions";
 import {
   disableSteamEnrichment,
@@ -124,6 +125,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
   }));
   const avatar = member.image ?? avatarPresets[0];
   const steamAccount = member.socialAccounts.find((account) => account.platform === "STEAM" && account.verifiedAt);
+  const steamUnlink = steamAccount ? await summarizeSteamUnlink(db, session.user.id) : null;
   const steamProfile = steamAccount?.steamProfile ?? null;
   const steamGames = steamProfile?.libraryGames ?? [];
   const steamMinutes = steamGames.reduce((total, game) => total + game.playtimeMinutes, 0);
@@ -231,7 +233,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prof
       <div className="profile-connection-stack">
         <article className="profile-connection-card steam-card">
           <header><div className="profile-connection-icon"><Gamepad2 aria-hidden="true" size={20} /></div><div><p className="eyebrow">Verified provider</p><h3>Steam</h3><span>Ownership and optional library enrichment</span></div><em className={steamAccount ? "connected" : "disconnected"}>{steamAccount ? "Verified" : "Not connected"}</em></header>
-          <div className="profile-connection-body"><div><p>Verified Steam ownership can automatically attach exact matching game identities. Verification alone collects no library data.</p><div className="steam-connect">{steamAccount ? <><span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span><form action={disconnectSteam}><button type="submit">Disconnect Steam</button></form></> : <a className="provider-connect" href="/api/steam/connect">Verify with Steam</a>}</div></div>{steamAccount ? <div className="profile-connection-fact"><BadgeCheck aria-hidden="true" size={18} /><strong>Ownership proven</strong><span>Exact Steam IDs may attach automatically. Name-only identities are never guessed.</span></div> : <div className="profile-connection-fact"><ShieldCheck aria-hidden="true" size={18} /><strong>Private by default</strong><span>Library enrichment is a separate opt-in after verification.</span></div>}</div>
+          <div className="profile-connection-body"><div><p>Verified Steam ownership can automatically attach exact matching game identities. Verification alone collects no library data.</p><div className="steam-connect">{steamAccount ? <span><BadgeCheck aria-hidden="true" size={15} /> Steam verified</span> : <a className="provider-connect" href="/api/steam/connect">Verify with Steam</a>}</div>{steamAccount && steamUnlink ? <details className="unlink-consequences"><summary>Disconnect Steam</summary><p>Before you disconnect, here is exactly what changes:</p><ul>{describeSteamUnlink(steamUnlink).map((line) => <li key={line}>{line}</li>)}</ul><form action={disconnectSteam}><label><input name="acknowledged" required type="checkbox" /> I have read these consequences and want to remove Steam verification.</label><button type="submit">Disconnect Steam</button></form></details> : null}</div>{steamAccount ? <div className="profile-connection-fact"><BadgeCheck aria-hidden="true" size={18} /><strong>Ownership proven</strong><span>Exact Steam IDs may attach automatically. Name-only identities are never guessed.</span></div> : <div className="profile-connection-fact"><ShieldCheck aria-hidden="true" size={18} /><strong>Private by default</strong><span>Library enrichment is a separate opt-in after verification.</span></div>}</div>
 
           {steamAccount ? <section className="steam-enrichment-panel">
             <div className="steam-enrichment-heading"><div><p className="eyebrow">Optional enrichment</p><h2>{steamProfile?.personaName ?? "Steam gaming history"}</h2></div>{steamProfile?.avatarMediumUrl ? <img alt="" src={steamProfile.avatarMediumUrl} /> : null}</div>

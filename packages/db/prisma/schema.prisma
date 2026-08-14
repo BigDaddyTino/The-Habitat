@@ -103,6 +103,27 @@ enum IdentityClaimStatus {
   REJECTED
 }
 
+enum IdentityOwnershipAction {
+  GRANT
+  REVOKE
+}
+
+enum IdentityOwnershipStatus {
+  APPLIED
+  REVERSED
+}
+
+/// How an ownership change was authorised. Only `ADMIN_CLAIM_APPROVAL`,
+/// `ADMIN_TRANSFER`, and `ADMIN_REVOCATION` involve a human decision; the two
+/// automatic sources are provider proof and carry no reviewer.
+enum IdentityOwnershipSource {
+  ADMIN_CLAIM_APPROVAL
+  ADMIN_TRANSFER
+  ADMIN_REVOCATION
+  STEAM_VERIFICATION
+  WORKER_AUTO_LINK
+}
+
 enum UserTitleSource {
   ADMIN
   ACHIEVEMENT
@@ -290,6 +311,9 @@ model User {
   chronicleReactions     ChronicleReaction[]
   identityClaims         PlayerIdentityClaim[]     @relation("IdentityClaimant")
   resolvedIdentityClaims PlayerIdentityClaim[]     @relation("IdentityClaimResolver")
+  identitiesGranted      IdentityOwnershipTransaction[] @relation("IdentityOwnershipTo")
+  identitiesRevoked      IdentityOwnershipTransaction[] @relation("IdentityOwnershipFrom")
+  ownershipDecisions     IdentityOwnershipTransaction[] @relation("IdentityOwnershipActor")
   titles                 UserTitle[]               @relation("TitleOwner")
   awardedTitles          UserTitle[]               @relation("TitleAwarder")
   achievements           PlayerAchievement[]
@@ -500,6 +524,7 @@ model PlayerIdentity {
   recordHistory     RecordHistory[]
   legacyEvidence    LegacyPlayerEvidence[]
   reconciliation    IdentityRewardReconciliation?
+  ownershipLedger   IdentityOwnershipTransaction[]
 
   @@unique([gameType, providerKey])
   @@index([externalProvider, externalAccountId])
@@ -517,6 +542,7 @@ model PlayerIdentityClaim {
   playerIdentity   PlayerIdentity      @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
   user             User                @relation("IdentityClaimant", fields: [userId], references: [id], onDelete: Cascade)
   resolvedBy       User?               @relation("IdentityClaimResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  ownershipLedger  IdentityOwnershipTransaction[]
 
   @@unique([playerIdentityId, userId])
   @@index([status, requestedAt])
@@ -536,6 +562,50 @@ model IdentityRewardReconciliation {
 
   @@index([completedAt, queuedAt])
   @@index([userId, completedAt])
+}
+
+/// Append-only ownership ledger for `PlayerIdentity`. Every transition of
+/// `PlayerIdentity.userId` — granted by claim approval, by Steam proof, by the
+/// worker's auto-link, or revoked by an administrator — writes exactly one row
+/// here, inside the same transaction as the change itself.
+///
+/// This is what makes a claim reversible. `projectedImpact` stores the preview
+/// an administrator was shown before confirming, and `appliedImpact` stores
+/// what the reversal actually removed, so the two can be compared afterwards.
+/// A REVOKE points at the GRANT it reverses through `reversalTransactionId`;
+/// that GRANT is marked `REVERSED` in the same database transaction.
+///
+/// Database-enforced in migration 20260814120000 and NOT expressible here:
+/// CHECK "IdentityOwnershipTransaction_direction" — a GRANT must carry a
+/// `toUserId` and a REVOKE must carry a `fromUserId`.
+model IdentityOwnershipTransaction {
+  id                    String                        @id @default(uuid()) @db.Uuid
+  playerIdentityId      String                        @db.Uuid
+  action                IdentityOwnershipAction
+  status                IdentityOwnershipStatus       @default(APPLIED)
+  source                IdentityOwnershipSource
+  fromUserId            String?                       @db.Uuid
+  toUserId              String?                       @db.Uuid
+  claimId               String?                       @db.Uuid
+  actorUserId           String?                       @db.Uuid
+  reason                String?                       @db.VarChar(300)
+  projectedImpact       Json?
+  appliedImpact         Json?
+  reversalTransactionId String?                       @unique @db.Uuid
+  reversedAt            DateTime?
+  createdAt             DateTime                      @default(now())
+  playerIdentity        PlayerIdentity                @relation(fields: [playerIdentityId], references: [id], onDelete: Restrict)
+  fromUser              User?                         @relation("IdentityOwnershipFrom", fields: [fromUserId], references: [id], onDelete: SetNull)
+  toUser                User?                         @relation("IdentityOwnershipTo", fields: [toUserId], references: [id], onDelete: SetNull)
+  actor                 User?                         @relation("IdentityOwnershipActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  claim                 PlayerIdentityClaim?          @relation(fields: [claimId], references: [id], onDelete: SetNull)
+  reversalOf            IdentityOwnershipTransaction? @relation("IdentityOwnershipReversal", fields: [reversalTransactionId], references: [id], onDelete: SetNull)
+  reversedBy            IdentityOwnershipTransaction? @relation("IdentityOwnershipReversal")
+
+  @@index([playerIdentityId, createdAt])
+  @@index([toUserId, createdAt])
+  @@index([fromUserId, createdAt])
+  @@index([action, status, createdAt])
 }
 
 model LegacyPlayerEvidence {
@@ -1511,6 +1581,8 @@ model AuditLog {
   actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([actorUserId, createdAt])
 }
 
 // ---------------------------------------------------------------------------

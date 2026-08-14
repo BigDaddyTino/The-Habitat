@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@habitat/db": "workspace:*",
+    "@habitat/identity": "workspace:*",
     "@habitat/shared": "workspace:*",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/exporter-metrics-otlp-http": "^0.221.0",
