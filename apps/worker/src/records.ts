@@ -48,27 +48,40 @@ export async function reconcileActivityRecordCatalog(db: ReturnType<typeof getPr
   const definitions = await db.recordDefinition.findMany({
     where: { enabled: true, ruleType: { in: ["ACTIVITY_COUNT", "ACTIVITY_VALUE_SUM", "ACTIVITY_DISTINCT_GAME_COUNT"] } },
   });
+  const members = await db.user.findMany({ where: { isActive: true }, select: { id: true, displayName: true, name: true, username: true } });
   let candidates = 0;
   for (const definition of definitions) {
     const rule = parseActivityRecordRule(definition.ruleConfig);
     if (!rule) continue;
-    const activities = await db.gameActivity.findMany({
-      where: {
-        activityType: rule.activityType,
-        sourceConfidence: { gte: rule.minimumConfidence },
-        ...(definition.gameKey ? { gameKey: definition.gameKey } : {}),
-      },
-      distinct: ["userId"],
-      orderBy: [{ userId: "asc" }, { occurredAt: "desc" }, { id: "desc" }],
-      include: { user: { select: { displayName: true, name: true, username: true } } },
-    });
-    candidates += activities.length;
+    // One indexed lookup per member rather than a scan of every qualifying activity. The
+    // [userId, activityType, occurredAt] index covers this exactly, so the reconciliation
+    // stays proportional to the roster instead of to retained history.
+    const representatives: Array<{ activity: { id: string; occurredAt: Date }; userId: string; displayName: string }> = [];
+    for (const member of members) {
+      const activity = await db.gameActivity.findFirst({
+        where: {
+          userId: member.id,
+          activityType: rule.activityType,
+          sourceConfidence: { gte: rule.minimumConfidence },
+          ...(definition.gameKey ? { gameKey: definition.gameKey } : {}),
+        },
+        orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+        select: { id: true, occurredAt: true },
+      });
+      if (!activity) continue;
+      representatives.push({ activity, userId: member.id, displayName: member.displayName ?? member.name ?? member.username ?? "Habitat member" });
+    }
+    candidates += representatives.length;
+    // Each representative is that member's newest qualifying activity, so the roster order is
+    // not chronological. Replaying out of order would stamp a history row with a timestamp
+    // older than the row it supersedes, and the halls read the newest history row as the
+    // prior holder.
+    representatives.sort((first, second) => first.activity.occurredAt.getTime() - second.activity.occurredAt.getTime());
     await db.$transaction(async (transaction) => {
-      for (const activity of activities) {
-        const result = await calculateActivityRecordValue(transaction, definition, activity.userId, activity.activityType);
+      for (const candidate of representatives) {
+        const result = await calculateActivityRecordValue(transaction, definition, candidate.userId, rule.activityType);
         if (!result || result.sampleSize < definition.minimumSampleSize) continue;
-        const displayName = activity.user.displayName ?? activity.user.name ?? activity.user.username ?? "Habitat member";
-        await recordActivityIfBroken(transaction, definition, activity, { userId: activity.userId, displayName }, result.value, { suppressNotifications: true });
+        await recordActivityIfBroken(transaction, definition, candidate.activity, candidate, result.value, { suppressNotifications: true });
       }
     }, { timeout: 20_000 });
   }

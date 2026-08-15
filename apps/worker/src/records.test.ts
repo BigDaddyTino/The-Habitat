@@ -77,9 +77,13 @@ test("activity records remain replay-safe and link directly to provider evidence
 
 test("a newly seeded Shame activity record silently reconciles existing verified defeat history", async () => {
   const definition = { id: "99999999-9999-9999-9999-999999999999", slug: "most-rivals-losses", title: "Most Heroic Defeats", valueLabel: "heroic defeats", gameKey: "MARVEL_RIVALS", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MATCH_LOST", minimumConfidence: 90 }, comparison: "MAX" as const, minimumSampleSize: 1 };
+  const members = [
+    { id: "user-a", displayName: "First Fall", name: null, username: null },
+    { id: "user-b", displayName: "Respawn Royalty", name: null, username: null },
+  ];
   const activities = [
-    { id: "activity-a", userId: "user-a", activityType: "MATCH_LOST", occurredAt: new Date("2026-08-12T10:00:00.000Z"), user: { displayName: "First Fall", name: null, username: null } },
-    { id: "activity-b", userId: "user-b", activityType: "MATCH_LOST", occurredAt: new Date("2026-08-13T10:00:00.000Z"), user: { displayName: "Respawn Royalty", name: null, username: null } },
+    { id: "activity-a", userId: "user-a", occurredAt: new Date("2026-08-12T10:00:00.000Z") },
+    { id: "activity-b", userId: "user-b", occurredAt: new Date("2026-08-13T10:00:00.000Z") },
   ];
   const totals = new Map([["user-a", 12], ["user-b", 17]]);
   type ReconciledHolder = { recordDefinitionId: string; userId: string; holderName: string; valueNumber: number; sourceActivityId: string };
@@ -98,7 +102,8 @@ test("a newly seeded Shame activity record silently reconciles existing verified
   } as unknown as Prisma.TransactionClient;
   const database = {
     recordDefinition: { findMany: async () => [definition] },
-    gameActivity: { findMany: async () => activities },
+    user: { findMany: async () => members },
+    gameActivity: { findFirst: async ({ where }: { where: { userId: string } }) => activities.find((activity) => activity.userId === where.userId) ?? null },
     $transaction: async (callback: (tx: Prisma.TransactionClient) => Promise<void>) => callback(transaction),
   } as unknown as Parameters<typeof reconcileActivityRecordCatalog>[0];
 
@@ -110,4 +115,50 @@ test("a newly seeded Shame activity record silently reconciles existing verified
   assert.equal(reconciledHolder?.valueNumber, 17);
   assert.equal(reconciledHolder?.sourceActivityId, "activity-b");
   assert.equal(history.size, 2);
+});
+
+test("record reconciliation engraves candidates chronologically so the newest history row is the current holder", async () => {
+  const definition = { id: "88888888-8888-8888-8888-888888888888", slug: "most-verified-deaths", title: "Most Verified Deaths", valueLabel: "verified deaths", gameKey: null, ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "DEATHS_RECORDED", minimumConfidence: 90 }, comparison: "MAX" as const, minimumSampleSize: 1 };
+  // Roster order is deliberately the reverse of chronological order: the eventual holder's most
+  // recent death is older than the runner-up's.
+  const members = [
+    { id: "user-a", displayName: "Cautious Cartographer", name: null, username: null },
+    { id: "user-b", displayName: "Respawn Royalty", name: null, username: null },
+  ];
+  const activities = [
+    { id: "activity-a", userId: "user-a", occurredAt: new Date("2026-08-14T10:00:00.000Z") },
+    { id: "activity-b", userId: "user-b", occurredAt: new Date("2026-08-10T10:00:00.000Z") },
+  ];
+  const totals = new Map([["user-a", 40], ["user-b", 90]]);
+  type ReconciledHolder = { recordDefinitionId: string; userId: string; holderName: string; valueNumber: number; establishedAt: Date };
+  type ReconciledHistory = { holderName: string; valueNumber: number; occurredAt: Date };
+  let holder: ReconciledHolder | null = null;
+  const history: ReconciledHistory[] = [];
+  const transaction = {
+    gameActivity: { count: async ({ where }: { where: { userId: string } }) => totals.get(where.userId) ?? 0 },
+    recordHolder: {
+      findUnique: async () => holder,
+      create: async ({ data }: { data: ReconciledHolder }) => { holder = data; return data; },
+      updateMany: async ({ data }: { data: ReconciledHolder }) => { holder = { ...holder!, ...data }; return { count: 1 }; },
+    },
+    recordHistory: { upsert: async ({ create }: { create: ReconciledHistory }) => { history.push(create); return {}; } },
+  } as unknown as Prisma.TransactionClient;
+  const database = {
+    recordDefinition: { findMany: async () => [definition] },
+    user: { findMany: async () => members },
+    gameActivity: { findFirst: async ({ where }: { where: { userId: string } }) => activities.find((activity) => activity.userId === where.userId) ?? null },
+    $transaction: async (callback: (tx: Prisma.TransactionClient) => Promise<void>) => callback(transaction),
+  } as unknown as Parameters<typeof reconcileActivityRecordCatalog>[0];
+
+  await reconcileActivityRecordCatalog(database);
+  const reconciledHolder = holder as ReconciledHolder | null;
+  const newest = [...history].sort((first, second) => second.occurredAt.getTime() - first.occurredAt.getTime())[0];
+
+  assert.equal(reconciledHolder?.holderName, "Respawn Royalty");
+  assert.equal(reconciledHolder?.valueNumber, 90);
+  // The halls read the newest history row as the prior-holder line, so it has to describe the
+  // member who actually holds the record. A member who never led writes no history at all.
+  assert.equal(history.length, 1);
+  assert.equal(newest?.holderName, "Respawn Royalty");
+  assert.equal(newest?.valueNumber, 90);
 });

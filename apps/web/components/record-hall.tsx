@@ -18,9 +18,14 @@ export async function RecordHall({ hall, action, searchParams }: RecordHallProps
   const heldRecords = definitions.filter((record) => record.currentHolder).length;
   const heroImage = isShame ? "/images/halls/hall-shame-cinematic.png" : "/images/halls/hall-legends-cinematic.png";
   const heroAlt = isShame ? "The ember-lit gallery where verified gaming disasters are preserved" : "The gilded trophy chamber where verified Habitat records are honored";
-  const emptyCopy = isShame
-    ? "No shame category matches these filters. Clear them to see the clubhouse's verified collection of heroic mistakes."
-    : "No legend category matches these filters. Clear them to reopen the complete record chamber.";
+  const isFiltered = Boolean(gameType || player);
+  const emptyCopy = isFiltered
+    ? isShame
+      ? "No shame category matches these filters. Clear them to see the clubhouse's verified collection of heroic mistakes."
+      : "No legend category matches these filters. Clear them to reopen the complete record chamber."
+    : isShame
+      ? "No shame category is active yet. Habitat has not connected a trusted source for this wing."
+      : "No verified record definition is active yet.";
 
   return <section className={`record-hall-page ${isShame ? "record-hall-shame" : "record-hall-legends"}`}>
     <header className="record-hall-hero">
@@ -57,15 +62,15 @@ export async function RecordHall({ hall, action, searchParams }: RecordHallProps
 
       {definitions.length === 0 ? <div className="record-hall-empty">
         <span className="record-hall-empty-icon"><Ghost aria-hidden="true" /></span>
-        <div><p className="eyebrow">Nothing behind this velvet rope</p><h2>The filtered ledger is quiet.</h2><p>{emptyCopy}</p></div>
-        <Link href={action}>Clear filters</Link>
+        <div><p className="eyebrow">Nothing behind this velvet rope</p><h2>{isFiltered ? "The filtered ledger is quiet." : "The ledger is quiet."}</h2><p>{emptyCopy}</p></div>
+        {isFiltered ? <Link href={action}>Clear filters</Link> : null}
       </div> : <div className="record-showcase-grid">{definitions.map((record, index) => {
         const holder = record.currentHolder;
         const history = record.history[0];
         const recentlyBroken = Boolean(holder && isRecentlyBroken(holder.establishedAt));
         const isDeathRecord = record.slug === "most-verified-deaths";
         const image = isDeathRecord ? "/images/halls/record-most-deaths.png" : heroImage;
-        const sourceHref = holder?.sourceActivityId ? `/chronicle/activity/${holder.sourceActivityId}` : holder?.sourceEventId ? `/chronicle/${holder.sourceEventId}` : null;
+        const sourceHref = holder?.sourceActivityId && isPubliclyViewable(holder.sourceActivity) ? `/chronicle/activity/${holder.sourceActivityId}` : holder?.sourceEventId ? `/chronicle/${holder.sourceEventId}` : null;
         const recordWorld = record.gameType ? chronicleGameLabels[record.gameType] : record.gameKey === "MARVEL_RIVALS" ? "Marvel Rivals" : "All supported worlds";
         return <article className={`record-showcase-card ${isShame ? "shame" : "legends"}${recentlyBroken ? " recently-broken" : ""}${isDeathRecord ? " death-record" : ""}${index === 0 ? " featured" : ""}`} key={record.id}>
           <div className="record-showcase-visual">
@@ -96,6 +101,15 @@ export async function RecordHall({ hall, action, searchParams }: RecordHallProps
 
 function isChronicleGameType(value: string | undefined): value is ChronicleGameType {
   return Boolean(value) && chronicleGameTypes.includes(value as ChronicleGameType);
+}
+
+/**
+ * Mirrors the activity receipt route's own visibility rule. Hosted evidence is always
+ * viewable; Club Game evidence is only viewable while the member keeps that profile public.
+ */
+function isPubliclyViewable(activity: { sourceServerEventId: string | null; sourceClubMatchParticipant: { clubGameProfile: { displayPublic: boolean } } | null } | null) {
+  if (!activity) return false;
+  return Boolean(activity.sourceServerEventId) || Boolean(activity.sourceClubMatchParticipant?.clubGameProfile.displayPublic);
 }
 
 /** A record established within the last 48 hours still carries the fresh-break flash. */

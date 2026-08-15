@@ -22,7 +22,18 @@ export async function getRecordHallData(hall: RecordHall, filters: RecordHallFil
     db.recordDefinition.findMany({
       where,
       include: {
-        currentHolder: true,
+        // The activity receipt page hides evidence behind a private Club Game profile, so the
+        // hall needs the same visibility facts to avoid offering a link that resolves to 404.
+        currentHolder: {
+          include: {
+            sourceActivity: {
+              select: {
+                sourceServerEventId: true,
+                sourceClubMatchParticipant: { select: { clubGameProfile: { select: { displayPublic: true } } } },
+              },
+            },
+          },
+        },
         history: { orderBy: { occurredAt: "desc" }, take: 1 },
       },
       orderBy: [{ category: "asc" }, { title: "asc" }],
