@@ -1,4 +1,4 @@
-import type { Prisma } from "@habitat/db/client";
+import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import { isAchievementCountRecordRule, parseActivityRecordRule, parseDistinctGameEventCountRecordRule, parsePlayerEventCountRecordRule } from "@habitat/shared";
 import { queueDiscordNotification } from "./discord-notifications.js";
 
@@ -36,6 +36,43 @@ export async function evaluateRecordsForActivity(transaction: Prisma.Transaction
     const displayName = activity.user.displayName ?? activity.user.name ?? activity.user.username ?? "Habitat member";
     await recordActivityIfBroken(transaction, definition, activity, { userId: activity.userId, displayName }, result.value, options);
   }
+}
+
+/**
+ * Replays one representative activity per member through every enabled
+ * activity-backed record. New record definitions therefore pick up trusted
+ * history after a seed without re-projecting source evidence or announcing an
+ * old result as breaking news.
+ */
+export async function reconcileActivityRecordCatalog(db: ReturnType<typeof getPrismaClient> = getPrismaClient()): Promise<{ definitions: number; candidates: number }> {
+  const definitions = await db.recordDefinition.findMany({
+    where: { enabled: true, ruleType: { in: ["ACTIVITY_COUNT", "ACTIVITY_VALUE_SUM", "ACTIVITY_DISTINCT_GAME_COUNT"] } },
+  });
+  let candidates = 0;
+  for (const definition of definitions) {
+    const rule = parseActivityRecordRule(definition.ruleConfig);
+    if (!rule) continue;
+    const activities = await db.gameActivity.findMany({
+      where: {
+        activityType: rule.activityType,
+        sourceConfidence: { gte: rule.minimumConfidence },
+        ...(definition.gameKey ? { gameKey: definition.gameKey } : {}),
+      },
+      distinct: ["userId"],
+      orderBy: [{ userId: "asc" }, { occurredAt: "desc" }, { id: "desc" }],
+      include: { user: { select: { displayName: true, name: true, username: true } } },
+    });
+    candidates += activities.length;
+    await db.$transaction(async (transaction) => {
+      for (const activity of activities) {
+        const result = await calculateActivityRecordValue(transaction, definition, activity.userId, activity.activityType);
+        if (!result || result.sampleSize < definition.minimumSampleSize) continue;
+        const displayName = activity.user.displayName ?? activity.user.name ?? activity.user.username ?? "Habitat member";
+        await recordActivityIfBroken(transaction, definition, activity, { userId: activity.userId, displayName }, result.value, { suppressNotifications: true });
+      }
+    }, { timeout: 20_000 });
+  }
+  return { definitions: definitions.length, candidates };
 }
 
 async function calculateActivityRecordValue(

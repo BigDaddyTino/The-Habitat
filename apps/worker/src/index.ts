@@ -19,6 +19,7 @@ import { recordServiceHeartbeat } from "./heartbeat.js";
 import { runPulseCycle } from "./pulse.js";
 import { startWorkerTelemetry } from "./telemetry.js";
 import { workerVersion } from "./version.js";
+import { reconcileActivityRecordCatalog } from "./records.js";
 
 export { checkAgentHealth } from "./agent-health.js";
 export { runMonitoringCycle } from "./monitoring.js";
@@ -147,6 +148,13 @@ async function main(): Promise<void> {
       } catch (error) {
         console.warn("Habitat achievement reconciliation failed. Live monitoring remains available.");
         console.error("[worker] achievement reconciliation failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        const records = await reconcileActivityRecordCatalog();
+        if (records.candidates > 0) console.info(`Habitat records: ${records.candidates} member candidates reconciled across ${records.definitions} activity-backed definitions.`);
+      } catch (error) {
+        console.warn("Habitat record reconciliation failed. Existing record holders remain available.");
+        console.error("[worker] record reconciliation failed:", error instanceof Error ? error.message : String(error));
       }
       nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
     }

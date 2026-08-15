@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { Prisma } from "@habitat/db/client";
-import { evaluateRecordsForActivity, evaluateRecordsForEvent } from "./records.js";
+import { evaluateRecordsForActivity, evaluateRecordsForEvent, reconcileActivityRecordCatalog } from "./records.js";
 
 test("replaying a qualifying event records one Legend break", async () => {
   const holders = new Map<string, { valueNumber: number; holderName: string }>();
@@ -73,4 +73,41 @@ test("activity records remain replay-safe and link directly to provider evidence
   assert.equal(holders.size, 1);
   assert.equal(history.size, 1);
   assert.equal([...history.values()][0]?.sourceActivityId, activity.id);
+});
+
+test("a newly seeded Shame activity record silently reconciles existing verified defeat history", async () => {
+  const definition = { id: "99999999-9999-9999-9999-999999999999", slug: "most-rivals-losses", title: "Most Heroic Defeats", valueLabel: "heroic defeats", gameKey: "MARVEL_RIVALS", ruleType: "ACTIVITY_COUNT", ruleConfig: { version: 1, activityType: "MATCH_LOST", minimumConfidence: 90 }, comparison: "MAX" as const, minimumSampleSize: 1 };
+  const activities = [
+    { id: "activity-a", userId: "user-a", activityType: "MATCH_LOST", occurredAt: new Date("2026-08-12T10:00:00.000Z"), user: { displayName: "First Fall", name: null, username: null } },
+    { id: "activity-b", userId: "user-b", activityType: "MATCH_LOST", occurredAt: new Date("2026-08-13T10:00:00.000Z"), user: { displayName: "Respawn Royalty", name: null, username: null } },
+  ];
+  const totals = new Map([["user-a", 12], ["user-b", 17]]);
+  type ReconciledHolder = { recordDefinitionId: string; userId: string; holderName: string; valueNumber: number; sourceActivityId: string };
+  let holder: ReconciledHolder | null = null;
+  const history = new Set<string>();
+  const transaction = {
+    gameActivity: {
+      count: async ({ where }: { where: { userId: string } }) => totals.get(where.userId) ?? 0,
+    },
+    recordHolder: {
+      findUnique: async () => holder,
+      create: async ({ data }: { data: ReconciledHolder }) => { holder = data; return data; },
+      updateMany: async ({ data }: { data: ReconciledHolder }) => { holder = { ...holder!, ...data }; return { count: 1 }; },
+    },
+    recordHistory: { upsert: async ({ where }: { where: { dedupeKey: string } }) => { history.add(where.dedupeKey); return {}; } },
+  } as unknown as Prisma.TransactionClient;
+  const database = {
+    recordDefinition: { findMany: async () => [definition] },
+    gameActivity: { findMany: async () => activities },
+    $transaction: async (callback: (tx: Prisma.TransactionClient) => Promise<void>) => callback(transaction),
+  } as unknown as Parameters<typeof reconcileActivityRecordCatalog>[0];
+
+  const result = await reconcileActivityRecordCatalog(database);
+  const reconciledHolder = holder as ReconciledHolder | null;
+
+  assert.deepEqual(result, { definitions: 1, candidates: 2 });
+  assert.equal(reconciledHolder?.holderName, "Respawn Royalty");
+  assert.equal(reconciledHolder?.valueNumber, 17);
+  assert.equal(reconciledHolder?.sourceActivityId, "activity-b");
+  assert.equal(history.size, 2);
 });

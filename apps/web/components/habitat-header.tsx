@@ -15,7 +15,7 @@ const progressNavigation = [
   { href: "/leaderboards", label: "Leaderboards", icon: Trophy },
   { href: "/quests", label: "Quests", icon: Target },
   { href: "/seasons", label: "Seasons", icon: CalendarRange },
-  { href: "/hall-of-legends", label: "Halls", icon: Crown },
+  { href: "/halls", label: "Halls", icon: Crown },
 ];
 
 export async function HabitatHeader() {
