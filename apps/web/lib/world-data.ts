@@ -24,7 +24,20 @@ export type WorldView = {
   enabled: boolean;
 };
 
-export type ChronicleEventView = { id: string; occurredAt: Date; world: string; worldSlug: string; text: string; sourceHref: string; permalinkHref: string };
+export const chronicleMomentKinds = ["arrival", "departure", "achievement", "record", "gathering", "rest", "danger", "world", "activity"] as const;
+export type ChronicleMomentKind = (typeof chronicleMomentKinds)[number];
+export type ChronicleEventView = {
+  id: string;
+  occurredAt: Date;
+  world: string;
+  worldSlug: string;
+  text: string;
+  sourceHref: string;
+  permalinkHref: string;
+  kind: ChronicleMomentKind;
+  actor?: string;
+  actorHref?: string;
+};
 
 export const chronicleGameTypes = ["VALHEIM", "PALWORLD", "ENSHROUDED", "SEVEN_DAYS_TO_DIE", "DRAGONWILDS", "PROJECT_ZOMBOID"] as const;
 export const chronicleEventTypes = ["SERVER_STARTED", "SERVER_STOPPED", "SERVER_SLEEPING", "SERVER_CRASHED", "SERVER_UPDATED", "PLAYER_JOINED", "PLAYER_LEFT", "BOSS_KILLED", "WORLD_GATHERING", "ACHIEVEMENT_EARNED", "RECORD_BROKEN", "WAKE_REQUESTED", "WAKE_APPROVED", "WORLD_SAVED"] as const;
@@ -152,19 +165,19 @@ export async function getChronicleEvents({ limit = 50, gameType, eventType, play
   const includeActivities = !gameType && !playerIdentityId;
   const publicActivity = { OR: [{ sourceServerEventId: { not: null } }, { sourceClubMatchParticipant: { is: { clubGameProfile: { is: { displayPublic: true } } } } }] };
   const [events, awards, histories, promoted] = await Promise.all([
-    db.serverEvent.findMany({ where: { ...(gameType ? { gameType } : {}), ...(eventType ? { eventType } : {}), ...(playerIdentityId ? { playerIdentityId } : {}) }, include: { server: { select: { displayName: true, slug: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take }),
+    db.serverEvent.findMany({ where: { ...(gameType ? { gameType } : {}), ...(eventType ? { eventType } : {}), ...(playerIdentityId ? { playerIdentityId } : {}) }, include: { server: { select: { displayName: true, slug: true } }, playerIdentity: { select: { id: true, userId: true, verifiedAt: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take }),
     includeActivities && (!eventType || eventType === "ACHIEVEMENT_EARNED") ? db.playerAchievement.findMany({ where: { sourceActivity: { is: publicActivity } }, include: { achievement: { select: { name: true } }, user: { select: { displayName: true, name: true, username: true } }, sourceActivity: { select: { id: true, gameKey: true } } }, orderBy: [{ awardedAt: "desc" }, { id: "desc" }], take }) : Promise.resolve([]),
-    includeActivities && (!eventType || eventType === "RECORD_BROKEN") ? db.recordHistory.findMany({ where: { sourceActivity: { is: publicActivity } }, include: { definition: { select: { title: true } }, sourceActivity: { select: { id: true, gameKey: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take }) : Promise.resolve([]),
+    includeActivities && (!eventType || eventType === "RECORD_BROKEN") ? db.recordHistory.findMany({ where: { sourceActivity: { is: publicActivity } }, include: { definition: { select: { title: true } }, user: { select: { username: true } }, sourceActivity: { select: { id: true, gameKey: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take }) : Promise.resolve([]),
     includeActivities && !eventType ? db.gameActivity.findMany({ where: { chroniclePromotedAt: { not: null }, ...publicActivity }, include: { user: { select: { displayName: true, name: true, username: true } } }, orderBy: [{ occurredAt: "desc" }, { id: "desc" }], take }) : Promise.resolve([]),
   ]);
-  const activityAwards: ChronicleEventView[] = awards.flatMap((award) => award.sourceActivity ? [{ id: `award-${award.id}`, occurredAt: award.awardedAt, world: gameLabel(award.sourceActivity.gameKey), worldSlug: "marvel-rivals", text: `${memberName(award.user)} earned ${award.achievement.name}.`, sourceHref: gameHref(award.sourceActivity.gameKey), permalinkHref: `/chronicle/activity/${award.sourceActivity.id}` }] : []);
-  const activityRecords: ChronicleEventView[] = histories.flatMap((history) => history.sourceActivity ? [{ id: `record-${history.id}`, occurredAt: history.occurredAt, world: gameLabel(history.sourceActivity.gameKey), worldSlug: "marvel-rivals", text: `${history.holderName} set a new record: ${history.definition.title}.`, sourceHref: gameHref(history.sourceActivity.gameKey), permalinkHref: `/chronicle/activity/${history.sourceActivity.id}` }] : []);
-  const promotedActivities: ChronicleEventView[] = promoted.map((activity) => ({ id: `activity-${activity.id}`, occurredAt: activity.occurredAt, world: gameLabel(activity.gameKey), worldSlug: "marvel-rivals", text: activity.chronicleHeadline ?? `${memberName(activity.user)} recorded a verified ${activity.activityType.toLowerCase().replaceAll("_", " ")}.`, sourceHref: gameHref(activity.gameKey), permalinkHref: `/chronicle/activity/${activity.id}` }));
+  const activityAwards: ChronicleEventView[] = awards.flatMap((award) => award.sourceActivity ? [{ id: `award-${award.id}`, occurredAt: award.awardedAt, world: gameLabel(award.sourceActivity.gameKey), worldSlug: "marvel-rivals", text: `${memberName(award.user)} earned ${award.achievement.name}.`, sourceHref: gameHref(award.sourceActivity.gameKey), permalinkHref: `/chronicle/activity/${award.sourceActivity.id}`, kind: "achievement", actor: memberName(award.user), actorHref: award.user.username ? `/members/${award.user.username}` : undefined }] : []);
+  const activityRecords: ChronicleEventView[] = histories.flatMap((history) => history.sourceActivity ? [{ id: `record-${history.id}`, occurredAt: history.occurredAt, world: gameLabel(history.sourceActivity.gameKey), worldSlug: "marvel-rivals", text: `${history.holderName} set a new record: ${history.definition.title}.`, sourceHref: gameHref(history.sourceActivity.gameKey), permalinkHref: `/chronicle/activity/${history.sourceActivity.id}`, kind: "record", actor: history.holderName, actorHref: history.user.username ? `/members/${history.user.username}` : undefined }] : []);
+  const promotedActivities: ChronicleEventView[] = promoted.map((activity) => ({ id: `activity-${activity.id}`, occurredAt: activity.occurredAt, world: gameLabel(activity.gameKey), worldSlug: "marvel-rivals", text: activity.chronicleHeadline ?? `${memberName(activity.user)} recorded a verified ${activity.activityType.toLowerCase().replaceAll("_", " ")}.`, sourceHref: gameHref(activity.gameKey), permalinkHref: `/chronicle/activity/${activity.id}`, kind: "activity", actor: memberName(activity.user), actorHref: activity.user.username ? `/members/${activity.user.username}` : undefined }));
   return [...events.map(toChronicleEventView), ...activityAwards, ...activityRecords, ...promotedActivities].sort((left, right) => right.occurredAt.getTime() - left.occurredAt.getTime() || right.id.localeCompare(left.id)).slice(0, take);
 }
 
 export async function getChronicleEvent(eventId: string, viewerUserId?: string): Promise<ChronicleEventDetailView | null> {
-  const event = await db.serverEvent.findUnique({ where: { id: eventId }, include: { server: { select: { displayName: true, slug: true } }, reactions: { select: { reactionType: true, userId: true } } } });
+  const event = await db.serverEvent.findUnique({ where: { id: eventId }, include: { server: { select: { displayName: true, slug: true } }, playerIdentity: { select: { id: true, userId: true, verifiedAt: true } }, reactions: { select: { reactionType: true, userId: true } } } });
   if (!event) return null;
   return {
     ...toChronicleEventView(event),
@@ -176,8 +189,33 @@ export async function getChronicleEvent(eventId: string, viewerUserId?: string):
   };
 }
 
-function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; actorText: string | null; valueText: string | null; server: { displayName: string; slug: string } }): ChronicleEventView {
-  return { id: event.id, occurredAt: event.occurredAt, world: event.server.displayName, worldSlug: event.server.slug, text: chronicleText(event.eventType, event.server.displayName, event.actorText, event.valueText), sourceHref: `/worlds/${event.server.slug}`, permalinkHref: `/chronicle/${event.id}` };
+function toChronicleEventView(event: { id: string; occurredAt: Date; eventType: string; actorText: string | null; valueText: string | null; playerIdentity?: { id: string; userId: string | null; verifiedAt: Date | null } | null; server: { displayName: string; slug: string } }): ChronicleEventView {
+  // /chronicle/identity/[id] only resolves claimed + verified identities, so an unverified
+  // sighting stays an unlinked name rather than a dead link that implies proven ownership.
+  const identity = event.playerIdentity;
+  return {
+    id: event.id,
+    occurredAt: event.occurredAt,
+    world: event.server.displayName,
+    worldSlug: event.server.slug,
+    text: chronicleText(event.eventType, event.server.displayName, event.actorText, event.valueText),
+    sourceHref: `/worlds/${event.server.slug}`,
+    permalinkHref: `/chronicle/${event.id}`,
+    kind: chronicleMomentKind(event.eventType),
+    actor: event.actorText ?? undefined,
+    actorHref: identity?.userId && identity.verifiedAt ? `/chronicle/identity/${identity.id}` : undefined,
+  };
+}
+
+function chronicleMomentKind(eventType: string): ChronicleMomentKind {
+  if (eventType === "PLAYER_JOINED") return "arrival";
+  if (eventType === "PLAYER_LEFT") return "departure";
+  if (eventType === "BOSS_KILLED" || eventType === "ACHIEVEMENT_EARNED") return "achievement";
+  if (eventType === "RECORD_BROKEN") return "record";
+  if (eventType === "WORLD_GATHERING") return "gathering";
+  if (eventType === "SERVER_SLEEPING" || eventType === "SERVER_STOPPED") return "rest";
+  if (eventType === "SERVER_CRASHED") return "danger";
+  return "world";
 }
 
 function memberName(user: { displayName: string | null; name: string | null; username: string | null }) {

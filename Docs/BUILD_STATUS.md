@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-14
+Last updated: 2026-08-15
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -63,6 +63,9 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Database-backed Chronicle route and Great Hall preview added with stable entry fragments
 - [x] Replay-safe Dragonwilds save ingestion verified against live agent telemetry
 - [x] Server-rendered Chronicle filters and permanent event detail links
+- [x] Chronicle Replay Theater groups retained evidence into daily cinematic chapters with playback controls, abstract non-coordinate journey paths, verified player and achievement spotlights, honest media availability, permanent receipts, and a Discord-ready private recap copy action
+- [x] Chronicle visual package adds original lodge-theater, transparent projector, and recap-card artwork; event-reactive light, film, dust, route, and transition choreography; reduced-motion fallbacks; and local-only downloadable Discord PNG cards populated from retained chapter evidence
+- [x] Signed-in Chronicle Director's Cut uses the member's real avatar, equipped title, claimed identity links, achievements, records, and retained sessions to build a provenance-safe personal reel; owned scenes receive a generated brass-and-iron portrait reliquary, personal spotlight choreography, a filtered evidence archive, and a locally rendered recap seal without inventing history or transmitting Chronicle data
 - [x] Authenticated, audit-logged, database-deduplicated member reactions
 - [ ] Palworld REST player-presence tracker awaiting first baseline and live join/leave verification
 - [x] Valheim death, native achievement, and personal-record recovery from the structured HabitatCore Chronicle
@@ -100,10 +103,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Record definitions, current holders, break history, and database-enforced replay safety
 - [x] Event-driven Legend evaluator for verified visits, games explored, and achievements earned
 - [x] Chronicle `RECORD_BROKEN` entries with a direct link back to the qualifying evidence
-- [x] Hall of Legends and Hall of Shame routes with world and record-holder filters
+- [x] Hall of Legends and Hall of Shame routes present exactly five cinematic category showcases each; the world and record-holder filter bars were retired because a five-category hall has nothing left to narrow
 - [x] Hall cards show current holder, value, date, prior record, and a restrained new-record treatment
+- [x] Lifetime cross-world Combat record sums verified eliminations from hosted `PLAYER_KILLED` evidence and Club Game match history under one gameKey-free definition
+- [x] Five seeded Shame categories: lifetime deaths, worlds died in, heroic defeats, consolation crowns, and uncredited assists
+- [x] Category showcase manifest is CI-locked to the seeded record catalog, so a new record can never land in an unrendered wing
 - [ ] Live first-record verification after an approved identity produces a qualifying event
-- [ ] Shame categories, pending a trustworthy death or reconnect adapter source
+- [x] All ten category banners authored at the 2400x1000 cinematic spec and CI-asserted for presence and dimensions; generation prompts retained in `Docs/HALL_CATEGORY_ART.md`
+- [ ] Combat and Supporting Role records stay unheld until a source emits `PLAYER_KILLED` or Club Game ingestion is enabled
 
 ## Phase 10 - Discord
 

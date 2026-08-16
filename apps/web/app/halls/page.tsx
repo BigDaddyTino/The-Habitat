@@ -14,8 +14,8 @@ export default async function HallsPage() {
       <div className="halls-intro-rule" aria-hidden="true"><i /><b>VS</b><i /></div>
     </header>
     <HallsGateway
-      legends={{ activeRecords: legends.definitions.length, heldRecords: legendHeld }}
-      shame={{ activeRecords: shame.definitions.length, heldRecords: shameHeld }}
+      legends={{ activeRecords: legends.activeRecords, heldRecords: legendHeld }}
+      shame={{ activeRecords: shame.activeRecords, heldRecords: shameHeld }}
     />
     <footer className="halls-oath">
       <span>Verified evidence only</span><i />
