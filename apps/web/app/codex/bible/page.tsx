@@ -1,0 +1,62 @@
+import Link from "next/link";
+import { ArrowLeft, BookOpen } from "lucide-react";
+import { storyEntryKindLabels, storyEntryKinds, type StoryEntryKind } from "@habitat/shared";
+import { requireRole } from "@/lib/authorization";
+import { listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { StoryLiveSync } from "@/components/story-live-sync";
+import { createEntry } from "@/app/codex/actions";
+
+export const metadata = { title: "Story bible" };
+
+export default async function StoryBiblePage({ searchParams }: { searchParams: Promise<{ kind?: string; q?: string }> }) {
+  await requireRole(storyReadRole);
+  const filters = await searchParams;
+  const kind = storyEntryKinds.includes(filters.kind as StoryEntryKind) ? (filters.kind as StoryEntryKind) : undefined;
+  const search = filters.q?.trim() || undefined;
+  const entries = await listStoryEntries({ kind, search });
+
+  return (
+    <section className="page-shell codex-shell">
+      <StoryLiveSync />
+      <div className="page-intro">
+        <Link className="codex-back" href="/codex"><ArrowLeft aria-hidden="true" size={13} /> Story codex</Link>
+        <p className="eyebrow">Martino — the bible</p>
+        <h1>What is already true</h1>
+        <p>The theme, the places, the creatures, the people, and the rules the world runs on. Read the entries that touch your quest before you write it, and add anything you invent so the next writer finds it here.</p>
+      </div>
+
+      <form className="codex-bible-filters" method="get">
+        <input aria-label="Search the bible" defaultValue={search ?? ""} name="q" placeholder="Search entries" type="search" />
+        <select aria-label="Filter by kind" defaultValue={kind ?? ""} name="kind">
+          <option value="">Everything</option>
+          {storyEntryKinds.map((option) => <option key={option} value={option}>{storyEntryKindLabels[option]}</option>)}
+        </select>
+        <button className="save-server" type="submit">Filter</button>
+      </form>
+
+      {entries.length === 0 ? (
+        <div className="empty-data"><BookOpen aria-hidden="true" size={24} /><div><h2>Nothing here yet.</h2><p>{search || kind ? "No entry matches that." : "Write the first entry below — start with the theme, so everyone builds on the same ground."}</p></div></div>
+      ) : (
+        <div className="codex-bible-grid">
+          {entries.map((entry) => (
+            <Link className={`codex-bible-card status-${entry.status.toLowerCase()}`} href={`/codex/bible/${entry.slug}`} key={entry.id}>
+              <p className="eyebrow">{storyEntryKindLabels[entry.kind]}</p>
+              <h3>{entry.title}</h3>
+              {entry.summary ? <p>{entry.summary}</p> : null}
+              <footer><span>{entry.status === "CANON" ? "Canon" : entry.status === "PROPOSED" ? "Proposed" : "Draft"}</span><span>{entry.appearanceCount} appearance{entry.appearanceCount === 1 ? "" : "s"}</span></footer>
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <form action={createEntry} className="story-form codex-new-entry">
+        <p className="eyebrow">Add an entry</p>
+        <label>Kind<select defaultValue="CHARACTER" name="kind">{storyEntryKinds.map((option) => <option key={option} value={option}>{storyEntryKindLabels[option]}</option>)}</select></label>
+        <label>Title<input maxLength={120} name="title" placeholder="Ashwarden of the Low Fen" required type="text" /></label>
+        <label>Summary<textarea maxLength={500} name="summary" placeholder="One line somebody can read at a glance." rows={2} /></label>
+        <label>Detail<textarea maxLength={20000} name="body" placeholder="Everything a writer needs: how it behaves, what it wants, what it must never do." rows={8} /></label>
+        <button className="save-server" type="submit">Add to the bible</button>
+      </form>
+    </section>
+  );
+}

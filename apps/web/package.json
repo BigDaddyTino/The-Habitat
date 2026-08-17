@@ -27,6 +27,7 @@
     "@opentelemetry/sdk-trace": "^2.10.0",
     "@opentelemetry/semantic-conventions": "^1.43.0",
     "@rive-app/canvas-advanced-single": "2.39.2",
+    "@xyflow/react": "^12.11.3",
     "dotenv": "^17.2.3",
     "lucide-react": "^0.468.0",
     "next": "16.2.11",

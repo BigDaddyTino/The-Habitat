@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, CalendarRange, ChevronDown, Crown, Landmark, LogIn, Radio, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
+import { Award, CalendarRange, ChevronDown, Crown, Landmark, LogIn, NotebookPen, Radio, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
 import { auth } from "@/auth";
 import { getLiveStreamSummary } from "@/lib/stream-showcase";
 
@@ -41,6 +41,11 @@ export async function HabitatHeader() {
             ? <span className="nav-live-flag"><i aria-hidden="true" /><span className="nav-label">{liveStreams.liveCount} Live</span></span>
             : <><Radio aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Streams</span></>}
         </Link>
+        {/* Unreleased plot for a game that has not shipped, so it is only
+            advertised to members who can actually open it. */}
+        {session?.user?.isActive && session.user.role !== "VIEWER" ? (
+          <Link href="/codex" aria-label="Story codex"><NotebookPen aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Codex</span></Link>
+        ) : null}
         <details className="nav-cluster">
           <summary aria-label="Progress navigation"><Crown aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Progress</span><ChevronDown aria-hidden="true" className="nav-cluster-caret" size={13} /></summary>
           <div className="nav-cluster-panel">

@@ -321,6 +321,65 @@ enum PulseCategory {
   PIPELINE
 }
 
+/// The lore bible's entry kinds. A writer opening a scene needs to know what is
+/// already canon before inventing more, so a node's references point at these
+/// rather than at free text.
+enum StoryEntryKind {
+  THEME
+  REGION
+  CREATURE
+  CHARACTER
+  FACTION
+  ITEM
+  EVENT
+  RULE
+}
+
+/// Contribution status. Anyone below ADMIN writes at PROPOSED, and only CANON
+/// is ever exported to the game, so an unreviewed idea cannot reach an Unreal
+/// build. REJECTED is kept rather than deleted: a rejected branch is a decision
+/// worth remembering, and the author should be able to see what happened to it.
+enum StoryStatus {
+  DRAFT
+  PROPOSED
+  CANON
+  REJECTED
+  ARCHIVED
+}
+
+enum StoryNodeKind {
+  BEAT
+  SCENE
+  DIALOGUE
+  CHOICE
+  CONDITION
+  QUEST_START
+  QUEST_STEP
+  ENDING
+}
+
+/// Why an assistant exchange ended the way it did. Every outcome is recorded,
+/// including the ones where no request ever reached Gemini — an audit that only
+/// kept successful answers would hide exactly the pattern worth looking for.
+enum StoryAssistantOutcome {
+  ANSWERED
+  BLOCKED
+  RATE_LIMITED
+  BUDGET_EXHAUSTED
+  UNAVAILABLE
+  UNCONFIGURED
+}
+
+enum StoryRevisionAction {
+  CREATED
+  UPDATED
+  MOVED
+  STATUS_CHANGED
+  DELETED
+  LINKED
+  UNLINKED
+}
+
 model User {
   id                     String                    @id @default(uuid()) @db.Uuid
   name                   String?
@@ -376,6 +435,20 @@ model User {
   memberPresence          MemberPresence?
   memberReferralsSent     MemberReferral[]           @relation("MemberReferralInviter")
   memberReferralReceived  MemberReferral?             @relation("MemberReferralInvitee")
+  storyArcs               StoryArc[]                  @relation("StoryArcCreator")
+  storyNodesCreated       StoryNode[]                 @relation("StoryNodeCreator")
+  storyNodesUpdated       StoryNode[]                 @relation("StoryNodeEditor")
+  storyNodeLocks          StoryNode[]                 @relation("StoryNodeLock")
+  storyEdges              StoryEdge[]                 @relation("StoryEdgeCreator")
+  storyEntriesCreated     StoryEntry[]                @relation("StoryEntryCreator")
+  storyEntriesUpdated     StoryEntry[]                @relation("StoryEntryEditor")
+  storyEntryLocks         StoryEntry[]                @relation("StoryEntryLock")
+  storyRevisions          StoryRevision[]             @relation("StoryRevisionActor")
+  storyComments           StoryComment[]              @relation("StoryCommentAuthor")
+  storyCommentsResolved   StoryComment[]              @relation("StoryCommentResolver")
+  storyPresence           StoryPresence?
+  storyExportTokens       StoryExportToken[]          @relation("StoryExportTokenCreator")
+  storyAssistantMessages  StoryAssistantMessage[]     @relation("StoryAssistantAsker")
 }
 
 model Account {
@@ -1882,4 +1955,258 @@ model EvaluationFailure {
 
   @@index([occurredAt])
   @@index([kind, resolvedAt, occurredAt])
+}
+
+/// A chapter of the mainline or a self-contained side quest — the unit a board
+/// is drawn for. Side quests get their own arc so a contributor can build one
+/// out without touching the spine of the story.
+model StoryArc {
+  id              String      @id @default(uuid()) @db.Uuid
+  slug            String      @unique @db.VarChar(64)
+  title           String      @db.VarChar(120)
+  summary         String?     @db.VarChar(500)
+  isMainline      Boolean     @default(false)
+  status          StoryStatus @default(PROPOSED)
+  position        Int         @default(0)
+  createdByUserId String      @db.Uuid
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  creator         User        @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  nodes           StoryNode[]
+  edges           StoryEdge[]
+  presence        StoryPresence[]
+  assistantMessages StoryAssistantMessage[]
+
+  @@index([status, isMainline, position])
+}
+
+/// One beat, scene, choice, or ending on a board.
+///
+/// `key` is the handle the Unreal importer addresses this node by, so it is
+/// stable across retitling — renaming a scene in the web editor must not orphan
+/// the asset it already generated.
+///
+/// `version` backs optimistic concurrency: an edit carrying a stale version is
+/// refused rather than silently overwriting whoever saved first. `lockedByUserId`
+/// is only a courtesy signal on top of that, and `lockExpiresAt` bounds it —
+/// a closed laptop must not freeze a node for everyone else forever.
+///
+/// The migration additionally CHECKs that canvas coordinates stay within
+/// +/-100000 and that a CANON node carries a non-empty title.
+model StoryNode {
+  id              String           @id @default(uuid()) @db.Uuid
+  arcId           String           @db.Uuid
+  kind            StoryNodeKind    @default(SCENE)
+  key             String           @db.VarChar(80)
+  title           String           @db.VarChar(160)
+  summary         String?          @db.VarChar(500)
+  body            String?          @db.Text
+  status          StoryStatus      @default(PROPOSED)
+  canvasX         Int              @default(0)
+  canvasY         Int              @default(0)
+  version         Int              @default(1)
+  createdByUserId String           @db.Uuid
+  updatedByUserId String?          @db.Uuid
+  lockedByUserId  String?          @db.Uuid
+  lockExpiresAt   DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  arc             StoryArc         @relation(fields: [arcId], references: [id], onDelete: Cascade)
+  creator         User             @relation("StoryNodeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor          User?            @relation("StoryNodeEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  lockedBy        User?            @relation("StoryNodeLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  outgoingEdges   StoryEdge[]      @relation("StoryEdgeFrom")
+  incomingEdges   StoryEdge[]      @relation("StoryEdgeTo")
+  entryLinks      StoryEntryLink[]
+  comments        StoryComment[]
+  presence        StoryPresence[]
+  assistantMessages StoryAssistantMessage[]
+
+  @@unique([arcId, key])
+  @@index([arcId, status])
+  @@index([status, updatedAt])
+}
+
+/// A transition between two nodes. `label` is the choice text the player sees,
+/// so an unlabelled edge is a straight continuation rather than a decision.
+///
+/// The migration CHECKs that an edge never points at its own source. Both ends
+/// living in the same arc is enforced in the server action rather than by a
+/// composite foreign key, because a two-relation composite FK through `arcId`
+/// would need Prisma to own the same column from two sides.
+model StoryEdge {
+  id              String      @id @default(uuid()) @db.Uuid
+  arcId           String      @db.Uuid
+  fromNodeId      String      @db.Uuid
+  toNodeId        String      @db.Uuid
+  label           String?     @db.VarChar(200)
+  condition       String?     @db.VarChar(300)
+  position        Int         @default(0)
+  status          StoryStatus @default(PROPOSED)
+  createdByUserId String      @db.Uuid
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  arc             StoryArc    @relation(fields: [arcId], references: [id], onDelete: Cascade)
+  fromNode        StoryNode   @relation("StoryEdgeFrom", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode          StoryNode   @relation("StoryEdgeTo", fields: [toNodeId], references: [id], onDelete: Cascade)
+  creator         User        @relation("StoryEdgeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@unique([fromNodeId, position])
+  @@index([arcId, status])
+  @@index([toNodeId])
+}
+
+/// A lore bible entry: the theme, regions, creatures, characters, factions,
+/// items, and rules a writer has to know before adding to the story.
+model StoryEntry {
+  id              String           @id @default(uuid()) @db.Uuid
+  kind            StoryEntryKind
+  slug            String           @unique @db.VarChar(64)
+  title           String           @db.VarChar(120)
+  summary         String?          @db.VarChar(500)
+  body            String?          @db.Text
+  status          StoryStatus      @default(PROPOSED)
+  version         Int              @default(1)
+  createdByUserId String           @db.Uuid
+  updatedByUserId String?          @db.Uuid
+  lockedByUserId  String?          @db.Uuid
+  lockExpiresAt   DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  creator         User             @relation("StoryEntryCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor          User?            @relation("StoryEntryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  lockedBy        User?            @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  nodeLinks       StoryEntryLink[]
+  comments        StoryComment[]
+
+  @@index([kind, status, title])
+  @@index([status, updatedAt])
+}
+
+/// Declares that a node features a bible entry, so a scene lists its cast and
+/// the bible can show where a creature actually appears.
+model StoryEntryLink {
+  id        String     @id @default(uuid()) @db.Uuid
+  nodeId    String     @db.Uuid
+  entryId   String     @db.Uuid
+  createdAt DateTime   @default(now())
+  node      StoryNode  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  entry     StoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@unique([nodeId, entryId])
+  @@index([entryId])
+}
+
+/// The change log every board and bible page reads from. It is also the review
+/// trail: a promotion to CANON is a STATUS_CHANGED revision, so the reviewer is
+/// recorded without every entity carrying its own reviewer columns.
+model StoryRevision {
+  id          String              @id @default(uuid()) @db.Uuid
+  entityType  String              @db.VarChar(12)
+  entityId    String              @db.Uuid
+  arcId       String?             @db.Uuid
+  action      StoryRevisionAction
+  actorUserId String              @db.Uuid
+  summary     String              @db.VarChar(300)
+  before      Json?
+  after       Json?
+  createdAt   DateTime            @default(now())
+  actor       User                @relation("StoryRevisionActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([entityType, entityId, createdAt])
+  @@index([arcId, createdAt])
+  @@index([createdAt])
+}
+
+/// Discussion attached to exactly one node or bible entry — the migration CHECKs
+/// that precisely one of the two targets is set.
+model StoryComment {
+  id               String      @id @default(uuid()) @db.Uuid
+  nodeId           String?     @db.Uuid
+  entryId          String?     @db.Uuid
+  authorUserId     String      @db.Uuid
+  body             String      @db.VarChar(2000)
+  resolvedAt       DateTime?
+  resolvedByUserId String?     @db.Uuid
+  createdAt        DateTime    @default(now())
+  node             StoryNode?  @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  entry            StoryEntry? @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  author           User        @relation("StoryCommentAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+  resolver         User?       @relation("StoryCommentResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([nodeId, createdAt])
+  @@index([entryId, createdAt])
+}
+
+/// Who is on which board right now. Freshness is judged from `lastSeenAt` at
+/// read time rather than by deleting rows on exit, because a browser that dies
+/// never sends its goodbye — the same reason the streaming showcase treats
+/// absence, not an event, as the authoritative signal.
+model StoryPresence {
+  userId     String     @id @db.Uuid
+  arcId      String?    @db.Uuid
+  nodeId     String?    @db.Uuid
+  lastSeenAt DateTime   @default(now())
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  arc        StoryArc?  @relation(fields: [arcId], references: [id], onDelete: Cascade)
+  node       StoryNode? @relation(fields: [nodeId], references: [id], onDelete: SetNull)
+
+  @@index([arcId, lastSeenAt])
+}
+
+/// One audited exchange with the codex assistant.
+///
+/// The question and the answer are stored verbatim. The extract the model was
+/// shown is NOT copied here — it would duplicate most of the story on every
+/// question — but `contextSummary` plus `revisionCursor` pin down exactly which
+/// codex state was rendered, and that render is a pure function, so any
+/// exchange can be reconstructed after the fact.
+///
+/// Rows are kept for outcomes where no request ever left the Habitat, because
+/// a member repeatedly hitting the rate limit or the daily budget is precisely
+/// what an audit should be able to see.
+model StoryAssistantMessage {
+  id             String                @id @default(uuid()) @db.Uuid
+  userId         String                @db.Uuid
+  arcId          String?               @db.Uuid
+  nodeId         String?               @db.Uuid
+  question       String                @db.VarChar(2000)
+  answer         String?               @db.Text
+  outcome        StoryAssistantOutcome
+  model          String                @db.VarChar(60)
+  contextSummary String                @db.VarChar(500)
+  /// The newest StoryRevision at the moment the extract was built.
+  revisionCursor String?               @db.Uuid
+  promptTokens   Int?
+  responseTokens Int?
+  /// Reasoning tokens. Billed, invisible in the reply, and typically the bulk
+  /// of a short answer's cost on a thinking model.
+  thinkingTokens Int?
+  latencyMs      Int?
+  failureReason  String?               @db.VarChar(300)
+  createdAt      DateTime              @default(now())
+  user           User                  @relation("StoryAssistantAsker", fields: [userId], references: [id], onDelete: Cascade)
+  arc            StoryArc?             @relation(fields: [arcId], references: [id], onDelete: SetNull)
+  node           StoryNode?            @relation(fields: [nodeId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([arcId, createdAt])
+  @@index([createdAt])
+  @@index([outcome, createdAt])
+}
+
+/// A bearer token the Unreal machine reads the canon export with. Only the
+/// SHA-256 hash is stored, so a leaked database row cannot be replayed against
+/// the endpoint — the same handling the Steam and Twitch link nonces get.
+model StoryExportToken {
+  id              String    @id @default(uuid()) @db.Uuid
+  label           String    @db.VarChar(80)
+  tokenHash       String    @unique @db.VarChar(64)
+  createdByUserId String    @db.Uuid
+  createdAt       DateTime  @default(now())
+  lastUsedAt      DateTime?
+  revokedAt       DateTime?
+  creator         User      @relation("StoryExportTokenCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@index([revokedAt])
 }

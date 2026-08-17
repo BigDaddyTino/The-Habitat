@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Award, CalendarRange, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, RadioTower, Users } from "lucide-react";
+import { Activity, Award, CalendarRange, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, NotebookPen, RadioTower, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const groups = [
@@ -20,6 +20,7 @@ const groups = [
     { href: "/admin/titles", label: "Titles", icon: Award },
     { href: "/admin/seasons", label: "Seasons", icon: CalendarRange },
     { href: "/admin/discord", label: "Discord", icon: MessageCircle },
+    { href: "/admin/story", label: "Story export", icon: NotebookPen },
   ] },
 ];
 
