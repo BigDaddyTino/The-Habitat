@@ -156,11 +156,11 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
       <div className="sheet-grid">
-        <label>Full name<input maxLength={160} onChange={(event) => setFullName(event.target.value)} value={fullName} /></label>
-        <label>Pronouns<input maxLength={40} onChange={(event) => setPronouns(event.target.value)} placeholder="null = writers use they/them" value={pronouns} /></label>
-        <label>Sex<input maxLength={40} onChange={(event) => setSex(event.target.value)} value={sex} /></label>
-        <label>Species<input maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" value={species} /></label>
-        <label>Age<input maxLength={80} onChange={(event) => setAge(event.target.value)} placeholder="late twenties" value={age} /></label>
+        <label>Full name<input maxLength={160} onChange={(event) => setFullName(event.target.value)} type="text" value={fullName} /></label>
+        <label>Pronouns<input maxLength={40} onChange={(event) => setPronouns(event.target.value)} placeholder="null = writers use they/them" type="text" value={pronouns} /></label>
+        <label>Sex<input maxLength={40} onChange={(event) => setSex(event.target.value)} type="text" value={sex} /></label>
+        <label>Species<input maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" type="text" value={species} /></label>
+        <label>Age<input maxLength={80} onChange={(event) => setAge(event.target.value)} placeholder="late twenties" type="text" value={age} /></label>
         <label>Home<select onChange={(event) => setHome(event.target.value)} value={home}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
       </div>
 
@@ -230,7 +230,7 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       </details>
 
       <div className="sheet-grid">
-        <label>Game ID — the tag the level actor carries<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="derived from the slug when blank" value={gameId} /></label>
+        <label>Game ID — the tag the level actor carries<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="derived from the slug when blank" type="text" value={gameId} /></label>
       </div>
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
 
@@ -288,9 +288,9 @@ export function FactionSheet({ entryId, version, meta, factions, regions, charac
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
       <div className="sheet-grid">
-        <label>Kind of power<input maxLength={80} onChange={(event) => setScope(event.target.value)} placeholder="state, corporate, criminal, supernatural…" value={scope} /></label>
+        <label>Kind of power<input maxLength={80} onChange={(event) => setScope(event.target.value)} placeholder="state, corporate, criminal, supernatural…" type="text" value={scope} /></label>
         <label>Seat of power<select onChange={(event) => setSeat(event.target.value)} value={seat}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
-        <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Faction.Stormglass" value={gameTag} /></label>
+        <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Faction.Stormglass" type="text" value={gameTag} /></label>
       </div>
 
       <div className="sheet-rows">
@@ -372,10 +372,10 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
         <label>Type<select onChange={(event) => setType(event.target.value)} value={type}><option value="">Not decided</option>{storyRegionTypes.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
         {type === "settlement" ? <label>Settlement tier<select onChange={(event) => setSettlementTier(event.target.value)} value={settlementTier}><option value="">Not decided</option>{storySettlementTiers.map((option) => <option key={option} value={option}>{option}</option>)}</select></label> : null}
         <label>Parent region<select onChange={(event) => setParent(event.target.value)} value={parent}><option value="">None — top level</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
-        <label>Biome<input maxLength={160} onChange={(event) => setBiome(event.target.value)} placeholder="jungle, tropical coast…" value={biome} /></label>
-        <label>Population<input maxLength={160} onChange={(event) => setPopulation(event.target.value)} placeholder="free-text scale" value={population} /></label>
-        <label>Status<input maxLength={160} onChange={(event) => setRegionStatus(event.target.value)} placeholder="collapsing, occupied, thriving…" value={regionStatus} /></label>
-        <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Region.*" value={gameTag} /></label>
+        <label>Biome<input maxLength={160} onChange={(event) => setBiome(event.target.value)} placeholder="jungle, tropical coast…" type="text" value={biome} /></label>
+        <label>Population<input maxLength={160} onChange={(event) => setPopulation(event.target.value)} placeholder="free-text scale" type="text" value={population} /></label>
+        <label>Status<input maxLength={160} onChange={(event) => setRegionStatus(event.target.value)} placeholder="collapsing, occupied, thriving…" type="text" value={regionStatus} /></label>
+        <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Region.*" type="text" value={gameTag} /></label>
       </div>
 
       <div className="sheet-rows">
@@ -444,7 +444,7 @@ export function CreatureSheet({ entryId, version, meta, regions }: {
 
       <div className="sheet-grid">
         <label>Category — the taxonomy law<select onChange={(event) => setCategory(event.target.value)} value={category}><option value="">Not decided</option>{storyCreatureCategories.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-        <label>Game ID<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="DA_* once one exists" value={gameId} /></label>
+        <label>Game ID<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="DA_* once one exists" type="text" value={gameId} /></label>
       </div>
 
       <div className="sheet-rows">
@@ -501,13 +501,13 @@ export function ItemSheet({ entryId, version, meta, factions, regions }: {
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
       <div className="sheet-grid">
-        <label>Category<input maxLength={80} onChange={(event) => setCategory(event.target.value)} placeholder="weapon, tool, substance, relic, document…" value={category} /></label>
-        <label>Rarity<input maxLength={80} onChange={(event) => setRarity(event.target.value)} value={rarity} /></label>
+        <label>Category<input maxLength={80} onChange={(event) => setCategory(event.target.value)} placeholder="weapon, tool, substance, relic, document…" type="text" value={category} /></label>
+        <label>Rarity<input maxLength={80} onChange={(event) => setRarity(event.target.value)} type="text" value={rarity} /></label>
         <label>Origin — a faction or place from the codex, or free text
-          <input list={originListId} maxLength={160} onChange={(event) => setOrigin(event.target.value)} placeholder="stormglass-cartel, the-riftwood…" value={origin} />
+          <input list={originListId} maxLength={160} onChange={(event) => setOrigin(event.target.value)} placeholder="stormglass-cartel, the-riftwood…" type="text" value={origin} />
         </label>
         <datalist id={originListId}>{[...factions, ...regions].map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}</datalist>
-        <label>Game ID — the DA_* asset name; once set it never changes<input maxLength={120} onChange={(event) => setGameId(event.target.value)} value={gameId} /></label>
+        <label>Game ID — the DA_* asset name; once set it never changes<input maxLength={120} onChange={(event) => setGameId(event.target.value)} type="text" value={gameId} /></label>
       </div>
 
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
@@ -551,7 +551,7 @@ export function EventSheet({ entryId, version, meta, regions, entries }: {
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
       <div className="sheet-grid">
-        <label>When<input maxLength={160} onChange={(event) => setWhen(event.target.value)} placeholder="prologue · 20 years before opening · chapter 1" value={when} /></label>
+        <label>When<input maxLength={160} onChange={(event) => setWhen(event.target.value)} placeholder="prologue · 20 years before opening · chapter 1" type="text" value={when} /></label>
       </div>
 
       <div className="sheet-rows">

@@ -80,6 +80,10 @@
 .story-form { display: grid; gap: 13px; padding: 25px; border: 1px solid var(--line); background: var(--panel); }
 .story-form > .eyebrow { display: inline-flex; align-items: center; gap: 6px; margin: 0; }
 .story-form label { display: grid; gap: 6px; color: var(--muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: .7px; text-transform: uppercase; }
+/* Matches on the type ATTRIBUTE, which a bare <input> does not carry: such a
+   field gets none of this and inherits the label's 9px uppercase mono, which
+   is how a whole sheet of fields once ended up unreadable. Give every field in
+   a label an explicit type; fields inside a .sheet-row are covered below. */
 .story-form input[type="text"], .story-form input[type="search"], .story-form select, .story-form textarea { width: 100%; border: 1px solid #4b554a; border-radius: 0; padding: 10px; background: #101511; color: var(--ink); font: inherit; font-size: 13px; letter-spacing: 0; text-transform: none; outline: none; }
 .story-form textarea { resize: vertical; }
 .story-form input:focus, .story-form select:focus, .story-form textarea:focus { border-color: var(--brass); }
