@@ -844,10 +844,38 @@ const factionMetaSchema = z.object({
   openQuestions: metaLines(30, 300),
 });
 
+const creatureMetaSchema = z.object({
+  category: z.enum(["natural", "magical", "monstrosity", "abomination", "supernatural"]).nullable(),
+  biomes: metaLines(20, 160),
+  threat: metaText(500),
+  harvest: metaText(500),
+  gameId: metaText(120),
+  openQuestions: metaLines(30, 300),
+});
+
+const itemMetaSchema = z.object({
+  category: metaText(80),
+  rarity: metaText(80),
+  origin: metaText(160),
+  gameId: metaText(120),
+  openQuestions: metaLines(30, 300),
+});
+
+const eventMetaSchema = z.object({
+  when: metaText(160),
+  where: metaLines(20, 64),
+  involved: metaLines(30, 64),
+  outcome: metaText(2000),
+  openQuestions: metaLines(30, 300),
+});
+
 const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodTypeAny>> = {
   CHARACTER: characterMetaSchema,
   FACTION: factionMetaSchema,
   REGION: regionMetaSchema,
+  CREATURE: creatureMetaSchema,
+  ITEM: itemMetaSchema,
+  EVENT: eventMetaSchema,
 };
 
 /**

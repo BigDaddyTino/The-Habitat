@@ -26,16 +26,46 @@ const context: StoryAssistantContext = {
       status: "CANON",
       summary: "He cannot enter.",
       body: "The iron holds.",
+      speaker: "Brother Ilex",
+      endingKind: null,
+      completion: null,
+      effects: ["set flag: gate-refused"],
+      rewards: [],
+      continuesIn: null,
       choices: [
-        { label: "Knock again", condition: null, toKey: "the-nave" },
-        { label: null, condition: "has-key", toKey: "the-crypt" },
+        { label: "Knock again", condition: null, toKey: "the-nave", effects: [] },
+        { label: null, condition: "has-key", toKey: "the-crypt", effects: ["set flag: crypt-entered"] },
       ],
       references: ["Ashwarden of the Low Fen"],
     },
-    { key: "the-nave", kind: "ENDING", title: "The nave", status: "PROPOSED", summary: null, body: null, choices: [], references: [] },
+    { key: "the-nave", kind: "ENDING", title: "The nave", status: "PROPOSED", summary: null, body: null, speaker: null, endingKind: "SUCCESS", completion: null, effects: [], rewards: ["the-drowned-key"], continuesIn: "The Drowned Crypt", choices: [], references: [] },
   ],
   entries: [
-    { kind: "CREATURE", slug: "ashwarden", title: "Ashwarden of the Low Fen", status: "CANON", summary: "It does not leave the fen.", body: "Bound to the water." },
+    {
+      kind: "CREATURE",
+      slug: "ashwarden",
+      title: "Ashwarden of the Low Fen",
+      status: "CANON",
+      summary: "It does not leave the fen.",
+      body: "Bound to the water.",
+      meta: { category: "supernatural", biomes: ["low-fen"], threat: "It drowns what enters.", harvest: null, gameId: null, openQuestions: [] },
+    },
+    {
+      kind: "CHARACTER",
+      slug: "brother-ilex",
+      title: "Brother Ilex",
+      status: "CANON",
+      summary: null,
+      body: null,
+      meta: {
+        pronouns: "he/him",
+        species: "human",
+        home: "low-fen",
+        factions: [{ faction: "ossuary-covenant", role: "archivist", standing: null }],
+        status: { known: "missing", actual: "drowned in the nave" },
+        openQuestions: [],
+      },
+    },
   ],
   problems: [{ kind: "DEAD_END", nodeKey: "the-crypt", detail: '"The crypt" continues nowhere.' }],
   focusNodeKey: "the-gate",
@@ -63,6 +93,15 @@ test("the system instruction keeps the assistant out of the rest of the Habitat"
 test("the system instruction states it cannot write or approve", () => {
   assert.match(storyAssistantSystemInstruction, /do not write to the codex/);
   assert.match(storyAssistantSystemInstruction, /cannot approve/);
+});
+
+test("the system instruction governs spoiler-tier facts and flag threads", () => {
+  // The sheets put writers-room truth and story-thread flags into the extract;
+  // the persona must know how to handle both, or the facts are a liability.
+  assert.match(storyAssistantSystemInstruction, /SPOILER-TIER/);
+  assert.match(storyAssistantSystemInstruction, /never propose story content that collapses the gap/);
+  assert.match(storyAssistantSystemInstruction, /set flag: <slug>/);
+  assert.match(storyAssistantSystemInstruction, /prose and facts disagree/);
 });
 
 // --- the extract ------------------------------------------------------------
@@ -94,6 +133,25 @@ test("a node with no way out says so rather than going silent", () => {
   assert.match(renderStoryAssistantContext(context), /Leads to: nothing yet\./);
 });
 
+test("the extract carries the sheets: entry facts, spoiler-tier labelled", () => {
+  const rendered = renderStoryAssistantContext(context);
+  assert.match(rendered, /Category: supernatural/);
+  assert.match(rendered, /Found in: low-fen/);
+  assert.match(rendered, /Facts: he\/him · human/);
+  assert.match(rendered, /Factions: ossuary-covenant \(archivist\)/);
+  assert.match(rendered, /Known status: missing/);
+  assert.match(rendered, /SPOILER-TIER — actual status, writers-room truth: drowned in the nave/);
+});
+
+test("the extract carries speakers, effects, rewards, and where an ending goes", () => {
+  const rendered = renderStoryAssistantContext(context);
+  assert.match(rendered, /Speaker: Brother Ilex/);
+  assert.match(rendered, /Effects: set flag: gate-refused/);
+  assert.match(rendered, /Rewards: the-drowned-key/);
+  assert.match(rendered, /Ending: SUCCESS — continues into The Drowned Crypt/);
+  assert.match(rendered, /\[if has-key\] \[effects: set flag: crypt-entered\]/);
+});
+
 test("known loose ends are handed over so the assistant explains rather than rediscovers", () => {
   assert.match(renderStoryAssistantContext(context), /## LOOSE ENDS[\s\S]*continues nowhere/);
 });
@@ -117,7 +175,7 @@ test("the prompt puts the question after the extract, plainly attributed", () =>
 
 test("the context summary records what was shown, within the audit column's width", () => {
   const summary = describeStoryAssistantContext(context);
-  assert.equal(summary, "arc drowned-chapel, 2 nodes, 1 bible entry, 1 loose end, focus the-gate");
+  assert.equal(summary, "arc drowned-chapel, 2 nodes, 2 bible entries, 1 loose end, focus the-gate");
   assert.ok(summary.length <= 500);
 });
 

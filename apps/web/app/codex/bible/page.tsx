@@ -70,6 +70,10 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
               <p className="eyebrow">Planned but not written yet — sheets pointing at future work</p>
               <ul>{needsWork.planned.slice(0, 30).map((item, index) => <li key={`p-${index}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> names <code>{item.target}</code> as {item.field === "involvement" ? "an arc they belong in" : `a ${item.field}`}, and it does not exist yet</li>)}</ul>
             </> : null}
+            {needsWork.unconnected.length > 0 ? <>
+              <p className="eyebrow">Floating free — nothing links these to the world, and they link to nothing</p>
+              <ul>{needsWork.unconnected.slice(0, 30).map((item) => <li key={`u-${item.slug}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> <span>{storyEntryKindLabels[item.kind].toLowerCase()}</span> — open it and connect it: a [[link]], a sheet field, or a scene reference</li>)}</ul>
+            </> : null}
             {needsWork.missingMeta.length > 0 ? <>
               <p className="eyebrow">No sheet filled in yet</p>
               <ul>{needsWork.missingMeta.slice(0, 40).map((item) => <li key={item.slug}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> <span>{storyEntryKindLabels[item.kind].toLowerCase()}</span></li>)}</ul>

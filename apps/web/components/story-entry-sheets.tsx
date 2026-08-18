@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryFactionMeta, type StoryRegionMeta } from "@habitat/shared";
+import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -403,6 +403,186 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
 
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
       <SheetSubmit label="Save region sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Creature sheet — taxonomy is a picker (the law), habitat links to regions
+// ---------------------------------------------------------------------------
+
+export function CreatureSheet({ entryId, version, meta, regions }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  regions: SlugOption[];
+}) {
+  const source = record(meta);
+  const [category, setCategory] = useState(text(source.category));
+  const [biomes, setBiomes] = useState(asArray(source.biomes).map(text));
+  const [threat, setThreat] = useState(text(source.threat));
+  const [harvest, setHarvest] = useState(text(source.harvest));
+  const [gameId, setGameId] = useState(text(source.gameId));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+  const biomeListId = `creature-biomes-${entryId}`;
+
+  const composed: StoryCreatureMeta = {
+    category: (storyCreatureCategories as readonly string[]).includes(category) ? (category as StoryCreatureMeta["category"]) : null,
+    biomes: biomes.map((value) => value.trim()).filter(Boolean),
+    threat: orNull(threat),
+    harvest: orNull(harvest),
+    gameId: orNull(gameId),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Creature sheet — pick a region for each habitat so the bestiary stays wired to the map</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Category — the taxonomy law<select onChange={(event) => setCategory(event.target.value)} value={category}><option value="">Not decided</option>{storyCreatureCategories.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+        <label>Game ID<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="DA_* once one exists" value={gameId} /></label>
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Where it lives — a region from the atlas, or a free-text biome <RowButton label="Add a habitat" onClick={() => setBiomes((rows) => [...rows, ""])} /></p>
+        <datalist id={biomeListId}>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</datalist>
+        {biomes.map((biome, index) => (
+          <div className="sheet-row sheet-row-compact" key={index}>
+            <input aria-label="Habitat" list={biomeListId} maxLength={160} onChange={(event) => setBiomes((rows) => rows.map((value, at) => (at === index ? event.target.value : value)))} placeholder="riftwood-interior, or 'tropical coast'" value={biome} />
+            <RowButton label="Remove this habitat" onClick={() => setBiomes((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <label>Threat — what makes it dangerous<textarea maxLength={500} onChange={(event) => setThreat(event.target.value)} rows={2} value={threat} /></label>
+      <label>Harvest — what the extraction economy wants from it<textarea maxLength={500} onChange={(event) => setHarvest(event.target.value)} rows={2} value={harvest} /></label>
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save creature sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Item sheet — origin links back to a faction or place where one exists
+// ---------------------------------------------------------------------------
+
+export function ItemSheet({ entryId, version, meta, factions, regions }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  factions: SlugOption[];
+  regions: SlugOption[];
+}) {
+  const source = record(meta);
+  const [category, setCategory] = useState(text(source.category));
+  const [rarity, setRarity] = useState(text(source.rarity));
+  const [origin, setOrigin] = useState(text(source.origin));
+  const [gameId, setGameId] = useState(text(source.gameId));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+  const originListId = `item-origin-${entryId}`;
+
+  const composed: StoryItemMeta = {
+    category: orNull(category),
+    rarity: orNull(rarity),
+    origin: orNull(origin),
+    gameId: orNull(gameId),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Item sheet — give it an origin so the object stays tied to whoever made it or wherever it came from</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Category<input maxLength={80} onChange={(event) => setCategory(event.target.value)} placeholder="weapon, tool, substance, relic, document…" value={category} /></label>
+        <label>Rarity<input maxLength={80} onChange={(event) => setRarity(event.target.value)} value={rarity} /></label>
+        <label>Origin — a faction or place from the codex, or free text
+          <input list={originListId} maxLength={160} onChange={(event) => setOrigin(event.target.value)} placeholder="stormglass-cartel, the-riftwood…" value={origin} />
+        </label>
+        <datalist id={originListId}>{[...factions, ...regions].map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}</datalist>
+        <label>Game ID — the DA_* asset name; once set it never changes<input maxLength={120} onChange={(event) => setGameId(event.target.value)} value={gameId} /></label>
+      </div>
+
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save item sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Event sheet — the timeline module: when, where, and who it dragged in
+// ---------------------------------------------------------------------------
+
+export function EventSheet({ entryId, version, meta, regions, entries }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  regions: SlugOption[];
+  /** Every working entry — an event can involve anyone and anything. */
+  entries: SlugOption[];
+}) {
+  const source = record(meta);
+  const [when, setWhen] = useState(text(source.when));
+  const [where, setWhere] = useState(asArray(source.where).map(text));
+  const [involved, setInvolved] = useState(asArray(source.involved).map(text));
+  const [outcome, setOutcome] = useState(text(source.outcome));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+
+  const composed: StoryEventMeta = {
+    when: orNull(when),
+    where: where.map((value) => value.trim()).filter(Boolean),
+    involved: involved.map((value) => value.trim()).filter(Boolean),
+    outcome: orNull(outcome),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Event sheet — events with a &quot;when&quot; are the world&apos;s timeline; where and who keep history wired to the map and the cast</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>When<input maxLength={160} onChange={(event) => setWhen(event.target.value)} placeholder="prologue · 20 years before opening · chapter 1" value={when} /></label>
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Where it happened <RowButton label="Add a place" onClick={() => setWhere((rows) => [...rows, ""])} /></p>
+        {where.map((place, index) => (
+          <div className="sheet-row sheet-row-compact" key={index}>
+            <select aria-label="Place" onChange={(event) => setWhere((rows) => rows.map((value, at) => (at === index ? event.target.value : value)))} value={place}>
+              <option value="">Choose a region…</option>
+              {regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}
+            </select>
+            <RowButton label="Remove this place" onClick={() => setWhere((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Who and what it involved <RowButton label="Add a participant" onClick={() => setInvolved((rows) => [...rows, ""])} /></p>
+        {involved.map((participant, index) => (
+          <div className="sheet-row sheet-row-compact" key={index}>
+            <select aria-label="Participant" onChange={(event) => setInvolved((rows) => rows.map((value, at) => (at === index ? event.target.value : value)))} value={participant}>
+              <option value="">Choose an entry…</option>
+              {entries.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select>
+            <RowButton label="Remove this participant" onClick={() => setInvolved((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <label>Outcome — what changed because of it<textarea maxLength={2000} onChange={(event) => setOutcome(event.target.value)} rows={3} value={outcome} /></label>
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save event sheet" />
     </form>
   );
 }

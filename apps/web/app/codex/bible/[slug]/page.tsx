@@ -6,7 +6,7 @@ import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryEntryEditor } from "@/components/story-entry-editor";
-import { CharacterSheet, FactionSheet, MetaView, RegionSheet } from "@/components/story-entry-sheets";
+import { CharacterSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet } from "@/components/story-entry-sheets";
 import { StoryEntityProfile } from "@/components/story-entity-profile";
 import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button";
 import { StoryWarden } from "@/components/story-warden";
@@ -21,7 +21,8 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
   const entry = await getStoryEntry(slug);
   if (!entry) notFound();
 
-  const needsPickers = entry.kind === "CHARACTER" || entry.kind === "FACTION" || entry.kind === "REGION";
+  const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT"] as const;
+  const needsPickers = (sheetKinds as readonly string[]).includes(entry.kind);
   const [factions, regions, characters, arcs] = needsPickers
     ? await Promise.all([
         listStoryEntries({ kind: "FACTION" }),
@@ -30,6 +31,8 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
         listStoryArcRefs(),
       ])
     : [[], [], [], []];
+  // An event can involve anyone and anything, so its picker spans every kind.
+  const allEntries = entry.kind === "EVENT" ? await listStoryEntries({}) : [];
   const collection = collectionForKind(entry.kind);
 
   // A region dossier IS the "what's in here" page: every place whose sheet
@@ -87,6 +90,32 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
                   regions={regions.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "CREATURE" ? (
+                <CreatureSheet
+                  entryId={entry.id}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "ITEM" ? (
+                <ItemSheet
+                  entryId={entry.id}
+                  factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "EVENT" ? (
+                <EventSheet
+                  entries={allEntries.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+                  entryId={entry.id}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />
               ) : entry.meta ? <MetaView meta={entry.meta} /> : null}

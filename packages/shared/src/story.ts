@@ -508,6 +508,41 @@ export type StoryFactionMeta = {
   openQuestions: string[];
 };
 
+/** The taxonomy law as a picker — never free text. */
+export const storyCreatureCategories = ["natural", "magical", "monstrosity", "abomination", "supernatural"] as const;
+
+export type StoryCreatureMeta = {
+  category: (typeof storyCreatureCategories)[number] | null;
+  /** Region slugs where they resolve, free-text biomes where they don't. */
+  biomes: string[];
+  threat: string | null;
+  /** What the harvest economy wants from it, if anything. */
+  harvest: string | null;
+  gameId: string | null;
+  openQuestions: string[];
+};
+
+export type StoryItemMeta = {
+  /** weapon | tool | substance | relic | document — open text by design. */
+  category: string | null;
+  rarity: string | null;
+  /** A faction/region slug where it resolves, free text where it doesn't. */
+  origin: string | null;
+  /** The DA_* asset name once one exists — the game's save ID, never changed after. */
+  gameId: string | null;
+  openQuestions: string[];
+};
+
+export type StoryEventMeta = {
+  /** Free-text era the app can sort: "prologue", "20 years before opening". */
+  when: string | null;
+  where: string[];
+  /** Any entry slug — people, factions, places, items. */
+  involved: string[];
+  outcome: string | null;
+  openQuestions: string[];
+};
+
 /**
  * What `GET /api/story/export` returns, and the only representation of the
  * story the game is built from.

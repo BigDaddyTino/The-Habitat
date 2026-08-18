@@ -81,6 +81,14 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     for (const row of rows(meta.connections)) if (label(row.to)) entityLinks.push({ slug: String(row.to), detail: label(row.by) ?? "Connected region" });
     if (label(meta.parent)) entityLinks.push({ slug: String(meta.parent), detail: "Parent region" });
   }
+  // Free-text values are legal in these fields; only slug-shaped ones can link.
+  const slugShaped = (value: unknown): value is string => typeof value === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
+  if (entry.kind === "CREATURE") for (const habitat of words(meta.biomes)) if (slugShaped(habitat)) entityLinks.push({ slug: habitat, detail: "Habitat" });
+  if (entry.kind === "ITEM" && slugShaped(meta.origin)) entityLinks.push({ slug: meta.origin, detail: "Origin" });
+  if (entry.kind === "EVENT") {
+    for (const place of words(meta.where)) if (slugShaped(place)) entityLinks.push({ slug: place, detail: "Happened here" });
+    for (const participant of words(meta.involved)) if (slugShaped(participant)) entityLinks.push({ slug: participant, detail: "Involved" });
+  }
 
   return (
     <>
@@ -110,10 +118,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         </div>
       </header>
 
-      {(isCharacter || isFaction || isRegion) ? <dl className="entity-fact-ribbon">
+      {(isCharacter || isFaction || isRegion || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
         {isCharacter ? <><Fact label="Full name" value={meta.fullName} /><Fact label="Species" value={meta.species} /><Fact label="Pronouns" value={meta.pronouns} /><Fact label="Magic" value={magic.origin} /><Fact label="Known status" value={status.known} /></> : null}
         {isFaction ? <><Fact label="Power" value={meta.scope} /><Fact label="Seat" value={meta.seat} /><Fact label="Game tag" value={meta.gameTag} /><Fact label="Leaders" value={words(meta.leaders).length ? `${words(meta.leaders).length} named` : null} /></> : null}
         {isRegion ? <><Fact label="Place type" value={meta.type} /><Fact label="Biome" value={meta.biome} /><Fact label="Population" value={meta.population} /><Fact label="World state" value={meta.status} /><Fact label="Game tag" value={meta.gameTag} /></> : null}
+        {entry.kind === "CREATURE" ? <><Fact label="Category" value={meta.category} /><Fact label="Habitats" value={words(meta.biomes).length ? words(meta.biomes).join(", ") : null} /><Fact label="Threat" value={meta.threat} /></> : null}
+        {entry.kind === "ITEM" ? <><Fact label="Category" value={meta.category} /><Fact label="Rarity" value={meta.rarity} /><Fact label="Origin" value={meta.origin} /></> : null}
+        {entry.kind === "EVENT" ? <><Fact label="When" value={meta.when} /><Fact label="Where" value={words(meta.where).length ? words(meta.where).join(", ") : null} /><Fact label="Involved" value={words(meta.involved).length ? `${words(meta.involved).length} named` : null} /></> : null}
       </dl> : null}
 
       <div className="entity-profile-layout">

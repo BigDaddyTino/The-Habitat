@@ -79,7 +79,11 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
             nodes: {
               where: { status: { in: [...workingStatuses] } },
               orderBy: { key: "asc" },
-              include: { entryLinks: { include: { entry: { select: { title: true } } } } },
+              include: {
+                entryLinks: { include: { entry: { select: { title: true } } } },
+                speaker: { select: { title: true } },
+                continuesIn: { select: { title: true } },
+              },
             },
             edges: { where: { status: { in: [...workingStatuses] } }, orderBy: [{ fromNodeId: "asc" }, { position: "asc" }] },
           },
@@ -88,12 +92,17 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
     db.storyEntry.findMany({
       where: { status: { in: [...workingStatuses] } },
       orderBy: [{ kind: "asc" }, { title: "asc" }],
-      select: { kind: true, slug: true, title: true, status: true, summary: true, body: true },
+      select: { kind: true, slug: true, title: true, status: true, summary: true, body: true, meta: true },
     }),
   ]);
 
+  const assistantEntries: StoryAssistantEntry[] = entries.map((entry) => ({
+    ...entry,
+    meta: (entry.meta as Record<string, unknown> | null) ?? null,
+  }));
+
   if (!arc) {
-    return { arc: null, nodes: [], entries: entries as StoryAssistantEntry[], problems: [], focusNodeKey: null };
+    return { arc: null, nodes: [], entries: assistantEntries, problems: [], focusNodeKey: null };
   }
 
   const keyById = new Map(arc.nodes.map((node) => [node.id, node.key]));
@@ -104,15 +113,21 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
     status: node.status,
     summary: node.summary,
     body: node.body,
+    speaker: node.speaker?.title ?? null,
+    endingKind: node.endingKind,
+    completion: node.completion,
+    effects: node.effects,
+    rewards: node.rewards,
+    continuesIn: node.continuesIn?.title ?? null,
     choices: arc.edges
       .filter((edge) => edge.fromNodeId === node.id && keyById.has(edge.toNodeId))
-      .map((edge) => ({ label: edge.label, condition: edge.condition, toKey: keyById.get(edge.toNodeId) as string })),
+      .map((edge) => ({ label: edge.label, condition: edge.condition, toKey: keyById.get(edge.toNodeId) as string, effects: edge.effects })),
     references: node.entryLinks.map((linked) => linked.entry.title),
   }));
 
   const graphNodes: StoryGraphNode[] = nodes.map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
-  // Built from the raw edges rather than the assistant's trimmed choices so
-  // the hollow-choice analysis sees effects, which the extract does not carry.
+  // Built from the raw edges so the analysis sees every edge, including any
+  // whose far node was filtered out of the assistant's view.
   const graphEdges: StoryGraphEdge[] = arc.edges.flatMap((edge) => {
     const fromKey = keyById.get(edge.fromNodeId);
     const toKey = keyById.get(edge.toNodeId);
@@ -122,7 +137,7 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
   return {
     arc: { slug: arc.slug, title: arc.title, summary: arc.summary, isMainline: arc.isMainline, status: arc.status },
     nodes,
-    entries: entries as StoryAssistantEntry[],
+    entries: assistantEntries,
     problems: analyzeStoryGraph(graphNodes, graphEdges),
     focusNodeKey: (nodeId && keyById.get(nodeId)) || null,
   };

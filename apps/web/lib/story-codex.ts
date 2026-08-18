@@ -338,7 +338,11 @@ export async function getStoryEntry(slug: string) {
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
     if (referencesSlug(meta.parent)) add("belongs inside this region");
+    if (referencesSlug(meta.origin)) add("originates here");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
+    if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
+    if (Array.isArray(meta.where) && meta.where.some(referencesSlug)) add("happened here");
+    if (Array.isArray(meta.involved) && meta.involved.some(referencesSlug)) add("involved them in this event");
     if (rows(meta.factions).some((row) => referencesSlug(row.faction))) add("is a member of this faction");
     if (rows(meta.relationships).some((row) => referencesSlug(row.character))) add("has a character relationship");
     if (rows(meta.relations).some((row) => referencesSlug(row.faction))) add("has a faction relationship");
@@ -444,13 +448,28 @@ export async function getStoryNeedsWork() {
   const [entries, arcs] = await Promise.all([
     db.storyEntry.findMany({
       where: { status: { in: workingStatuses } },
-      select: { slug: true, title: true, kind: true, body: true, meta: true },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        kind: true,
+        summary: true,
+        body: true,
+        meta: true,
+        _count: {
+          select: {
+            nodeLinks: { where: { node: { status: { in: workingStatuses } } } },
+            speakerOf: { where: { status: { in: workingStatuses } } },
+          },
+        },
+      },
       orderBy: [{ kind: "asc" }, { title: "asc" }],
     }),
-    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true } }),
+    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true } }),
   ]);
 
   const known = new Set([...entries.map((entry) => entry.slug), ...arcs.map((arc) => arc.slug)]);
+  const arcRegionIds = new Set(arcs.flatMap((arc) => (arc.regionEntryId ? [arc.regionEntryId] : [])));
   const unresolvedLinks: Array<{ slug: string; title: string; target: string }> = [];
   const openQuestions: Array<{ slug: string; title: string; question: string }> = [];
   const missingMeta: Array<{ slug: string; title: string; kind: StoryEntryKind }> = [];
@@ -458,20 +477,66 @@ export async function getStoryNeedsWork() {
    *  "pick this up later" markers. This is how a character's involvement in a
    *  future arc stays in view until somebody opens that arc. */
   const planned: Array<{ slug: string; title: string; field: string; target: string }> = [];
+  /** Entries with no connection in either direction — nothing links to them,
+   *  they link to nothing. The one state where losing sight of an entry is
+   *  actually possible, so it gets its own bucket. */
+  const unconnected: Array<{ slug: string; title: string; kind: StoryEntryKind }> = [];
 
   const slugOf = (value: unknown): string | null => (typeof value === "string" && value.trim() ? value.trim() : null);
   const rows = (value: unknown): Array<Record<string, unknown>> =>
     Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 
-  for (const entry of entries) {
-    for (const match of (entry.body ?? "").matchAll(/\[\[([a-z0-9-]+)\]\]/g)) {
-      if (!known.has(match[1])) unresolvedLinks.push({ slug: entry.slug, title: entry.title, target: match[1] });
-    }
+  /** Every slug an entry's own text and sheet reach for, resolved or not. */
+  const outboundOf = (entry: (typeof entries)[number]): string[] => {
+    const targets: string[] = [];
+    for (const match of `${entry.summary ?? ""}\n${entry.body ?? ""}`.matchAll(/\[\[([a-z0-9-]+)\]\]/g)) targets.push(match[1]);
     const meta = entry.meta as Record<string, unknown> | null;
+    if (meta) {
+      for (const value of [meta.home, meta.seat, meta.parent, meta.origin]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      for (const list of [meta.leaders, meta.biomes, meta.where, meta.involved]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      for (const row of rows(meta.factions)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
+      for (const row of rows(meta.relationships)) { const slug = slugOf(row.character); if (slug) targets.push(slug); }
+      for (const row of rows(meta.relations)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
+      for (const row of rows(meta.control)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
+      for (const row of rows(meta.connections)) { const slug = slugOf(row.to); if (slug) targets.push(slug); }
+      for (const row of rows(meta.involvement)) { const slug = slugOf(row.arc); if (slug) targets.push(slug); }
+    }
+    return targets;
+  };
+
+  // First pass: who points at whom. An entry is reachable if anything else in
+  // the world names it — prose link, sheet field, scene reference, speaker
+  // casting, or an arc picking it as its region.
+  const inbound = new Set<string>();
+  const outbound = new Map<string, string[]>();
+  for (const entry of entries) {
+    const targets = outboundOf(entry);
+    outbound.set(entry.slug, targets);
+    for (const target of targets) if (target !== entry.slug) inbound.add(target);
+  }
+
+  for (const entry of entries) {
+    for (const target of outbound.get(entry.slug) ?? []) {
+      if (!known.has(target)) {
+        // Body links get the classic unresolved-link line; sheet fields are
+        // reported through `planned` below with their field names attached.
+        if (`${entry.summary ?? ""}\n${entry.body ?? ""}`.includes(`[[${target}]]`)) unresolvedLinks.push({ slug: entry.slug, title: entry.title, target });
+      }
+    }
+
+    const meta = entry.meta as Record<string, unknown> | null;
+    const hasInbound = inbound.has(entry.slug) || entry._count.nodeLinks > 0 || entry._count.speakerOf > 0 || arcRegionIds.has(entry.id);
+    const hasOutbound = (outbound.get(entry.slug) ?? []).some((target) => known.has(target) && target !== entry.slug);
+    // THEME and RULE are ambient law, and FLAG lives on the threads ledger —
+    // being unreferenced is not a problem for them.
+    if (!hasInbound && !hasOutbound && entry.kind !== "THEME" && entry.kind !== "RULE" && entry.kind !== "FLAG") {
+      unconnected.push({ slug: entry.slug, title: entry.title, kind: entry.kind });
+    }
+
     if (meta === null) {
-      // THEME and RULE deliberately have no module yet; their null is silence,
-      // not an unanswered question.
-      if (entry.kind !== "THEME" && entry.kind !== "RULE") missingMeta.push({ slug: entry.slug, title: entry.title, kind: entry.kind });
+      // THEME and RULE deliberately have no module, and a FLAG is complete the
+      // moment it exists — their null is silence, not an unanswered question.
+      if (entry.kind !== "THEME" && entry.kind !== "RULE" && entry.kind !== "FLAG") missingMeta.push({ slug: entry.slug, title: entry.title, kind: entry.kind });
       continue;
     }
     if (Array.isArray(meta.openQuestions)) {
@@ -495,9 +560,25 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.control)) check("control", row.faction);
       for (const row of rows(meta.connections)) check("connection", row.to);
     }
+    if (entry.kind === "FACTION") {
+      check("seat", meta.seat);
+      for (const leader of Array.isArray(meta.leaders) ? meta.leaders : []) check("leader", leader);
+      for (const row of rows(meta.relations)) check("relation", row.faction);
+    }
+    if (entry.kind === "EVENT") {
+      for (const place of Array.isArray(meta.where) ? meta.where : []) check("where", place);
+      for (const participant of Array.isArray(meta.involved) ? meta.involved : []) check("involved", participant);
+    }
   }
 
-  return { unresolvedLinks, openQuestions, missingMeta, planned, total: unresolvedLinks.length + openQuestions.length + missingMeta.length + planned.length };
+  return {
+    unresolvedLinks,
+    openQuestions,
+    missingMeta,
+    planned,
+    unconnected,
+    total: unresolvedLinks.length + openQuestions.length + missingMeta.length + planned.length + unconnected.length,
+  };
 }
 
 /** Everything waiting on a reviewer, newest first. */
