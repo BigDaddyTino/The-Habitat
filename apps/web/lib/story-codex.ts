@@ -282,6 +282,7 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
     slug: entry.slug,
     title: entry.title,
     summary: entry.summary,
+    meta: (entry.meta as Record<string, unknown> | null) ?? null,
     status: entry.status,
     author: storyMemberName(entry.creator),
     appearanceCount: entry._count.nodeLinks,
@@ -290,7 +291,7 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
 }
 
 export async function getStoryEntry(slug: string) {
-  const entry = await db.storyEntry.findUnique({
+  const [entry, possibleConnections] = await Promise.all([db.storyEntry.findUnique({
     where: { slug },
     include: {
       creator: { select: writerSelect },
@@ -309,13 +310,41 @@ export async function getStoryEntry(slug: string) {
       },
       comments: { include: { author: { select: writerSelect } }, orderBy: { createdAt: "asc" } },
     },
-  });
+  }), db.storyEntry.findMany({
+    where: { slug: { not: slug }, status: { in: workingStatuses } },
+    select: { slug: true, title: true, kind: true, meta: true },
+    orderBy: [{ kind: "asc" }, { title: "asc" }],
+  })]);
   if (!entry) return null;
 
   const now = new Date();
   const referenced = entry.nodeLinks.map((link) => ({ ...link.node, via: "referenced" as const }));
   const speaks = entry.speakerOf.map((node) => ({ ...node, via: "speaks" as const }));
   const seen = new Set(referenced.map((node) => node.id));
+  const connections: Array<{ slug: string; title: string; kind: StoryEntryKind; relation: string }> = [];
+  const rows = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value)
+    ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null)
+    : [];
+  const referencesSlug = (value: unknown) => typeof value === "string" && value === slug;
+
+  for (const candidate of possibleConnections) {
+    const meta = candidate.meta as Record<string, unknown> | null;
+    if (!meta) continue;
+    const add = (relation: string) => {
+      if (!connections.some((connection) => connection.slug === candidate.slug && connection.relation === relation)) {
+        connections.push({ slug: candidate.slug, title: candidate.title, kind: candidate.kind, relation });
+      }
+    };
+    if (referencesSlug(meta.home)) add("calls this home");
+    if (referencesSlug(meta.seat)) add("is based here");
+    if (referencesSlug(meta.parent)) add("belongs inside this region");
+    if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
+    if (rows(meta.factions).some((row) => referencesSlug(row.faction))) add("is a member of this faction");
+    if (rows(meta.relationships).some((row) => referencesSlug(row.character))) add("has a character relationship");
+    if (rows(meta.relations).some((row) => referencesSlug(row.faction))) add("has a faction relationship");
+    if (rows(meta.control).some((row) => referencesSlug(row.faction))) add("is controlled or influenced by this faction");
+    if (rows(meta.connections).some((row) => referencesSlug(row.to))) add("connects to this region");
+  }
 
   return {
     id: entry.id,
@@ -332,6 +361,7 @@ export async function getStoryEntry(slug: string) {
     updatedAt: entry.updatedAt,
     lockedBy: entry.lockedBy && entry.lockExpiresAt && entry.lockExpiresAt > now ? toWriter(entry.lockedBy) : null,
     appearances: [...referenced, ...speaks.filter((node) => !seen.has(node.id))],
+    connections,
     comments: entry.comments.map((comment) => ({
       id: comment.id,
       body: comment.body,

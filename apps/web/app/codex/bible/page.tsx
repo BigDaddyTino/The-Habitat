@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/authorization";
 import { getStoryNeedsWork, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { createEntry } from "@/app/codex/actions";
+import { storyCollections } from "@/lib/story-library";
 
 export const metadata = { title: "Story bible" };
 
@@ -23,6 +24,10 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
         <p className="eyebrow">Martino — the bible</p>
         <h1>What is already true</h1>
         <p>The theme, the places, the creatures, the people, and the rules the world runs on. Read the entries that touch your quest before you write it, and add anything you invent so the next writer finds it here.</p>
+      </div>
+
+      <div className="codex-library-shortcuts" aria-label="Lore libraries">
+        {Object.entries(storyCollections).map(([slug, collection]) => <Link href={`/codex/library/${slug}`} key={slug}><span>{collection.label}</span><small>{collection.description}</small></Link>)}
       </div>
 
       <form className="codex-bible-filters" method="get">

@@ -21,16 +21,37 @@ Two halves, severable:
 
 | Route | Who | What |
 | --- | --- | --- |
-| `/codex` | USER | Arc list, recent work, open a new arc |
+| `/codex` | USER | Story premise, core themes, world libraries, arcs, recent work |
+| `/codex/library/[collection]` | USER | Visual, searchable libraries for characters, factions, regions, creatures, items, events, themes, and rules |
 | `/codex/arc/[slug]` | USER | The board: cards, branches, inspector, presence |
 | `/codex/bible` | USER | The lore bible, filterable by kind |
-| `/codex/bible/[slug]` | USER | One entry, its appearances, its notes |
+| `/codex/bible/[slug]` | USER | One entity dossier, relationships, quest appearances, guided sheet, notes, and archive action |
 | `/codex/review` | ADMIN | Everything waiting on a reviewer |
 | `/admin/story` | ADMIN | Issue and revoke export tokens |
 
 The whole codex sits behind `USER`, not `VIEWER`. It is unreleased plot for a
 game that has not shipped, so a signed-in spectator does not get to read it, and
 the nav entry is not rendered for them either.
+
+### Writer-first entity workspaces
+
+The Codex does not ask a writer to edit JSON. Its landing page starts with the
+game premise and the three current theme entries, then sends the writer into a
+visual library for the kind of thing they want to shape. Each library supports
+search, create, open, edit, and recoverable archive flows.
+
+Character dossiers expose identity, story role, voice, home, faction and
+character relationships, planned arc involvement, open questions, and a visual
+picker backed by the game team's supplied model gallery. Faction dossiers expose
+scope, seat, leadership, faction stances, goals, game tag, and open questions.
+Region dossiers expose hierarchy, biome, population, control, travel
+connections, landmarks, game tag, and open questions. Other lore kinds use the
+same visual library and natural-language dossier flow without pretending they
+have a typed schema that has not been defined yet.
+
+The Warden is available from the landing page and every library as a read-only
+writing partner. It sees the existing Codex but still cannot mutate it; a human
+must decide what belongs and save it through the ordinary audited action.
 
 ---
 

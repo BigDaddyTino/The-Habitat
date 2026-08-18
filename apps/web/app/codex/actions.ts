@@ -13,6 +13,7 @@ import {
   type StoryStatus,
 } from "@habitat/shared";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
 import { storyReadRole, storyReviewRole } from "@/lib/story-codex";
@@ -69,6 +70,11 @@ function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex");
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
+  revalidatePath("/codex/library/characters");
+  revalidatePath("/codex/library/factions");
+  revalidatePath("/codex/library/regions");
+  revalidatePath("/codex/library/creatures");
+  revalidatePath("/codex/library/items");
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
 }
 
@@ -733,6 +739,7 @@ export async function createEntry(formData: FormData) {
 
   refreshCodex();
   revalidatePath(`/codex/bible/${slug}`);
+  redirect(`/codex/bible/${slug}`);
 }
 
 export async function updateEntry(formData: FormData) {
@@ -823,10 +830,56 @@ const regionMetaSchema = z.object({
   openQuestions: metaLines(30, 300),
 });
 
+const factionMetaSchema = z.object({
+  scope: metaText(80),
+  seat: metaText(64),
+  leaders: metaLines(20, 64),
+  relations: z.array(z.object({
+    faction: metaSlug,
+    stance: z.enum(["ally", "enemy", "rival", "client", "unknown"]).nullable(),
+    notes: metaText(500),
+  })).max(30),
+  goals: metaLines(20, 500),
+  gameTag: metaText(120),
+  openQuestions: metaLines(30, 300),
+});
+
 const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodTypeAny>> = {
   CHARACTER: characterMetaSchema,
+  FACTION: factionMetaSchema,
   REGION: regionMetaSchema,
 };
+
+/**
+ * "Remove" in the writers' room is deliberately recoverable. Archiving keeps
+ * the revision history and every relationship intact while immediately taking
+ * the entry out of the working library and canon export.
+ */
+export async function archiveEntry(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const entryId = z.string().uuid().safeParse(formData.get("entryId"));
+  if (!entryId.success) throw new Error("Invalid story entry.");
+
+  const entry = await db.$transaction(async (tx) => {
+    const current = await tx.storyEntry.findUnique({ where: { id: entryId.data }, select: { id: true, slug: true, title: true, kind: true, status: true } });
+    if (!current) throw new Error("That entry no longer exists.");
+    await tx.storyEntry.update({ where: { id: current.id }, data: { status: "ARCHIVED", updatedByUserId: user.id, lockedByUserId: null, lockExpiresAt: null } });
+    await recordRevision(tx, {
+      entityType: "ENTRY",
+      entityId: current.id,
+      action: "STATUS_CHANGED",
+      actorUserId: user.id,
+      summary: `Archived "${current.title}"`,
+      before: { status: current.status },
+      after: { status: "ARCHIVED" },
+    });
+    return current;
+  });
+
+  refreshCodex();
+  const collection = entry.kind === "CHARACTER" ? "characters" : entry.kind === "FACTION" ? "factions" : entry.kind === "REGION" ? "regions" : "all";
+  redirect(collection === "all" ? "/codex/bible" : `/codex/library/${collection}`);
+}
 
 /**
  * Saves an entry's module sheet. The sheet component composes the object

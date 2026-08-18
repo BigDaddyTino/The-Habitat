@@ -439,3 +439,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Authenticated live browser QA covered the landing, Bible, review queue, admin audit, empty board, three-card branched board, branch editor, card editing/version refresh, Bible reference linking, Warden panel, confirmations, and 390 x 844 mobile layouts with no horizontal overflow or browser-console errors. Exact-slug QA arc/Bible data and all 10 associated revisions were deleted and verified absent afterward
 - [x] Full workspace verification after the audit: strict typecheck across six projects, lint, all 291 tests, production build, and `git diff --check` are green
 - [ ] No deployment or HabitatWeb service restart was performed; the new archive hero and final canvas refinements will appear after the normal release process
+
+## 2026-08-18 - Writer-first Story Codex workspaces
+
+- [x] Rebuilt `/codex` around a story compass that states the premise immediately, surfaces the three current theme entries as the game's shared truths, and routes writers into the world or story area they intend to shape before showing audit and administration material
+- [x] Added dedicated, searchable visual libraries for characters, factions, regions, creatures, items, events, themes, and rules, with guided create-and-open flows instead of requiring writers to find a kind in a generic form
+- [x] Added full entity dossiers that put the writer briefing, game model, canon status, typed facts, inbound and outbound world relationships, written quest appearances, planned arc involvement, and open writing questions in one readable place
+- [x] Added an interactive faction sheet alongside the existing character and region sheets, moved character casting to the top of its editor, and exposed recoverable archive actions to ordinary Codex writers while preserving the revision ledger
+- [x] Added a compact secondary Codex navigation designed around large mobile tap targets, horizontally safe overflow, responsive one-column libraries and dossiers, and two original cinematic faction/region library images that are atmosphere only and never represented as live game data
+- [x] Kept the game handoff at `contractVersion: 1`: the new interfaces write the already-exported nullable `bible[].meta` objects documented in `Docs/Codex_Module_Schema.md`; there is no payload shape change, migration, public game API, or importer update required
+- [x] Full workspace strict typecheck, web lint, all 292 tests, production build, `git diff --check`, live service restart, and anonymous route probes are green; `/members` returns 200 and protected Codex routes return the expected authentication redirect
+- [ ] Authenticated desktop/mobile browser verification remains pending because no signed-in browser bridge was available during this release; do not interpret the successful anonymous boundary probe as private-screen visual QA

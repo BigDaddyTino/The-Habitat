@@ -491,6 +491,23 @@ export type StoryRegionMeta = {
   openQuestions: string[];
 };
 
+export const storyFactionStances = ["ally", "enemy", "rival", "client", "unknown"] as const;
+
+export type StoryFactionMeta = {
+  /** Intentionally open text: new kinds of power can emerge without a contract bump. */
+  scope: string | null;
+  seat: string | null;
+  leaders: string[];
+  relations: Array<{
+    faction: string;
+    stance: (typeof storyFactionStances)[number] | null;
+    notes: string | null;
+  }>;
+  goals: string[];
+  gameTag: string | null;
+  openQuestions: string[];
+};
+
 /**
  * What `GET /api/story/export` returns, and the only representation of the
  * story the game is built from.

@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryRegionMeta } from "@habitat/shared";
+import { storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryFactionMeta, type StoryRegionMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import gallery from "@/lib/model-gallery.json";
 
@@ -163,6 +163,8 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
         <label>Home<select onChange={(event) => setHome(event.target.value)} value={home}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
       </div>
 
+      <ModelPicker onChange={setModel} value={model} />
+
       <label>Aliases — one per line<textarea onChange={(event) => setAliases(event.target.value)} rows={2} value={aliases} /></label>
       <label>Appearance<textarea maxLength={2000} onChange={(event) => setAppearance(event.target.value)} rows={2} value={appearance} /></label>
       <label>Voice — what their dialogue sounds like<textarea maxLength={2000} onChange={(event) => setVoice(event.target.value)} rows={3} value={voice} /></label>
@@ -217,14 +219,98 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
         <textarea id={`actual-${entryId}`} maxLength={500} onChange={(event) => setStatusActual(event.target.value)} rows={2} value={statusActual} />
       </details>
 
-      <ModelPicker onChange={setModel} value={model} />
-
       <div className="sheet-grid">
         <label>Game ID — the tag the level actor carries<input maxLength={120} onChange={(event) => setGameId(event.target.value)} placeholder="derived from the slug when blank" value={gameId} /></label>
       </div>
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
 
       <SheetSubmit label="Save character sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Faction sheet — power, territory, leadership, and conflict
+// ---------------------------------------------------------------------------
+
+export function FactionSheet({ entryId, version, meta, factions, regions, characters }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  factions: SlugOption[];
+  regions: SlugOption[];
+  characters: SlugOption[];
+}) {
+  const source = record(meta);
+  const [scope, setScope] = useState(text(source.scope));
+  const [seat, setSeat] = useState(text(source.seat));
+  const [leaders, setLeaders] = useState(asArray(source.leaders).map(text));
+  const [relations, setRelations] = useState(asArray(source.relations).map((row) => ({
+    faction: text(record(row).faction),
+    stance: text(record(row).stance),
+    notes: text(record(row).notes),
+  })));
+  const [goals, setGoals] = useState(asArray(source.goals).map(text).join("\n"));
+  const [gameTag, setGameTag] = useState(text(source.gameTag));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+
+  const composed: StoryFactionMeta = {
+    scope: orNull(scope),
+    seat: orNull(seat),
+    leaders: leaders.filter(Boolean),
+    relations: relations
+      .filter((row) => row.faction.trim())
+      .map((row) => ({
+        faction: row.faction.trim(),
+        stance: (storyFactionStances as readonly string[]).includes(row.stance) ? row.stance as StoryFactionMeta["relations"][number]["stance"] : null,
+        notes: orNull(row.notes),
+      })),
+    goals: splitLines(goals),
+    gameTag: orNull(gameTag),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Faction sheet — define the power, then connect its people, territory, and rivals</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Kind of power<input maxLength={80} onChange={(event) => setScope(event.target.value)} placeholder="state, corporate, criminal, supernatural…" value={scope} /></label>
+        <label>Seat of power<select onChange={(event) => setSeat(event.target.value)} value={seat}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
+        <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Faction.Stormglass" value={gameTag} /></label>
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Leadership <RowButton label="Add a leader" onClick={() => setLeaders((rows) => [...rows, ""])} /></p>
+        {leaders.map((leader, index) => (
+          <div className="sheet-row sheet-row-compact" key={index}>
+            <select aria-label="Leader" onChange={(event) => setLeaders((rows) => rows.map((value, at) => at === index ? event.target.value : value))} value={leader}>
+              <option value="">Choose a character…</option>
+              {characters.map((character) => <option key={character.slug} value={character.slug}>{character.title}</option>)}
+            </select>
+            <RowButton label="Remove this leader" onClick={() => setLeaders((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Faction relationships <RowButton label="Add a relationship" onClick={() => setRelations((rows) => [...rows, { faction: "", stance: "unknown", notes: "" }])} /></p>
+        {relations.map((row, index) => (
+          <div className="sheet-row" key={index}>
+            <select aria-label="Faction" onChange={(event) => setRelations((rows) => rows.map((other, at) => at === index ? { ...other, faction: event.target.value } : other))} value={row.faction}><option value="">Choose a faction…</option>{factions.map((faction) => <option key={faction.slug} value={faction.slug}>{faction.title}</option>)}</select>
+            <select aria-label="Stance" onChange={(event) => setRelations((rows) => rows.map((other, at) => at === index ? { ...other, stance: event.target.value } : other))} value={row.stance}><option value="">Not decided</option>{storyFactionStances.map((stance) => <option key={stance} value={stance}>{stance}</option>)}</select>
+            <input aria-label="Relationship notes" maxLength={500} onChange={(event) => setRelations((rows) => rows.map((other, at) => at === index ? { ...other, notes: event.target.value } : other))} placeholder="What binds or divides them?" value={row.notes} />
+            <RowButton label="Remove this relationship" onClick={() => setRelations((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <label>Goals — one per line<textarea onChange={(event) => setGoals(event.target.value)} placeholder="What are they trying to change, protect, acquire, or destroy?" rows={4} value={goals} /></label>
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={3} value={openQuestions} /></label>
+      <SheetSubmit label="Save faction sheet" />
     </form>
   );
 }
