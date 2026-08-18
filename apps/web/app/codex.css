@@ -159,6 +159,30 @@
 .codex-needs-work-body code { color: var(--brass); font-family: var(--font-mono); font-size: 11px; }
 .codex-needs-work-body span { color: var(--muted); font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; }
 
+/* ---- Story threads ------------------------------------------------------ */
+
+.thread-section-hint { margin: -6px 0 14px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.thread-list { display: grid; gap: 12px; }
+.thread-card { border: 1px solid var(--line); border-left: 2px solid var(--proposed); padding: 18px 20px; background: var(--panel); }
+.thread-card.is-planted { border-left-color: #d8a657; }
+.thread-card.is-unset { border-left-color: var(--danger); }
+.thread-card.is-wired { border-left-color: var(--canon); }
+.thread-card header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.thread-card header a { color: var(--paper); font-family: var(--font-display); font-size: 22px; line-height: 1; }
+.thread-card header a:hover { color: var(--brass); }
+.thread-summary { margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.thread-sites { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 13px; border-top: 1px solid rgba(214,195,151,.1); padding-top: 12px; }
+.thread-sites ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
+.thread-sites li { display: grid; gap: 1px; }
+.thread-sites li a { color: var(--paper); font-size: 12px; font-weight: 700; }
+.thread-sites li span { color: var(--muted); font-family: var(--font-mono); font-size: 9px; }
+.thread-footnote { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.thread-footnote code { color: var(--brass); font-family: var(--font-mono); font-size: 11px; }
+.codex-section .section-heading h2 svg { margin-right: 6px; color: var(--brass); vertical-align: -2px; }
+
+.story-flag-hints { margin-top: -6px; color: #6e766d; font-size: 10px; line-height: 1.7; }
+.story-flag-hints code { color: var(--brass); font-family: var(--font-mono); font-size: 9px; }
+
 .codex-review-list { display: grid; gap: 12px; }
 .codex-review-list article { display: flex; justify-content: space-between; gap: 24px; align-items: center; padding: 21px; border: 1px solid var(--line); border-left: 2px solid var(--proposed); background: var(--panel); }
 .codex-review-list h2 { font-family: var(--font-display); font-size: 25px; line-height: 1.05; }

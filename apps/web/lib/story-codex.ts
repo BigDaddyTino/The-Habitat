@@ -343,6 +343,68 @@ export async function getStoryEntry(slug: string) {
 }
 
 /**
+ * The story-threads ledger: every FLAG, where the story plants it and where
+ * the story answers it, derived entirely by scanning effects and conditions
+ * for the canonical slugs. Nobody maintains this list — that is the point of
+ * flags having exactly one name each. A thread that is planted but never
+ * checked is a promise still waiting for its payoff; one that is checked but
+ * never planted is a payoff nothing sets up.
+ */
+export async function getStoryThreads() {
+  const [flags, nodes, edges] = await Promise.all([
+    db.storyEntry.findMany({
+      where: { kind: "FLAG", status: { in: workingStatuses } },
+      select: { id: true, slug: true, title: true, summary: true },
+      orderBy: { title: "asc" },
+    }),
+    db.storyNode.findMany({
+      where: { status: { in: workingStatuses } },
+      select: { id: true, key: true, title: true, effects: true, arc: { select: { slug: true, title: true } } },
+    }),
+    db.storyEdge.findMany({
+      where: { status: { in: workingStatuses } },
+      select: { id: true, label: true, condition: true, effects: true, fromNodeId: true, fromNode: { select: { title: true } }, arc: { select: { slug: true, title: true } } },
+    }),
+  ]);
+
+  // Word-boundary-ish match so one slug never matches inside a longer one.
+  const touches = (text: string | null, slug: string) =>
+    text !== null && new RegExp(`(^|[^a-z0-9-])${slug}([^a-z0-9-]|$)`).test(text);
+
+  type ThreadSite = { label: string; detail: string; arcSlug: string; arcTitle: string; nodeId: string };
+
+  const threads = flags.map((flag) => {
+    const setAt: ThreadSite[] = [
+      ...nodes
+        .filter((node) => node.effects.some((line) => touches(line, flag.slug)))
+        .map((node) => ({ label: node.title, detail: "scene effect", arcSlug: node.arc.slug, arcTitle: node.arc.title, nodeId: node.id })),
+      ...edges
+        .filter((edge) => edge.effects.some((line) => touches(line, flag.slug)))
+        .map((edge) => ({ label: edge.label ?? "Continue", detail: `choice out of "${edge.fromNode.title}"`, arcSlug: edge.arc.slug, arcTitle: edge.arc.title, nodeId: edge.fromNodeId })),
+    ];
+    const checkedAt: ThreadSite[] = edges
+      .filter((edge) => touches(edge.condition, flag.slug))
+      .map((edge) => ({ label: edge.label ?? "Continue", detail: `condition on a choice out of "${edge.fromNode.title}"`, arcSlug: edge.arc.slug, arcTitle: edge.arc.title, nodeId: edge.fromNodeId }));
+
+    const state: "planted" | "unset" | "wired" | "dormant" =
+      setAt.length > 0 && checkedAt.length > 0 ? "wired" : setAt.length > 0 ? "planted" : checkedAt.length > 0 ? "unset" : "dormant";
+
+    return { slug: flag.slug, title: flag.title, summary: flag.summary, state, setAt, checkedAt };
+  });
+
+  const order: Record<string, number> = { planted: 0, unset: 1, dormant: 2, wired: 3 };
+  threads.sort((left, right) => order[left.state] - order[right.state] || left.title.localeCompare(right.title));
+
+  return {
+    threads,
+    planted: threads.filter((thread) => thread.state === "planted").length,
+    unset: threads.filter((thread) => thread.state === "unset").length,
+    wired: threads.filter((thread) => thread.state === "wired").length,
+    dormant: threads.filter((thread) => thread.state === "dormant").length,
+  };
+}
+
+/**
  * The needs-work dashboard: unanswered corners of the world, found by scanning
  * rather than by anyone maintaining a to-do list. Null meta, open questions,
  * and wiki-links pointing at slugs nobody has written yet — all of which are

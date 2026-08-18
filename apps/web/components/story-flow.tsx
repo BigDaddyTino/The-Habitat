@@ -472,7 +472,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
                         </button>
                         {editingEdgeId === edge.id ? (
                           <div className="flow-editor flow-edge-editor">
-                            <EdgeEditor canReview={canReview} edge={edge} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
+                            <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
                           </div>
                         ) : null}
                       </div>
@@ -508,7 +508,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
                       </button>
                       {editingEdgeId === edge.id ? (
                         <div className="flow-editor flow-edge-editor">
-                          <EdgeEditor canReview={canReview} edge={edge} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
+                          <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
                         </div>
                       ) : null}
                     </div>

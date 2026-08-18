@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { BookOpen, GitBranch, Inbox, Plus, Scale } from "lucide-react";
+import { BookOpen, GitBranch, Inbox, Plus, Scale, Sprout } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { getStoryActivity, getStoryReviewQueue, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getStoryActivity, getStoryReviewQueue, getStoryThreads, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { createArc } from "./actions";
 
@@ -34,7 +34,7 @@ function auditTone(action: string, statusTo: string | null): { label: string; to
 export default async function CodexPage() {
   await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
-  const [arcs, activity, queue, rules, regions] = await Promise.all([listStoryArcs(), getStoryActivity(50), canReview ? getStoryReviewQueue() : Promise.resolve(null), listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" })]);
+  const [arcs, activity, queue, rules, regions, threads] = await Promise.all([listStoryArcs(), getStoryActivity(50), canReview ? getStoryReviewQueue() : Promise.resolve(null), listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" }), getStoryThreads()]);
   const mainline = arcs.filter((arc) => arc.isMainline);
   const side = arcs.filter((arc) => !arc.isMainline);
   const laws = rules.filter((rule) => rule.status === "CANON");
@@ -53,6 +53,7 @@ export default async function CodexPage() {
 
       <div className="codex-quicklinks">
         <Link className="codex-quicklink" href="/codex/bible"><BookOpen aria-hidden="true" size={18} /><span><strong>The bible</strong><small>Theme, regions, creatures, characters — read this before you write.</small></span></Link>
+        <Link className="codex-quicklink" href="/codex/threads"><Sprout aria-hidden="true" size={18} /><span><strong>Story threads</strong><small>{threads.planted > 0 ? `${threads.planted} promise${threads.planted === 1 ? "" : "s"} planted and waiting for a payoff.` : threads.threads.length > 0 ? "Every promise the story has made, and where it stands." : "Set a flag in one scene, answer it chapters later — tracked here."}</small></span></Link>
         {/* The approval ladder is gone; the queue only resurfaces if legacy
             proposed material still exists somewhere. */}
         {canReview && queue && queue.total > 0 ? <Link className="codex-quicklink" href="/codex/review"><Inbox aria-hidden="true" size={18} /><span><strong>Review queue</strong><small>{`${queue.total} older contribution${queue.total === 1 ? "" : "s"} still marked proposed.`}</small></span></Link> : null}

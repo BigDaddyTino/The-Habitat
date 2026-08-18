@@ -43,6 +43,20 @@ function StorySubmit({ children, pendingLabel, className = "save-server", disabl
   return <button className={className} disabled={disabled || pending} type="submit">{pending ? pendingLabel : children}</button>;
 }
 
+/**
+ * The flags that exist, shown where effects are typed — a thread only tracks
+ * if the slug is spelled exactly, and nobody should have to remember them.
+ */
+function FlagHints({ flags }: { flags: LibraryEntry[] }) {
+  if (flags.length === 0) return null;
+  return (
+    <p className="story-flag-hints">
+      Flags the story can set or check: {flags.map((flag, index) => <span key={flag.id}>{index > 0 ? " · " : ""}<code>{flag.slug}</code></span>)}
+      {" — "}write <code>set flag: the-slug</code> in effects; every use is tracked on the threads page.
+    </p>
+  );
+}
+
 function NewNodeForm({ arcId }: { arcId: string }) {
   return <form action={createNode} className="story-form">
     <p className="eyebrow">Add to this arc</p>
@@ -136,6 +150,7 @@ export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntrie
       <label>Summary<textarea defaultValue={node.summary ?? ""} key={`summary-${node.id}-${node.version}`} maxLength={500} name="summary" rows={3} /></label>
       <label>Scene text<textarea defaultValue={node.body ?? ""} key={`body-${node.id}-${node.version}`} maxLength={20000} name="body" placeholder="Narration, dialogue, direction — whatever the game needs from this beat." rows={12} /></label>
       <label>Effects<textarea defaultValue={node.effects.join("\n")} key={`effects-${node.id}-${node.version}`} name="effects" placeholder="One per line: give item, set flag, shift reputation. The game interprets these." rows={2} /></label>
+      <FlagHints flags={libraryEntries.filter((entry) => entry.kind === "FLAG")} />
       <label>Rewards<textarea defaultValue={node.rewards.join("\n")} key={`rewards-${node.id}-${node.version}`} name="rewards" placeholder="One per line: what finishing this pays. Notable rewards should also be ITEM entries, referenced below." rows={2} /></label>
       <StorySubmit pendingLabel="Saving…">Save card</StorySubmit>
     </form> : <div className="story-readonly-copy">{node.summary ? <p>{node.summary}</p> : null}<div>{node.body || "No scene text has been written yet."}</div></div>}
@@ -179,7 +194,7 @@ export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntrie
   </>;
 }
 
-export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean; nodes: StoryNodeRef[] }) {
+export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags = [] }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean; nodes: StoryNodeRef[]; flags?: LibraryEntry[] }) {
   const canEdit = isStoryContentEditable(edge.status, canReview);
   return <>
     <div className="story-edge-route"><span>{fromTitle}</span><GitBranch aria-hidden="true" size={16} /><span>{toTitle}</span></div>
@@ -193,6 +208,7 @@ export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes }: { edg
       </select></label>
       <label>Condition<textarea defaultValue={edge.condition ?? ""} maxLength={300} name="condition" placeholder="Optional requirement, flag, or designer note." rows={3} /></label>
       <label>Effects<textarea defaultValue={edge.effects.join("\n")} name="effects" placeholder="One per line: what choosing this does. The game interprets these." rows={2} /></label>
+      <FlagHints flags={flags.filter((entry) => entry.kind === "FLAG")} />
       <StorySubmit pendingLabel="Saving…">Save branch</StorySubmit>
     </form>}
     <div className="story-inspector-meta">
@@ -236,7 +252,7 @@ export function StoryWorkbench({ arcId, node, edge, fromTitle, toTitle, problems
       <NodeEditor arcId={arcId} arcRefs={arcRefs} canReview={canReview} key={node.id} libraryEntries={libraryEntries} node={node} viewerUserId={viewerUserId} />
     </> : edge ? <>
       <header className="story-inspector-head"><div><p className="eyebrow">Story branch</p><h2>{edge.label || "Continuation"}</h2></div><button aria-label="Close the inspector" className="icon-action" onClick={onClose} type="button"><X aria-hidden="true" size={15} /></button></header>
-      <EdgeEditor canReview={canReview} edge={edge} fromTitle={fromTitle ?? "Unknown card"} nodes={nodes} toTitle={toTitle ?? "Unknown card"} />
+      <EdgeEditor canReview={canReview} edge={edge} flags={libraryEntries} fromTitle={fromTitle ?? "Unknown card"} nodes={nodes} toTitle={toTitle ?? "Unknown card"} />
     </> : <>
       <header className="story-inspector-head"><div><p className="eyebrow">Board tools</p><h2>Build the next beat</h2></div></header>
       <p className="story-inspector-hint">Select a card to write it, or select a branch to label the player&apos;s choice. Drag from the right handle of one card to the left handle of another to connect them.</p>
