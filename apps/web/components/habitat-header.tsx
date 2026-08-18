@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Award, CalendarRange, ChevronDown, Crown, Landmark, LogIn, Menu, NotebookPen, Radio, ScrollText, Settings, Swords, Target, Trophy, UserRound, Users } from "lucide-react";
 import { auth } from "@/auth";
+import { NavDisclosure } from "@/components/nav-disclosure";
 import { getLiveStreamSummary } from "@/lib/stream-showcase";
 
 const navigation = [
@@ -51,7 +52,7 @@ export async function HabitatHeader() {
           </Link>
         ))}
         {streamLink}
-        <details className="nav-cluster">
+        <NavDisclosure className="nav-cluster">
           <summary aria-label="More destinations"><Menu aria-hidden="true" size={16} strokeWidth={1.8} /><span className="nav-label">Explore</span><ChevronDown aria-hidden="true" className="nav-cluster-caret" size={13} /></summary>
           <div className="nav-cluster-panel">
             <p>Clubhouse</p>
@@ -62,7 +63,7 @@ export async function HabitatHeader() {
             <p>Progress</p>
             {progressNavigation.map(({ href, label, icon: Icon }) => <Link href={href} key={href}><Icon aria-hidden="true" size={16} /><span>{label}</span></Link>)}
           </div>
-        </details>
+        </NavDisclosure>
       </nav>
       <div className="header-actions">
         <div className="header-status"><span /> Registry online</div>
@@ -75,7 +76,7 @@ export async function HabitatHeader() {
           <Link className="profile-link" href="/sign-in"><LogIn aria-hidden="true" size={15} /> Sign in</Link>
         )}
       </div>
-      <details className="mobile-navigation">
+      <NavDisclosure className="mobile-navigation">
         <summary><Menu aria-hidden="true" size={19} /><span>Menu</span><ChevronDown aria-hidden="true" size={14} /></summary>
         <div className="mobile-navigation-panel">
           <p>Clubhouse</p>
@@ -99,7 +100,7 @@ export async function HabitatHeader() {
             ) : <Link href="/sign-in"><LogIn aria-hidden="true" size={18} /><span>Sign in</span></Link>}
           </nav>
         </div>
-      </details>
+      </NavDisclosure>
     </header>
   );
 }
