@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, BookOpen, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Plus, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
@@ -133,16 +133,21 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {entry.body ? entry.body.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
           {isCharacter && label(meta.storyRole) ? <blockquote><Sparkles aria-hidden="true" size={16} /><div><strong>Why this character exists</strong><p>{String(meta.storyRole)}</p></div></blockquote> : null}
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
-          {isRegion && containedPlaces.length ? <div className="entity-contained-places">
+          {isRegion ? <div className="entity-contained-places">
             <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>
-            <ul>{containedPlaces.map((place) => {
+            {containedPlaces.length ? <ul>{containedPlaces.map((place) => {
               const placeBrand = getRegionBranding(place.slug);
               return <li key={place.slug}>
                 {placeBrand ? <img alt="" src={placeBrand.keyart} /> : null}
                 <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {place.summary ? <p>{place.summary}</p> : null}</div>
               </li>;
-            })}</ul>
+            })}</ul> : <p className="story-inspector-hint">Nothing is placed inside this yet.</p>}
+            {/* The obvious place to think "add a POI here" is the region
+                itself, so the button lives here and carries the parent with it. */}
+            <Link className="entity-add-place" href={`/codex/library/regions?parent=${entry.slug}&placeKind=site#new-entry`}>
+              <Plus aria-hidden="true" size={13} /> Add a place in {entry.title}
+            </Link>
           </div> : null}
         </article>
 

@@ -5,11 +5,13 @@ import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
   isValidStoryKey,
   isStoryContentEditable,
+  parseStoryPlaceKind,
   slugifyStoryKey,
   storyEndingKinds,
   storyEntryKinds,
   storyLockTtlMs,
   storyNodeKinds,
+  type StoryRegionMeta,
   type StoryStatus,
 } from "@habitat/shared";
 import { revalidatePath } from "next/cache";
@@ -730,16 +732,50 @@ export async function createEntry(formData: FormData) {
   const existing = await db.storyEntry.findUnique({ where: { slug }, select: { id: true } });
   if (existing) throw new Error("The bible already has an entry with that name.");
 
+  // A place is born already placed. Creating it loose and adopting it later
+  // through the sheet is what left new POIs sitting in "not placed in a region
+  // yet" — so where it sits and what kind of place it is are asked here, and
+  // written as a real region sheet rather than left null.
+  const place = parsed.data.kind === "REGION" ? parseStoryPlaceKind(formData.get("placeKind")) : null;
+  const parentSlug = parsed.data.kind === "REGION" ? metaSlug.safeParse(formData.get("parent")) : null;
+  const parent = parentSlug?.success ? parentSlug.data : null;
+  const placeMeta = place || parent
+    ? {
+        type: place?.type ?? null,
+        settlementTier: place?.settlementTier ?? null,
+        parent,
+        biome: null,
+        control: [],
+        population: null,
+        connections: [],
+        status: null,
+        gameTag: null,
+        openQuestions: [],
+      } satisfies StoryRegionMeta
+    : null;
+
   await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.create({
-      data: { kind: parsed.data.kind, slug, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, status: creationStatus(), createdByUserId: user.id },
+      data: {
+        kind: parsed.data.kind,
+        slug,
+        title: parsed.data.title,
+        summary: parsed.data.summary,
+        body: parsed.data.body,
+        status: creationStatus(),
+        createdByUserId: user.id,
+        ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue } : {}),
+      },
     });
-    await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"` });
+    const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}` : "";
+    await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"${placed}` });
   });
 
   refreshCodex();
   revalidatePath(`/codex/bible/${slug}`);
-  redirect(`/codex/bible/${slug}`);
+  // `created` opens the editing workspace on arrival, so the writer keeps
+  // filling the sheet in instead of landing on a page that looks finished.
+  redirect(`/codex/bible/${slug}?created=1`);
 }
 
 export async function updateEntry(formData: FormData) {

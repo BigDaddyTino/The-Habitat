@@ -7,8 +7,10 @@ import {
   isStoryContentEditable,
   isStoryPresenceFresh,
   isValidStoryKey,
+  parseStoryPlaceKind,
   slugifyStoryKey,
   storyLockTtlMs,
+  storyPlaceKinds,
   storyPresenceTtlMs,
   type StoryGraphEdge,
   type StoryGraphNode,
@@ -172,4 +174,31 @@ test("presence ages out rather than being deleted on exit", () => {
   const now = new Date("2026-08-17T12:00:00Z");
   assert.equal(isStoryPresenceFresh(new Date(now.getTime() - 1000), now), true);
   assert.equal(isStoryPresenceFresh(new Date(now.getTime() - storyPresenceTtlMs - 1), now), false);
+});
+
+// --- the place picker -------------------------------------------------------
+
+test("one place-kind choice carries both the type and the settlement tier", () => {
+  assert.deepEqual(parseStoryPlaceKind("site"), { type: "site", settlementTier: null });
+  assert.deepEqual(parseStoryPlaceKind("settlement:village"), { type: "settlement", settlementTier: "village" });
+  assert.deepEqual(parseStoryPlaceKind("settlement:major-city"), { type: "settlement", settlementTier: "major-city" });
+  assert.deepEqual(parseStoryPlaceKind("region"), { type: "region", settlementTier: null });
+});
+
+test("an unknown place kind is refused rather than guessed at", () => {
+  // The value arrives from a form, so anything can be posted; a null here
+  // leaves the sheet's type unset instead of inventing a tier.
+  assert.equal(parseStoryPlaceKind("settlement"), null);
+  assert.equal(parseStoryPlaceKind("hamlet"), null);
+  assert.equal(parseStoryPlaceKind(""), null);
+  assert.equal(parseStoryPlaceKind(null), null);
+  assert.equal(parseStoryPlaceKind(undefined), null);
+});
+
+test("every offered place kind parses, and only settlements carry a tier", () => {
+  for (const kind of storyPlaceKinds) {
+    const parsed = parseStoryPlaceKind(kind.value);
+    assert.deepEqual(parsed, { type: kind.type, settlementTier: kind.settlementTier });
+    if (kind.type !== "settlement") assert.equal(parsed?.settlementTier, null, `${kind.value} must not carry a tier`);
+  }
 });

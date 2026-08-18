@@ -59,6 +59,12 @@
 .region-atlas-places li a>img,.region-place-fallback{width:72px;height:54px;object-fit:cover}.region-place-fallback{display:grid;place-items:center;background:#202820;color:#788678}.region-atlas-places li a>span:nth-child(2){display:flex;min-width:0;flex-direction:column;gap:3px}.region-atlas-places li strong{overflow:hidden;color:#ded0ab;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.region-atlas-places li a>svg{margin-right:10px;color:var(--region-accent,#9a7940)}
 .region-atlas-places li a:hover{background:#1e241d;color:#f1e3bd}
 .region-atlas-places li i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.region-atlas-add,.entity-add-place{display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;margin:10px 0 0;border:1px dashed #6d7a5f;padding:0 12px;color:#c3cba4;font:700 9px var(--font-mono);letter-spacing:.06em;text-decoration:none;text-transform:uppercase;transition:.18s ease}
+/* order 2 puts it after the list of places; auto margin pins it to the bottom
+   of the card so the three cards' buttons line up whatever they contain. */
+.region-atlas-add{order:2;margin-top:auto;padding-top:0}
+.region-atlas-add:hover,.entity-add-place:hover{border-color:#a28247;border-style:solid;background:#1b1f16;color:#efd9a6}
+.entity-add-place{margin-top:14px}
 .region-atlas-unplaced{display:grid;grid-template-columns:minmax(240px,.9fr) 1.1fr;gap:20px;margin-top:14px;border:1px dashed #5c5a43;padding:18px 20px;background:#14170f}
 .region-atlas-unplaced .eyebrow{display:flex;align-items:center;gap:6px}
 .region-atlas-unplaced p:not(.eyebrow){margin:7px 0 0;color:#8f998f;font-size:11px;line-height:1.6}

@@ -8,13 +8,20 @@ import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
+import { storyPlaceKinds } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 
 
-export async function StoryEntityDirectory({ collectionSlug, search }: { collectionSlug: StoryCollectionSlug; search?: string }) {
+export async function StoryEntityDirectory({ collectionSlug, search, parent, placeKind }: {
+  collectionSlug: StoryCollectionSlug;
+  search?: string;
+  /** Pre-selected parent region, from an "add a place here" link. */
+  parent?: string;
+  placeKind?: string;
+}) {
   const collection = storyCollections[collectionSlug];
   const entries = await listStoryEntries({ kind: collection.kind, search });
   const castingImages = modelGalleryImages.filter((image) => image.pack === "Warriors_Pack" || image.pack === "CitySampleCrowd").slice(0, 6);
@@ -41,6 +48,14 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
       current = next;
     }
   };
+  const isRegionLibrary = collection.kind === "REGION";
+  // Everything already in the world can hold a place inside it — a POI can sit
+  // in a zone as easily as in a whole region — so the parent list is every
+  // region, top-level ones first.
+  const placeParents = isRegionLibrary
+    ? [...entries].sort((a, b) => Number(asRecord(b.meta).type === "region") - Number(asRecord(a.meta).type === "region") || a.title.localeCompare(b.title))
+    : [];
+  const addingInside = parent ? entries.find((entry) => entry.slug === parent) ?? null : null;
   const contained = new Map<string, typeof entries>();
   const unplaced: typeof entries = [];
   if (atlasActive) {
@@ -93,6 +108,9 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
               </Link>
               <div className="region-atlas-places">
                 <p className="eyebrow">{places.length ? `${places.length} place${places.length === 1 ? "" : "s"} inside` : "Nothing placed here yet"}</p>
+                <Link className="region-atlas-add" href={`/codex/library/regions?parent=${region.slug}&placeKind=site#new-entry`}>
+                  <Plus aria-hidden="true" size={12} /> Add a place in {region.title}
+                </Link>
                 {places.length
                   ? <ul>{places.map((place) => {
                       const placeBrand = getRegionBranding(place.slug);
@@ -160,11 +178,23 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
         })}
       </div> : <div className="entity-empty"><Boxes aria-hidden="true" size={25} /><div><h2>No {collection.label.toLowerCase()} found.</h2><p>{search ? "Try a different search, or create the missing entry below." : `Create the first ${collection.singular} and start connecting the world.`}</p></div></div>}
 
-      <details className="entity-create-panel" id="new-entry" open={entries.length === 0 && !search}>
-        <summary><Plus aria-hidden="true" size={15} /><span><strong>Add a new {collection.singular}</strong><small>Start with the pitch. The full visual sheet opens next.</small></span></summary>
+      <details className="entity-create-panel" id="new-entry" open={(entries.length === 0 && !search) || Boolean(addingInside) || Boolean(placeKind)}>
+        <summary><Plus aria-hidden="true" size={15} /><span>
+          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : `Add a new ${collection.singular}`}</strong>
+          <small>{isRegionLibrary ? "A point of interest, a settlement, a zone, or a whole region — say where it sits and it files itself." : "Start with the pitch. The full visual sheet opens next."}</small>
+        </span></summary>
         <form action={createEntry} className="story-form">
           <input name="kind" type="hidden" value={collection.kind} />
-          <label>Name<input maxLength={120} name="title" placeholder={collection.placeholder} required type="text" /></label>
+          <label>Name<input maxLength={120} name="title" placeholder={isRegionLibrary ? "Blackreef Watchtower" : collection.placeholder} required type="text" /></label>
+          {isRegionLibrary ? <div className="sheet-grid">
+            <label>What kind of place<select defaultValue={placeKind ?? "site"} name="placeKind">
+              {storyPlaceKinds.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select></label>
+            <label>Inside which region<select defaultValue={addingInside?.slug ?? ""} name="parent">
+              <option value="">Nowhere yet — a top-level region</option>
+              {placeParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select></label>
+          </div> : null}
           <label>One-line pitch<textarea maxLength={500} name="summary" placeholder={collection.summaryPlaceholder} rows={2} /></label>
           <label>What writers need to know<textarea maxLength={20000} name="body" placeholder="Write naturally. You can refine this later from the dossier." rows={6} /></label>
           <button className="save-server" type="submit"><Sparkles aria-hidden="true" size={14} /> Create and open dossier</button>

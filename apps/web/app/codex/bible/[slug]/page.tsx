@@ -14,10 +14,10 @@ import { addComment, resolveComment, setStoryStatus } from "@/app/codex/actions"
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { collectionForKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
 
-export default async function StoryEntryPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function StoryEntryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ created?: string }> }) {
   const user = await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
-  const { slug } = await params;
+  const [{ slug }, { created }] = await Promise.all([params, searchParams]);
   const entry = await getStoryEntry(slug);
   if (!entry) notFound();
 
@@ -57,7 +57,7 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
 
       <div className="codex-entry-grid codex-entry-workspace-grid">
         <div className="codex-entry-main">
-          <details className="entry-edit-workspace" open={entry.meta === null && needsPickers}>
+          <details className="entry-edit-workspace" open={Boolean(created) || (entry.meta === null && needsPickers)}>
             <summary><Pencil aria-hidden="true" size={15} /><span><strong>Edit {storyEntryKindLabels[entry.kind].toLowerCase()}</strong><small>Writing reference, structured facts, and story connections</small></span></summary>
             <div className="entry-edit-workspace-body">
               <StoryEntryEditor canReview={canReview} entry={entry} viewerUserId={user.id} />

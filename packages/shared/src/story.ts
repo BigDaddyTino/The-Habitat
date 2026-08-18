@@ -508,6 +508,35 @@ export type StoryFactionMeta = {
   openQuestions: string[];
 };
 
+/**
+ * One picker for "what kind of place is this", because `type` and
+ * `settlementTier` are two fields describing one decision, and asking a writer
+ * to fill both — while quietly ignoring the tier unless the type happens to be
+ * "settlement" — is how the region sheet reads as two puzzles instead of one
+ * question. The option value carries both; the server splits it.
+ */
+export const storyPlaceKinds = [
+  { value: "site", label: "Site — a camp, fort, quarry, or other point of interest", type: "site", settlementTier: null },
+  { value: "landmark", label: "Landmark — a named feature people navigate by", type: "landmark", settlementTier: null },
+  { value: "settlement:village", label: "Village — a small settlement", type: "settlement", settlementTier: "village" },
+  { value: "settlement:town", label: "Town — a medium settlement", type: "settlement", settlementTier: "town" },
+  { value: "settlement:city", label: "City — a large settlement", type: "settlement", settlementTier: "city" },
+  { value: "settlement:major-city", label: "Major city — one of the great cities", type: "settlement", settlementTier: "major-city" },
+  { value: "zone", label: "Zone — a stretch of ground inside a region", type: "zone", settlementTier: null },
+  { value: "region", label: "Region — a whole landmass, sea, or territory", type: "region", settlementTier: null },
+] as const satisfies ReadonlyArray<{
+  value: string;
+  label: string;
+  type: (typeof storyRegionTypes)[number];
+  settlementTier: (typeof storySettlementTiers)[number] | null;
+}>;
+
+/** Splits a place-kind picker value back into the two stored fields. */
+export function parseStoryPlaceKind(value: unknown): { type: (typeof storyRegionTypes)[number]; settlementTier: (typeof storySettlementTiers)[number] | null } | null {
+  const match = storyPlaceKinds.find((kind) => kind.value === value);
+  return match ? { type: match.type, settlementTier: match.settlementTier } : null;
+}
+
 /** The taxonomy law as a picker — never free text. */
 export const storyCreatureCategories = ["natural", "magical", "monstrosity", "abomination", "supernatural"] as const;
 
