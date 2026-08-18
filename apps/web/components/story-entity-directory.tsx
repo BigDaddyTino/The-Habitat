@@ -5,6 +5,7 @@ import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { getFactionBranding } from "@/lib/faction-branding";
+import { getRegionBranding } from "@/lib/region-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
@@ -79,17 +80,28 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
           {topRegions.map((region) => {
             const regionMeta = asRecord(region.meta);
             const places = contained.get(region.slug) ?? [];
-            return <article className="region-atlas-card" key={region.id}>
+            const regionBrand = getRegionBranding(region.slug);
+            return <article className="region-atlas-card" key={region.id} style={regionBrand ? { "--region-accent": regionBrand.accent } as React.CSSProperties : undefined}>
               <Link className="region-atlas-head" href={`/codex/bible/${region.slug}`}>
-                <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
-                <h2>{region.title}</h2>
-                <p>{region.summary || "This region still needs its one-line pitch."}</p>
-                <strong>Open the region <ArrowRight aria-hidden="true" size={12} /></strong>
+                {regionBrand ? <img alt={`${region.title} environment key art`} src={regionBrand.keyart} /> : null}
+                <div className="region-atlas-head-copy">
+                  <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
+                  <h2>{region.title}</h2>
+                  <p>{region.summary || "This region still needs its one-line pitch."}</p>
+                  <strong>Open the region <ArrowRight aria-hidden="true" size={12} /></strong>
+                </div>
               </Link>
               <div className="region-atlas-places">
                 <p className="eyebrow">{places.length ? `${places.length} place${places.length === 1 ? "" : "s"} inside` : "Nothing placed here yet"}</p>
                 {places.length
-                  ? <ul>{places.map((place) => <li key={place.id}><Link href={`/codex/bible/${place.slug}`}><span>{place.title}</span><i>{placeKindLabel(asRecord(place.meta))}</i></Link></li>)}</ul>
+                  ? <ul>{places.map((place) => {
+                      const placeBrand = getRegionBranding(place.slug);
+                      return <li key={place.id}><Link href={`/codex/bible/${place.slug}`}>
+                        {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
+                        <span><strong>{place.title}</strong><i>{placeKindLabel(asRecord(place.meta))}</i></span>
+                        <ArrowRight aria-hidden="true" size={11} />
+                      </Link></li>;
+                    })}</ul>
                   : <p className="story-inspector-hint">Create a place below and pick this as its parent region.</p>}
               </div>
             </article>;
@@ -105,6 +117,7 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
+          const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
           const characterFactionBrands = entry.kind === "CHARACTER"
             ? asRecords(meta.factions).flatMap((membership) => {
                 const slug = typeof membership.faction === "string" ? membership.faction : "";
@@ -112,7 +125,7 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
                 return brand ? [{ slug, brand }] : [];
               })
             : [];
-          const activeBrand = factionBrand ?? characterFactionBrands[0]?.brand ?? null;
+          const activeBrand = factionBrand ?? regionBrand ?? characterFactionBrands[0]?.brand ?? null;
           const detail = entry.kind === "CHARACTER"
             ? [meta.species, asRecord(meta.magic).origin].filter(Boolean).join(" · ")
             : entry.kind === "FACTION"
@@ -121,7 +134,7 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
                 ? [meta.type, meta.biome].filter(Boolean).join(" · ")
                 : "";
           return <Link
-            className={`entity-card${factionBrand ? " entity-card-faction" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
+            className={`entity-card${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
             href={`/codex/bible/${entry.slug}`}
             key={entry.id}
             style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
@@ -130,7 +143,7 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}

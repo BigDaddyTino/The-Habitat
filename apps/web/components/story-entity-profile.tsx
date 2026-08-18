@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
 import { getFactionBranding } from "@/lib/faction-branding";
+import { getRegionBranding } from "@/lib/region-branding";
 import { modelPreview } from "@/lib/story-library";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
@@ -43,6 +44,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
+  const regionBrand = isRegion ? getRegionBranding(entry.slug) : null;
   const characterAffiliations = isCharacter
     ? rows(meta.factions).flatMap((membership) => {
         const slug = label(membership.faction);
@@ -57,7 +59,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         }];
       })
     : [];
-  const activeBrand = factionBrand ?? characterAffiliations[0]?.brand ?? null;
+  const activeBrand = factionBrand ?? regionBrand ?? characterAffiliations[0]?.brand ?? null;
   const questions = words(meta.openQuestions);
   // Children get their own organized section above; repeating each one in the
   // aside as "belongs inside this region" would just be the mess twice.
@@ -83,15 +85,15 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   return (
     <>
       <header
-        className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}${characterAffiliations.length ? " entity-profile-character-affiliated" : ""}`}
+        className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}${regionBrand ? " entity-profile-region-branded" : ""}${characterAffiliations.length ? " entity-profile-character-affiliated" : ""}`}
         style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
       >
         <div className="entity-profile-art">
           {factionBrand ? <>
             <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
             <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {factionBrand ? <span>Faction identity · original key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
           <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
@@ -122,10 +124,14 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
           {isRegion && containedPlaces.length ? <div className="entity-contained-places">
             <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>
-            <ul>{containedPlaces.map((place) => <li key={place.slug}>
-              <Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
-              {place.summary ? <p>{place.summary}</p> : null}
-            </li>)}</ul>
+            <ul>{containedPlaces.map((place) => {
+              const placeBrand = getRegionBranding(place.slug);
+              return <li key={place.slug}>
+                {placeBrand ? <img alt="" src={placeBrand.keyart} /> : null}
+                <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+                {place.summary ? <p>{place.summary}</p> : null}</div>
+              </li>;
+            })}</ul>
           </div> : null}
         </article>
 
