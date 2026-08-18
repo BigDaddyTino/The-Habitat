@@ -92,7 +92,10 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
 
 ```json
 {
-  "type": "region | zone | settlement | landmark | site",
+  "type": "region | zone | settlement | landmark | site | destination",
+  // `destination` added Habitat-side 2026-08-18 (additive, contract still v1):
+  // the third rung, a place inside a place — the shop inside the district.
+  // See Docs/STORY_CODEX.md. An importer may treat it exactly like `site`.
   "settlementTier": "village | town | city | major-city   // only when type = settlement",
   "parent": "region slug — hierarchy: forward-camp-kestrel -> the-starting-island; port-arcadia -> the-peninsula",
   "biome": "string: 'jungle', 'tropical coast', ...",

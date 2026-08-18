@@ -4,6 +4,8 @@ import {
   analyzeStoryGraph,
   findStoryEntryNodeKeys,
   isStoryPresenceFresh,
+  storyPlaceAncestry,
+  storyPlaceDescendants,
   storyPresenceTtlMs,
   type StoryEntryKind,
   type StoryGraphEdge,
@@ -11,6 +13,7 @@ import {
   type StoryEndingKind,
   type StoryGraphProblem,
   type StoryNodeKind,
+  type StoryPlaceLink,
   type StoryStatus,
 } from "@habitat/shared";
 
@@ -312,7 +315,7 @@ export async function getStoryEntry(slug: string) {
     },
   }), db.storyEntry.findMany({
     where: { slug: { not: slug }, status: { in: workingStatuses } },
-    select: { slug: true, title: true, kind: true, meta: true },
+    select: { id: true, slug: true, title: true, kind: true, meta: true },
     orderBy: [{ kind: "asc" }, { title: "asc" }],
   })]);
   if (!entry) return null;
@@ -350,7 +353,54 @@ export async function getStoryEntry(slug: string) {
     if (rows(meta.connections).some((row) => referencesSlug(row.to))) add("connects to this region");
   }
 
+  // The world hierarchy — region > place > destination — and the quests that
+  // begin somewhere in it. An arc records its pickup place, but nothing ever
+  // read that back the other way, so a place could be the door into a quest
+  // and say nothing about it.
+  let placeAncestry: Array<{ slug: string; title: string }> = [];
+  let arcsHere: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }> = [];
+
+  if (entry.kind === "REGION") {
+    const places = possibleConnections.filter((candidate) => candidate.kind === "REGION");
+    const parentOf = (meta: unknown) => {
+      const value = (meta as Record<string, unknown> | null)?.parent;
+      return typeof value === "string" && value.trim() ? value.trim() : null;
+    };
+    const links: StoryPlaceLink[] = [
+      { slug: entry.slug, parent: parentOf(entry.meta) },
+      ...places.map((place) => ({ slug: place.slug, parent: parentOf(place.meta) })),
+    ];
+    const titleOf = new Map(places.map((place) => [place.slug, place.title]));
+
+    // Nearest container first from the helper; the breadcrumb reads outermost
+    // first, the way an address does.
+    placeAncestry = storyPlaceAncestry(entry.slug, links)
+      .map((ancestor) => ({ slug: ancestor, title: titleOf.get(ancestor) ?? ancestor }))
+      .reverse();
+
+    // A quest at the grocery store is also a quest in Shattermarket, so the
+    // rollup reaches down the whole tree and says where each one actually is.
+    const inside = storyPlaceDescendants(entry.slug, links);
+    const idOf = new Map(places.map((place) => [place.slug, place.id]));
+    const hereIds = [entry.id, ...inside.flatMap((child) => (idOf.has(child) ? [idOf.get(child) as string] : []))];
+    const arcs = await db.storyArc.findMany({
+      where: { status: { in: workingStatuses }, regionEntryId: { in: hereIds } },
+      select: { slug: true, title: true, isMainline: true, hook: true, regionEntryId: true },
+      orderBy: [{ isMainline: "desc" }, { title: "asc" }],
+    });
+    const placeById = new Map(places.map((place) => [place.id, { slug: place.slug, title: place.title }]));
+    arcsHere = arcs.map((arc) => ({
+      slug: arc.slug,
+      title: arc.title,
+      isMainline: arc.isMainline,
+      hook: arc.hook,
+      where: arc.regionEntryId && arc.regionEntryId !== entry.id ? placeById.get(arc.regionEntryId) ?? null : null,
+    }));
+  }
+
   return {
+    placeAncestry,
+    arcsHere,
     id: entry.id,
     kind: entry.kind,
     slug: entry.slug,

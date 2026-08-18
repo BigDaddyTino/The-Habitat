@@ -10,10 +10,14 @@ import {
   parseStoryPlaceKind,
   slugifyStoryKey,
   storyLockTtlMs,
+  storyPlaceAncestry,
+  storyPlaceDescendants,
   storyPlaceKinds,
+  storyPlaceRoot,
   storyPresenceTtlMs,
   type StoryGraphEdge,
   type StoryGraphNode,
+  type StoryPlaceLink,
 } from "@habitat/shared";
 
 const scene = (key: string, title = key): StoryGraphNode => ({ key, kind: "SCENE", title });
@@ -201,4 +205,50 @@ test("every offered place kind parses, and only settlements carry a tier", () =>
     assert.deepEqual(parsed, { type: kind.type, settlementTier: kind.settlementTier });
     if (kind.type !== "settlement") assert.equal(parsed?.settlementTier, null, `${kind.value} must not carry a tier`);
   }
+});
+
+// --- the world hierarchy: region > place > destination ----------------------
+
+/** island > shattermarket > grocery-store, plus an unattached drifter. */
+const world: StoryPlaceLink[] = [
+  { slug: "igit-island", parent: null },
+  { slug: "shattermarket", parent: "igit-island" },
+  { slug: "grocery-store", parent: "shattermarket" },
+  { slug: "stock-room", parent: "grocery-store" },
+  { slug: "glasswater", parent: "igit-island" },
+  { slug: "loose-place", parent: null },
+];
+
+test("a destination knows every place that contains it, nearest first", () => {
+  assert.deepEqual(storyPlaceAncestry("grocery-store", world), ["shattermarket", "igit-island"]);
+  assert.deepEqual(storyPlaceAncestry("stock-room", world), ["grocery-store", "shattermarket", "igit-island"]);
+  assert.deepEqual(storyPlaceAncestry("igit-island", world), []);
+  assert.deepEqual(storyPlaceAncestry("loose-place", world), []);
+});
+
+test("a place lists everything inside it at every depth", () => {
+  assert.deepEqual(storyPlaceDescendants("igit-island", world), ["shattermarket", "glasswater", "grocery-store", "stock-room"]);
+  assert.deepEqual(storyPlaceDescendants("shattermarket", world), ["grocery-store", "stock-room"]);
+  assert.deepEqual(storyPlaceDescendants("stock-room", world), []);
+});
+
+test("a destination still files under the top-level region it sits in", () => {
+  const isRoot = (slug: string) => slug === "igit-island";
+  assert.equal(storyPlaceRoot("stock-room", world, isRoot), "igit-island");
+  assert.equal(storyPlaceRoot("igit-island", world, isRoot), "igit-island");
+  assert.equal(storyPlaceRoot("loose-place", world, isRoot), null);
+});
+
+test("a broken parent chain renders short instead of hanging the page", () => {
+  // parent is writer-editable, so all three of these are reachable states.
+  const selfParent: StoryPlaceLink[] = [{ slug: "a", parent: "a" }];
+  const cycle: StoryPlaceLink[] = [{ slug: "a", parent: "b" }, { slug: "b", parent: "a" }];
+  const unwritten: StoryPlaceLink[] = [{ slug: "a", parent: "not-written-yet" }];
+
+  assert.deepEqual(storyPlaceAncestry("a", selfParent), []);
+  assert.deepEqual(storyPlaceDescendants("a", selfParent), []);
+  assert.deepEqual(storyPlaceAncestry("a", cycle), ["b"]);
+  assert.deepEqual(storyPlaceDescendants("a", cycle), ["b"]);
+  assert.deepEqual(storyPlaceAncestry("a", unwritten), []);
+  assert.equal(storyPlaceRoot("a", cycle, () => false), null);
 });

@@ -220,6 +220,17 @@ enterable from more than one place — so multiple entry points are not flagged.
 }
 ```
 
+**REGION `meta.type` gained `destination` (2026-08-18), additive, contract still v1.**
+The world nests three rungs: a **region** holds **places** (`site`, `zone`,
+`settlement`, `landmark`), and a place holds **destinations** — the grocery
+store inside the market district, the ward inside the clinic. `meta.parent`
+carries the nesting at every rung and is unchanged; `destination` is simply one
+more value in an enum the importer already had to tolerate, and an importer
+that has never heard of it can read it exactly as it reads `site`. Quests,
+characters, creatures and events attach to whichever rung they actually happen
+at, and the app rolls them up: a quest picked up at a destination is listed on
+that destination, on the place holding it, and on the region above that.
+
 Design points:
 
 - **Keys, not UUIDs.** `key` is stable when a scene is retitled, so renaming in

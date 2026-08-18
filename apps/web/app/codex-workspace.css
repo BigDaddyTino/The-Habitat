@@ -65,6 +65,32 @@
 .region-atlas-add{order:2;margin-top:auto;padding-top:0}
 .region-atlas-add:hover,.entity-add-place:hover{border-color:#a28247;border-style:solid;background:#1b1f16;color:#efd9a6}
 .entity-add-place{margin-top:14px}
+/* The third rung, indented under the place that holds it. The rule down the
+   left is the containment: these are rooms inside that POI, not siblings. */
+.region-atlas-destinations{display:grid;gap:1px;margin:1px 0 3px 34px!important;padding-left:11px;border-left:1px solid #3a4438}
+.region-atlas-destinations li a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;background:#12170f;color:#b6c09f;font-size:11px;text-decoration:none}
+.region-atlas-destinations li a:hover{background:#1b211a;color:#e9dcb4}
+.region-atlas-destinations i{color:#79836f;font:normal 7px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.place-destinations{display:grid;gap:1px;margin:8px 0 0!important;padding-left:11px!important;border-left:1px solid #3a4438;list-style:none}
+.place-destinations li{border:0!important;padding:0!important;background:none!important}
+.place-destinations li a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;background:#12170f;color:#b6c09f;font-size:11px;text-decoration:none}
+.place-destinations li a:hover{background:#1b211a;color:#e9dcb4}
+.place-destinations i{color:#79836f;font:normal 7px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+/* Where a place sits, read outermost first, the way an address does. */
+.place-trail{display:flex;flex-wrap:wrap;align-items:center;gap:2px;margin-bottom:9px}
+.place-trail span{display:flex;align-items:center;gap:2px}
+.place-trail a{color:#9fa894;font:700 9px var(--font-mono);letter-spacing:.07em;text-decoration:none;text-transform:uppercase}
+.place-trail a:hover{color:#e2c985}
+.place-trail svg{color:#5f6a58}
+.entity-quests-here{margin-top:22px;border-top:1px solid #363c35;padding-top:19px}
+.entity-quests-here ul{display:grid;gap:8px;margin:12px 0 0;padding:0;list-style:none}
+.entity-quests-here li{border:1px solid #39413a;border-left:2px solid #7d8a5f;padding:11px 13px;background:#111611}
+.entity-quests-here li a{display:flex;align-items:center;gap:8px;color:#dcc58d;text-decoration:none}
+.entity-quests-here li a strong{flex:1;color:#e6d7b5;font:600 14px var(--font-serif)}
+.entity-quests-here li a i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+.entity-quests-here li>p{margin:6px 0 0;color:#9ca69d;font-size:11px;line-height:1.55}
+.entity-quests-here li>span{display:block;margin-top:6px;color:#778279;font:8px var(--font-mono);text-transform:uppercase}
+.entity-quests-here li>span a{display:inline;color:#c5a85f}
 .region-atlas-unplaced{display:grid;grid-template-columns:minmax(240px,.9fr) 1.1fr;gap:20px;margin-top:14px;border:1px dashed #5c5a43;padding:18px 20px;background:#14170f}
 .region-atlas-unplaced .eyebrow{display:flex;align-items:center;gap:6px}
 .region-atlas-unplaced p:not(.eyebrow){margin:7px 0 0;color:#8f998f;font-size:11px;line-height:1.6}

@@ -8,7 +8,7 @@ import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
-import { storyPlaceKinds } from "@habitat/shared";
+import { storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -32,22 +32,13 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // to the flat grid for search results, and until a top-level region exists.
   const topRegions = collection.kind === "REGION" && !search ? entries.filter((entry) => asRecord(entry.meta).type === "region") : [];
   const atlasActive = topRegions.length > 0;
-  const entryBySlug = new Map(entries.map((entry) => [entry.slug, entry]));
-  const containerOf = (entry: (typeof entries)[number]): string | null => {
-    // Walk the parent chain to the nearest top-level region, so a district of
-    // a city still files under the city's own region.
-    const seen = new Set<string>([entry.slug]);
-    let current = entry;
-    for (;;) {
-      const parent = asRecord(current.meta).parent;
-      if (typeof parent !== "string" || seen.has(parent)) return null;
-      const next = entryBySlug.get(parent);
-      if (!next) return null;
-      if (asRecord(next.meta).type === "region") return next.slug;
-      seen.add(parent);
-      current = next;
-    }
+  const parentSlugOf = (entry: (typeof entries)[number]) => {
+    const value = asRecord(entry.meta).parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
   };
+  const placeLinks: StoryPlaceLink[] = entries.map((entry) => ({ slug: entry.slug, parent: parentSlugOf(entry) }));
+  const topSlugs = new Set(topRegions.map((region) => region.slug));
+  const isTop = (slug: string) => topSlugs.has(slug);
   const isRegionLibrary = collection.kind === "REGION";
   // Everything already in the world can hold a place inside it — a POI can sit
   // in a zone as easily as in a whole region — so the parent list is every
@@ -56,16 +47,23 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     ? [...entries].sort((a, b) => Number(asRecord(b.meta).type === "region") - Number(asRecord(a.meta).type === "region") || a.title.localeCompare(b.title))
     : [];
   const addingInside = parent ? entries.find((entry) => entry.slug === parent) ?? null : null;
-  const contained = new Map<string, typeof entries>();
+  /** Places sitting directly in a top-level region, each with its own inside. */
+  const contained = new Map<string, Array<{ place: (typeof entries)[number]; inside: typeof entries }>>();
   const unplaced: typeof entries = [];
   if (atlasActive) {
-    const rank = (entry: (typeof entries)[number]) => placeTypeOrder[String(asRecord(entry.meta).type)] ?? 4;
-    for (const entry of [...entries].sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title))) {
-      if (asRecord(entry.meta).type === "region") continue;
-      const home = containerOf(entry);
+    const rank = (entry: (typeof entries)[number]) => placeTypeOrder[String(asRecord(entry.meta).type)] ?? 9;
+    const ordered = [...entries].sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title));
+    for (const entry of ordered) {
+      if (topSlugs.has(entry.slug)) continue;
+      const home = storyPlaceRoot(entry.slug, placeLinks, isTop);
       if (!home) { unplaced.push(entry); continue; }
+      // Only the rung directly under the region gets a row; anything deeper —
+      // a destination inside a POI — is listed under the place holding it, so
+      // the card shows the shape of the world rather than a flat pile.
+      if (parentSlugOf(entry) !== home) continue;
+      const inside = ordered.filter((candidate) => parentSlugOf(candidate) === entry.slug);
       const bucket = contained.get(home);
-      if (bucket) bucket.push(entry); else contained.set(home, [entry]);
+      if (bucket) bucket.push({ place: entry, inside }); else contained.set(home, [{ place: entry, inside }]);
     }
   }
 
@@ -112,13 +110,20 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                   <Plus aria-hidden="true" size={12} /> Add a place in {region.title}
                 </Link>
                 {places.length
-                  ? <ul>{places.map((place) => {
+                  ? <ul>{places.map(({ place, inside }) => {
                       const placeBrand = getRegionBranding(place.slug);
-                      return <li key={place.id}><Link href={`/codex/bible/${place.slug}`}>
-                        {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
-                        <span><strong>{place.title}</strong><i>{placeKindLabel(asRecord(place.meta))}</i></span>
-                        <ArrowRight aria-hidden="true" size={11} />
-                      </Link></li>;
+                      return <li key={place.id}>
+                        <Link href={`/codex/bible/${place.slug}`}>
+                          {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
+                          <span><strong>{place.title}</strong><i>{placeKindLabel(asRecord(place.meta))}</i></span>
+                          <ArrowRight aria-hidden="true" size={11} />
+                        </Link>
+                        {inside.length ? <ul className="region-atlas-destinations">
+                          {inside.map((destination) => <li key={destination.id}>
+                            <Link href={`/codex/bible/${destination.slug}`}>{destination.title}<i>{placeKindLabel(asRecord(destination.meta))}</i></Link>
+                          </li>)}
+                        </ul> : null}
+                      </li>;
                     })}</ul>
                   : <p className="story-inspector-hint">Create a place below and pick this as its parent region.</p>}
               </div>

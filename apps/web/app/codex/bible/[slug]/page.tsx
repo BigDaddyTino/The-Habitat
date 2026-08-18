@@ -12,7 +12,7 @@ import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button
 import { StoryWarden } from "@/components/story-warden";
 import { addComment, resolveComment, setStoryStatus } from "@/app/codex/actions";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
-import { collectionForKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
+import { collectionForKind, defaultChildPlaceKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
 
 export default async function StoryEntryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ created?: string }> }) {
   const user = await requireRole(storyReadRole);
@@ -36,12 +36,26 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const collection = collectionForKind(entry.kind);
 
   // A region dossier IS the "what's in here" page: every place whose sheet
-  // names this region as its parent, ordered settlements-first.
+  // names this region as its parent, ordered settlements-first, each carrying
+  // whatever sits inside it in turn — the region > place > destination rungs.
+  const order = (meta: Record<string, unknown> | null) => placeTypeOrder[String(meta?.type)] ?? 9;
+  const byTitle = (a: { order: number; title: string }, b: { order: number; title: string }) => a.order - b.order || a.title.localeCompare(b.title);
   const containedPlaces = entry.kind === "REGION"
     ? regions
         .filter((region) => (region.meta?.parent ?? null) === entry.slug)
-        .map((region) => ({ slug: region.slug, title: region.title, summary: region.summary, label: placeKindLabel(region.meta ?? {}), order: placeTypeOrder[String(region.meta?.type)] ?? 4 }))
-        .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+        .map((place) => ({
+          slug: place.slug,
+          title: place.title,
+          summary: place.summary,
+          label: placeKindLabel(place.meta ?? {}),
+          order: order(place.meta),
+          inside: regions
+            .filter((candidate) => (candidate.meta?.parent ?? null) === place.slug)
+            .map((candidate) => ({ slug: candidate.slug, title: candidate.title, label: placeKindLabel(candidate.meta ?? {}), order: order(candidate.meta) }))
+            .sort(byTitle)
+            .map(({ slug, title, label }) => ({ slug, title, label })),
+        }))
+        .sort(byTitle)
     : [];
 
   return (
@@ -49,10 +63,13 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       <StoryLiveSync refreshOnHeartbeat />
       <Link className="codex-back entity-profile-back" href={collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {collection ?? "the bible"}</Link>
       <StoryEntityProfile
+        addChildKind={defaultChildPlaceKind(entry.meta?.type)}
+        arcsHere={entry.arcsHere}
         containedPlaces={containedPlaces}
         entry={entry}
         existingArcSlugs={arcs.map((arc) => arc.slug)}
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}
+        placeAncestry={entry.placeAncestry}
       />
 
       <div className="codex-entry-grid codex-entry-workspace-grid">

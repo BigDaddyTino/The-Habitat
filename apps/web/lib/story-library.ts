@@ -114,8 +114,18 @@ export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | n
 }
 
 /** Atlas ordering for places inside a region: where people live first, then
- *  named ground, then working locations. Anything untyped sorts last. */
-export const placeTypeOrder: Record<string, number> = { settlement: 0, zone: 1, site: 2, landmark: 3 };
+ *  named ground, then working locations, then the rooms inside those.
+ *  Anything untyped sorts last. */
+export const placeTypeOrder: Record<string, number> = { settlement: 0, zone: 1, site: 2, landmark: 3, destination: 4 };
+
+/**
+ * What a new place inside this one most likely is. Adding to a whole region
+ * usually means a POI; adding to a POI means a destination inside it — which
+ * is the third rung and the one people forget the picker even has.
+ */
+export function defaultChildPlaceKind(parentType: unknown): string {
+  return parentType === "region" || parentType === null || parentType === undefined ? "site" : "destination";
+}
 
 export function placeKindLabel(meta: Record<string, unknown>): string {
   const tier = typeof meta.settlementTier === "string" ? meta.settlementTier : null;

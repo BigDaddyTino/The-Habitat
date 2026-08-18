@@ -473,7 +473,15 @@ export type StoryCharacterMeta = {
   openQuestions: string[];
 };
 
-export const storyRegionTypes = ["region", "zone", "settlement", "landmark", "site"] as const;
+/**
+ * `destination` is the third rung: a region holds places, a place holds
+ * destinations — the grocery store inside Shattermarket, the ward inside the
+ * clinic. It is the level the player actually stands in, which is why quests
+ * and characters attach to it rather than to the district around it.
+ * Additive to the contract: an importer that has never heard of it reads it as
+ * one more region-typed hint, exactly as it already reads "site".
+ */
+export const storyRegionTypes = ["region", "zone", "settlement", "landmark", "site", "destination"] as const;
 export const storySettlementTiers = ["village", "town", "city", "major-city"] as const;
 export const storyControlKinds = ["holds", "contests", "influences"] as const;
 
@@ -517,6 +525,7 @@ export type StoryFactionMeta = {
  */
 export const storyPlaceKinds = [
   { value: "site", label: "Site — a camp, fort, quarry, or other point of interest", type: "site", settlementTier: null },
+  { value: "destination", label: "Destination — somewhere inside a place: a shop, a ward, an arena", type: "destination", settlementTier: null },
   { value: "landmark", label: "Landmark — a named feature people navigate by", type: "landmark", settlementTier: null },
   { value: "settlement:village", label: "Village — a small settlement", type: "settlement", settlementTier: "village" },
   { value: "settlement:town", label: "Town — a medium settlement", type: "settlement", settlementTier: "town" },
@@ -535,6 +544,68 @@ export const storyPlaceKinds = [
 export function parseStoryPlaceKind(value: unknown): { type: (typeof storyRegionTypes)[number]; settlementTier: (typeof storySettlementTiers)[number] | null } | null {
   const match = storyPlaceKinds.find((kind) => kind.value === value);
   return match ? { type: match.type, settlementTier: match.settlementTier } : null;
+}
+
+/** The one fact the world hierarchy is built from: a place and what holds it. */
+export type StoryPlaceLink = { slug: string; parent: string | null };
+
+/**
+ * Walks a place's containers outward, nearest first.
+ *
+ * `parent` is writer-editable free-form data, so the chain can be broken in
+ * ways a tree cannot be: a place can name itself, two places can name each
+ * other, or a parent can be a slug nobody has written yet. Every walker here
+ * carries a seen-set and stops rather than looping — a mis-set parent must
+ * render a short breadcrumb, never hang the page.
+ */
+export function storyPlaceAncestry(slug: string, places: StoryPlaceLink[]): string[] {
+  const parentOf = new Map(places.map((place) => [place.slug, place.parent]));
+  const ancestry: string[] = [];
+  const seen = new Set([slug]);
+  let current = parentOf.get(slug) ?? null;
+  while (current && !seen.has(current) && parentOf.has(current)) {
+    ancestry.push(current);
+    seen.add(current);
+    current = parentOf.get(current) ?? null;
+  }
+  return ancestry;
+}
+
+/** Everything inside a place, at any depth, nearest generation first. */
+export function storyPlaceDescendants(slug: string, places: StoryPlaceLink[]): string[] {
+  const childrenOf = new Map<string, string[]>();
+  for (const place of places) {
+    if (!place.parent || place.parent === place.slug) continue;
+    const siblings = childrenOf.get(place.parent);
+    if (siblings) siblings.push(place.slug); else childrenOf.set(place.parent, [place.slug]);
+  }
+  const found: string[] = [];
+  const seen = new Set([slug]);
+  let generation = childrenOf.get(slug) ?? [];
+  while (generation.length > 0) {
+    const next: string[] = [];
+    for (const child of generation) {
+      if (seen.has(child)) continue;
+      seen.add(child);
+      found.push(child);
+      next.push(...(childrenOf.get(child) ?? []));
+    }
+    generation = next;
+  }
+  return found;
+}
+
+/**
+ * The top-level region a place ultimately sits in — the atlas card it files
+ * under, however many rungs down it lives. Null when the chain never reaches
+ * one, which is what puts a place in the "not placed yet" strip.
+ */
+export function storyPlaceRoot(slug: string, places: StoryPlaceLink[], isRoot: (slug: string) => boolean): string | null {
+  if (isRoot(slug)) return slug;
+  for (const ancestor of storyPlaceAncestry(slug, places)) {
+    if (isRoot(ancestor)) return ancestor;
+  }
+  return null;
 }
 
 /** The taxonomy law as a picker — never free text. */

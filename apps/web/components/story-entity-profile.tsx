@@ -1,12 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, BookOpen, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Plus, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Plus, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { modelPreview } from "@/lib/story-library";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
+/** A place directly inside this one, with whatever sits inside it in turn. */
+type ContainedPlace = { slug: string; title: string; summary: string | null; label: string; inside?: Array<{ slug: string; title: string; label: string }> };
 type Appearance = { id: string; title: string; via: "referenced" | "speaks"; arc: { slug: string; title: string } };
 
 const record = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -23,7 +25,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [] }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site" }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -35,7 +37,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: Array<{ slug: string; title: string; summary: string | null; label: string }> }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -105,6 +107,10 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         </div>
         <div className="entity-profile-copy">
           <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
+          {/* A destination three rungs down is meaningless without its address. */}
+          {placeAncestry.length ? <nav aria-label="Where this sits" className="place-trail">
+            {placeAncestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
+          </nav> : null}
           <h1>{entry.title}</h1>
           <p className="entity-profile-summary">{entry.summary ?? "This entry still needs its one-line pitch."}</p>
           {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
@@ -140,14 +146,30 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               return <li key={place.slug}>
                 {placeBrand ? <img alt="" src={placeBrand.keyart} /> : null}
                 <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
-                {place.summary ? <p>{place.summary}</p> : null}</div>
+                {place.summary ? <p>{place.summary}</p> : null}
+                {/* The third rung, shown in place: a POI's own destinations
+                    are the rooms a player stands in, and burying them one
+                    click deeper is what made them easy to lose. */}
+                {place.inside?.length ? <ul className="place-destinations">
+                  {place.inside.map((destination) => <li key={destination.slug}>
+                    <Link href={`/codex/bible/${destination.slug}`}>{destination.title}<i>{destination.label}</i></Link>
+                  </li>)}
+                </ul> : null}</div>
               </li>;
             })}</ul> : <p className="story-inspector-hint">Nothing is placed inside this yet.</p>}
             {/* The obvious place to think "add a POI here" is the region
                 itself, so the button lives here and carries the parent with it. */}
-            <Link className="entity-add-place" href={`/codex/library/regions?parent=${entry.slug}&placeKind=site#new-entry`}>
+            <Link className="entity-add-place" href={`/codex/library/regions?parent=${entry.slug}&placeKind=${addChildKind}#new-entry`}>
               <Plus aria-hidden="true" size={13} /> Add a place in {entry.title}
             </Link>
+          </div> : null}
+          {isRegion && arcsHere.length ? <div className="entity-quests-here">
+            <p className="eyebrow"><Compass aria-hidden="true" size={12} /> Quests that begin here</p>
+            <ul>{arcsHere.map((arc) => <li key={arc.slug}>
+              <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{arc.isMainline ? "mainline" : "side quest"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {arc.hook ? <p>{arc.hook}</p> : null}
+              {arc.where ? <span>picked up at <Link href={`/codex/bible/${arc.where.slug}`}>{arc.where.title}</Link>, inside this</span> : null}
+            </li>)}</ul>
           </div> : null}
         </article>
 
@@ -181,7 +203,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           </section>
 
           {questions.length ? <section className="entity-open-questions"><p className="eyebrow"><CircleHelp aria-hidden="true" size={12} /> Open writing</p><ul>{questions.map((question) => <li key={question}>{question}</li>)}</ul></section> : null}
-          {isRegion && label(meta.parent) ? <p className="entity-map-note"><MapPin aria-hidden="true" size={13} /> Nested inside <strong>{String(meta.parent).replaceAll("-", " ")}</strong></p> : null}
+          {/* The breadcrumb covers a resolved parent; this is left for the case
+              it does not resolve — a parent slug nobody has written yet. */}
+          {isRegion && label(meta.parent) && !placeAncestry.length ? <p className="entity-map-note"><MapPin aria-hidden="true" size={13} /> Meant to sit inside <strong>{String(meta.parent).replaceAll("-", " ")}</strong>, which nobody has written yet</p> : null}
           {isFaction && words(meta.leaders).length ? <p className="entity-map-note"><Crown aria-hidden="true" size={13} /> {words(meta.leaders).length} named leader{words(meta.leaders).length === 1 ? "" : "s"}</p> : null}
         </aside>
       </div>
