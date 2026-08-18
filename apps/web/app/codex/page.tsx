@@ -106,7 +106,7 @@ export default async function CodexPage() {
         <div className="codex-section" id={group.title === "The mainline" ? "stories" : undefined} key={group.title}>
           <div className="section-heading"><h2>{group.title}</h2></div>
           {group.arcs.length === 0 ? (
-            <div className="empty-data"><GitBranch aria-hidden="true" size={24} /><div><h2>No arcs yet.</h2><p>Open one below and start dropping scenes onto its board.</p></div></div>
+            <div className="empty-data"><GitBranch aria-hidden="true" size={24} /><div><h2>No arcs yet.</h2><p>Open one below and start laying down scenes.</p></div></div>
           ) : (
             <div className="codex-arc-grid">
               {group.arcs.map((arc) => (

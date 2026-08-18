@@ -21,7 +21,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -33,7 +33,7 @@ export function StoryEntityProfile({ entry }: { entry: {
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-} }) {
+}; existingArcSlugs?: string[] }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -93,7 +93,21 @@ export function StoryEntityProfile({ entry }: { entry: {
           <section>
             <p className="eyebrow"><GitBranch aria-hidden="true" size={12} /> Story & quest connections</p>
             {entry.appearances.length ? <ul>{entry.appearances.map((node) => <li key={node.id}><Link href={`/codex/arc/${node.arc.slug}`}>{node.title}<ArrowRight aria-hidden="true" size={11} /></Link><span>{node.arc.title}{node.via === "speaks" ? " · dialogue speaker" : " · referenced"}</span></li>)}</ul> : <p className="story-inspector-hint">No written scene touches this yet.</p>}
-            {isCharacter ? rows(meta.involvement).map((row) => label(row.arc) ? <div className="planned-connection" key={String(row.arc)}><Link href={`/codex/arc/${row.arc}`}><GitBranch aria-hidden="true" size={12} /> {String(row.arc).replaceAll("-", " ")}</Link>{label(row.how) ? <p>{String(row.how)}</p> : null}<span>Planned involvement</span></div> : null) : null}
+            {isCharacter ? rows(meta.involvement).map((row) => {
+              if (!label(row.arc)) return null;
+              const arcSlug = String(row.arc);
+              // A planned arc that nobody has opened yet has nowhere to link —
+              // that is the point of planning it. Show it as a marker instead
+              // of a link to a page that does not exist.
+              const exists = existingArcSlugs.includes(arcSlug);
+              return <div className="planned-connection" key={arcSlug}>
+                {exists
+                  ? <Link href={`/codex/arc/${arcSlug}`}><GitBranch aria-hidden="true" size={12} /> {arcSlug.replaceAll("-", " ")}</Link>
+                  : <strong className="planned-unwritten"><GitBranch aria-hidden="true" size={12} /> {arcSlug.replaceAll("-", " ")}</strong>}
+                {label(row.how) ? <p>{String(row.how)}</p> : null}
+                <span>{exists ? "Planned involvement" : "Planned involvement — arc not opened yet"}</span>
+              </div>;
+            }) : null}
           </section>
 
           <section>

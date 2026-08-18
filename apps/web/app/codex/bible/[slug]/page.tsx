@@ -36,7 +36,7 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
     <section className="page-shell codex-shell codex-entry-shell">
       <StoryLiveSync refreshOnHeartbeat />
       <Link className="codex-back entity-profile-back" href={collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {collection ?? "the bible"}</Link>
-      <StoryEntityProfile entry={entry} />
+      <StoryEntityProfile entry={entry} existingArcSlugs={arcs.map((arc) => arc.slug)} />
 
       <div className="codex-entry-grid codex-entry-workspace-grid">
         <div className="codex-entry-main">
