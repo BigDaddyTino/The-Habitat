@@ -22,7 +22,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [] }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [] }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -34,7 +34,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }> }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: Array<{ slug: string; title: string; summary: string | null; label: string }> }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -59,6 +59,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     : [];
   const activeBrand = factionBrand ?? characterAffiliations[0]?.brand ?? null;
   const questions = words(meta.openQuestions);
+  // Children get their own organized section above; repeating each one in the
+  // aside as "belongs inside this region" would just be the mess twice.
+  const asideConnections = containedPlaces.length ? entry.connections.filter((connection) => connection.relation !== "belongs inside this region") : entry.connections;
   const entityLinks: Array<{ slug: string; detail: string }> = [];
 
   if (isCharacter) {
@@ -117,6 +120,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {entry.body ? entry.body.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
           {isCharacter && label(meta.storyRole) ? <blockquote><Sparkles aria-hidden="true" size={16} /><div><strong>Why this character exists</strong><p>{String(meta.storyRole)}</p></div></blockquote> : null}
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
+          {isRegion && containedPlaces.length ? <div className="entity-contained-places">
+            <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>
+            <ul>{containedPlaces.map((place) => <li key={place.slug}>
+              <Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {place.summary ? <p>{place.summary}</p> : null}
+            </li>)}</ul>
+          </div> : null}
         </article>
 
         <aside className="entity-connections">
@@ -142,9 +152,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
 
           <section>
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> World connections</p>
-            {entityLinks.length || entry.connections.length ? <ul>
+            {entityLinks.length || asideConnections.length ? <ul>
               {entityLinks.map((connection, index) => <li key={`${connection.slug}-${index}`}><LoreLink slug={connection.slug}>{connection.slug.replaceAll("-", " ")}</LoreLink><span>{connection.detail}</span></li>)}
-              {entry.connections.map((connection) => <li key={`${connection.slug}-${connection.relation}`}><LoreLink slug={connection.slug}>{connection.title}</LoreLink><span>{connection.relation}</span></li>)}
+              {asideConnections.map((connection) => <li key={`${connection.slug}-${connection.relation}`}><LoreLink slug={connection.slug}>{connection.title}</LoreLink><span>{connection.relation}</span></li>)}
             </ul> : <p className="story-inspector-hint">Nothing else in the world points here yet.</p>}
           </section>
 

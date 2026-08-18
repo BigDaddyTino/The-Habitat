@@ -12,7 +12,7 @@ import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button
 import { StoryWarden } from "@/components/story-warden";
 import { addComment, resolveComment, setStoryStatus } from "@/app/codex/actions";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
-import { collectionForKind } from "@/lib/story-library";
+import { collectionForKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
 
 export default async function StoryEntryPage({ params }: { params: Promise<{ slug: string }> }) {
   const user = await requireRole(storyReadRole);
@@ -32,11 +32,21 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
     : [[], [], [], []];
   const collection = collectionForKind(entry.kind);
 
+  // A region dossier IS the "what's in here" page: every place whose sheet
+  // names this region as its parent, ordered settlements-first.
+  const containedPlaces = entry.kind === "REGION"
+    ? regions
+        .filter((region) => (region.meta?.parent ?? null) === entry.slug)
+        .map((region) => ({ slug: region.slug, title: region.title, summary: region.summary, label: placeKindLabel(region.meta ?? {}), order: placeTypeOrder[String(region.meta?.type)] ?? 4 }))
+        .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title))
+    : [];
+
   return (
     <section className="page-shell codex-shell codex-entry-shell">
       <StoryLiveSync refreshOnHeartbeat />
       <Link className="codex-back entity-profile-back" href={collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {collection ?? "the bible"}</Link>
       <StoryEntityProfile
+        containedPlaces={containedPlaces}
         entry={entry}
         existingArcSlugs={arcs.map((arc) => arc.slug)}
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}

@@ -1,21 +1,57 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, Boxes, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
+import { ArrowRight, Boxes, Compass, MapPin, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
-import { modelGalleryImages, modelPreview, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
+import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
+
 
 export async function StoryEntityDirectory({ collectionSlug, search }: { collectionSlug: StoryCollectionSlug; search?: string }) {
   const collection = storyCollections[collectionSlug];
   const entries = await listStoryEntries({ kind: collection.kind, search });
   const castingImages = modelGalleryImages.filter((image) => image.pack === "Warriors_Pack" || image.pack === "CitySampleCrowd").slice(0, 6);
+
+  // The regions library reads as an atlas, not a card dump: the world's few
+  // top-level regions as large cards, with every other place filed inside the
+  // one that contains it (meta.parent — stored once, grouped here). Falls back
+  // to the flat grid for search results, and until a top-level region exists.
+  const topRegions = collection.kind === "REGION" && !search ? entries.filter((entry) => asRecord(entry.meta).type === "region") : [];
+  const atlasActive = topRegions.length > 0;
+  const entryBySlug = new Map(entries.map((entry) => [entry.slug, entry]));
+  const containerOf = (entry: (typeof entries)[number]): string | null => {
+    // Walk the parent chain to the nearest top-level region, so a district of
+    // a city still files under the city's own region.
+    const seen = new Set<string>([entry.slug]);
+    let current = entry;
+    for (;;) {
+      const parent = asRecord(current.meta).parent;
+      if (typeof parent !== "string" || seen.has(parent)) return null;
+      const next = entryBySlug.get(parent);
+      if (!next) return null;
+      if (asRecord(next.meta).type === "region") return next.slug;
+      seen.add(parent);
+      current = next;
+    }
+  };
+  const contained = new Map<string, typeof entries>();
+  const unplaced: typeof entries = [];
+  if (atlasActive) {
+    const rank = (entry: (typeof entries)[number]) => placeTypeOrder[String(asRecord(entry.meta).type)] ?? 4;
+    for (const entry of [...entries].sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title))) {
+      if (asRecord(entry.meta).type === "region") continue;
+      const home = containerOf(entry);
+      if (!home) { unplaced.push(entry); continue; }
+      const bucket = contained.get(home);
+      if (bucket) bucket.push(entry); else contained.set(home, [entry]);
+    }
+  }
 
   return (
     <section className={`page-shell codex-shell entity-directory directory-${collectionSlug}`}>
@@ -38,7 +74,33 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
         <Link href="/codex/bible">Browse every lore type <ArrowRight aria-hidden="true" size={13} /></Link>
       </div>
 
-      {entries.length > 0 ? <div className="entity-card-grid">
+      {atlasActive ? <>
+        <div className="region-atlas">
+          {topRegions.map((region) => {
+            const regionMeta = asRecord(region.meta);
+            const places = contained.get(region.slug) ?? [];
+            return <article className="region-atlas-card" key={region.id}>
+              <Link className="region-atlas-head" href={`/codex/bible/${region.slug}`}>
+                <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
+                <h2>{region.title}</h2>
+                <p>{region.summary || "This region still needs its one-line pitch."}</p>
+                <strong>Open the region <ArrowRight aria-hidden="true" size={12} /></strong>
+              </Link>
+              <div className="region-atlas-places">
+                <p className="eyebrow">{places.length ? `${places.length} place${places.length === 1 ? "" : "s"} inside` : "Nothing placed here yet"}</p>
+                {places.length
+                  ? <ul>{places.map((place) => <li key={place.id}><Link href={`/codex/bible/${place.slug}`}><span>{place.title}</span><i>{placeKindLabel(asRecord(place.meta))}</i></Link></li>)}</ul>
+                  : <p className="story-inspector-hint">Create a place below and pick this as its parent region.</p>}
+              </div>
+            </article>;
+          })}
+        </div>
+        {unplaced.length ? <section className="region-atlas-unplaced">
+          <div><p className="eyebrow"><MapPin aria-hidden="true" size={11} /> Not placed in a region yet</p>
+          <p>Open each one and pick its parent region on the region sheet so it files into the atlas above.</p></div>
+          <ul>{unplaced.map((place) => <li key={place.id}><Link href={`/codex/bible/${place.slug}`}>{place.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+        </section> : null}
+      </> : entries.length > 0 ? <div className="entity-card-grid">
         {entries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);

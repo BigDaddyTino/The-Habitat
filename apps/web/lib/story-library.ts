@@ -113,6 +113,16 @@ export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | n
   return (match?.[0] as StoryCollectionSlug | undefined) ?? null;
 }
 
+/** Atlas ordering for places inside a region: where people live first, then
+ *  named ground, then working locations. Anything untyped sorts last. */
+export const placeTypeOrder: Record<string, number> = { settlement: 0, zone: 1, site: 2, landmark: 3 };
+
+export function placeKindLabel(meta: Record<string, unknown>): string {
+  const tier = typeof meta.settlementTier === "string" ? meta.settlementTier : null;
+  const type = typeof meta.type === "string" ? meta.type : null;
+  return (tier ?? type ?? "place").replaceAll("-", " ");
+}
+
 type GalleryImage = { asset: string; pack: string; packLabel: string; image: string; ref: string };
 export const modelGalleryImages = (gallery as { images: GalleryImage[] }).images;
 
