@@ -9,6 +9,12 @@ import { createArc } from "./actions";
 
 export const metadata = { title: "Story Codex" };
 
+const themeArt: Record<string, string> = {
+  "something-under-the-war": "/images/codex-theme-something-under-war.jpg",
+  "the-cost-of-borrowed-power": "/images/codex-theme-borrowed-power.jpg",
+  "the-harvest-economy": "/images/codex-theme-harvest-economy.jpg",
+};
+
 function auditStamp(value: Date) {
   return value.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
@@ -60,7 +66,7 @@ export default async function CodexPage() {
       <section className="codex-story-compass">
         <div className="codex-compass-heading"><div><p className="eyebrow"><Sparkles aria-hidden="true" size={12} /> Start here</p><h2>The game in three truths</h2></div><p>Every character, place, faction, and quest should pull on at least one of these. Open a truth to read the full canon before you build.</p></div>
         <div className="codex-theme-grid">
-          {themes.map((theme, index) => <Link href={`/codex/bible/${theme.slug}`} key={theme.id}><span>0{index + 1}</span><div><p className="eyebrow">Core theme</p><h3>{theme.title}</h3><p>{theme.summary}</p><strong>Read the canon <ArrowRight aria-hidden="true" size={12} /></strong></div></Link>)}
+          {themes.map((theme, index) => <Link href={`/codex/bible/${theme.slug}`} key={theme.id}><div aria-hidden="true" className="codex-theme-art" style={{ backgroundImage: `url('${themeArt[theme.slug] ?? "/images/story-codex-archive.webp"}')` }} /><div className="codex-theme-copy"><span>0{index + 1}</span><div><p className="eyebrow">Core theme</p><h3>{theme.title}</h3><p>{theme.summary}</p><strong>Read the canon <ArrowRight aria-hidden="true" size={12} /></strong></div></div></Link>)}
         </div>
       </section>
 
