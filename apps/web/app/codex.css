@@ -195,8 +195,14 @@
 
 /* ---- The board ---------------------------------------------------------- */
 
-.codex-board-shell { --proposed: #7b93b8; --canon: #8fbf8a; display: flex; flex-direction: column; height: calc(100vh - 68px); }
-body:has(.codex-board-shell) { overflow: hidden; }
+/* 123px = the 68px site header plus the 55px sticky codex nav above the shell;
+   subtracting only the header leaves the bottom strip of the board unreachable
+   because the body cannot scroll. */
+.codex-board-shell { --proposed: #7b93b8; --canon: #8fbf8a; display: flex; flex-direction: column; height: calc(100dvh - 123px); min-height: 620px; }
+/* auto, not hidden: when the viewport is tall enough the shell fits exactly and
+   nothing scrolls; on a short window the 620px floor wins and the page must be
+   able to scroll to reach the bottom of the board. */
+body:has(.codex-board-shell) { overflow: auto; }
 body:has(.codex-board-shell) > .site-footer { display: none; }
 .codex-board-head { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; padding: 22px 24px 18px; border-bottom: 1px solid var(--line); }
 .codex-board-head h1 { font-family: var(--font-display); font-size: clamp(34px, 5vw, 50px); line-height: .9; text-transform: uppercase; }
