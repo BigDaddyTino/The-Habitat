@@ -61,6 +61,10 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
               <p className="eyebrow">Links waiting for an entry — claim one and write it</p>
               <ul>{needsWork.unresolvedLinks.slice(0, 30).map((item, index) => <li key={`l-${index}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> links <code>[[{item.target}]]</code>, which nobody has written yet</li>)}</ul>
             </> : null}
+            {needsWork.planned.length > 0 ? <>
+              <p className="eyebrow">Planned but not written yet — sheets pointing at future work</p>
+              <ul>{needsWork.planned.slice(0, 30).map((item, index) => <li key={`p-${index}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> names <code>{item.target}</code> as {item.field === "involvement" ? "an arc they belong in" : `a ${item.field}`}, and it does not exist yet</li>)}</ul>
+            </> : null}
             {needsWork.missingMeta.length > 0 ? <>
               <p className="eyebrow">No sheet filled in yet</p>
               <ul>{needsWork.missingMeta.slice(0, 40).map((item) => <li key={item.slug}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> <span>{storyEntryKindLabels[item.kind].toLowerCase()}</span></li>)}</ul>

@@ -141,7 +141,9 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     });
 
     const graphNodes: StoryGraphNode[] = nodes.map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
-    const graphEdges: StoryGraphEdge[] = nodes.flatMap((node) => node.choices.map((choice) => ({ fromKey: node.key, toKey: choice.toKey, label: choice.label })));
+    const graphEdges: StoryGraphEdge[] = nodes.flatMap((node) =>
+      node.choices.map((choice) => ({ fromKey: node.key, toKey: choice.toKey, label: choice.label, hasConsequence: (choice.effects?.length ?? 0) > 0 })),
+    );
 
     // Entry keys are ordered by node creation, not by the key-sorted node
     // list: `entryNodeKeys[0]` is the canonical start on the importer side,

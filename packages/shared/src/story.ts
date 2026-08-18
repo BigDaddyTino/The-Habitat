@@ -169,6 +169,12 @@ export type StoryGraphEdge = {
   fromKey: string;
   toKey: string;
   label: string | null;
+  /**
+   * Whether choosing this branch records anything — effects the game acts on.
+   * A condition is not a consequence: it gates whether the choice is offered,
+   * not what picking it changes.
+   */
+  hasConsequence?: boolean;
 };
 
 export const storyGraphProblemKinds = [
@@ -178,6 +184,7 @@ export const storyGraphProblemKinds = [
   "DEAD_END",
   "UNLABELLED_BRANCH",
   "DUPLICATE_BRANCH_LABEL",
+  "HOLLOW_CHOICE",
 ] as const;
 
 export type StoryGraphProblemKind = (typeof storyGraphProblemKinds)[number];
@@ -285,6 +292,26 @@ export function analyzeStoryGraph(nodes: StoryGraphNode[], edges: StoryGraphEdge
           kind: "DUPLICATE_BRANCH_LABEL",
           nodeKey: node.key,
           detail: `"${node.title}" offers the choice "${duplicate}" more than once.`,
+        });
+      }
+
+      // A real decision changes something: it leads somewhere different, or
+      // it records a consequence the story can answer later. Several labelled
+      // choices converging on one card with nothing written down is theatre —
+      // the player deliberates and the world does not notice.
+      const byTarget = new Map<string, StoryGraphEdge[]>();
+      for (const edge of branches) {
+        if (!edge.label?.trim()) continue;
+        const group = byTarget.get(edge.toKey);
+        if (group) group.push(edge);
+        else byTarget.set(edge.toKey, [edge]);
+      }
+      for (const [toKey, group] of byTarget) {
+        if (group.length < 2 || group.some((edge) => edge.hasConsequence)) continue;
+        problems.push({
+          kind: "HOLLOW_CHOICE",
+          nodeKey: node.key,
+          detail: `"${node.title}" offers ${group.length} choices that all lead to "${byKey.get(toKey)?.title ?? toKey}" and record nothing — give each choice effects, or send them down different paths, so the decision matters.`,
         });
       }
     }

@@ -111,7 +111,13 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
   }));
 
   const graphNodes: StoryGraphNode[] = nodes.map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
-  const graphEdges: StoryGraphEdge[] = nodes.flatMap((node) => node.choices.map((choice) => ({ fromKey: node.key, toKey: choice.toKey, label: choice.label })));
+  // Built from the raw edges rather than the assistant's trimmed choices so
+  // the hollow-choice analysis sees effects, which the extract does not carry.
+  const graphEdges: StoryGraphEdge[] = arc.edges.flatMap((edge) => {
+    const fromKey = keyById.get(edge.fromNodeId);
+    const toKey = keyById.get(edge.toNodeId);
+    return fromKey && toKey ? [{ fromKey, toKey, label: edge.label, hasConsequence: edge.effects.length > 0 }] : [];
+  });
 
   return {
     arc: { slug: arc.slug, title: arc.title, summary: arc.summary, isMainline: arc.isMainline, status: arc.status },

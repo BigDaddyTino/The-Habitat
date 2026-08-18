@@ -103,6 +103,26 @@ test("two branches offering the same choice text are flagged once", () => {
   assert.deepEqual(problemKinds(nodes, edges), ["DUPLICATE_BRANCH_LABEL:gate"]);
 });
 
+test("labelled choices that all land on one card and record nothing are hollow", () => {
+  const nodes = [scene("manifest"), scene("carry"), ending("out")];
+  const onward = [link("carry", "out")];
+  // Three labelled choices, one destination, no effects: the decision is theatre.
+  const hollow = [link("manifest", "carry", "Wounded first"), link("manifest", "carry", "Munitions first"), link("manifest", "carry", "Archives")];
+  assert.deepEqual(problemKinds(nodes, [...hollow, ...onward]), ["HOLLOW_CHOICE:manifest"]);
+
+  // Effects on each branch make the same shape a real decision.
+  const consequential = hollow.map((edge) => ({ ...edge, hasConsequence: true }));
+  assert.deepEqual(problemKinds(nodes, [...consequential, ...onward]), []);
+
+  // Different destinations are their own consequence — never flagged.
+  const diverging = [link("manifest", "carry", "Wounded first"), link("manifest", "out", "Munitions first")];
+  assert.deepEqual(problemKinds(nodes, [...diverging, ...onward]), []);
+
+  // A condition gates whether a choice is offered; it is not a consequence.
+  const gated = [link("manifest", "carry", "Wounded first"), { ...link("manifest", "carry", "Archives"), hasConsequence: false }];
+  assert.deepEqual(problemKinds(nodes, [...gated, ...onward]), ["HOLLOW_CHOICE:manifest"]);
+});
+
 test("edges pointing at nodes outside the graph are ignored rather than crashing", () => {
   // The export drops choices whose far end is not canon, so an edge can
   // legitimately outlive one of its endpoints in the data handed to analysis.

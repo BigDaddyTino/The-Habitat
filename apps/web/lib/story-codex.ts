@@ -213,7 +213,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
   const graphEdges: StoryGraphEdge[] = edges.flatMap((edge) => {
     const from = byId.get(edge.fromNodeId);
     const to = byId.get(edge.toNodeId);
-    return from && to ? [{ fromKey: from.key, toKey: to.key, label: edge.label }] : [];
+    return from && to ? [{ fromKey: from.key, toKey: to.key, label: edge.label, hasConsequence: edge.effects.length > 0 }] : [];
   });
 
   return {
@@ -362,24 +362,50 @@ export async function getStoryNeedsWork() {
   const unresolvedLinks: Array<{ slug: string; title: string; target: string }> = [];
   const openQuestions: Array<{ slug: string; title: string; question: string }> = [];
   const missingMeta: Array<{ slug: string; title: string; kind: StoryEntryKind }> = [];
+  /** Slug-typed meta fields pointing at things nobody has written — the
+   *  "pick this up later" markers. This is how a character's involvement in a
+   *  future arc stays in view until somebody opens that arc. */
+  const planned: Array<{ slug: string; title: string; field: string; target: string }> = [];
+
+  const slugOf = (value: unknown): string | null => (typeof value === "string" && value.trim() ? value.trim() : null);
+  const rows = (value: unknown): Array<Record<string, unknown>> =>
+    Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 
   for (const entry of entries) {
     for (const match of (entry.body ?? "").matchAll(/\[\[([a-z0-9-]+)\]\]/g)) {
       if (!known.has(match[1])) unresolvedLinks.push({ slug: entry.slug, title: entry.title, target: match[1] });
     }
-    const meta = entry.meta as { openQuestions?: unknown } | null;
+    const meta = entry.meta as Record<string, unknown> | null;
     if (meta === null) {
       // THEME and RULE deliberately have no module yet; their null is silence,
       // not an unanswered question.
       if (entry.kind !== "THEME" && entry.kind !== "RULE") missingMeta.push({ slug: entry.slug, title: entry.title, kind: entry.kind });
-    } else if (Array.isArray(meta.openQuestions)) {
+      continue;
+    }
+    if (Array.isArray(meta.openQuestions)) {
       for (const question of meta.openQuestions) {
         if (typeof question === "string" && question.trim()) openQuestions.push({ slug: entry.slug, title: entry.title, question });
       }
     }
+
+    const check = (field: string, target: unknown) => {
+      const slug = slugOf(target);
+      if (slug && !known.has(slug)) planned.push({ slug: entry.slug, title: entry.title, field, target: slug });
+    };
+    if (entry.kind === "CHARACTER") {
+      check("home", meta.home);
+      for (const row of rows(meta.factions)) check("faction", row.faction);
+      for (const row of rows(meta.relationships)) check("relationship", row.character);
+      for (const row of rows(meta.involvement)) check("involvement", row.arc);
+    }
+    if (entry.kind === "REGION") {
+      check("parent", meta.parent);
+      for (const row of rows(meta.control)) check("control", row.faction);
+      for (const row of rows(meta.connections)) check("connection", row.to);
+    }
   }
 
-  return { unresolvedLinks, openQuestions, missingMeta, total: unresolvedLinks.length + openQuestions.length + missingMeta.length };
+  return { unresolvedLinks, openQuestions, missingMeta, planned, total: unresolvedLinks.length + openQuestions.length + missingMeta.length + planned.length };
 }
 
 /** Everything waiting on a reviewer, newest first. */
