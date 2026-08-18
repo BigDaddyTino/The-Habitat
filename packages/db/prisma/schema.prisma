@@ -333,6 +333,11 @@ enum StoryEntryKind {
   ITEM
   EVENT
   RULE
+  /// A consequence with a canonical name — set by one quest, checked by
+  /// another, possibly chapters apart. Flags exist so two writers can never
+  /// spell the same consequence two ways; the set and check ends both
+  /// reference the entry, and the bible shows everywhere it appears.
+  FLAG
 }
 
 /// Contribution status. Anyone below ADMIN writes at PROPOSED, and only CANON
@@ -356,6 +361,16 @@ enum StoryNodeKind {
   QUEST_START
   QUEST_STEP
   ENDING
+}
+
+/// The valence of an ENDING node, carried to the game so the importer can set
+/// the quest state machine's success/failure node type. NEUTRAL is a real
+/// answer, not a default — the prologue's Defend-or-Flee endings are neither
+/// victory nor defeat by authorial intent.
+enum StoryEndingKind {
+  SUCCESS
+  FAILURE
+  NEUTRAL
 }
 
 /// Why an assistant exchange ended the way it did. Every outcome is recorded,
@@ -1965,6 +1980,13 @@ model StoryArc {
   slug            String      @unique @db.VarChar(64)
   title           String      @db.VarChar(120)
   summary         String?     @db.VarChar(500)
+  /// How the party finds this quest — notice board, dying stranger, a rumor
+  /// in a tavern. Free-text roleplay intent; the region below is the
+  /// structural half.
+  hook            String?     @db.VarChar(500)
+  /// Where the quest is picked up, as a REGION bible entry so the pickup
+  /// place always resolves to a real asset on the game side.
+  regionEntryId   String?     @db.Uuid
   isMainline      Boolean     @default(false)
   status          StoryStatus @default(PROPOSED)
   position        Int         @default(0)
@@ -1972,8 +1994,10 @@ model StoryArc {
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   creator         User        @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  region          StoryEntry? @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
   nodes           StoryNode[]
   edges           StoryEdge[]
+  continuedFrom   StoryNode[] @relation("StoryContinuation")
   presence        StoryPresence[]
   assistantMessages StoryAssistantMessage[]
 
@@ -2002,6 +2026,28 @@ model StoryNode {
   summary         String?          @db.VarChar(500)
   body            String?          @db.Text
   status          StoryStatus      @default(PROPOSED)
+  /// Who speaks this node, when it is one voice. A reference to a CHARACTER
+  /// bible entry rather than free text, so a speaker can never be a typo and
+  /// always resolves to an asset the importer knows. Null is unattributed
+  /// narration — the correct value for most SCENE and BEAT nodes, whose bodies
+  /// carry multi-speaker attribution inline.
+  speakerEntryId  String?          @db.Uuid
+  /// Only meaningful on ENDING nodes; the migration CHECKs that pairing.
+  endingKind      StoryEndingKind?
+  /// What finishes this step, as writer intent in free text — only meaningful
+  /// on QUEST_STEP nodes (CHECKed). An Unreal author transcribes it into a
+  /// real task; it is documentation for a human, never parsed by a machine.
+  completion      String?          @db.VarChar(500)
+  /// What the story does here — give item, set flag, shift reputation — as
+  /// free-text lines. Interpreted by the game, never by the codex.
+  effects         String[]         @default([])
+  /// What finishing this pays, one reward per line. Kept apart from effects
+  /// so payment reads at a glance; notable rewards should also exist as ITEM
+  /// entries referenced on the node.
+  rewards         String[]         @default([])
+  /// Where an ENDING flows next (CHECKed to endings) — the structural link
+  /// that chains multi-part quests and joins the prologue to its branches.
+  continuesInArcId String?         @db.Uuid
   canvasX         Int              @default(0)
   canvasY         Int              @default(0)
   version         Int              @default(1)
@@ -2015,6 +2061,8 @@ model StoryNode {
   creator         User             @relation("StoryNodeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
   editor          User?            @relation("StoryNodeEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
   lockedBy        User?            @relation("StoryNodeLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  speaker         StoryEntry?      @relation("StoryNodeSpeaker", fields: [speakerEntryId], references: [id], onDelete: SetNull)
+  continuesIn     StoryArc?        @relation("StoryContinuation", fields: [continuesInArcId], references: [id], onDelete: SetNull)
   outgoingEdges   StoryEdge[]      @relation("StoryEdgeFrom")
   incomingEdges   StoryEdge[]      @relation("StoryEdgeTo")
   entryLinks      StoryEntryLink[]
@@ -2037,10 +2085,19 @@ model StoryNode {
 model StoryEdge {
   id              String      @id @default(uuid()) @db.Uuid
   arcId           String      @db.Uuid
+  /// The stable handle the Unreal importer names a synthesised choice asset
+  /// by. Minted at creation, unique inside the arc, and never derived from
+  /// the label, the target, or the order — all three are things a writer
+  /// legitimately changes without meaning to orphan a game asset. The
+  /// database default is a deployment bridge for builds older than the
+  /// column; the server action always mints a readable key explicitly.
+  key             String      @default(dbgenerated("('choice-'::text || substr(md5((gen_random_uuid())::text), 1, 12))")) @db.VarChar(80)
   fromNodeId      String      @db.Uuid
   toNodeId        String      @db.Uuid
   label           String?     @db.VarChar(200)
   condition       String?     @db.VarChar(300)
+  /// What choosing this branch does, as free-text lines the game interprets.
+  effects         String[]    @default([])
   position        Int         @default(0)
   status          StoryStatus @default(PROPOSED)
   createdByUserId String      @db.Uuid
@@ -2051,6 +2108,7 @@ model StoryEdge {
   toNode          StoryNode   @relation("StoryEdgeTo", fields: [toNodeId], references: [id], onDelete: Cascade)
   creator         User        @relation("StoryEdgeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
 
+  @@unique([arcId, key])
   @@unique([fromNodeId, position])
   @@index([arcId, status])
   @@index([toNodeId])
@@ -2065,6 +2123,10 @@ model StoryEntry {
   title           String           @db.VarChar(120)
   summary         String?          @db.VarChar(500)
   body            String?          @db.Text
+  /// The typed module object from Codex_Module_Schema.md — shape depends on
+  /// kind, every field nullable, null meaning "not yet decided". Prose stays
+  /// primary; meta is the queryable index over it.
+  meta            Json?
   status          StoryStatus      @default(PROPOSED)
   version         Int              @default(1)
   createdByUserId String           @db.Uuid
@@ -2078,6 +2140,8 @@ model StoryEntry {
   lockedBy        User?            @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
   nodeLinks       StoryEntryLink[]
   comments        StoryComment[]
+  speakerOf       StoryNode[]      @relation("StoryNodeSpeaker")
+  regionOf        StoryArc[]       @relation("StoryArcRegion")
 
   @@index([kind, status, title])
   @@index([status, updatedAt])

@@ -185,7 +185,7 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
 
   const [context, newestRevision, priorTurns] = await Promise.all([
     buildAssistantContext(input.arcId, input.nodeId),
-    db.storyRevision.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true } }),
+    db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } }),
     // A short memory, so "what about the other one?" means something. Only this
     // member's own answered exchanges on this arc, and only a few — history is
     // paid for in tokens on every subsequent question.

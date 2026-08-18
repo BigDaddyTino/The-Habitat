@@ -16,6 +16,7 @@ export const storyEntryKinds = [
   "ITEM",
   "EVENT",
   "RULE",
+  "FLAG",
 ] as const;
 
 export type StoryEntryKind = (typeof storyEntryKinds)[number];
@@ -25,12 +26,14 @@ export const storyStatuses = ["DRAFT", "PROPOSED", "CANON", "REJECTED", "ARCHIVE
 export type StoryStatus = (typeof storyStatuses)[number];
 
 /**
- * Canon is the payload consumed by the game. Contributors can discuss it and
- * build proposed branches around it, but only a reviewer may alter canon in
- * place; otherwise an ordinary edit would bypass the review queue entirely.
+ * The codex is an open writers' room: any member edits anything, canon
+ * included, and the audit log on the landing page — not an approval gate —
+ * is what keeps everyone honest. (Tino's call, 2026-08-18, reversing the
+ * original propose→approve ladder.) The hook survives so a review ladder
+ * could come back without touching a single call site.
  */
-export function isStoryContentEditable(status: StoryStatus, canReview: boolean) {
-  return status !== "CANON" || canReview;
+export function isStoryContentEditable(_status: StoryStatus, _canReview: boolean) {
+  return true;
 }
 
 export const storyNodeKinds = [
@@ -47,6 +50,21 @@ export const storyNodeKinds = [
 export type StoryNodeKind = (typeof storyNodeKinds)[number];
 
 /**
+ * The valence of an ENDING, for the importer's quest state machine. NEUTRAL is
+ * an authored answer — a choice that is neither victory nor defeat — not the
+ * absence of one; absence is null, on nodes that are not endings at all.
+ */
+export const storyEndingKinds = ["SUCCESS", "FAILURE", "NEUTRAL"] as const;
+
+export type StoryEndingKind = (typeof storyEndingKinds)[number];
+
+export const storyEndingKindLabels: Record<StoryEndingKind, string> = {
+  SUCCESS: "Success",
+  FAILURE: "Failure",
+  NEUTRAL: "Neutral",
+};
+
+/**
  * The only status the game is ever built from. Everything else on a board is
  * somebody thinking out loud, and the export refuses to carry it.
  */
@@ -61,6 +79,7 @@ export const storyEntryKindLabels: Record<StoryEntryKind, string> = {
   ITEM: "Item",
   EVENT: "Event",
   RULE: "Rule",
+  FLAG: "Flag",
 };
 
 export const storyNodeKindLabels: Record<StoryNodeKind, string> = {
@@ -255,7 +274,7 @@ export function analyzeStoryGraph(nodes: StoryGraphNode[], edges: StoryGraphEdge
         problems.push({
           kind: "UNLABELLED_BRANCH",
           nodeKey: node.key,
-          detail: `"${node.title}" splits ${branches.length} ways but ${unlabelled} branch${unlabelled === 1 ? " has" : "es have"} no choice text, so the player cannot tell them apart.`,
+          detail: `"${node.title}" splits ${branches.length} ways but ${unlabelled} branch${unlabelled === 1 ? " has" : "es have"} no choice text, so the player cannot tell them apart and the game has no way to offer them as separate choices.`,
         });
       }
 
@@ -282,16 +301,33 @@ export function analyzeStoryGraph(nodes: StoryGraphNode[], edges: StoryGraphEdge
  * Bumped only when the shape below changes in a way an existing importer could
  * not read. The Unreal side checks it and refuses rather than guessing, because
  * a half-understood story import corrupts assets that are expensive to rebuild.
+ *
+ * Still 1 after the 2026-08-18 additions (choice keys, speakers, ending
+ * valence, completion, effects): every one of them is a new nullable field a
+ * v1 importer safely ignores. Nullable-additive changes never bump this.
  */
 export const storyExportContractVersion = 1;
 
 export type StoryExportChoice = {
   order: number;
+  /**
+   * The stable handle the importer names this choice's asset by. Unique inside
+   * the arc and unaffected by relabelling, retargeting, or reordering.
+   */
+  key: string;
   /** The text the player is shown. Null means an unconditional continuation. */
   label: string | null;
   /** Free-text gate, interpreted by the game rather than by the codex. */
   condition: string | null;
+  /** What choosing this does, as free-text lines the game interprets. Null when empty. */
+  effects: string[] | null;
   toKey: string;
+};
+
+/** The node's speaker, resolved from a CHARACTER bible entry. */
+export type StoryExportSpeaker = {
+  slug: string;
+  title: string;
 };
 
 export type StoryExportReference = {
@@ -306,6 +342,27 @@ export type StoryExportNode = {
   title: string;
   summary: string | null;
   body: string | null;
+  /**
+   * Null is unattributed narration, which is the correct value for a node
+   * whose body carries several voices with inline attribution.
+   */
+  speaker: StoryExportSpeaker | null;
+  /** Set only on ENDING nodes. */
+  endingKind: StoryEndingKind | null;
+  /**
+   * Writer intent for what finishes a QUEST_STEP, in free text. Documentation
+   * for the human who authors the real task in Unreal — never parsed.
+   */
+  completion: string | null;
+  /** What the story does here, as free-text lines. Null when empty. */
+  effects: string[] | null;
+  /** What finishing this pays, one reward per line. Null when empty. */
+  rewards: string[] | null;
+  /**
+   * The arc an ENDING flows into — the structural link that chains quests.
+   * Withheld unless that arc is itself canon, like every other reference.
+   */
+  continuesInArcSlug: string | null;
   choices: StoryExportChoice[];
   references: StoryExportReference[];
 };
@@ -314,7 +371,19 @@ export type StoryExportArc = {
   slug: string;
   title: string;
   summary: string | null;
+  /** How the party finds this quest — roleplay intent, free text. */
+  hook: string | null;
+  /** Where it is picked up, resolved from a REGION bible entry. */
+  region: { slug: string; title: string } | null;
   isMainline: boolean;
+  /**
+   * Nodes nothing transitions into. Several are legitimate — a side quest can
+   * be enterable from more than one place — but importers that must store
+   * exactly one start treat `entryNodeKeys[0]` as canonical. Entry keys are
+   * emitted oldest-created-first, so the arc's original opening stays at
+   * index 0 and a later-added opening can never silently displace it; extras
+   * are call-site-only.
+   */
   entryNodeKeys: string[];
   nodes: StoryExportNode[];
   problems: StoryGraphProblem[];
@@ -326,6 +395,73 @@ export type StoryExportEntry = {
   title: string;
   summary: string | null;
   body: string | null;
+  /**
+   * The typed module object from Codex_Module_Schema.md. Shape depends on
+   * kind; every field inside is nullable, and null at this level is exactly
+   * as valid as it has always been. Additive — a v1 importer that predates
+   * modules ignores it.
+   */
+  meta: Record<string, unknown> | null;
+};
+
+// ---------------------------------------------------------------------------
+// Module meta (Codex_Module_Schema.md)
+// ---------------------------------------------------------------------------
+
+/** Magic origins, mirroring the game's Magic.Origin.* tags. */
+export const storyMagicOrigins = ["none", "born", "infused", "gifted"] as const;
+
+export type StoryCharacterMeta = {
+  fullName: string | null;
+  aliases: string[];
+  pronouns: string | null;
+  sex: string | null;
+  species: string | null;
+  age: string | null;
+  appearance: string | null;
+  voice: string | null;
+  magic: {
+    origin: (typeof storyMagicOrigins)[number] | null;
+    schools: string[];
+    corruptionPhase: number | null;
+    notes: string | null;
+  };
+  factions: Array<{ faction: string; role: string | null; standing: string | null }>;
+  home: string | null;
+  status: {
+    known: string | null;
+    /**
+     * Writers-room truth, spoiler-tier. Visually gated in the UI, and the
+     * standing RULEs govern when story content may collapse the known/actual
+     * gap — the Tino rule, generalized.
+     */
+    actual: string | null;
+  };
+  relationships: Array<{ character: string | null; who: string | null; type: string | null }>;
+  storyRole: string | null;
+  involvement: Array<{ arc: string; how: string | null }>;
+  gameId: string | null;
+  /** In-engine asset reference, e.g. "/Game/Creatures_Pack/Mesh/SK_Daemon". */
+  model: string | null;
+  openQuestions: string[];
+};
+
+export const storyRegionTypes = ["region", "zone", "settlement", "landmark", "site"] as const;
+export const storySettlementTiers = ["village", "town", "city", "major-city"] as const;
+export const storyControlKinds = ["holds", "contests", "influences"] as const;
+
+export type StoryRegionMeta = {
+  type: (typeof storyRegionTypes)[number] | null;
+  settlementTier: (typeof storySettlementTiers)[number] | null;
+  parent: string | null;
+  biome: string | null;
+  control: Array<{ faction: string; kind: (typeof storyControlKinds)[number] | null }>;
+  population: string | null;
+  /** The connections graph IS the world map — the app renders it, nobody maintains a map file. */
+  connections: Array<{ to: string; by: string | null; notes: string | null }>;
+  status: string | null;
+  gameTag: string | null;
+  openQuestions: string[];
 };
 
 /**

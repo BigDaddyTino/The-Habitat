@@ -27,10 +27,18 @@ export async function GET(request: Request) {
     );
   }
 
-  const newest = await db.storyRevision.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true } });
+  // Tie-broken by id: several revisions written inside one transaction share a
+  // createdAt, and an ETag that flips between them would send the importer to
+  // fetch the whole codex again for a story that had not changed.
+  const newest = await db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } });
   const etag = `"story-v${storyExportContractVersion}-${newest?.id ?? "empty"}"`;
   const since = new URL(request.url).searchParams.get("since");
-  const unchanged = request.headers.get("if-none-match") === etag || (since !== null && since === (newest?.id ?? ""));
+  // Cloudflare downgrades the response ETag to a weak validator (W/"…"), so a
+  // well-behaved client echoing what it received would never match a strict
+  // comparison. Weakness only concerns byte-identity; for "has the story
+  // changed" the weak form is exactly as meaningful, so compare without it.
+  const presented = request.headers.get("if-none-match")?.replace(/^\s*W\//i, "") ?? null;
+  const unchanged = presented === etag || (since !== null && since === (newest?.id ?? ""));
 
   if (unchanged) {
     return new NextResponse(null, { status: 304, headers: { ETag: etag, "Cache-Control": "private, no-store, max-age=0" } });

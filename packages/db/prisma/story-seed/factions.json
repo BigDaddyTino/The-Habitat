@@ -1,0 +1,239 @@
+{
+  "contractVersion": 1,
+  "generatedAt": "2026-08-18T05:30:00.000Z",
+  "revisionCursor": "rev_factions_0001",
+  "arcs": [],
+  "bible": [
+    {
+      "kind": "REGION",
+      "slug": "port-arcadia",
+      "title": "Port Arcadia",
+      "summary": "The great dock city of the peninsula, where both prologue branches make landfall — cranes and warded lighthouses above, jungle pressing at the walls behind. The first zone after the Starting Island, and the door to the wider war.",
+      "body": "UPDATE - supersedes the earlier entry with new locked canon: Port Arcadia is not just an arrival marker, it is the peninsula's great dock city. A deep-water harbour of stacked piers, cranes, customs houses, warded lighthouses, fish markets, drydocks, and naval yards — the place where the islands' trade, the military's logistics, and every smuggler's ambition meet salt water. The evacuation fleet puts in at its military port; the island's defenders wash up on a storm beach within sight of its walls. Distinct arrivals, same city, and the city can tell which one you were.\n\nBehind the harbour the jungle begins almost immediately — see [[the-peninsula]] for the environment canon. Port Arcadia lives with its back to green walls: cleared roads that the canopy keeps trying to reclaim, jungle produce and jungle dangers in the same markets, expedition outfitters next to shipping offices.\n\nThe city is the campaign's first mainland stage: its intelligence net may know what hunts like the thing that took Tino, its docks receive every faction's cargo, and its streets hold recruiters, fixers, refugees from the island, and buyers for anything the war shook loose. Stories set here are port stories — arrival, debt, smuggling, press-gangs, information for sale — played against jungle-adventure country a single gate away."
+    },
+    {
+      "kind": "REGION",
+      "slug": "the-peninsula",
+      "title": "The Peninsula",
+      "summary": "The primary landmass and the campaign's ultimate prize — and its first face is jungle: dense, green, adventure-serial jungle in the spirit of Temple of Doom, swallowing roads, ruins, and anyone who leaves the river.",
+      "body": "UPDATE - supersedes the earlier entry with new locked art direction: the peninsula's first zone, the country around [[port-arcadia]], is **jungle** — and the tone reference is the adventure-serial jungle of Indiana Jones and the Temple of Doom. Not that literal jungle, but that *feeling*: dense canopy that turns noon into dusk, river gorges and rope bridges over them, mud roads that end in vines, torch-lit shrines the canopy swallowed generations ago, wildlife that watches, and the constant sense that the green is older, hungrier, and more patient than anything walking through it. Near-future kit against ancient jungle is the visual engine — convoys hacking through overgrowth, drone signals dying under canopy, a warded lantern line marking the one safe path ([[the-look-of-the-world]]).\n\nThe wider landmass keeps its canon: one massive peninsula, roughly three large islands plus smaller ones, and the floating island bearing the fourth major city. Settlement tiers from village to major city; villages lean traditional, the great cities are the full magic-tech fusion. Beyond the jungle belt the other biomes wait inland — mountains, farmland, swamps, deserts, lakes, coasts — each with its own ecology per [[the-five-pillars]].\n\nThe peninsula is where [[the-long-game]] plays out. Port Arcadia is its door, the jungle is its threshold, and everything the players did on the Starting Island echoes ahead of them into the trees."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "national-defense-directorate",
+      "title": "The National Defense Directorate",
+      "summary": "The official state military, trying to hold a peninsula that half its own population no longer believes it controls.",
+      "body": "The Directorate is the state's sword and the state's paperwork in one body: conscripts and career officers, armored columns, warded installations, mage units on the official rolls, and a chain of command that still files casualty reports as if the system works. It is stretched — against Pearl money, corporate armies, criminal fleets, and now supernatural incursions no field manual covers — and being stretched is making it both more honest and more ruthless.\n\nIts relationship to magic is institutional: licensed casters serve in uniform, infusion is officially regulated and unofficially overused, and every Directorate quartermaster knows the [[essence]] ledgers don't add up.\n\nCharacters to write here: the garrison commander in [[port-arcadia]] deciding which laws still apply; the conscript who joined for the pension and found demons; the licensed battle-mage who reads their own regulation book like a hostage note; the internal auditor tracking where the Essence went."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "peninsula-expeditionary-army",
+      "title": "The Peninsula Expeditionary Army",
+      "summary": "The frontline army command — the part of the state that stopped waiting for orders and started fighting for territory and supply lines.",
+      "body": "The Expeditionary Army is where the war actually lives: forward commands fighting for roads, bridges, fuel, and ground, jungle-belt garrisons whose maps are older than their soldiers, and generals who negotiate with factions the capital pretends not to recognize. Formally it answers to the [[national-defense-directorate]]; practically, distance and desperation have made it a power of its own — and everyone on the peninsula knows the difference between a Directorate decree and an Army checkpoint.\n\nIt fights the fusion war as it is, not as doctrine wishes: enchanted armor plate, creature-handler platoons, infusion abuse in units that can't get replacements, and jungle campaigns where the canopy eats air support.\n\nCharacters to write here: the colonel who rules a river valley like a governor; the supply officer trading with smugglers because the depot is empty; the veteran sergeant who has fought monsters, corporations, and their own headquarters; the war correspondent embedded too long to leave."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "aegis-extraction-consortium",
+      "title": "The Aegis Extraction Consortium",
+      "summary": "The corporate extraction empire — the biggest single buyer, hunter, and refiner of magic on the peninsula, with a legal department where its conscience should be.",
+      "body": "Aegis industrialized the darkest fact of the setting: extraction kills the source, demand never ends, and somebody was always going to build the supply chain ([[the-harvest-economy]]). Consortium operations run from licensed creature farms and refinery campuses down to deniable catcher crews in the jungle belt; its product is [[essence]], its currency is contracts, and its public face is clean, insured, and sponsoring the hospital wing.\n\nIt is not cartoonishly evil — that is what makes it dangerous to write and worth writing. Aegis pays well, keeps cities lit, and can prove in court that every unit was legally sourced. The court has never seen the jungle sites.\n\nCharacters to write here: the acquisitions officer who has never watched an extraction; the catcher-crew boss with a quota and a conscience, in that order; the corporate lawyer who defends the indefensible brilliantly; the whistleblower still on payroll because leaving is how you disappear."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "helix-arcanobiotics",
+      "title": "Helix Arcanobiotics",
+      "summary": "The biotech-magic lab network: infused super-soldiers on the brochure, monstrosities in the basement, and containment incidents in neither.",
+      "body": "Helix is where science does what science can rather than what it should: infusion programs that build soldiers with expiry dates, cross-breeding wings that produce [[monstrosities]], and research campuses whose lower floors do not appear on the fire-evacuation plans. It sells enhancement to militaries, custom creatures to whoever qualifies, and silence to itself.\n\nEvery Helix site is a quest waiting to detonate: rescue, liberation, sabotage, or profit — the canonical choices at any facility ([[the-taxonomy-of-monsters]]). And every Helix employee lives on a gradient between believer, hostage, and accomplice.\n\nCharacters to write here: the program director who genuinely believes the abomination rate is acceptable; the researcher who named the thing in Vat Nine and now cannot sign the termination order; the escaped test subject with a Helix barcode and a grudge; the security chief who has read the containment statistics and keeps a boat fueled."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "meridian-arcane-institute",
+      "title": "The Meridian Arcane Institute",
+      "summary": "The elite research university of magic — public prestige, beautiful campuses, and funding sources it teaches its students never to ask about.",
+      "body": "Meridian is where the peninsula's best minds study magic in daylight: theory chairs, teaching hospitals for casters, expedition grants, and a reputation so clean it squeaks. It certifies the licensed mages of the [[national-defense-directorate]], publishes the taxonomies everyone else argues with, and hosts the conferences where policy quietly gets made.\n\nIts compromise is structural: research costs Essence, Essence costs lives, and the Institute's endowment does not itemize. Some faculty know, some suspect, and some built careers on not asking — which makes Meridian the setting's best stage for stories about clean hands and dirty foundations.\n\nCharacters to write here: the brilliant scholarship student from Glasswater-nowhere discovering what funds their fellowship; the tenured chair who signs procurement forms with a fountain pen and no questions; the field-research team in the jungle belt finding things the syllabus says are myths; the archivist who knows where the first extraction papers are buried."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "concordance-of-natural-casters",
+      "title": "The Concordance of Natural Casters",
+      "summary": "The secretive community of the born — organized the way hunted people organize: quietly, thoroughly, and with an exit always planned.",
+      "body": "To be born with magic is to be born valuable ([[the-three-origins-of-magic]]) — hunted by catchers, courted by states, priced by corporations. The Concordance is what the born built in response: a hidden network of safehouses, forged papers, coded introductions, and quiet enforcers, woven through villages, cities, and respectable institutions. It is not a rebellion; it is a survival apparatus, and its first law is that the network outlives any member.\n\nIt argues with itself constantly: shelter or strike back, hide the gifted child or train them, cooperate with the [[liberation-of-the-gifted]] hotheads or disown them.\n\nCharacters to write here: the village schoolteacher who is also a waypoint on the underground railroad; the Concordance judge who decides which exposed caster gets extracted and which gets abandoned; the born teenager in Port Arcadia who doesn't know what their nosebleeds mean yet; the catcher who took the Concordance's coin to look the other way, twice."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "wardens-monster-hunter-guild",
+      "title": "The Wardens' Monster Hunter Guild",
+      "summary": "The licensed monster hunters — half protectors, half profiteers, wholly aware that a world without monsters would put them out of business.",
+      "body": "The Guild sells the oldest service on the peninsula: something is eating the village, and the Wardens will stop it — for the posted rate. Licensed, chartered, and lodge-based, they hunt jungle stalkers, contain breaches, escort expeditions, and certify kills. Their split is generational and real: the protection wing that culls only what threatens people, and the profit wing that fills [[the-harvest-economy]]'s orders because magical carcasses pay triple.\n\nIn the jungle belt around [[port-arcadia]] the Wardens are indispensable — nobody else reads the canopy like they do — which buys them a latitude both wings exploit.\n\nCharacters to write here: the old lodge-master who remembers when the charter meant protection; the young Warden discovering their contracts feed Aegis intake pens; the trophy hunter gone native in the green; the creature-tracker who can find anything and has started wondering what finds *them*."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "liberation-of-the-gifted",
+      "title": "The Liberation of the Gifted",
+      "summary": "The militant anti-harvest resistance: they burn catcher camps, crack farm gates, and free the caged — and they have stopped apologizing for the body count.",
+      "body": "Where the [[concordance-of-natural-casters]] hides, the Liberation strikes. Cells of freed casters, sympathizers, and the gifted hit extraction convoys, breeding farms, and Helix transports; their symbol shows up scorched into catcher-camp gates from the jungle belt to the mountain roads. To the caged they are salvation. To the state they are terrorists. To the corporations they are a line item in security budgets — which the Liberation considers the highest compliment.\n\nTheir moral engine is honest and troubling: every raid frees real prisoners and kills real guards, some of whom were conscripts with debts. Writers should keep both true.\n\nCharacters to write here: the cell leader who was extracted from and survived it, which should be impossible; the quartermaster who buys guns from the same syndicates that traffic casters; the teenage recruit whose gift is small and whose anger is not; the freed creature that follows the cell like a debt."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "black-tithe-syndicate",
+      "title": "The Black Tithe Syndicate",
+      "summary": "The black market's harvest arm: smugglers, traffickers, and quiet auction houses moving magic — and the magical — to buyers no license would cover.",
+      "body": "Whatever the legal harvest economy will not touch, the Black Tithe will: unlicensed extraction, caster trafficking, creature smuggling, stolen [[essence]], and auctions where the lots breathe. The Syndicate runs like a franchise of fear — local crews, regional brokers, and a leadership nobody meets — and its logistics are genuinely excellent, which is the most damning thing about it. In [[port-arcadia]]'s harbour sprawl, Black Tithe cargo moves under manifests as clean as any corporation's.\n\nThey are the [[stormglass-cartel]]'s ugliest competitor and occasional subcontractor — Stormglass runs lanes and artifacts and considers live cargo bad business; the Tithe considers that sentimentality with a margin attached.\n\nCharacters to write here: the dockside broker who can source anything and prices souls fluently; the reformed Tithe courier who knows every hollow container in the harbour; the auctioneer with impeccable manners and a client list worth killing for; the enforcer starting to recognize the faces in the crates."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "church-of-the-first-gift",
+      "title": "The Church of the First Gift",
+      "summary": "The faith that worships creature-gifted magic — the only power in the world that was ever freely given — and preaches against every drop that was taken.",
+      "body": "The Church's theology stands on one canonical fact: of the three origins ([[the-three-origins-of-magic]]), only the gift costs no one anything. A creature that grants magic freely performs, in the Church's eyes, the only sacred act the world has left — and extraction is therefore not crime but *desecration*. Its chapels stand in fishing villages and jungle clearings; its missionaries walk catcher country unarmed; its saints are the gifted, venerated and, uncomfortably, collected.\n\nThe Church shelters creatures, shames corporations, and splits internally over whether a gifted person is a teacher, a relic, or a captive of their own congregation.\n\nCharacters to write here: the jungle-parish priest who knows where a granting creature dens and lies to everyone about it; the gifted saint who never asked to be worshipped; the fire-brand deacon drifting toward the Liberation's methods; the pilgrim walking the peninsula to see the First Gift's shrine before Aegis finds it."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "ossuary-covenant",
+      "title": "The Ossuary Covenant",
+      "summary": "The necromantic order: the dead as labor, the dead as soldiers, the dead as witnesses — lawful where it can be, indispensable where it can't.",
+      "body": "The Covenant's argument is economics, delivered in a graveside voice: the peninsula is at war, labor is scarce, and the dead are neither squeamish nor unionized. Its licensed chapters raise work-crews for mines and harbours and sell battlefield recovery services; its unlicensed chapters do everything the licensed ones swear they don't. Necromancy school casters, bone-archivists, and corpse-contract lawyers make up its strange clergy, and its deepest asset is knowledge: the dead remember, and the Covenant knows how to ask.\n\nIts nightmare and obsession is [[the-risen]] — dead that rise *without* a necromancer, answering something else entirely. Nothing offends the Covenant like amateurs, and nothing frightens it like competition it cannot identify.\n\nCharacters to write here: the chapter-mistress who treats her raised crews with more dignity than the living dockworkers get; the bone-archivist who interviewed a corpse from the Starting Island and hasn't slept since; the young initiate who joined to speak to one specific dead person; the Covenant investigator hunting whoever is raising the dead off-book."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "crimson-choir",
+      "title": "The Crimson Choir",
+      "summary": "The blood-magic cabal — power purchased in the oldest currency, organized like a cult, run like a bank.",
+      "body": "Blood magic works, which is the whole problem. The Choir trades in it: sacrifice as transaction, vitality as loan, pain as collateral. Its cells run from candlelit salon-societies in the great cities to raw jungle altars, and its book-keeping is meticulous — every drop owed, every favor priced, every member's balance known to the voice above them. People come to the Choir when every other door has closed: the dying, the desperate, the ambitious. The Choir always opens the door. The door is the trap.\n\nIt feuds theologically with the [[ossuary-covenant]] (blood is life-magic, bone is death-magic, and both find the comparison insulting) and does quiet business with anyone.\n\nCharacters to write here: the choir-mother who collects debts with genuine kindness and total finality; the initiate paying off a parent's healing one cut at a time; the defector who knows the ledger's names; the jungle altar-keeper whose congregation has started sacrificing to something that answers back differently now."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "iron-saints-pmc",
+      "title": "The Iron Saints PMC",
+      "summary": "The private military company: soldiers, cyborgs, and security by the invoice — professional, expensive, and loyal to the signature line.",
+      "body": "The Iron Saints sell the war back to everyone fighting it: garrison contracts, convoy escort, corporate site security, cyborg shock teams, and — for the right client — deniable field operations. Their brand is discipline: pressed uniforms in the jungle, equipment that works, contracts honored to the letter. The letter is the trick; the Saints have never broken a contract and never once been on the side their client assumed they'd stay on when the money changed.\n\nThey fought for Pearl on the Starting Island, for the Directorate on the mainland, and for three corporations simultaneously in disputes with each other — lawfully, per clause 12.\n\nCharacters to write here: the contract-officer who negotiates like a duelist; the augmented veteran whose hardware is company property, including the parts inside them; the Saint who served opposite the players on the island and respects them professionally; the compliance auditor who decides what clause 12 means today."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "peninsula-coast-guard-authority",
+      "title": "The Peninsula Coast Guard Authority",
+      "summary": "The official sea patrol: search, rescue, customs, and blockade — underfunded, incorruptible in patches, and the only thing between the sea lanes and the people who own them at night.",
+      "body": "The Authority holds the water the state still claims: harbour patrols out of [[port-arcadia]], lighthouse and beacon networks, storm rescue, fisheries protection, and the blockade lines that make smuggling profitable. It is chronically outspent by everyone it polices — [[stormglass-cartel]] lanes, [[black-tithe-syndicate]] cargo, Pearl's private flotillas — and it knows it. What it has is reach, legitimacy, and a stubborn professional core that keeps pulling drowning people out of the water regardless of whose flag they sank under.\n\nThey fished survivors of the Starting Island out of the strait. Both branches owe them, whether the players know it yet or not.\n\nCharacters to write here: the cutter captain who knows which of her own stations are bought; the rescue swimmer with opinions about what they've seen under the water lately; the customs inspector playing a decade-long chess game with one particular smuggler; the lighthouse keeper on the jungle coast whose log records lights that aren't ships."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "free-islander-league",
+      "title": "The Free Islander League",
+      "summary": "The smaller-island independence coalition — fishing federations, island councils, and militia skiffs united by one conviction: the islands belong to islanders.",
+      "body": "The League is what the smaller islands built so the mainland would have to negotiate instead of dictate: a loose coalition of island councils, fishing federations, ferry combines, and volunteer militias. It runs on assembly votes, family reputation, and the certainty — freshly proven by the Starting Island's fate — that when the great powers fight over an island, the islanders pay the bill.\n\nThe fall of the Starting Island is the League's rallying wound: an island burned between a cartel and a trade house while every flag watched. Refugees from it are in League harbours now, and their testimony is political dynamite.\n\nCharacters to write here: the assembly speaker turning grief into a movement; the ferry captain who runs League dispatches under Coast Guard noses; the militia leader deciding whether the League needs a navy or a treaty; the Starting Island refugee whom both branches' choices personally touched."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "floating-city-council",
+      "title": "The Floating City Council",
+      "summary": "The ruling bloc of the floating metropolis — the fourth major city, looking down on the peninsula in every sense.",
+      "body": "The floating island carries the peninsula's fourth major city, and the Council rules it: old families, guild seats, arcane engineering houses, and money so altitude-refined it considers mainland corporations provincial. The city is the setting's purest magic-tech fusion — gravity-anchored districts, sky harbours, warded ballast — and its politics are correspondingly rarefied: everything is leverage, nothing is free, and the ground is somewhere problems get sent.\n\nThe Council's cardinal fear is simple physics: what floats was made to float, by means the Council funds, maintains, and does not fully understand anymore.\n\nCharacters to write here: the councillor whose family's seat predates the city's current altitude; the ballast-engineer who has seen the maintenance projections and started attending church; the ground-born clerk climbing a system built to be unclimbable; the Council spymaster who watches the peninsula's wars like weather — until the weather starts climbing."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "skybridge-transit-authority",
+      "title": "The Skybridge Transit Authority",
+      "summary": "The gatekeepers of altitude: air-shuttles, sky lanes, and the only legal ways up to the floating city — every one of them ticketed, searched, and priced.",
+      "body": "Whoever controls access controls everything, and the Authority controls access to the sky: shuttle terminals in the great cities, the sky-lane beacon network, freight lifts, landing rights, and the customs regime of the vertical border. Formally it serves the [[floating-city-council]]; practically it is a power of its own, because the Council rules the city but the Authority decides who reaches it.\n\nIts uniforms are crisp, its manifests are sacred, and its inspectors have seen every trick — which is exactly why the tricks that work are worth so much. Smuggling *up* is the peninsula's most exclusive criminal discipline.\n\nCharacters to write here: the terminal director who sells nothing and permits everything; the sky-lane pilot who flies the storm routes nobody else will; the customs inspector of the vertical border, incorruptible and therefore endangered; the freight-lift operator who has noticed what certain crates weigh versus what they claim."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "verdant-marsh-clans",
+      "title": "The Verdant Marsh Clans",
+      "summary": "The swamp communities of the deep wetlands — old families, older creature pacts, and routes through the drowned country that no map survives long enough to record.",
+      "body": "Where the jungle belt sinks into wetland, the Clans have lived since before the peninsula had borders: stilt villages, reed causeways, poling routes through black water, and — their true wealth — *pacts*. Clan families keep old arrangements with the marsh's creatures: offerings made, boundaries honored, guardianship inherited ([[the-taxonomy-of-monsters]]'s natural order at its most intact). Outsiders call it superstition until their expedition doesn't come back and a Clan guide's does.\n\nThe harvest economy is their existential enemy — every catcher crew in the wetlands is robbing a pact the Clans are sworn to — and modernity is their slow one.\n\nCharacters to write here: the clan matriarch who speaks for a creature nobody living has seen; the young guide torn between Port Arcadia wages and pact duty; the pact-keeper whose bonded guardian has started behaving as if something new moved into the deep marsh; the Aegis surveyor whose maps keep being wrong in the same deliberate way."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "desert-nomad-compact",
+      "title": "The Desert Nomad Compact",
+      "summary": "The caravan peoples of the interior deserts — survival masters, relic guides, and the only safe passage across country that kills the confident.",
+      "body": "Beyond the inland ranges the peninsula dries into desert, and the Compact owns the crossing of it: caravan lines, water-right treaties older than the state, and guides who navigate by stars, sand-sign, and things politely not named. The desert is relic country — buried facilities, glassed battlefields from wars nobody archived, ruins the Compact calls *the quiet places* — and Compact guides are the only ones who reliably come back from them, chiefly because they know which ones not to enter.\n\nThey trade with everyone, swear to no one, and enforce exactly one law absolutely: on the sand, the Compact's word is the border.\n\nCharacters to write here: the caravan-mistress who has buried three fortunes and outlived four governments; the relic-guide who takes Meridian scholars to ruins and edits what they find; the water-judge whose rulings prevent wars monthly; the outcast guide who entered a quiet place, and what came back wearing their face is polite about it."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "mountain-holdfasts",
+      "title": "The Mountain Holdfasts",
+      "summary": "The armed mountain towns — miners, smiths, and anti-corporate militias holding the high passes, the ore, and a grudge with compound interest.",
+      "body": "The inland ranges belong to the Holdfasts: fortified towns above the cloud line, mining families five generations deep, and militias that have turned back corporate 'survey teams' with rifle fire and avalanche. Their ground holds what everyone wants — ore, deep tunnels, and stormglass-bearing seams — and their history is one long lesson in what happens when they let outsiders dig: [[the-harvest-economy]]'s mining-lab monstrosities came out of *their* mountains, from facilities *their* labor built, under contracts *their* grandparents were cheated on.\n\nNever again is not a slogan up there; it is municipal policy.\n\nCharacters to write here: the holdfast reeve who negotiates with corporations from behind a fortified pass and enjoys it; the deep-tunnel foreman who knows which shafts are sealed for geology and which for other reasons; the militia captain arming against Aegis with Aegis's own lost shipments; the young miner whose canary-instinct for wrong tunnels is starting to look like a born gift."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "drifter-renegade-camps",
+      "title": "The Drifter Renegade Camps",
+      "summary": "The moving nations of the dispossessed — deserters, refugees, criminals, and survivors, welded into convoys that belong nowhere and therefore go anywhere.",
+      "body": "Every war sheds people, and the peninsula's wars have shed enough to populate a country with no address: army deserters, burned villages' survivors, debt-runners, escaped test subjects, small criminals, and now Starting Island refugees. The Camps are what they built — vehicle convoys, jungle clearings that are towns for a month, codes of hospitality enforced with absolute seriousness because trust is the only currency the stateless can mint.\n\nEvery faction uses them (labor, recruits, deniable couriers) and every faction despises them, which the Camps have converted into their one strategic asset: they hear everything, everywhere, first.\n\nCharacters to write here: the camp-boss who was a Directorate major and runs her convoy like the battalion she deserted with; the fixer who can find anyone who doesn't want to be found, having been one; the kid born on the road who has never seen a wall they trusted; the quiet man by the fuel truck whom three factions' wanted lists describe differently."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "foundry-workers-union",
+      "title": "The Foundry Workers Union",
+      "summary": "Industrial labor organized: the people who actually build the war's machines, increasingly aware that stopping work stops everything.",
+      "body": "The Union holds the manufacturing towns — foundries, shipyards, munition plants, enchantment-line workshops where warding sigils are stamped like license plates. Its members build the Directorate's armor, the corporations' machines, and the harbour cranes of [[port-arcadia]], and its leadership has done the arithmetic out loud: every power on the peninsula is downstream of a Union shift-whistle.\n\nThat arithmetic is getting dangerous. Strikes have stopped convoys; negotiations now involve people who solve problems permanently; and the Union's own radicals ask why the builders of everything own nothing.\n\nCharacters to write here: the shop steward who negotiates with a PMC across the table and her whole town behind her; the sigil-stamper who noticed the ward patterns changed last quarter and nobody will say why; the union organizer working the Port Arcadia docks against three factions' quiet opposition; the old foundry-master who remembers what the plants built before the war and won't say."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "cybernetic-ascendancy",
+      "title": "The Cybernetic Ascendancy",
+      "summary": "The transhumanist movement pursuing the full fusion of machine and magic in the human body — evangelists of an upgrade the flesh didn't ask for.",
+      "body": "The Ascendancy believes the setting's fusion ([[the-five-pillars]]) stops one step short: the world integrated magic and technology, but the *body* remains stubbornly unimproved. Its chapters run augmentation clinics, bionic-school casting research, and salons where members display new hardware like theology. Its spectrum runs from respectable prosthetics-and-implants medicine to full conversion cells for whom remaining human is a failure of nerve.\n\nIts unresolved question is corruption: infusion mutates flesh — so replace the flesh? Ascendancy labs quietly test whether the seven phases ([[the-seven-phases-of-corruption]]) can be *engineered around*, which every other power finds either heretical or extremely purchasable.\n\nCharacters to write here: the clinic surgeon who genuinely heals and genuinely recruits; the fully-converted elder whose humanity is a philosophical position now; the corruption-phase infusion addict betting everything on chrome outrunning mutation; the repossession agent, because augments are financed and the Ascendancy collects."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "drone-surveillance-bureau",
+      "title": "The Drone Surveillance Bureau",
+      "summary": "The watching apparatus: state-and-corporate surveillance fused into one bureau that sees the cities, the roads — and sells selective blindness.",
+      "body": "The Bureau is what happens when a state's security cameras and its corporations' analytics merge and nobody objects in time: drone lattices over the great cities, road-eye networks, warded observation posts, and archives where the peninsula's movements are stored, indexed, and — this is the business model — *queried*, for the right requester. It is officially neutral infrastructure. Unofficially, its query logs are the most valuable document on the peninsula, and its blind spots are sold like real estate.\n\nThe jungle is its humiliation: canopy kills drone coverage, which is why the green belt is where everyone goes to be unobserved, and why Bureau ground assets there are so nervous.\n\nCharacters to write here: the analyst who watched a disappearance frame by frame and filed it as requested; the blind-spot broker selling ten unobserved minutes at a time; the drone-wrangler whose jungle units keep recording things that get classified above her; the auditor hunting who queried a certain face the week before the island fell."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "abomination-containment-authority",
+      "title": "The Abomination Containment Authority",
+      "summary": "The quarantine force for when infusion's bill comes due — half emergency service, half evidence-disposal, and which half arrives depends on who made the mess.",
+      "body": "When an infusion user completes the seventh phase ([[the-seven-phases-of-corruption]], [[abominations]]), the ACA responds: cordon teams, containment casters, tranquilizer doctrine, and the sealed transports nobody films. Its public mandate is protection, and its crews are genuinely brave. Its quieter mandate is *narrative* control: an outbreak traced to a corporate program is a lawsuit, so certain scenes are contained, cleaned, and un-happened before the press or the family arrives.\n\nEvery ACA officer eventually meets the job's central horror: the thing in the cordon used to be someone, sometimes someone whose name is on the manifest in their hand.\n\nCharacters to write here: the cordon captain who keeps a private list of the names the reports erased; the containment caster burning out on warding work nobody thanks; the cleanup contractor who has stopped asking whose logo was on the site; the widow who knows the official story is wrong and has started finding others like her."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "sanctuary-of-living-beasts",
+      "title": "The Sanctuary of Living Beasts",
+      "summary": "The creature-rescue network: liberating magical beings from farms, labs, and auction lots — smugglers whose contraband has heartbeats.",
+      "body": "The Sanctuary is the harvest economy's ([[the-harvest-economy]]) gentlest and most wanted enemy: a network of handlers, veterinarians, safe-range keepers, and infiltrators who free magical creatures from Aegis farms, Helix labs, and Black Tithe auction rooms, then move them along hidden corridors to protected ranges — deep jungle, deep marsh (with [[verdant-marsh-clans]] blessing), and places only the creatures themselves choose. Its members can read a creature's distress like text and consider the word 'stock' obscene.\n\nIts hard edge is real: liberation runs are theft-at-minimum, and a freed apex creature is not a grateful pet. The Sanctuary accepts both costs with open eyes.\n\nCharacters to write here: the range-keeper bonded to a rescued creature the Church would canonize; the inside-woman still wearing an Aegis badge; the veterinarian who repairs what extraction facilities leave behind and testifies to no one; the handler whose freed charges have begun refusing certain territories, all in the same direction."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "bone-market-families",
+      "title": "The Bone Market Families",
+      "summary": "Old-money crime with a specialty: the corpse, relic, and necromancy trade — dignified, patient, and owed by everyone who has ever needed the dead.",
+      "body": "The Families are older than most of the states that outlaw them: dynastic criminal houses whose trade is everything death produces — corpses for the [[ossuary-covenant]]'s chapters, relics from tomb country, necromantic materials, funerary fraud, and the discreet movement of remains that must not be found. They operate like antique banks: introductions required, ledgers eternal, debts inherited. Vulgar crime bores them; the [[black-tithe-syndicate]] traffics in the living, which the Families consider both immoral and, worse, indiscreet.\n\nTheir holdings run under the great cities — literally: ossuary vaults, bone-archives, and tomb-country concessions mapped in family memory alone.\n\nCharacters to write here: the family matriarch who has buried allies, rivals, and two governments, profitably; the relic-appraiser who can date a saint's fingerbone and forge one; the heir who wants the Families out of corpse-trade and into legitimate death-services, over everyone's dead bodies; the vault-keeper who reports that something has been *withdrawing*."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "the-choir-below",
+      "title": "The Choir Below",
+      "summary": "The subterranean intelligence: a supernatural mind beneath the peninsula that steers surface politics through dreams, cults, and the possessed — patient as geology.",
+      "body": "Nobody has seen the Choir Below. That is not a gap in the record; it is the Choir's method. It exists beneath — in deep tunnels, sealed mines, drowned caves — and it reaches upward only through intermediaries: recurring dreams that arrive in whole districts at once, cults that believe they invented themselves, and the quietly possessed seeded through councils, unions, and congregations. Its goals are inferred, never stated; its interventions look like coincidence until mapped across decades ([[something-under-the-war]] at its most political).\n\nIts known rivalries are supernatural: the [[the-ashen-court]] forces doors; the Choir *is* a door, already open, that everyone walked past.\n\nCharacters to write here: the dream-recorder cataloguing a city's nightmares and finding the pattern; the cultist rising through a hierarchy whose top floor has no floor; the possessed clerk who has been someone's hands for eleven years and is starting to wake mid-task; the deep-mine surveyor whose maps end at a wall that hums in words."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "the-pale-embassy",
+      "title": "The Pale Embassy",
+      "summary": "The supernatural diplomats: courteous envoys who offer bargains, truces, and impossible gifts — every one of them fairly priced, and the price is never what you think.",
+      "body": "The Embassy arrives politely. Its envoys — pale, exact, impeccably mannered — appear to factions, cities, and occasionally individuals, offering terms: a truce here, a gift there, a debt restructured, a war averted. Every offer is genuine. Every term is honored to the letter. And every bargain, examined years later, turns out to have purchased something the signer did not know they were selling ([[the-taxonomy-of-monsters]] — true supernaturals, with their own hierarchy and agenda).\n\nWhat the Embassy actually represents — a court, a power, a debtor's prison collecting on the world — is unwritten and should stay expensive to learn. Its known etiquette is absolute: violence against an envoy has happened twice in recorded history, and both sites are still avoided.\n\nCharacters to write here: the envoy assigned to Port Arcadia, currently taking meetings; the state lawyer who reads Embassy contracts and has started sleeping badly; the town that prospered impossibly for a generation and now keeps its bargain's anniversary like a funeral; the scholar collecting every recorded Embassy deal, looking for what they all bought."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "the-riftbound-legion",
+      "title": "The Riftbound Legion",
+      "summary": "The organized demonic military: summoned infantry, bone engines, and corrupted artillery — an army that treats the world's wounds as beachheads.",
+      "body": "Where the [[the-ashen-court]] is nobility, the Legion is the army: a disciplined demonic war-machine that pushes through rifts in force — summoned infantry in ranks, bone engines that grow their own siegeworks, artillery that fires corruption as ordnance. It does not raid; it *deploys*, holds ground, fortifies, and expands, with a competence human militaries find more frightening than any monstrousness ([[the-taxonomy-of-monsters]]).\n\nIts relationship to the Court is unwritten — vanguard, rival, or instrument — and worth deciding slowly. What is locked: the Legion's incursions need wounds to enter by, and the peninsula's wars keep supplying them. The Starting Island's breach country ([[the-riftwood-breach]]) is exactly the kind of ground the Legion consolidates.\n\nCharacters to write here: the Directorate analyst who war-gamed the Legion and resigned; the artillery officer who has heard Legion counter-battery fire *answer in rhythm*; the deserter from a militia that held a rift-line for nine days; the summoned soldier — because someone should eventually write one from the inside."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "the-old-hunger",
+      "title": "The Old Hunger",
+      "summary": "The ancient predatory presence — worshipped by cults, feared by demons, and older than the categories everyone else fights about. Some things are not factions; they are appetites with followers.",
+      "body": "At the bottom of the supernatural order, beneath courts and legions and embassies, there is something that predates them all — and even demons lower their voices about it. The Old Hunger is not organized; it is *orbited*: cults that feed it, places that belong to it, and a slow gravitational pull on every dark ambition the peninsula produces. It does not bargain like the [[the-pale-embassy]] or deploy like the [[the-riftbound-legion]]. It waits, and is fed, and is — this is the horrifying part — apparently still waking up.\n\nWriters' discipline, per [[something-under-the-war]]: the Hunger is glimpses only. An impossible silhouette under deep water. A cult's feeding calendar. The fact that the Ashen Court reroutes around certain places. Whether the shape beneath the waves at the Starting Island's fall was the Hunger, one of its orbiters, or something else again is deliberately unanswered — and should stay unanswered for a long, long time.\n\nCharacters to write here: the cult accountant who manages feeding logistics like a shipping schedule; the deep-water salvage diver who came up early and retired the same day; the demonologist whose taxonomy has one entry marked only DO NOT PURSUE; the coastal village that has always thrown one net's catch back, and no longer remembers being told to."
+    }
+  ]
+}

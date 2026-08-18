@@ -1,11 +1,12 @@
 "use server";
 
 import "@/lib/environment";
-import { getPrismaClient } from "@habitat/db/client";
+import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
   isValidStoryKey,
   isStoryContentEditable,
   slugifyStoryKey,
+  storyEndingKinds,
   storyEntryKinds,
   storyLockTtlMs,
   storyNodeKinds,
@@ -54,13 +55,14 @@ async function recordRevision(tx: Transaction, input: RevisionInput) {
 }
 
 /**
- * Contributions land at PROPOSED so a reviewer sees them before the game does.
- * An administrator is that reviewer, so requiring them to approve their own
- * writing would be ceremony rather than a safeguard — their work is canon on
- * save, and everyone else's waits.
+ * The clubhouse writes without a gate: everything lands CANON the moment it is
+ * saved, for every member alike, and the game reads it on its next pull.
+ * Tino's call, 2026-08-18 — the color-coded audit log on the codex landing
+ * page replaced approval as the safety mechanism, and REJECTED/ARCHIVED stay
+ * available to an administrator for after-the-fact housekeeping.
  */
-function creationStatus(role: string | undefined): StoryStatus {
-  return role === "ADMIN" ? "CANON" : "PROPOSED";
+function creationStatus(): StoryStatus {
+  return "CANON";
 }
 
 function refreshCodex(arcSlug?: string | null) {
@@ -70,14 +72,31 @@ function refreshCodex(arcSlug?: string | null) {
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
 }
 
+/**
+ * An optional prose field: blank means "not written", and anything over the
+ * column's width is a validation failure rather than a value quietly replaced
+ * with null. Swallowing the failure would let an oversized paste erase a scene
+ * a writer had already saved, and report the save as successful.
+ */
 const optionalText = (max: number) =>
   z
     .string()
     .trim()
     .max(max)
     .transform((value) => (value.length > 0 ? value : null))
-    .nullable()
-    .catch(null);
+    .nullable();
+
+/**
+ * Effects arrive as a textarea, one per line. They are free text the game
+ * interprets — the codex only keeps them short enough to stay legible in an
+ * import log, and refuses rather than truncates when they are not.
+ */
+const effectsList = z
+  .string()
+  .max(8000)
+  .transform((value) => value.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length > 0))
+  .refine((lines) => lines.length <= 20, { message: "At most 20 effects on one card or branch." })
+  .refine((lines) => lines.every((line) => line.length <= 300), { message: "Keep each effect under 300 characters." });
 
 // ---------------------------------------------------------------------------
 // Arcs
@@ -86,18 +105,29 @@ const optionalText = (max: number) =>
 const arcSchema = z.object({
   title: z.string().trim().min(1).max(120),
   summary: optionalText(500),
+  hook: optionalText(500),
+  regionEntryId: z.string().uuid().nullable(),
   isMainline: z.boolean(),
 });
+
+/** The pickup place is a REGION bible entry, never free text. */
+async function assertRegionEntry(tx: Transaction, regionEntryId: string | null) {
+  if (!regionEntryId) return;
+  const region = await tx.storyEntry.findUnique({ where: { id: regionEntryId }, select: { kind: true } });
+  if (!region || region.kind !== "REGION") throw new Error("A pickup place has to be a region from the bible.");
+}
 
 export async function createArc(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = arcSchema.safeParse({
     title: formData.get("title"),
     summary: formData.get("summary") ?? "",
+    hook: formData.get("hook") ?? "",
+    regionEntryId: formData.get("regionEntryId") || null,
     // Only a reviewer decides what counts as the spine of the story.
     isMainline: user.role === "ADMIN" && formData.get("isMainline") === "on",
   });
-  if (!parsed.success) throw new Error("Give the arc a title of 120 characters or fewer.");
+  if (!parsed.success) throw new Error("Give the arc a title of 120 characters or fewer, with a summary and hook under 500 each.");
 
   const slug = slugifyStoryKey(parsed.data.title);
   if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
@@ -106,13 +136,66 @@ export async function createArc(formData: FormData) {
   if (existing) throw new Error("An arc with that name already exists.");
 
   await db.$transaction(async (tx) => {
+    await assertRegionEntry(tx, parsed.data.regionEntryId);
     const arc = await tx.storyArc.create({
-      data: { slug, title: parsed.data.title, summary: parsed.data.summary, isMainline: parsed.data.isMainline, status: creationStatus(user.role), createdByUserId: user.id },
+      data: { slug, title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, isMainline: parsed.data.isMainline, status: creationStatus(), createdByUserId: user.id },
     });
     await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "CREATED", actorUserId: user.id, summary: `Opened the arc "${arc.title}"` });
   });
 
   refreshCodex(slug);
+}
+
+/**
+ * Retitling never touches the slug — the slug is the identity the Unreal
+ * importer matches the arc's assets on, and an arc that changed its slug on a
+ * rename would orphan everything built from it.
+ */
+export async function updateArc(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = arcSchema.extend({ arcId: z.string().uuid() }).safeParse({
+    arcId: formData.get("arcId"),
+    title: formData.get("title"),
+    summary: formData.get("summary") ?? "",
+    hook: formData.get("hook") ?? "",
+    regionEntryId: formData.get("regionEntryId") || null,
+    isMainline: user.role === "ADMIN" && formData.get("isMainline") === "on",
+  });
+  if (!parsed.success) throw new Error("An arc needs a title of 120 characters or fewer, with a summary and hook under 500 each.");
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const arc = await tx.storyArc.findUnique({ where: { id: parsed.data.arcId } });
+    if (!arc) throw new Error("That arc no longer exists.");
+    if (!isStoryContentEditable(arc.status, user.role === "ADMIN")) {
+      throw new Error("This arc is canon. Leave a note for a reviewer before changing shipped story.");
+    }
+    await assertRegionEntry(tx, parsed.data.regionEntryId);
+
+    await tx.storyArc.update({
+      where: { id: arc.id },
+      data: {
+        title: parsed.data.title,
+        summary: parsed.data.summary,
+        hook: parsed.data.hook,
+        regionEntryId: parsed.data.regionEntryId,
+        // Mainline stays a reviewer's call; everyone else's edit keeps it as-is.
+        isMainline: user.role === "ADMIN" ? parsed.data.isMainline : arc.isMainline,
+      },
+    });
+    await recordRevision(tx, {
+      entityType: "ARC",
+      entityId: arc.id,
+      arcId: arc.id,
+      action: "UPDATED",
+      actorUserId: user.id,
+      summary: `Reworked the arc "${parsed.data.title}"`,
+      before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, isMainline: arc.isMainline },
+      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId },
+    });
+    return arc.slug;
+  });
+
+  refreshCodex(arcSlug);
 }
 
 // ---------------------------------------------------------------------------
@@ -165,7 +248,7 @@ export async function createNode(formData: FormData) {
     canvasX: formData.get("canvasX"),
     canvasY: formData.get("canvasY"),
   });
-  if (!parsed.success) throw new Error("That node is missing a title or a valid kind.");
+  if (!parsed.success) throw new Error("A card needs a valid kind, a title of 160 characters or fewer, and a summary under 500.");
 
   const arc = await db.storyArc.findUnique({ where: { id: parsed.data.arcId }, select: { id: true, slug: true } });
   if (!arc) throw new Error("That arc no longer exists.");
@@ -184,7 +267,7 @@ export async function createNode(formData: FormData) {
         summary: parsed.data.summary,
         canvasX: placement.canvasX,
         canvasY: placement.canvasY,
-        status: creationStatus(user.role),
+        status: creationStatus(),
         createdByUserId: user.id,
       },
     });
@@ -201,6 +284,12 @@ const updateNodeSchema = z.object({
   title: z.string().trim().min(1).max(160),
   summary: optionalText(500),
   body: optionalText(20000),
+  speakerEntryId: z.string().uuid().nullable(),
+  endingKind: z.enum(storyEndingKinds).nullable(),
+  completion: optionalText(500),
+  effects: effectsList,
+  rewards: effectsList,
+  continuesInArcId: z.string().uuid().nullable(),
 });
 
 export async function updateNode(formData: FormData) {
@@ -212,14 +301,40 @@ export async function updateNode(formData: FormData) {
     title: formData.get("title"),
     summary: formData.get("summary") ?? "",
     body: formData.get("body") ?? "",
+    speakerEntryId: formData.get("speakerEntryId") || null,
+    endingKind: formData.get("endingKind") || null,
+    completion: formData.get("completion") ?? "",
+    effects: formData.get("effects") ?? "",
+    rewards: formData.get("rewards") ?? "",
+    continuesInArcId: formData.get("continuesInArcId") || null,
   });
-  if (!parsed.success) throw new Error("That edit is missing a title or a valid kind.");
+  if (!parsed.success) throw new Error("That edit needs a valid kind, a title of 160 characters or fewer, a summary under 500, and scene text under 20,000.");
+
+  // Ending valence and continuation belong to endings, completion to quest
+  // steps. Enforced by clearing rather than refusing: a writer who turns an
+  // Ending back into a Scene should not be blocked by what the old kind left.
+  const endingKind = parsed.data.kind === "ENDING" ? parsed.data.endingKind : null;
+  const completion = parsed.data.kind === "QUEST_STEP" ? parsed.data.completion : null;
+  const continuesInArcId = parsed.data.kind === "ENDING" ? parsed.data.continuesInArcId : null;
 
   const arcSlug = await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, include: { arc: { select: { slug: true } } } });
     if (!node) throw new Error("That node no longer exists.");
     if (!isStoryContentEditable(node.status, user.role === "ADMIN")) {
       throw new Error("This node is canon. Leave a note for a reviewer before changing shipped story.");
+    }
+
+    // A speaker is a character from the bible, never free text — the importer
+    // resolves the attribution against a real asset, so it must exist here.
+    if (parsed.data.speakerEntryId) {
+      const speaker = await tx.storyEntry.findUnique({ where: { id: parsed.data.speakerEntryId }, select: { kind: true } });
+      if (!speaker || speaker.kind !== "CHARACTER") throw new Error("A speaker has to be a character from the bible.");
+    }
+
+    if (continuesInArcId) {
+      if (continuesInArcId === node.arcId) throw new Error("An ending cannot continue into its own arc.");
+      const nextArc = await tx.storyArc.findUnique({ where: { id: continuesInArcId }, select: { id: true } });
+      if (!nextArc) throw new Error("The arc this ending continues into no longer exists.");
     }
 
     // Optimistic concurrency, not the courtesy lock, is what actually protects
@@ -232,6 +347,12 @@ export async function updateNode(formData: FormData) {
         title: parsed.data.title,
         summary: parsed.data.summary,
         body: parsed.data.body,
+        speakerEntryId: parsed.data.speakerEntryId,
+        endingKind,
+        completion,
+        effects: parsed.data.effects,
+        rewards: parsed.data.rewards,
+        continuesInArcId,
         updatedByUserId: user.id,
         version: { increment: 1 },
         // An edit is an implicit release: the writer is done with this pass.
@@ -250,8 +371,8 @@ export async function updateNode(formData: FormData) {
       action: "UPDATED",
       actorUserId: user.id,
       summary: `Rewrote "${parsed.data.title}"`,
-      before: { title: node.title, kind: node.kind, summary: node.summary, body: node.body },
-      after: { title: parsed.data.title, kind: parsed.data.kind, summary: parsed.data.summary, body: parsed.data.body },
+      before: { title: node.title, kind: node.kind, summary: node.summary, body: node.body, speakerEntryId: node.speakerEntryId, endingKind: node.endingKind, completion: node.completion, effects: node.effects, rewards: node.rewards, continuesInArcId: node.continuesInArcId },
+      after: { title: parsed.data.title, kind: parsed.data.kind, summary: parsed.data.summary, body: parsed.data.body, speakerEntryId: parsed.data.speakerEntryId, endingKind, completion, effects: parsed.data.effects, rewards: parsed.data.rewards, continuesInArcId },
     });
 
     return node.arc.slug;
@@ -306,15 +427,13 @@ export async function deleteNode(formData: FormData) {
 
     // Canon is what the game was built from. Removing it outright would tear a
     // hole in an export somebody has already imported, so it is archived and
-    // stays addressable by key.
+    // stays addressable by key. Any member can do it — the audit log shows
+    // who, in red, and an administrator can restore from the revision trail.
     if (node.status === "CANON") {
-      if (user.role !== "ADMIN") throw new Error("This node is canon. Ask an administrator to archive it.");
       await tx.storyNode.update({ where: { id: node.id }, data: { status: "ARCHIVED", updatedByUserId: user.id } });
       await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Archived the canon node "${node.title}"`, before: { status: "CANON" }, after: { status: "ARCHIVED" } });
       return node.arc.slug;
     }
-
-    if (node.createdByUserId !== user.id && user.role !== "ADMIN") throw new Error("Only the writer who added this node, or an administrator, can remove it.");
 
     await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "DELETED", actorUserId: user.id, summary: `Removed "${node.title}"`, before: { key: node.key, title: node.title, kind: node.kind, body: node.body } });
     await tx.storyNode.delete({ where: { id: node.id } });
@@ -328,6 +447,24 @@ export async function deleteNode(formData: FormData) {
 // Edges
 // ---------------------------------------------------------------------------
 
+/**
+ * Choice keys are what the Unreal importer names a synthesised choice asset
+ * by, so they are minted once at creation and never re-derived — a key built
+ * from the label, the target, or the order would orphan the asset the moment
+ * a writer relabelled, retargeted, or reordered the branch.
+ */
+async function availableChoiceKey(tx: Transaction, arcId: string, fromKey: string) {
+  const base = `${slugifyStoryKey(fromKey, 66) || "scene"}-choice`;
+  const siblings = await tx.storyEdge.findMany({ where: { arcId, key: { startsWith: base } }, select: { key: true } });
+  const taken = new Set(siblings.map((edge) => edge.key));
+  if (!taken.has(base)) return base;
+  for (let suffix = 2; suffix < 1000; suffix += 1) {
+    const candidate = `${base}-${suffix}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+  throw new Error("That card has too many branches to key another one.");
+}
+
 export async function createEdge(input: { fromNodeId: string; toNodeId: string; label?: string | null }) {
   const user = await requireRole(storyReadRole);
   const parsed = z
@@ -338,7 +475,7 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
 
   const arcSlug = await db.$transaction(async (tx) => {
     const [from, to] = await Promise.all([
-      tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, title: true, arc: { select: { slug: true } } } }),
+      tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, title: true, key: true, arc: { select: { slug: true } } } }),
       tx.storyNode.findUnique({ where: { id: parsed.data.toNodeId }, select: { id: true, arcId: true, title: true } }),
     ]);
     if (!from || !to) throw new Error("One end of that transition no longer exists.");
@@ -346,18 +483,22 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
     // StoryEdge in schema.prisma.
     if (from.arcId !== to.arcId) throw new Error("A transition has to stay inside one arc.");
 
-    const existing = await tx.storyEdge.findFirst({ where: { fromNodeId: from.id, toNodeId: to.id }, select: { id: true } });
-    if (existing) throw new Error("Those nodes are already connected.");
+    // Several branches between the same pair of nodes are legitimate — three
+    // differently-labelled choices can all lead to the same scene, with the
+    // difference carried in their effects. The accident this used to guard
+    // against, a double-dragged duplicate, still surfaces: two unlabelled
+    // parallel branches are flagged as an unlabelled split on the board.
 
     const last = await tx.storyEdge.findFirst({ where: { fromNodeId: from.id }, orderBy: { position: "desc" }, select: { position: true } });
     const edge = await tx.storyEdge.create({
       data: {
         arcId: from.arcId,
+        key: await availableChoiceKey(tx, from.arcId, from.key),
         fromNodeId: from.id,
         toNodeId: to.id,
         label: parsed.data.label ?? null,
         position: last ? last.position + 1 : 0,
-        status: creationStatus(user.role),
+        status: creationStatus(),
         createdByUserId: user.id,
       },
     });
@@ -371,8 +512,8 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
 export async function updateEdge(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z
-    .object({ edgeId: z.string().uuid(), label: optionalText(200), condition: optionalText(300) })
-    .safeParse({ edgeId: formData.get("edgeId"), label: formData.get("label") ?? "", condition: formData.get("condition") ?? "" });
+    .object({ edgeId: z.string().uuid(), toNodeId: z.string().uuid().nullable(), label: optionalText(200), condition: optionalText(300), effects: effectsList })
+    .safeParse({ edgeId: formData.get("edgeId"), toNodeId: formData.get("toNodeId") || null, label: formData.get("label") ?? "", condition: formData.get("condition") ?? "", effects: formData.get("effects") ?? "" });
   if (!parsed.success) throw new Error("That transition is not valid.");
 
   const arcSlug = await db.$transaction(async (tx) => {
@@ -382,18 +523,160 @@ export async function updateEdge(formData: FormData) {
       throw new Error("This branch is canon. Only a reviewer can change its choice text or condition.");
     }
 
-    await tx.storyEdge.update({ where: { id: edge.id }, data: { label: parsed.data.label, condition: parsed.data.condition } });
+    // Retargeting keeps the edge — and above all its key — so pointing a
+    // choice somewhere new never orphans the asset the importer already built
+    // from it. That is the whole reason choice keys exist.
+    const toNodeId = parsed.data.toNodeId ?? edge.toNodeId;
+    let targetTitle = edge.toNode.title;
+    if (toNodeId !== edge.toNodeId) {
+      const target = await tx.storyNode.findUnique({ where: { id: toNodeId }, select: { arcId: true, title: true } });
+      if (!target) throw new Error("The card that branch should lead to no longer exists.");
+      if (target.arcId !== edge.arcId) throw new Error("A transition has to stay inside one arc.");
+      if (toNodeId === edge.fromNodeId) throw new Error("A node cannot continue into itself.");
+      targetTitle = target.title;
+    }
+
+    await tx.storyEdge.update({ where: { id: edge.id }, data: { toNodeId, label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects } });
     await recordRevision(tx, {
       entityType: "EDGE",
       entityId: edge.id,
       arcId: edge.arcId,
       action: "UPDATED",
       actorUserId: user.id,
-      summary: `Relabelled the branch from "${edge.fromNode.title}" to "${edge.toNode.title}"`,
-      before: { label: edge.label, condition: edge.condition },
-      after: { label: parsed.data.label, condition: parsed.data.condition },
+      summary: toNodeId !== edge.toNodeId
+        ? `Moved the branch from "${edge.fromNode.title}" to lead to "${targetTitle}"`
+        : `Relabelled the branch from "${edge.fromNode.title}" to "${edge.toNode.title}"`,
+      before: { label: edge.label, condition: edge.condition, effects: edge.effects, toNode: edge.toNode.title },
+      after: { label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects, toNode: targetTitle },
     });
     return edge.arc.slug;
+  });
+
+  refreshCodex(arcSlug);
+}
+
+/**
+ * Swaps a branch with its neighbour above or below. Order is what the player
+ * sees the choices in, so it is content — but like a drag on the canvas it is
+ * recorded as MOVED, which the activity feed keeps out of the way.
+ */
+export async function reorderEdge(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = z
+    .object({ edgeId: z.string().uuid(), direction: z.enum(["up", "down"]) })
+    .safeParse({ edgeId: formData.get("edgeId"), direction: formData.get("direction") });
+  if (!parsed.success) throw new Error("Invalid reorder.");
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const edge = await tx.storyEdge.findUnique({ where: { id: parsed.data.edgeId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } } } });
+    if (!edge) throw new Error("That transition no longer exists.");
+    if (!isStoryContentEditable(edge.status, user.role === "ADMIN")) {
+      throw new Error("This branch is canon. Only a reviewer can reorder the player's choices.");
+    }
+
+    const siblings = await tx.storyEdge.findMany({ where: { fromNodeId: edge.fromNodeId }, orderBy: { position: "asc" }, select: { id: true, position: true } });
+    const index = siblings.findIndex((sibling) => sibling.id === edge.id);
+    const swapWith = parsed.data.direction === "up" ? siblings[index - 1] : siblings[index + 1];
+    if (!swapWith) return edge.arc.slug; // already at the end — nothing to do
+
+    // Three steps through a spare slot, because (fromNodeId, position) is
+    // unique and the constraint is checked immediately.
+    const spare = siblings[siblings.length - 1].position + 1;
+    const own = edge.position;
+    await tx.storyEdge.update({ where: { id: edge.id }, data: { position: spare } });
+    await tx.storyEdge.update({ where: { id: swapWith.id }, data: { position: own } });
+    await tx.storyEdge.update({ where: { id: edge.id }, data: { position: swapWith.position } });
+
+    await recordRevision(tx, {
+      entityType: "EDGE",
+      entityId: edge.id,
+      arcId: edge.arcId,
+      action: "MOVED",
+      actorUserId: user.id,
+      summary: `Reordered the choices out of "${edge.fromNode.title}"`,
+      before: { position: own },
+      after: { position: swapWith.position },
+    });
+    return edge.arc.slug;
+  });
+
+  refreshCodex(arcSlug);
+}
+
+/**
+ * Draws a new branch from a card in one submit — to an existing card, or to a
+ * brand-new one created in the same transaction. This is what lets the story
+ * grow from the reader's walk without a trip back to the whiteboard.
+ */
+export async function addBranch(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = z
+    .object({
+      fromNodeId: z.string().uuid(),
+      targetNodeId: z.string().uuid().nullable(),
+      label: optionalText(200),
+      newTitle: optionalText(160),
+      newKind: z.enum(storyNodeKinds).catch("SCENE"),
+    })
+    .safeParse({
+      fromNodeId: formData.get("fromNodeId"),
+      targetNodeId: formData.get("targetNodeId") || null,
+      label: formData.get("label") ?? "",
+      newTitle: formData.get("newTitle") ?? "",
+      newKind: formData.get("newKind") ?? "SCENE",
+    });
+  if (!parsed.success) throw new Error("That branch is not valid.");
+  if (!parsed.data.targetNodeId && !parsed.data.newTitle) throw new Error("Pick a card for the branch to lead to, or give the new card a title.");
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const from = await tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, key: true, title: true, canvasX: true, canvasY: true, arc: { select: { slug: true } } } });
+    if (!from) throw new Error("The card this branch starts from no longer exists.");
+
+    let toNodeId = parsed.data.targetNodeId;
+    let toTitle: string;
+    if (toNodeId) {
+      if (toNodeId === from.id) throw new Error("A node cannot continue into itself.");
+      const target = await tx.storyNode.findUnique({ where: { id: toNodeId }, select: { arcId: true, title: true } });
+      if (!target) throw new Error("The card that branch should lead to no longer exists.");
+      if (target.arcId !== from.arcId) throw new Error("A transition has to stay inside one arc.");
+      toTitle = target.title;
+    } else {
+      const title = parsed.data.newTitle as string;
+      const node = await tx.storyNode.create({
+        data: {
+          arcId: from.arcId,
+          kind: parsed.data.newKind,
+          key: await availableNodeKey(tx, from.arcId, title),
+          title,
+          // The new card lands one column to the right of its parent, where
+          // the branch visibly goes somewhere instead of onto a distant grid.
+          canvasX: from.canvasX + 300,
+          canvasY: from.canvasY + 40,
+          status: creationStatus(),
+          createdByUserId: user.id,
+        },
+        select: { id: true, title: true },
+      });
+      await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: from.arcId, action: "CREATED", actorUserId: user.id, summary: `Added "${node.title}"` });
+      toNodeId = node.id;
+      toTitle = node.title;
+    }
+
+    const last = await tx.storyEdge.findFirst({ where: { fromNodeId: from.id }, orderBy: { position: "desc" }, select: { position: true } });
+    const edge = await tx.storyEdge.create({
+      data: {
+        arcId: from.arcId,
+        key: await availableChoiceKey(tx, from.arcId, from.key),
+        fromNodeId: from.id,
+        toNodeId,
+        label: parsed.data.label,
+        position: last ? last.position + 1 : 0,
+        status: creationStatus(),
+        createdByUserId: user.id,
+      },
+    });
+    await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: from.arcId, action: "CREATED", actorUserId: user.id, summary: `Connected "${from.title}" to "${toTitle}"` });
+    return from.arc.slug;
   });
 
   refreshCodex(arcSlug);
@@ -407,10 +690,11 @@ export async function deleteEdge(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: edgeId.data }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
     if (!edge) throw new Error("That transition no longer exists.");
-    if (edge.status === "CANON" && user.role !== "ADMIN") throw new Error("That branch is canon. Ask an administrator to remove it.");
-    if (edge.status !== "CANON" && edge.createdByUserId !== user.id && user.role !== "ADMIN") throw new Error("Only the writer who drew this branch, or an administrator, can remove it.");
 
-    await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: edge.arcId, action: "DELETED", actorUserId: user.id, summary: `Cut the branch from "${edge.fromNode.title}" to "${edge.toNode.title}"`, before: { label: edge.label, condition: edge.condition } });
+    // Open writers' room: anyone can cut a branch, and the audit log shows
+    // who cut it. The key travels in `before`, so the Unreal side can match
+    // the report against the asset it had built.
+    await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: edge.arcId, action: "DELETED", actorUserId: user.id, summary: `Cut the branch from "${edge.fromNode.title}" to "${edge.toNode.title}"`, before: { key: edge.key, label: edge.label, condition: edge.condition } });
     await tx.storyEdge.delete({ where: { id: edge.id } });
     return edge.arc.slug;
   });
@@ -432,7 +716,7 @@ const entrySchema = z.object({
 export async function createEntry(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = entrySchema.safeParse({ kind: formData.get("kind"), title: formData.get("title"), summary: formData.get("summary") ?? "", body: formData.get("body") ?? "" });
-  if (!parsed.success) throw new Error("A bible entry needs a kind and a title.");
+  if (!parsed.success) throw new Error("A bible entry needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
   const slug = slugifyStoryKey(parsed.data.title);
   if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
@@ -442,7 +726,7 @@ export async function createEntry(formData: FormData) {
 
   await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.create({
-      data: { kind: parsed.data.kind, slug, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, status: creationStatus(user.role), createdByUserId: user.id },
+      data: { kind: parsed.data.kind, slug, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, status: creationStatus(), createdByUserId: user.id },
     });
     await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"` });
   });
@@ -461,7 +745,7 @@ export async function updateEntry(formData: FormData) {
     summary: formData.get("summary") ?? "",
     body: formData.get("body") ?? "",
   });
-  if (!parsed.success) throw new Error("That edit is missing a kind or a title.");
+  if (!parsed.success) throw new Error("That edit needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId } });
@@ -484,6 +768,110 @@ export async function updateEntry(formData: FormData) {
       summary: `Revised "${parsed.data.title}"`,
       before: { kind: entry.kind, title: entry.title, summary: entry.summary, body: entry.body },
       after: { kind: parsed.data.kind, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body },
+    });
+    return entry.slug;
+  });
+
+  refreshCodex();
+  revalidatePath(`/codex/bible/${slug}`);
+}
+
+// --- Module meta (Codex_Module_Schema.md) ----------------------------------
+
+const metaText = (max: number) => z.string().trim().min(1).max(max).nullable();
+const metaLines = (max: number, each: number) => z.array(z.string().trim().min(1).max(each)).max(max);
+/** Slug-typed meta fields reference other entries — link now, fill later, so
+ *  only the shape is checked; an unresolved slug is a todo, not an error. */
+const metaSlug = z.string().trim().min(1).max(64);
+
+const characterMetaSchema = z.object({
+  fullName: metaText(160),
+  aliases: metaLines(20, 120),
+  pronouns: metaText(40),
+  sex: metaText(40),
+  species: metaText(80),
+  age: metaText(80),
+  appearance: metaText(2000),
+  voice: metaText(2000),
+  magic: z.object({
+    origin: z.enum(["none", "born", "infused", "gifted"]).nullable(),
+    schools: metaLines(12, 80),
+    corruptionPhase: z.number().int().min(0).max(7).nullable(),
+    notes: metaText(2000),
+  }),
+  factions: z.array(z.object({ faction: metaSlug, role: metaText(160), standing: metaText(160) })).max(12),
+  home: metaText(64),
+  status: z.object({ known: metaText(500), actual: metaText(500) }),
+  relationships: z.array(z.object({ character: metaSlug.nullable(), who: metaText(160), type: metaText(300) })).max(30),
+  storyRole: metaText(500),
+  involvement: z.array(z.object({ arc: metaSlug, how: metaText(300) })).max(20),
+  gameId: metaText(120),
+  model: metaText(200),
+  openQuestions: metaLines(30, 300),
+});
+
+const regionMetaSchema = z.object({
+  type: z.enum(["region", "zone", "settlement", "landmark", "site"]).nullable(),
+  settlementTier: z.enum(["village", "town", "city", "major-city"]).nullable(),
+  parent: metaText(64),
+  biome: metaText(160),
+  control: z.array(z.object({ faction: metaSlug, kind: z.enum(["holds", "contests", "influences"]).nullable() })).max(12),
+  population: metaText(160),
+  connections: z.array(z.object({ to: metaSlug, by: metaText(80), notes: metaText(300) })).max(30),
+  status: metaText(160),
+  gameTag: metaText(120),
+  openQuestions: metaLines(30, 300),
+});
+
+const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodTypeAny>> = {
+  CHARACTER: characterMetaSchema,
+  REGION: regionMetaSchema,
+};
+
+/**
+ * Saves an entry's module sheet. The sheet component composes the object
+ * client-side and ships it as JSON; nothing is trusted from that side — the
+ * per-kind schema here is the contract, and a kind without a schema has no
+ * sheet to save yet (its meta arrives via module files until one exists).
+ */
+export async function updateEntryMeta(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = z
+    .object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), metaJson: z.string().max(30000) })
+    .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), metaJson: formData.get("metaJson") });
+  if (!parsed.success) throw new Error("That sheet could not be read.");
+
+  let raw: unknown;
+  try {
+    raw = JSON.parse(parsed.data.metaJson);
+  } catch {
+    throw new Error("That sheet could not be read.");
+  }
+
+  const slug = await db.$transaction(async (tx) => {
+    const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId }, select: { id: true, kind: true, slug: true, title: true, meta: true, status: true } });
+    if (!entry) throw new Error("That entry no longer exists.");
+    if (!isStoryContentEditable(entry.status, user.role === "ADMIN")) throw new Error("This entry is canon. Leave a note for a reviewer.");
+
+    const schema = metaSchemasByKind[entry.kind];
+    if (!schema) throw new Error(`${entry.kind} entries do not have a sheet yet.`);
+    const meta = schema.safeParse(raw);
+    if (!meta.success) throw new Error("Some fields on that sheet are too long or the wrong shape. Nothing was saved.");
+
+    const updated = await tx.storyEntry.updateMany({
+      where: { id: entry.id, version: parsed.data.version },
+      data: { meta: meta.data as Prisma.InputJsonValue, updatedByUserId: user.id, version: { increment: 1 } },
+    });
+    if (updated.count !== 1) throw new Error("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
+
+    await recordRevision(tx, {
+      entityType: "ENTRY",
+      entityId: entry.id,
+      action: "UPDATED",
+      actorUserId: user.id,
+      summary: `Filled in the ${entry.kind.toLowerCase()} sheet for "${entry.title}"`,
+      before: { meta: entry.meta },
+      after: { meta: meta.data },
     });
     return entry.slug;
   });
@@ -647,13 +1035,26 @@ export async function addComment(formData: FormData) {
   if (!parsed.success) throw new Error("Write something first.");
   if (Boolean(parsed.data.nodeId) === Boolean(parsed.data.entryId)) throw new Error("A note belongs to one node or one entry.");
 
-  await db.$transaction(async (tx) => {
-    const comment = await tx.storyComment.create({ data: { nodeId: parsed.data.nodeId, entryId: parsed.data.entryId, authorUserId: user.id, body: parsed.data.body } });
-    const arcId = parsed.data.nodeId ? (await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { arcId: true } }))?.arcId ?? null : null;
-    await recordRevision(tx, { entityType: parsed.data.nodeId ? "NODE" : "ENTRY", entityId: parsed.data.nodeId ?? parsed.data.entryId ?? comment.id, arcId, action: "UPDATED", actorUserId: user.id, summary: "Left a note" });
+  const target = await db.$transaction(async (tx) => {
+    await tx.storyComment.create({ data: { nodeId: parsed.data.nodeId, entryId: parsed.data.entryId, authorUserId: user.id, body: parsed.data.body } });
+
+    if (parsed.data.nodeId) {
+      const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { arcId: true, arc: { select: { slug: true } } } });
+      await recordRevision(tx, { entityType: "NODE", entityId: parsed.data.nodeId, arcId: node?.arcId ?? null, action: "UPDATED", actorUserId: user.id, summary: "Left a note" });
+      return { arcSlug: node?.arc.slug ?? null, entrySlug: null };
+    }
+
+    const entryId = parsed.data.entryId as string;
+    const entry = await tx.storyEntry.findUnique({ where: { id: entryId }, select: { slug: true } });
+    await recordRevision(tx, { entityType: "ENTRY", entityId: entryId, action: "UPDATED", actorUserId: user.id, summary: "Left a note" });
+    return { arcSlug: null, entrySlug: entry?.slug ?? null };
   });
 
-  refreshCodex();
+  // A note has to appear on the surface it was written on, not only in the
+  // activity feed: revalidating the index alone left the writer looking at the
+  // card or bible entry they had just posted to with nothing new on it.
+  refreshCodex(target.arcSlug);
+  if (target.entrySlug) revalidatePath(`/codex/bible/${target.entrySlug}`);
 }
 
 export async function resolveComment(formData: FormData) {
@@ -661,12 +1062,14 @@ export async function resolveComment(formData: FormData) {
   const commentId = z.string().uuid().safeParse(formData.get("commentId"));
   if (!commentId.success) throw new Error("Invalid note.");
 
-  const arcSlug = await db.$transaction(async (tx) => {
+  const target = await db.$transaction(async (tx) => {
     const comment = await tx.storyComment.findUnique({
       where: { id: commentId.data },
-      include: { node: { select: { arcId: true, arc: { select: { slug: true } } } } },
+      include: { node: { select: { arcId: true, arc: { select: { slug: true } } } }, entry: { select: { slug: true } } },
     });
-    if (!comment || comment.resolvedAt) return comment?.node?.arc.slug ?? null;
+    if (!comment) return { arcSlug: null, entrySlug: null };
+    const surface = { arcSlug: comment.node?.arc.slug ?? null, entrySlug: comment.entry?.slug ?? null };
+    if (comment.resolvedAt) return surface;
 
     await tx.storyComment.update({ where: { id: comment.id }, data: { resolvedAt: new Date(), resolvedByUserId: user.id } });
     await recordRevision(tx, {
@@ -677,9 +1080,11 @@ export async function resolveComment(formData: FormData) {
       actorUserId: user.id,
       summary: "Resolved a story note",
     });
-    return comment.node?.arc.slug ?? null;
+    return surface;
   });
-  refreshCodex(arcSlug);
+
+  refreshCodex(target.arcSlug);
+  if (target.entrySlug) revalidatePath(`/codex/bible/${target.entrySlug}`);
 }
 
 // ---------------------------------------------------------------------------

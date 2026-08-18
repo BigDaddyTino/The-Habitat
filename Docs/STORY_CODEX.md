@@ -44,25 +44,25 @@ DRAFT ──▶ PROPOSED ──▶ CANON ──▶ ARCHIVED
               └──────▶ REJECTED
 ```
 
-**Only `CANON` is exported.** This is the safety property the whole design turns
-on: there is no path through the schema, the actions, or the export by which an
-unreviewed idea reaches a game build.
+**Only `CANON` is exported — and since 2026-08-18, everything is written at
+`CANON`.** Tino removed the approval ladder: the codex is an open writers'
+room where every member writes, edits, and removes freely, and the game reads
+the result on its next pull. The safety mechanism is no longer a gate but a
+ledger — the color-coded audit log at the bottom of `/codex` shows every
+change, who made it, and when (green added, yellow edited, red removed or
+archived), and `StoryRevision` keeps before/after for every mutation so an
+administrator can reconstruct anything.
 
-- A contributor writes at `PROPOSED`. An administrator writes at `CANON` —
-  requiring the reviewer to approve their own writing would be ceremony, not a
-  safeguard.
-- Canon content is read-only for contributors at both the UI and action layers.
-  A contributor can leave a note or build a proposed branch, but cannot revise
-  a canon node, branch, bible entry, or its references in place and silently
-  bypass review.
-- `REJECTED` is kept, not deleted. A rejected branch is a decision worth
-  remembering, and the author should be able to see what became of their idea.
-- Canon is never hard-deleted, only `ARCHIVED`. Deleting it would tear a hole in
-  an export somebody has already imported; archiving keeps the key addressable.
-- Approving a node also makes its arc canon, because a canon node inside a
-  proposed arc would be silently dropped by the export. `canoniseArc` promotes
-  an arc and everything proposed inside it in one transaction, which is how you
-  avoid shipping a scene whose branches are all still proposed.
+- Every member creates and edits at `CANON`, including canon written by
+  someone else. `isStoryContentEditable` survives as a hook returning true,
+  so a review ladder could return without touching call sites.
+- `REJECTED` and `ARCHIVED` remain as administrator housekeeping via
+  `setStoryStatus` — review after the fact rather than before.
+- Canon is never hard-deleted, only `ARCHIVED` — by any member. Deleting it
+  would tear a hole in an export somebody has already imported; archiving
+  keeps the key addressable. Draft/proposed leftovers hard-delete.
+- The review queue at `/codex/review` survives for legacy proposed material
+  and only resurfaces on the landing page when such material exists.
 
 ---
 
@@ -162,20 +162,40 @@ enterable from more than one place — so multiple entry points are not flagged.
     "slug": "the-drowned-chapel",
     "title": "The Drowned Chapel",
     "summary": "…",
+    "hook": "A notice board in the fishing village.", // how the party finds it; free text
+    "region": { "slug": "port-arcadia", "title": "Port Arcadia" }, // pickup place, from a REGION entry
     "isMainline": false,
-    "entryNodeKeys": ["the-gate"],
+    "entryNodeKeys": ["the-gate"], // oldest-first; [0] is the importer's canonical start
     "nodes": [{
       "key": "the-gate",        // stable across retitling — the importer's handle
       "kind": "SCENE",
       "title": "The gate refuses him",
       "summary": "…",
       "body": "…",
-      "choices": [{ "order": 0, "label": "Knock again", "condition": null, "toKey": "the-hall" }],
+      "speaker": { "slug": "ashwarden", "title": "Ashwarden of the Low Fen" }, // null = narration
+      "endingKind": null,       // SUCCESS | FAILURE | NEUTRAL, ENDING nodes only
+      "completion": null,       // QUEST_STEP only: writer intent, free text, never parsed
+      "effects": null,          // free-text lines the game interprets; null when none
+      "rewards": null,          // what finishing this pays, one line each; null when none
+      "continuesInArcSlug": null, // ENDING only: the arc this ending flows into (canon arcs only)
+      "choices": [{
+        "order": 0,
+        "key": "the-gate-choice", // stable choice handle: survives relabel, retarget, reorder
+        "label": "Knock again",
+        "condition": null,
+        "effects": null,
+        "toKey": "the-hall"
+      }],
       "references": [{ "kind": "CREATURE", "slug": "ashwarden", "title": "Ashwarden of the Low Fen" }]
     }],
     "problems": []
   }],
-  "bible": [{ "kind": "THEME", "slug": "…", "title": "…", "summary": "…", "body": "…" }]
+  "bible": [{ "kind": "THEME", "slug": "…", "title": "…", "summary": "…", "body": "…",
+               "meta": null }] // typed module object per kind (Codex_Module_Schema.md); null = not yet decided
+  // kinds: THEME REGION CREATURE CHARACTER FACTION ITEM EVENT RULE FLAG.
+  // FLAG entries are the canonical names for consequences one quest sets and
+  // another checks — both ends reference the flag entry, so a side quest can
+  // touch the main story chapters later without the name ever drifting.
 }
 ```
 
@@ -190,7 +210,29 @@ Design points:
   import corrupts assets that are expensive to rebuild.
 - **Cheap polling.** Send `revisionCursor` back as `?since=` or as an
   `If-None-Match` ETag; unchanged gets a `304` without the codex ever being
-  projected.
+  projected. The cursor is opaque — send it back verbatim, never parse it. It
+  is not the same value the live-sync SSE stream emits; the two are not
+  interchangeable.
+- **Version 1 survives additive change.** `speaker`, `endingKind`,
+  `completion`, `effects`, and `choices[].key` were added 2026-08-18 without
+  a bump: all nullable, all safely ignored by an importer that predates them.
+  The version moves only when the shape changes in a way an old importer
+  cannot read.
+- **Labels are never blank.** A choice `label` is `null` or genuinely
+  non-empty — a database CHECK enforces it — so an importer can rely on
+  "labelled" meaning "has text a player can be shown".
+- **Speakers resolve.** `speaker` is drawn from a CHARACTER bible entry via a
+  picker, never typed free-hand, and a non-canon speaker is withheld like any
+  other reference — an attribution always points at an entry in the same
+  payload.
+- **Cross-arc flow is structural.** An ENDING may carry `continuesInArcSlug`
+  — the arc the story flows into next — withheld unless that arc is itself
+  canon. Side quests declare where they are picked up (`region` + `hook` on
+  the arc) and what they pay (`rewards` on nodes); consequences that outlive
+  a quest are FLAG bible entries referenced at both the set and check ends.
+- **Parallel branches are legal.** Two nodes can be connected by several
+  differently-labelled choices (the consequences live in `effects`);
+  `choices[].key` is what tells them apart, not the (from, to) pair.
 
 ### Tokens
 

@@ -1,0 +1,143 @@
+{
+  "contractVersion": 1,
+  "generatedAt": "2026-08-18T06:00:00.000Z",
+  "revisionCursor": "rev_characters_0001",
+  "arcs": [],
+  "bible": [
+    {
+      "kind": "CHARACTER",
+      "slug": "tino",
+      "title": "Tino",
+      "summary": "Stormglass Cartel magic-infuser, the player's war buddy, and the emotional spine of the entire campaign. Competent, vulgar, funny under pressure — and taken by something no one saw clearly.",
+      "body": "Tino trusts the player before the game even begins, and the game spends its entire opening making sure the player earns it retroactively. He teaches without lecturing, swears like it's a load-bearing structure, and in the middle of a running battle builds himself a future out loud — a boat, a little piece of coast, cold beer, fishing, and absolutely nobody trying to summon fucking hell.\n\nHis field-infusion rig gives him his power and is quietly killing him for it; the tremor he hides in the grocery store is the first corruption tell the player ever sees.\n\nHe is captured, not killed, during the vehicle escape — see [[what-the-player-knows-about-tino]] before writing anything that touches his fate. His capture is the campaign's recurring emotional anchor: who took him, where, why, and what he is by the time anyone finds him again are questions the writers' room owns and the player must be made to ache over.",
+      "meta": {
+        "fullName": null,
+        "aliases": [],
+        "pronouns": "he/him",
+        "sex": "male",
+        "species": "human",
+        "age": null,
+        "appearance": null,
+        "voice": "Competent, vulgar, funny under pressure. Gallows humor that never undercuts the stakes. Teaches by shouting tactical instructions, not narration. Swears structurally, jokes fastest when things are worst, and goes quiet exactly once — closing the leaking valve on his rig.",
+        "magic": {
+          "origin": "infused",
+          "schools": [],
+          "corruptionPhase": null,
+          "notes": "Field-infusion rig user ([[field-infusion-rig]]). Visible tremor hidden after dosing — his corruption phase is deliberately undisclosed and is an owner-level decision; what he is by reunion is part of the captivity arc's payload."
+        },
+        "factions": [
+          { "faction": "stormglass-cartel", "role": "magic-infuser soldier", "standing": "trusted veteran" }
+        ],
+        "home": null,
+        "status": {
+          "known": "missing — taken from the vehicle during the escape; the player assumes the worst",
+          "actual": "captured alive by an unidentified force that moved east (TINO_ACTUAL_FATE = CAPTURED). Who holds him, where, and his condition are unwritten owner-gated canon."
+        },
+        "relationships": [
+          { "character": null, "who": "the player", "type": "war buddy — established trust predating the game's first frame" },
+          { "character": "steve", "who": null, "type": "squadmate; delivered his two-line eulogy" }
+        ],
+        "storyRole": "The campaign's recurring emotional anchor. His empty seat is a loaded weapon — do not discharge it in a side quest.",
+        "involvement": [
+          { "arc": "the-island-is-already-lost", "how": "Companion and teacher through the entire prologue spine; captured in beat 13; his absence drives the finale." },
+          { "arc": "the-last-days-of-kestrel", "how": "The trail east — evidence of what took him is a tracked island-state line the Defend branch can pursue." },
+          { "arc": "the-evacuation", "how": "The port's intelligence net may know what hunts like the thing that took him — the Flee branch's thread to him." }
+        ],
+        "gameId": "Tino",
+        "openQuestions": [
+          "The full captivity arc: who took him, where he is held, why, when the player learns he survived, and what he has become by reunion.",
+          "His corruption phase at capture, and whether captivity accelerates it.",
+          "His life before the war — family, the coast he wants, how he ended up enlisted."
+        ]
+      }
+    },
+    {
+      "kind": "CHARACTER",
+      "slug": "the-kestrel-commander",
+      "title": "Commander Rook",
+      "summary": "The senior officer holding Forward Camp Kestrel together by will, profanity, and an honest ledger of what is already lost — and the one who must finally commit the island to Defend or Flee.",
+      "body": "Rook reads faces like casualty lists and wastes no words on comfort: 'You came from the east road?' — then, seeing the answer — 'Fuck.' Their operations-table briefing frames the campaign's first real decision without moralizing it, and their one piece of intelligence about Tino is deliberately double-edged: stay and follow the trail east, or sail and ask the port's intelligence net what hunts like that.\n\nThe name is canon; face, background, history, and fate across both branches are open writing work. So is their command staff — a medic, a mechanic, a quartermaster, and a scout, all waiting to be written. What is locked: Rook does not sugarcoat, does not pick the players' branch for them, and is still standing when everyone stops.",
+      "meta": {
+        "fullName": null,
+        "aliases": [],
+        "pronouns": null,
+        "sex": null,
+        "species": "human",
+        "age": null,
+        "appearance": null,
+        "voice": "Economical to the point of bluntness. Reads the answer off your face and says the one word it deserves. Frames terrible choices without decorating them. Profanity as punctuation, never as performance.",
+        "magic": {
+          "origin": "none",
+          "schools": [],
+          "corruptionPhase": null,
+          "notes": null
+        },
+        "factions": [
+          { "faction": "stormglass-cartel", "role": "commanding officer, Forward Camp Kestrel", "standing": "in command of everything left" }
+        ],
+        "home": "forward-camp-kestrel",
+        "status": {
+          "known": "alive — holding Kestrel",
+          "actual": null
+        },
+        "relationships": [
+          { "character": null, "who": "the Kestrel command staff (medic, mechanic, quartermaster, scout — all unwritten, see [[the-unnamed]])", "type": "commands" }
+        ],
+        "storyRole": "The voice of the first campaign decision, and the proof that neither branch is the morally correct one.",
+        "involvement": [
+          { "arc": "the-island-is-already-lost", "how": "Receives the player at Kestrel; delivers the operations-table briefing that arms the Defend/Flee choice." },
+          { "arc": "the-last-days-of-kestrel", "how": "Commands the defense; their fate through the last stand and the collapse is unwritten." },
+          { "arc": "the-evacuation", "how": "Orders and runs the evacuation; their fate — last boat or last on the dock — is unwritten." }
+        ],
+        "gameId": "CommanderRook",
+        "openQuestions": [
+          "Pronouns, face, age, background — deliberately open for the writers' room.",
+          "Fate in each branch, and whether they reach Port Arcadia.",
+          "History with Stormglass: career smuggler-soldier, or something that ended up here?"
+        ]
+      }
+    },
+    {
+      "kind": "CHARACTER",
+      "slug": "steve",
+      "title": "Steve",
+      "summary": "A Stormglass soldier who ran too early on the rooftops. The tutorial's shortest, most effective lesson.",
+      "body": "Steve broke cover before the hypogriff rider's search pattern allowed it, and the gunner saw him, and the player watched the consequence land without a single line of tutorial text. His entire memorial is Tino's eulogy: '...yeah. Don't do what Steve did.' A beat. 'Sorry, Steve.'\n\nSteve is canon now. Every future lesson about patience, timing, and the cost of panic on this island is taught in his name.",
+      "meta": {
+        "fullName": null,
+        "aliases": [],
+        "pronouns": "he/him",
+        "sex": "male",
+        "species": "human",
+        "age": null,
+        "appearance": null,
+        "voice": null,
+        "magic": {
+          "origin": "none",
+          "schools": [],
+          "corruptionPhase": null,
+          "notes": null
+        },
+        "factions": [
+          { "faction": "stormglass-cartel", "role": "soldier", "standing": "posthumously beloved" }
+        ],
+        "home": null,
+        "status": {
+          "known": "dead — killed by the hypogriff rider on the Shattermarket rooftops",
+          "actual": null
+        },
+        "relationships": [
+          { "character": "tino", "who": null, "type": "squadmate; eulogist" }
+        ],
+        "storyRole": "The lesson. A demonstration that a two-line character can be a valid, complete entry — and that small canon compounds: any future mention of Steve pays off the prologue.",
+        "involvement": [
+          { "arc": "the-island-is-already-lost", "how": "Dies in the rooftop hunter beat as the wordless stealth lesson." }
+        ],
+        "gameId": "Steve",
+        "openQuestions": [
+          "Whether anyone at Kestrel knew him — one line of grief from a named NPC would land hard, and cheap."
+        ]
+      }
+    }
+  ]
+}

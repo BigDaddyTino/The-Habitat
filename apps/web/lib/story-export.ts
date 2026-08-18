@@ -68,10 +68,13 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       where: { status: exportableStoryStatus },
       orderBy: [{ isMainline: "desc" }, { position: "asc" }, { createdAt: "asc" }],
       include: {
+        region: { select: { slug: true, title: true, status: true } },
         nodes: {
           where: { status: exportableStoryStatus },
           orderBy: { key: "asc" },
           include: {
+            speaker: { select: { slug: true, title: true, status: true } },
+            continuesIn: { select: { slug: true, status: true } },
             entryLinks: {
               include: { entry: { select: { kind: true, slug: true, title: true, status: true } } },
               orderBy: { createdAt: "asc" },
@@ -87,9 +90,9 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     db.storyEntry.findMany({
       where: { status: exportableStoryStatus },
       orderBy: [{ kind: "asc" }, { slug: "asc" }],
-      select: { kind: true, slug: true, title: true, summary: true, body: true },
+      select: { kind: true, slug: true, title: true, summary: true, body: true, meta: true },
     }),
-    db.storyRevision.findFirst({ orderBy: { createdAt: "desc" }, select: { id: true } }),
+    db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } }),
   ]);
 
   const exportArcs: StoryExportArc[] = arcs.map((arc) => {
@@ -101,8 +104,10 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
         .sort((left, right) => left.position - right.position)
         .map((edge, index) => ({
           order: index,
+          key: edge.key,
           label: edge.label,
           condition: edge.condition,
+          effects: edge.effects.length > 0 ? edge.effects : null,
           toKey: keyById.get(edge.toNodeId) as string,
         }));
 
@@ -112,6 +117,19 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
         title: node.title,
         summary: node.summary,
         body: node.body,
+        // A speaker that is not itself canon is withheld like any other
+        // reference — the importer must never resolve an attribution against
+        // a character the game does not have.
+        speaker: node.speaker && node.speaker.status === exportableStoryStatus
+          ? { slug: node.speaker.slug, title: node.speaker.title }
+          : null,
+        endingKind: node.endingKind,
+        completion: node.completion,
+        effects: node.effects.length > 0 ? node.effects : null,
+        rewards: node.rewards.length > 0 ? node.rewards : null,
+        // A continuation into an arc that is not itself canon is withheld —
+        // the importer must never chain a quest into a story it cannot see.
+        continuesInArcSlug: node.continuesIn && node.continuesIn.status === exportableStoryStatus ? node.continuesIn.slug : null,
         choices,
         // A reference to a bible entry that is still proposed is dropped: the
         // importer would otherwise resolve it against an asset that does not
@@ -125,12 +143,22 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     const graphNodes: StoryGraphNode[] = nodes.map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
     const graphEdges: StoryGraphEdge[] = nodes.flatMap((node) => node.choices.map((choice) => ({ fromKey: node.key, toKey: choice.toKey, label: choice.label })));
 
+    // Entry keys are ordered by node creation, not by the key-sorted node
+    // list: `entryNodeKeys[0]` is the canonical start on the importer side,
+    // and creation order is the only ordering a newly added opening cannot
+    // rewrite out from under it.
+    const graphNodesByAge: StoryGraphNode[] = [...arc.nodes]
+      .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime() || (left.id < right.id ? -1 : 1))
+      .map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
+
     return {
       slug: arc.slug,
       title: arc.title,
       summary: arc.summary,
+      hook: arc.hook,
+      region: arc.region && arc.region.status === exportableStoryStatus ? { slug: arc.region.slug, title: arc.region.title } : null,
       isMainline: arc.isMainline,
-      entryNodeKeys: findStoryEntryNodeKeys(graphNodes, graphEdges),
+      entryNodeKeys: findStoryEntryNodeKeys(graphNodesByAge, graphEdges),
       nodes,
       // Reported, never enforced. The importer decides whether a story with
       // loose ends is worth building; the codex only refuses to hide them.
@@ -143,6 +171,15 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     generatedAt: new Date().toISOString(),
     revisionCursor: newestRevision?.id ?? null,
     arcs: exportArcs,
-    bible: entries,
+    bible: entries.map((entry) => ({
+      kind: entry.kind,
+      slug: entry.slug,
+      title: entry.title,
+      summary: entry.summary,
+      body: entry.body,
+      // Postgres NULL and JSON null both project to the contract's null; the
+      // CHECK constraint guarantees anything else here is an object.
+      meta: (entry.meta as Record<string, unknown> | null) ?? null,
+    })),
   };
 }

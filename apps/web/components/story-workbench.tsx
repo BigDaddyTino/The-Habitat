@@ -3,15 +3,18 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { Check, GitBranch, Link2, Lock, ShieldCheck, Trash2, Unlink, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, GitBranch, Link2, Lock, ShieldCheck, Trash2, Unlink, X } from "lucide-react";
 import {
   isStoryContentEditable,
+  storyEndingKindLabels,
+  storyEndingKinds,
   storyHeartbeatMs,
   storyNodeKinds,
   storyNodeKindLabels,
   storyStatusLabels,
   type StoryEntryKind,
   type StoryGraphProblem,
+  type StoryNodeKind,
   type StoryStatus,
 } from "@habitat/shared";
 import {
@@ -22,6 +25,7 @@ import {
   deleteNode,
   linkEntryToNode,
   releaseNodeLock,
+  reorderEdge,
   resolveComment,
   setStoryStatus,
   unlinkEntryFromNode,
@@ -31,6 +35,8 @@ import {
 import type { StoryBoardEdge, StoryBoardNode } from "@/lib/story-codex";
 
 type LibraryEntry = { id: string; slug: string; title: string; kind: StoryEntryKind; status: StoryStatus };
+export type StoryArcRef = { id: string; slug: string; title: string; isMainline: boolean };
+export type StoryNodeRef = { id: string; title: string };
 
 function StorySubmit({ children, pendingLabel, className = "save-server", disabled = false }: { children: ReactNode; pendingLabel: string; className?: string; disabled?: boolean }) {
   const { pending } = useFormStatus();
@@ -48,9 +54,20 @@ function NewNodeForm({ arcId }: { arcId: string }) {
   </form>;
 }
 
-function NodeEditor({ node, canReview, viewerUserId, libraryEntries }: { node: StoryBoardNode; canReview: boolean; viewerUserId: string; libraryEntries: LibraryEntry[] }) {
+export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntries, arcRefs }: { node: StoryBoardNode; arcId: string; canReview: boolean; viewerUserId: string; libraryEntries: LibraryEntry[]; arcRefs: StoryArcRef[] }) {
   const [claimFailed, setClaimFailed] = useState(false);
   const [lockHeld, setLockHeld] = useState(false);
+  // Controlled so the valence and completion fields appear the moment the
+  // writer switches a card's kind, not on the render after they save it.
+  // Reset during render (not in an effect) whenever a save or a different
+  // card brings a new server version in.
+  const [kind, setKind] = useState<StoryNodeKind>(node.kind);
+  const [kindIdentity, setKindIdentity] = useState(`${node.id}:${node.version}`);
+  const identity = `${node.id}:${node.version}`;
+  if (kindIdentity !== identity) {
+    setKindIdentity(identity);
+    setKind(node.kind);
+  }
   const claimed = useRef(false);
   const claimPending = useRef(false);
   const canEdit = isStoryContentEditable(node.status, canReview);
@@ -87,6 +104,10 @@ function NodeEditor({ node, canReview, viewerUserId, libraryEntries }: { node: S
   const heldByOther = node.lockedBy && node.lockedBy.userId !== viewerUserId ? node.lockedBy : null;
   const linkedIds = new Set(node.references.map((reference) => reference.id));
   const availableEntries = libraryEntries.filter((entry) => !linkedIds.has(entry.id));
+  // Speakers come from the bible, never from free text — a typo'd speaker
+  // would reach the game as an attribution against a character that does not
+  // exist there.
+  const characterEntries = libraryEntries.filter((entry) => entry.kind === "CHARACTER");
 
   return <>
     {heldByOther ? <p className="story-lock-warning"><Lock aria-hidden="true" size={12} />{heldByOther.name} is writing here. A version check protects both drafts if you overlap.</p> : null}
@@ -95,16 +116,38 @@ function NodeEditor({ node, canReview, viewerUserId, libraryEntries }: { node: S
 
     {canEdit ? <form action={updateNode} className="story-form" onFocus={claim} onSubmit={() => { claimed.current = false; setLockHeld(false); }}>
       <input name="nodeId" type="hidden" value={node.id} /><input name="version" type="hidden" value={node.version} />
-      <label>Kind<select defaultValue={node.kind} key={`kind-${node.id}-${node.version}`} name="kind">{storyNodeKinds.map((kind) => <option key={kind} value={kind}>{storyNodeKindLabels[kind]}</option>)}</select></label>
+      <label>Kind<select name="kind" onChange={(event) => setKind(event.target.value as StoryNodeKind)} value={kind}>{storyNodeKinds.map((option) => <option key={option} value={option}>{storyNodeKindLabels[option]}</option>)}</select></label>
       <label>Title<input defaultValue={node.title} key={`title-${node.id}-${node.version}`} maxLength={160} name="title" required type="text" /></label>
+      <label>Speaker<select defaultValue={node.speaker?.id ?? ""} key={`speaker-${node.id}-${node.version}`} name="speakerEntryId">
+        <option value="">No single speaker — narration</option>
+        {characterEntries.map((entry) => <option key={entry.id} value={entry.id}>{entry.title}</option>)}
+      </select></label>
+      {kind === "ENDING" ? <>
+        <label>Ending valence<select defaultValue={node.endingKind ?? ""} key={`ending-${node.id}-${node.version}`} name="endingKind">
+          <option value="">Not decided yet</option>
+          {storyEndingKinds.map((option) => <option key={option} value={option}>{storyEndingKindLabels[option]}</option>)}
+        </select></label>
+        <label>Continues in<select defaultValue={node.continuesIn?.id ?? ""} key={`continues-${node.id}-${node.version}`} name="continuesInArcId">
+          <option value="">Nowhere — the story ends here</option>
+          {arcRefs.filter((arc) => arc.id !== arcId).map((arc) => <option key={arc.id} value={arc.id}>{arc.title}{arc.isMainline ? "" : " · side quest"}</option>)}
+        </select></label>
+      </> : null}
+      {kind === "QUEST_STEP" ? <label>What finishes this step<textarea defaultValue={node.completion ?? ""} key={`completion-${node.id}-${node.version}`} maxLength={500} name="completion" placeholder="Writer intent, in plain words. An Unreal author turns it into a real task — the game never parses it." rows={2} /></label> : null}
       <label>Summary<textarea defaultValue={node.summary ?? ""} key={`summary-${node.id}-${node.version}`} maxLength={500} name="summary" rows={3} /></label>
       <label>Scene text<textarea defaultValue={node.body ?? ""} key={`body-${node.id}-${node.version}`} maxLength={20000} name="body" placeholder="Narration, dialogue, direction — whatever the game needs from this beat." rows={12} /></label>
+      <label>Effects<textarea defaultValue={node.effects.join("\n")} key={`effects-${node.id}-${node.version}`} name="effects" placeholder="One per line: give item, set flag, shift reputation. The game interprets these." rows={2} /></label>
+      <label>Rewards<textarea defaultValue={node.rewards.join("\n")} key={`rewards-${node.id}-${node.version}`} name="rewards" placeholder="One per line: what finishing this pays. Notable rewards should also be ITEM entries, referenced below." rows={2} /></label>
       <StorySubmit pendingLabel="Saving…">Save card</StorySubmit>
     </form> : <div className="story-readonly-copy">{node.summary ? <p>{node.summary}</p> : null}<div>{node.body || "No scene text has been written yet."}</div></div>}
 
     <div className="story-inspector-meta">
       <p><span>Export key</span><code>{node.key}</code></p><p><span>Status</span><strong>{storyStatusLabels[node.status]}</strong></p><p><span>Opened by</span><strong>{node.author}</strong></p>
+      {node.speaker ? <p><span>Speaker</span><strong>{node.speaker.title}</strong></p> : null}
+      {node.endingKind ? <p><span>Ending valence</span><strong>{storyEndingKindLabels[node.endingKind]}</strong></p> : null}
+      {node.continuesIn ? <p><span>Continues in</span><strong><Link href={`/codex/arc/${node.continuesIn.slug}`}>{node.continuesIn.title}</Link></strong></p> : null}
+      {!canEdit && node.completion ? <p><span>Step completes when</span><strong>{node.completion}</strong></p> : null}
     </div>
+    {!canEdit && node.effects.length > 0 ? <div className="story-inspector-refs"><p className="eyebrow">Effects</p><ul>{node.effects.map((effect, index) => <li key={index}><span className="story-effect-line">{effect}</span></li>)}</ul></div> : null}
 
     <div className="story-inspector-refs">
       <p className="eyebrow">Bible references</p>
@@ -136,17 +179,32 @@ function NodeEditor({ node, canReview, viewerUserId, libraryEntries }: { node: S
   </>;
 }
 
-function EdgeEditor({ edge, fromTitle, toTitle, canReview }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean }) {
+export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean; nodes: StoryNodeRef[] }) {
   const canEdit = isStoryContentEditable(edge.status, canReview);
   return <>
     <div className="story-edge-route"><span>{fromTitle}</span><GitBranch aria-hidden="true" size={16} /><span>{toTitle}</span></div>
     {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This branch is canon.</strong> Only a reviewer can alter the exported choice.</span></p> : <form action={updateEdge} className="story-form">
       <input name="edgeId" type="hidden" value={edge.id} />
       <label>Choice label<textarea defaultValue={edge.label ?? ""} maxLength={200} name="label" placeholder="What the player chooses. Leave blank for a simple continuation." rows={2} /></label>
+      {/* Retargeting keeps the branch's export key, so pointing it somewhere
+          new never orphans the asset the importer already built from it. */}
+      <label>Leads to<select defaultValue={edge.toNodeId} key={`to-${edge.id}-${edge.toNodeId}`} name="toNodeId">
+        {nodes.filter((node) => node.id !== edge.fromNodeId).map((node) => <option key={node.id} value={node.id}>{node.title}</option>)}
+      </select></label>
       <label>Condition<textarea defaultValue={edge.condition ?? ""} maxLength={300} name="condition" placeholder="Optional requirement, flag, or designer note." rows={3} /></label>
+      <label>Effects<textarea defaultValue={edge.effects.join("\n")} name="effects" placeholder="One per line: what choosing this does. The game interprets these." rows={2} /></label>
       <StorySubmit pendingLabel="Saving…">Save branch</StorySubmit>
     </form>}
-    <div className="story-inspector-meta"><p><span>Status</span><strong>{storyStatusLabels[edge.status]}</strong></p><p><span>Order</span><strong>{edge.position + 1}</strong></p></div>
+    <div className="story-inspector-meta">
+      <p><span>Export key</span><code>{edge.key}</code></p>
+      <p><span>Status</span><strong>{storyStatusLabels[edge.status]}</strong></p>
+      <p><span>Order</span><strong>{edge.position + 1}</strong></p>
+      {canEdit ? <div className="story-reorder">
+        <span>Offer this choice</span>
+        <form action={reorderEdge}><input name="edgeId" type="hidden" value={edge.id} /><input name="direction" type="hidden" value="up" /><StorySubmit className="icon-action" pendingLabel="…"><ArrowUp aria-hidden="true" size={13} /><span className="sr-only">earlier</span></StorySubmit></form>
+        <form action={reorderEdge}><input name="edgeId" type="hidden" value={edge.id} /><input name="direction" type="hidden" value="down" /><StorySubmit className="icon-action" pendingLabel="…"><ArrowDown aria-hidden="true" size={13} /><span className="sr-only">later</span></StorySubmit></form>
+      </div> : null}
+    </div>
     <div className="story-inspector-actions">
       {canReview && edge.status === "PROPOSED" ? <>
         <form action={setStoryStatus}><input name="entityType" type="hidden" value="EDGE" /><input name="entityId" type="hidden" value={edge.id} /><input name="status" type="hidden" value="CANON" /><StorySubmit pendingLabel="Approving…">Make canon</StorySubmit></form>
@@ -157,7 +215,7 @@ function EdgeEditor({ edge, fromTitle, toTitle, canReview }: { edge: StoryBoardE
   </>;
 }
 
-export function StoryWorkbench({ arcId, node, edge, fromTitle, toTitle, problems, canReview, viewerUserId, libraryEntries, onClose }: {
+export function StoryWorkbench({ arcId, node, edge, fromTitle, toTitle, problems, canReview, viewerUserId, libraryEntries, arcRefs, nodes, onClose }: {
   arcId: string;
   node: StoryBoardNode | null;
   edge: StoryBoardEdge | null;
@@ -167,16 +225,18 @@ export function StoryWorkbench({ arcId, node, edge, fromTitle, toTitle, problems
   canReview: boolean;
   viewerUserId: string;
   libraryEntries: LibraryEntry[];
+  arcRefs: StoryArcRef[];
+  nodes: StoryNodeRef[];
   onClose: () => void;
 }) {
   return <aside aria-label="Story inspector" className="story-inspector">
     {node ? <>
       <header className="story-inspector-head"><div><p className="eyebrow">{storyNodeKindLabels[node.kind]}</p><h2>{node.title}</h2></div><button aria-label="Close the inspector" className="icon-action" onClick={onClose} type="button"><X aria-hidden="true" size={15} /></button></header>
       {problems.length > 0 ? <ul className="story-problem-list">{problems.map((problem, index) => <li key={`${problem.kind}-${problem.nodeKey}-${index}`}>{problem.detail}</li>)}</ul> : null}
-      <NodeEditor canReview={canReview} key={node.id} libraryEntries={libraryEntries} node={node} viewerUserId={viewerUserId} />
+      <NodeEditor arcId={arcId} arcRefs={arcRefs} canReview={canReview} key={node.id} libraryEntries={libraryEntries} node={node} viewerUserId={viewerUserId} />
     </> : edge ? <>
       <header className="story-inspector-head"><div><p className="eyebrow">Story branch</p><h2>{edge.label || "Continuation"}</h2></div><button aria-label="Close the inspector" className="icon-action" onClick={onClose} type="button"><X aria-hidden="true" size={15} /></button></header>
-      <EdgeEditor canReview={canReview} edge={edge} fromTitle={fromTitle ?? "Unknown card"} toTitle={toTitle ?? "Unknown card"} />
+      <EdgeEditor canReview={canReview} edge={edge} fromTitle={fromTitle ?? "Unknown card"} nodes={nodes} toTitle={toTitle ?? "Unknown card"} />
     </> : <>
       <header className="story-inspector-head"><div><p className="eyebrow">Board tools</p><h2>Build the next beat</h2></div></header>
       <p className="story-inspector-hint">Select a card to write it, or select a branch to label the player&apos;s choice. Drag from the right handle of one card to the left handle of another to connect them.</p>

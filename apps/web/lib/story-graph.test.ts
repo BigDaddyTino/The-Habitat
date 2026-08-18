@@ -18,8 +18,9 @@ const scene = (key: string, title = key): StoryGraphNode => ({ key, kind: "SCENE
 const ending = (key: string): StoryGraphNode => ({ key, kind: "ENDING", title: key });
 const link = (fromKey: string, toKey: string, label: string | null = null): StoryGraphEdge => ({ fromKey, toKey, label });
 
-test("contributors cannot revise canon in place while reviewers can", () => {
-  assert.equal(isStoryContentEditable("CANON", false), false);
+test("the codex is an open writers' room — every status is editable by any member", () => {
+  // The approval ladder was removed on 2026-08-18; the audit log replaced it.
+  assert.equal(isStoryContentEditable("CANON", false), true);
   assert.equal(isStoryContentEditable("CANON", true), true);
   assert.equal(isStoryContentEditable("PROPOSED", false), true);
   assert.equal(isStoryContentEditable("DRAFT", false), true);

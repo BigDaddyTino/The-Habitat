@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { ArrowLeft, BookOpen, Hammer } from "lucide-react";
 import { storyEntryKindLabels, storyEntryKinds, type StoryEntryKind } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
-import { listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getStoryNeedsWork, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { createEntry } from "@/app/codex/actions";
 
@@ -13,7 +13,7 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
   const filters = await searchParams;
   const kind = storyEntryKinds.includes(filters.kind as StoryEntryKind) ? (filters.kind as StoryEntryKind) : undefined;
   const search = filters.q?.trim() || undefined;
-  const entries = await listStoryEntries({ kind, search });
+  const [entries, needsWork] = await Promise.all([listStoryEntries({ kind, search }), getStoryNeedsWork()]);
 
   return (
     <section className="page-shell codex-shell">
@@ -48,6 +48,26 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
           ))}
         </div>
       )}
+
+      {needsWork.total > 0 ? (
+        <details className="codex-problems codex-needs-work">
+          <summary><Hammer aria-hidden="true" size={14} /> Needs work — {needsWork.total} unanswered corner{needsWork.total === 1 ? "" : "s"} of the world</summary>
+          <div className="codex-needs-work-body">
+            {needsWork.openQuestions.length > 0 ? <>
+              <p className="eyebrow">Open questions</p>
+              <ul>{needsWork.openQuestions.slice(0, 30).map((item, index) => <li key={`q-${index}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> — {item.question}</li>)}</ul>
+            </> : null}
+            {needsWork.unresolvedLinks.length > 0 ? <>
+              <p className="eyebrow">Links waiting for an entry — claim one and write it</p>
+              <ul>{needsWork.unresolvedLinks.slice(0, 30).map((item, index) => <li key={`l-${index}`}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> links <code>[[{item.target}]]</code>, which nobody has written yet</li>)}</ul>
+            </> : null}
+            {needsWork.missingMeta.length > 0 ? <>
+              <p className="eyebrow">No sheet filled in yet</p>
+              <ul>{needsWork.missingMeta.slice(0, 40).map((item) => <li key={item.slug}><Link href={`/codex/bible/${item.slug}`}>{item.title}</Link> <span>{storyEntryKindLabels[item.kind].toLowerCase()}</span></li>)}</ul>
+            </> : null}
+          </div>
+        </details>
+      ) : null}
 
       <form action={createEntry} className="story-form codex-new-entry">
         <p className="eyebrow">Add an entry</p>

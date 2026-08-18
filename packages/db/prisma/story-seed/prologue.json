@@ -1,0 +1,632 @@
+{
+  "contractVersion": 1,
+  "generatedAt": "2026-08-18T03:30:00.000Z",
+  "revisionCursor": "rev_prologue_0001",
+  "arcs": [
+    {
+      "slug": "the-island-is-already-lost",
+      "title": "The Island Is Already Lost",
+      "summary": "The prologue. You are a Stormglass Cartel mercenary on an island that is dying under you, and the only person keeping you alive is a foul-mouthed infuser named Tino who trusts you more than either of you would ever say out loud. Twenty-two minutes from the first muzzle flash to the title card, and by the end the war has taken him. Faithful to Docs/Tutorial_Island_Flow.md beats 1-18; the Defend and Flee branches continue in their own arcs.",
+      "isMainline": true,
+      "entryNodeKeys": ["cold-open"],
+      "nodes": [
+        {
+          "key": "cold-open",
+          "kind": "SCENE",
+          "title": "Eyes The Fuck Up",
+          "summary": "No menu. No mercy. The white flare of the world cinematic resolves into a muzzle flash and you are already crouched in a war you are losing.",
+          "body": "The light of the last cinematic frame becomes tracer fire. You are face-down behind shattered masonry in a tropical market street that has been converted, violently and recently, into a battlefield: storefronts burning, awnings shredded, civilian cars abandoned mid-flight, and arcane scarring on the walls that no explosive ever left. Somewhere close, a soldier is vomiting. Somewhere closer, Tino is arguing with someone.\n\nTINO: \"Hey. Eyes up. Eyes the fuck up.\"\n\nA mercenary fires over cover. MERCENARY: \"Pearl's pushing the east street!\" TINO: \"Then let 'em. We're getting boxed in.\"\n\nThe radio answers with a voice already halfway to panic. RADIO: \"Stormglass Actual, this is Red Three. We have movement under the streets. Repeat — under the fucking streets.\" The transmission ends in screaming and static.\n\nTino looks at you. TINO: \"You still with me?\"\n\nYou don't answer with words. You answer by looking up. That is the whole tutorial: the war teaches, and it does not pause.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-strike" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "FACTION", "slug": "stormglass-cartel", "title": "The Stormglass Cartel" },
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" },
+            { "kind": "REGION", "slug": "the-starting-island", "title": "The Starting Island" },
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" }
+          ]
+        },
+        {
+          "key": "the-strike",
+          "kind": "BEAT",
+          "title": "The Sky Changes Its Mind",
+          "summary": "The squad moves. The sky falls. The player is not expected to win this battle — they are expected to survive being wrong about what a battle is.",
+          "body": "The squad advances twenty meters through a scripted combat lane — friendlies shooting, dragging wounded, reloading, shouting orders that already sound like obituaries. Then the sky changes. Every sound drops into one low-frequency pressure tone, the kind you feel in your teeth before you hear it.\n\nUNKNOWN SOLDIER: \"...what the fuck is that?\"\n\nTino looks up. TINO: \"Oh, shit.\"\n\nThe strike is orbital and magical at once and it lands like the fist of something that was never asked for permission. Glass bows inward before it breaks. Streetlights die. Gravity forgets itself in glittering arcane particles. Bodies and debris cross your vision and then you are airborne, thrown through your own cover, and the world collapses into tinnitus and a single held breath of black.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "wake-up" }
+          ],
+          "references": [
+            { "kind": "EVENT", "slug": "the-strike", "title": "The Strike" }
+          ]
+        },
+        {
+          "key": "wake-up",
+          "kind": "SCENE",
+          "title": "The Crater Gives Back Its Dead",
+          "summary": "First sight of the aftermath — and the first proof that this war has a third side, and the third side does not recruit the living.",
+          "body": "You wake face-down. Vision doubled. Blood on your hands that may or may not be yours. A burning vehicle lies upside down nearby, and a soldier who was alive thirty seconds ago is close enough to read the name on his vest.\n\nTino crawls into view and grabs your vest with both fists. TINO: \"Come on. Come on!\" He slaps your helmet. TINO: \"Wake the fuck up.\"\n\nBehind him, the blast crater moves. Something skeletal claws its way out of the churned earth. A nearby body rises — wrong, hinged in places bodies do not hinge. And then a true demon follows them up into the smoke, and it is not a skeleton and it is not a machine and it is not anything either faction built.\n\nTino sees all of it. TINO: \"Nope.\" A beat. TINO: \"Absolutely fucking not. MOVE.\"\n\nThe enemies here are deliberately overwhelming. Fighting is possible; retreat is correct. The battlefield itself makes the argument — no invulnerable enemies, just crossfire, pressure, and collapsing routes.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "run-to-the-green-sign" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "CREATURE", "slug": "the-risen", "title": "The Risen" },
+            { "kind": "CREATURE", "slug": "true-demons", "title": "True Demons" },
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" }
+          ]
+        },
+        {
+          "key": "run-to-the-green-sign",
+          "kind": "SCENE",
+          "title": "Stay Off The Fucking Street",
+          "summary": "A sprint through controlled chaos to the grocery store. Every disaster on this run happens to someone else — this time.",
+          "body": "Tino leads you across the intersection at a dead sprint while the battle eats everyone slower than you. A friendly emplacement dies in a geyser of sandbags. A vehicle crashes through the crossing. An injured mercenary reaches for you and is dragged away before your hand can close. Something with wings — Pearl's, or worse — crosses overhead trailing a shadow the width of the street.\n\nTINO: \"Stay off the fucking street!\" Then, pointing: \"Inside! Green sign!\" And if you stop to watch the world end: \"You wanna die sightseeing? MOVE!\"\n\nYou make the grocery store. Tino slams the damaged doors, and for the first time since you were born into this war, the gunfire goes muffled. Silence. Breathing. One fluorescent light, flickering like it hasn't heard the news.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-quiet-store" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "the-quiet-store",
+          "kind": "SCENE",
+          "title": "Quiet After Violence",
+          "summary": "The pacing valley. A civilian story told in spilled food and evacuation notices — and the first glimpse of what Tino's power is costing him.",
+          "body": "The store tells you everything without a single line of exposition: abandoned carts, spilled produce going soft, emergency rationing signs, blood behind the service counter, soldiers' bedrolls in the cereal aisle. One radio still plays a cheerful advertisement to nobody. Ordinary people were here very recently. They are not here now.\n\nTINO: \"You good?\" He looks you over. TINO: \"Don't answer that. Stupid question.\"\n\nHis field-infusion rig spits pale light. He closes a leaking valve with practiced speed — and then hides the tremor in his hand, the way a man hides a debt. Nobody explains it. That is the point: infused power is temporary, useful, and it is eating someone you like, one dose at a time.\n\nA distant impact shakes dust from the ceiling. TINO: \"Roof access. Back of the store.\" The stairwell is collapsed; the way up is a maintenance ladder and a jump across a broken service platform. Tino goes first. TINO: \"Don't look down.\" He lands, and looks back. TINO: \"Actually, look down. That's funny.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-roof-and-the-rider" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "ITEM", "slug": "field-infusion-rig", "title": "Field-Infusion Rig" },
+            { "kind": "THEME", "slug": "the-cost-of-borrowed-power", "title": "The Cost of Borrowed Power" }
+          ]
+        },
+        {
+          "key": "the-roof-and-the-rider",
+          "kind": "SCENE",
+          "title": "Something Is Hunting You",
+          "summary": "The first world-scale reveal, ten seconds of beauty — then an armored hypogriff rider with a machine gun turns the rooftops into a predator sequence. Rest in peace, Steve.",
+          "body": "The roof feels safer. Wind. Distant battle. A tropical horizon half-hidden by smoke — for five, maybe ten seconds you are allowed to see how beautiful this island was, and how big, and how much of it is burning. This is the first time the world admits its own scale.\n\nThen a shadow crosses the roof.\n\nAn armored hypogriff rider, machine gun slung against the beast's barding, begins sweeping the rooftops — an old war-beast integrated with modern kit, hunting with a search pattern you can learn if you live long enough to study it. Tino drops flat. TINO: \"DOWN.\" Gunfire tears an HVAC unit into confetti. TINO: \"That thing sees us, we're meat.\"\n\nYou move when it looks away. Crouch behind roof structures, sprint the gaps between safe zones, mantle low obstacles, jump the alley — and never, ever try to outshoot a thing you were only meant to outlast. It will fire through weak cover to remind you that hiding is not a plan; timing is.\n\nA nearby friendly breaks too early. The gunner sees him. You watch what happens next, and no tutorial text insults the moment.\n\nTINO: \"...yeah. Don't do what Steve did.\" A beat. TINO: \"Sorry, Steve.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "one-idiot" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "CHARACTER", "slug": "steve", "title": "Steve" },
+            { "kind": "CREATURE", "slug": "the-hypogriff-riders", "title": "The Hypogriff Riders" }
+          ]
+        },
+        {
+          "key": "one-idiot",
+          "kind": "SCENE",
+          "title": "Your Idiot",
+          "summary": "The stealth lesson, delivered as arithmetic. Three contractors become two become one, and the one is yours.",
+          "body": "The rooftop route ends above an alley where a small Tropic Pearl patrol is searching the wreckage. Crossing openly is death. Tino goes still in a way that says he has done this math before.\n\nTINO, in a whisper: \"Pearl contractors.\" He studies them. \"Three.\"\n\nA radio call pulls one through a doorway. \"Two.\"\n\nGunfire in the next street peels the second away. \"One idiot.\"\n\nTino looks at you, and there is something almost like ceremony in it. TINO: \"Your idiot.\"\n\nYou drop into the alley behind the sentry, and your first stealth takedown is fast and violent and honest about what it is. The beat does not advance on a timer — the sentry dies by your hand or the prompt stays.\n\nTino's verdict depends on who you are. To the soldier: \"Still got it.\" To the caster: \"Jesus. Remind me not to piss you off.\" To the engineer: \"That was deeply fucking unethical. I approve.\" To the assassin: \"...show-off.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "check-him" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" }
+          ]
+        },
+        {
+          "key": "check-him",
+          "kind": "SCENE",
+          "title": "That'll Do",
+          "summary": "First real weapon, looted from the man you just killed — and it fits your hands like the battlefield placed it there on purpose, because it did.",
+          "body": "Tino kneels beside the body. TINO: \"Check him.\"\n\nThe dead contractor's kit carries your first meaningful weapon, and it is yours in the oldest sense: the soldier finds a sidearm and ammunition; the born caster finds a focus keyed to elemental, blood, or warding work; the infused finds a practical gun and a sealed charge that whispers of the next dose; the gifted finds a token still warm with something older than the war; the engineer finds a compact firearm and a tool that wants to be deployed; the assassin finds a blade that agrees with them. The encounter is authored so the find feels placed by the battlefield, not rolled by a machine.\n\nTino watches you arm yourself, and gives the only blessing he knows.\n\nTINO: \"That'll do.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "through-not-around" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "through-not-around",
+          "kind": "SCENE",
+          "title": "So We Go Through",
+          "summary": "The first fight the player is expected to win. Four Pearl mercenaries, one arena that supports every class, and a friend who will not let you die stupid.",
+          "body": "You hear them before you see them.\n\nPEARL MERC 1: \"Stormglass is folding.\" PEARL MERC 2: \"Then why are we still getting shot at?\" PEARL MERC 1: \"Because they're fucking Stormglass.\"\n\nTino checks his ammunition with the calm of a man consulting a bad bank balance. TINO: \"Can't go around them.\" Click. \"So we go through.\"\n\nThe arena gives every class a fair war: two layers of cover, one elevated shooter, a flanking route, an explosive opportunity, a lootable body mid-fight, one safe angle to retreat to, and a stealth opener for those who came to the fight sideways. The lessons arrive layered, one under fire at a time — aim, damage, cover, reload, loot — never as a lecture. All four enemies die through the real damage path or the beat does not move.\n\nIf you nearly die learning, Tino intervenes exactly once. TINO: \"Not dying here, asshole.\"\n\nAnd when it is done: TINO: \"See?\" Pause. \"Completely under control.\" A building detonates on the skyline. \"...mostly.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "fall-back-to-kestrel" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "FACTION", "slug": "stormglass-cartel", "title": "The Stormglass Cartel" },
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" }
+          ]
+        },
+        {
+          "key": "fall-back-to-kestrel",
+          "kind": "BEAT",
+          "title": "The Island Defense Line Is Broken",
+          "summary": "The retreat order. The war stops being a fight and becomes a flood, and everyone in it is suddenly cargo or current.",
+          "body": "The sky is getting worse in a way that has nothing to do with weather. A Stormglass emergency signal begins to sound, and the radio channels start talking over each other like drowning men sharing one rope.\n\nRADIO: \"All Stormglass personnel, fall back to Forward Camp Kestrel. Repeat, Kestrel. Island defense line is broken.\"\n\nRADIO 2: \"Do not use the eastern bridge. Something is on the bridge.\"\n\nNobody asks what. Nobody wants the answer.\n\nTINO: \"Kestrel's still standing.\" He looks toward a shattered vehicle checkpoint. TINO: \"We need wheels.\"\n\nThe route there shows you the size of the collapse: wounded soldiers, dead armor, abandoned equipment, civilians being herded toward the docks, officers burning documents, and one soldier refusing — flatly, finally — to leave a wounded friend. The island is not losing. The island has lost, and is now deciding how much it will cost.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "wheels" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" },
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" }
+          ]
+        },
+        {
+          "key": "wheels",
+          "kind": "SCENE",
+          "title": "Good News. Today You Learn.",
+          "summary": "Lockpick and hot-wire, taught at gunpoint by circumstance. The vehicle is locked, the crew is dead, and the war is incoming.",
+          "body": "The one usable truck is locked, and its crew will not be needing it. Tino tries the door with the weary optimism of a man who has never once been lucky.\n\nTINO: \"Locked.\" He surveys the incoming battle. \"Naturally.\"\n\nYou pick the lock while the horizon gets louder — theatrical pressure, not punishing, this first time. Inside, the ignition answers with nothing.\n\nTino stares at it. TINO: \"You know how to hot-wire one of these?\"\n\nIf you are the engineer, he catches himself: \"Actually, stupid question. Do your thing.\" For everyone else: \"Good news. Today you learn.\"\n\nThe engine catches. For one second, both of you grin like the war isn't watching.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "tino-drives" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "tino-drives",
+          "kind": "DIALOGUE",
+          "title": "A Boat, Cold Beer, Fishing",
+          "summary": "Tino drives so the player can watch the war go by — and in the middle of it, he builds himself a small human future, out loud, moments before it is taken from him.",
+          "body": "Tino takes the wheel and the convoy escape unrolls past your window like a war film that forgot you were in it: retreating Stormglass units, burning roadside positions, Pearl pursuit weaving through the wrecks, monsters hauling themselves out of impact zones — and once, far off, something so large that the smoke moves around it, shown and not fought.\n\nTINO: \"You know what I'm doing when we get off this shithole?\"\n\nGunfire punches into the side panel. TINO: \"Okay. Assuming we get off this shithole.\"\n\nHe swerves around wreckage. TINO: \"I'm getting a boat.\"\n\nAnother impact rocks the frame. TINO: \"Little piece of coast. Cold beer. Fishing.\"\n\nHe glances at you — one second of a man showing you the inside of his life.\n\nTINO: \"And absolutely nobody trying to summon fucking hell.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "tino-is-taken" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "tino-is-taken",
+          "kind": "SCENE",
+          "title": "GO",
+          "summary": "The capture. Chaotic, fast, unwinnable by design — and deliberately unwitnessed, so the player cannot know what the writers know. See the RULE entry before writing anything about Tino's fate.",
+          "body": "The road narrows through wreckage. An impact — Tino wrestles the wheel and wins, barely. Then a creature lands on the vehicle, all claws and wrongness, and you get one real combat interaction: shoot it, stab it, cast at it, knock it loose. You can wound it. You cannot change what happens next.\n\nA second creature hits Tino's side. The door tears away like paper. Tino is grabbed.\n\nYour hand reaches into frame — first person, no cinematic mercy — and his hand closes on yours. For one full second you have him. For one full second the game lets you believe it.\n\nThen something else pulls, and his grip goes.\n\nTINO: \"GO!\"\n\nSmoke. Movement. The swarm.\n\nTINO: \"FUCKING GO!\"\n\nAnd he is gone — into smoke, into enemy motion, into a chaos built precisely so that you cannot know what happened. No body. No confirmation. No clean kidnapping shot. The seat beside you is empty and the war does not slow down to let you grieve.\n\nFor several seconds afterward: no prompts, no objectives, no text. Just gameplay, engine noise, and the absence.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "take-the-wheel" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "RULE", "slug": "what-the-player-knows-about-tino", "title": "What the Player Knows About Tino" }
+          ]
+        },
+        {
+          "key": "take-the-wheel",
+          "kind": "SCENE",
+          "title": "The Empty Seat",
+          "summary": "The player takes the driver's seat. The driving tutorial proper — taught by grief and pursuit, with Tino's empty seat doing more work than any objective marker.",
+          "body": "The truck is still rolling, and rolling wrong. You claw your way into the driver's seat because the alternative is the ditch and whatever lives in it now.\n\nAccelerate. Steer through debris. Brake where braking is survival and ram where it isn't. The vehicle takes scripted damage and teaches you to read its health; a pursuer appears and teaches you that driving is also fighting. The route opens toward Forward Camp Kestrel, floodlights somewhere ahead in the smoke.\n\nTino's seat stays empty in the corner of your eye the whole way down.\n\nOBJECTIVE: REACH FORWARD CAMP KESTREL.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-last-kilometer" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "the-last-kilometer",
+          "kind": "SCENE",
+          "title": "Hold! HOLD!",
+          "summary": "The approach to Kestrel: less chaos, more dread. A checkpoint nearly kills the player before the gate swallows them whole.",
+          "body": "The battle thins as you close on the camp, and what replaces it is worse: quiet with weight in it. Kestrel's floodlights burn through the smoke like the last lit windows of a sinking ship.\n\nA Stormglass checkpoint swings its guns onto your vehicle.\n\nGUARD: \"Hold! HOLD!\"\n\nA breath, a spotlight, an insignia read.\n\nGUARD 2: \"Stormglass! Open it!\"\n\nThe gate opens exactly enough. You drive through, and it slams behind you as an explosion flashes on the horizon like punctuation.\n\nFor the first time since the game began, you are somewhere temporarily defensible. The word doing all the work in that sentence is 'temporarily'.\n\nCHECKPOINT: FORWARD CAMP KESTREL — UNLOCKED. The first permanent respawn point. From here, death obeys the campaign's rules, not the tutorial's.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "where-is-your-partner" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" },
+            { "kind": "FACTION", "slug": "stormglass-cartel", "title": "The Stormglass Cartel" }
+          ]
+        },
+        {
+          "key": "where-is-your-partner",
+          "kind": "DIALOGUE",
+          "title": "Where's Your Partner?",
+          "summary": "Arrival at the camp that is barely holding. One question the player cannot answer, one commander who reads the answer anyway, and the handoff line into the title sequence.",
+          "body": "You step out of the truck into a military position held together by exhaustion: medics working in open air, ammunition passed hand to hand, engineers splinting the fortifications, terrified recruits, officers arguing over evacuation, boats being readied, prisoners under guard, maps showing how much of the island is simply gone. And one empty space, exactly the size of the man who should be standing next to you.\n\nA guard clocks the truck, then you, then the seat.\n\nGUARD: \"Where's your partner?\"\n\nYou don't answer. Or you answer with something small and true, and it costs you.\n\nThe camp commander approaches — senior, spent, still standing anyway.\n\nCOMMANDER: \"You came from the east road?\" The commander reads your face the way officers read casualty lists. COMMANDER: \"Fuck.\"\n\nA radio operator cuts in: \"Commander — western perimeter says Pearl armor is moving again.\" Another: \"And the docks are asking if they're cleared to launch.\"\n\nThe commander looks between the battle map and you, and the world's audio begins to narrow, like the island itself is inhaling.\n\nCOMMANDER: \"We're out of time.\"",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-shard" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "the-kestrel-commander", "title": "Commander Rook" },
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "the-shard",
+          "kind": "BEAT",
+          "title": "The Title in the Stormglass",
+          "summary": "The 90-120 second first-person title sequence: the island from above, both factions in their own words, the thing beneath the war, one frozen frame of Tino's hand — and the game's name forming in the fractures of a shard.",
+          "body": "The battlefield audio falls away. You look toward the sea, smoke rolls across your vision, and a low restrained motif begins — no bombast yet; the music knows what you just lost.\n\nThe camera never leaves your eyes. A commander pulls a live reconnaissance feed onto the operations table and the whole island appears beneath your hands: sections burning, artillery lines, ships offshore, magical anomalies, your entire desperate escape route reduced to one thin scratch across a dying map. The feed fractures into helmet-camera fragments — a Stormglass soldier carving a unit mark into a magazine, an infuser dosing a rig, a banner on fire that will not fall. Match cut to Pearl: mercenaries being paid, polished officers watching violence from safety, exotic creatures in restraints, a contract being signed, a prisoner dragged through frame. Nobody says who the bad guys are. You watch how each of them operates, and you decide.\n\nThen the soundtrack drops, the feeds begin to fail, and the sequence shows you what neither faction understands: movement beneath cracked pavement, an ancient structure waking, an impossible silhouette under ocean water, a dead soldier's eyes opening.\n\nAnd then, without warning, it is personal again — one distorted first-person flash of Tino's hand leaving yours, frozen for a fraction of a second, and his voice, faint: \"And absolutely nobody trying to summon fucking hell.\"\n\nA medic cuts a shard of stormglass from your damaged armor. Your bloodied hand places it on the tactical map. The camp lights fall away until only the shard, the map, and your hands remain — and hairline fractures ignite inside the crystal, resembling coastlines, battle lines, veins, lightning, a shattered world. Through those fractures, the title forms.\n\nFull title. Held long enough to be earned. A distant explosion under the final note. Cut to black. One beat.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "tutorial-complete" }
+          ],
+          "references": [
+            { "kind": "ITEM", "slug": "stormglass", "title": "Stormglass" },
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" },
+            { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
+          ]
+        },
+        {
+          "key": "tutorial-complete",
+          "kind": "BEAT",
+          "title": "The Real Game Opens Its Doors",
+          "summary": "The live handoff. The camp unlocks, co-op opens, and the player gets a few unforced minutes to walk, loot, grieve, and gather friends before the commander calls them to the table.",
+          "body": "Fade back into first person at Kestrel, standing roughly where the cinematic found you. The camp is no longer cinematic-locked; the simulation breathes again around you.\n\nTUTORIAL COMPLETE. Then: CO-OP AVAILABLE. Then both vanish, because this game does not linger on its own applause.\n\nFriends can join from this moment — arriving in fiction, not by teleport: Stormglass survivors from another section of the island, mercenaries folded in from a broken unit, soldiers already in camp now grouped to your squad. The war explains them so the menu doesn't have to.\n\nNobody forces a dialogue box on you. For a few minutes the camp is yours: walk it, loot personal storage, meet the quartermaster, read the tactical map, watch the boats being loaded, find the conversations nobody scripted a marker for. Process it.\n\nThen the commander calls you — and whoever came for you — to the operations table.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-operations-table" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "the-operations-table",
+          "kind": "QUEST_START",
+          "title": "Here's Where We Are",
+          "summary": "The commander lays out the truth of the island and arms the first real campaign decision. This node begins the live game's first quest.",
+          "body": "The map on the operations table is the island, and the island is mostly the wrong colors now.\n\nCOMMANDER: \"Here's where we are.\"\n\nCOMMANDER: \"Pearl owns the east. North road's gone. We've got civilians, wounded, and enough ammunition to start a war we already lost.\"\n\nA beat, heavy as wet canvas.\n\nCOMMANDER: \"Boats can still make the military port.\"\n\nA finger moves to Kestrel's walls.\n\nCOMMANDER: \"Or we stay. Reinforce the camp. Find whoever's still breathing. Make them pay for every fucking meter.\"\n\nNeither option is dressed up as the right one. That is deliberate, and it is the law of this scene: the first true campaign decision belongs to the player and their group, and the game will not put its thumb on the scale.",
+          "choices": [
+            { "order": 0, "label": "Turn to the map", "condition": null, "toKey": "defend-or-flee" },
+            { "order": 1, "label": "Ask about Tino", "condition": "The player raises Tino with the commander", "toKey": "what-hunts-like-that" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "the-kestrel-commander", "title": "Commander Rook" },
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "what-hunts-like-that",
+          "kind": "DIALOGUE",
+          "title": "What Hunts Like That",
+          "summary": "The optional Tino thread at the operations table. Each branch is given one honest reason to be the road back to him — so neither choice is the obviously loyal one.",
+          "body": "If you ask about him — and the empty seat is still riding with you, so you might — the commander gives you the only intelligence that exists, and it cuts both ways on purpose.\n\nCOMMANDER: \"Whatever hit your vehicle moved east. Stay, and scouts can follow the trail. Leave, and the port's intelligence net may know what hunts like that.\"\n\nHold the island, and you can chase the thing that took him. Sail, and you can learn what it was. The war has made sure that loyalty to Tino points in both directions at once.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "defend-or-flee" }
+          ],
+          "references": [
+            { "kind": "CHARACTER", "slug": "the-kestrel-commander", "title": "Commander Rook" },
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "defend-or-flee",
+          "kind": "CHOICE",
+          "title": "Defend or Flee",
+          "summary": "The first major campaign choice, made by the whole party. Both are full playable branches with distinct consequences; both roads eventually reach Port Arcadia, and neither arrives clean.",
+          "body": "The table waits. The camp waits. Pearl armor is moving in the west, the boats are straining at their lines in the south, and somewhere east of here is the thing that took your friend.\n\nStay, and make the island cost them everything. Go, and carry everyone you can out of its grave.\n\nThe sequence promised you both were real. It was not lying.",
+          "choices": [
+            { "order": 0, "label": "Defend the island", "condition": null, "toKey": "hold-the-line" },
+            { "order": 1, "label": "Flee the island", "condition": null, "toKey": "the-boats" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" },
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "hold-the-line",
+          "kind": "ENDING",
+          "title": "Every Fucking Meter",
+          "summary": "Prologue ending, Defend branch chosen. Continues in the arc 'the-last-days-of-kestrel'. Intended as a NEUTRAL ending — the choice itself is neither victory nor defeat.",
+          "body": "The commander nods once, and the camp changes shape around the decision: ammunition uncrated instead of loaded, walls reinforced instead of abandoned, scouts sent east along a trail of torn metal and worse.\n\nThe island is lost. That was never the question. The question is what it costs them — and whether the trail the creature left leads anywhere a friend might still be breathing.\n\nThe prologue ends here. The Last Days of Kestrel begin.",
+          "choices": [],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "the-boats",
+          "kind": "ENDING",
+          "title": "The Boats Can Still Make the Port",
+          "summary": "Prologue ending, Flee branch chosen. Continues in the arc 'the-evacuation'. Intended as a NEUTRAL ending — the choice itself is neither victory nor defeat.",
+          "body": "The commander gives the order the docks have been begging for, and Kestrel begins to pour itself into the boats: the wounded first or the ammunition first, and someone has to decide which, and that someone is about to be you.\n\nThe island burns at your back. Ahead, across violent water, is the military port, the mainland, the intelligence net that may know what hunts like the thing that took Tino — and the rest of the war.\n\nThe prologue ends here. The Evacuation begins.",
+          "choices": [],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        }
+      ],
+      "problems": []
+    },
+    {
+      "slug": "the-last-days-of-kestrel",
+      "title": "The Last Days of Kestrel",
+      "summary": "The Defend branch, in full. The party holds Forward Camp Kestrel against escalating Tropic Pearl assaults while the thing beneath the island grows less patient — through preparation, rescue, discovery, siege, a playable last stand, and the collapse that throws the survivors into the sea. Picks up from the 'hold-the-line' ending of the prologue arc; cross-arc continuity is carried in prose because the contract does not link arcs.",
+      "isMainline": true,
+      "entryNodeKeys": ["dig-in"],
+      "nodes": [
+        {
+          "key": "dig-in",
+          "kind": "QUEST_START",
+          "title": "Make Them Pay For It",
+          "summary": "The defense begins: walls, generators, turrets, and the arithmetic of a siege you cannot win, only price.",
+          "body": "Kestrel stops pretending it might leave. Engineers who were packing tools an hour ago are welding them to the walls instead. The quartermaster opens the deep stores. Every task in the camp is suddenly the same task wearing different gloves: buy time, and sell it dear.\n\nReinforce the defenses. Repair the generators and turrets. Decide — because resources will force the decision — what gets protected and what gets sacrificed. The camp's survival is a ledger, and the party holds the pen.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-scattered-living" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "the-scattered-living",
+          "kind": "QUEST_STEP",
+          "title": "Whoever's Still Breathing",
+          "summary": "Rescue and recruitment sweeps beyond the walls — every survivor brought in is a rifle on the wall and a mouth in the mess, and the island does not give them up for free.",
+          "body": "The commander's words made it sound simple: find whoever's still breathing. Out past the wire it is anything but. Stormglass stragglers are holed up in cellars and shattered strongpoints across the district, each rescue a small war of its own — and each survivor brought home is another rifle for the last stand and another reason the camp's supplies won't stretch.\n\nSome will not come. Some cannot. The soldier who refused to leave his wounded friend is still out there, still refusing, and what the party does about that is the kind of choice this branch is made of.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-dead-do-not-wait" }
+          ],
+          "references": [
+            { "kind": "FACTION", "slug": "stormglass-cartel", "title": "The Stormglass Cartel" }
+          ]
+        },
+        {
+          "key": "the-dead-do-not-wait",
+          "kind": "QUEST_STEP",
+          "title": "The Trail Goes East",
+          "summary": "Scouting Pearl's movements uncovers the worse truth: the supernatural contamination is spreading on its own schedule, and the creature that took Tino left a trail.",
+          "body": "The scouts go out to count Pearl armor and come back counting something else. Impact craters that should be cold are moving at the edges. Contamination drifts against the wind. Positions Pearl overran days ago stand empty now — not abandoned. Emptied.\n\nAnd along the east road, exactly where the commander promised, there is a trail: torn metal, drag marks, and sign that whatever hit the party's vehicle was not hunting alone.\n\nThe intelligence is unambiguous and unwelcome: the two-sided war has a third side, the third side is winning ground neither faction has noticed losing, and the trail east is getting older by the hour.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-long-nights" }
+          ],
+          "references": [
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" },
+            { "kind": "CREATURE", "slug": "the-risen", "title": "The Risen" },
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" }
+          ]
+        },
+        {
+          "key": "the-long-nights",
+          "kind": "QUEST_STEP",
+          "title": "The Long Nights",
+          "summary": "The siege escalates: probing attacks, then real ones, then the ones that come after dark and are not Pearl at all.",
+          "body": "The first assaults are professional — Pearl contractors probing the wire, pricing the camp's defenses the way accountants price a debt. The walls hold. The turrets earn their repairs.\n\nThen the attacks start coming at night, and some of the things in the wire have no employer.\n\nEach defense survived buys another day of searching, another supply run, another survivor hauled in from the district — and grinds the camp down a little further toward the night when the arithmetic finally fails. Everyone in Kestrel knows the last night is coming. The work is making it cost.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "every-fucking-meter" }
+          ],
+          "references": [
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" },
+            { "kind": "CREATURE", "slug": "true-demons", "title": "True Demons" }
+          ]
+        },
+        {
+          "key": "every-fucking-meter",
+          "kind": "QUEST_STEP",
+          "title": "The Last Stand of Forward Camp Kestrel",
+          "summary": "The playable final defense. Doomed by design, glorious by construction — the island is overrun, and Kestrel goes down with its guns firing.",
+          "body": "The final push comes with everything: Pearl armor from the west, the risen from the craters, and beneath all of it the deep structural groan of an island beginning to fail as a physical object.\n\nThis is a battle the party fights and cannot win, and it must never feel like a cutscene wearing gameplay's clothes. Every emplacement repaired, every survivor rescued, every crate of ammunition gathered across the branch is on the wall tonight, shooting back. The camp falls the way the party built it to fall: expensively.\n\nAnd then the ground itself makes the decision everyone has been arguing about. The island's collapse reaches Kestrel, the world tilts, and the sea comes up to meet the survivors.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-sea-takes-the-island" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" },
+            { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
+          ]
+        },
+        {
+          "key": "the-sea-takes-the-island",
+          "kind": "ENDING",
+          "title": "Washed Ashore",
+          "summary": "Defend branch conclusion: thrown into the water in the collapse, the survivors wash ashore near a small fishing village in the Port Arcadia region. Intended as a SUCCESS ending in survival terms, carried in defeat's clothing — the contract cannot mark valence yet.",
+          "body": "Water. Darkness. The muffled thunder of an island becoming seabed.\n\nThen sand, and coughing, and gray morning light on a shoreline that is not on fire — the first such shoreline in the party's living memory. A small fishing village sits up the beach, nets drying, mainland hills behind it. The Port Arcadia region, reached the hard way.\n\nThe defenders arrive with nothing but what the sea allowed: their scars, their story, the debts Pearl now owes them — and a trail gone cold across water, waiting to be found again. The island held for every meter it was worth. What it bought is what comes next.",
+          "choices": [],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" },
+            { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
+          ]
+        }
+      ],
+      "problems": []
+    },
+    {
+      "slug": "the-evacuation",
+      "title": "The Evacuation",
+      "summary": "The Flee branch, in full. Kestrel empties itself into the boats: supply triage, survivor escort, a contested harbour run, and a departure with the island burning in the wake. Picks up from 'the-boats' ending of the prologue arc; cross-arc continuity is carried in prose because the contract does not link arcs.",
+      "isMainline": true,
+      "entryNodeKeys": ["the-manifest"],
+      "nodes": [
+        {
+          "key": "the-manifest",
+          "kind": "QUEST_START",
+          "title": "The Manifest",
+          "summary": "Evacuation triage: the boats hold what they hold, and every line on the manifest is a judgment on what Kestrel was for.",
+          "body": "The boats can still make the military port. The boats cannot carry everything that deserves to go.\n\nSecure the transportation. Then face the manifest: the wounded, the ammunition, the intelligence archives the officers were burning an hour ago, the prisoners nobody wants to guard and nobody wants to leave, the civilians who trusted a mercenary cartel because it was the only thing on the island still shaped like order.\n\nWhat gets loaded is the branch's first real decision, and its consequences board the boats with everyone else.",
+          "choices": [
+            { "order": 0, "label": "Load the wounded first", "condition": null, "toKey": "who-we-carry" },
+            { "order": 1, "label": "Load the munitions and stores first", "condition": null, "toKey": "who-we-carry" },
+            { "order": 2, "label": "Load the archives and the prisoners", "condition": "The party holds Pearl prisoners or recovered intelligence worth the cargo space", "toKey": "who-we-carry" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
+          ]
+        },
+        {
+          "key": "who-we-carry",
+          "kind": "QUEST_STEP",
+          "title": "Who We Carry",
+          "summary": "Survivor escort through a collapsing district to the waterfront — the slowest convoy of the war, guarded by everyone the manifest spared.",
+          "body": "Whatever was loaded first, the rest of Kestrel moves on foot: a column of wounded, civilians, camp followers, and bone-tired soldiers threading a district that is actively coming apart. Pearl knows the docks are the prize now. So does the thing beneath the streets.\n\nThe party is the column's edge — scouting the route, breaking ambushes, carrying who cannot walk, and holding the line at every choke point while the slowest people the war has left alive shuffle past behind them.\n\nEvery survivor delivered to the waterfront is a life the island does not get to keep.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "the-harbour-run" }
+          ],
+          "references": [
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" },
+            { "kind": "THEME", "slug": "something-under-the-war", "title": "Something Under the War" }
+          ]
+        },
+        {
+          "key": "the-harbour-run",
+          "kind": "QUEST_STEP",
+          "title": "The Harbour Run",
+          "summary": "The final contested push to the boats. Pearl wants the docks intact; the island wants nobody to leave at all.",
+          "body": "The waterfront is the last argument of the campaign for this island, and everyone is making it at once: Pearl contractors racing to take the docks whole, Stormglass rearguards feeding themselves into the delay, and under it all the water itself moving wrong around the pilings — something vast keeping pace with the evacuation from below.\n\nThe run to the boats is fought pier by pier. Lines are cut under fire. The last boat's engine catches on the second try, which is one try later than anyone's nerves could afford.\n\nGet aboard. Get everyone aboard who can still be gotten.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "wake-of-the-island" }
+          ],
+          "references": [
+            { "kind": "FACTION", "slug": "stormglass-cartel", "title": "The Stormglass Cartel" },
+            { "kind": "FACTION", "slug": "tropic-pearl-trade-house", "title": "The Tropic Pearl Trade House" }
+          ]
+        },
+        {
+          "key": "wake-of-the-island",
+          "kind": "ENDING",
+          "title": "The Island Burns Behind Us",
+          "summary": "Flee branch conclusion: departure by boat, the crossing, and arrival at the Port Arcadia military port. Intended as a SUCCESS ending with a long shadow — the contract cannot mark valence yet.",
+          "body": "The boats pull out through violent water, and nobody on deck says anything, because the view says it all: the island burning stem to stern, the smoke leaning east, and — just once, far off, where the water goes deep — a shape beneath the surface that is patient and enormous and not done.\n\nTino's plan comes to the party unbidden: a boat, a little piece of coast, cold beer, fishing. This is a boat. It is not that boat.\n\nThe military port takes the survivors in at gray dawn — Port Arcadia, the mainland, the wider war. Somewhere in its intelligence net is a file on what hunts like the thing that took him. The evacuation saved everyone it could. The list of what it couldn't is the cargo nobody declared.",
+          "choices": [],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" },
+            { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
+            { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
+          ]
+        }
+      ],
+      "problems": []
+    }
+  ],
+  "bible": [
+    {
+      "kind": "CHARACTER",
+      "slug": "tino",
+      "title": "Tino",
+      "summary": "Stormglass Cartel magic-infuser, the player's war buddy, and the emotional spine of the entire campaign. Competent, vulgar, funny under pressure — and taken by something no one saw clearly.",
+      "body": "Tino trusts the player before the game even begins, and the game spends its entire opening making sure the player earns it retroactively. He teaches without lecturing, swears like it's a load-bearing structure, and in the middle of a running battle builds himself a future out loud — a boat, a little piece of coast, cold beer, fishing, and absolutely nobody trying to summon fucking hell.\n\nHis field-infusion rig gives him his power and is quietly killing him for it; the tremor he hides in the grocery store is the first corruption tell the player ever sees.\n\nHe is captured, not killed, during the vehicle escape — see [[what-the-player-knows-about-tino]] before writing anything that touches his fate. His capture is the campaign's recurring emotional anchor: who took him, where, why, and what he is by the time anyone finds him again are questions the writers' room owns and the player must be made to ache over."
+    },
+    {
+      "kind": "CHARACTER",
+      "slug": "steve",
+      "title": "Steve",
+      "summary": "A Stormglass soldier who ran too early on the rooftops. The tutorial's shortest, most effective lesson.",
+      "body": "Steve broke cover before the hypogriff rider's search pattern allowed it, and the gunner saw him, and the player watched the consequence land without a single line of tutorial text. His entire memorial is Tino's eulogy: '...yeah. Don't do what Steve did.' A beat. 'Sorry, Steve.'\n\nSteve is canon now. Every future lesson about patience, timing, and the cost of panic on this island is taught in his name."
+    },
+    {
+      "kind": "CHARACTER",
+      "slug": "the-kestrel-commander",
+      "title": "Commander Rook",
+      "summary": "The senior officer holding Forward Camp Kestrel together by will, profanity, and an honest ledger of what is already lost — and the one who must finally commit the island to Defend or Flee.",
+      "body": "Rook reads faces like casualty lists and wastes no words on comfort: 'You came from the east road?' — then, seeing the answer — 'Fuck.' Their operations-table briefing frames the campaign's first real decision without moralizing it, and their one piece of intelligence about Tino is deliberately double-edged: stay and follow the trail east, or sail and ask the port's intelligence net what hunts like that.\n\nThe name is canon; face, background, history, and fate across both branches are open writing work. So is their command staff — a medic, a mechanic, a quartermaster, and a scout, all waiting to be written. What is locked: Rook does not sugarcoat, does not pick the players' branch for them, and is still standing when everyone stops."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "stormglass-cartel",
+      "title": "The Stormglass Cartel",
+      "summary": "The player's employer: island smugglers who control the illegal sea lanes and artifact trade, grown rich and organized enough to field an enlisted mercenary army — and currently losing an island they cannot afford to lose cheaply.",
+      "body": "By charter Stormglass is not an army at all: a smuggling cartel that rules the illegal sea lanes and the artifact trade of the islands, wealthy and structured enough to enlist mercenaries, hold territory, and fight a trade house to a standstill. The island war is their military face; the smuggler sea cave on the Blackreef coast is their older one.\n\nThe prologue shows their character from below: soldiers carving unit marks into magazines, infusers dosing field rigs before combat, workers loading unnatural crystal ammunition, an exhausted officer washing blood from their hands, a banner catching fire and refusing to fall. Even their enemies grant them the point — 'Then why are we still getting shot at?' 'Because they're fucking Stormglass.'\n\nTheir namesake is the crystal itself — see [[stormglass]] — and how deep that connection runs is open lore territory with a long fuse."
+    },
+    {
+      "kind": "FACTION",
+      "slug": "tropic-pearl-trade-house",
+      "title": "The Tropic Pearl Trade House",
+      "summary": "The enemy of the opening: a polished commercial power that buys wars wholesale — hired mercenaries, battlefield technology, exotic creatures in restraints, and contracts signed far from the smoke.",
+      "body": "Pearl is never narrated as villainous; it is shown operating. Mercenaries being paid. Polished officers observing violence from safety. Cargo manifests. A contract signed while a prisoner is dragged through frame. Their assault on the Starting Island is a seizure, not a crusade — the island is an asset, the war an acquisition cost.\n\nTheir contractors are professionals, not monsters, and occasionally funny about their own side ('Stormglass is folding.' 'Then why are we still getting shot at?'). Their hypogriff riders — see [[the-hypogriff-riders]] — are the committed visual of how Pearl wages war: old power, new money, modern kit."
+    },
+    {
+      "kind": "REGION",
+      "slug": "the-starting-island",
+      "title": "The Starting Island",
+      "summary": "The tutorial island: a tropical commercial island seized mid-prologue by the Tropic Pearl Trade House, undermined by something older, and doomed to collapse into the sea. Awaiting its true name.",
+      "body": "One of the smaller islands off the peninsula — not the mainland. A tropical commercial district violently converted into a battlefield: burning storefronts, shredded market awnings, propaganda signage, arcane damage that no explosive ever left. Beneath the faction war, something is moving under the streets, and by the chapter's end the island physically falls, by battle or by collapse, into the sea.\n\n'The Starting Island' is the production name. The place deserves a real one — first writer to make one stick on the board wins it — but every arc, checkpoint, and flag currently keys to this working identity."
+    },
+    {
+      "kind": "REGION",
+      "slug": "forward-camp-kestrel",
+      "title": "Forward Camp Kestrel",
+      "summary": "The Stormglass forward camp that ends the prologue: the game's first safe hub, first permanent respawn point, and the stage for the Defend-or-Flee decision.",
+      "body": "Kestrel is a military position barely holding together: medics in the open air, engineers splinting fortifications, terrified recruits, officers arguing evacuation, boats being readied, and maps showing how much of the island is simply gone. It is defensible for the moment — and 'the moment' is the entire point. The camp cannot survive the next major push without a decision, and the decision is the campaign's first.\n\nIn the Defend branch it becomes the site of a full playable last stand. In Flee, it empties itself into the boats. 'Forward Camp Kestrel' is a working name that can change without affecting structure — but it has been said aloud on the radio now, so change it early or never."
+    },
+    {
+      "kind": "REGION",
+      "slug": "port-arcadia",
+      "title": "Port Arcadia",
+      "summary": "The mainland military-port region where both prologue branches converge — by boat, or by being washed ashore. The door to the wider war.",
+      "body": "Both roads off the Starting Island end here, and neither arrives clean: the evacuation fleet puts in at the military port at gray dawn, while the island's defenders wash up on a beach near a small fishing village with nothing the sea didn't allow. The destination is shared; the consequences are not — branch-specific faction standing, survivors, and supplies persist past the convergence, and the region should feel different depending on how you reached it.\n\nPort Arcadia holds the intelligence net that may know what hunts like the thing that took Tino, and beyond it: the peninsula, the factions, the campaign."
+    },
+    {
+      "kind": "CREATURE",
+      "slug": "the-hypogriff-riders",
+      "title": "The Hypogriff Riders",
+      "summary": "Tropic Pearl's airborne hunters: armored war-beasts of the old world fitted with machine guns of the new one.",
+      "body": "The rooftop hunter of the prologue is the committed visual: an old war-beast integrated with modern kit, not a placeholder gunship. A rider sweeps rooftops in a learnable search pattern, fires through weak cover to punish passive hiding, and cannot be beaten by damage in the open — only outlasted, out-timed, and out-thought.\n\nThey are the game's first lesson that some threats are weather: you do not fight the storm, you learn when it looks away. Steve did not learn. [[steve]]"
+    },
+    {
+      "kind": "CREATURE",
+      "slug": "the-risen",
+      "title": "The Risen",
+      "summary": "The dead that do not stay down — skeletal figures and wrongly-rejoined bodies that climb out of impact craters where the war has broken the ground deep enough.",
+      "body": "First seen clawing out of the blast crater in the prologue's wake-up beat: something skeletal pulling itself from churned earth, then a fresh corpse rising hinged in places bodies do not hinge. They appear where the war has wounded the island deepest, they answer to neither faction, and their contamination spreads against the wind.\n\nThey are distinct from the engineered monstrosities and infusion-born abominations elsewhere in the setting, and distinct again from the true demons that walk among them. What raises them — and what it wants with a battlefield's worth of dead — belongs to the mystery of [[something-under-the-war]]."
+    },
+    {
+      "kind": "CREATURE",
+      "slug": "true-demons",
+      "title": "True Demons",
+      "summary": "The third kind of monster — visibly distinct from skeletons, engineered horrors, and infusion abominations. When one walks out of a crater, even Tino's answer is 'Absolutely fucking not.'",
+      "body": "A true demon follows the risen out of the prologue's first crater, and the game's visual language must keep it unmistakable: not undead, not built, not a mercenary's corrupted mistake — something other, arriving through the wounds the war tears in the world.\n\nThey are seen, fled from, and never explained in the prologue. Their taxonomy, their relationship to the risen and to whatever moves beneath the streets, and the meaning of Tino's almost-prophetic joke about summoning hell are open questions the writers' room owns — and should spend slowly."
+    },
+    {
+      "kind": "ITEM",
+      "slug": "stormglass",
+      "title": "Stormglass",
+      "summary": "The crystal the cartel is named for: unnatural, ammunition-grade, and beautiful enough that the game's own title forms inside a shard of it.",
+      "body": "Stormglass appears in the prologue's margins — workers loading unnatural crystal ammunition, strange arcane damage on the walls, debris embedded in the player's armor — and then takes center frame in the title sequence: a medic cuts a shard from the player's battered armor, a bloodied hand places it on the tactical map, and hairline fractures ignite inside it in the shapes of coastlines, battle lines, veins, lightning, a shattered world. The title forms in those cracks.\n\nWhat stormglass actually is — mineral, residue, wound, or invitation — and what the cartel's relationship to it costs are unwritten. Whatever the answer, this is the substance the game chose as its face."
+    },
+    {
+      "kind": "ITEM",
+      "slug": "field-infusion-rig",
+      "title": "Field-Infusion Rig",
+      "summary": "The dose-fed apparatus that gives infused soldiers their magic — pale light, leaking valves, and a bill that comes due in tremors.",
+      "body": "Tino's rig spits pale light in the quiet of the grocery store; he closes a leaking valve with practiced speed and hides the tremor in his hand the way a man hides a debt. That is the entire tutorial on infusion, and it is deliberately wordless: temporary power, real utility, cumulative damage — even to someone you like.\n\nThe rig is the visible half of the setting's corruption bargain. See [[the-cost-of-borrowed-power]]."
+    },
+    {
+      "kind": "EVENT",
+      "slug": "the-strike",
+      "title": "The Strike",
+      "summary": "The combined orbital-magical artillery strike that opens the war's mouth: glass bows inward, gravity forgets itself, and the player wakes up in a different genre.",
+      "body": "The strike lands minutes into the prologue and must feel catastrophic rather than explosive: streetlights failing, arcane particles distorting gravity, bodies crossing the player's vision, audio collapsing into tinnitus. It kills the squad's advance, cracks the ground deep enough for [[the-risen]] to climb out, and converts the tutorial from 'battle' to 'escape'.\n\nWho fired it — Pearl doctrine, Stormglass desperation, or something using the war as cover to dig — is an open question with teeth."
+    },
+    {
+      "kind": "EVENT",
+      "slug": "the-fall-of-the-starting-island",
+      "title": "The Fall of the Starting Island",
+      "summary": "The chapter's fixed point: however the party leaves — by boat or by drowning — the island itself does not survive the story.",
+      "body": "Both branches end the same geological sentence with different punctuation. Defend, and the collapse arrives mid-battle, throwing the last defenders into the sea to wash ashore near a fishing village. Flee, and the island burns in the boats' wake with something enormous keeping pace beneath the water.\n\nThe fall is the setting's first proof that the ground itself is a casualty of this war — and the first large-scale evidence of what [[something-under-the-war]] is capable of when it stops being subtle."
+    },
+    {
+      "kind": "THEME",
+      "slug": "something-under-the-war",
+      "title": "Something Under the War",
+      "summary": "The story's deepest current: beneath the two-sided faction war is a third thing that neither side understands, and it is patient.",
+      "body": "It enters the game as a radio transmission that ends in screaming — 'We have movement under the streets. Repeat — under the fucking streets.' It surfaces as the risen in the craters, a warning to stay off a bridge because 'something is on the bridge', contamination moving against the wind, an ancient structure waking, an impossible silhouette under ocean water, a dead soldier's eyes opening.\n\nThe rule of the theme: neither human faction fully understands what is happening, and the story is bigger than their war. Reveal it in glimpses, never in briefings. Every arc that touches it should leave the player knowing slightly less than they think they do."
+    },
+    {
+      "kind": "THEME",
+      "slug": "the-cost-of-borrowed-power",
+      "title": "The Cost of Borrowed Power",
+      "summary": "Infused magic works, and it collects. The tremor in Tino's hand is the first payment the player ever witnesses.",
+      "body": "The setting's magic economy runs on a bargain the prologue teaches in one wordless beat: a leaking valve, a practiced hand, a hidden tremor. Infusion grants real power on a schedule of doses, and corruption keeps the ledger.\n\nThe theme's discipline is restraint — show the tells, never pause combat for the seven-phase lecture. It is personal before it is systemic: the player should worry about Tino's hands long before they ever read a corruption meter of their own."
+    },
+    {
+      "kind": "RULE",
+      "slug": "what-the-player-knows-about-tino",
+      "title": "What the Player Knows About Tino",
+      "summary": "Writers' room law: Tino is CAPTURED in production truth and MISSING in player knowledge, and no approved content may collapse that gap until the story does it on purpose.",
+      "body": "Production truth and player knowledge are deliberately different, and both are flagged separately in the game: TINO_ACTUAL_FATE = CAPTURED, TINO_KNOWN_STATUS = MISSING.\n\nThe capture was authored to be unwitnessable — chaotic, fast, no body, no clean kidnapping shot — precisely so the player genuinely cannot know what happened and assumes the worst. Every arc, line, and lore entry written for the codex must respect the gap: nothing confirms his death, nothing confirms his survival, and nothing reveals who took him, where, or why until the captivity arc spends that reveal deliberately. His empty seat is a loaded weapon. Do not discharge it in a side quest."
+    },
+    {
+      "kind": "RULE",
+      "slug": "the-war-teaches",
+      "title": "The War Teaches",
+      "summary": "The prologue's authoring law, kept for every future tutorial beat: mechanics are taught by believable pressure, never by pausing the war for a lecture.",
+      "body": "Every lesson in the opening is delivered by circumstance and confirmed by a prompt only when the player already wants to act: Tino's shouted instructions are the tutorial voice, Steve's death is the stealth lecture, an empty magazine is the reload tutorial, and a locked ignition is a class in hot-wiring.\n\nThe rule generalizes to all future content: never freeze gameplay for explanations during danger, teach one thing at a time, let character dialogue carry instruction, and give the player quiet pockets with no prompts at all. If a beat cannot teach its mechanic under believable pressure, the beat is not finished."
+    }
+  ]
+}
