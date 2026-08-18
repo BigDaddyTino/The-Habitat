@@ -15,6 +15,7 @@ import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
 import { storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryFactionMeta, type StoryRegionMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
+import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
 
 type SlugOption = { slug: string; title: string };
@@ -179,14 +180,23 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
 
       <div className="sheet-rows">
         <p className="eyebrow">Factions <RowButton label="Add a faction" onClick={() => setMemberships((rows) => [...rows, { faction: "", role: "", standing: "" }])} /></p>
-        {memberships.map((row, index) => (
-          <div className="sheet-row" key={index}>
+        {memberships.map((row, index) => {
+          const option = factions.find((faction) => faction.slug === row.faction);
+          const brand = getFactionBranding(row.faction);
+          return <div className="sheet-row sheet-row-faction" key={index}>
+            <span className={`sheet-faction-logo${brand ? "" : " is-empty"}`} title={option ? `${option.title} logo` : "Choose a faction to preview its logo"}>
+              {brand ? <>
+                {/* Small static identity marks shipped with the app. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img alt="" src={brand.logo} />
+              </> : null}
+            </span>
             <select aria-label="Faction" onChange={(event) => setMemberships((rows) => rows.map((other, at) => (at === index ? { ...other, faction: event.target.value } : other)))} value={row.faction}><option value="">Faction…</option>{factions.map((faction) => <option key={faction.slug} value={faction.slug}>{faction.title}</option>)}</select>
             <input aria-label="Role" maxLength={160} onChange={(event) => setMemberships((rows) => rows.map((other, at) => (at === index ? { ...other, role: event.target.value } : other)))} placeholder="role" value={row.role} />
             <input aria-label="Standing" maxLength={160} onChange={(event) => setMemberships((rows) => rows.map((other, at) => (at === index ? { ...other, standing: event.target.value } : other)))} placeholder="standing" value={row.standing} />
             <RowButton label="Remove this faction" onClick={() => setMemberships((rows) => rows.filter((_, at) => at !== index))} remove />
           </div>
-        ))}
+        })}
       </div>
 
       <div className="sheet-rows">

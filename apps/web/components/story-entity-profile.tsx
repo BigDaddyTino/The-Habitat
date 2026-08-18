@@ -22,7 +22,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [] }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -34,7 +34,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[] }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }> }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -43,6 +43,21 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
+  const characterAffiliations = isCharacter
+    ? rows(meta.factions).flatMap((membership) => {
+        const slug = label(membership.faction);
+        const brand = slug ? getFactionBranding(slug) : null;
+        if (!slug || !brand) return [];
+        return [{
+          brand,
+          role: label(membership.role),
+          slug,
+          standing: label(membership.standing),
+          title: factionOptions.find((option) => option.slug === slug)?.title ?? slug.replaceAll("-", " "),
+        }];
+      })
+    : [];
+  const activeBrand = factionBrand ?? characterAffiliations[0]?.brand ?? null;
   const questions = words(meta.openQuestions);
   const entityLinks: Array<{ slug: string; detail: string }> = [];
 
@@ -65,8 +80,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
   return (
     <>
       <header
-        className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}`}
-        style={factionBrand ? { "--entity-accent": factionBrand.accent } as React.CSSProperties : undefined}
+        className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}${characterAffiliations.length ? " entity-profile-character-affiliated" : ""}`}
+        style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
       >
         <div className="entity-profile-art">
           {factionBrand ? <>
@@ -79,6 +94,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
           <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
           <h1>{entry.title}</h1>
           <p className="entity-profile-summary">{entry.summary ?? "This entry still needs its one-line pitch."}</p>
+          {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
+            {characterAffiliations.map(({ brand, role, slug, standing, title }) => <Link href={`/codex/bible/${slug}`} key={slug} style={{ "--affiliation-accent": brand.accent } as React.CSSProperties}>
+              <img alt="" src={brand.logo} />
+              <span><small>Faction affiliation</small><strong>{title}</strong>{role || standing ? <em>{[role, standing].filter(Boolean).join(" · ")}</em> : null}</span>
+              <ArrowRight aria-hidden="true" size={12} />
+            </Link>)}
+          </div> : null}
           <p className="entity-profile-byline">Created by {entry.author}{entry.lastEditor && entry.lastEditor !== entry.author ? ` · last shaped by ${entry.lastEditor}` : ""}</p>
         </div>
       </header>

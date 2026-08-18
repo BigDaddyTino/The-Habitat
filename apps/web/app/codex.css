@@ -118,6 +118,10 @@
 .sheet-rows { display: grid; gap: 7px; border-top: 1px solid rgba(214,195,151,.1); padding-top: 12px; }
 .sheet-rows > .eyebrow { display: flex; gap: 8px; align-items: center; }
 .sheet-row { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 7px; align-items: center; }
+.sheet-row-faction { grid-template-columns: 48px minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr) auto; }
+.sheet-faction-logo { display: grid; width: 48px; height: 48px; border: 1px solid rgba(214,195,151,.2); place-items: center; background: radial-gradient(circle, #303a33, #111612 72%); }
+.sheet-faction-logo.is-empty { border-style: dashed; opacity: .48; }
+.sheet-faction-logo img { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 4px 7px rgba(0,0,0,.65)); }
 .sheet-row-two { grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) auto; }
 .sheet-row input, .sheet-row select { width: 100%; border: 1px solid #4b554a; padding: 8px; background: #101511; color: var(--ink); font: inherit; font-size: 12px; letter-spacing: 0; text-transform: none; outline: none; }
 .sheet-row input:focus, .sheet-row select:focus { border-color: var(--brass); }
@@ -473,6 +477,12 @@ body:has(.codex-board-shell) > .site-footer { display: none; }
   .codex-audit-list li { grid-template-columns: minmax(0, 1fr) auto; }
   .codex-audit-list li p { grid-column: 1 / -1; }
   .sheet-row, .sheet-row-two { grid-template-columns: minmax(0, 1fr) auto; }
+  .sheet-row-faction { grid-template-columns: 44px minmax(0, 1fr) auto; }
+  .sheet-row-faction .sheet-faction-logo { grid-row: 1; width: 44px; height: 44px; }
+  .sheet-row-faction .sheet-faction-logo img { width: 40px; height: 40px; }
+  .sheet-row-faction select { grid-column: 2; grid-row: 1; }
+  .sheet-row-faction input { grid-column: 2 / -1; }
+  .sheet-row-faction .icon-action { grid-column: 3; grid-row: 1; }
   .entry-meta-view dl > div { grid-template-columns: 1fr; gap: 2px; }
   .codex-arc-grid, .codex-bible-grid { grid-template-columns: 1fr; }
   .codex-bible-filters input { flex-basis: 100%; }

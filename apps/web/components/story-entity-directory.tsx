@@ -10,6 +10,7 @@ import { listStoryEntries } from "@/lib/story-codex";
 import { modelGalleryImages, modelPreview, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
+const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 
 export async function StoryEntityDirectory({ collectionSlug, search }: { collectionSlug: StoryCollectionSlug; search?: string }) {
   const collection = storyCollections[collectionSlug];
@@ -42,6 +43,14 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
+          const characterFactionBrands = entry.kind === "CHARACTER"
+            ? asRecords(meta.factions).flatMap((membership) => {
+                const slug = typeof membership.faction === "string" ? membership.faction : "";
+                const brand = getFactionBranding(slug);
+                return brand ? [{ slug, brand }] : [];
+              })
+            : [];
+          const activeBrand = factionBrand ?? characterFactionBrands[0]?.brand ?? null;
           const detail = entry.kind === "CHARACTER"
             ? [meta.species, asRecord(meta.magic).origin].filter(Boolean).join(" · ")
             : entry.kind === "FACTION"
@@ -50,16 +59,20 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
                 ? [meta.type, meta.biome].filter(Boolean).join(" · ")
                 : "";
           return <Link
-            className={`entity-card${factionBrand ? " entity-card-faction" : ""}`}
+            className={`entity-card${factionBrand ? " entity-card-faction" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
             href={`/codex/bible/${entry.slug}`}
             key={entry.id}
-            style={factionBrand ? { "--entity-accent": factionBrand.accent } as React.CSSProperties : undefined}
+            style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
           >
             <div className="entity-card-visual">
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
               </> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
+                {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
+                {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}
+              </span> : null}
               <i>{entry.status === "CANON" ? "Canon" : entry.status}</i>
             </div>
             <div className="entity-card-copy">
