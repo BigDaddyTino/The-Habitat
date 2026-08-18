@@ -4,6 +4,7 @@ import { Crown, Gamepad2, Laptop, MailPlus, Radio, ShieldCheck, Smartphone, Spar
 import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { MembersLodge } from "@/components/members-lodge";
+import { ResilientAvatar } from "@/components/resilient-avatar";
 import { WeeklyInviteCode } from "@/components/weekly-invite-code";
 import { progressionForXp } from "@habitat/shared";
 import { isPresenceActive } from "@/lib/member-presence";
@@ -97,7 +98,7 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
           const presence = member.memberPresence;
           return <article className={member.active ? "member-roster-card is-active" : "member-roster-card"} key={member.id} style={{ "--card-index": index } as React.CSSProperties}>
             <div className="member-card-rank"><span>{String(index + 1).padStart(2, "0")}</span>{member.role === "ADMIN" ? <Crown aria-label="Administrator" size={15} /> : <ShieldCheck aria-label="Verified member" size={15} />}</div>
-            <div className={`member-card-portrait ${avatarBorderClass(member.avatarBorder)}`}><img alt={`${name} avatar`} src={member.image ?? fallbackAvatar} /><span className="member-card-glow" /></div>
+            <div className={`member-card-portrait ${avatarBorderClass(member.avatarBorder)}`}><ResilientAvatar alt={`${name} avatar`} fallbackSrc={fallbackAvatar} src={member.image} /><span className="member-card-glow" /></div>
             <div className="member-card-copy"><p className="eyebrow">Level {member.progression.level} · {member.role === "ADMIN" ? "Lodge keeper" : "Verified member"}</p><h3>{name}</h3><span className={`habitat-title ${titlePlateClass(member.titles[0]?.title.slug, member.role)}`}><span>{member.titles[0]?.title.name ?? (member.role === "ADMIN" ? "Lodge keeper" : "Habitat member")}</span></span>{member.username ? <span className="member-callsign">@{member.username}</span> : null}</div>
             <div className="member-presence-line"><Radio aria-hidden="true" size={14} /><div><strong>{lastSeenLabel(viewerIsMember ? presence?.lastSeenAt ?? null : null, member.active)}</strong>{member.active && presence ? <span>{viewerIsMember ? `Signed in with ${presence.authProvider} · ${presence.browser} on ${presence.platform}` : "Active in The Habitat"}</span> : <span>Not currently active in the portal</span>}</div>{viewerIsMember && member.active && presence?.deviceType === "Mobile" ? <Smartphone aria-label="Mobile device" size={16} /> : viewerIsMember && member.active ? <Laptop aria-label="Desktop device" size={16} /> : null}</div>
             {member.currentWorld ? <div className="member-now-playing"><Gamepad2 aria-hidden="true" size={15} /><span><small>Now in world</small><strong>{member.currentWorld.server?.worldName ?? member.currentWorld.server?.displayName}</strong></span></div> : <div className="member-now-playing quiet"><Gamepad2 aria-hidden="true" size={15} /><span><small>World signal</small><strong>No verified live game presence</strong></span></div>}

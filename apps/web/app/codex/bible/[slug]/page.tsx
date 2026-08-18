@@ -41,7 +41,7 @@ export default async function StoryEntryPage({ params }: { params: Promise<{ slu
       <div className="codex-entry-grid codex-entry-workspace-grid">
         <div className="codex-entry-main">
           <details className="entry-edit-workspace" open={entry.meta === null && needsPickers}>
-            <summary><Pencil aria-hidden="true" size={15} /><span><strong>Edit {storyEntryKindLabels[entry.kind].toLowerCase()}</strong><small>Writing reference, game identity, model, and connections</small></span></summary>
+            <summary><Pencil aria-hidden="true" size={15} /><span><strong>Edit {storyEntryKindLabels[entry.kind].toLowerCase()}</strong><small>Writing reference, structured facts, and story connections</small></span></summary>
             <div className="entry-edit-workspace-body">
               <StoryEntryEditor canReview={canReview} entry={entry} viewerUserId={user.id} />
 

@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, Award, BadgeCheck, ExternalLink, Gamepad2, MapPinned, Swords, Trophy } from "lucide-react";
@@ -6,6 +5,7 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { progressionForXp, type AchievementRarity } from "@habitat/shared";
 import { TrophyCabinet, type CabinetItem } from "@/components/trophy-cabinet";
+import { ResilientAvatar } from "@/components/resilient-avatar";
 import { socialPlatformLabels } from "@/lib/social-platforms";
 import { hasRequiredRole } from "@/lib/permissions";
 import { avatarBorderClass, titlePlateClass } from "@/lib/reward-presentation";
@@ -103,7 +103,7 @@ export default async function MemberProfilePage({ params }: { params: Promise<{ 
   const publicSteamCoverage = publicSteam?.achievementSyncs.filter((scan) => scan.status === "READY" || scan.status === "UNSUPPORTED").length ?? 0;
 
   return <section className={`page-shell public-profile layout-${layout}`}>
-    <div className="public-profile-hero"><div className={`member-avatar ${avatarBorderClass(member.avatarBorder)}`}><img src={member.image ?? fallbackAvatar} alt={`${ownerName} avatar`} /></div><div><p className="eyebrow">Level {progression.level} Habitat member · @{member.username}</p><h1>{ownerName}</h1><span className={`habitat-title public-title ${titlePlateClass(title?.slug, "MEMBER")}`}><span>{title?.name ?? "Habitat member"}</span></span><p>{member.bio ?? "No field notes left for the lodge yet."}</p></div></div>
+    <div className="public-profile-hero"><div className={`member-avatar ${avatarBorderClass(member.avatarBorder)}`}><ResilientAvatar alt={`${ownerName} avatar`} fallbackSrc={fallbackAvatar} src={member.image} /></div><div><p className="eyebrow">Level {progression.level} Habitat member · @{member.username}</p><h1>{ownerName}</h1><span className={`habitat-title public-title ${titlePlateClass(title?.slug, "MEMBER")}`}><span>{title?.name ?? "Habitat member"}</span></span><p>{member.bio ?? "No field notes left for the lodge yet."}</p></div></div>
     <dl className="profile-metrics"><div><dt>Habitat level</dt><dd>{progression.level}</dd></div><div><dt>Total XP</dt><dd>{progression.totalXp.toLocaleString()}</dd></div><div><dt>Achievements</dt><dd>{member.achievements.length}</dd></div></dl>
     <div className="level-track compact"><i style={{ width: `${progression.progressPercent}%` }} /><div><span>{progression.currentLevelXp.toLocaleString()} XP this level</span><span>{progression.level === 100 ? "Maximum level" : `${progression.nextLevelXp.toLocaleString()} XP to Level ${progression.level + 1}`}</span><strong>{member.playerIdentities.length} worlds · {legacySeconds > 0 ? `${(legacySeconds / 3_600).toFixed(1)} legacy hours` : "live record"}</strong></div></div>
     <TrophyCabinet compact items={cabinetItems} ownerName={ownerName} />
