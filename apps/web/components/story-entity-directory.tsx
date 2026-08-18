@@ -4,6 +4,7 @@ import { ArrowRight, Boxes, Plus, Search, Sparkles, UserRoundSearch } from "luci
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
+import { getFactionBranding } from "@/lib/faction-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
 import { modelGalleryImages, modelPreview, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
@@ -40,6 +41,7 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
         {entries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
+          const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const detail = entry.kind === "CHARACTER"
             ? [meta.species, asRecord(meta.magic).origin].filter(Boolean).join(" · ")
             : entry.kind === "FACTION"
@@ -47,9 +49,17 @@ export async function StoryEntityDirectory({ collectionSlug, search }: { collect
               : entry.kind === "REGION"
                 ? [meta.type, meta.biome].filter(Boolean).join(" · ")
                 : "";
-          return <Link className="entity-card" href={`/codex/bible/${entry.slug}`} key={entry.id}>
+          return <Link
+            className={`entity-card${factionBrand ? " entity-card-faction" : ""}`}
+            href={`/codex/bible/${entry.slug}`}
+            key={entry.id}
+            style={factionBrand ? { "--entity-accent": factionBrand.accent } as React.CSSProperties : undefined}
+          >
             <div className="entity-card-visual">
-              {preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              {factionBrand ? <>
+                <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
+                <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
+              </> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               <i>{entry.status === "CANON" ? "Canon" : entry.status}</i>
             </div>
             <div className="entity-card-copy">

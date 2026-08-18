@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
+import { getFactionBranding } from "@/lib/faction-branding";
 import { modelPreview } from "@/lib/story-library";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
@@ -41,6 +42,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
   const isCharacter = entry.kind === "CHARACTER";
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
+  const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
   const questions = words(meta.openQuestions);
   const entityLinks: Array<{ slug: string; detail: string }> = [];
 
@@ -62,10 +64,16 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [] }: { entry: {
 
   return (
     <>
-      <header className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}`}>
+      <header
+        className={`entity-profile-hero entity-profile-${entry.kind.toLowerCase()}`}
+        style={factionBrand ? { "--entity-accent": factionBrand.accent } as React.CSSProperties : undefined}
+      >
         <div className="entity-profile-art">
-          {preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          {factionBrand ? <>
+            <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
+            <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
+          </> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
           <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
