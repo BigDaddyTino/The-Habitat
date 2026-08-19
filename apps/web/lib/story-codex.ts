@@ -359,7 +359,7 @@ export async function getStoryEntry(slug: string) {
     };
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
-    if (referencesSlug(meta.parent)) add("belongs inside this region");
+    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");

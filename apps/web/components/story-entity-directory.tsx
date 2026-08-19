@@ -42,6 +42,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
       const meta = asRecord(entry.meta);
       const unlockArc = typeof meta.unlockArc === "string" && meta.unlockArc.trim() ? meta.unlockArc.trim() : null;
       const unlockStage = typeof meta.unlockStage === "string" && meta.unlockStage.trim() ? meta.unlockStage.trim() : null;
+      // A child system ships with its parent; it only appears on the rail when
+      // it sets a gate of its own (a Blood Moon scheduled apart from the sky).
+      const parent = typeof meta.parent === "string" && meta.parent.trim() ? meta.parent.trim() : null;
+      if (parent && !unlockArc && !unlockStage) continue;
       if (unlockArc) {
         const bucket = releaseByArc.get(unlockArc);
         if (bucket) bucket.push(entry); else releaseByArc.set(unlockArc, [entry]);
@@ -59,6 +63,35 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     ...[...releaseByArc.keys()].filter((slug) => !arcRefs.some((arc) => arc.slug === slug)).map((slug) => ({ slug, title: slug, linked: false, systems: releaseByArc.get(slug) as typeof entries })),
   ];
   const releasePlanActive = isSystemsLibrary && !search && entries.length > 0;
+  // The grid reads as a tree flattened: each top-level system followed by its
+  // children (marked as such), so Environment's weather and sky never drift
+  // alphabetically away from it.
+  const systemParentOf = (entry: (typeof entries)[number]) => {
+    const value = asRecord(entry.meta).parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  };
+  const orderedEntries = isSystemsLibrary && !search
+    ? (() => {
+        const bySlug = new Map(entries.map((entry) => [entry.slug, entry]));
+        const childrenOf = new Map<string, typeof entries>();
+        const tops: typeof entries = [];
+        for (const entry of entries) {
+          const parent = systemParentOf(entry);
+          // A child whose parent is missing files as top-level: visible, not lost.
+          if (parent && bySlug.has(parent)) {
+            const bucket = childrenOf.get(parent);
+            if (bucket) bucket.push(entry); else childrenOf.set(parent, [entry]);
+          } else tops.push(entry);
+        }
+        const ordered: typeof entries = [];
+        const walk = (entry: (typeof entries)[number]) => {
+          ordered.push(entry);
+          for (const child of childrenOf.get(entry.slug) ?? []) walk(child);
+        };
+        for (const top of tops) walk(top);
+        return ordered;
+      })()
+    : entries;
   const castingImages = modelGalleryImages.filter((image) => image.pack === "Warriors_Pack" || image.pack === "CitySampleCrowd").slice(0, 6);
 
   // The regions library reads as an atlas, not a card dump: the world's few
@@ -82,6 +115,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     ? [...entries].sort((a, b) => Number(asRecord(b.meta).type === "region") - Number(asRecord(a.meta).type === "region") || a.title.localeCompare(b.title))
     : [];
   const addingInside = parent ? entries.find((entry) => entry.slug === parent) ?? null : null;
+  const systemParents = isSystemsLibrary ? [...entries].sort((a, b) => a.title.localeCompare(b.title)) : [];
   /** Places sitting directly in a top-level region, each with its own inside. */
   const contained = new Map<string, Array<{ place: (typeof entries)[number]; inside: typeof entries }>>();
   const unplaced: typeof entries = [];
@@ -196,7 +230,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <ul>{unplaced.map((place) => <li key={place.id}><Link href={`/codex/bible/${place.slug}`}>{place.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
         </section> : null}
       </> : entries.length > 0 ? <div className="entity-card-grid">
-        {entries.map((entry) => {
+        {orderedEntries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
           const characterKeyart = entry.kind === "CHARACTER" ? getCharacterKeyart(entry.slug) : null;
@@ -218,7 +252,11 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               : entry.kind === "REGION"
                 ? [meta.type, meta.biome].filter(Boolean).join(" · ")
                 : entry.kind === "SYSTEM"
-                  ? [meta.category, typeof meta.unlockStage === "string" && meta.unlockStage ? meta.unlockStage : meta.unlockArc ? "story-gated" : null].filter(Boolean).join(" · ")
+                  ? [
+                      typeof meta.parent === "string" && meta.parent ? `inside ${String(meta.parent).replaceAll("-", " ")}` : null,
+                      meta.category,
+                      typeof meta.unlockStage === "string" && meta.unlockStage ? meta.unlockStage : meta.unlockArc ? "story-gated" : null,
+                    ].filter(Boolean).join(" · ")
                   : "";
           return <Link
             className={`entity-card${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
@@ -249,7 +287,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
 
       <details className="entity-create-panel" id="new-entry" open={(entries.length === 0 && !search) || Boolean(addingInside) || Boolean(placeKind)}>
         <summary><Plus aria-hidden="true" size={15} /><span>
-          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : `Add a new ${collection.singular}`}</strong>
+          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : `Add a new ${collection.singular}`}</strong>
           <small>{isRegionLibrary ? "A point of interest, a settlement, a zone, or a whole region — say where it sits and it files itself." : "Start with the pitch. The full visual sheet opens next."}</small>
         </span></summary>
         <form action={createEntry} className="story-form">
@@ -264,6 +302,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               {placeParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
             </select></label>
           </div> : null}
+          {isSystemsLibrary ? <label>Part of which system<select defaultValue={addingInside?.slug ?? ""} name="parent">
+            <option value="">Nothing — a top-level system</option>
+            {systemParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select></label> : null}
           <label>One-line pitch<textarea maxLength={500} name="summary" placeholder={collection.summaryPlaceholder} rows={2} /></label>
           <label>What writers need to know<textarea maxLength={20000} name="body" placeholder="Write naturally. You can refine this later from the dossier." rows={6} /></label>
           <button className="save-server" type="submit"><Sparkles aria-hidden="true" size={14} /> Create and open dossier</button>

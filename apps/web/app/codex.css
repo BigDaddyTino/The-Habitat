@@ -448,6 +448,14 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .system-release-group li a:hover { border-color: rgba(198,151,76,.5); color: var(--paper); }
 .system-release-group .story-inspector-hint { margin-bottom: 10px; }
 
+/* A system's regional expression, and the region's reverse view of it. */
+.entity-region-notes { display: grid; gap: 10px; margin-top: 22px; }
+.entity-region-notes ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.entity-region-notes li { padding: 10px 13px; border: 1px solid var(--line); border-left: 2px solid #4b554a; background: rgba(17,22,18,.7); }
+.entity-region-notes li a { color: var(--paper); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.entity-region-notes li p { margin: 4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.entity-region-missing { color: var(--danger); font-weight: 600; }
+
 /* The arc page names what finishing it switches on. */
 .codex-arc-unlocks { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; color: var(--muted); font-size: 12px; }
 .codex-arc-unlocks svg { color: var(--brass); }

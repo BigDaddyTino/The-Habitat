@@ -32,7 +32,53 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       ])
     : [[], [], [], []];
   // An event can involve anyone and anything, so its picker spans every kind.
-  const allEntries = entry.kind === "EVENT" || entry.kind === "SYSTEM" ? await listStoryEntries({}) : [];
+  const allEntries = entry.kind === "EVENT" ? await listStoryEntries({}) : [];
+  // Systems form a tree (Weather inside Environment) and express per region
+  // (the tropical island cools in winter but never sees snow), so both the
+  // system and region dossiers need the systems shelf in hand.
+  const systemEntries = entry.kind === "SYSTEM" || entry.kind === "REGION" ? await listStoryEntries({ kind: "SYSTEM" }) : [];
+  const systemMetaOf = (candidate: { meta: Record<string, unknown> | null }) => candidate.meta ?? {};
+  const systemParentOf = (candidate: { meta: Record<string, unknown> | null }) => {
+    const value = systemMetaOf(candidate).parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  };
+  const systemFamily = entry.kind === "SYSTEM"
+    ? {
+        // The chain of parents up to the top, nearest last — rendered as the
+        // same breadcrumb trail places use. A broken link ends the climb.
+        ancestry: (() => {
+          const trail: Array<{ slug: string; title: string }> = [];
+          let cursor = typeof entry.meta?.parent === "string" ? (entry.meta.parent as string) : null;
+          while (cursor && trail.length < 6) {
+            const parent = systemEntries.find((candidate) => candidate.slug === cursor);
+            if (!parent) break;
+            trail.unshift({ slug: parent.slug, title: parent.title });
+            cursor = systemParentOf(parent);
+          }
+          return trail;
+        })(),
+        children: systemEntries
+          .filter((candidate) => systemParentOf(candidate) === entry.slug)
+          .map((child) => ({ slug: child.slug, title: child.title, summary: child.summary }))
+          .sort((a, b) => a.title.localeCompare(b.title)),
+        regionNotes: (Array.isArray(entry.meta?.regionNotes) ? (entry.meta.regionNotes as Array<Record<string, unknown>>) : [])
+          .filter((row) => typeof row === "object" && row !== null && typeof row.region === "string" && typeof row.note === "string")
+          .map((row) => ({
+            slug: row.region as string,
+            title: regions.find((region) => region.slug === row.region)?.title ?? null,
+            note: row.note as string,
+          })),
+      }
+    : null;
+  // The reverse direction: a region dossier lists every system that says it
+  // behaves differently here, note and all.
+  const systemsHere = entry.kind === "REGION"
+    ? systemEntries.flatMap((system) => {
+        const notes = Array.isArray(systemMetaOf(system).regionNotes) ? (systemMetaOf(system).regionNotes as Array<Record<string, unknown>>) : [];
+        const match = notes.find((row) => typeof row === "object" && row !== null && row.region === entry.slug && typeof row.note === "string");
+        return match ? [{ slug: system.slug, title: system.title, note: match.note as string }] : [];
+      }).sort((a, b) => a.title.localeCompare(b.title))
+    : [];
   const collection = collectionForKind(entry.kind);
 
   // A region dossier IS the "what's in here" page: every place whose sheet
@@ -67,6 +113,8 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         arcsHere={entry.arcsHere}
         containedPlaces={containedPlaces}
         entry={entry}
+        systemFamily={systemFamily}
+        systemsHere={systemsHere}
         existingArcSlugs={arcs.map((arc) => arc.slug)}
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}
         placeAncestry={entry.placeAncestry}
@@ -132,7 +180,8 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   entryId={entry.id}
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
-                  systems={allEntries.filter((option) => option.kind === "SYSTEM" && option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  systems={systemEntries.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />
               ) : entry.kind === "EVENT" ? (

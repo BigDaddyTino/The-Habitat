@@ -171,6 +171,13 @@ without, `pillars` are the loop's promises one per line, and `openQuestions`
 work as everywhere else. Key art is by convention, not by meta: drop a file at
 `public/images/systems/<slug>.png` and the card and dossier pick it up.
 
+Systems nest: `parent` names the SYSTEM this one lives inside (Weather sits
+in Environment; the Blood Moon sits in The Sun & Moon), exactly as places nest
+under regions. A child without its own release gate ships with its parent.
+`regionNotes` is the tie to the atlas — `[{ region, note }]` rows saying how
+the system expresses per region (the tropical island cools in winter but never
+sees snow); the region dossier shows the same rows back.
+
 ### 3.8 THEME / RULE
 
 No meta needed now. Optionally `appliesTo: [kind]` later so the app can surface "rules that govern characters" on character-editing screens (e.g. the Tino rule appearing wherever someone edits his status).

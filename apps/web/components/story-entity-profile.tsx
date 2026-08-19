@@ -27,7 +27,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site" }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [] }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -39,7 +39,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }> }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -70,7 +70,12 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const questions = words(meta.openQuestions);
   // Children get their own organized section above; repeating each one in the
   // aside as "belongs inside this region" would just be the mess twice.
-  const asideConnections = containedPlaces.length ? entry.connections.filter((connection) => connection.relation !== "belongs inside this region") : entry.connections;
+  const asideConnections = entry.connections.filter((connection) =>
+    // Whatever the narrative column already lists in full is not repeated in
+    // the aside — places when the atlas block runs, subsystems when the
+    // system tree does.
+    !(containedPlaces.length && connection.relation === "belongs inside this region") &&
+    !(systemFamily && connection.relation === "is a subsystem of this"));
   const entityLinks: Array<{ slug: string; detail: string }> = [];
 
   if (isCharacter) {
@@ -116,6 +121,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {placeAncestry.length ? <nav aria-label="Where this sits" className="place-trail">
             {placeAncestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
           </nav> : null}
+          {systemFamily?.ancestry.length ? <nav aria-label="Part of which system" className="place-trail">
+            {systemFamily.ancestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
+          </nav> : null}
           <h1>{entry.title}</h1>
           <p className="entity-profile-summary">{entry.summary ?? "This entry still needs its one-line pitch."}</p>
           {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
@@ -136,6 +144,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         {entry.kind === "CREATURE" ? <><Fact label="Category" value={meta.category} /><Fact label="Habitats" value={words(meta.biomes).length ? words(meta.biomes).join(", ") : null} /><Fact label="Threat" value={meta.threat} /></> : null}
         {entry.kind === "ITEM" ? <><Fact label="Category" value={meta.category} /><Fact label="Rarity" value={meta.rarity} /><Fact label="Origin" value={meta.origin} /></> : null}
         {entry.kind === "EVENT" ? <><Fact label="When" value={meta.when} /><Fact label="Where" value={words(meta.where).length ? words(meta.where).join(", ") : null} /><Fact label="Involved" value={words(meta.involved).length ? `${words(meta.involved).length} named` : null} /></> : null}
+        {isSystem ? <><Fact label="Category" value={meta.category} /><Fact label="Build status" value={meta.buildStatus} /><Fact label="Unlocks" value={label(meta.unlockStage) ?? (label(meta.unlockArc) ? `with ${String(meta.unlockArc).replaceAll("-", " ")}` : systemFamily?.ancestry.length ? "with its parent system" : null)} /><Fact label="Game tag" value={meta.gameTag} /></> : null}
       </dl> : null}
 
       <div className="entity-profile-layout">
@@ -167,6 +176,30 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             <Link className="entity-add-place" href={`/codex/library/regions?parent=${entry.slug}&placeKind=${addChildKind}#new-entry`}>
               <Plus aria-hidden="true" size={13} /> Add a place in {entry.title}
             </Link>
+          </div> : null}
+          {isSystem && systemFamily ? <div className="entity-contained-places entity-system-children">
+            <p className="eyebrow"><Network aria-hidden="true" size={12} /> Inside {entry.title}</p>
+            {systemFamily.children.length ? <ul>{systemFamily.children.map((child) => <li key={child.slug}>
+              <div><Link href={`/codex/bible/${child.slug}`}><strong>{child.title}</strong><i>subsystem</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {child.summary ? <p>{child.summary}</p> : null}</div>
+            </li>)}</ul> : <p className="story-inspector-hint">No subsystems yet. Weather belongs inside Environment — file children here and they inherit this system’s release unless they set their own.</p>}
+            <Link className="entity-add-place" href={`/codex/library/systems?parent=${entry.slug}#new-entry`}>
+              <Plus aria-hidden="true" size={13} /> Add a system inside {entry.title}
+            </Link>
+          </div> : null}
+          {isSystem && systemFamily?.regionNotes.length ? <div className="entity-region-notes">
+            <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> By region — how {entry.title} expresses on the map</p>
+            <ul>{systemFamily.regionNotes.map((row) => <li key={row.slug}>
+              {row.title ? <Link href={`/codex/bible/${row.slug}`}>{row.title}</Link> : <span className="entity-region-missing" title="This region does not exist yet">{row.slug.replaceAll("-", " ")}</span>}
+              <p>{row.note}</p>
+            </li>)}</ul>
+          </div> : null}
+          {isRegion && systemsHere.length ? <div className="entity-region-notes">
+            <p className="eyebrow"><Sparkles aria-hidden="true" size={12} /> How the world behaves here</p>
+            <ul>{systemsHere.map((system) => <li key={system.slug}>
+              <Link href={`/codex/bible/${system.slug}`}>{system.title}</Link>
+              <p>{system.note}</p>
+            </li>)}</ul>
           </div> : null}
           {isRegion && arcsHere.length ? <div className="entity-quests-here">
             <p className="eyebrow"><Compass aria-hidden="true" size={12} /> Quests that begin here</p>

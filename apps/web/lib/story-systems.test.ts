@@ -23,6 +23,8 @@ test("the actions module validates SYSTEM sheets and the collection exists", () 
   const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
   assert.match(actions, /SYSTEM: systemMetaSchema/, "SYSTEM sheets must be validated server-side");
   assert.match(actions, /unlockArc: metaSlug\.nullable\(\)/, "the release gate must survive in the schema");
+  assert.match(actions, /parent: metaSlug\.nullable\(\)/, "the hierarchy must survive in the schema");
+  assert.match(actions, /regionNotes: z\.array/, "regional expression must survive in the schema");
   const library = readFileSync(join(process.cwd(), "lib/story-library.ts"), "utf8");
   assert.match(library, /systems: \{\s*\n\s*kind: "SYSTEM"/, "the systems library collection must exist");
 });
@@ -47,14 +49,38 @@ test("the seed is internally coherent", () => {
     }
     for (const pillar of seed.meta.pillars) assert.ok(pillar.length <= 300, `${seed.slug} pillar length`);
     for (const question of seed.meta.openQuestions) assert.ok(question.length <= 300, `${seed.slug} open question length`);
+    assert.ok(seed.meta.regionNotes.length <= 20, `${seed.slug} regionNotes count`);
+    for (const note of seed.meta.regionNotes) {
+      assert.ok(isValidStoryKey(note.region), `${seed.slug} region note slug "${note.region}"`);
+      assert.ok(note.note.length > 0 && note.note.length <= 300, `${seed.slug} region note length`);
+    }
   }
 });
 
-test("release intent is explicit on every seeded system", () => {
-  // A system with neither an unlock arc nor a stage note lands in the release
-  // plan's "not scheduled" hole. The founding shelf ships with no holes — the
-  // hole exists for systems added later and forgotten.
+test("the system tree is sound — parents exist, and nothing orbits itself", () => {
+  const bySlug = new Map(storySystemsSeed.map((seed) => [seed.slug, seed]));
   for (const seed of storySystemsSeed) {
+    if (seed.meta.parent === null) continue;
+    assert.ok(bySlug.has(seed.meta.parent), `${seed.slug} is inside ${seed.meta.parent}, which is not in the seed`);
+    assert.notEqual(seed.meta.parent, seed.slug, `${seed.slug} is inside itself`);
+    // Walk to the top; a cycle would spin past the seed count.
+    let cursor: string | null = seed.meta.parent;
+    let steps = 0;
+    while (cursor) {
+      steps += 1;
+      assert.ok(steps <= storySystemsSeed.length, `${seed.slug} sits in a parent cycle`);
+      cursor = bySlug.get(cursor)?.meta.parent ?? null;
+    }
+  }
+});
+
+test("release intent is explicit on every top-level system", () => {
+  // A top-level system with neither an unlock arc nor a stage note lands in
+  // the release plan's "not scheduled" hole. The founding shelf ships with no
+  // holes — the hole exists for systems added later and forgotten. A child
+  // ships with its parent, so its own intent is optional and overrides when set.
+  for (const seed of storySystemsSeed) {
+    if (seed.meta.parent !== null) continue;
     assert.ok(seed.meta.unlockArc !== null || seed.meta.unlockStage !== null, `${seed.slug} has no release intent`);
   }
 });

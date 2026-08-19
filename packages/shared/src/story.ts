@@ -700,6 +700,10 @@ export const storySystemStatuses = ["concept", "designed", "in-build", "playable
 export type StorySystemMeta = {
   category: (typeof storySystemCategories)[number] | null;
   buildStatus: (typeof storySystemStatuses)[number] | null;
+  /** Slug of the SYSTEM this one lives inside — Weather sits in Environment
+   *  the way a district sits in a city. Null = a top-level system. Children
+   *  without their own release gate ship with their parent. */
+  parent: string | null;
   /** Slug of the arc that unlocks this system for the player; null = day one or unscheduled. */
   unlockArc: string | null;
   /** Prose release intent while no arc exists to link: "Day one", "Act II — once the party holds ground". */
@@ -708,6 +712,9 @@ export type StorySystemMeta = {
   dependsOn: string[];
   /** The promises of the loop, one per line — what the system guarantees the player. */
   pillars: string[];
+  /** How the system expresses per region — the tropical island runs cooler in
+   *  winter but never sees snow. The region end shows these back. */
+  regionNotes: Array<{ region: string; note: string }>;
   gameTag: string | null;
   openQuestions: string[];
 };

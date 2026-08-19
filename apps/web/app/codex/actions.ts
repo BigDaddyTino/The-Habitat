@@ -20,6 +20,7 @@ import {
   storySystemStatuses,
   type StoryRegionMeta,
   type StoryStatus,
+  type StorySystemMeta,
 } from "@habitat/shared";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -815,6 +816,13 @@ export async function createEntry(formData: FormData) {
       } satisfies StoryRegionMeta
     : null;
 
+  // Same law for systems: Weather is born inside Environment, not created
+  // loose and adopted later — which is how orphans happen.
+  const systemParent = parsed.data.kind === "SYSTEM" ? metaSlug.safeParse(formData.get("parent")) : null;
+  const systemMeta: StorySystemMeta | null = systemParent?.success
+    ? { category: null, buildStatus: "concept", parent: systemParent.data, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
+    : null;
+
   await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.create({
       data: {
@@ -825,10 +833,10 @@ export async function createEntry(formData: FormData) {
         body: parsed.data.body,
         status: creationStatus(),
         createdByUserId: user.id,
-        ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue } : {}),
+        ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue } : systemMeta ? { meta: systemMeta as unknown as Prisma.InputJsonValue } : {}),
       },
     });
-    const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}` : "";
+    const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}` : systemMeta?.parent ? `, inside ${systemMeta.parent}` : "";
     await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"${placed}` });
   });
 
@@ -988,10 +996,12 @@ const itemMetaSchema = z.object({
 const systemMetaSchema = z.object({
   category: z.enum(storySystemCategories).nullable(),
   buildStatus: z.enum(storySystemStatuses).nullable(),
+  parent: metaSlug.nullable(),
   unlockArc: metaSlug.nullable(),
   unlockStage: metaText(160),
   dependsOn: z.array(metaSlug).max(12),
   pillars: metaLines(12, 300),
+  regionNotes: z.array(z.object({ region: metaSlug, note: metaText(300) })).max(20),
   gameTag: metaText(120),
   openQuestions: metaLines(30, 300),
 });

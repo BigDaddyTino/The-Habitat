@@ -596,33 +596,40 @@ export function EventSheet({ entryId, version, meta, regions, entries }: {
 // System sheet — the release gate is the point
 // ---------------------------------------------------------------------------
 
-export function SystemSheet({ entryId, version, meta, arcs, systems }: {
+export function SystemSheet({ entryId, version, meta, arcs, systems, regions }: {
   entryId: string;
   version: number;
   meta: Record<string, unknown> | null;
   /** Quest arcs, for the unlock picker — the tie between systems and story. */
   arcs: SlugOption[];
-  /** Every other system, for the depends-on rows. */
+  /** Every other system, for the parent picker and depends-on rows. */
   systems: SlugOption[];
+  /** Regions, for the per-region expression notes. */
+  regions: SlugOption[];
 }) {
   const source = record(meta);
   const [category, setCategory] = useState(text(source.category));
   const [buildStatus, setBuildStatus] = useState(text(source.buildStatus));
+  const [parent, setParent] = useState(text(source.parent));
   const [unlockArc, setUnlockArc] = useState(text(source.unlockArc));
   const [unlockStage, setUnlockStage] = useState(text(source.unlockStage));
   const [dependsOn, setDependsOn] = useState(asArray(source.dependsOn).map(text));
   const [pillars, setPillars] = useState(asArray(source.pillars).map(text).join("\n"));
+  const [regionNotes, setRegionNotes] = useState(asArray(source.regionNotes).map((row) => ({ region: text(record(row).region), note: text(record(row).note) })));
   const [gameTag, setGameTag] = useState(text(source.gameTag));
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
   const systemListId = `system-depends-${entryId}`;
+  const regionListId = `system-regions-${entryId}`;
 
   const composed: StorySystemMeta = {
     category: (storySystemCategories as readonly string[]).includes(category) ? (category as StorySystemMeta["category"]) : null,
     buildStatus: (storySystemStatuses as readonly string[]).includes(buildStatus) ? (buildStatus as StorySystemMeta["buildStatus"]) : null,
+    parent: orNull(parent),
     unlockArc: orNull(unlockArc),
     unlockStage: orNull(unlockStage),
     dependsOn: dependsOn.map((value) => value.trim()).filter(Boolean),
     pillars: splitLines(pillars),
+    regionNotes: regionNotes.map((row) => ({ region: row.region.trim(), note: row.note.trim() })).filter((row) => row.region && row.note),
     gameTag: orNull(gameTag),
     openQuestions: splitLines(openQuestions),
   };
@@ -639,6 +646,11 @@ export function SystemSheet({ entryId, version, meta, arcs, systems }: {
         <label>Build status — how real it is on the game side<select onChange={(event) => setBuildStatus(event.target.value)} value={buildStatus}><option value="">Not decided</option>{storySystemStatuses.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
       </div>
 
+      <label>Part of which system — Weather lives inside Environment<select onChange={(event) => setParent(event.target.value)} value={parent}>
+        <option value="">Nothing — a top-level system</option>
+        {systems.map((system) => <option key={system.slug} value={system.slug}>{system.title}</option>)}
+      </select></label>
+
       <div className="sheet-grid">
         <label>Unlocked by which quest arc — the release gate<select onChange={(event) => setUnlockArc(event.target.value)} value={unlockArc}>
           <option value="">No arc — day one, or set a stage note below</option>
@@ -654,6 +666,18 @@ export function SystemSheet({ entryId, version, meta, arcs, systems }: {
           <div className="sheet-row sheet-row-compact" key={index}>
             <input aria-label="Depends on" list={systemListId} maxLength={64} onChange={(event) => setDependsOn((rows) => rows.map((value, at) => (at === index ? event.target.value : value)))} placeholder="trade-and-economy" value={dependency} />
             <RowButton label="Remove this dependency" onClick={() => setDependsOn((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">By region — how this system expresses where the story happens <RowButton label="Add a region note" onClick={() => setRegionNotes((rows) => [...rows, { region: "", note: "" }])} /></p>
+        <datalist id={regionListId}>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</datalist>
+        {regionNotes.map((row, index) => (
+          <div className="sheet-row" key={index}>
+            <input aria-label="Region" list={regionListId} maxLength={64} onChange={(event) => setRegionNotes((rows) => rows.map((value, at) => (at === index ? { ...value, region: event.target.value } : value)))} placeholder="the-starting-island" value={row.region} />
+            <input aria-label="How it behaves there" maxLength={300} onChange={(event) => setRegionNotes((rows) => rows.map((value, at) => (at === index ? { ...value, note: event.target.value } : value)))} placeholder="Cooler in winter, but it never snows." value={row.note} />
+            <RowButton label="Remove this region note" onClick={() => setRegionNotes((rows) => rows.filter((_, at) => at !== index))} remove />
           </div>
         ))}
       </div>

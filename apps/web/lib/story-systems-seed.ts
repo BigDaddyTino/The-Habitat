@@ -23,10 +23,12 @@ export type StorySystemSeed = {
 const meta = (value: Partial<StorySystemMeta>): StorySystemMeta => ({
   category: null,
   buildStatus: "concept",
+  parent: null,
   unlockArc: null,
   unlockStage: null,
   dependsOn: [],
   pillars: [],
+  regionNotes: [],
   gameTag: null,
   openQuestions: [],
   ...value,
@@ -37,13 +39,13 @@ export const storySystemsSeed: StorySystemSeed[] = [
     slug: "character-progression",
     title: "Character Progression",
     summary: "How the player grows: skills earned by doing, gear with a history, and infused power rented from Essence at corruption's price.",
-    body: `The RPG spine. Power comes by three roads, mirroring the three origins of magic: training (skills improve through use — a mercenary becomes what they practice, there are no class walls), equipment (gear is found, bought, and maintained, and the good pieces have histories), and infusion — doses of [[essence]] through rigs like [[field-infusion-rig]], which grant real power on a schedule and hand the bill to [[the-corruption-system]].
+    body: `The RPG spine. Power comes by three roads, mirroring the three origins of magic: training (skills improve through use — a mercenary becomes what they practice), equipment (gear is found, bought, and maintained, and the good pieces have histories), and infusion — doses of [[essence]] through rigs like [[field-infusion-rig]], which grant real power on a schedule and hand the bill to [[the-corruption-system]].
 
-For writers: rewards should be growth the fiction can see. A veteran teaching a technique, a rig upgrade, a crate of doses — not abstract points falling out of a corpse. Never write a quest that assumes a build; write quests that *tempt* a build, offering the infusion shortcut where the honest road is slow. That temptation is [[the-cost-of-borrowed-power]] operating at the level of character sheets.`,
+For writers: rewards should be growth the fiction can see. A veteran teaching a technique, a rig upgrade, a crate of doses — not abstract points falling out of a corpse. Never write a quest that assumes a build; write quests that *tempt* a build, offering the infusion shortcut where the honest road is slow. That temptation is [[the-cost-of-borrowed-power]] operating at the level of character sheets. [[character-classes]] sets a character's starting shape; practice and choices decide everything after.`,
     meta: meta({
       category: "progression",
       unlockStage: "Day one",
-      pillars: ["Power is earned by doing, bought with gear, or borrowed at a price", "No class walls — practice makes the character", "Every reward should be visible in the fiction"],
+      pillars: ["Power is earned by doing, bought with gear, or borrowed at a price", "Classes set the starting shape; practice does the rest", "Every reward should be visible in the fiction"],
       openQuestions: ["Do unused skills decay?", "What does staying at phase zero cost the infused player in raw power?"],
     }),
   },
@@ -56,6 +58,7 @@ For writers: rewards should be growth the fiction can see. A veteran teaching a 
 For writers: corruption is personal before it is systemic — canon's discipline is to show the tells and never pause the scene for the seven-phase lecture. Quests can move phases: a favor paid in doses, a cleansing rumor that costs more than it cleans, a job that only an infused specialist can survive. Never write a cure. Write bargains.`,
     meta: meta({
       category: "progression",
+      parent: "magic",
       unlockStage: "Day one",
       dependsOn: ["character-progression"],
       pillars: ["Every dose is a debt", "Tells before numbers", "The player can walk the whole road to abomination"],
@@ -309,6 +312,156 @@ For writers: do not write toward this before the story grants it — the release
       dependsOn: ["outpost-and-city-management", "faction-membership", "the-power-balance"],
       pillars: ["Authority arrives when the story grants it", "Harvest policy at scale is the endgame's moral core", "Kingdoms get noticed"],
       openQuestions: ["Which arc actually grants the charter? It does not exist yet — link it here when it does.", "What does the thing beneath the war want with a kingdom?"],
+    }),
+  },
+  {
+    slug: "environment",
+    title: "Environment",
+    summary: "The sky, the seasons, the weather, and the living land — one system for everything the world does that no faction ordered.",
+    body: `The parent of the world's own behavior, split into four subsystems: [[nature]] (the land's flora, fauna, and ambient life), [[seasons]] (the year's turning), [[weather]] (what the sky does today), and [[the-sun-and-moon]] (the day-night cycle and what hangs in it). Each expresses differently by region — the same winter that buries the peninsula only cools the tropics — and the per-region notes on each subsystem's sheet are where those differences are law, wired to the region atlas.
+
+The environment runs through [[the-living-world]]: storms land and seasons turn whether anyone is playing or not.
+
+For writers: the environment is a story instrument, not a backdrop. A quest that must happen in the rain says so; a siege that starves through winter is a different siege. Name the conditions your scene assumes, and check this family's sheets before promising the sky can do something.`,
+    meta: meta({
+      category: "world simulation",
+      unlockStage: "Day one",
+      dependsOn: ["the-living-world"],
+      pillars: ["The world acts without orders", "Same sky, different ground — region decides expression", "Weather and seasons are story instruments"],
+      openQuestions: ["Does severe weather gate travel outright, or only price it?"],
+    }),
+  },
+  {
+    slug: "nature",
+    title: "Nature",
+    summary: "The land itself: flora, fauna, growth, and decay — the ambient life that makes a region feel alive before anything magical shows up.",
+    body: `The mundane living world inside [[environment]]: plant cover, animal populations, spawning and migration, growth and rot. Nature is the substrate [[gathering-and-harvest]] draws its mundane tier from, and the ordinary wildlife against which the magical creatures of the bestiary read as wrong.
+
+Populations respond to pressure — overhunt a coast and it empties; abandon a field and the jungle takes it back within a season. Tied to [[seasons]] for cycles and to each region's biome for what grows at all.
+
+For writers: nature is the world's baseline reading. An empty forest is a warning sign the player should be able to trust, so never write ambient life as random set dressing — a place where the birds have gone quiet is saying something, and canon's horrors are at their best walking through a nature that behaves believably right up until it does not.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "environment",
+      pillars: ["Ambient life is a readable signal", "Populations respond to pressure", "The mundane baseline makes the magical legible"],
+      openQuestions: ["Do regrowth and repopulation run on season boundaries or continuous clocks?"],
+    }),
+  },
+  {
+    slug: "seasons",
+    title: "Seasons",
+    summary: "Summer, fall, winter, spring — the year turns everywhere, and every region wears each season its own way.",
+    body: `The four seasons cycle through the whole world inside [[environment]], but a season is a question each region answers for itself: the peninsula gets four true seasons; the tropical island gets a cooler, stormier winter and will never see snow. The per-region notes on this sheet are where those answers live, and [[weather]] draws from them — what the sky can do today depends on where you are standing in the year.
+
+Seasons move the economy and the war: harvest yields, sea conditions for the boats, campaign windows, what [[nature]] offers and withholds. They turn off-screen with [[the-living-world]].
+
+For writers: date your scenes. A quest written "in winter" reads differently in every region, and that is the feature — use the season to price choices (a mountain pass now or in the thaw?), and never write snow onto ground whose region note forbids it.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "environment",
+      pillars: ["The year turns everywhere, differently", "Seasons move the economy and the war", "Region notes are the law of what a season can do"],
+      regionNotes: [
+        { region: "the-starting-island", note: "Tropical: winter runs cooler and stormier, greens the Riftwood, and roughens the sea lanes — but it never snows here." },
+        { region: "the-peninsula", note: "Four true seasons. Winter closes mountain routes and freezes siege lines; spring floods the lowland roads." },
+      ],
+      openQuestions: ["How long is a season in real time?", "Do arcs pin themselves to a season, or drift with when the party arrives?"],
+    }),
+  },
+  {
+    slug: "weather",
+    title: "Weather",
+    summary: "Rain, snow, sandstorm, and the clear days between — what the sky is doing right now, region by region.",
+    body: `The day-to-day sky inside [[environment]]. The founding catalog: rain (and its tropical-storm big sibling), snow, sandstorm, fog, and clear — with room to grow. What can actually occur is decided by region and [[seasons]] together: the tropical island gets rain and hurricanes but never snow; sandstorms wait on the mainland's dry interior; the peninsula gets the full four-season range.
+
+Weather is mechanical, not cosmetic: visibility, fire, tracking, boats, aircraft if any, and how sound carries. It rolls in off-screen with [[the-living-world]], and a settlement's stores feel a hard season through [[survival]].
+
+For writers: weather is pacing. A storm is cover for one side and catastrophe for the other; write scenes that want a condition and say so, and let the wait for that condition be story. Check the region notes before writing the sky — snow on the tropics is a continuity bug, not atmosphere.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "environment",
+      dependsOn: ["seasons"],
+      pillars: ["Weather is mechanics, not mood lighting", "Region and season decide what the sky may do", "Storms are cover, catastrophe, and pacing"],
+      regionNotes: [
+        { region: "the-starting-island", note: "Rain, squalls, and true tropical storms — a hurricane season that matters to the boats. Never snow." },
+        { region: "the-peninsula", note: "The full range by season: rain, fog, and real winter snow. Sandstorms only in the dry interior, when the story writes one." },
+      ],
+      openQuestions: ["Is weather forecastable in-fiction — and who sells the forecast?", "Which mainland region hosts the first sandstorm?"],
+    }),
+  },
+  {
+    slug: "the-sun-and-moon",
+    title: "The Sun & Moon",
+    summary: "The day-night cycle: forty-five minutes of daylight, fifteen of night — and a sky that sometimes does something it shouldn't.",
+    body: `The clock of the world, inside [[environment]]: a full day runs one real hour — forty-five minutes of daylight, fifteen of night. Night is a different game: darker work, different creatures, different rules for what moves. The cycle runs everywhere at once and never pauses for a cutscene.
+
+Hanging off the cycle are the celestial events — [[the-blood-moon]] by night and [[the-solar-eclipse]] by day — scheduled world moments the whole server experiences together, each with its own dossier.
+
+For writers: the short night is scarcity — fifteen minutes is a raid window, not an evening, so night content must earn its darkness fast. Write scenes that want a time of day and say so. And keep the sky's stranger moments inside the event subsystems; the ordinary cycle stays ordinary, which is what makes the exceptions land.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "environment",
+      pillars: ["Forty-five minutes of day, fifteen of night", "Night is a different game", "The cycle never pauses"],
+      openQuestions: ["Do interiors and dungeons obey the surface clock?", "Is the fifteen-minute night global, or does latitude bend it?"],
+    }),
+  },
+  {
+    slug: "the-blood-moon",
+    title: "The Blood Moon",
+    summary: "A night event: the moon rises wrong, the world's worst things get bolder, and everyone with sense gets behind a wall.",
+    body: `A scheduled celestial event inside [[the-sun-and-moon]]: some nights the moon rises red, and for that night the rules bend — the corrupted and the fallen are bolder, creatures push into places they normally avoid, and the things that obey [[something-under-the-war]]'s glimpse discipline come nearer to being seen. Settlements light up and lock down; the [[survival]] math of one bad night is the point of the event.
+
+For writers: the blood moon is a pressure vessel, not a lore dump. What it actually is — an omen, a tide, a feeding calendar — stays unanswered per canon's rules; what it does is concrete and writable: sieges timed to it, contracts that must be finished before moonrise, a companion whose phases run hotter under it. One red night should be worth a whole quest.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "the-sun-and-moon",
+      pillars: ["The rules bend for one night", "Concrete effects, unexplained cause", "A whole settlement holds its breath together"],
+      openQuestions: ["Fixed lunar calendar or story-triggered?", "What does a blood moon do to a companion in the late phases?"],
+    }),
+  },
+  {
+    slug: "the-solar-eclipse",
+    title: "The Solar Eclipse",
+    summary: "A day event: night's rules arrive in the middle of the day, with none of night's warning.",
+    body: `The rarer sibling of [[the-blood-moon]], inside [[the-sun-and-moon]]: the sun goes dark mid-cycle and, for minutes, the day runs on night's rules — night creatures surface into daylight positions, work parties are caught in the open far from walls, and the careful arithmetic of the forty-five-minute day breaks down exactly when everyone trusted it.
+
+For writers: the eclipse is the ambush the sky writes. Its power is that daylight is where the game keeps its promises — supply runs, harvests, sieges are all planned around the safe forty-five — so the eclipse betrays plans, not just people. Best used sparingly and scheduled with intent: an eclipse over a battle already going wrong is a scene nobody forgets. Cause stays unexplained, per canon.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "the-sun-and-moon",
+      pillars: ["Night's rules, day's positions", "It betrays plans, not just people", "Rare enough to be a story every time"],
+      openQuestions: ["How rare — and does anything in-world predict one?", "Does an eclipse touch corruption, or only creatures?"],
+    }),
+  },
+  {
+    slug: "magic",
+    title: "Magic",
+    summary: "The whole magical order in one system: where power comes from, what it costs, and why the world went to war over it.",
+    body: `The parent system for everything arcane, built directly on [[the-three-origins-of-magic]]: the gifted are born with power that cost no one anything — which in this world is nearly a miracle; the infused rent power dose by dose from [[essence]], with [[the-corruption-system]] keeping the ledger inside this family; and creatures carry magic natively, which is exactly why [[the-harvest-economy]] exists to render them into product.
+
+Magic is the setting's economy, its war, and its horror in one mechanism, so this system owns the rules the others borrow: what a dose does, what a gifted caster risks, what extraction takes, and what magic can never do.
+
+For writers: magic has prices, not exceptions. Before a scene lets power solve a problem, name which origin paid and what it cost — free magic anywhere unravels the whole bargain the setting is built on. The gifted are precious, hunted, and rare; write them accordingly.`,
+    meta: meta({
+      category: "progression",
+      unlockStage: "Day one",
+      pillars: ["Three origins, three prices", "No free magic anywhere", "The magical order is the war's cause, not its backdrop"],
+      openQuestions: ["Can the player character be gifted, or only infused?", "What are the hard nevers — what can magic not do at any price?"],
+    }),
+  },
+  {
+    slug: "character-classes",
+    title: "Character Classes",
+    summary: "The starting shape of a character: what you were before the island, and the kit, instincts, and doors that history opens.",
+    body: `The archetype layer inside [[character-progression]]: a class is who the character was before the story found them — the shape of their training, their starting kit, and the instincts the game trusts them with on day one. The prologue's own cast sketches the first roster: the Stormglass mercenary, the infuser-tech like Tino, the medic, the scout. From there, practice moves the character wherever play takes them; class sets the door you came in through, never the walls.
+
+Classes are combat-and-instinct identity; [[professions]] are craft. The two overlap on purpose — a medic class and a medic profession are different depths of the same calling.
+
+For writers: class is voice and history before it is numbers. Write class-flavored reads of a scene — the merc counts exits, the tech smells the bad valve — and recruitment or origin quests that honor where each archetype came from. Never gate a story branch on class alone; gate it on what the class would plausibly know.`,
+    meta: meta({
+      category: "progression",
+      parent: "character-progression",
+      pillars: ["Class is the door in, not the walls", "History and instincts before numbers", "Classes overlap professions on purpose"],
+      openQuestions: ["The starting roster — which classes ship, and is Tino's infuser-tech playable?", "Can a class ever change outright, or only blur?"],
     }),
   },
 ];
