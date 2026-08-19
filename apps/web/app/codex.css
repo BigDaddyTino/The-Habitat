@@ -718,3 +718,12 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
   .codex-spotlight-art { min-height: 200px; }
   .codex-spotlight-art::after { background: linear-gradient(180deg, transparent 55%, rgba(13,16,17,.92)); }
 }
+
+/* --- Codex prose: real links and emphasis in entry bodies ---------------- */
+
+.prose-link { color: var(--paper); text-decoration: underline; text-decoration-color: rgba(198,151,76,.55); text-underline-offset: 3px; }
+.prose-link:hover { color: #f0e2bb; text-decoration-color: var(--brass); }
+/* Link now, fill later: an unwritten target is a todo, not a dead link. */
+.prose-link.is-unwritten { color: #9aa79b; text-decoration-style: dashed; text-decoration-color: rgba(154,167,155,.5); cursor: help; }
+.entity-profile-narrative strong, .flow-panel-body strong { color: #e6d7b5; font-weight: 700; }
+.entity-profile-narrative em, .flow-panel-body em { color: #cdbf9a; }

@@ -23,6 +23,7 @@ import { EdgeEditor, NodeEditor, type StoryArcRef } from "@/components/story-wor
 import { StoryFlowLock } from "@/components/story-flow-lock";
 import { StoryWarden } from "@/components/story-warden";
 import { StoryLiveSync } from "@/components/story-live-sync";
+import { StoryProse, type ProseResolver } from "@/components/story-prose";
 import type { StoryBoard, StoryBoardEdge, StoryBoardNode } from "@/lib/story-codex";
 
 /**
@@ -171,6 +172,13 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
   // reads and walks exactly as before — what it loses is every way to change
   // anything, so a locked story stays as browsable as an open one.
   const locked = board.arc.locked;
+  // Scene text cites the bible constantly; resolve those to real links.
+  const resolveProse: ProseResolver = (slug) => {
+    const entry = board.libraryEntries.find((candidate) => candidate.slug === slug);
+    if (entry) return { title: entry.title, href: `/codex/bible/${slug}` };
+    const arc = arcRefs.find((candidate) => candidate.slug === slug);
+    return arc ? { title: arc.title, href: `/codex/arc/${slug}` } : null;
+  };
   const flowRef = useRef<ReactFlowInstance<FlowNode, Edge> | null>(null);
   const [, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -490,7 +498,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
             ) : null}
 
             {!editingCard ? <>
-              {shown.body ? <div className="flow-panel-body story-prose">{shown.body}</div> : <p className="story-inspector-hint">No scene text yet — this card is still being written.</p>}
+              {shown.body ? <div className="flow-panel-body story-prose"><StoryProse body={shown.body} resolve={resolveProse} /></div> : <p className="story-inspector-hint">No scene text yet — this card is still being written.</p>}
               {shown.effects.length > 0 ? <div className="flow-panel-effects"><p className="eyebrow">Effects</p><ul>{shown.effects.map((effect, index) => <li key={index}>{effect}</li>)}</ul></div> : null}
               {shown.rewards.length > 0 ? <div className="flow-panel-effects"><p className="eyebrow">Rewards</p><ul>{shown.rewards.map((reward, index) => <li key={index}>{reward}</li>)}</ul></div> : null}
             </> : null}

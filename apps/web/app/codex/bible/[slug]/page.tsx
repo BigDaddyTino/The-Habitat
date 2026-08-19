@@ -79,6 +79,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         return match ? [{ slug: system.slug, title: system.title, note: match.note as string }] : [];
       }).sort((a, b) => a.title.localeCompare(b.title))
     : [];
+  // Prose cites anything: a body can link a faction, a flag, an arc, a system.
+  // One title map over everything beats a map of whatever the pickers needed.
+  const [everyEntry, allArcs] = await Promise.all([listStoryEntries({}), listStoryArcRefs()]);
   const collection = collectionForKind(entry.kind);
 
   // A region dossier IS the "what's in here" page: every place whose sheet
@@ -121,7 +124,8 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         arcsHere={entry.arcsHere}
         containedPlaces={containedPlaces}
         entry={entry}
-        slugTitles={Object.fromEntries([...regions, ...allEntries, ...systemEntries].map((option) => [option.slug, option.title]))}
+        arcTitles={Object.fromEntries(allArcs.map((option) => [option.slug, option.title]))}
+        slugTitles={Object.fromEntries(everyEntry.map((option) => [option.slug, option.title]))}
         systemFamily={systemFamily}
         systemsHere={systemsHere}
         existingArcSlugs={arcs.map((arc) => arc.slug)}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, CircleDot, Flag, Link2Off, Sprout } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
 import { getStoryThreads, storyReadRole } from "@/lib/story-codex";
+import { plainStoryProse } from "@/lib/story-prose";
 import { StoryLiveSync } from "@/components/story-live-sync";
 
 export const metadata = { title: "Story threads" };
@@ -77,7 +78,7 @@ export default async function StoryThreadsPage() {
                         {thread.state === "planted" ? "waiting for payoff" : thread.state === "unset" ? "no setup" : thread.state}
                       </span>
                     </header>
-                    {thread.summary ? <p className="thread-summary">{thread.summary}</p> : null}
+                    {thread.summary ? <p className="thread-summary">{plainStoryProse(thread.summary)}</p> : null}
                     <div className="thread-sites">
                       <div>
                         <p className="eyebrow">Set at</p>

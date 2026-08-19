@@ -3,6 +3,7 @@ import { ArrowLeft, BookOpen, Hammer } from "lucide-react";
 import { storyEntryKindLabels, storyEntryKinds, type StoryEntryKind } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { getStoryNeedsWork, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { plainStoryProse } from "@/lib/story-prose";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { createEntry } from "@/app/codex/actions";
 import { storyCollections } from "@/lib/story-library";
@@ -47,7 +48,7 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
             <Link className={`codex-bible-card status-${entry.status.toLowerCase()}`} href={`/codex/bible/${entry.slug}`} key={entry.id}>
               <p className="eyebrow">{storyEntryKindLabels[entry.kind]}</p>
               <h3>{entry.title}</h3>
-              {entry.summary ? <p>{entry.summary}</p> : null}
+              {entry.summary ? <p>{plainStoryProse(entry.summary)}</p> : null}
               <footer><span>{entry.status === "CANON" ? "Canon" : entry.status === "PROPOSED" ? "Proposed" : "Draft"}</span><span>{entry.appearanceCount} appearance{entry.appearanceCount === 1 ? "" : "s"}</span></footer>
             </Link>
           ))}

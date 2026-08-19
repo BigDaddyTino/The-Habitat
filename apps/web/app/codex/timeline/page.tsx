@@ -6,6 +6,7 @@ import { listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { getEventArt, eventArtSlot } from "@/lib/event-art";
 import { findCodexArt } from "@/lib/codex-art";
 import { arrangeTimeline, timelineEraLabel } from "@/lib/story-timeline";
+import { plainStoryProse } from "@/lib/story-prose";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
@@ -78,7 +79,7 @@ export default async function StoryTimelinePage() {
                 {art ? <Link className="codex-timeline-art" href={`/codex/bible/${event.slug}`}><img alt={`${event.title} key art`} src={art} /></Link> : null}
                 <p className="codex-timeline-era">{era}</p>
                 <h2><Link href={`/codex/bible/${event.slug}`}>{event.title}</Link></h2>
-                <p className="codex-timeline-summary">{event.summary ?? "No summary yet — open the dossier and give this moment its one line."}</p>
+                <p className="codex-timeline-summary">{event.summary ? plainStoryProse(event.summary) : "No summary yet — open the dossier and give this moment its one line."}</p>
                 {places.length || involved.length ? (
                   <p className="codex-timeline-chips">
                     {places.map((place) => place.exists

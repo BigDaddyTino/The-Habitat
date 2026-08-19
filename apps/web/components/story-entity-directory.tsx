@@ -10,6 +10,7 @@ import { getRegionBranding } from "@/lib/region-branding";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
+import { plainStoryProse } from "@/lib/story-prose";
 import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
@@ -198,7 +199,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                 <div className="region-atlas-head-copy">
                   <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
                   <h2>{region.title}</h2>
-                  <p>{region.summary || "This region still needs its one-line pitch."}</p>
+                  <p>{region.summary ? plainStoryProse(region.summary) : "This region still needs its one-line pitch."}</p>
                   <strong>Open the region <ArrowRight aria-hidden="true" size={12} /></strong>
                 </div>
               </Link>
@@ -282,7 +283,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             <div className="entity-card-copy">
               <p className="eyebrow">{detail || collection.singular}</p>
               <h2>{entry.title}</h2>
-              <p>{entry.summary || `Open this ${collection.singular} and give the next writer something to build on.`}</p>
+              <p>{entry.summary ? plainStoryProse(entry.summary) : `Open this ${collection.singular} and give the next writer something to build on.`}</p>
               <footer><span>{entry.appearanceCount} story connection{entry.appearanceCount === 1 ? "" : "s"}</span><strong>Open dossier <ArrowRight aria-hidden="true" size={12} /></strong></footer>
             </div>
           </Link>;

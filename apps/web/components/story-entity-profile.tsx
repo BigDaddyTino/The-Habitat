@@ -9,6 +9,7 @@ import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { modelPreview } from "@/lib/story-library";
+import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
 /** A place directly inside this one, with whatever sits inside it in turn. */
@@ -29,7 +30,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {} }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {} }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -41,7 +42,16 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string> }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string> }) {
+  // Entries resolve to the bible, arcs to their board, and anything nobody has
+  // written yet renders as a visible todo rather than disappearing.
+  const resolveProse: ProseResolver = (slug) => {
+    const entryTitle = slugTitles[slug];
+    if (entryTitle) return { title: entryTitle, href: `/codex/bible/${slug}` };
+    const arcTitle = arcTitles[slug];
+    if (arcTitle) return { title: arcTitle, href: `/codex/arc/${slug}` };
+    return null;
+  };
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -128,7 +138,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             {systemFamily.ancestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
           </nav> : null}
           <h1>{entry.title}</h1>
-          <p className="entity-profile-summary">{entry.summary ?? "This entry still needs its one-line pitch."}</p>
+          <p className="entity-profile-summary">{entry.summary ? <StoryProseLine resolve={resolveProse} text={entry.summary} /> : "This entry still needs its one-line pitch."}</p>
           {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
             {characterAffiliations.map(({ brand, role, slug, standing, title }) => <Link href={`/codex/bible/${slug}`} key={slug} style={{ "--affiliation-accent": brand.accent } as React.CSSProperties}>
               <img alt="" src={brand.logo} />
@@ -153,7 +163,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
       <div className="entity-profile-layout">
         <article className="entity-profile-narrative">
           <p className="eyebrow"><BookOpen aria-hidden="true" size={12} /> Writer briefing</p>
-          {entry.body ? entry.body.split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => <p key={index}>{paragraph}</p>) : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
+          {entry.body ? <StoryProse body={entry.body} resolve={resolveProse} /> : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
           {isCharacter && label(meta.storyRole) ? <blockquote><Sparkles aria-hidden="true" size={16} /><div><strong>Why this character exists</strong><p>{String(meta.storyRole)}</p></div></blockquote> : null}
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
           {isRegion ? <div className="entity-contained-places">
@@ -168,7 +178,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
                     a writer adds is unbranded, so this hit new work only. */}
                 {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={18} /></span>}
                 <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
-                {place.summary ? <p>{place.summary}</p> : null}
+                {place.summary ? <p><StoryProseLine resolve={resolveProse} text={place.summary} /></p> : null}
                 {/* The third rung, shown in place: a POI's own destinations
                     are the rooms a player stands in, and burying them one
                     click deeper is what made them easy to lose. */}
@@ -192,7 +202,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Inside {entry.title}</p>
             {systemFamily.children.length ? <ul>{systemFamily.children.map((child) => <li key={child.slug}>
               <div><Link href={`/codex/bible/${child.slug}`}><strong>{child.title}</strong><i>subsystem</i><ArrowRight aria-hidden="true" size={11} /></Link>
-              {child.summary ? <p>{child.summary}</p> : null}</div>
+              {child.summary ? <p><StoryProseLine resolve={resolveProse} text={child.summary} /></p> : null}</div>
             </li>)}</ul> : <p className="story-inspector-hint">No subsystems yet. Weather belongs inside Environment — file children here and they inherit this system’s release unless they set their own.</p>}
             <Link className="entity-add-place" href={`/codex/library/systems?parent=${entry.slug}#new-entry`}>
               <Plus aria-hidden="true" size={13} /> Add a system inside {entry.title}
