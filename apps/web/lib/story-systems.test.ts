@@ -88,14 +88,31 @@ test("release intent is explicit on every top-level system", () => {
 test("dependencies never gate earlier than what they depend on", () => {
   // A day-one system depending on an act-two system is a shipping order that
   // cannot be honored. Arc-gated entries are treated as later than day one.
+  //
+  // Release is INHERITED: a child with no gate of its own ships with its
+  // parent, so a day-one parent's children are day-one too and answer for
+  // their dependencies the same way. Persistent Damage's children were caught
+  // by exactly this — both inherited day one while depending on systems that
+  // unlock chapters later.
+  const bySlug = new Map(storySystemsSeed.map((seed) => [seed.slug, seed]));
+  const effectiveRelease = (slug: string): { arc: string | null; stage: string | null } | null => {
+    let cursor = bySlug.get(slug);
+    for (let hops = 0; cursor && hops <= storySystemsSeed.length; hops++) {
+      if (cursor.meta.unlockArc !== null || cursor.meta.unlockStage !== null) {
+        return { arc: cursor.meta.unlockArc, stage: cursor.meta.unlockStage };
+      }
+      cursor = cursor.meta.parent ? bySlug.get(cursor.meta.parent) : undefined;
+    }
+    return null;
+  };
   const isDayOne = (slug: string) => {
-    const seed = storySystemsSeed.find((candidate) => candidate.slug === slug);
-    return Boolean(seed && seed.meta.unlockArc === null && seed.meta.unlockStage !== null && /day one|start/i.test(seed.meta.unlockStage));
+    const release = effectiveRelease(slug);
+    return Boolean(release && release.arc === null && release.stage !== null && /day one|start/i.test(release.stage));
   };
   for (const seed of storySystemsSeed) {
     if (!isDayOne(seed.slug)) continue;
     for (const dependency of seed.meta.dependsOn) {
-      assert.ok(isDayOne(dependency), `day-one system ${seed.slug} depends on ${dependency}, which unlocks later`);
+      assert.ok(isDayOne(dependency), `${seed.slug} ships day one (its own gate or its parent's) but depends on ${dependency}, which unlocks later`);
     }
   }
 });

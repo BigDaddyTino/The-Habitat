@@ -464,4 +464,84 @@ For writers: class is voice and history before it is numbers. Write class-flavor
       openQuestions: ["The starting roster — which classes ship, and is Tino's infuser-tech playable?", "Can a class ever change outright, or only blur?"],
     }),
   },
+  {
+    slug: "persistent-damage",
+    title: "Persistent Damage",
+    summary: "The world keeps its wounds. Bullet holes, blast craters, burned buildings, and scars are still there hours later — and so is the wall somebody rebuilt.",
+    body: `Damage is world state, not decoration. Every hole punched in a wall, every building burned, every crater and every scar is recorded and persists — across hours, across sessions, and across every player in the shared world of [[cooperative-play]]. Come back to a street you fought down and it is the street you left it: pocked, shored up, or gone.
+
+The system has two halves, each its own dossier: [[structural-integrity]] for what happens to buildings and terrain — stability, demolition, and cascading collapse — and [[lasting-wounds]] for what happens to bodies, from scars to missing limbs. Both feed the same ledger. Repair and reinforcement run through [[building]], paid for out of the materials [[survival]] and [[gathering-and-harvest]] account for, and an upgraded structure records its upgrade the same way a broken one records its break. Damage that lands while nobody is watching still lands: [[the-living-world]] runs the shelling, the fires, and the weathering off-screen.
+
+Canon already runs on this. [[the-island-remembers]] tracks fortification state and evacuation-boat damage as ledger lines before the Defend/Flee decision commits; [[the-last-days-of-kestrel]] is a siege whose walls, generators, and turrets are consumed one assault at a time; and [[the-strike]] is remembered by the depth of the wound it leaves, not the blast. The scar is the story.
+
+For writers: damage is memory the player can walk through, so write it as evidence. A quest can turn on what a wall looks like now — who fired from here, how many, how long ago. Never write a scene that requires a location to be pristine unless somebody repaired it, and never quietly heal the world between chapters; if a district got fixed, say who paid and what they wanted for it. The most valuable thing this system gives the writers' room is proof: what the party did to a place is still there to be found by the next party, and by the people who live there.`,
+    meta: meta({
+      category: "world simulation",
+      unlockStage: "Day one",
+      dependsOn: ["combat", "the-living-world"],
+      pillars: [
+        "The world keeps its wounds — hours later, sessions later, for everyone",
+        "Damage is evidence a player can read",
+        "Nothing heals quietly; repair is somebody's decision and somebody's bill",
+      ],
+      regionNotes: [
+        { region: "the-starting-island", note: "The prologue teaches the rule and then breaks it once, on purpose: the island's damage accumulates all chapter and is then erased wholesale by the fall — the only wipe canon allows, and it costs the island." },
+        { region: "the-peninsula", note: "Mainland damage is permanent and political: a burned block stays burned until a faction pays to clear it, and who rebuilt what is a readable map of who actually holds the ground." },
+      ],
+      openQuestions: [
+        "How long is the persistence horizon — forever, or a decay curve the living world runs?",
+        "Can a settlement's accumulated damage make it uninhabitable, and does the sim relocate the people?",
+      ],
+    }),
+  },
+  {
+    slug: "structural-integrity",
+    title: "Structural Integrity",
+    summary: "Buildings hold until they cannot: load paths, stability, demolition, and collapse that spreads from what you actually broke.",
+    body: `The structural half of [[persistent-damage]]. Buildings and terrain are not hit-point sacks with a rubble animation at zero — they carry load, and what a piece of a structure is holding up decides what happens when it fails. Cut the supports under a floor and the floor goes; take the corner column and the corner goes, and whatever the corner was carrying follows it. Collapse cascades from the break, which makes demolition a tactic with a plan rather than a damage race.
+
+That cuts both ways. Reinforcement through [[building]] adds real load capacity — the difference between a wall that holds one more assault and one that does not — and [[battle-management]] is largely the art of spending structure well. Partial states matter most: a building that is half down is the interesting one, and most of them will spend the campaign there.
+
+For writers: structure is a resource the party spends and an argument the world makes back. Write objectives that are structural — bring down the causeway, hold the third floor, get the wall standing before dusk — and remember that a collapse kills whoever is under it, including people the party was trying to save. Canon's fixed point is the ceiling here: [[the-fall-of-the-starting-island]] is cascading collapse at island scale, authored rather than simulated, and nothing the players do to a building should read as bigger.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "persistent-damage",
+      // Not a dependency: buildings break long before players can build, so
+      // reinforcement through Building enhances this rather than gating it.
+      pillars: [
+        "Load paths, not hit points — what it holds decides how it falls",
+        "Collapse spreads from the break, so demolition is a plan",
+        "Half-standing is the interesting state, and the common one",
+      ],
+      openQuestions: [
+        "How deep does the simulation go — per-structure, per-room, or per-piece?",
+        "Can a player-built structure be brought down by the living world while they are away?",
+      ],
+    }),
+  },
+  {
+    slug: "lasting-wounds",
+    title: "Lasting Wounds",
+    summary: "Bodies keep the record too: scars that name the fight, wounds that do not fully mend, and limbs that do not come back.",
+    body: `The body half of [[persistent-damage]]. Serious injury leaves something behind — a scar with a date attached, a joint that stiffens in the cold, a hand that never fully closes, a limb that is simply gone. Characters and [[companions]] both carry it, treatment through [[professions]] decides how much of it they keep, and the world's replacements are exactly as dark as the setting is: prosthetics from the [[foundry-workers-union]]'s shops, arcane grafts with an [[essence]] cost, and whatever the [[cybernetic-ascendancy]] is evangelizing this season.
+
+Keep it distinct from [[the-corruption-system]]. Corruption is the price of borrowed power and runs on its own seven-phase ledger; a wound is just what the world did to a body, and the two are only related in that both are visible on a person long before anyone discusses them.
+
+For writers: a scar is a plot hook with a location. Write injuries with provenance — which fight, whose fault, what it cost the party at the time — and let other characters read them; a medic who recognises a wound pattern is a whole scene. The hardest and best material here is a companion the party could have saved something of: an arm, a hand, a career. Never write a wound away off-screen, and never make the prosthetic free — the cheap ones cost autonomy, and the good ones cost the kind of money that gets a person hunted.`,
+    meta: meta({
+      category: "progression",
+      parent: "persistent-damage",
+      // Not dependencies: a scar needs neither a companion roster nor a medic
+      // profession to exist. Both deepen it; neither gates it.
+      pillars: [
+        "Injury leaves a mark with a date and a story",
+        "Wounds are not corruption — different ledger, different price",
+        "Replacement is always paid for in autonomy, money, or Essence",
+      ],
+      openQuestions: [
+        "Is limb loss ever a player-character outcome, or companions only?",
+        "What can a top-tier prosthetic do that a hand cannot — and who notices?",
+      ],
+    }),
+  },
 ];
