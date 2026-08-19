@@ -1,4 +1,4 @@
-import type { StoryEntryKind } from "@habitat/shared";
+import { storyPlaceKinds, type StoryEntryKind } from "@habitat/shared";
 import gallery from "@/lib/model-gallery.json";
 
 export const storyCollections = {
@@ -129,13 +129,24 @@ export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | n
  *  Anything untyped sorts last. */
 export const placeTypeOrder: Record<string, number> = { settlement: 0, zone: 1, site: 2, landmark: 3, destination: 4 };
 
+/** The values the place picker offers, so a typo cannot ship as a default. */
+export type StoryPlaceKindValue = (typeof storyPlaceKinds)[number]["value"];
+
 /**
- * What a new place inside this one most likely is. Adding to a whole region
- * usually means a POI; adding to a POI means a destination inside it — which
- * is the third rung and the one people forget the picker even has.
+ * What a new place inside this one most likely is, by what contains it:
+ * a region holds sites, a settlement holds districts (zones), and a zone or a
+ * site holds destinations — the third rung, and the one people forget the
+ * picker even has.
+ *
+ * The settlement case was defaulting to `destination`, which is why Port
+ * Arcadia's districts all had to be corrected by hand at creation: a city's
+ * next rung down is a district, not a shop inside one. This is only the
+ * pre-selection — every kind stays available in the picker.
  */
-export function defaultChildPlaceKind(parentType: unknown): string {
-  return parentType === "region" || parentType === null || parentType === undefined ? "site" : "destination";
+export function defaultChildPlaceKind(parentType: unknown): StoryPlaceKindValue {
+  if (parentType === "settlement") return "zone";
+  if (parentType === "zone" || parentType === "site" || parentType === "landmark" || parentType === "destination") return "destination";
+  return "site";
 }
 
 export function placeKindLabel(meta: Record<string, unknown>): string {

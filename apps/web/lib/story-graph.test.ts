@@ -20,6 +20,7 @@ import {
   type StoryGraphNode,
   type StoryPlaceLink,
 } from "@habitat/shared";
+import { defaultChildPlaceKind } from "./story-library";
 
 const scene = (key: string, title = key): StoryGraphNode => ({ key, kind: "SCENE", title });
 const ending = (key: string): StoryGraphNode => ({ key, kind: "ENDING", title: key });
@@ -273,4 +274,38 @@ test("a broken parent chain renders short instead of hanging the page", () => {
   assert.deepEqual(storyPlaceDescendants("a", cycle), ["b"]);
   assert.deepEqual(storyPlaceAncestry("a", unwritten), []);
   assert.equal(storyPlaceRoot("a", cycle, () => false), null);
+});
+
+test("a new place defaults to the rung below whatever contains it", () => {
+  // Port Arcadia is a settlement and its children are districts, but the
+  // picker was pre-selecting "destination" for it — so every district anyone
+  // added arrived as the wrong kind unless they noticed and changed it.
+  assert.equal(defaultChildPlaceKind("region"), "site");
+  assert.equal(defaultChildPlaceKind("settlement"), "zone");
+  assert.equal(defaultChildPlaceKind("zone"), "destination");
+  assert.equal(defaultChildPlaceKind("site"), "destination");
+  assert.equal(defaultChildPlaceKind("landmark"), "destination");
+  assert.equal(defaultChildPlaceKind("destination"), "destination");
+  // Nothing known about the parent means a top-level region takes a POI.
+  assert.equal(defaultChildPlaceKind(null), "site");
+  assert.equal(defaultChildPlaceKind(undefined), "site");
+  // Every default has to be a kind the picker actually offers.
+  const offered = new Set(storyPlaceKinds.map((kind) => kind.value));
+  for (const parentType of ["region", "settlement", "zone", "site", "landmark", "destination", null, undefined]) {
+    assert.ok(offered.has(defaultChildPlaceKind(parentType)), `${String(parentType)} defaults to a kind the picker does not offer`);
+  }
+});
+
+test("a region dossier can reach every place beneath it, however deep", () => {
+  // A destination filed under a zone under a settlement sits three rungs down.
+  // Listing only direct children left it on no region page at all.
+  const links: StoryPlaceLink[] = [
+    { slug: "the-peninsula", parent: null },
+    { slug: "port-arcadia", parent: "the-peninsula" },
+    { slug: "waterfront-district", parent: "port-arcadia" },
+    { slug: "census-office", parent: "waterfront-district" },
+  ];
+  assert.deepEqual(storyPlaceDescendants("port-arcadia", links).sort(), ["census-office", "waterfront-district"]);
+  assert.deepEqual(storyPlaceDescendants("waterfront-district", links), ["census-office"]);
+  assert.deepEqual(storyPlaceDescendants("census-office", links), []);
 });

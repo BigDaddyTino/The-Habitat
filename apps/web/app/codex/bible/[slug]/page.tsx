@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
-import { storyEntryKindLabels } from "@habitat/shared";
+import { storyEntryKindLabels, storyPlaceDescendants, type StoryPlaceLink } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -86,6 +86,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   // whatever sits inside it in turn — the region > place > destination rungs.
   const order = (meta: Record<string, unknown> | null) => placeTypeOrder[String(meta?.type)] ?? 9;
   const byTitle = (a: { order: number; title: string }, b: { order: number; title: string }) => a.order - b.order || a.title.localeCompare(b.title);
+  // Descendants per place, computed once from the shared place graph.
+  const placeLinks: StoryPlaceLink[] = regions.map((region) => ({ slug: region.slug, parent: typeof region.meta?.parent === "string" && region.meta.parent.trim() ? region.meta.parent.trim() : null }));
+  const placeDescendants = new Map(regions.map((region) => [region.slug, new Set(storyPlaceDescendants(region.slug, placeLinks))]));
   const containedPlaces = entry.kind === "REGION"
     ? regions
         .filter((region) => (region.meta?.parent ?? null) === entry.slug)
@@ -95,8 +98,13 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
           summary: place.summary,
           label: placeKindLabel(place.meta ?? {}),
           order: order(place.meta),
+          // Everything beneath this place at any depth, not just its direct
+          // children. A destination filed under a zone under a settlement sat
+          // three rungs down and appeared on no region page at all — the
+          // library atlas already flattens the same way, and a place that
+          // exists but is listed nowhere is how POIs go missing.
           inside: regions
-            .filter((candidate) => (candidate.meta?.parent ?? null) === place.slug)
+            .filter((candidate) => placeDescendants.get(place.slug)?.has(candidate.slug))
             .map((candidate) => ({ slug: candidate.slug, title: candidate.title, label: placeKindLabel(candidate.meta ?? {}), order: order(candidate.meta) }))
             .sort(byTitle)
             .map(({ slug, title, label }) => ({ slug, title, label })),
