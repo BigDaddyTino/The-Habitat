@@ -185,8 +185,11 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
   };
 
   if (!provider) {
+    // Same rule as the failure path below: the plumbing is named in the audit,
+    // not to the writer. This one does not say "try again later" because it
+    // will not come back on its own — it needs an administrator.
     await record("UNCONFIGURED", { failureReason: "No GEMINI_API_KEY, or HABITAT_STORY_ASSISTANT is off." });
-    return { ok: false, outcome: "UNCONFIGURED", message: "The Warden is not on duty — no Gemini key is configured yet." };
+    return { ok: false, outcome: "UNCONFIGURED", message: "The Warden is not on duty." };
   }
 
   // Nothing gates the question but Gemini itself: ask as often as you like,
@@ -245,13 +248,17 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
         : cause instanceof GeminiApiError && cause.code === "RATE_LIMITED" ? "RATE_LIMITED"
           : "UNAVAILABLE";
 
+    // The writer hears the Warden, never the plumbing: a keeper who lives in
+    // Martino has no business naming Google in his own refusal. The real cause
+    // still goes to the audit as `failureReason`, which is where an operator
+    // looks and where the distinction between a quota and an outage matters.
     await record(outcome, { contextSummary, revisionCursor, latencyMs, failureReason: failure });
     return {
       ok: false,
       outcome: outcome as Exclude<AssistantOutcome, "ANSWERED">,
-      // Provider messages here are our own strings from the Gemini client, not
-      // relayed provider prose, so they are safe to show a member.
-      message: cause instanceof GeminiApiError ? cause.message : "The Warden could not be reached. Try again shortly.",
+      message: outcome === "BLOCKED"
+        ? "The Warden will not answer that one. Try asking it another way."
+        : "The Warden is hibernating. Try again later.",
     };
   }
 }
