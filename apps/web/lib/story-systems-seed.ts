@@ -55,13 +55,19 @@ For writers: rewards should be growth the fiction can see. A veteran teaching a 
     summary: "The seven-phase ledger every infused character keeps. Borrowed power collects — the tremor in Tino's hand is the first payment the player ever sees.",
     body: `The mechanical mirror of [[the-cost-of-borrowed-power]]. Every dose advances a character along [[the-seven-phases-of-corruption]] toward becoming one of the [[abominations]] — and the game shows tells before it shows numbers: tremors, veins, appetite, sensitivity to things others cannot feel. The player learns to read people, not bars. Companions keep their own ledgers, and watching a friend's phases advance is meant to hurt.
 
-For writers: corruption is personal before it is systemic — canon's discipline is to show the tells and never pause the scene for the seven-phase lecture. Quests can move phases: a favor paid in doses, a cleansing rumor that costs more than it cleans, a job that only an infused specialist can survive. Never write a cure. Write bargains.`,
+**Why it happens is the ugliest fact in the setting.** Corruption is not a side effect of magic; it is what happens when you put somebody else's soul inside your own. Refined [[essence]] is soul-stuff — that is what extraction takes and why it kills the source — so every dose is another person's or another creature's severed self, pushed into a body that already has one. Souls do not share. What comes back is a soul with somebody else's grain running through it, and after enough doses the grain is all there is: that is the seven-phase road, and the thing at the end of it is [[abominations]].
+
+It is why corruption cannot be cured, only carried. There is nothing to flush; the damage is not chemical. And it is why a heavily infused person feels *wrong* to people who cannot say why — some of what is looking out is not theirs.
+
+The mitigation, such as it is, comes from source rather than dosage: essence drawn from nature rather than from a living thing — stormglass-derived and its cousins ([[stormglass]]) — carries no severed soul, so it advances the phases far more slowly. It is also weaker, less pure, and needed in far greater volume. That is the setting's one honest middle path: cheaper on the soul, harder on everything else, and never clean.
+
+For writers: corruption is personal before it is systemic — canon's discipline is to show the tells and never pause the scene for the seven-phase lecture. Quests can move phases: a favor paid in doses, a cleansing rumor that costs more than it cleans, a job that only an infused specialist can survive. Never write a cure. Write bargains. And when a character learns what a dose actually is, let it land — plenty of people in this world make a living not thinking about it.`,
     meta: meta({
       category: "progression",
       parent: "magic",
       unlockStage: "Day one",
       dependsOn: ["character-progression"],
-      pillars: ["Every dose is a debt", "Tells before numbers", "The player can walk the whole road to abomination"],
+      pillars: ["Every dose is a debt", "Tells before numbers", "The player can walk the whole road to abomination", "A dose is somebody else’s soul, and souls do not share", "Nature-drawn essence is cheaper on the soul, weaker, and never clean"],
       openQuestions: ["Is a phase ever reversible, and at what atrocity?", "How much of their own ledger does the player get to see?"],
     }),
   },
@@ -200,6 +206,8 @@ For writers: every companion needs a want beyond the party — a person who exis
     summary: "When the fight is bigger than the party: holding Kestrel means positioning squads, spending scarce shells, and deciding who is expendable.",
     body: `The Defend branch is the tutorial: escalating Tropic Pearl assaults on Forward Camp Kestrel, with surviving Stormglass squads, fortifications, and [[fort-tempest]]'s battery all lines in [[the-island-remembers]]. The player directs rather than micromanages — squad assignments, fortification priorities, fire missions, and triage when the line cracks.
 
+**Most battles worth fighting are about a [[the-soul-forge]].** Attackers want it intact, because a levelled Forge is a prize destroyed; defenders fight in front of it, because losing it turns every further loss permanent. A siege therefore has a clock nobody draws on the map: the moment the Forge falls or its reserve runs dry, the defenders stop coming back and the arithmetic inverts. Write assaults that aim at it, sabotage that starves it, and last stands that are standing in front of it.
+
 For writers: a battle is choices under scarcity, never a cutscene. Whatever the player positioned, spent, and sacrificed should be legible in the outcome, and casualty lists should name names — this game's dead have families in Glasswater. Defeat states must be written as story, not game-overs; the branch structure exists precisely so the war can be lost forward.`,
     meta: meta({
       category: "combat",
@@ -260,6 +268,8 @@ For writers: write joining ceremonies that mean something — an oath the scene 
     summary: "Territory, supply, and momentum between the powers, simulated and visible. The front line is a fact the player can read — and bend.",
     body: `[[the-faction-map]] made live. Control, supply, and momentum shift with events on-screen and off — [[the-living-world]] runs the war between sessions — and the region sheets' control fields are the substrate. The player's weight is real but never solitary: a held bridge opens a supply line, a burned depot starves an offensive, and the map repaints to match.
 
+Territory is counted in [[the-soul-forge]]s before it is counted in ground. A power with more working Forges than its rival can spend soldiers its rival cannot, so fronts bend toward Forge density, supply lines exist mostly to keep reserves fed, and a captured Forge moves the map further than a captured province. The ugliest consequence is the honest one: a nation losing a war starts asking where its Essence is going to come from, and the answers get worse the longer it loses ([[the-harvest-economy]]).
+
 For writers: quests that move the balance should name the delta — say what the bridge was worth, and to whom. Write the war's weather into scenes: who patrols this road this month is an output of the balance, not set dressing. And keep canon's deepest rule — neither human faction understands the whole war, and the balance must never explain [[something-under-the-war]]. The map measures the war it can see.`,
     meta: meta({
       category: "world simulation",
@@ -290,6 +300,8 @@ For writers: every stall implies a supply chain of atrocity, and canon demands t
     summary: "Running held ground: population, staffing, defense, supply, and the politics of who gets let in.",
     body: `From a fortified camp to a working settlement: assign professionals, set supply priorities, plan defenses — [[battle-management]] takes over when the siege actually comes — and decide admission policy, because every refugee is a person and a mouth, and the evacuation's arithmetic does not stop when the boats land. The settlement runs while the party is away; [[the-living-world]] keeps it honest.
 
+**The Forge is the settlement.** A held place with a working [[the-soul-forge]] is a place whose people come back; without one it is a camp with good intentions. Running a settlement therefore means running a Forge: keeping its Essence reserve fed, deciding who is allowed to bind to it, and protecting the one room that makes everything else survivable. Admission policy and binding policy are the same conversation — a refugee let through the gate but refused the Forge has been given shelter and not a future, and somebody in that queue will say so out loud. Which essence the reserve runs on ([[essence]], [[stormglass]]) is the other half of the settlement’s character.
+
 For writers: management choices are moral instruments. Write shortages that force policy, and named residents whose fates react to it — the family turned away at the gate is a scene, not a statistic. A settlement's culture is authored by accumulated player choices; write moments that reflect it back, so the town the player built can look them in the eye.`,
     meta: meta({
       category: "management",
@@ -304,6 +316,8 @@ For writers: management choices are moral instruments. Write shortages that forc
     title: "Kingdom Management",
     summary: "The endgame of holding ground: multiple settlements, vassal relations, doctrine, and a seat at the war's table — long after day one.",
     body: `Not a day-one verb — this entry is why the release gate exists. When the story finally hands the player region-scale authority, every earlier system becomes politics: a multi-settlement economy over [[outpost-and-city-management]], relations with the surviving powers as a peer on [[the-power-balance]], and doctrine — above all harvest policy at scale, which is [[the-harvest-economy]]'s question asked of the player with a whole population's weight behind the answer. Kingdoms also get noticed, and not only by the powers on the map.
+
+At this scale the [[the-soul-forge]] network *is* the kingdom: a crown is a set of Forges and the roads between them, subjects are people bound to machines you own, and vassalage is frequently just somebody else’s population binding to your Core. Doctrine follows — who may bind, what the reserve burns, whether reclamation is a right or a wage — and it is where harvest policy stops being an argument about creatures and becomes an argument about whose lives keep a nation permanent.
 
 For writers: do not write toward this before the story grants it — the release plan on the Systems shelf is the check. Do plant its seeds early: charters, old claims, oaths sworn in the prologue that a crown would have to honor. The best endgame material is paid for in the prologue.`,
     meta: meta({
@@ -662,6 +676,10 @@ The law it rests on: **a soul cannot be duplicated, but its connection to a body
 
 And that is the setting's moral engine, finally stated plainly. People do not slaughter magical creatures because magic is useful. They do it because magic brings their dead back. Nations would go to war over that. Corporations would farm it, states would stockpile it, rings would traffic it — all of which [[the-harvest-economy]] already says they do. This system is why. It does not make the atrocity acceptable; it makes it *understandable*, which is worse and better drama. And it puts the [[the-soul-breakthrough]] on a fuse: if a body can be rebuilt from Essence, and Essence can be drawn from people, somebody was always going to do that arithmetic out loud.
 
+**What reclamation burns is not neutral.** [[essence]] is soul-stuff, so a body rebuilt with it is paid for out of something that was alive and is not any more — which is why a settlement’s Essence reserve is a moral position as much as a supply line. A Forge running on soul essence brings people back cheaply and quickly. A Forge running on nature-drawn essence ([[stormglass]]) needs far more of it for the same body, and the people who insist on it know exactly what they are paying extra for. Both are canon; which one a settlement chose is one of the fastest ways to characterise it.
+
+**And Forges are how ground is actually held.** A city or outpost with a working, protected Forge is a place whose defenders come back and whose attackers do not — hold it and every casualty you take is temporary, lose it and your own dead stop returning. That is why taking a settlement means taking its Forge intact rather than levelling it, why garrisons are built around Forge rooms instead of walls, and why the first thing a competent occupier does is re-bind the population to a machine they control. Whoever owns the Forge owns who is allowed to be permanent. See [[outpost-and-city-management]] for running one, [[battle-management]] for fighting over one, and [[the-power-balance]] for what it does to a map.
+
 Humanity operates Forges. It does not understand them. Some were discovered whole, some reverse-engineered, and modern builds still carry ancient components nobody can manufacture. One fact troubles everyone who reads the instruments honestly: **nobody knows where the soul goes in between.** Departure is measurable. Resonance is measurable. Between them is a gap, and then the soul returns. Some who have died remember nothing. Some describe impossible places. Some hear voices. Some are certain something followed them back. Writers: that gap is yours to use and is deliberately **not** tied to [[the-veil]] — leaving it unattached keeps both mysteries alive.`,
     meta: meta({
       category: "core loop",
@@ -670,6 +688,8 @@ Humanity operates Forges. It does not understand them. Some were discovered whol
       pillars: [
         "A soul cannot be duplicated, but its connection to a body can be restored",
         "No Forge, no return — an unbound death is true death, and the run is over",
+        "Whoever holds a Forge decides who gets to be permanent",
+        "Reclamation is paid for in Essence, and Essence was alive",
         "Reclamation burns Essence — death costs the world something real",
         "This is why humanity harvests: magic brings the dead back",
         "Humanity operates Forges without understanding them, and nobody knows where the soul goes in between",

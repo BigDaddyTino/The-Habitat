@@ -310,3 +310,28 @@ test("the binding scene respects the order the prologue already authored", () =>
     );
   }
 });
+
+test("essence is soul, and the middle path is stated wherever corruption is", () => {
+  // The reveal that makes the setting cohere: a dose is somebody else's
+  // severed self, which is why corruption cannot be cured and why the clean
+  // alternative is merely worse business rather than impossible.
+  const corruption = bySlugBody("the-corruption-system");
+  assert.match(corruption, /souls do not share/i, "corruption must name the mechanism");
+  assert.match(corruption, /\[\[stormglass\]\]/, "and the nature-drawn alternative");
+  assert.match(corruption, /never clean/i, "which must stay honestly qualified");
+  // The Forge spends the same stuff, and that has to be said where it is spent.
+  const forge = bySlugBody("the-soul-forge");
+  assert.match(forge, /soul-stuff/i, "the Forge must say what reclamation burns");
+});
+
+test("holding a Forge is written as how ground is held", () => {
+  // The strategic layer: a settlement with a protected Forge is a settlement
+  // whose defenders come back. Every system that governs ground has to know.
+  const forge = bySlugBody("the-soul-forge");
+  assert.match(forge, /owns who is allowed to be permanent|Forges are how ground is actually held/i);
+  for (const slug of ["outpost-and-city-management", "kingdom-management", "battle-management", "the-power-balance"]) {
+    assert.match(bySlugBody(slug), /\[\[the-soul-forge\]\]/, `${slug} must reckon with the Forge`);
+  }
+  // Taking a settlement means taking its Forge intact, not levelling it.
+  assert.match(bySlugBody("battle-management"), /intact/i, "sieges must want the Forge whole");
+});
