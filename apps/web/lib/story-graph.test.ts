@@ -20,7 +20,7 @@ import {
   type StoryGraphNode,
   type StoryPlaceLink,
 } from "@habitat/shared";
-import { defaultChildPlaceKind } from "./story-library";
+import { defaultChildPlaceKind, placeKindLabel } from "./story-library";
 
 const scene = (key: string, title = key): StoryGraphNode => ({ key, kind: "SCENE", title });
 const ending = (key: string): StoryGraphNode => ({ key, kind: "ENDING", title: key });
@@ -308,4 +308,17 @@ test("a region dossier can reach every place beneath it, however deep", () => {
   assert.deepEqual(storyPlaceDescendants("port-arcadia", links).sort(), ["census-office", "waterfront-district"]);
   assert.deepEqual(storyPlaceDescendants("waterfront-district", links), ["census-office"]);
   assert.deepEqual(storyPlaceDescendants("census-office", links), []);
+});
+
+test("a place that is a Veil Anchor says so wherever it is listed", () => {
+  // The marker lives in the shared label rather than in each surface, because
+  // patching surfaces individually missed the deeper rungs: an Anchor filed
+  // under a district rendered unmarked on the atlas.
+  assert.equal(placeKindLabel({ type: "site" }), "site");
+  assert.equal(placeKindLabel({ type: "site", veilAnchorTier: "III" }), "site · Veil Anchor III");
+  assert.equal(placeKindLabel({ type: "settlement", settlementTier: "major-city", veilAnchorTier: "V" }), "major city · Veil Anchor V");
+  // Not an Anchor, and nothing invented from a junk value.
+  assert.equal(placeKindLabel({ type: "zone", veilAnchorTier: null }), "zone");
+  assert.equal(placeKindLabel({ type: "zone", veilAnchorTier: 3 }), "zone");
+  assert.equal(placeKindLabel({}), "place");
 });

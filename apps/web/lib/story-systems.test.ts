@@ -8,6 +8,8 @@ import {
   storyEntryKindLabels,
   storySystemCategories,
   storySystemStatuses,
+  storyVeilAnchorTiers,
+  storyVeilAnchorTierLabels,
 } from "@habitat/shared";
 import { storySystemsSeed } from "./story-systems-seed";
 import { metaSchemasByKind } from "./story-meta-schemas";
@@ -148,4 +150,43 @@ test("dependencies never gate earlier than what they depend on", () => {
       assert.ok(isDayOne(dependency), `${seed.slug} ships day one (its own gate or its parent's) but depends on ${dependency}, which unlocks later`);
     }
   }
+});
+
+test("a Veil Anchor is recorded on the place that IS one", () => {
+  // Anchors are POIs, not prose: the tier lives on the REGION entry so the
+  // atlas can show which places open onto other Shards, and at what risk.
+  const schema = metaSchemasByKind.REGION;
+  assert.ok(schema, "REGION must have a sheet schema");
+  const place = { type: "site", settlementTier: null, parent: "the-peninsula", biome: null, control: [], population: null, connections: [], status: null, gameTag: null, openQuestions: [] };
+  // Most places are not Anchors, and null must stay legal.
+  assert.ok(schema.safeParse({ ...place, veilAnchorTier: null }).success, "a place that is not an Anchor must save");
+  for (const tier of storyVeilAnchorTiers) {
+    assert.ok(schema.safeParse({ ...place, veilAnchorTier: tier }).success, `tier ${tier} must be storable`);
+  }
+  for (const bad of ["VI", "1", "i", "Tier III", ""]) {
+    assert.equal(schema.safeParse({ ...place, veilAnchorTier: bad }).success, false, `${bad} must be refused`);
+  }
+  // Required-but-nullable, like every other sheet field.
+  assert.equal(schema.safeParse(place).success, false, "omitting the tier must be refused");
+  // Every tier the picker offers has a label to show for it.
+  for (const tier of storyVeilAnchorTiers) assert.ok(storyVeilAnchorTierLabels[tier]?.includes(tier), `tier ${tier} needs a label`);
+});
+
+test("the Veil family is wired to what it cannot ship without", () => {
+  const bySlug = new Map(storySystemsSeed.map((seed) => [seed.slug, seed]));
+  const veil = bySlug.get("the-veil");
+  assert.ok(veil, "The Veil must exist");
+  assert.equal(veil.meta.parent, null, "The Veil is top-level");
+  for (const child of ["veil-anchors", "veil-expeditions", "veil-incursions"]) {
+    assert.equal(bySlug.get(child)?.meta.parent, "the-veil", `${child} files under The Veil`);
+  }
+  // Nothing crosses without a structure to cross through.
+  for (const dependent of ["veil-expeditions", "veil-incursions"]) {
+    assert.ok(bySlug.get(dependent)?.meta.dependsOn.includes("veil-anchors"), `${dependent} depends on veil-anchors`);
+  }
+  // The raid is gated apart from the rest of the family.
+  assert.match(String(bySlug.get("veil-incursions")?.meta.unlockStage), /late game/i);
+  assert.equal(bySlug.get("veil-anchors")?.meta.unlockStage, null, "Anchors ship with the parent");
+  // The Anchors sheet must say how each region expresses them.
+  assert.ok((bySlug.get("veil-anchors")?.meta.regionNotes.length ?? 0) >= 2, "Anchors need region notes");
 });

@@ -579,7 +579,7 @@ For writers: one law above all — everything beyond the Veil is an opportunity,
 
 Anchors are tiered, I through V, and the tier is a promise about both ends: Tier I opens introductory, low-threat Crossings for common returns; Tier III opens full [[veil-incursions]]; Tier V opens catastrophic-threat, artifact-grade endgame Crossings. Placement follows the same ladder — a Tier V Anchor does not sit conveniently beside anyone's settlement. It is under a ruined city, inside a magical exclusion zone, in ground held by a power nobody fights casually, or in the hunting range of something legendary. Merely reaching and powering a high-tier Anchor is an expedition in its own right, and should be written as one.
 
-For writers: every discovered Anchor is a place, so it enters the codex as a REGION entry — a site (or a destination inside one), filed in the atlas with its parent, its controlling faction, and its own dossier. The system entry here is the law; the atlas holds the instances. When you write one, answer the accretion questions: who found it, who fenced it, who is paying the research crew, and what the instruments do at night when nobody scheduled a Crossing.`,
+For writers: every discovered Anchor is a place, so it enters the codex as a REGION entry — a site (or a destination inside one), filed in the atlas with its parent, its controlling faction, and its own dossier. Set its tier on the region sheet: the "Veil Anchor tier" field marks that place as an Anchor and is what puts it on the atlas as one. The system entry here is the law; the atlas holds the instances. When you write one, answer the accretion questions: who found it, who fenced it, who is paying the research crew, and what the instruments do at night when nobody scheduled a Crossing.`,
     meta: meta({
       category: "world simulation",
       parent: "the-veil",
@@ -610,7 +610,7 @@ For writers: a parallel Shard shows consequences without touching the campaign. 
     meta: meta({
       category: "world simulation",
       parent: "the-veil",
-      dependsOn: ["gathering-and-harvest", "survival"],
+      dependsOn: ["veil-anchors", "gathering-and-harvest", "survival"],
       pillars: [
         "One door, many destinations — and UNKNOWN means somebody goes first",
         "Dead Shards carry the best loot and the worst answers",
@@ -635,7 +635,7 @@ Two laws keep it a raid rather than a griefing tool. Incursors risk what they ca
       category: "cooperative",
       parent: "the-veil",
       unlockStage: "Late game — when a Shard is worth raiding",
-      dependsOn: ["combat", "cooperative-play"],
+      dependsOn: ["veil-anchors", "veil-expeditions", "combat", "cooperative-play"],
       pillars: [
         "Nobody is invaded who did not open the Veil",
         "Twenty minutes, and stealth decays into a manhunt",

@@ -9,6 +9,7 @@ import {
   storySettlementTiers,
   storySystemCategories,
   storySystemStatuses,
+  storyVeilAnchorTiers,
 } from "@habitat/shared";
 
 /**
@@ -72,6 +73,8 @@ export const regionMetaSchema = z.object({
   population: metaText(160),
   connections: z.array(z.object({ to: metaSlug, by: metaText(80), notes: metaText(300) })).max(30),
   status: metaText(160),
+  // Set only on places that ARE a Veil Anchor; null everywhere else.
+  veilAnchorTier: z.enum(storyVeilAnchorTiers).nullable(),
   gameTag: metaText(120),
   openQuestions: metaLines(30, 300),
 });

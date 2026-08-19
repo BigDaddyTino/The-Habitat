@@ -152,7 +152,12 @@ export function defaultChildPlaceKind(parentType: unknown): StoryPlaceKindValue 
 export function placeKindLabel(meta: Record<string, unknown>): string {
   const tier = typeof meta.settlementTier === "string" ? meta.settlementTier : null;
   const type = typeof meta.type === "string" ? meta.type : null;
-  return (tier ?? type ?? "place").replaceAll("-", " ");
+  const kind = (tier ?? type ?? "place").replaceAll("-", " ");
+  // A place that IS a Veil Anchor says so wherever it is listed. Patching the
+  // individual surfaces missed the deeper rungs — an Anchor filed under a
+  // district went unmarked on the atlas — so the marker lives in the label.
+  const anchor = typeof meta.veilAnchorTier === "string" ? meta.veilAnchorTier : null;
+  return anchor ? `${kind} · Veil Anchor ${anchor}` : kind;
 }
 
 type GalleryImage = { asset: string; pack: string; packLabel: string; image: string; ref: string };

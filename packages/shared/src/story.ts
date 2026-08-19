@@ -509,6 +509,26 @@ export const storyRegionTypes = ["region", "zone", "settlement", "landmark", "si
 export const storySettlementTiers = ["village", "town", "city", "major-city"] as const;
 export const storyControlKinds = ["holds", "contests", "influences"] as const;
 
+/**
+ * A Veil Anchor's tier, I through V — the ladder that decides how dangerous a
+ * Crossing is and how valuable what comes back. Anchors are places, so the tier
+ * lives on the REGION entry that IS the Anchor rather than in prose about it;
+ * that is what lets the atlas show which POIs open onto other Shards, and at
+ * what risk. Null on every place that is not an Anchor, which is most of them.
+ */
+export const storyVeilAnchorTiers = ["I", "II", "III", "IV", "V"] as const;
+
+export type StoryVeilAnchorTier = (typeof storyVeilAnchorTiers)[number];
+
+/** What each tier promises, for the picker and the dossier. */
+export const storyVeilAnchorTierLabels: Record<StoryVeilAnchorTier, string> = {
+  I: "Tier I — low threat, common returns, introductory Crossings",
+  II: "Tier II — moderate threat, uncommon and rare returns",
+  III: "Tier III — high threat, rare and epic returns, full Incursions",
+  IV: "Tier IV — extreme threat, epic and legendary returns, endgame",
+  V: "Tier V — catastrophic threat, legendary and artifact returns",
+};
+
 export type StoryRegionMeta = {
   type: (typeof storyRegionTypes)[number] | null;
   settlementTier: (typeof storySettlementTiers)[number] | null;
@@ -519,6 +539,8 @@ export type StoryRegionMeta = {
   /** The connections graph IS the world map — the app renders it, nobody maintains a map file. */
   connections: Array<{ to: string; by: string | null; notes: string | null }>;
   status: string | null;
+  /** Set only on places that ARE a Veil Anchor; null everywhere else. */
+  veilAnchorTier: StoryVeilAnchorTier | null;
   gameTag: string | null;
   openQuestions: string[];
 };

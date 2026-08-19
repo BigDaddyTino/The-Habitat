@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySystemCategories, storySystemStatuses, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta } from "@habitat/shared";
+import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySystemCategories, storySystemStatuses, storyVeilAnchorTiers, storyVeilAnchorTierLabels, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -343,6 +343,7 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
   const [biome, setBiome] = useState(text(source.biome));
   const [population, setPopulation] = useState(text(source.population));
   const [regionStatus, setRegionStatus] = useState(text(source.status));
+  const [veilAnchorTier, setVeilAnchorTier] = useState(text(source.veilAnchorTier));
   const [gameTag, setGameTag] = useState(text(source.gameTag));
   const [control, setControl] = useState(asArray(source.control).map((row) => ({ faction: text(record(row).faction), kind: text(record(row).kind) })));
   const [connections, setConnections] = useState(asArray(source.connections).map((row) => ({ to: text(record(row).to), by: text(record(row).by), notes: text(record(row).notes) })));
@@ -357,6 +358,7 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
     population: orNull(population),
     connections: connections.filter((row) => row.to.trim()).map((row) => ({ to: row.to.trim(), by: orNull(row.by), notes: orNull(row.notes) })),
     status: orNull(regionStatus),
+    veilAnchorTier: (storyVeilAnchorTiers as readonly string[]).includes(veilAnchorTier) ? (veilAnchorTier as StoryRegionMeta["veilAnchorTier"]) : null,
     gameTag: orNull(gameTag),
     openQuestions: splitLines(openQuestions),
   };
@@ -375,6 +377,12 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
         <label>Biome<input maxLength={160} onChange={(event) => setBiome(event.target.value)} placeholder="jungle, tropical coast…" type="text" value={biome} /></label>
         <label>Population<input maxLength={160} onChange={(event) => setPopulation(event.target.value)} placeholder="free-text scale" type="text" value={population} /></label>
         <label>Status<input maxLength={160} onChange={(event) => setRegionStatus(event.target.value)} placeholder="collapsing, occupied, thriving…" type="text" value={regionStatus} /></label>
+        {/* Only places that ARE a Veil Anchor carry a tier; it is what puts the
+            Anchor on the atlas and decides how dangerous a Crossing from it is. */}
+        <label>Veil Anchor tier<select onChange={(event) => setVeilAnchorTier(event.target.value)} value={veilAnchorTier}>
+          <option value="">Not a Veil Anchor</option>
+          {storyVeilAnchorTiers.map((option) => <option key={option} value={option}>{storyVeilAnchorTierLabels[option]}</option>)}
+        </select></label>
         <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Region.*" type="text" value={gameTag} /></label>
       </div>
 
