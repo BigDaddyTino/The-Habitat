@@ -10,6 +10,31 @@ import {
   storySystemStatuses,
 } from "@habitat/shared";
 import { storySystemsSeed } from "./story-systems-seed";
+import { metaSchemasByKind } from "./story-meta-schemas";
+
+test("every seeded system validates against the schema its sheet enforces", () => {
+  // Seeded meta that does not parse would be a row nobody can save from the
+  // sheet, and — as the 2026-08-19 audit found — a row whose shape silently
+  // disagrees with its contract. Twenty-one rows had drifted that way because
+  // they predated `parent` and `regionNotes`; this keeps the seed honest so it
+  // cannot happen again from this side.
+  const schema = metaSchemasByKind.SYSTEM;
+  assert.ok(schema, "SYSTEM must have a sheet schema");
+  for (const seed of storySystemsSeed) {
+    const result = schema.safeParse(seed.meta);
+    assert.ok(result.success, `${seed.slug} meta is invalid: ${result.success ? "" : result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
+  }
+});
+
+test("the seeded meta carries every key the schema declares", () => {
+  // safeParse passing is not enough on its own: a key the schema does not know
+  // is stripped silently rather than rejected, so compare the key sets too.
+  const shape = (metaSchemasByKind.SYSTEM as unknown as { shape: Record<string, unknown> }).shape;
+  const declared = Object.keys(shape).sort();
+  for (const seed of storySystemsSeed) {
+    assert.deepEqual(Object.keys(seed.meta).sort(), declared, `${seed.slug} meta keys drifted from the schema`);
+  }
+});
 
 test("SYSTEM is a first-class entry kind with a label", () => {
   assert.ok((storyEntryKinds as readonly string[]).includes("SYSTEM"));
@@ -17,14 +42,22 @@ test("SYSTEM is a first-class entry kind with a label", () => {
   for (const kind of storyEntryKinds) assert.ok(storyEntryKindLabels[kind], `${kind} has no label`);
 });
 
-test("the actions module validates SYSTEM sheets and the collection exists", () => {
-  // Source-level checks, matching story-lock.test.ts: importing the server
-  // modules would drag in env and Prisma, and what we are guarding is wiring.
-  const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
-  assert.match(actions, /SYSTEM: systemMetaSchema/, "SYSTEM sheets must be validated server-side");
-  assert.match(actions, /unlockArc: metaSlug\.nullable\(\)/, "the release gate must survive in the schema");
-  assert.match(actions, /parent: metaSlug\.nullable\(\)/, "the hierarchy must survive in the schema");
-  assert.match(actions, /regionNotes: z\.array/, "regional expression must survive in the schema");
+test("the SYSTEM sheet is validated, and the fields the shelf depends on survive", () => {
+  // Exercises the real schema. The hierarchy, the release gate, and the
+  // regional expression are what every systems surface reads; losing any of
+  // them silently would strip the field on the next save rather than error.
+  const schema = metaSchemasByKind.SYSTEM;
+  assert.ok(schema, "SYSTEM sheets must be validated server-side");
+  const shape = (schema as unknown as { shape: Record<string, unknown> }).shape;
+  for (const field of ["parent", "unlockArc", "unlockStage", "dependsOn", "regionNotes", "category", "buildStatus"]) {
+    assert.ok(field in shape, `the schema must keep ${field}`);
+  }
+  // Slug-typed fields refuse prose, so a picker can always resolve them.
+  const valid = { category: null, buildStatus: null, parent: null, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] };
+  assert.ok(schema.safeParse(valid).success, "an empty sheet must be savable");
+  assert.equal(schema.safeParse({ ...valid, parent: "The Environment" }).success, false, "parent must be a slug, not prose");
+  assert.equal(schema.safeParse({ ...valid, regionNotes: [{ region: "the-peninsula" }] }).success, false, "a region note needs its note");
+
   const library = readFileSync(join(process.cwd(), "lib/story-library.ts"), "utf8");
   assert.match(library, /systems: \{\s*\n\s*kind: "SYSTEM"/, "the systems library collection must exist");
 });

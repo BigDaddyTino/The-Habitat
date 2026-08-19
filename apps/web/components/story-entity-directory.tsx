@@ -70,6 +70,9 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     const value = asRecord(entry.meta).parent;
     return typeof value === "string" && value.trim() ? value.trim() : null;
   };
+  // Real titles, not de-slugged guesses: "the-sun-and-moon" is titled
+  // "The Sun & Moon", and the ampersand does not survive a replaceAll.
+  const systemTitles = new Map(entries.map((entry) => [entry.slug, entry.title]));
   const orderedEntries = isSystemsLibrary && !search
     ? (() => {
         const bySlug = new Map(entries.map((entry) => [entry.slug, entry]));
@@ -254,7 +257,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                 ? [meta.type, meta.biome].filter(Boolean).join(" · ")
                 : entry.kind === "SYSTEM"
                   ? [
-                      typeof meta.parent === "string" && meta.parent ? `inside ${String(meta.parent).replaceAll("-", " ")}` : null,
+                      typeof meta.parent === "string" && meta.parent ? `inside ${systemTitles.get(meta.parent) ?? String(meta.parent).replaceAll("-", " ")}` : null,
                       meta.category,
                       typeof meta.unlockStage === "string" && meta.unlockStage ? meta.unlockStage : meta.unlockArc ? "story-gated" : null,
                     ].filter(Boolean).join(" · ")

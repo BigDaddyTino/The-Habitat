@@ -113,6 +113,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         arcsHere={entry.arcsHere}
         containedPlaces={containedPlaces}
         entry={entry}
+        slugTitles={Object.fromEntries([...regions, ...allEntries, ...systemEntries].map((option) => [option.slug, option.title]))}
         systemFamily={systemFamily}
         systemsHere={systemsHere}
         existingArcSlugs={arcs.map((arc) => arc.slug)}

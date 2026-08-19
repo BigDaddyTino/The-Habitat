@@ -4,6 +4,7 @@ import { ArrowRight, CircleHelp, History, MapPin, Plus, Scale, Shield, Sparkles,
 import { requireRole } from "@/lib/authorization";
 import { listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { getEventArt, eventArtSlot } from "@/lib/event-art";
+import { findCodexArt } from "@/lib/codex-art";
 import { arrangeTimeline, timelineEraLabel } from "@/lib/story-timeline";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
@@ -28,6 +29,8 @@ export default async function StoryTimelinePage() {
   const [events, everything] = await Promise.all([listStoryEntries({ kind: "EVENT" }), listStoryEntries({})]);
   const titles = new Map(everything.map((entry) => [entry.slug, { title: entry.title, kind: entry.kind }]));
   const { dated, undated } = arrangeTimeline(events);
+  // The archive mural, when somebody has drawn one, sits behind the hero.
+  const mural = findCodexArt("timeline", "timeline-archive-mural");
 
   const chip = (slug: string) => {
     const known = titles.get(slug);
@@ -39,7 +42,10 @@ export default async function StoryTimelinePage() {
   return (
     <section className="page-shell codex-shell codex-timeline-shell">
       <StoryLiveSync />
-      <header className="codex-timeline-hero">
+      <header
+        className={`codex-timeline-hero${mural ? " has-mural" : ""}`}
+        style={mural ? ({ "--timeline-mural": `url('${mural}')` } as React.CSSProperties) : undefined}
+      >
         <div>
           <p className="eyebrow"><History aria-hidden="true" size={12} /> The long hunt</p>
           <h1>How the world got this way</h1>

@@ -1,9 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, History, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
 import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getEventArt } from "@/lib/event-art";
+import { timelineEraLabel } from "@/lib/story-timeline";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
@@ -28,7 +29,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [] }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {} }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -40,7 +41,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }> }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string> }) {
   const meta = record(entry.meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
@@ -145,7 +146,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         {isRegion ? <><Fact label="Place type" value={meta.type} /><Fact label="Biome" value={meta.biome} /><Fact label="Population" value={meta.population} /><Fact label="World state" value={meta.status} /><Fact label="Game tag" value={meta.gameTag} /></> : null}
         {entry.kind === "CREATURE" ? <><Fact label="Category" value={meta.category} /><Fact label="Habitats" value={words(meta.biomes).length ? words(meta.biomes).join(", ") : null} /><Fact label="Threat" value={meta.threat} /></> : null}
         {entry.kind === "ITEM" ? <><Fact label="Category" value={meta.category} /><Fact label="Rarity" value={meta.rarity} /><Fact label="Origin" value={meta.origin} /></> : null}
-        {entry.kind === "EVENT" ? <><Fact label="When" value={meta.when} /><Fact label="On the timeline" value={typeof meta.timelineYearsAgo === "number" ? "placed" : "not placed yet"} /><Fact label="Where" value={words(meta.where).length ? words(meta.where).join(", ") : null} /><Fact label="Involved" value={words(meta.involved).length ? `${words(meta.involved).length} named` : null} /></> : null}
+        {entry.kind === "EVENT" ? <><Fact label="When" value={meta.when} /><Fact label="On the timeline" value={typeof meta.timelineYearsAgo === "number" ? timelineEraLabel(meta.timelineYearsAgo) : "not placed yet"} /><Fact label="Where" value={words(meta.where).length ? words(meta.where).map((slug) => slugTitles[slug] ?? slug.replaceAll("-", " ")).join(", ") : null} /><Fact label="Involved" value={words(meta.involved).length ? `${words(meta.involved).length} named` : null} /></> : null}
         {isSystem ? <><Fact label="Category" value={meta.category} /><Fact label="Build status" value={meta.buildStatus} /><Fact label="Unlocks" value={label(meta.unlockStage) ?? (label(meta.unlockArc) ? `with ${String(meta.unlockArc).replaceAll("-", " ")}` : systemFamily?.ancestry.length ? "with its parent system" : null)} /><Fact label="Game tag" value={meta.gameTag} /></> : null}
       </dl> : null}
 
@@ -179,6 +180,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               <Plus aria-hidden="true" size={13} /> Add a place in {entry.title}
             </Link>
           </div> : null}
+          {entry.kind === "EVENT" ? <p className="entity-map-note is-prose"><History aria-hidden="true" size={13} /> {typeof meta.timelineYearsAgo === "number"
+            ? <>Sits on <Link href="/codex/timeline">the timeline</Link>, {timelineEraLabel(meta.timelineYearsAgo)}.</>
+            : <>Not on <Link href="/codex/timeline">the timeline</Link> yet — set &ldquo;years before the present&rdquo; on the sheet below, or leave it off if the unknown age is the canon.</>}</p> : null}
           {isSystem && systemFamily ? <div className="entity-contained-places entity-system-children">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Inside {entry.title}</p>
             {systemFamily.children.length ? <ul>{systemFamily.children.map((child) => <li key={child.slug}>

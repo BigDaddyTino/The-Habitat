@@ -6,18 +6,10 @@ import {
   isValidStoryKey,
   parseStoryPlaceKind,
   slugifyStoryKey,
-  storyControlKinds,
-  storyCreatureCategories,
   storyEndingKinds,
   storyEntryKinds,
-  storyFactionStances,
   storyLockTtlMs,
-  storyMagicOrigins,
   storyNodeKinds,
-  storyRegionTypes,
-  storySettlementTiers,
-  storySystemCategories,
-  storySystemStatuses,
   type StoryRegionMeta,
   type StoryStatus,
   type StorySystemMeta,
@@ -26,6 +18,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { metaSchemasByKind, metaSlug } from "@/lib/story-meta-schemas";
+import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
 
@@ -76,15 +70,21 @@ function creationStatus(): StoryStatus {
   return "CANON";
 }
 
+/**
+ * Every codex surface a write can change. The library paths are derived from
+ * storyCollections rather than listed by hand — the hand-written list had
+ * silently missed systems, events, themes, and rules as those shelves were
+ * added, so each new collection shipped serving stale pages until something
+ * else happened to revalidate them. Adding a collection now refreshes it for
+ * free; the only literals left are the pages that are not collections.
+ */
 function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex");
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
-  revalidatePath("/codex/library/characters");
-  revalidatePath("/codex/library/factions");
-  revalidatePath("/codex/library/regions");
-  revalidatePath("/codex/library/creatures");
-  revalidatePath("/codex/library/items");
+  revalidatePath("/codex/threads");
+  revalidatePath("/codex/timeline");
+  for (const collection of Object.keys(storyCollections)) revalidatePath(`/codex/library/${collection}`);
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
 }
 
@@ -901,132 +901,8 @@ export async function updateEntry(formData: FormData) {
   revalidatePath(`/codex/bible/${slug}`);
 }
 
-// --- Module meta (Codex_Module_Schema.md) ----------------------------------
-
-const metaText = (max: number) => z.string().trim().min(1).max(max).nullable();
-const metaLines = (max: number, each: number) => z.array(z.string().trim().min(1).max(each)).max(max);
-/** Slug-typed meta fields reference other entries — link now, fill later, so
- *  only the shape is checked; an unresolved slug is a todo, not an error.
- *  The shape IS checked though: every real slug is kebab-case, so anything
- *  else ("The Northern Vale") could never resolve, never match a picker, and
- *  would sit in the sheet as a link that structurally cannot come true. */
-const metaSlug = z.string().trim().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "not a slug").max(64);
-
-const characterMetaSchema = z.object({
-  fullName: metaText(160),
-  aliases: metaLines(20, 120),
-  pronouns: metaText(40),
-  sex: metaText(40),
-  species: metaText(80),
-  age: metaText(80),
-  appearance: metaText(2000),
-  voice: metaText(2000),
-  magic: z.object({
-    origin: z.enum(storyMagicOrigins).nullable(),
-    schools: metaLines(12, 80),
-    corruptionPhase: z.number().int().min(0).max(7).nullable(),
-    notes: metaText(2000),
-  }),
-  factions: z.array(z.object({ faction: metaSlug, role: metaText(160), standing: metaText(160) })).max(12),
-  home: metaText(64),
-  status: z.object({ known: metaText(500), actual: metaText(500) }),
-  relationships: z.array(z.object({ character: metaSlug.nullable(), who: metaText(160), type: metaText(300) })).max(30),
-  storyRole: metaText(500),
-  involvement: z.array(z.object({ arc: metaSlug, how: metaText(300) })).max(20),
-  gameId: metaText(120),
-  model: metaText(200),
-  openQuestions: metaLines(30, 300),
-});
-
-// Enums come from the shared constants the sheets themselves render — never
-// duplicated literals. The duplicated version rotted the moment the shared
-// list grew: "destination" was added to storyRegionTypes and the region sheet
-// offered it, while the copy here still rejected it, so saving any
-// destination's sheet failed validation and stored nothing.
-const regionMetaSchema = z.object({
-  type: z.enum(storyRegionTypes).nullable(),
-  settlementTier: z.enum(storySettlementTiers).nullable(),
-  parent: metaText(64),
-  biome: metaText(160),
-  control: z.array(z.object({ faction: metaSlug, kind: z.enum(storyControlKinds).nullable() })).max(12),
-  population: metaText(160),
-  connections: z.array(z.object({ to: metaSlug, by: metaText(80), notes: metaText(300) })).max(30),
-  status: metaText(160),
-  gameTag: metaText(120),
-  openQuestions: metaLines(30, 300),
-});
-
-const factionMetaSchema = z.object({
-  scope: metaText(80),
-  seat: metaText(64),
-  leaders: metaLines(20, 64),
-  relations: z.array(z.object({
-    faction: metaSlug,
-    stance: z.enum(storyFactionStances).nullable(),
-    notes: metaText(500),
-  })).max(30),
-  goals: metaLines(20, 500),
-  gameTag: metaText(120),
-  openQuestions: metaLines(30, 300),
-});
-
-const creatureMetaSchema = z.object({
-  category: z.enum(storyCreatureCategories).nullable(),
-  biomes: metaLines(20, 160),
-  threat: metaText(500),
-  harvest: metaText(500),
-  gameId: metaText(120),
-  openQuestions: metaLines(30, 300),
-});
-
-const itemMetaSchema = z.object({
-  category: metaText(80),
-  rarity: metaText(80),
-  origin: metaText(160),
-  gameId: metaText(120),
-  openQuestions: metaLines(30, 300),
-});
-
-/**
- * The systems sheet (Codex_Module_Schema.md §3.8). The release fields are the
- * point: `unlockArc` names the quest arc that switches the system on for the
- * player, which is how "you are not managing a kingdom on day one" stays a
- * fact the codex enforces rather than a note everybody has to remember.
- */
-const systemMetaSchema = z.object({
-  category: z.enum(storySystemCategories).nullable(),
-  buildStatus: z.enum(storySystemStatuses).nullable(),
-  parent: metaSlug.nullable(),
-  unlockArc: metaSlug.nullable(),
-  unlockStage: metaText(160),
-  dependsOn: z.array(metaSlug).max(12),
-  pillars: metaLines(12, 300),
-  regionNotes: z.array(z.object({ region: metaSlug, note: metaText(300) })).max(20),
-  gameTag: metaText(120),
-  openQuestions: metaLines(30, 300),
-});
-
-const eventMetaSchema = z.object({
-  when: metaText(160),
-  // The timeline's sortable anchor: years before the present. Fractions order
-  // same-era events; null = deliberately unplaced (an unknown age can be
-  // canon). Bounded well past the First Hunt so nobody fat-fingers infinity.
-  timelineYearsAgo: z.number().min(0).max(1_000_000).nullable(),
-  where: metaLines(20, 64),
-  involved: metaLines(30, 64),
-  outcome: metaText(2000),
-  openQuestions: metaLines(30, 300),
-});
-
-const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodTypeAny>> = {
-  CHARACTER: characterMetaSchema,
-  FACTION: factionMetaSchema,
-  REGION: regionMetaSchema,
-  CREATURE: creatureMetaSchema,
-  ITEM: itemMetaSchema,
-  EVENT: eventMetaSchema,
-  SYSTEM: systemMetaSchema,
-};
+// Sheet validation lives in lib/story-meta-schemas.ts so the same schemas can
+// be audited against stored rows by tests and scripts; see that file.
 
 /**
  * "Remove" in the writers' room is deliberately recoverable. Archiving keeps
