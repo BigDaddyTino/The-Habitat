@@ -7,7 +7,9 @@ import type { StorySystemMeta } from "@habitat/shared";
  * `scripts/seed-story-systems.ts`; from then on the entries live in the codex
  * like any other lore, edited and extended there, never from this file.
  *
- * Release gates reflect the three arcs that exist today. Kingdom management
+ * Act structure: the whole island chapter is the prologue, and Act I opens at
+ * Port Arcadia on the peninsula. Release gates reflect the three arcs that
+ * exist today. Kingdom management
  * deliberately has no arc yet — its open question points at the gap.
  */
 export type StorySystemSeed = {
@@ -228,7 +230,7 @@ For writers: construction is a promise with a delivery date. Write quests around
 For writers: expertise is voice. Write profession-gated dialogue and profession-shaped solutions — the medic reads a body differently, the infuser-tech smells a bad valve across the room. A master teaching a technique is a reward worth a whole quest. And the infuser-tech line should always feel like handling live ordnance, because it is.`,
     meta: meta({
       category: "progression",
-      unlockStage: "Act II — settled ground on the peninsula",
+      unlockStage: "Act I — settled ground on the peninsula",
       dependsOn: ["gathering-and-harvest", "trade-and-economy"],
       pillars: ["Being needed is progression", "Craft has a moral ceiling, and the game prices it"],
       openQuestions: ["One profession per character, or a skill web?", "Which professions can companions master beyond the player?"],
@@ -243,7 +245,7 @@ For writers: expertise is voice. Write profession-gated dialogue and profession-
 For writers: write joining ceremonies that mean something — an oath the scene takes seriously is a contract the story can enforce later. Every faction quest should ask what the faction owes back, because a power that only takes is a mugging with paperwork. And exit must be writable — desertion, excommunication, bought freedom, burned bridges — because players will absolutely try it.`,
     meta: meta({
       category: "social",
-      unlockStage: "Act II — the peninsula's powers",
+      unlockStage: "Act I — the peninsula's powers",
       dependsOn: ["reputation"],
       pillars: ["Joining opens doors and closes more", "Every rank has duties, not just perks", "Exit exists, and it costs"],
       openQuestions: ["Is multi-membership possible, secret, or suicidal?", "Which powers are joinable at all?"],
@@ -258,7 +260,7 @@ For writers: write joining ceremonies that mean something — an oath the scene 
 For writers: quests that move the balance should name the delta — say what the bridge was worth, and to whom. Write the war's weather into scenes: who patrols this road this month is an output of the balance, not set dressing. And keep canon's deepest rule — neither human faction understands the whole war, and the balance must never explain [[something-under-the-war]]. The map measures the war it can see.`,
     meta: meta({
       category: "world simulation",
-      unlockStage: "Act II — the peninsula war",
+      unlockStage: "Act I — the peninsula war",
       dependsOn: ["the-living-world"],
       pillars: ["The front is legible", "Player weight is real but not solitary", "The map never explains what is beneath it"],
       openQuestions: ["Can a power be eliminated outright?", "How is the balance surfaced — map paint, rumor, prices, all three?"],
@@ -273,7 +275,7 @@ For writers: quests that move the balance should name the delta — say what the
 For writers: every stall implies a supply chain of atrocity, and canon demands the chain have a return address — a breeding site, a ring, a quota, someone who signed off. Write sting, raid, and debt quests from both sides of the counter. And remember the standing companion hook: the buyer who wants a friend of yours dead rather than alive shops here, and knows exactly what the parts are worth.`,
     meta: meta({
       category: "economy",
-      unlockStage: "Act II — Port Arcadia",
+      unlockStage: "Act I — Port Arcadia",
       dependsOn: ["trade-and-economy", "reputation"],
       pillars: ["Everything has a price nobody prints", "Every lot has a return address"],
       openQuestions: ["Can the party sell — and is it exactly as profitable as it is damning?"],
@@ -288,7 +290,7 @@ For writers: every stall implies a supply chain of atrocity, and canon demands t
 For writers: management choices are moral instruments. Write shortages that force policy, and named residents whose fates react to it — the family turned away at the gate is a scene, not a statistic. A settlement's culture is authored by accumulated player choices; write moments that reflect it back, so the town the player built can look them in the eye.`,
     meta: meta({
       category: "management",
-      unlockStage: "Act II — once the party holds ground on the peninsula",
+      unlockStage: "Act I — once the party holds ground on the peninsula",
       dependsOn: ["building", "professions", "trade-and-economy"],
       pillars: ["Policy is a moral instrument", "The town runs, and remembers, without you"],
       openQuestions: ["One party settlement or several?", "Do co-op partners share governance, and how do they outvote each other?"],
@@ -300,7 +302,7 @@ For writers: management choices are moral instruments. Write shortages that forc
     summary: "The endgame of holding ground: multiple settlements, vassal relations, doctrine, and a seat at the war's table — long after day one.",
     body: `Not a day-one verb — this entry is why the release gate exists. When the story finally hands the player region-scale authority, every earlier system becomes politics: a multi-settlement economy over [[outpost-and-city-management]], relations with the surviving powers as a peer on [[the-power-balance]], and doctrine — above all harvest policy at scale, which is [[the-harvest-economy]]'s question asked of the player with a whole population's weight behind the answer. Kingdoms also get noticed, and not only by the powers on the map.
 
-For writers: do not write toward this before the story grants it — the release plan on the Systems shelf is the check. Do plant its seeds early: charters, old claims, oaths sworn in the prologue that a crown would have to honor. The best endgame material is paid for in Act I.`,
+For writers: do not write toward this before the story grants it — the release plan on the Systems shelf is the check. Do plant its seeds early: charters, old claims, oaths sworn in the prologue that a crown would have to honor. The best endgame material is paid for in the prologue.`,
     meta: meta({
       category: "management",
       unlockStage: "Late game — well beyond the peninsula landing",
