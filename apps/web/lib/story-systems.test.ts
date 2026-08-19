@@ -263,3 +263,50 @@ test("true death is stated as a floor, not a difficulty setting", () => {
     "every layer of the family names the unbound state",
   );
 });
+
+test("a Soul Echo and a Dimensional Echo are never the same thing", () => {
+  // Both are called "Echo" and they mean opposite things: one is the beacon
+  // that brings a person home, the other is what bleeds off a body that died
+  // in the wrong reality. Read as one, every Incursion death becomes a true
+  // death and the raid design collapses.
+  const incursions = bySlugBody("veil-incursions");
+  assert.match(incursions, /\[\[true-death\]\]/, "incursions must say where it stands on true death");
+  assert.match(incursions, /still has a living \[\[the-soul-forge\]\]|reclaim normally/i, "dying abroad must resolve to a normal reclamation");
+  assert.match(incursions, /is \*not\* that Soul Echo|not that Soul Echo/i, "the two Echoes must be told apart in the raid entry");
+  // And crossing unbound is still fatal — the exception has an exception.
+  assert.match(incursions, /crosses unbound|crossing with nothing to call them back/i, "an unbound Crossing must stay lethal");
+});
+
+test("co-op opens where the prologue board opens it, not on day one", () => {
+  // The authored prologue fires CO-OP AVAILABLE at Kestrel the moment the
+  // tutorial completes. A "Day one" gate contradicted the cards themselves.
+  const coop = storySystemsSeed.find((seed) => seed.slug === "cooperative-play");
+  assert.ok(coop, "cooperative-play must exist");
+  assert.equal(coop.meta.unlockArc, "the-island-is-already-lost", "co-op unlocks with the prologue");
+  assert.equal(coop.meta.unlockStage, null, "and must not also claim a day-one stage");
+  assert.match(coop.body, /prologue is single-player|CO-OP AVAILABLE/i, "the body must say when it opens");
+});
+
+test("the binding scene respects the order the prologue already authored", () => {
+  // Rook's first words on arrival are about the missing partner; binding
+  // belongs after TUTORIAL COMPLETE and before the operations table. Asserted
+  // as real ordering rather than keyword presence — a negative regex on prose
+  // flags the corrected sentence as readily as the wrong one, which is how the
+  // last two guards here tried to argue good writing out of the file.
+  const binding = bySlugBody("soul-binding");
+  // Scoped to the paragraph that stages the scene: "TUTORIAL COMPLETE" is also
+  // named earlier, where checkpoints end, and measuring that occurrence would
+  // compare beats from two different paragraphs.
+  const sceneAt = binding.indexOf("Where it happens first");
+  assert.notEqual(sceneAt, -1, "the scene must be staged under its own heading");
+  const scene = binding.slice(sceneAt);
+  const beats = ["asks about the partner", "TUTORIAL COMPLETE", "where are you bound", "operations table"];
+  const positions = beats.map((beat) => ({ beat, at: scene.indexOf(beat) }));
+  for (const { beat, at } of positions) assert.notEqual(at, -1, `the scene must mention "${beat}"`);
+  for (let i = 1; i < positions.length; i += 1) {
+    assert.ok(
+      positions[i].at > positions[i - 1].at,
+      `"${positions[i].beat}" must come after "${positions[i - 1].beat}" — the prologue board fixes that order`,
+    );
+  }
+});
