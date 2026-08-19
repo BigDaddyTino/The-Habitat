@@ -1190,17 +1190,22 @@ export async function setStoryStatus(formData: FormData) {
 // --- The freeze -------------------------------------------------------------
 
 /**
- * Locking and unlocking a flow. An ADMIN's call in both directions, and the
- * only pair of actions in the codex a writer cannot reach — everything else
- * here is open to any member.
+ * Locking and unlocking a flow. Deliberately asymmetric: any member can lock,
+ * only an ADMIN can unlock.
  *
- * Both are idempotent on purpose: two admins clicking the same badge, or one
+ * A writer finishing a flow should be able to settle it themselves — that is
+ * the point of the lock, so nobody else edits it out from under them and so
+ * what it said on the day is not arguable later. Letting them lift it again
+ * would give that away, and would make the freeze a preference rather than a
+ * record. (Tino's call, 2026-08-19.)
+ *
+ * Both are idempotent on purpose: two people clicking the same badge, or one
  * clicking twice on a slow connection, should settle rather than argue. A lock
  * that is already held keeps its original time and holder, so the trail says
  * when the story was actually settled and not when somebody last clicked.
  */
 export async function lockArc(formData: FormData) {
-  const user = await requireRole(storyReviewRole);
+  const user = await requireRole(storyReadRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
   if (!arcId.success) throw new Error("Invalid arc.");
 

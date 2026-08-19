@@ -7,36 +7,42 @@ import { lockArc, unlockArc } from "@/app/codex/actions";
 /**
  * The freeze, in the bottom-left corner of every flow.
  *
- * Who sees what, and why:
- *  - An admin always sees it, open or shut, because they are the only one who
- *    can turn it and the control has to be findable before it is needed.
- *  - Everyone else sees it only while the flow is locked. An "unlocked" badge
- *    on every board would be a permanent notice that nothing is happening —
- *    the open state is the default, and defaults do not need announcing.
+ * The two directions are not the same act, so they are not offered to the same
+ * people. Locking is any writer settling their own work — one click, always
+ * available, so finishing a flow and protecting it are the same gesture.
+ * Unlocking is reopening something somebody already called finished, which is
+ * an admin's call.
+ *
+ * A writer looking at a locked flow therefore gets a badge, not a button: the
+ * point of their own lock is that they cannot quietly take it back either.
  */
 export function StoryFlowLock({ arcId, canReview, locked }: {
   arcId: string;
   canReview: boolean;
   locked: { at: Date; by: string | null } | null;
 }) {
-  if (!locked && !canReview) return null;
-
   const heldBy = locked?.by;
   const since = locked ? locked.at.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : null;
-  const title = locked
-    ? `${heldBy ? `${heldBy} locked` : "Locked"} this flow${since ? ` on ${since}` : ""}. Nothing here can be changed until it is unlocked.`
-    : "Lock this flow. Its cards, branches, and settings freeze until an admin unlocks it.";
+
+  if (!locked) {
+    return <form action={lockArc} className="flow-lock-form">
+      <input name="arcId" type="hidden" value={arcId} />
+      <LockButton locked={false} title="Lock this flow. Its cards, branches, and settings freeze, and only an admin can reopen it." />
+    </form>;
+  }
+
+  const held = `${heldBy ? `${heldBy} locked` : "Locked"} this flow${since ? ` on ${since}` : ""}.`;
 
   if (!canReview) {
-    return <p className="flow-lock is-locked" title={title}>
+    return <p className="flow-lock is-locked" title={`${held} Nothing here can change until an admin unlocks it.`}>
       <Lock aria-hidden="true" size={12} />
       <span>Locked{heldBy ? ` by ${heldBy}` : ""}</span>
     </p>;
   }
 
-  return <form action={locked ? unlockArc : lockArc} className="flow-lock-form">
+  return <form action={unlockArc} className="flow-lock-form">
     <input name="arcId" type="hidden" value={arcId} />
-    <LockButton locked={Boolean(locked)} title={title} />
+    <LockButton locked title={`${held} Unlocking reopens it for everyone.`} />
   </form>;
 }
 
@@ -48,6 +54,6 @@ function LockButton({ locked, title }: { locked: boolean; title: string }) {
   const { pending } = useFormStatus();
   return <button className={`flow-lock${locked ? " is-locked" : ""}`} disabled={pending} title={title} type="submit">
     {locked ? <Lock aria-hidden="true" size={12} /> : <LockOpen aria-hidden="true" size={12} />}
-    <span>{pending ? (locked ? "Unlocking…" : "Locking…") : locked ? "Locked — click to unlock" : "Unlocked — click to lock"}</span>
+    <span>{pending ? (locked ? "Unlocking…" : "Locking…") : locked ? "Locked — click to unlock" : "Lock this flow"}</span>
   </button>;
 }

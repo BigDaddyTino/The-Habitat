@@ -98,17 +98,23 @@ test("the gate runs inside the writing transaction, never before it", () => {
   }
 });
 
-test("turning the lock is an admin's call, in both directions", () => {
+test("any writer can lock, and only an admin can unlock", () => {
+  // The asymmetry is the feature. A writer settles their own flow so nobody
+  // edits it out from under them; letting them lift it again would make the
+  // freeze a preference rather than a record.
   const bodies = actionBodies();
-  for (const name of ["lockArc", "unlockArc"]) {
-    const body = bodies.get(name);
-    assert.ok(body, `${name} is missing`);
-    assert.match(body, /requireRole\(storyReviewRole\)/, `${name} must be ADMIN-only`);
-  }
-  // storyReadRole is every member; it must never appear on these two.
-  for (const name of ["lockArc", "unlockArc"]) {
-    assert.doesNotMatch(bodies.get(name) as string, /requireRole\(storyReadRole\)/);
-  }
+  const lock = bodies.get("lockArc");
+  const unlock = bodies.get("unlockArc");
+  assert.ok(lock && unlock, "lockArc and unlockArc must both exist");
+  assert.match(lock, /requireRole\(storyReadRole\)/, "any member must be able to lock");
+  assert.doesNotMatch(lock, /requireRole\(storyReviewRole\)/);
+  assert.match(unlock, /requireRole\(storyReviewRole\)/, "only an admin may unlock");
+  assert.doesNotMatch(unlock, /requireRole\(storyReadRole\)/);
+});
+
+test("locking is idempotent, so a second click cannot rewrite who settled it", () => {
+  const lock = actionBodies().get("lockArc") as string;
+  assert.match(lock, /if \(arc\.lockedAt\) return/, "a lock already held must be left exactly as it stands");
 });
 
 test("the actions left outside the freeze are left outside deliberately", () => {

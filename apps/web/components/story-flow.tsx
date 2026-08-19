@@ -41,13 +41,15 @@ type FlowNodeData = {
   state: FlowNodeState;
   /** 1-based step number when this card is on the walked path. */
   walkIndex: number | null;
+  /** Every card on a locked flow wears the frost. */
+  frozen: boolean;
 };
 type FlowNode = Node<FlowNodeData, "flow">;
 
 function FlowNodeCard({ data }: NodeProps<FlowNode>) {
-  const { node, state, walkIndex } = data;
+  const { node, state, walkIndex, frozen } = data;
   return (
-    <article className={`flow-card is-${state} kind-${node.kind.toLowerCase()}`}>
+    <article className={`flow-card is-${state} kind-${node.kind.toLowerCase()}${frozen ? " is-frozen" : ""}`}>
       <Handle position={Position.Top} type="target" />
       {walkIndex !== null ? <span className="flow-step-badge">{walkIndex}</span> : null}
       <span className="flow-card-kind">{storyNodeKindLabels[node.kind]}{node.status !== "CANON" ? ` · ${node.status.toLowerCase()}` : ""}</span>
@@ -300,11 +302,11 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
           id: node.id,
           type: "flow" as const,
           position: positions.get(node.id) ?? { x: 0, y: 0 },
-          data: { node, state, walkIndex: walkIndexByNode.get(node.id) ?? null },
+          data: { node, state, walkIndex: walkIndexByNode.get(node.id) ?? null, frozen: locked !== null },
           draggable: false,
         };
       }),
-    [board.nodes, current, shown, peeking, offeredNodeIds, walkIndexByNode, positions],
+    [board.nodes, current, shown, peeking, offeredNodeIds, walkIndexByNode, positions, locked],
   );
 
   const flowEdges: Edge[] = useMemo(
@@ -392,6 +394,9 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
           <Background color="#3a4239" gap={22} />
           {board.nodes.length >= 6 ? <MiniMap className="story-minimap" maskColor="rgba(10, 14, 11, .72)" nodeColor={(node) => {
             const data = node.data as FlowNodeData;
+            // The minimap ices over with the board, or a locked flow would
+            // still read as brass and green in the corner.
+            if (data.frozen) return data.state === "dim" ? "#2b3a45" : "#7ec4f0";
             return data.state === "walked" || data.state === "current" ? "#c6974c" : data.state === "offered" ? "#8fbf8a" : "#39413a";
           }} pannable zoomable /> : null}
         </ReactFlow>
