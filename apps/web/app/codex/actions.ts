@@ -759,8 +759,19 @@ export async function createEntry(formData: FormData) {
   const slug = slugifyStoryKey(parsed.data.title);
   if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
 
-  const existing = await db.storyEntry.findUnique({ where: { slug }, select: { id: true } });
-  if (existing) throw new Error("The bible already has an entry with that name.");
+  // The slug is the key the canon export ships under, so it is frozen at
+  // creation and a later rename never moves it. That makes a collision
+  // possible against an entry nobody can find under the name they just typed:
+  // "Upper Westside" was created, renamed to "Lower Westside", and then
+  // "Upper Westside" could not be created again because its key was still
+  // held — reported only as "an entry with that name", a name that no longer
+  // existed anywhere in the bible. Say which entry actually holds the key.
+  const existing = await db.storyEntry.findUnique({ where: { slug }, select: { title: true } });
+  if (existing) {
+    throw new Error(existing.title === parsed.data.title
+      ? "The bible already has an entry with that name."
+      : `That name needs the key "${slug}", which is still held by "${existing.title}" — it was written under this name and renamed afterwards. Open /codex/bible/${slug} to rename it back, or give this one a different name.`);
+  }
 
   // A place is born already placed. Creating it loose and adopting it later
   // through the sheet is what left new POIs sitting in "not placed in a region

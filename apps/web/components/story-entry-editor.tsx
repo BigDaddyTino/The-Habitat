@@ -9,6 +9,7 @@ export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
   entry: {
     id: string;
     kind: StoryEntryKind;
+    slug: string;
     title: string;
     summary: string | null;
     body: string | null;
@@ -70,6 +71,10 @@ export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
       <input name="entryId" type="hidden" value={entry.id} /><input name="version" type="hidden" value={entry.version} />
       <label>Kind<select defaultValue={entry.kind} key={`kind-${entry.version}`} name="kind">{storyEntryKinds.map((option) => <option key={option} value={option}>{storyEntryKindLabels[option]}</option>)}</select></label>
       <label>Title<input defaultValue={entry.title} key={`title-${entry.version}`} maxLength={120} name="title" required type="text" /></label>
+      {/* The key is set when the entry is written and never moves again — the
+          game reads canon by it. Renaming without knowing that leaves the entry
+          squatting its old key, and the old name then cannot be reused. */}
+      <p className="story-inspector-hint">Key <code>{entry.slug}</code> — set when this was written, and a rename leaves it here. Nothing else can be created under the name it was born with.</p>
       <label>Summary<textarea defaultValue={entry.summary ?? ""} key={`summary-${entry.version}`} maxLength={500} name="summary" rows={2} /></label>
       <label>Detail<textarea defaultValue={entry.body ?? ""} key={`body-${entry.version}`} maxLength={20000} name="body" rows={16} /></label>
       <button className="save-server" type="submit">Save entry</button>
