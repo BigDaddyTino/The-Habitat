@@ -54,6 +54,21 @@ export async function authorizeStoryExport(authorization: string | null) {
 }
 
 /**
+ * The newest revision the export cares about. MOVED rows are excluded: card
+ * drags never change a byte of the export, and counting them churned the
+ * importer's ETag/`?since` cursor into full refetches of identical payloads
+ * every time somebody tidied a board. (The SSE cursor deliberately still
+ * counts MOVED — live boards do want to see cards move.)
+ */
+export async function newestExportRevision() {
+  return db.storyRevision.findFirst({
+    where: { action: { not: "MOVED" } },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    select: { id: true },
+  });
+}
+
+/**
  * Projects the canon story into the shape the Unreal importer reads.
  *
  * Nothing below CANON is selected at any level — arc, node, edge, or bible
@@ -63,7 +78,14 @@ export async function authorizeStoryExport(authorization: string | null) {
  * would import as a dangling asset reference.
  */
 export async function buildStoryExport(): Promise<MartinoStoryExport> {
-  const [arcs, entries, newestRevision] = await Promise.all([
+  // The cursor is read BEFORE the content, not alongside it. Read together,
+  // a change committing between the content reads and the cursor read stamps
+  // newer-cursor-on-older-content — and the importer, polling ?since=cursor,
+  // 304s forever on a codex that already moved past what it holds. Read
+  // first, the mismatch inverts to older-cursor-on-newer-content, which
+  // merely costs one redundant refetch and then self-corrects.
+  const newestRevision = await newestExportRevision();
+  const [arcs, entries] = await Promise.all([
     db.storyArc.findMany({
       where: { status: exportableStoryStatus },
       orderBy: [{ isMainline: "desc" }, { position: "asc" }, { createdAt: "asc" }],
@@ -92,7 +114,6 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       orderBy: [{ kind: "asc" }, { slug: "asc" }],
       select: { kind: true, slug: true, title: true, summary: true, body: true, meta: true },
     }),
-    db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } }),
   ]);
 
   const exportArcs: StoryExportArc[] = arcs.map((arc) => {

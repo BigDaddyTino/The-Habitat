@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, Check, GitBranch, Link2, Lock, ShieldCheck, Trash2, Unlink, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, GitBranch, Link2, Lock, ShieldCheck, Trash2, Unlink } from "lucide-react";
 import {
   isStoryContentEditable,
   storyEndingKindLabels,
@@ -13,14 +13,12 @@ import {
   storyNodeKindLabels,
   storyStatusLabels,
   type StoryEntryKind,
-  type StoryGraphProblem,
   type StoryNodeKind,
   type StoryStatus,
 } from "@habitat/shared";
 import {
   addComment,
   claimNodeLock,
-  createNode,
   deleteEdge,
   deleteNode,
   linkEntryToNode,
@@ -57,16 +55,6 @@ function FlagHints({ flags }: { flags: LibraryEntry[] }) {
   );
 }
 
-function NewNodeForm({ arcId }: { arcId: string }) {
-  return <form action={createNode} className="story-form">
-    <p className="eyebrow">Add to this arc</p>
-    <input name="arcId" type="hidden" value={arcId} />
-    <label>Kind<select defaultValue="SCENE" name="kind">{storyNodeKinds.map((kind) => <option key={kind} value={kind}>{storyNodeKindLabels[kind]}</option>)}</select></label>
-    <label>Title<input maxLength={160} name="title" placeholder="The gate refuses him" required type="text" /></label>
-    <label>Summary<textarea maxLength={500} name="summary" placeholder="One line on what happens here." rows={3} /></label>
-    <StorySubmit pendingLabel="Adding…">Add card</StorySubmit>
-  </form>;
-}
 
 export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntries, arcRefs }: { node: StoryBoardNode; arcId: string; canReview: boolean; viewerUserId: string; libraryEntries: LibraryEntry[]; arcRefs: StoryArcRef[] }) {
   const [claimFailed, setClaimFailed] = useState(false);
@@ -200,14 +188,18 @@ export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags =
     <div className="story-edge-route"><span>{fromTitle}</span><GitBranch aria-hidden="true" size={16} /><span>{toTitle}</span></div>
     {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This branch is canon.</strong> Only a reviewer can alter the exported choice.</span></p> : <form action={updateEdge} className="story-form">
       <input name="edgeId" type="hidden" value={edge.id} />
-      <label>Choice label<textarea defaultValue={edge.label ?? ""} maxLength={200} name="label" placeholder="What the player chooses. Leave blank for a simple continuation." rows={2} /></label>
+      {/* Edges have no version column, so fields are keyed on the row's
+          updatedAt: another writer's save arriving via live sync remounts them
+          with the fresh values instead of leaving pre-refresh text staged to
+          silently overwrite that save on the next submit. */}
+      <label>Choice label<textarea defaultValue={edge.label ?? ""} key={`label-${edge.id}-${edge.updatedAt.getTime()}`} maxLength={200} name="label" placeholder="What the player chooses. Leave blank for a simple continuation." rows={2} /></label>
       {/* Retargeting keeps the branch's export key, so pointing it somewhere
           new never orphans the asset the importer already built from it. */}
-      <label>Leads to<select defaultValue={edge.toNodeId} key={`to-${edge.id}-${edge.toNodeId}`} name="toNodeId">
+      <label>Leads to<select defaultValue={edge.toNodeId} key={`to-${edge.id}-${edge.updatedAt.getTime()}`} name="toNodeId">
         {nodes.filter((node) => node.id !== edge.fromNodeId).map((node) => <option key={node.id} value={node.id}>{node.title}</option>)}
       </select></label>
-      <label>Condition<textarea defaultValue={edge.condition ?? ""} maxLength={300} name="condition" placeholder="Optional requirement, flag, or designer note." rows={3} /></label>
-      <label>Effects<textarea defaultValue={edge.effects.join("\n")} name="effects" placeholder="One per line: what choosing this does. The game interprets these." rows={2} /></label>
+      <label>Condition<textarea defaultValue={edge.condition ?? ""} key={`condition-${edge.id}-${edge.updatedAt.getTime()}`} maxLength={300} name="condition" placeholder="Optional requirement, flag, or designer note." rows={3} /></label>
+      <label>Effects<textarea defaultValue={edge.effects.join("\n")} key={`effects-${edge.id}-${edge.updatedAt.getTime()}`} name="effects" placeholder="One per line: what choosing this does. The game interprets these." rows={2} /></label>
       <FlagHints flags={flags.filter((entry) => entry.kind === "FLAG")} />
       <StorySubmit pendingLabel="Saving…">Save branch</StorySubmit>
     </form>}
@@ -231,32 +223,6 @@ export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags =
   </>;
 }
 
-export function StoryWorkbench({ arcId, node, edge, fromTitle, toTitle, problems, canReview, viewerUserId, libraryEntries, arcRefs, nodes, onClose }: {
-  arcId: string;
-  node: StoryBoardNode | null;
-  edge: StoryBoardEdge | null;
-  fromTitle?: string;
-  toTitle?: string;
-  problems: StoryGraphProblem[];
-  canReview: boolean;
-  viewerUserId: string;
-  libraryEntries: LibraryEntry[];
-  arcRefs: StoryArcRef[];
-  nodes: StoryNodeRef[];
-  onClose: () => void;
-}) {
-  return <aside aria-label="Story inspector" className="story-inspector">
-    {node ? <>
-      <header className="story-inspector-head"><div><p className="eyebrow">{storyNodeKindLabels[node.kind]}</p><h2>{node.title}</h2></div><button aria-label="Close the inspector" className="icon-action" onClick={onClose} type="button"><X aria-hidden="true" size={15} /></button></header>
-      {problems.length > 0 ? <ul className="story-problem-list">{problems.map((problem, index) => <li key={`${problem.kind}-${problem.nodeKey}-${index}`}>{problem.detail}</li>)}</ul> : null}
-      <NodeEditor arcId={arcId} arcRefs={arcRefs} canReview={canReview} key={node.id} libraryEntries={libraryEntries} node={node} viewerUserId={viewerUserId} />
-    </> : edge ? <>
-      <header className="story-inspector-head"><div><p className="eyebrow">Story branch</p><h2>{edge.label || "Continuation"}</h2></div><button aria-label="Close the inspector" className="icon-action" onClick={onClose} type="button"><X aria-hidden="true" size={15} /></button></header>
-      <EdgeEditor canReview={canReview} edge={edge} flags={libraryEntries} fromTitle={fromTitle ?? "Unknown card"} nodes={nodes} toTitle={toTitle ?? "Unknown card"} />
-    </> : <>
-      <header className="story-inspector-head"><div><p className="eyebrow">Board tools</p><h2>Build the next beat</h2></div></header>
-      <p className="story-inspector-hint">Select a card to write it, or select a branch to label the player&apos;s choice. Drag from the right handle of one card to the left handle of another to connect them.</p>
-      <NewNodeForm arcId={arcId} />
-    </>}
-  </aside>;
-}
+// The whiteboard-era StoryWorkbench inspector shell that used to live here was
+// dead code — the arc rework left only NodeEditor and EdgeEditor imported —
+// and was removed with the stale drag-between-handles copy inside it.

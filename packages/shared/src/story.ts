@@ -201,7 +201,13 @@ export type StoryGraphProblem = {
  * none is a cycle the player can never get into.
  */
 export function findStoryEntryNodeKeys(nodes: StoryGraphNode[], edges: StoryGraphEdge[]) {
-  const entered = new Set(edges.map((edge) => edge.toKey));
+  // Only an edge between two nodes that are actually on the board marks its
+  // target as entered. An edge can legitimately outlive one of its endpoints
+  // (a cut or non-canon node), and counting such a ghost edge here declared a
+  // healthy opening "entered" — reporting NO_ENTRY_POINT on a walkable arc and
+  // suppressing every UNREACHABLE check along with it.
+  const known = new Set(nodes.map((node) => node.key));
+  const entered = new Set(edges.filter((edge) => known.has(edge.fromKey) && known.has(edge.toKey)).map((edge) => edge.toKey));
   return nodes.filter((node) => !entered.has(node.key)).map((node) => node.key);
 }
 

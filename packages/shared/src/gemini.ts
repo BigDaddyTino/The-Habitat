@@ -147,7 +147,11 @@ export async function generateGeminiAnswer(
     throw new GeminiApiError("UNKNOWN_MODEL", `Gemini has no model named "${model}" for this key. Check GEMINI_MODEL.`);
   }
   if (response.status === 429) {
-    const retryAfter = Number(response.headers?.get("retry-after"));
+    // A missing header must read as "no hint" (null), not "retry in 0
+    // seconds": Number(null) is 0, which passes the finite/non-negative
+    // check below and turns absence into an immediately-retryable promise.
+    const header = response.headers?.get("retry-after");
+    const retryAfter = header === null || header === undefined ? Number.NaN : Number(header);
     // The only ceiling the assistant has: Google's own. Naming it stops this
     // reading as a Habitat-side refusal the operator would go hunting for.
     throw new GeminiApiError("RATE_LIMITED", "Gemini has hit its own rate limit for this key. Try again in a few minutes.", Number.isFinite(retryAfter) && retryAfter >= 0 ? Math.ceil(retryAfter) : null);

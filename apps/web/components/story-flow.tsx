@@ -188,6 +188,16 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
     initialNodeId && board.nodes.some((node) => node.id === initialNodeId) ? initialNodeId : null,
   );
 
+  // A ?node= deep link must land even when the arc page is already mounted —
+  // the threads ledger links "set at" and "answered at" into the same arc, and
+  // search-param navigation preserves client state, so the lazy initializer
+  // above only covers the cold mount. Adjust-during-render, per house rule.
+  const [lastDeepLink, setLastDeepLink] = useState(initialNodeId);
+  if (initialNodeId !== lastDeepLink) {
+    setLastDeepLink(initialNodeId);
+    if (initialNodeId && board.nodes.some((node) => node.id === initialNodeId)) setSelectedId(initialNodeId);
+  }
+
   // Writing tools fold away per card; reset during render when the panel
   // moves to a different card so an open editor never carries over.
   const [editingCard, setEditingCard] = useState(false);
@@ -237,10 +247,21 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
     setPath([{ nodeId, via: null }]);
     setSelectedId(null);
   }, []);
-  const rewindTo = useCallback((nodeId: string) => {
+  // Rewinds take the step's index, not its node id: loops are legal, so one
+  // node can appear twice in a walk, and a findIndex by id always truncated
+  // at the FIRST visit — discarding more of the walk than the writer chose.
+  const rewindTo = useCallback((stepIndex: number) => {
+    setPath((previous) => (stepIndex >= 0 && stepIndex < previous.length ? previous.slice(0, stepIndex + 1) : previous));
+    setSelectedId(null);
+  }, []);
+  // From a peeked card the writer means "back to when I was HERE last" — the
+  // most recent visit, which on a looped walk is not the first one.
+  const rewindToNode = useCallback((nodeId: string) => {
     setPath((previous) => {
-      const index = previous.findIndex((step) => step.nodeId === nodeId);
-      return index >= 0 ? previous.slice(0, index + 1) : previous;
+      for (let index = previous.length - 1; index >= 0; index -= 1) {
+        if (previous[index].nodeId === nodeId) return previous.slice(0, index + 1);
+      }
+      return previous;
     });
     setSelectedId(null);
   }, []);
@@ -250,12 +271,13 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
   }, [entryNodes]);
 
   // The camera follows whatever the panel is showing.
-  useEffect(() => {
-    if (!shown) return;
-    const position = positions.get(shown.id);
+  const centerOn = useCallback((nodeId: string | null) => {
+    if (!nodeId) return;
+    const position = positions.get(nodeId);
     if (!position) return;
     flowRef.current?.setCenter(position.x + 120, position.y + 46, { zoom: 0.95, duration: 500 });
-  }, [shown, positions]);
+  }, [positions]);
+  useEffect(() => centerOn(shown?.id ?? null), [shown, centerOn]);
 
   const flowNodes: FlowNode[] = useMemo(
     () =>
@@ -350,7 +372,13 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
           nodeTypes={nodeTypes}
           nodes={flowNodes}
           onConnect={onConnect}
-          onInit={(instance) => { flowRef.current = instance; }}
+          onInit={(instance) => {
+            flowRef.current = instance;
+            // A ?node= deep link selects before the canvas exists; the mount
+            // effect ran against a null ref, so the first centering happens
+            // here or not at all.
+            centerOn(shown?.id ?? null);
+          }}
           onNodeClick={onNodeClick}
           onPaneClick={() => setSelectedId(null)}
           proOptions={{ hideAttribution: false }}
@@ -415,7 +443,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
             {peeking ? (
               <div className="flow-peek-actions">
                 {walkIndexByNode.has(shown.id) ? (
-                  <button className="flow-tool" onClick={() => rewindTo(shown.id)} type="button"><Undo2 aria-hidden="true" size={12} /> Rewind the walk to here</button>
+                  <button className="flow-tool" onClick={() => rewindToNode(shown.id)} type="button"><Undo2 aria-hidden="true" size={12} /> Rewind the walk to here</button>
                 ) : (
                   <button className="flow-tool" onClick={() => readFrom(shown.id)} type="button"><CornerDownRight aria-hidden="true" size={12} /> Read the story from here</button>
                 )}
@@ -524,7 +552,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
                   {path.map((step, index) => {
                     const node = nodesById.get(step.nodeId);
                     if (!node) return null;
-                    return <li key={`${step.nodeId}-${index}`}><button onClick={() => rewindTo(step.nodeId)} type="button">{node.title}</button></li>;
+                    return <li key={`${step.nodeId}-${index}`}><button onClick={() => rewindTo(index)} type="button">{node.title}</button></li>;
                   })}
                 </ol>
               </div>

@@ -4,11 +4,12 @@ import { ArrowRight, Boxes, Compass, MapPin, Plus, Search, Sparkles, UserRoundSe
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
+import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryEntries } from "@/lib/story-codex";
-import { storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
+import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -57,11 +58,13 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
       if (topSlugs.has(entry.slug)) continue;
       const home = storyPlaceRoot(entry.slug, placeLinks, isTop);
       if (!home) { unplaced.push(entry); continue; }
-      // Only the rung directly under the region gets a row; anything deeper —
-      // a destination inside a POI — is listed under the place holding it, so
-      // the card shows the shape of the world rather than a flat pile.
+      // Only the rung directly under the region gets a row; everything deeper
+      // — however deep — is listed under that row. Direct children only here
+      // would silently drop a place four rungs down: filed under a parent
+      // that never gets a row of its own, it appeared nowhere on this page.
       if (parentSlugOf(entry) !== home) continue;
-      const inside = ordered.filter((candidate) => parentSlugOf(candidate) === entry.slug);
+      const beneath = new Set(storyPlaceDescendants(entry.slug, placeLinks));
+      const inside = ordered.filter((candidate) => beneath.has(candidate.slug));
       const bucket = contained.get(home);
       if (bucket) bucket.push({ place: entry, inside }); else contained.set(home, [{ place: entry, inside }]);
     }
@@ -139,6 +142,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
         {entries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
+          const characterKeyart = entry.kind === "CHARACTER" ? getCharacterKeyart(entry.slug) : null;
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
           const characterFactionBrands = entry.kind === "CHARACTER"
@@ -166,7 +170,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}

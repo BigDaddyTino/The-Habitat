@@ -137,6 +137,17 @@ test("edges pointing at nodes outside the graph are ignored rather than crashing
   assert.deepEqual(analyzeStoryGraph(nodes, edges), []);
 });
 
+test("a ghost edge INTO the board cannot fake an entrance", () => {
+  // The mirror of the case above: an edge whose SOURCE was cut. Counting it
+  // marked the arc's real opening as "entered", which reported NO_ENTRY_POINT
+  // on a perfectly walkable arc — and, with no entry points, suppressed every
+  // UNREACHABLE check as well.
+  const nodes = [scene("gate"), ending("out")];
+  const edges = [link("ghost", "gate"), link("gate", "out")];
+  assert.deepEqual(findStoryEntryNodeKeys(nodes, edges), ["gate"]);
+  assert.deepEqual(analyzeStoryGraph(nodes, edges), []);
+});
+
 test("an empty board reports nothing", () => {
   assert.deepEqual(analyzeStoryGraph([], []), []);
 });

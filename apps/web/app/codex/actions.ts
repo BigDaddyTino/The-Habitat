@@ -7,10 +7,16 @@ import {
   isStoryContentEditable,
   parseStoryPlaceKind,
   slugifyStoryKey,
+  storyControlKinds,
+  storyCreatureCategories,
   storyEndingKinds,
   storyEntryKinds,
+  storyFactionStances,
   storyLockTtlMs,
+  storyMagicOrigins,
   storyNodeKinds,
+  storyRegionTypes,
+  storySettlementTiers,
   type StoryRegionMeta,
   type StoryStatus,
 } from "@habitat/shared";
@@ -179,6 +185,8 @@ export async function updateArc(formData: FormData) {
     }
     await assertRegionEntry(tx, parsed.data.regionEntryId);
 
+    // Mainline stays a reviewer's call; everyone else's edit keeps it as-is.
+    const nextIsMainline = user.role === "ADMIN" ? parsed.data.isMainline : arc.isMainline;
     await tx.storyArc.update({
       where: { id: arc.id },
       data: {
@@ -186,8 +194,7 @@ export async function updateArc(formData: FormData) {
         summary: parsed.data.summary,
         hook: parsed.data.hook,
         regionEntryId: parsed.data.regionEntryId,
-        // Mainline stays a reviewer's call; everyone else's edit keeps it as-is.
-        isMainline: user.role === "ADMIN" ? parsed.data.isMainline : arc.isMainline,
+        isMainline: nextIsMainline,
       },
     });
     await recordRevision(tx, {
@@ -198,7 +205,7 @@ export async function updateArc(formData: FormData) {
       actorUserId: user.id,
       summary: `Reworked the arc "${parsed.data.title}"`,
       before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, isMainline: arc.isMainline },
-      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId },
+      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, isMainline: nextIsMainline },
     });
     return arc.slug;
   });
@@ -224,9 +231,15 @@ const createNodeSchema = z.object({
  * a grid rather than at a random offset so two people adding a node at the same
  * moment do not drop them on top of each other.
  */
+/** The DB CHECK bounds canvas coordinates to ±100000; every computed
+ *  placement clamps to it so arithmetic near the edge of the board fails
+ *  gracefully into the corner instead of rolling the whole save back with a
+ *  raw constraint error. */
+const clampCanvas = (value: number) => Math.max(-100_000, Math.min(100_000, value));
+
 function nextCanvasSlot(existingNodes: number) {
   const columns = 4;
-  return { canvasX: (existingNodes % columns) * 300, canvasY: Math.floor(existingNodes / columns) * 220 };
+  return { canvasX: clampCanvas((existingNodes % columns) * 300), canvasY: clampCanvas(Math.floor(existingNodes / columns) * 220) };
 }
 
 /**
@@ -441,6 +454,23 @@ export async function deleteNode(formData: FormData) {
       await tx.storyNode.update({ where: { id: node.id }, data: { status: "ARCHIVED", updatedByUserId: user.id } });
       await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Archived the canon node "${node.title}"`, before: { status: "CANON" }, after: { status: "ARCHIVED" } });
       return node.arc.slug;
+    }
+
+    // Archived is terminal for this action. Without this, a second delete —
+    // one stale tab away — fell through to the hard delete below and erased
+    // the very node the archive path had just protected.
+    if (node.status === "ARCHIVED") throw new Error("That node is already archived. An administrator can restore it from the revision trail.");
+
+    // The node's edges go with it via the DB cascade, and each is a choice
+    // asset the Unreal side may have built. Every one gets its own DELETED
+    // revision with the key in `before` — the same contract deleteEdge keeps —
+    // so the importer can match the report to the asset it loses.
+    const attachedEdges = await tx.storyEdge.findMany({
+      where: { OR: [{ fromNodeId: node.id }, { toNodeId: node.id }] },
+      select: { id: true, key: true, label: true, condition: true },
+    });
+    for (const edge of attachedEdges) {
+      await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: node.arcId, action: "DELETED", actorUserId: user.id, summary: `Removed a branch with "${node.title}"`, before: { key: edge.key, label: edge.label, condition: edge.condition } });
     }
 
     await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "DELETED", actorUserId: user.id, summary: `Removed "${node.title}"`, before: { key: node.key, title: node.title, kind: node.kind, body: node.body } });
@@ -658,8 +688,8 @@ export async function addBranch(formData: FormData) {
           title,
           // The new card lands one column to the right of its parent, where
           // the branch visibly goes somewhere instead of onto a distant grid.
-          canvasX: from.canvasX + 300,
-          canvasY: from.canvasY + 40,
+          canvasX: clampCanvas(from.canvasX + 300),
+          canvasY: clampCanvas(from.canvasY + 40),
           status: creationStatus(),
           createdByUserId: user.id,
         },
@@ -797,6 +827,22 @@ export async function updateEntry(formData: FormData) {
       throw new Error("This bible entry is canon. Leave a note for a reviewer before changing it.");
     }
 
+    // A kind change must not orphan structural references that were validated
+    // against the old kind at link time: a dialogue speaker has to stay a
+    // CHARACTER, and an arc's pickup place has to stay a REGION. Without
+    // these, "actually this should be an item" silently broke the exporter's
+    // speaker-resolves-to-a-character-asset promise on every node involved.
+    if (parsed.data.kind !== entry.kind) {
+      if (entry.kind === "CHARACTER") {
+        const speaks = await tx.storyNode.count({ where: { speakerEntryId: entry.id, status: { in: ["DRAFT", "PROPOSED", "CANON"] } } });
+        if (speaks > 0) throw new Error(`"${entry.title}" speaks in ${speaks} scene${speaks === 1 ? "" : "s"}. Recast those speakers before changing what kind of entry this is.`);
+      }
+      if (entry.kind === "REGION") {
+        const pickups = await tx.storyArc.count({ where: { regionEntryId: entry.id, status: { in: ["DRAFT", "PROPOSED", "CANON"] } } });
+        if (pickups > 0) throw new Error(`"${entry.title}" is the pickup place of ${pickups} quest${pickups === 1 ? "" : "s"}. Repoint those arcs before changing what kind of entry this is.`);
+      }
+    }
+
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: parsed.data.version },
       data: { kind: parsed.data.kind, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, updatedByUserId: user.id, version: { increment: 1 }, lockedByUserId: null, lockExpiresAt: null },
@@ -824,8 +870,11 @@ export async function updateEntry(formData: FormData) {
 const metaText = (max: number) => z.string().trim().min(1).max(max).nullable();
 const metaLines = (max: number, each: number) => z.array(z.string().trim().min(1).max(each)).max(max);
 /** Slug-typed meta fields reference other entries — link now, fill later, so
- *  only the shape is checked; an unresolved slug is a todo, not an error. */
-const metaSlug = z.string().trim().min(1).max(64);
+ *  only the shape is checked; an unresolved slug is a todo, not an error.
+ *  The shape IS checked though: every real slug is kebab-case, so anything
+ *  else ("The Northern Vale") could never resolve, never match a picker, and
+ *  would sit in the sheet as a link that structurally cannot come true. */
+const metaSlug = z.string().trim().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "not a slug").max(64);
 
 const characterMetaSchema = z.object({
   fullName: metaText(160),
@@ -837,7 +886,7 @@ const characterMetaSchema = z.object({
   appearance: metaText(2000),
   voice: metaText(2000),
   magic: z.object({
-    origin: z.enum(["none", "born", "infused", "gifted"]).nullable(),
+    origin: z.enum(storyMagicOrigins).nullable(),
     schools: metaLines(12, 80),
     corruptionPhase: z.number().int().min(0).max(7).nullable(),
     notes: metaText(2000),
@@ -853,12 +902,17 @@ const characterMetaSchema = z.object({
   openQuestions: metaLines(30, 300),
 });
 
+// Enums come from the shared constants the sheets themselves render — never
+// duplicated literals. The duplicated version rotted the moment the shared
+// list grew: "destination" was added to storyRegionTypes and the region sheet
+// offered it, while the copy here still rejected it, so saving any
+// destination's sheet failed validation and stored nothing.
 const regionMetaSchema = z.object({
-  type: z.enum(["region", "zone", "settlement", "landmark", "site"]).nullable(),
-  settlementTier: z.enum(["village", "town", "city", "major-city"]).nullable(),
+  type: z.enum(storyRegionTypes).nullable(),
+  settlementTier: z.enum(storySettlementTiers).nullable(),
   parent: metaText(64),
   biome: metaText(160),
-  control: z.array(z.object({ faction: metaSlug, kind: z.enum(["holds", "contests", "influences"]).nullable() })).max(12),
+  control: z.array(z.object({ faction: metaSlug, kind: z.enum(storyControlKinds).nullable() })).max(12),
   population: metaText(160),
   connections: z.array(z.object({ to: metaSlug, by: metaText(80), notes: metaText(300) })).max(30),
   status: metaText(160),
@@ -872,7 +926,7 @@ const factionMetaSchema = z.object({
   leaders: metaLines(20, 64),
   relations: z.array(z.object({
     faction: metaSlug,
-    stance: z.enum(["ally", "enemy", "rival", "client", "unknown"]).nullable(),
+    stance: z.enum(storyFactionStances).nullable(),
     notes: metaText(500),
   })).max(30),
   goals: metaLines(20, 500),
@@ -881,7 +935,7 @@ const factionMetaSchema = z.object({
 });
 
 const creatureMetaSchema = z.object({
-  category: z.enum(["natural", "magical", "monstrosity", "abomination", "supernatural"]).nullable(),
+  category: z.enum(storyCreatureCategories).nullable(),
   biomes: metaLines(20, 160),
   threat: metaText(500),
   harvest: metaText(500),

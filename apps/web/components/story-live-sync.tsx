@@ -18,11 +18,36 @@ export function StoryLiveSync({ arcId = null, nodeId = null, refreshOnHeartbeat 
 
   useEffect(() => {
     const source = new EventSource("/api/codex/stream");
-    const onChanged = () => router.refresh();
+    // The server recycles every stream after ten minutes and EventSource
+    // reconnects on its own — but each new connection starts a fresh cursor.
+    // A change landing in the reconnect gap would never produce a `changed`
+    // event, so the `ready` cursor is compared against the last one seen:
+    // if it moved while we were not listening, the page refreshes to catch up.
+    let lastCursor: string | null = null;
+    const cursorOf = (event: MessageEvent) => {
+      try {
+        const parsed: unknown = JSON.parse(String(event.data));
+        const cursor = (parsed as { cursor?: unknown } | null)?.cursor;
+        return typeof cursor === "string" && cursor ? cursor : null;
+      } catch {
+        return null;
+      }
+    };
+    const onReady = (event: MessageEvent) => {
+      const cursor = cursorOf(event);
+      if (cursor && lastCursor && cursor !== lastCursor) router.refresh();
+      if (cursor) lastCursor = cursor;
+    };
+    const onChanged = (event: MessageEvent) => {
+      lastCursor = cursorOf(event) ?? lastCursor;
+      router.refresh();
+    };
+    source.addEventListener("ready", onReady);
     source.addEventListener("changed", onChanged);
     // EventSource retries on its own, so an error here needs no handling beyond
     // not tearing the page down over it.
     return () => {
+      source.removeEventListener("ready", onReady);
       source.removeEventListener("changed", onChanged);
       source.close();
     };

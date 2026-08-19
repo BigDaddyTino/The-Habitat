@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { getPrismaClient } from "@habitat/db/client";
 import { storyExportContractVersion } from "@habitat/shared";
-import { authorizeStoryExport, buildStoryExport } from "@/lib/story-export";
-
-const db = getPrismaClient();
+import { authorizeStoryExport, buildStoryExport, newestExportRevision } from "@/lib/story-export";
 
 /**
  * The canon story, for the Martino Unreal project.
@@ -29,8 +26,10 @@ export async function GET(request: Request) {
 
   // Tie-broken by id: several revisions written inside one transaction share a
   // createdAt, and an ETag that flips between them would send the importer to
-  // fetch the whole codex again for a story that had not changed.
-  const newest = await db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } });
+  // fetch the whole codex again for a story that had not changed. MOVED rows
+  // are excluded (same rule as the cursor stamped into the payload): a card
+  // drag changes nothing the importer reads.
+  const newest = await newestExportRevision();
   const etag = `"story-v${storyExportContractVersion}-${newest?.id ?? "empty"}"`;
   const since = new URL(request.url).searchParams.get("since");
   // Cloudflare downgrades the response ETag to a weak validator (W/"…"), so a

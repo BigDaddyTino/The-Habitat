@@ -38,28 +38,45 @@ export async function GET(request: Request) {
   const encoder = new TextEncoder();
   let cursor = "";
 
+  // Shared between start() and cancel() so a consumer-side cancellation tears
+  // the timers down too, not only an abort event.
+  let finish = () => {};
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let closed = false;
+      // Declared before finish() can possibly run — send() may call it on the
+      // very first write if the client is already gone.
+      let poll: ReturnType<typeof setInterval> | null = null;
+      let keepAlive: ReturnType<typeof setInterval> | null = null;
+      let expiry: ReturnType<typeof setTimeout> | null = null;
+
+      // Teardown must be reachable from every path. The old version guarded
+      // finish() behind the same `closed` flag that send() sets when an
+      // enqueue throws — so a stream that died mid-write skipped the
+      // clearInterval calls and its poll/keep-alive timers ran for the life
+      // of the process, accumulating with every recycled connection.
+      finish = () => {
+        if (poll) clearInterval(poll);
+        if (keepAlive) clearInterval(keepAlive);
+        if (expiry) clearTimeout(expiry);
+        if (closed) return;
+        closed = true;
+        try {
+          controller.close();
+        } catch {
+          // Already torn down by the client disconnecting.
+        }
+      };
+
       const send = (payload: string) => {
         if (closed) return;
         try {
           controller.enqueue(encoder.encode(payload));
         } catch {
+          // The consumer is gone; release the timers with it.
           closed = true;
-        }
-      };
-
-      const finish = () => {
-        if (closed) return;
-        closed = true;
-        clearInterval(poll);
-        clearInterval(keepAlive);
-        clearTimeout(expiry);
-        try {
-          controller.close();
-        } catch {
-          // Already torn down by the client disconnecting.
+          finish();
         }
       };
 
@@ -71,7 +88,7 @@ export async function GET(request: Request) {
       }
       send(`retry: 5000\nevent: ready\ndata: ${JSON.stringify({ cursor })}\n\n`);
 
-      const poll = setInterval(async () => {
+      poll = setInterval(async () => {
         if (closed) return;
         try {
           const next = await getStoryCursor();
@@ -84,9 +101,15 @@ export async function GET(request: Request) {
         }
       }, pollMs);
 
-      const keepAlive = setInterval(() => send(": keep-alive\n\n"), keepAliveMs);
-      const expiry = setTimeout(finish, maxConnectionMs);
-      request.signal.addEventListener("abort", finish);
+      keepAlive = setInterval(() => send(": keep-alive\n\n"), keepAliveMs);
+      expiry = setTimeout(() => finish(), maxConnectionMs);
+      request.signal.addEventListener("abort", () => finish());
+      if (closed) finish();
+    },
+    // The runtime calls this when the consumer cancels the stream without an
+    // abort event — the other path the timers used to leak through.
+    cancel() {
+      finish();
     },
   });
 

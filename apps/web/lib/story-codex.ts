@@ -82,6 +82,10 @@ export type StoryBoardEdge = {
   effects: string[];
   position: number;
   status: StoryStatus;
+  /** Edges carry no version column, so the editor keys its fields on this to
+   *  pick up another writer's save on refresh instead of silently holding —
+   *  and later re-submitting — pre-refresh values. */
+  updatedAt: Date;
 };
 
 export type StoryBoard = {
@@ -232,7 +236,10 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       author: storyMemberName(arc.creator),
     },
     nodes: boardNodes,
-    edges: edges.map((edge) => ({
+    // Edges whose endpoint was withheld (archived/rejected node) are withheld
+    // too, matching the export. Shipping them made the reader offer a choice
+    // whose target is not in the payload — a "Continue →" into nothing.
+    edges: edges.filter((edge) => byId.has(edge.fromNodeId) && byId.has(edge.toNodeId)).map((edge) => ({
       id: edge.id,
       key: edge.key,
       fromNodeId: edge.fromNodeId,
@@ -242,6 +249,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       effects: edge.effects,
       position: edge.position,
       status: edge.status,
+      updatedAt: edge.updatedAt,
     })),
     libraryEntries,
     entryNodeKeys: findStoryEntryNodeKeys(graphNodes, graphEdges),
@@ -301,6 +309,11 @@ export async function getStoryEntry(slug: string) {
       editor: { select: writerSelect },
       lockedBy: { select: writerSelect },
       nodeLinks: {
+        // Filtered like speakerOf below and like every count elsewhere: a
+        // rejected or archived scene is not an appearance. Unfiltered, a dead
+        // reference also poisoned the dedupe set and could suppress a live
+        // speaker row for the same node.
+        where: { node: { status: { in: workingStatuses } } },
         include: { node: { select: { id: true, key: true, title: true, status: true, arc: { select: { slug: true, title: true } } } } },
         orderBy: { createdAt: "asc" },
       },
