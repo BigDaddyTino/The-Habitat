@@ -6,7 +6,7 @@ import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryEntryEditor } from "@/components/story-entry-editor";
-import { CharacterSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet } from "@/components/story-entry-sheets";
+import { CharacterSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet, SystemSheet } from "@/components/story-entry-sheets";
 import { StoryEntityProfile } from "@/components/story-entity-profile";
 import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button";
 import { StoryWarden } from "@/components/story-warden";
@@ -21,7 +21,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const entry = await getStoryEntry(slug);
   if (!entry) notFound();
 
-  const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT"] as const;
+  const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT", "SYSTEM"] as const;
   const needsPickers = (sheetKinds as readonly string[]).includes(entry.kind);
   const [factions, regions, characters, arcs] = needsPickers
     ? await Promise.all([
@@ -32,7 +32,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       ])
     : [[], [], [], []];
   // An event can involve anyone and anything, so its picker spans every kind.
-  const allEntries = entry.kind === "EVENT" ? await listStoryEntries({}) : [];
+  const allEntries = entry.kind === "EVENT" || entry.kind === "SYSTEM" ? await listStoryEntries({}) : [];
   const collection = collectionForKind(entry.kind);
 
   // A region dossier IS the "what's in here" page: every place whose sheet
@@ -124,6 +124,15 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
                   regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "SYSTEM" ? (
+                <SystemSheet
+                  arcs={arcs.map((arc) => ({ slug: arc.slug, title: arc.title }))}
+                  entryId={entry.id}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  systems={allEntries.filter((option) => option.kind === "SYSTEM" && option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />
               ) : entry.kind === "EVENT" ? (

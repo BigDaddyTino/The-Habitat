@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, GitBranch, Inbox, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
+import { ArrowRight, BookOpen, Cog, GitBranch, Inbox, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryActivity, getStoryReviewQueue, getStoryThreads, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -42,10 +42,10 @@ function auditTone(action: string, statusTo: string | null): { label: string; to
 export default async function CodexPage() {
   await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
-  const [arcs, activity, queue, rules, regions, themes, characters, factions, threads] = await Promise.all([
+  const [arcs, activity, queue, rules, regions, themes, characters, factions, systems, threads] = await Promise.all([
     listStoryArcs(), getStoryActivity(50), canReview ? getStoryReviewQueue() : Promise.resolve(null),
     listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "THEME" }),
-    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), getStoryThreads(),
+    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }), getStoryThreads(),
   ]);
   const mainline = arcs.filter((arc) => arc.isMainline);
   const side = arcs.filter((arc) => !arc.isMainline);
@@ -76,6 +76,7 @@ export default async function CodexPage() {
           <Link href="/codex/library/characters"><UsersRound aria-hidden="true" /><span><small>{characters.length} characters</small><strong>Characters</strong><p>Voice, relationships, factions, quests, and game models.</p></span><ArrowRight aria-hidden="true" /></Link>
           <Link href="/codex/library/factions"><Shield aria-hidden="true" /><span><small>{factions.length} factions</small><strong>Factions</strong><p>Leadership, territory, goals, allies, enemies, and influence.</p></span><ArrowRight aria-hidden="true" /></Link>
           <Link href="/codex/library/regions"><Map aria-hidden="true" /><span><small>{regions.length} regions</small><strong>Regions</strong><p>World hierarchy, control, travel connections, and game tags.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link href="/codex/library/systems"><Cog aria-hidden="true" /><span><small>{systems.length} systems</small><strong>Game systems</strong><p>The mechanics the game will ship, and when the story hands each one to the player.</p></span><ArrowRight aria-hidden="true" /></Link>
           <Link href="#stories"><GitBranch aria-hidden="true" /><span><small>{arcs.length} arcs</small><strong>Stories &amp; quests</strong><p>Scene flow, decisions, consequences, rewards, and endings.</p></span><ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>

@@ -338,6 +338,10 @@ enum StoryEntryKind {
   /// spell the same consequence two ways; the set and check ends both
   /// reference the entry, and the bible shows everywhere it appears.
   FLAG
+  /// A game mechanic written down for the writers' room — what the player can
+  /// actually do — so quests are written toward systems that exist. Its meta
+  /// carries the release gate: the arc that switches the system on.
+  SYSTEM
 }
 
 /// Contribution status. Anyone below ADMIN writes at PROPOSED, and only CANON

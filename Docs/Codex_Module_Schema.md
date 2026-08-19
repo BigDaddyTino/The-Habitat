@@ -161,7 +161,17 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
 
 EVENT entries with `when` *are* the timeline — the app sorts and renders them; no separate history system.
 
-### 3.7 THEME / RULE
+### 3.7 SYSTEM.meta — the release gate
+
+The mechanics shelf. `category` and `buildStatus` are pickers from the shared
+enums; `unlockArc` is the arc slug that unlocks the system for the player —
+the tie between pacing and story — with `unlockStage` as prose intent while no
+arc exists to link. `dependsOn` lists other SYSTEM slugs this one cannot ship
+without, `pillars` are the loop's promises one per line, and `openQuestions`
+work as everywhere else. Key art is by convention, not by meta: drop a file at
+`public/images/systems/<slug>.png` and the card and dossier pick it up.
+
+### 3.8 THEME / RULE
 
 No meta needed now. Optionally `appliesTo: [kind]` later so the app can surface "rules that govern characters" on character-editing screens (e.g. the Tino rule appearing wherever someone edits his status).
 

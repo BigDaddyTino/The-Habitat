@@ -16,6 +16,8 @@ import {
   storyNodeKinds,
   storyRegionTypes,
   storySettlementTiers,
+  storySystemCategories,
+  storySystemStatuses,
   type StoryRegionMeta,
   type StoryStatus,
 } from "@habitat/shared";
@@ -977,6 +979,23 @@ const itemMetaSchema = z.object({
   openQuestions: metaLines(30, 300),
 });
 
+/**
+ * The systems sheet (Codex_Module_Schema.md §3.8). The release fields are the
+ * point: `unlockArc` names the quest arc that switches the system on for the
+ * player, which is how "you are not managing a kingdom on day one" stays a
+ * fact the codex enforces rather than a note everybody has to remember.
+ */
+const systemMetaSchema = z.object({
+  category: z.enum(storySystemCategories).nullable(),
+  buildStatus: z.enum(storySystemStatuses).nullable(),
+  unlockArc: metaSlug.nullable(),
+  unlockStage: metaText(160),
+  dependsOn: z.array(metaSlug).max(12),
+  pillars: metaLines(12, 300),
+  gameTag: metaText(120),
+  openQuestions: metaLines(30, 300),
+});
+
 const eventMetaSchema = z.object({
   when: metaText(160),
   where: metaLines(20, 64),
@@ -992,6 +1011,7 @@ const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodT
   CREATURE: creatureMetaSchema,
   ITEM: itemMetaSchema,
   EVENT: eventMetaSchema,
+  SYSTEM: systemMetaSchema,
 };
 
 /**

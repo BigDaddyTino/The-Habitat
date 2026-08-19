@@ -17,6 +17,7 @@ export const storyEntryKinds = [
   "EVENT",
   "RULE",
   "FLAG",
+  "SYSTEM",
 ] as const;
 
 export type StoryEntryKind = (typeof storyEntryKinds)[number];
@@ -96,6 +97,7 @@ export const storyEntryKindLabels: Record<StoryEntryKind, string> = {
   EVENT: "Event",
   RULE: "Rule",
   FLAG: "Flag",
+  SYSTEM: "Game system",
 };
 
 export const storyNodeKindLabels: Record<StoryNodeKind, string> = {
@@ -662,6 +664,51 @@ export type StoryEventMeta = {
   /** Any entry slug — people, factions, places, items. */
   involved: string[];
   outcome: string | null;
+  openQuestions: string[];
+};
+
+/** What part of the game a system belongs to, as a picker rather than prose. */
+export const storySystemCategories = [
+  "core loop",
+  "progression",
+  "combat",
+  "economy",
+  "social",
+  "management",
+  "world simulation",
+  "cooperative",
+] as const;
+
+/**
+ * How real a system currently is on the game side. Writers read this before
+ * leaning on a mechanic: a scene hinged on a "concept" system is a promise the
+ * build cannot keep yet, and should stay soft enough to survive redesign.
+ */
+export const storySystemStatuses = ["concept", "designed", "in-build", "playable", "live"] as const;
+
+/**
+ * SYSTEM entries are the game's mechanics written down for the writers' room —
+ * what the player can actually do, so quests are written toward systems that
+ * exist instead of inventing verbs the game never ships.
+ *
+ * `unlockArc` is the release gate: the quest arc that switches this system on
+ * for the player. Kingdom management is not a day-one verb — it arrives when
+ * the story hands the player a kingdom, and this field is where that pacing
+ * lives. `unlockStage` carries the same intent as prose while the gating arc
+ * does not exist yet to link.
+ */
+export type StorySystemMeta = {
+  category: (typeof storySystemCategories)[number] | null;
+  buildStatus: (typeof storySystemStatuses)[number] | null;
+  /** Slug of the arc that unlocks this system for the player; null = day one or unscheduled. */
+  unlockArc: string | null;
+  /** Prose release intent while no arc exists to link: "Day one", "Act II — once the party holds ground". */
+  unlockStage: string | null;
+  /** Slugs of other SYSTEM entries this one cannot ship without. */
+  dependsOn: string[];
+  /** The promises of the loop, one per line — what the system guarantees the player. */
+  pillars: string[];
+  gameTag: string | null;
   openQuestions: string[];
 };
 

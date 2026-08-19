@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { isStoryFlowEditable, storyLockNotice } from "@habitat/shared";
 import { getStoryBoard, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
@@ -19,7 +19,14 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const [{ slug }, { node: initialNodeId }] = await Promise.all([params, searchParams]);
   const board = await getStoryBoard(slug);
   if (!board) notFound();
-  const [arcRefs, regions] = await Promise.all([listStoryArcRefs(), listStoryEntries({ kind: "REGION" })]);
+  const [arcRefs, regions, allSystems] = await Promise.all([listStoryArcRefs(), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "SYSTEM" })]);
+  // The other end of the release gate: each system's sheet names the arc that
+  // unlocks it, and the arc page answers "what does finishing this hand the
+  // player" without anyone opening nineteen dossiers to find out.
+  const unlockedSystems = allSystems.filter((system) => {
+    const meta = system.meta;
+    return typeof meta === "object" && meta !== null && !Array.isArray(meta) && (meta as Record<string, unknown>).unlockArc === slug;
+  });
   const nodeTitles = new Map(board.nodes.map((node) => [node.id, node.title]));
   // One freeze for the whole flow: arc settings included, admins included.
   const canEditArc = isStoryFlowEditable(board.arc.locked !== null);
@@ -36,6 +43,13 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
               <MapPin aria-hidden="true" size={12} />
               {board.arc.region ? <Link href={`/codex/bible/${board.arc.region.slug}`}>{board.arc.region.title}</Link> : "No pickup place yet"}
               {board.arc.hook ? <span> — {board.arc.hook}</span> : null}
+            </p>
+          ) : null}
+          {unlockedSystems.length > 0 ? (
+            <p className="codex-arc-unlocks">
+              <Cog aria-hidden="true" size={12} />
+              <span>Completing this unlocks</span>
+              {unlockedSystems.map((system) => <Link href={`/codex/bible/${system.slug}`} key={system.id}>{system.title}</Link>)}
             </p>
           ) : null}
         </div>

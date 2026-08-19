@@ -213,12 +213,21 @@ enterable from more than one place — so multiple entry points are not flagged.
   }],
   "bible": [{ "kind": "THEME", "slug": "…", "title": "…", "summary": "…", "body": "…",
                "meta": null }] // typed module object per kind (Codex_Module_Schema.md); null = not yet decided
-  // kinds: THEME REGION CREATURE CHARACTER FACTION ITEM EVENT RULE FLAG.
+  // kinds: THEME REGION CREATURE CHARACTER FACTION ITEM EVENT RULE FLAG SYSTEM.
   // FLAG entries are the canonical names for consequences one quest sets and
   // another checks — both ends reference the flag entry, so a side quest can
   // touch the main story chapters later without the name ever drifting.
 }
 ```
+
+**The `SYSTEM` kind was added (2026-08-19), additive, contract still v1.**
+SYSTEM entries are the game's mechanics written down for the writers' room —
+what the player can actually do, and when the story hands each verb over. The
+meta carries the release gate: `unlockArc` names the quest arc that switches
+the system on (`unlockStage` is the prose fallback while no arc exists to
+link), `dependsOn` names other systems, and `buildStatus` says how real it is
+on the game side. An importer that has never heard of the kind reads these
+entries exactly as it reads a THEME it does not act on.
 
 **REGION `meta.type` gained `destination` (2026-08-18), additive, contract still v1.**
 The world nests three rungs: a **region** holds **places** (`site`, `zone`,

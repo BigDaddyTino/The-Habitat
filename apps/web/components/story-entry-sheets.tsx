@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta } from "@habitat/shared";
+import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySystemCategories, storySystemStatuses, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -590,6 +590,81 @@ export function EventSheet({ entryId, version, meta, regions, entries }: {
 // ---------------------------------------------------------------------------
 // Generic read view for kinds without a sheet yet
 // ---------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------
+// System sheet — the release gate is the point
+// ---------------------------------------------------------------------------
+
+export function SystemSheet({ entryId, version, meta, arcs, systems }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  /** Quest arcs, for the unlock picker — the tie between systems and story. */
+  arcs: SlugOption[];
+  /** Every other system, for the depends-on rows. */
+  systems: SlugOption[];
+}) {
+  const source = record(meta);
+  const [category, setCategory] = useState(text(source.category));
+  const [buildStatus, setBuildStatus] = useState(text(source.buildStatus));
+  const [unlockArc, setUnlockArc] = useState(text(source.unlockArc));
+  const [unlockStage, setUnlockStage] = useState(text(source.unlockStage));
+  const [dependsOn, setDependsOn] = useState(asArray(source.dependsOn).map(text));
+  const [pillars, setPillars] = useState(asArray(source.pillars).map(text).join("\n"));
+  const [gameTag, setGameTag] = useState(text(source.gameTag));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+  const systemListId = `system-depends-${entryId}`;
+
+  const composed: StorySystemMeta = {
+    category: (storySystemCategories as readonly string[]).includes(category) ? (category as StorySystemMeta["category"]) : null,
+    buildStatus: (storySystemStatuses as readonly string[]).includes(buildStatus) ? (buildStatus as StorySystemMeta["buildStatus"]) : null,
+    unlockArc: orNull(unlockArc),
+    unlockStage: orNull(unlockStage),
+    dependsOn: dependsOn.map((value) => value.trim()).filter(Boolean),
+    pillars: splitLines(pillars),
+    gameTag: orNull(gameTag),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">System sheet — the release fields keep the story and the machine in step</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Category<select onChange={(event) => setCategory(event.target.value)} value={category}><option value="">Not decided</option>{storySystemCategories.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+        <label>Build status — how real it is on the game side<select onChange={(event) => setBuildStatus(event.target.value)} value={buildStatus}><option value="">Not decided</option>{storySystemStatuses.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+      </div>
+
+      <div className="sheet-grid">
+        <label>Unlocked by which quest arc — the release gate<select onChange={(event) => setUnlockArc(event.target.value)} value={unlockArc}>
+          <option value="">No arc — day one, or set a stage note below</option>
+          {arcs.map((arc) => <option key={arc.slug} value={arc.slug}>{arc.title}</option>)}
+        </select></label>
+        <label>Release stage — while no arc exists to link<input maxLength={160} onChange={(event) => setUnlockStage(event.target.value)} placeholder={'"Day one", or "Act II — once the party holds ground"'} type="text" value={unlockStage} /></label>
+      </div>
+
+      <div className="sheet-rows">
+        <p className="eyebrow">Depends on — systems this one cannot ship without <RowButton label="Add a dependency" onClick={() => setDependsOn((rows) => [...rows, ""])} /></p>
+        <datalist id={systemListId}>{systems.map((system) => <option key={system.slug} value={system.slug}>{system.title}</option>)}</datalist>
+        {dependsOn.map((dependency, index) => (
+          <div className="sheet-row sheet-row-compact" key={index}>
+            <input aria-label="Depends on" list={systemListId} maxLength={64} onChange={(event) => setDependsOn((rows) => rows.map((value, at) => (at === index ? event.target.value : value)))} placeholder="trade-and-economy" value={dependency} />
+            <RowButton label="Remove this dependency" onClick={() => setDependsOn((rows) => rows.filter((_, at) => at !== index))} remove />
+          </div>
+        ))}
+      </div>
+
+      <label>Pillars — what the loop promises the player, one per line<textarea onChange={(event) => setPillars(event.target.value)} placeholder={"Power always has a price\nNothing gathered is worthless"} rows={3} value={pillars} /></label>
+      <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="SYS_* once one exists" type="text" value={gameTag} /></label>
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save system sheet" />
+    </form>
+  );
+}
 
 function MetaValue({ value }: { value: unknown }) {
   if (value === null || value === undefined) return <em>not yet decided</em>;
