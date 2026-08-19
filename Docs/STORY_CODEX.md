@@ -357,9 +357,9 @@ trimmed and marked `[trimmed]` so one card cannot crowd out the board.
 ### The audit
 
 Every exchange writes a `StoryAssistantMessage`, **including the ones that never
-reach Google** — rate limited, budget exhausted, unconfigured. A log that only
-kept successful answers would hide exactly the pattern worth looking for. Read
-it at `/admin/story`.
+come back with an answer** — rate limited by Google, blocked, unconfigured. A log
+that only kept successful answers would hide exactly the pattern worth looking
+for. Read it at `/admin/story`.
 
 A DB CHECK ties answer to outcome in both directions: an `ANSWERED` row must
 carry an answer, and a non-answered row must not.
@@ -373,14 +373,16 @@ be reconstructed exactly.
 
 | Control | Default | Env |
 | --- | --- | --- |
-| Daily requests, whole clubhouse | 500 | `GEMINI_DAILY_REQUEST_BUDGET` |
-| Questions per member per hour | 30 | `GEMINI_MEMBER_HOURLY_LIMIT` |
 | Model | `gemini-3.7-flash` | `GEMINI_MODEL` |
 | Off switch | on | `HABITAT_STORY_ASSISTANT=off` |
 
-The per-member throttle is checked before the shared budget, so one enthusiastic
-writer cannot drain the day on their own. The daily counter shares the
-`ProviderRequestUsage` table the worker's providers use.
+**There is no Habitat-side quota** (removed 2026-08-19). The key runs on
+Gemini's free tier, which enforces its own ceiling and answers `429` when it is
+reached; the client reports that as rate limiting and names Google as the
+source. A second budget on this side only ever refused a writer Google would
+still have answered. Requests are still counted into the `ProviderRequestUsage`
+table the worker's providers share, and `/admin/story` still reports the day's
+total — the counter is for visibility, not enforcement.
 
 ### Flash 3.7 is a thinking model — this matters
 

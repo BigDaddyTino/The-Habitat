@@ -123,12 +123,17 @@ export async function generateGeminiAnswer(
     }
   };
 
-  let response = await send();
   // 503 from this API means "the model is busy right now", not "the model is
-  // broken" — it was observed on the very first live call against Flash 3.7.
-  // One retry turns most of those into an answer instead of an apology.
-  if (response.status === 503) {
-    await new Promise<void>((resolve) => runtime.setTimeout(() => resolve(), 1_500));
+  // broken". Flash 3.7 answers it readily: a live probe needed five attempts to
+  // get through, and two of the three real questions writers had asked were
+  // sitting in the audit as failures. Since nothing else limits the assistant
+  // any more, this backoff is the difference between "ask freely" and "the
+  // Warden is usually asleep". Bounded well inside the 60s request timeout.
+  const backoffMs = [1_500, 4_000];
+  let response = await send();
+  for (const delay of backoffMs) {
+    if (response.status !== 503) break;
+    await new Promise<void>((resolve) => runtime.setTimeout(() => resolve(), delay));
     response = await send();
   }
 
@@ -143,7 +148,9 @@ export async function generateGeminiAnswer(
   }
   if (response.status === 429) {
     const retryAfter = Number(response.headers?.get("retry-after"));
-    throw new GeminiApiError("RATE_LIMITED", "Gemini is rate limiting the Habitat. Try again in a few minutes.", Number.isFinite(retryAfter) && retryAfter >= 0 ? Math.ceil(retryAfter) : null);
+    // The only ceiling the assistant has: Google's own. Naming it stops this
+    // reading as a Habitat-side refusal the operator would go hunting for.
+    throw new GeminiApiError("RATE_LIMITED", "Gemini has hit its own rate limit for this key. Try again in a few minutes.", Number.isFinite(retryAfter) && retryAfter >= 0 ? Math.ceil(retryAfter) : null);
   }
   if (response.status === 400) {
     throw new GeminiApiError("UNKNOWN_MODEL", `Gemini refused the request as malformed, which usually means "${model}" is not a valid model id.`);
@@ -198,15 +205,17 @@ export type GeminiProviderEnv = {
   GEMINI_API_KEY?: string;
   GEMINI_MODEL?: string;
   HABITAT_STORY_ASSISTANT?: string;
-  GEMINI_DAILY_REQUEST_BUDGET?: string;
-  GEMINI_MEMBER_HOURLY_LIMIT?: string;
   [key: string]: string | undefined;
 };
 
+/**
+ * No request budget and no per-member throttle: the key is on the free tier,
+ * which enforces its own ceiling and answers 429 when it is reached. A second
+ * limit on top of that one only ever stopped a writer who was still inside
+ * Google's allowance. Usage is still counted and audited — just not capped.
+ */
 export type GeminiProvider = {
   model: string;
-  dailyRequestBudget: number;
-  memberHourlyLimit: number;
   ask(request: GeminiRequest): Promise<GeminiAnswer>;
 };
 
@@ -214,11 +223,6 @@ export type GeminiProvider = {
 export const geminiProviderKey = "GEMINI";
 
 export const defaultGeminiModel = "gemini-3.7-flash";
-
-function boundedInteger(value: string | undefined, fallback: number, min: number, max: number) {
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) && parsed >= min && parsed <= max ? parsed : fallback;
-}
 
 /**
  * Resolves the story assistant, or null when it is unconfigured or switched
@@ -235,10 +239,5 @@ export function resolveGeminiProvider(env: GeminiProviderEnv, fetcher?: GeminiFe
   const model = env.GEMINI_MODEL?.trim() || defaultGeminiModel;
   if (!isValidGeminiModel(model)) return null;
 
-  return {
-    model,
-    dailyRequestBudget: boundedInteger(env.GEMINI_DAILY_REQUEST_BUDGET, 500, 1, 100_000),
-    memberHourlyLimit: boundedInteger(env.GEMINI_MEMBER_HOURLY_LIMIT, 30, 1, 1_000),
-    ask: (request) => generateGeminiAnswer(apiKey, model, request, fetcher),
-  };
+  return { model, ask: (request) => generateGeminiAnswer(apiKey, model, request, fetcher) };
 }

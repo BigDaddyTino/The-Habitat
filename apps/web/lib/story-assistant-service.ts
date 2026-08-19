@@ -15,6 +15,11 @@ import { analyzeStoryGraph, type StoryGraphEdge, type StoryGraphNode } from "@ha
 
 const db = getPrismaClient();
 
+/**
+ * BUDGET_EXHAUSTED is no longer produced — the Habitat-side budget is gone —
+ * but it stays in the union because audited rows from when it was enforced are
+ * still on the record, and the audit view reads them back.
+ */
 export type AssistantOutcome = "ANSWERED" | "BLOCKED" | "RATE_LIMITED" | "BUDGET_EXHAUSTED" | "UNAVAILABLE" | "UNCONFIGURED";
 
 export type AssistantReply =
@@ -35,26 +40,20 @@ function utcUsageDay(value = new Date()) {
 }
 
 /**
- * Daily spend guard against the same `ProviderRequestUsage` counter the worker's
- * providers use.
+ * Counts a request against the shared `ProviderRequestUsage` row — the same
+ * counter the worker's providers use, and what `/admin/story` reports as
+ * "requests today".
  *
- * This deliberately duplicates `apps/worker/src/provider-budget.ts` rather than
- * importing it: the web app and the worker are separate deployables, and
- * reaching across that boundary for fifteen lines would couple them for no
- * benefit. The counter row is shared, so the budget is still global.
+ * It counts; it does not cap. The key is on Gemini's free tier, which enforces
+ * its own ceiling and says so with a 429, and a Habitat-side budget on top of
+ * that only ever stopped a writer Google would still have answered.
  */
-async function reserveAssistantRequest(dailyLimit: number) {
+async function countAssistantRequest() {
   const usageDay = utcUsageDay();
-  return db.$transaction(async (tx) => {
-    const usage = await tx.providerRequestUsage.upsert({
-      where: { provider_usageDay: { provider: geminiProviderKey, usageDay } },
-      create: { provider: geminiProviderKey, usageDay, requestCount: 0 },
-      update: {},
-      select: { id: true, requestCount: true },
-    });
-    if (usage.requestCount + 1 > dailyLimit) return false;
-    await tx.providerRequestUsage.update({ where: { id: usage.id }, data: { requestCount: { increment: 1 } } });
-    return true;
+  await db.providerRequestUsage.upsert({
+    where: { provider_usageDay: { provider: geminiProviderKey, usageDay } },
+    create: { provider: geminiProviderKey, usageDay, requestCount: 1 },
+    update: { requestCount: { increment: 1 } },
   });
 }
 
@@ -190,19 +189,10 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
     return { ok: false, outcome: "UNCONFIGURED", message: "The Warden is not on duty — no Gemini key is configured yet." };
   }
 
-  // Per-member throttle before the shared budget, so one enthusiastic writer
-  // cannot drain the clubhouse's daily allowance on their own.
-  const since = new Date(Date.now() - 3_600_000);
-  const recentCount = await db.storyAssistantMessage.count({ where: { userId: input.userId, createdAt: { gt: since }, outcome: { in: ["ANSWERED", "BLOCKED"] } } });
-  if (recentCount >= provider.memberHourlyLimit) {
-    await record("RATE_LIMITED", { failureReason: `${recentCount} questions in the last hour, limit ${provider.memberHourlyLimit}.` });
-    return { ok: false, outcome: "RATE_LIMITED", message: `You have asked ${recentCount} questions this hour. The Warden needs a minute — try again shortly.` };
-  }
-
-  if (!(await reserveAssistantRequest(provider.dailyRequestBudget))) {
-    await record("BUDGET_EXHAUSTED", { failureReason: `Daily budget of ${provider.dailyRequestBudget} requests is spent.` });
-    return { ok: false, outcome: "BUDGET_EXHAUSTED", message: "The Warden has answered all he can today. The daily budget resets at midnight UTC." };
-  }
+  // Nothing gates the question but Gemini itself: ask as often as you like,
+  // and when the free tier's own ceiling is reached it answers 429 and the
+  // catch below reports that plainly.
+  await countAssistantRequest();
 
   const [context, newestRevision, priorTurns] = await Promise.all([
     buildAssistantContext(input.arcId, input.nodeId),
