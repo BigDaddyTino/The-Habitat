@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, MapPin, Network, Plus, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
+import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { modelPreview } from "@/lib/story-library";
@@ -45,6 +46,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const isCharacter = entry.kind === "CHARACTER";
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
+  const characterKeyart = isCharacter ? getCharacterKeyart(entry.slug) : null;
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
   const regionBrand = isRegion ? getRegionBranding(entry.slug) : null;
   const characterAffiliations = isCharacter
@@ -102,8 +104,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {factionBrand ? <>
             <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
             <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
           <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
