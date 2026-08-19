@@ -243,3 +243,23 @@ function bySlugBody(slug: string): string {
   assert.ok(seed, `${slug} must exist`);
   return seed.body;
 }
+
+test("true death is stated as a floor, not a difficulty setting", () => {
+  // The rule the whole death system rests on: no living Forge holding your
+  // Echo means no reclamation at all, and being bound to a destroyed Forge is
+  // the same as bound to nothing. Every layer has to say it, because a writer
+  // who reads only one of them could still write a merciful revival.
+  const forge = bySlugBody("the-soul-forge");
+  const binding = bySlugBody("soul-binding");
+  const reclamation = bySlugBody("reclamation");
+  for (const [slug, body] of [["soul-binding", binding], ["reclamation", reclamation]] as const) {
+    assert.match(body, /\[\[true-death\]\]/, `${slug} must cite the law`);
+  }
+  assert.match(binding, /\[\[the-danger-of-true-death\]\]/, "binding must point at the quest that warns the player");
+  assert.match(binding, /[Nn]ever write an automatic re-binding/, "the walk to a Forge must be protected from being skipped");
+  assert.match(reclamation, /not rebuilt at all|no reclamation at all/i, "reclamation must state the floor beneath the levels");
+  assert.ok(
+    [forge, binding, reclamation].every((body) => /unbound|no living Forge|bound to nothing/i.test(body)),
+    "every layer of the family names the unbound state",
+  );
+});

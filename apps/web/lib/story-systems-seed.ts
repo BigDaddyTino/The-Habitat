@@ -656,7 +656,7 @@ Two laws keep it a raid rather than a griefing tool. Incursors risk what they ca
 
 A Soul Forge is a heavy pedestal etched with symbols nobody can reproduce, wrapped in cabling, containment rings, gauges, and modern electronics humanity bolted onto technology it did not build. Suspended inside the rings is the Soul Core — a small sphere of swirling energy. Held in that Core is a Soul Echo: a resonance uniquely synchronised to one person. The vocabulary is fixed and used by everyone in-world: **Soul Forge** (the machine), **Soul Core** (the sphere), **Soul Echo** (your resonance inside it), **Binding** (synchronising yourself to a Forge — see [[soul-binding]]), **Essence** (what reconstruction burns), and **Reclamation** (the act itself — see [[reclamation]]). Soldiers say it flatly: *"Johnson's down." "Confirmed — his Echo's still active." "Forge?" "Camp Kestrel." "Then he'll be back."* Players will say *"where's your Forge?"*, *"did you bind?"*, *"we're almost out of Essence."*
 
-The law it rests on: **a soul cannot be duplicated, but its connection to a body can be restored.** The Forge copies nothing. The Echo is a beacon — when the body dies and the connection breaks, the Echo calls the soul home, and the machine spends [[essence]] building a vessel compatible enough for it to reconnect. That is why reconstruction is expensive, and why a more magically developed person costs more to rebuild.
+The law it rests on: **a soul cannot be duplicated, but its connection to a body can be restored.** The Forge copies nothing. The Echo is a beacon — when the body dies and the connection breaks, the Echo calls the soul home, and the machine spends [[essence]] building a vessel compatible enough for it to reconnect. That is why reconstruction is expensive, and why a more magically developed person costs more to rebuild. And it is why the whole thing has a floor: with no living Forge holding your Echo there is no beacon and nothing to build, so an **unbound** death is final — see [[true-death]], which is a law rather than a difficulty setting.
 
 And that is the setting's moral engine, finally stated plainly. People do not slaughter magical creatures because magic is useful. They do it because magic brings their dead back. Nations would go to war over that. Corporations would farm it, states would stockpile it, rings would traffic it — all of which [[the-harvest-economy]] already says they do. This system is why. It does not make the atrocity acceptable; it makes it *understandable*, which is worse and better drama. And it puts the [[the-soul-breakthrough]] on a fuse: if a body can be rebuilt from Essence, and Essence can be drawn from people, somebody was always going to do that arithmetic out loud.
 
@@ -667,6 +667,7 @@ Humanity operates Forges. It does not understand them. Some were discovered whol
       dependsOn: ["magic"],
       pillars: [
         "A soul cannot be duplicated, but its connection to a body can be restored",
+        "No Forge, no return — an unbound death is true death, and the run is over",
         "Reclamation burns Essence — death costs the world something real",
         "This is why humanity harvests: magic brings the dead back",
         "Humanity operates Forges without understanding them, and nobody knows where the soul goes in between",
@@ -691,7 +692,9 @@ Binding is physical. You approach the Core, press your palm to it, and the machi
 
 **And it is where the party works out that Tino is not dead.** He is not at Kestrel, and no Echo of his sits in this Core — so whatever happened to him, he did not reclaim here. The inference is that he is bound somewhere else. That is all it is: an inference. Binding on every writer, per [[what-the-player-knows-about-tino]] — **a Forge can only speak about Echoes bound to it.** Kestrel's Forge cannot confirm that Tino is alive, cannot confirm he is dead, and cannot be asked. Never write a scene where an instrument settles his fate; the empty Core is the point, and the party leaving with a question is the correct outcome. A party that raises him here should set [[asked-about-tino]].
 
-**Then Kestrel is lost.** The island does not survive ([[the-fall-of-the-starting-island]]), and the camp's Forge goes with it — so both branches arrive at [[port-arcadia]] bound to a machine that no longer exists. Whether the party walked off the evacuation boats or washed ashore from the beach, the city feels wrong before anyone can name why, and the first real task on the mainland is finding a Forge and binding again.`,
+**Then Kestrel is lost.** The island does not survive ([[the-fall-of-the-starting-island]]), and the camp's Forge goes with it — so both branches arrive at [[port-arcadia]] bound to a machine that no longer exists. Whether the party walked off the evacuation boats or washed ashore from the beach, the city feels wrong before anyone can name why, and the first real task on the mainland is finding a Forge and binding again.
+
+**That gap is lethal.** Bound to a destroyed Forge is bound to nothing, so from landfall until the party binds again — in Arcadia or anywhere — a single death ends the run for good ([[true-death]]). It is the most dangerous stretch of the campaign, and the game warns rather than rescues: [[the-danger-of-true-death]] starts itself the moment the party walks into the city unbound. Never write an automatic re-binding on arrival; the walk to a Forge is the point.`,
     meta: meta({
       category: "core loop",
       parent: "the-soul-forge",
@@ -699,6 +702,7 @@ Binding is physical. You approach the Core, press your palm to it, and the machi
         "Checkpoints are scaffolding, and the game takes them away on purpose",
         "BOUND, never 'spawn point set' — bind anywhere you reach, return to anywhere you have touched",
         "A Forge can only speak about Echoes bound to it — it can never settle Tino",
+        "Unbound on the mainland is one death from the end of the run",
       ],
       regionNotes: [
         { region: "forward-camp-kestrel", note: "The first binding, and Rook performs it herself after asking where the party is bound. Its Core holds no Echo of Tino — which is where the party works out he did not reclaim here. Lost with the island." },
@@ -720,6 +724,8 @@ Your corpse stays exactly where it fell, and so does everything it was carrying:
 
 The cost is [[essence]], and it scales with the person: an early-game reclamation might run 47, a developed character 386, because a more magically developed body is a harder thing to build. A base therefore keeps an Essence reserve, and that reserve is a resource the party can actually run out of. **If there is not enough, the Forge builds what it can afford — and the shortfall is paid out of the person: experience is lost and levels go down.** Nobody dies permanently; they come back *less*, which is a far more interesting punishment and one the party will feel for hours.
 
+**And there is a floor beneath the levels.** Reclamation needs a living Forge holding your Echo; a body that dies with none is not rebuilt at all. Being bound to a Forge that no longer exists counts as bound to nothing — which is precisely the state both branches arrive on the mainland in, and why [[true-death]] is a law rather than a difficulty setting. Nobody comes back from that, and the run ends.
+
 For writers: this is the pressure that sends people hunting, per [[gathering-and-harvest]] and [[the-harvest-economy]] — a settlement low on Essence is a settlement that starts making choices it would not otherwise make, and that is a quest, not a status bar. Write reclamation as an event with witnesses; write what it costs; and never write a death that skips the corpse. What happens in the gap between departure and return is [[the-soul-forge]]'s open question, and stays open.`,
     meta: meta({
       category: "core loop",
@@ -729,6 +735,7 @@ For writers: this is the pressure that sends people hunting, per [[gathering-and
         "The body and everything on it stays where it fell",
         "Reclamation is a spectacle with witnesses, not a fade to black",
         "Too little Essence and you come back less — levels are the shortfall",
+        "No living Forge holding your Echo means no reclamation at all",
       ],
       openQuestions: [
         "Does the corpse decay, and how long does the party have to reach it?",
