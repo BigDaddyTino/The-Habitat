@@ -5,6 +5,7 @@ import { getStoryActivity, getStoryReviewQueue, getStoryThreads, listStoryArcs, 
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
+import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { createArc } from "./actions";
 
 export const metadata = { title: "Story Codex" };
@@ -47,6 +48,17 @@ export default async function CodexPage() {
     listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "THEME" }),
     listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }), getStoryThreads(),
   ]);
+  // The core system spotlight: the mechanic big enough to headline the codex.
+  // Swap the slug to feature a different system; everything else follows it.
+  const spotlightSlug = "the-veil";
+  const spotlight = systems.find((system) => system.slug === spotlightSlug) ?? null;
+  const spotlightArt = spotlight ? getSystemArt(spotlight.slug) : null;
+  const spotlightChildren = systems
+    .filter((system) => {
+      const meta = system.meta as Record<string, unknown> | null;
+      return typeof meta === "object" && meta !== null && (meta as Record<string, unknown>).parent === spotlightSlug;
+    })
+    .sort((a, b) => a.title.localeCompare(b.title));
   const mainline = arcs.filter((arc) => arc.isMainline);
   const side = arcs.filter((arc) => !arc.isMainline);
   const laws = rules.filter((rule) => rule.status === "CANON");
@@ -69,6 +81,24 @@ export default async function CodexPage() {
           {themes.map((theme, index) => <Link href={`/codex/bible/${theme.slug}`} key={theme.id}><div aria-hidden="true" className="codex-theme-art" style={{ backgroundImage: `url('${themeArt[theme.slug] ?? "/images/story-codex-archive.webp"}')` }} /><div className="codex-theme-copy"><span>0{index + 1}</span><div><p className="eyebrow">Core theme</p><h3>{theme.title}</h3><p>{theme.summary}</p><strong>Read the canon <ArrowRight aria-hidden="true" size={12} /></strong></div></div></Link>)}
         </div>
       </section>
+
+      {spotlight ? (
+        <section className="codex-system-spotlight">
+          <div aria-hidden="true" className={`codex-spotlight-art${spotlightArt ? "" : " is-slot"}`} style={spotlightArt ? { backgroundImage: `url("${spotlightArt}")` } : undefined}>
+            {!spotlightArt ? <span className="codex-spotlight-slot"><Cog aria-hidden="true" size={26} /><i>Key art slot</i><code>{systemArtSlot(spotlight.slug)}</code></span> : null}
+          </div>
+          <div className="codex-spotlight-copy">
+            <p className="eyebrow"><Sparkles aria-hidden="true" size={12} /> Core system spotlight</p>
+            <h2>{spotlight.title}</h2>
+            <p className="codex-spotlight-summary">{spotlight.summary}</p>
+            <blockquote>Everything beyond the Veil is an opportunity. Everything you carry through it is a wager.</blockquote>
+            {spotlightChildren.length ? <p className="codex-spotlight-children">
+              {spotlightChildren.map((child) => <Link href={`/codex/bible/${child.slug}`} key={child.id}>{child.title}</Link>)}
+            </p> : null}
+            <Link className="primary-link" href={`/codex/bible/${spotlight.slug}`}>Open the system <ArrowRight aria-hidden="true" size={14} /></Link>
+          </div>
+        </section>
+      ) : null}
 
       <section className="codex-world-libraries">
         <div className="section-heading"><div><p className="eyebrow">Build the world</p><h2>Choose what you want to shape</h2></div><p>No JSON. Open a visual library, create an entry, and fill out its connected sheet.</p></div>

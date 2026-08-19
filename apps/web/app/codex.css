@@ -692,3 +692,29 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .codex-timeline-hero.has-mural::before { content: ""; position: absolute; z-index: 0; inset: 0; background-image: var(--timeline-mural); background-position: center 38%; background-size: cover; opacity: .32; }
 .codex-timeline-hero.has-mural::after { content: ""; position: absolute; z-index: 1; inset: 0; background: linear-gradient(100deg, rgba(11,15,12,.95) 30%, rgba(11,15,12,.6) 66%, rgba(11,15,12,.88)); }
 .codex-timeline-hero.has-mural > div { position: relative; z-index: 2; max-width: 880px; }
+
+/* --- Core system spotlight on the codex landing --------------------------- */
+
+.codex-system-spotlight { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); overflow: hidden; border: 1px solid rgba(198,151,76,.35); background: linear-gradient(160deg, rgba(24,26,31,.96), rgba(13,16,17,.98)); box-shadow: 0 0 0 1px rgba(198,151,76,.1), 0 0 34px rgba(198,151,76,.14), inset 0 1px 0 rgba(226,205,151,.08); }
+.codex-spotlight-art { position: relative; min-height: 320px; background-position: center; background-size: cover; }
+.codex-spotlight-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent 55%, rgba(13,16,17,.92)); }
+.codex-spotlight-art.is-slot { display: grid; place-items: center; border-right: 1px dashed rgba(214,195,151,.28); background: repeating-linear-gradient(-45deg, rgba(214,195,151,.03), rgba(214,195,151,.03) 10px, transparent 10px, transparent 22px); }
+.codex-spotlight-art.is-slot::after { content: none; }
+.codex-spotlight-slot { display: grid; justify-items: center; gap: 7px; color: #8c9288; text-align: center; }
+.codex-spotlight-slot svg { color: var(--brass); opacity: .75; }
+.codex-spotlight-slot i { font: 700 8px var(--font-mono); font-style: normal; letter-spacing: .8px; text-transform: uppercase; }
+.codex-spotlight-slot code { padding: 3px 8px; border: 1px solid var(--line); background: rgba(12,16,13,.8); color: var(--paper); font-size: 10px; }
+.codex-spotlight-copy { display: grid; align-content: center; gap: 12px; padding: 34px 36px; }
+.codex-spotlight-copy h2 { margin: 0; font-family: var(--font-display); font-size: clamp(26px, 3.4vw, 38px); line-height: 1.02; }
+.codex-spotlight-summary { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+.codex-spotlight-copy blockquote { margin: 0; border-left: 2px solid var(--brass); padding: 9px 14px; background: rgba(29,26,19,.7); color: #d9cba6; font-size: 12px; font-style: italic; line-height: 1.6; }
+.codex-spotlight-children { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.codex-spotlight-children a { padding: 4px 10px; border: 1px solid rgba(198,151,76,.35); background: rgba(12,16,13,.65); color: #cbbd97; font-size: 11px; text-decoration: none; }
+.codex-spotlight-children a:hover { border-color: var(--brass); color: var(--paper); }
+.codex-spotlight-copy .primary-link { justify-self: start; }
+
+@media (max-width: 860px) {
+  .codex-system-spotlight { grid-template-columns: 1fr; }
+  .codex-spotlight-art { min-height: 200px; }
+  .codex-spotlight-art::after { background: linear-gradient(180deg, transparent 55%, rgba(13,16,17,.92)); }
+}

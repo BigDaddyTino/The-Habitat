@@ -80,13 +80,19 @@ async function main() {
     const rowField = (rows: unknown, key: string): string[] =>
       (Array.isArray(rows) ? rows : []).flatMap((row) => one(asRecord(row)?.[key]));
 
+    // Slug-or-prose fields (home, seat, origin, leaders) legally hold either a
+    // linkable slug or plain description — "a fishing village on the coast" is
+    // a fine origin. Only values that are shaped like multi-word slugs get
+    // checked, mirroring how the creature biomes field was already handled.
+    const slugShaped = (value: string) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value) && value.includes("-");
+    const maybeSlugs = (values: string[]) => values.filter(slugShaped);
     check("parent", one(meta.parent), known, "entry");
-    check("home", one(meta.home), known, "entry");
-    check("seat", one(meta.seat), known, "entry");
-    check("origin", one(meta.origin), known, "entry");
+    check("home", maybeSlugs(one(meta.home)), known, "entry");
+    check("seat", maybeSlugs(one(meta.seat)), known, "entry");
+    check("origin", maybeSlugs(one(meta.origin)), known, "entry");
     check("where", strings(meta.where), known, "entry");
     check("involved", strings(meta.involved), known, "entry");
-    check("leaders", strings(meta.leaders), known, "entry");
+    check("leaders", maybeSlugs(strings(meta.leaders)), known, "entry");
     check("dependsOn", strings(meta.dependsOn), known, "entry");
     check("factions[].faction", rowField(meta.factions, "faction"), known, "entry");
     check("relationships[].character", rowField(meta.relationships, "character"), known, "entry");

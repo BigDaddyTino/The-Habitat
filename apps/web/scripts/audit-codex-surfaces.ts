@@ -118,6 +118,9 @@ async function main() {
     must(path, "summary field on the create form", 'name="summary"');
     must(path, "search box", 'name="q"');
   }
+  // The landing page headlines the current core system.
+  must("/codex", "core system spotlight", "codex-system-spotlight");
+
   // Places and systems must offer the parent picker at creation, or new work
   // arrives orphaned and has to be adopted afterwards.
   must("/codex/library/regions", "parent picker on the create form", 'name="parent"');

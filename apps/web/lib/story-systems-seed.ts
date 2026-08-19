@@ -544,4 +544,108 @@ For writers: a scar is a plot hook with a location. Write injuries with provenan
       ],
     }),
   },
+  {
+    slug: "the-veil",
+    title: "The Veil",
+    summary: "Reality is not singular. The Veil is the boundary between neighboring realities, every world is a Shard of it, and humanity has learned to cross — without learning what it reopened.",
+    body: `The core frame for everything cross-world. Reality is not singular: the boundary separating neighboring realities is the Veil, and each reality on either side of it is a Shard — which is how every multiplayer world exists canonically, as another Shard rather than "someone's server". Ancient civilizations learned to pierce the boundary; their structures, the [[veil-anchors]], still stand. Modern humanity has learned to partially reactivate them. It does not understand them. It uses them anyway.
+
+The vocabulary, binding on all writing: the Veil (the boundary), a Shard (one reality), a Veil Anchor (the structure that ties two Shards together), a Breach (an active connection), a Crossing (physically traveling it), an Expedition (any journey to another Shard — see [[veil-expeditions]]), and an Incursion (a hostile Crossing into another player's Shard — see [[veil-incursions]]). Incursors cross; Defenders are native. Never write "server", "matchmaking", or "game mode" in fiction — the Veil network finds compatible Shards, and that is all anyone in-world knows.
+
+The canon already rhymes with this, and the rhymes are the point. The [[the-riftbound-legion]] treats the world's wounds as beachheads — a rift is a hostile Crossing by an older name. The Great Purges' survivors withdrew into "hidden realms" — the timeline never said which side of the Veil those realms are on. The [[meridian-arcane-institute]]'s unpublished depletion curves suggest the world's magic is not being consumed but taken — taken *where* is a question this system makes askable. And the oldest question of all sits underneath: humanity recently learned to Cross, but the Anchors are thousands of years old. Who built them? What else has been using them? Per [[something-under-the-war]], these stay glimpses. The Veil is allowed to rhyme with the Drain, the Hunger, and the thing beneath the war. It must never be confirmed as the answer to any of them.
+
+For writers: one law above all — everything beyond the Veil is an opportunity, and everything carried through it is a wager. Nothing an expedition takes is truly theirs until they cross home; death on the far side leaves it all behind. Write that pressure into every Veil scene, and write the human ritual around it: the crew that says "we're opening the Veil tonight" knows exactly what they are inviting.`,
+    meta: meta({
+      category: "world simulation",
+      unlockStage: "Act I — the first controlled Crossing",
+      dependsOn: ["magic"],
+      pillars: [
+        "Reality is not singular — every world is a Shard",
+        "Humanity reactivated what it does not understand",
+        "Everything beyond the Veil is an opportunity; everything carried through it is a wager",
+        "The Veil rhymes with the setting's mysteries and never answers them",
+      ],
+      openQuestions: [
+        "Who built the Anchors — and which faction is closest to finding out?",
+        "Does opening the Veil tell things on the other side exactly where humanity lives?",
+      ],
+    }),
+  },
+  {
+    slug: "veil-anchors",
+    title: "Veil Anchors",
+    summary: "The ancient structures that tie two Shards together — physical landmarks in the world, tiered by danger, and every discovered one is a POI on the atlas.",
+    body: `The physical half of [[the-veil]], and the part that lives on the map. An Anchor is never a menu: it is a landmark — ancient magical engineering with whatever modern hardware humanity has bolted on while trying to understand it. A discovered Anchor accretes generators, monitoring stations, containment fencing, barricades, research trailers, and a faction flag; an undiscovered one waits under ruins or deep in territory that kills visitors. Activation is spectacle, always: lights, ancient mechanisms turning, energy building, the environment reacting — and then the Veil tears open.
+
+Anchors are tiered, I through V, and the tier is a promise about both ends: Tier I opens introductory, low-threat Crossings for common returns; Tier III opens full [[veil-incursions]]; Tier V opens catastrophic-threat, artifact-grade endgame Crossings. Placement follows the same ladder — a Tier V Anchor does not sit conveniently beside anyone's settlement. It is under a ruined city, inside a magical exclusion zone, in ground held by a power nobody fights casually, or in the hunting range of something legendary. Merely reaching and powering a high-tier Anchor is an expedition in its own right, and should be written as one.
+
+For writers: every discovered Anchor is a place, so it enters the codex as a REGION entry — a site (or a destination inside one), filed in the atlas with its parent, its controlling faction, and its own dossier. The system entry here is the law; the atlas holds the instances. When you write one, answer the accretion questions: who found it, who fenced it, who is paying the research crew, and what the instruments do at night when nobody scheduled a Crossing.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "the-veil",
+      pillars: [
+        "Anchors are places, not menus — every discovered one is a POI in the atlas",
+        "Tier climbs with danger, and reaching a high-tier Anchor is an expedition of its own",
+        "Activation is spectacle: the world reacts before the Veil tears",
+      ],
+      regionNotes: [
+        { region: "the-starting-island", note: "The island's open question: whether the Riftwood Breach is a wild tear in the Veil — an Anchor nobody built, or one that failed — is glimpse material, never confirmed. No controlled Anchor is known here, and the island falls before anyone can dig." },
+        { region: "the-peninsula", note: "The first controlled Anchors are mainland discoveries — under purge-era ruins and interior exclusion zones, already fenced and instrumented by whichever power reached each one first." },
+      ],
+      openQuestions: [
+        "Which mainland region hides the first Tier I Anchor the party can reach — and which power got there first?",
+        "Does Port Arcadia's Exclusion Area exist because of something Anchor-shaped?",
+      ],
+    }),
+  },
+  {
+    slug: "veil-expeditions",
+    title: "Veil Expeditions",
+    summary: "Any Crossing to another Shard: co-op worlds, faction realities, hunting grounds, corrupted realities — and Dead Shards, where the loot is best and the answers are worst.",
+    body: `The PvE half of [[the-veil]]: the same Anchors, the same wager, no other players required. An Expedition begins with a destination the Veil network resolves — sometimes the one asked for, sometimes not — classified the way the instruments report it: PLAYER SHARD (a cooperative world), HOSTILE SHARD (a player world accepting [[veil-incursions]]), FACTION SHARD (a reality a major power controls), DEAD SHARD (a world where civilization collapsed), CORRUPTED SHARD (catastrophic magical contamination), HUNTING GROUND (a reality that belongs to its creatures), or UNKNOWN — no reliable information until somebody goes first.
+
+Dead Shards are the crown of the system. Players cross expecting ruins and find abandoned vehicles, military checkpoints, bodies, emptied research facilities, messages left behind. Something happened here. Maybe humanity lost its war. Maybe one faction won it. Maybe the magic ran out, or ran wild, or something crossed that should never have been allowed through. The loot is the best available through any Crossing, the enemies are among the worst in the game, and the correct first line of any Dead Shard scene is somebody whispering "what the hell happened here?"
+
+For writers: a parallel Shard shows consequences without touching the campaign. A world where a character who died here survived; where the war was lost; where a faction rules everything; where humans are the hunted species; where the harvest never industrialized — every one is a Dead or divergent Shard away, and each discovery can quietly suggest the Veil matters more to the central story than humanity realizes. The extraction law binds everything found there: nothing is theirs until it crosses home.`,
+    meta: meta({
+      category: "world simulation",
+      parent: "the-veil",
+      dependsOn: ["gathering-and-harvest", "survival"],
+      pillars: [
+        "One door, many destinations — and UNKNOWN means somebody goes first",
+        "Dead Shards carry the best loot and the worst answers",
+        "A parallel Shard shows consequences without touching the campaign",
+      ],
+      openQuestions: [
+        "What is the first Dead Shard the story sends players to — and what happened there?",
+        "Can a faction Shard be traded with instead of raided?",
+      ],
+    }),
+  },
+  {
+    slug: "veil-incursions",
+    title: "Veil Incursions",
+    summary: "The hostile Crossing: three Incursors, twenty minutes inside another crew's Shard, and nothing is theirs until they cross back home.",
+    body: `The extraction raid inside [[the-veil]], governed by consent before anything else: nobody is invaded who did not open the Veil. A Shard's owners must explicitly enable Incursions, and an open Veil pays for its danger — richer magical yields, rarer creatures, Veil-only events and materials, and [[dimensional-echo]] drops from Incursors killed on your ground. Opening up is a deliberate table decision, said out loud: "we're opening the Veil tonight."
+
+An Incursion is up to three Incursors and roughly twenty minutes, and the clock changes the game as it runs. At 20:00 the defenders get the Breach alarm — foreign Anchor established, signatures crossed, origin Shard named. Tracking pulses at 15:00 and 10:00 flash approximate invader positions; at 5:00 the extraction phase opens return Crossings whose locations both sides learn; at 2:00 the collapse makes Incursors near-continuously visible. Stealth decays into a manhunt by design. Extraction is physical — reach the Anchor and cross, under fire if it comes to that — and missing it means WORLD CONNECTION SEVERED: a stranded Incursor, increasingly visible, surviving an emergency recall countdown while the world itself turns hostile. Death at any point leaves everything behind — carried equipment and unsecured raid loot alike — for defenders to claim or teammates to mount a rescue for. "Leave him and extract" versus "go back for his gear" is the best decision this system produces; protect it.
+
+Two laws keep it a raid rather than a griefing tool. Incursors risk what they carry — the legendary rifle is an enormous advantage right up until it becomes the defender's legendary rifle — and matchmaking is the Veil network in fiction: tier, progression, population, cooldowns, and eligibility decide compatibility, so an endgame squad does not land on a fresh world, ever. And persistent player work is protected: no demolishing ordinary structures, no emptying long-term storage, no sabotaging a world someone spent hundreds of hours on. The value sits in raidable Veil caches, faction stockpiles, and artifact vaults spawned around Anchor activity. What legitimate battle damage the fight does leave behind persists by [[persistent-damage]] — the bullet holes around the Anchor are the story the defenders tell later.`,
+    meta: meta({
+      category: "cooperative",
+      parent: "the-veil",
+      unlockStage: "Late game — when a Shard is worth raiding",
+      dependsOn: ["combat", "cooperative-play"],
+      pillars: [
+        "Nobody is invaded who did not open the Veil",
+        "Twenty minutes, and stealth decays into a manhunt",
+        "Nothing is yours until you cross home — death leaves everything behind",
+        "A raid, never a griefing tool: persistent work is protected, raidable value is provided",
+      ],
+      openQuestions: [
+        "What ruleset lets a lone defender opt into facing a full squad?",
+        "How long is the cooldown before the same Shard can be hit again?",
+      ],
+    }),
+  },
 ];
