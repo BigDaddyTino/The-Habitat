@@ -4,11 +4,12 @@ import {
   analyzeStoryGraph,
   findStoryEntryNodeKeys,
   isStoryLockHeld,
-  isStoryContentEditable,
+  isStoryFlowEditable,
   isStoryPresenceFresh,
   isValidStoryKey,
   parseStoryPlaceKind,
   slugifyStoryKey,
+  storyLockNotice,
   storyLockTtlMs,
   storyPlaceAncestry,
   storyPlaceDescendants,
@@ -24,12 +25,22 @@ const scene = (key: string, title = key): StoryGraphNode => ({ key, kind: "SCENE
 const ending = (key: string): StoryGraphNode => ({ key, kind: "ENDING", title: key });
 const link = (fromKey: string, toKey: string, label: string | null = null): StoryGraphEdge => ({ fromKey, toKey, label });
 
-test("the codex is an open writers' room — every status is editable by any member", () => {
-  // The approval ladder was removed on 2026-08-18; the audit log replaced it.
-  assert.equal(isStoryContentEditable("CANON", false), true);
-  assert.equal(isStoryContentEditable("CANON", true), true);
-  assert.equal(isStoryContentEditable("PROPOSED", false), true);
-  assert.equal(isStoryContentEditable("DRAFT", false), true);
+test("nothing is frozen until a lock says so", () => {
+  // The approval ladder went on 2026-08-18 and status stopped freezing
+  // anything; the explicit lock replaced it on 2026-08-19. An unlocked flow
+  // is editable no matter what status its cards carry.
+  assert.equal(isStoryFlowEditable(false), true);
+  assert.equal(isStoryFlowEditable(true), false);
+});
+
+test("a locked flow explains itself the same way wherever it is met", () => {
+  assert.match(storyLockNotice("Tino"), /^Tino locked this flow./);
+  // The locker's account can be deleted out from under a standing lock, and
+  // the notice still has to read as a sentence rather than "null locked this".
+  assert.match(storyLockNotice(null), /^This flow is locked./);
+  for (const notice of [storyLockNotice("Tino"), storyLockNotice(null)]) {
+    assert.match(notice, /an admin can unlock it/i);
+  }
 });
 
 function problemKinds(nodes: StoryGraphNode[], edges: StoryGraphEdge[]) {

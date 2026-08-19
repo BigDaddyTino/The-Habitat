@@ -5,12 +5,13 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, Check, GitBranch, Link2, Lock, ShieldCheck, Trash2, Unlink } from "lucide-react";
 import {
-  isStoryContentEditable,
+  isStoryFlowEditable,
   storyEndingKindLabels,
   storyEndingKinds,
   storyHeartbeatMs,
   storyNodeKinds,
   storyNodeKindLabels,
+  storyLockNotice,
   storyStatusLabels,
   type StoryEntryKind,
   type StoryNodeKind,
@@ -56,7 +57,7 @@ function FlagHints({ flags }: { flags: LibraryEntry[] }) {
 }
 
 
-export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntries, arcRefs }: { node: StoryBoardNode; arcId: string; canReview: boolean; viewerUserId: string; libraryEntries: LibraryEntry[]; arcRefs: StoryArcRef[] }) {
+export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntries, arcRefs, locked }: { node: StoryBoardNode; arcId: string; canReview: boolean; viewerUserId: string; libraryEntries: LibraryEntry[]; arcRefs: StoryArcRef[]; locked: { by: string | null } | null }) {
   const [claimFailed, setClaimFailed] = useState(false);
   const [lockHeld, setLockHeld] = useState(false);
   // Controlled so the valence and completion fields appear the moment the
@@ -72,7 +73,7 @@ export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntrie
   }
   const claimed = useRef(false);
   const claimPending = useRef(false);
-  const canEdit = isStoryContentEditable(node.status, canReview);
+  const canEdit = isStoryFlowEditable(locked !== null);
 
   const claim = useCallback(() => {
     if (!canEdit || claimed.current || claimPending.current) return;
@@ -114,7 +115,7 @@ export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntrie
   return <>
     {heldByOther ? <p className="story-lock-warning"><Lock aria-hidden="true" size={12} />{heldByOther.name} is writing here. A version check protects both drafts if you overlap.</p> : null}
     {claimFailed && !heldByOther ? <p className="story-lock-warning"><Lock aria-hidden="true" size={12} />Another writer claimed this card. Click back into a field to retry.</p> : null}
-    {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>Canon is locked for contributors.</strong> Leave a note with the change you want; a reviewer can revise it without bypassing approval.</span></p> : null}
+    {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This flow is locked.</strong> {storyLockNotice(locked?.by ?? null)} Notes below stay open — locking settles the story, not the conversation about it.</span></p> : null}
 
     {canEdit ? <form action={updateNode} className="story-form" onFocus={claim} onSubmit={() => { claimed.current = false; setLockHeld(false); }}>
       <input name="nodeId" type="hidden" value={node.id} /><input name="version" type="hidden" value={node.version} />
@@ -182,11 +183,11 @@ export function NodeEditor({ node, arcId, canReview, viewerUserId, libraryEntrie
   </>;
 }
 
-export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags = [] }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean; nodes: StoryNodeRef[]; flags?: LibraryEntry[] }) {
-  const canEdit = isStoryContentEditable(edge.status, canReview);
+export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags = [], locked }: { edge: StoryBoardEdge; fromTitle: string; toTitle: string; canReview: boolean; nodes: StoryNodeRef[]; flags?: LibraryEntry[]; locked: { by: string | null } | null }) {
+  const canEdit = isStoryFlowEditable(locked !== null);
   return <>
     <div className="story-edge-route"><span>{fromTitle}</span><GitBranch aria-hidden="true" size={16} /><span>{toTitle}</span></div>
-    {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This branch is canon.</strong> Only a reviewer can alter the exported choice.</span></p> : <form action={updateEdge} className="story-form">
+    {!canEdit ? <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This flow is locked.</strong> {storyLockNotice(locked?.by ?? null)}</span></p> : <form action={updateEdge} className="story-form">
       <input name="edgeId" type="hidden" value={edge.id} />
       {/* Edges have no version column, so fields are keyed on the row's
           updatedAt: another writer's save arriving via live sync remounts them

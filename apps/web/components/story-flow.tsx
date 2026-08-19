@@ -20,6 +20,7 @@ import { CornerDownRight, Flag, GitBranch, PenLine, RotateCcw, Settings2, Sparkl
 import { storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels } from "@habitat/shared";
 import { addBranch, createEdge, createNode } from "@/app/codex/actions";
 import { EdgeEditor, NodeEditor, type StoryArcRef } from "@/components/story-workbench";
+import { StoryFlowLock } from "@/components/story-flow-lock";
 import { StoryWarden } from "@/components/story-warden";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import type { StoryBoard, StoryBoardEdge, StoryBoardNode } from "@/lib/story-codex";
@@ -164,6 +165,10 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
   assistantAvailable: boolean;
   initialNodeId?: string | null;
 }) {
+  // The whole canvas reads the freeze from one place. A locked flow still
+  // reads and walks exactly as before — what it loses is every way to change
+  // anything, so a locked story stays as browsable as an open one.
+  const locked = board.arc.locked;
   const flowRef = useRef<ReactFlowInstance<FlowNode, Edge> | null>(null);
   const [, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
@@ -345,14 +350,14 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
   // Dragging from the bottom handle of one card to the top of another still
   // draws a branch — the tree re-lays itself around the new connection.
   const onConnect = useCallback((connection: Connection) => {
-    if (!connection.source || !connection.target) return;
+    if (locked || !connection.source || !connection.target) return;
     setActionError(null);
     startTransition(() => {
       void createEdge({ fromNodeId: connection.source as string, toNodeId: connection.target as string }).catch((cause: unknown) => {
         setActionError(cause instanceof Error ? cause.message : "That branch could not be drawn.");
       });
     });
-  }, []);
+  }, [locked]);
 
   const isEnded = current !== null && (current.kind === "ENDING" || offeredEdges.length === 0);
   const nodeRefs = board.nodes.map((node) => ({ id: node.id, title: node.title }));
@@ -368,6 +373,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
           fitView
           fitViewOptions={{ maxZoom: 0.9, padding: 0.15 }}
           minZoom={0.12}
+          nodesConnectable={!locked}
           nodesDraggable={false}
           nodeTypes={nodeTypes}
           nodes={flowNodes}
@@ -394,6 +400,7 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
           <span className="is-choice">Green — your next choices</span>
           <span>Click any card to read or edit it</span>
         </div>
+        <StoryFlowLock arcId={board.arc.id} canReview={canReview} locked={locked} />
         <StoryWarden arcId={board.arc.id} available={assistantAvailable} nodeId={shown?.id ?? null} />
       </div>
 
@@ -403,14 +410,14 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
             <p className="eyebrow"><Sparkles aria-hidden="true" size={12} /> A blank page</p>
             <h2>{board.arc.title}</h2>
             {board.arc.summary ? <p className="flow-panel-summary">{board.arc.summary}</p> : null}
-            <form action={createNode} className="story-form">
+            {locked ? <p className="story-inspector-hint">This flow is locked and has no cards yet. An admin can unlock it from the badge on the canvas.</p> : <form action={createNode} className="story-form">
               <p className="eyebrow">The first card</p>
               <input name="arcId" type="hidden" value={board.arc.id} />
               <label>Kind<select defaultValue="SCENE" name="kind">{storyNodeKinds.map((kind) => <option key={kind} value={kind}>{storyNodeKindLabels[kind]}</option>)}</select></label>
               <label>Title<input maxLength={160} name="title" placeholder="Where does it begin?" required type="text" /></label>
               <label>Summary<textarea maxLength={500} name="summary" placeholder="One line on what happens here." rows={3} /></label>
               <button className="save-server" type="submit">Add the first card</button>
-            </form>
+            </form>}
           </>
         ) : shown === null ? (
           <>
@@ -451,14 +458,14 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
               </div>
             ) : null}
 
-            <div className="flow-tools">
+            {locked ? null : <div className="flow-tools">
               <button className={`flow-tool${editingCard ? " is-open" : ""}`} onClick={() => { setEditingCard((open) => !open); setAddingBranch(false); setEditingEdgeId(null); }} type="button"><PenLine aria-hidden="true" size={12} /> {editingCard ? "Close editor" : "Edit this card"}</button>
               <button className={`flow-tool${addingBranch ? " is-open" : ""}`} onClick={() => { setAddingBranch((open) => !open); setEditingCard(false); setEditingEdgeId(null); }} type="button"><GitBranch aria-hidden="true" size={12} /> Add a branch</button>
-            </div>
+            </div>}
 
             {editingCard ? (
               <div className="flow-editor">
-                <NodeEditor arcId={board.arc.id} arcRefs={arcRefs} canReview={canReview} key={shown.id} libraryEntries={board.libraryEntries} node={shown} viewerUserId={viewerUserId} />
+                <NodeEditor arcId={board.arc.id} arcRefs={arcRefs} canReview={canReview} key={shown.id} libraryEntries={board.libraryEntries} locked={locked} node={shown} viewerUserId={viewerUserId} />
               </div>
             ) : null}
 
@@ -495,12 +502,12 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
                           <CornerDownRight aria-hidden="true" size={13} />
                           <span><strong>{edge.label ?? "Continue"}</strong><small>{target ? `→ ${target.title}` : ""}</small></span>
                         </button>
-                        <button aria-label={editingEdgeId === edge.id ? "Close the branch editor" : `Edit the branch "${edge.label ?? "Continue"}"`} className="icon-action flow-choice-edit" onClick={() => { setEditingEdgeId((open) => (open === edge.id ? null : edge.id)); setEditingCard(false); setAddingBranch(false); }} type="button">
+                        {locked ? null : <button aria-label={editingEdgeId === edge.id ? "Close the branch editor" : `Edit the branch "${edge.label ?? "Continue"}"`} className="icon-action flow-choice-edit" onClick={() => { setEditingEdgeId((open) => (open === edge.id ? null : edge.id)); setEditingCard(false); setAddingBranch(false); }} type="button">
                           {editingEdgeId === edge.id ? <X aria-hidden="true" size={13} /> : <Settings2 aria-hidden="true" size={13} />}
-                        </button>
+                        </button>}
                         {editingEdgeId === edge.id ? (
                           <div className="flow-editor flow-edge-editor">
-                            <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
+                            <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} locked={locked} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
                           </div>
                         ) : null}
                       </div>
@@ -531,12 +538,12 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
                           <small>{target ? `→ ${target.title}` : ""}{edge.condition ? ` · if: ${edge.condition}` : ""}</small>
                         </span>
                       </button>
-                      <button aria-label={editingEdgeId === edge.id ? "Close the branch editor" : `Edit the branch "${edge.label ?? "Continue"}"`} className="icon-action flow-choice-edit" onClick={() => { setEditingEdgeId((open) => (open === edge.id ? null : edge.id)); setEditingCard(false); setAddingBranch(false); }} type="button">
+                      {locked ? null : <button aria-label={editingEdgeId === edge.id ? "Close the branch editor" : `Edit the branch "${edge.label ?? "Continue"}"`} className="icon-action flow-choice-edit" onClick={() => { setEditingEdgeId((open) => (open === edge.id ? null : edge.id)); setEditingCard(false); setAddingBranch(false); }} type="button">
                         {editingEdgeId === edge.id ? <X aria-hidden="true" size={13} /> : <Settings2 aria-hidden="true" size={13} />}
-                      </button>
+                      </button>}
                       {editingEdgeId === edge.id ? (
                         <div className="flow-editor flow-edge-editor">
-                          <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
+                          <EdgeEditor canReview={canReview} edge={edge} flags={board.libraryEntries} fromTitle={shown.title} locked={locked} nodes={nodeRefs} toTitle={target?.title ?? "Unknown card"} />
                         </div>
                       ) : null}
                     </div>

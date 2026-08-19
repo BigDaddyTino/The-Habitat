@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Lock, ShieldCheck } from "lucide-react";
-import { isStoryContentEditable, storyEntryKindLabels, storyEntryKinds, storyHeartbeatMs, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
+import { Lock } from "lucide-react";
+import { storyEntryKindLabels, storyEntryKinds, storyHeartbeatMs, type StoryEntryKind } from "@habitat/shared";
 import { claimEntryLock, releaseEntryLock, updateEntry } from "@/app/codex/actions";
 
-export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
+export function StoryEntryEditor({ entry, viewerUserId }: {
   entry: {
     id: string;
     kind: StoryEntryKind;
@@ -13,21 +13,18 @@ export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
     title: string;
     summary: string | null;
     body: string | null;
-    status: StoryStatus;
     version: number;
     lockedBy: { userId: string; name: string } | null;
   };
-  canReview: boolean;
   viewerUserId: string;
 }) {
   const [claimFailed, setClaimFailed] = useState(false);
   const [lockHeld, setLockHeld] = useState(false);
   const claimed = useRef(false);
   const claimPending = useRef(false);
-  const canEdit = isStoryContentEditable(entry.status, canReview);
 
   const claim = useCallback(() => {
-    if (!canEdit || claimed.current || claimPending.current) return;
+    if (claimed.current || claimPending.current) return;
     claimPending.current = true;
     void claimEntryLock({ entryId: entry.id })
       .then((result) => {
@@ -37,7 +34,7 @@ export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
       })
       .catch(() => setClaimFailed(true))
       .finally(() => { claimPending.current = false; });
-  }, [canEdit, entry.id]);
+  }, [entry.id]);
 
   useEffect(() => {
     if (!lockHeld) return;
@@ -56,13 +53,6 @@ export function StoryEntryEditor({ entry, canReview, viewerUserId }: {
   }, [entry.id]);
 
   const heldByOther = entry.lockedBy && entry.lockedBy.userId !== viewerUserId ? entry.lockedBy : null;
-
-  if (!canEdit) {
-    return <article className="story-entry-reading">
-      <p className="story-canon-notice"><ShieldCheck aria-hidden="true" size={14} /><span><strong>This entry is canon.</strong> Contributors can leave a note; a reviewer can revise the exported text.</span></p>
-      {entry.body ? <div className="story-prose">{entry.body}</div> : <p className="story-inspector-hint">No detail has been written yet.</p>}
-    </article>;
-  }
 
   return <div className="story-entry-editor">
     {heldByOther ? <p className="story-lock-warning"><Lock aria-hidden="true" size={12} />{heldByOther.name} is writing here. A version check protects both drafts if you overlap.</p> : null}

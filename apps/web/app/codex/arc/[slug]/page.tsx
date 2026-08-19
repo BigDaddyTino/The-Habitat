@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Settings2, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { isStoryContentEditable } from "@habitat/shared";
+import { isStoryFlowEditable, storyLockNotice } from "@habitat/shared";
 import { getStoryBoard, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { StoryFlow } from "@/components/story-flow";
@@ -21,7 +21,8 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   if (!board) notFound();
   const [arcRefs, regions] = await Promise.all([listStoryArcRefs(), listStoryEntries({ kind: "REGION" })]);
   const nodeTitles = new Map(board.nodes.map((node) => [node.id, node.title]));
-  const canEditArc = isStoryContentEditable(board.arc.status, canReview);
+  // One freeze for the whole flow: arc settings included, admins included.
+  const canEditArc = isStoryFlowEditable(board.arc.locked !== null);
 
   return (
     <section className="codex-board-shell">
@@ -50,7 +51,7 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
               })}</ul>
             </div>
           ) : null}
-          {canReview && board.arc.status !== "CANON" ? (
+          {canReview && board.arc.status !== "CANON" && canEditArc ? (
             <form action={canoniseArc}>
               <input name="arcId" type="hidden" value={board.arc.id} />
               <button className="save-server" type="submit">Make this arc canon</button>
@@ -58,6 +59,10 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
           ) : null}
         </div>
       </header>
+
+      {!canEditArc ? (
+        <p className="codex-problems codex-arc-locked"><Lock aria-hidden="true" size={14} /> {storyLockNotice(board.arc.locked?.by ?? null)}</p>
+      ) : null}
 
       {canEditArc ? (
         <details className="codex-problems codex-arc-settings">

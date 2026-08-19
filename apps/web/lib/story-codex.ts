@@ -99,6 +99,9 @@ export type StoryBoard = {
     isMainline: boolean;
     status: StoryStatus;
     author: string;
+    /** Non-null only while an admin's freeze stands. `by` decays to null if
+     *  that admin's account is later deleted; the freeze itself does not. */
+    locked: { at: Date; by: string | null } | null;
   };
   nodes: StoryBoardNode[];
   edges: StoryBoardEdge[];
@@ -154,7 +157,7 @@ export async function listStoryArcs() {
 export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
   const arc = await db.storyArc.findUnique({
     where: { slug },
-    include: { creator: { select: writerSelect }, region: { select: { id: true, slug: true, title: true } } },
+    include: { creator: { select: writerSelect }, lockedBy: { select: writerSelect }, region: { select: { id: true, slug: true, title: true } } },
   });
   if (!arc) return null;
 
@@ -234,6 +237,9 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       isMainline: arc.isMainline,
       status: arc.status,
       author: storyMemberName(arc.creator),
+      // Read off the timestamp, never off the relation: an admin's account can
+      // be deleted (the FK nulls the locker) and the freeze must survive it.
+      locked: arc.lockedAt ? { at: arc.lockedAt, by: arc.lockedBy ? storyMemberName(arc.lockedBy) : null } : null,
     },
     nodes: boardNodes,
     // Edges whose endpoint was withheld (archived/rejected node) are withheld

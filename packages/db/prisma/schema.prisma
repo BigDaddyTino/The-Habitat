@@ -451,6 +451,7 @@ model User {
   memberReferralsSent     MemberReferral[]           @relation("MemberReferralInviter")
   memberReferralReceived  MemberReferral?             @relation("MemberReferralInvitee")
   storyArcs               StoryArc[]                  @relation("StoryArcCreator")
+  storyArcLocks           StoryArc[]                  @relation("StoryArcLock")
   storyNodesCreated       StoryNode[]                 @relation("StoryNodeCreator")
   storyNodesUpdated       StoryNode[]                 @relation("StoryNodeEditor")
   storyNodeLocks          StoryNode[]                 @relation("StoryNodeLock")
@@ -1990,10 +1991,22 @@ model StoryArc {
   isMainline      Boolean     @default(false)
   status          StoryStatus @default(PROPOSED)
   position        Int         @default(0)
+  /// The writers' room is open by default: nothing is frozen until somebody
+  /// freezes it. A locked arc is settled story — no card, branch, or arc
+  /// setting on it can be changed by anyone, including the admin who locked
+  /// it, until it is unlocked again. Only an ADMIN may turn it either way.
+  ///
+  /// This is NOT the courtesy lock that `StoryNode.lockedByUserId` carries.
+  /// That one is transient, self-expiring, and only says "someone is typing
+  /// here"; this one is a deliberate, permanent-until-lifted freeze, so it
+  /// has no expiry and is never claimed automatically.
+  lockedAt        DateTime?
+  lockedByUserId  String?     @db.Uuid
   createdByUserId String      @db.Uuid
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   creator         User        @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  lockedBy        User?       @relation("StoryArcLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
   region          StoryEntry? @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
   nodes           StoryNode[]
   edges           StoryEdge[]

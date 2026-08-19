@@ -77,7 +77,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
           <details className="entry-edit-workspace" open={Boolean(created) || (entry.meta === null && needsPickers)}>
             <summary><Pencil aria-hidden="true" size={15} /><span><strong>Edit {storyEntryKindLabels[entry.kind].toLowerCase()}</strong><small>Writing reference, structured facts, and story connections</small></span></summary>
             <div className="entry-edit-workspace-body">
-              <StoryEntryEditor canReview={canReview} entry={entry} viewerUserId={user.id} />
+              <StoryEntryEditor entry={entry} viewerUserId={user.id} />
 
               {entry.kind === "CHARACTER" ? (
                 <CharacterSheet

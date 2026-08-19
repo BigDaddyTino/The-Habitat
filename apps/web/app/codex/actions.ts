@@ -4,7 +4,6 @@ import "@/lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
   isValidStoryKey,
-  isStoryContentEditable,
   parseStoryPlaceKind,
   slugifyStoryKey,
   storyControlKinds,
@@ -24,7 +23,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
-import { storyReadRole, storyReviewRole } from "@/lib/story-codex";
+import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
 
 const db = getPrismaClient();
@@ -124,6 +123,27 @@ const arcSchema = z.object({
   isMainline: z.boolean(),
 });
 
+/**
+ * The one gate that freezes story. Every mutation that touches an arc — its
+ * settings, its cards, its branches, what they link to — passes through here
+ * first, inside the same transaction that does the writing, so a lock landing
+ * mid-edit is seen rather than raced past.
+ *
+ * It binds admins too. The lock says "this is settled", and a freeze that the
+ * person most likely to be editing can write straight through would say
+ * nothing at all. An admin who needs to change a locked flow lifts the lock,
+ * which is one click on the same badge and leaves a trail.
+ */
+async function assertArcUnlocked(tx: Transaction, arcId: string) {
+  const arc = await tx.storyArc.findUnique({ where: { id: arcId }, select: { lockedAt: true, title: true, lockedBy: { select: { displayName: true, name: true, username: true } } } });
+  if (!arc) throw new Error("That arc no longer exists.");
+  if (!arc.lockedAt) return;
+  const locker = arc.lockedBy ? storyMemberName(arc.lockedBy) : null;
+  throw new Error(locker
+    ? `"${arc.title}" is locked — ${locker} settled this flow. An admin has to unlock it before anything here can change.`
+    : `"${arc.title}" is locked. An admin has to unlock it before anything here can change.`);
+}
+
 /** The pickup place is a REGION bible entry, never free text. */
 async function assertRegionEntry(tx: Transaction, regionEntryId: string | null) {
   if (!regionEntryId) return;
@@ -180,9 +200,7 @@ export async function updateArc(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: parsed.data.arcId } });
     if (!arc) throw new Error("That arc no longer exists.");
-    if (!isStoryContentEditable(arc.status, user.role === "ADMIN")) {
-      throw new Error("This arc is canon. Leave a note for a reviewer before changing shipped story.");
-    }
+    await assertArcUnlocked(tx, arc.id);
     await assertRegionEntry(tx, parsed.data.regionEntryId);
 
     // Mainline stays a reviewer's call; everyone else's edit keeps it as-is.
@@ -275,6 +293,7 @@ export async function createNode(formData: FormData) {
   if (!arc) throw new Error("That arc no longer exists.");
 
   await db.$transaction(async (tx) => {
+    await assertArcUnlocked(tx, arc.id);
     const key = await availableNodeKey(tx, arc.id, parsed.data.title);
     const placement = parsed.data.canvasX !== null && parsed.data.canvasY !== null
       ? { canvasX: parsed.data.canvasX, canvasY: parsed.data.canvasY }
@@ -341,9 +360,7 @@ export async function updateNode(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, include: { arc: { select: { slug: true } } } });
     if (!node) throw new Error("That node no longer exists.");
-    if (!isStoryContentEditable(node.status, user.role === "ADMIN")) {
-      throw new Error("This node is canon. Leave a note for a reviewer before changing shipped story.");
-    }
+    await assertArcUnlocked(tx, node.arcId);
 
     // A speaker is a character from the bible, never free text — the importer
     // resolves the attribution against a real asset, so it must exist here.
@@ -422,6 +439,7 @@ export async function moveNode(input: { nodeId: string; canvasX: number; canvasY
     const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { id: true, arcId: true, title: true, canvasX: true, canvasY: true } });
     if (!node) throw new Error("That node no longer exists.");
     if (node.canvasX === parsed.data.canvasX && node.canvasY === parsed.data.canvasY) return;
+    await assertArcUnlocked(tx, node.arcId);
 
     await tx.storyNode.update({ where: { id: node.id }, data: { canvasX: parsed.data.canvasX, canvasY: parsed.data.canvasY } });
     await recordRevision(tx, {
@@ -445,6 +463,7 @@ export async function deleteNode(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: nodeId.data }, include: { arc: { select: { slug: true } } } });
     if (!node) throw new Error("That node no longer exists.");
+    await assertArcUnlocked(tx, node.arcId);
 
     // Canon is what the game was built from. Removing it outright would tear a
     // hole in an export somebody has already imported, so it is archived and
@@ -520,6 +539,7 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
     // Enforced here rather than by a composite foreign key; see the note on
     // StoryEdge in schema.prisma.
     if (from.arcId !== to.arcId) throw new Error("A transition has to stay inside one arc.");
+    await assertArcUnlocked(tx, from.arcId);
 
     // Several branches between the same pair of nodes are legitimate — three
     // differently-labelled choices can all lead to the same scene, with the
@@ -557,9 +577,7 @@ export async function updateEdge(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: parsed.data.edgeId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
     if (!edge) throw new Error("That transition no longer exists.");
-    if (!isStoryContentEditable(edge.status, user.role === "ADMIN")) {
-      throw new Error("This branch is canon. Only a reviewer can change its choice text or condition.");
-    }
+    await assertArcUnlocked(tx, edge.arcId);
 
     // Retargeting keeps the edge — and above all its key — so pointing a
     // choice somewhere new never orphans the asset the importer already built
@@ -608,9 +626,7 @@ export async function reorderEdge(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: parsed.data.edgeId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } } } });
     if (!edge) throw new Error("That transition no longer exists.");
-    if (!isStoryContentEditable(edge.status, user.role === "ADMIN")) {
-      throw new Error("This branch is canon. Only a reviewer can reorder the player's choices.");
-    }
+    await assertArcUnlocked(tx, edge.arcId);
 
     const siblings = await tx.storyEdge.findMany({ where: { fromNodeId: edge.fromNodeId }, orderBy: { position: "asc" }, select: { id: true, position: true } });
     const index = siblings.findIndex((sibling) => sibling.id === edge.id);
@@ -669,6 +685,7 @@ export async function addBranch(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const from = await tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, key: true, title: true, canvasX: true, canvasY: true, arc: { select: { slug: true } } } });
     if (!from) throw new Error("The card this branch starts from no longer exists.");
+    await assertArcUnlocked(tx, from.arcId);
 
     let toNodeId = parsed.data.targetNodeId;
     let toTitle: string;
@@ -728,6 +745,7 @@ export async function deleteEdge(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: edgeId.data }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
     if (!edge) throw new Error("That transition no longer exists.");
+    await assertArcUnlocked(tx, edge.arcId);
 
     // Open writers' room: anyone can cut a branch, and the audit log shows
     // who cut it. The key travels in `before`, so the Unreal side can match
@@ -834,9 +852,6 @@ export async function updateEntry(formData: FormData) {
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId } });
     if (!entry) throw new Error("That entry no longer exists.");
-    if (!isStoryContentEditable(entry.status, user.role === "ADMIN")) {
-      throw new Error("This bible entry is canon. Leave a note for a reviewer before changing it.");
-    }
 
     // A kind change must not orphan structural references that were validated
     // against the old kind at link time: a dialogue speaker has to stay a
@@ -1033,7 +1048,6 @@ export async function updateEntryMeta(formData: FormData) {
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId }, select: { id: true, kind: true, slug: true, title: true, meta: true, status: true } });
     if (!entry) throw new Error("That entry no longer exists.");
-    if (!isStoryContentEditable(entry.status, user.role === "ADMIN")) throw new Error("This entry is canon. Leave a note for a reviewer.");
 
     const schema = metaSchemasByKind[entry.kind];
     if (!schema) throw new Error(`${entry.kind} entries do not have a sheet yet.`);
@@ -1073,9 +1087,7 @@ export async function linkEntryToNode(formData: FormData) {
       tx.storyEntry.findUnique({ where: { id: parsed.data.entryId }, select: { id: true, title: true } }),
     ]);
     if (!node || !entry) throw new Error("That reference no longer exists.");
-    if (!isStoryContentEditable(node.status, user.role === "ADMIN")) {
-      throw new Error("References on a canon node can only be changed by a reviewer.");
-    }
+    await assertArcUnlocked(tx, node.arcId);
 
     const existing = await tx.storyEntryLink.findUnique({ where: { nodeId_entryId: { nodeId: node.id, entryId: entry.id } }, select: { id: true } });
     if (existing) return node.arc.slug;
@@ -1099,9 +1111,7 @@ export async function unlinkEntryFromNode(formData: FormData) {
       include: { node: { select: { arcId: true, title: true, status: true, arc: { select: { slug: true } } } }, entry: { select: { title: true } } },
     });
     if (!link) return null;
-    if (!isStoryContentEditable(link.node.status, user.role === "ADMIN")) {
-      throw new Error("References on a canon node can only be changed by a reviewer.");
-    }
+    await assertArcUnlocked(tx, link.node.arcId);
 
     await tx.storyEntryLink.delete({ where: { id: link.id } });
     await recordRevision(tx, { entityType: "LINK", entityId: link.id, arcId: link.node.arcId, action: "UNLINKED", actorUserId: user.id, summary: `Took "${link.entry.title}" out of "${link.node.title}"` });
@@ -1131,6 +1141,7 @@ export async function setStoryStatus(formData: FormData) {
     if (entityType === "ARC") {
       const arc = await tx.storyArc.findUnique({ where: { id: entityId } });
       if (!arc) throw new Error("That arc no longer exists.");
+      await assertArcUnlocked(tx, arc.id);
       await tx.storyArc.update({ where: { id: arc.id }, data: { status } });
       await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked the arc "${arc.title}" ${status.toLowerCase()}`, before: { status: arc.status }, after: { status } });
       return arc.slug;
@@ -1139,6 +1150,7 @@ export async function setStoryStatus(formData: FormData) {
     if (entityType === "NODE") {
       const node = await tx.storyNode.findUnique({ where: { id: entityId }, include: { arc: true } });
       if (!node) throw new Error("That node no longer exists.");
+      await assertArcUnlocked(tx, node.arcId);
       await tx.storyNode.update({ where: { id: node.id }, data: { status } });
       await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked "${node.title}" ${status.toLowerCase()}`, before: { status: node.status }, after: { status } });
 
@@ -1154,6 +1166,7 @@ export async function setStoryStatus(formData: FormData) {
     if (entityType === "EDGE") {
       const edge = await tx.storyEdge.findUnique({ where: { id: entityId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
       if (!edge) throw new Error("That transition no longer exists.");
+      await assertArcUnlocked(tx, edge.arcId);
       await tx.storyEdge.update({ where: { id: edge.id }, data: { status } });
       await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: edge.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked the branch "${edge.fromNode.title}" → "${edge.toNode.title}" ${status.toLowerCase()}`, before: { status: edge.status }, after: { status } });
       return edge.arc.slug;
@@ -1174,6 +1187,54 @@ export async function setStoryStatus(formData: FormData) {
  * whose branches are still proposed — a scene that exports with no way out.
  * This promotes an arc and everything currently proposed inside it together.
  */
+// --- The freeze -------------------------------------------------------------
+
+/**
+ * Locking and unlocking a flow. An ADMIN's call in both directions, and the
+ * only pair of actions in the codex a writer cannot reach — everything else
+ * here is open to any member.
+ *
+ * Both are idempotent on purpose: two admins clicking the same badge, or one
+ * clicking twice on a slow connection, should settle rather than argue. A lock
+ * that is already held keeps its original time and holder, so the trail says
+ * when the story was actually settled and not when somebody last clicked.
+ */
+export async function lockArc(formData: FormData) {
+  const user = await requireRole(storyReviewRole);
+  const arcId = z.string().uuid().safeParse(formData.get("arcId"));
+  if (!arcId.success) throw new Error("Invalid arc.");
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, lockedAt: true } });
+    if (!arc) throw new Error("That arc no longer exists.");
+    if (arc.lockedAt) return arc.slug;
+
+    await tx.storyArc.update({ where: { id: arc.id }, data: { lockedAt: new Date(), lockedByUserId: user.id } });
+    await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Locked "${arc.title}" — this flow is settled`, before: { locked: false }, after: { locked: true } });
+    return arc.slug;
+  });
+
+  refreshCodex(arcSlug);
+}
+
+export async function unlockArc(formData: FormData) {
+  const user = await requireRole(storyReviewRole);
+  const arcId = z.string().uuid().safeParse(formData.get("arcId"));
+  if (!arcId.success) throw new Error("Invalid arc.");
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, lockedAt: true } });
+    if (!arc) throw new Error("That arc no longer exists.");
+    if (!arc.lockedAt) return arc.slug;
+
+    await tx.storyArc.update({ where: { id: arc.id }, data: { lockedAt: null, lockedByUserId: null } });
+    await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Unlocked "${arc.title}" — this flow is open again`, before: { locked: true }, after: { locked: false } });
+    return arc.slug;
+  });
+
+  refreshCodex(arcSlug);
+}
+
 export async function canoniseArc(formData: FormData) {
   const user = await requireRole(storyReviewRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
@@ -1182,6 +1243,7 @@ export async function canoniseArc(formData: FormData) {
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: arcId.data } });
     if (!arc) throw new Error("That arc no longer exists.");
+    await assertArcUnlocked(tx, arc.id);
 
     const [nodes, edges] = await Promise.all([
       tx.storyNode.updateMany({ where: { arcId: arc.id, status: "PROPOSED" }, data: { status: "CANON" } }),

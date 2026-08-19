@@ -384,6 +384,21 @@ body:has(.codex-board-shell) > .site-footer { display: none; }
 .flow-guide .is-current { border-color: rgba(198,151,76,.45); color: var(--brass); }
 .flow-guide .is-choice { border-color: rgba(143,191,138,.4); color: var(--canon); }
 
+/* The freeze, bottom-left of every canvas. Sits above the react-flow pane so
+   it stays clickable, and clear of the minimap, which lives bottom-right. */
+.flow-lock-form { position: absolute; z-index: 6; bottom: 12px; left: 12px; }
+.flow-lock { display: inline-flex; gap: 6px; align-items: center; border: 1px solid rgba(214,195,151,.16); padding: 6px 9px; background: rgba(12,16,13,.88); color: #8c9288; font-family: var(--font-mono); font-size: 7px; letter-spacing: .45px; text-transform: uppercase; backdrop-filter: blur(8px); cursor: pointer; }
+.flow-lock:hover:not(:disabled) { border-color: rgba(214,195,151,.4); color: #d6c397; }
+.flow-lock:disabled { cursor: progress; opacity: .6; }
+.flow-lock svg { flex: 0 0 auto; }
+.flow-lock.is-locked { border-color: rgba(198,151,76,.5); background: rgba(29,26,19,.9); color: var(--brass); }
+.flow-lock.is-locked:hover:not(:disabled) { border-color: rgba(198,151,76,.8); color: #e2cd9b; }
+/* A writer cannot turn it, so theirs is a plain badge rather than a button. */
+p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 0; cursor: default; }
+
+.codex-arc-locked { display: flex; gap: 10px; align-items: center; padding: 12px 14px; color: #e2cd9b; font-size: 12px; line-height: 1.5; }
+.codex-arc-locked svg { flex: 0 0 auto; color: var(--brass); }
+
 .flow-peek-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .flow-tools { display: flex; flex-wrap: wrap; gap: 8px; }

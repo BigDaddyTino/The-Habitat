@@ -29,11 +29,27 @@ export type StoryStatus = (typeof storyStatuses)[number];
  * The codex is an open writers' room: any member edits anything, canon
  * included, and the audit log on the landing page — not an approval gate —
  * is what keeps everyone honest. (Tino's call, 2026-08-18, reversing the
- * original propose→approve ladder.) The hook survives so a review ladder
- * could come back without touching a single call site.
+ * original propose→approve ladder.)
+ *
+ * Nothing is frozen by what status it carries. A flow freezes only when an
+ * admin locks it, deliberately, and thaws when they lift that lock. (Tino's
+ * call, 2026-08-19.) The lock binds everyone — the admin who set it included;
+ * an admin who wants to write here unlocks first, which keeps "is this
+ * settled?" a question with one answer rather than one answer per reader.
  */
-export function isStoryContentEditable(_status: StoryStatus, _canReview: boolean) {
-  return true;
+export function isStoryFlowEditable(locked: boolean) {
+  return !locked;
+}
+
+/**
+ * How a locked flow explains itself. One sentence, shared by the canvas badge,
+ * the card editor, and the branch editor, so a writer meets the same words
+ * wherever they run into the freeze.
+ */
+export function storyLockNotice(lockedBy: string | null) {
+  return lockedBy
+    ? `${lockedBy} locked this flow. It is settled story — an admin can unlock it to change anything here.`
+    : "This flow is locked. It is settled story — an admin can unlock it to change anything here.";
 }
 
 export const storyNodeKinds = [
