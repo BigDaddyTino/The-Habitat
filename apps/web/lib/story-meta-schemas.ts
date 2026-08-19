@@ -9,6 +9,7 @@ import {
   storySettlementTiers,
   storySystemCategories,
   storySystemStatuses,
+  storySoulForgeStates,
   storyVeilAnchorTiers,
 } from "@habitat/shared";
 
@@ -75,6 +76,8 @@ export const regionMetaSchema = z.object({
   status: metaText(160),
   // Set only on places that ARE a Veil Anchor; null everywhere else.
   veilAnchorTier: z.enum(storyVeilAnchorTiers).nullable(),
+  // Set only on places that hold a Soul Forge; null everywhere else.
+  soulForge: z.enum(storySoulForgeStates).nullable(),
   gameTag: metaText(120),
   openQuestions: metaLines(30, 300),
 });

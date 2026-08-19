@@ -812,6 +812,7 @@ export async function createEntry(formData: FormData) {
         connections: [],
         status: null,
         veilAnchorTier: null,
+        soulForge: null,
         gameTag: null,
         openQuestions: [],
       } satisfies StoryRegionMeta

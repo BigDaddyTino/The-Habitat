@@ -157,7 +157,9 @@ export function placeKindLabel(meta: Record<string, unknown>): string {
   // individual surfaces missed the deeper rungs — an Anchor filed under a
   // district went unmarked on the atlas — so the marker lives in the label.
   const anchor = typeof meta.veilAnchorTier === "string" ? meta.veilAnchorTier : null;
-  return anchor ? `${kind} · Veil Anchor ${anchor}` : kind;
+  const forge = typeof meta.soulForge === "string" ? meta.soulForge : null;
+  const marks = [anchor ? `Veil Anchor ${anchor}` : null, forge ? (forge === "active" ? "Soul Forge" : `Soul Forge (${forge})`) : null].filter(Boolean);
+  return marks.length ? `${kind} · ${marks.join(" · ")}` : kind;
 }
 
 type GalleryImage = { asset: string; pack: string; packLabel: string; image: string; ref: string };

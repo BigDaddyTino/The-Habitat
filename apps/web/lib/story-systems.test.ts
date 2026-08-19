@@ -10,6 +10,8 @@ import {
   storySystemStatuses,
   storyVeilAnchorTiers,
   storyVeilAnchorTierLabels,
+  storySoulForgeStates,
+  storySoulForgeStateLabels,
 } from "@habitat/shared";
 import { storySystemsSeed } from "./story-systems-seed";
 import { metaSchemasByKind } from "./story-meta-schemas";
@@ -157,7 +159,7 @@ test("a Veil Anchor is recorded on the place that IS one", () => {
   // atlas can show which places open onto other Shards, and at what risk.
   const schema = metaSchemasByKind.REGION;
   assert.ok(schema, "REGION must have a sheet schema");
-  const place = { type: "site", settlementTier: null, parent: "the-peninsula", biome: null, control: [], population: null, connections: [], status: null, gameTag: null, openQuestions: [] };
+  const place = { type: "site", settlementTier: null, parent: "the-peninsula", biome: null, control: [], population: null, connections: [], status: null, soulForge: null, gameTag: null, openQuestions: [] };
   // Most places are not Anchors, and null must stay legal.
   assert.ok(schema.safeParse({ ...place, veilAnchorTier: null }).success, "a place that is not an Anchor must save");
   for (const tier of storyVeilAnchorTiers) {
@@ -190,3 +192,54 @@ test("the Veil family is wired to what it cannot ship without", () => {
   // The Anchors sheet must say how each region expresses them.
   assert.ok((bySlug.get("veil-anchors")?.meta.regionNotes.length ?? 0) >= 2, "Anchors need region notes");
 });
+
+test("a place that holds a Soul Forge says so, and a dead one says that louder", () => {
+  const schema = metaSchemasByKind.REGION;
+  assert.ok(schema, "REGION must have a sheet schema");
+  const place = { type: "site", settlementTier: null, parent: "the-starting-island", biome: null, control: [], population: null, connections: [], status: null, veilAnchorTier: null, gameTag: null, openQuestions: [] };
+  assert.ok(schema.safeParse({ ...place, soulForge: null }).success, "most places have no Forge");
+  for (const state of storySoulForgeStates) {
+    assert.ok(schema.safeParse({ ...place, soulForge: state }).success, `${state} must be storable`);
+    assert.ok(storySoulForgeStateLabels[state], `${state} needs a label`);
+  }
+  for (const bad of ["gone", "ACTIVE", "", "broken"]) {
+    assert.equal(schema.safeParse({ ...place, soulForge: bad }).success, false, `${bad} must be refused`);
+  }
+  assert.equal(schema.safeParse(place).success, false, "omitting the field must be refused");
+});
+
+test("the Soul Forge family is wired, and binding is what teaches it", () => {
+  const bySlug = new Map(storySystemsSeed.map((seed) => [seed.slug, seed]));
+  const forge = bySlug.get("the-soul-forge");
+  assert.ok(forge, "The Soul Forge must exist");
+  assert.equal(forge.meta.parent, null, "The Soul Forge is top-level");
+  assert.match(String(forge.meta.unlockStage), /day one/i, "death works from the first minute");
+  for (const child of ["soul-binding", "reclamation"]) {
+    assert.equal(bySlug.get(child)?.meta.parent, "the-soul-forge", `${child} files under The Soul Forge`);
+  }
+  // You cannot reclaim to a Forge you never bound to.
+  assert.ok(bySlug.get("reclamation")?.meta.dependsOn.includes("soul-binding"));
+  // Binding is placed on the two locations the prologue actually uses.
+  const notes = bySlug.get("soul-binding")?.meta.regionNotes ?? [];
+  assert.deepEqual(notes.map((note) => note.region).sort(), ["forward-camp-kestrel", "port-arcadia"]);
+});
+
+test("no Forge is ever written as settling Tino", () => {
+  // Canon law: a Forge speaks only about Echoes bound to it, so it can neither
+  // confirm nor deny him. The guard is the limiting language itself — an
+  // earlier draft searched for "Tino is alive" and flagged the very sentence
+  // that refuses to say it, which is how a crude guard talks you out of good
+  // prose instead of protecting anything.
+  const binding = bySlugBody("soul-binding");
+  assert.match(binding, /can only speak about Echoes bound to it/i, "the limit must be stated where the scene is");
+  assert.match(binding, /inference/i, "the realization must read as an inference, not a finding");
+  assert.match(binding, /cannot confirm that Tino is alive/i, "it must refuse the alive reading explicitly");
+  assert.match(binding, /cannot confirm he is dead/i, "and the dead reading too");
+  assert.match(binding, /\[\[what-the-player-knows-about-tino\]\]/, "the scene must cite the law it obeys");
+});
+
+function bySlugBody(slug: string): string {
+  const seed = storySystemsSeed.find((candidate) => candidate.slug === slug);
+  assert.ok(seed, `${slug} must exist`);
+  return seed.body;
+}

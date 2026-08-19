@@ -648,4 +648,92 @@ Two laws keep it a raid rather than a griefing tool. Incursors risk what they ca
       ],
     }),
   },
+  {
+    slug: "the-soul-forge",
+    title: "The Soul Forge",
+    summary: "Death in Martino: a machine of ancient magic and retrofitted engineering holds an Echo of you, and calls you home when your body stops. Reclamation costs Essence — which is why the world kills for it.",
+    body: `How death works, and the single mechanic that explains why the whole setting behaves as it does.
+
+A Soul Forge is a heavy pedestal etched with symbols nobody can reproduce, wrapped in cabling, containment rings, gauges, and modern electronics humanity bolted onto technology it did not build. Suspended inside the rings is the Soul Core — a small sphere of swirling energy. Held in that Core is a Soul Echo: a resonance uniquely synchronised to one person. The vocabulary is fixed and used by everyone in-world: **Soul Forge** (the machine), **Soul Core** (the sphere), **Soul Echo** (your resonance inside it), **Binding** (synchronising yourself to a Forge — see [[soul-binding]]), **Essence** (what reconstruction burns), and **Reclamation** (the act itself — see [[reclamation]]). Soldiers say it flatly: *"Johnson's down." "Confirmed — his Echo's still active." "Forge?" "Camp Kestrel." "Then he'll be back."* Players will say *"where's your Forge?"*, *"did you bind?"*, *"we're almost out of Essence."*
+
+The law it rests on: **a soul cannot be duplicated, but its connection to a body can be restored.** The Forge copies nothing. The Echo is a beacon — when the body dies and the connection breaks, the Echo calls the soul home, and the machine spends [[essence]] building a vessel compatible enough for it to reconnect. That is why reconstruction is expensive, and why a more magically developed person costs more to rebuild.
+
+And that is the setting's moral engine, finally stated plainly. People do not slaughter magical creatures because magic is useful. They do it because magic brings their dead back. Nations would go to war over that. Corporations would farm it, states would stockpile it, rings would traffic it — all of which [[the-harvest-economy]] already says they do. This system is why. It does not make the atrocity acceptable; it makes it *understandable*, which is worse and better drama. And it puts the [[the-soul-breakthrough]] on a fuse: if a body can be rebuilt from Essence, and Essence can be drawn from people, somebody was always going to do that arithmetic out loud.
+
+Humanity operates Forges. It does not understand them. Some were discovered whole, some reverse-engineered, and modern builds still carry ancient components nobody can manufacture. One fact troubles everyone who reads the instruments honestly: **nobody knows where the soul goes in between.** Departure is measurable. Resonance is measurable. Between them is a gap, and then the soul returns. Some who have died remember nothing. Some describe impossible places. Some hear voices. Some are certain something followed them back. Writers: that gap is yours to use and is deliberately **not** tied to [[the-veil]] — leaving it unattached keeps both mysteries alive.`,
+    meta: meta({
+      category: "core loop",
+      unlockStage: "Day one",
+      dependsOn: ["magic"],
+      pillars: [
+        "A soul cannot be duplicated, but its connection to a body can be restored",
+        "Reclamation burns Essence — death costs the world something real",
+        "This is why humanity harvests: magic brings the dead back",
+        "Humanity operates Forges without understanding them, and nobody knows where the soul goes in between",
+      ],
+      openQuestions: [
+        "Who built the first Forges, and is that the same question as who built the Veil Anchors?",
+        "What do the people who remember impossible places have in common?",
+      ],
+    }),
+  },
+  {
+    slug: "soul-binding",
+    title: "Soul Binding",
+    summary: "Checkpoints carry the tutorial; then you press your palm to a Core, it cuts you, and the machine writes you down. BOUND — and from then on that is where you come back.",
+    body: `The first half of [[the-soul-forge]], and the prologue's most important scene.
+
+Before the party's first Forge, the tutorial runs on **checkpoints**: die and you resume at the last one. That is scaffolding, and the game says so by taking it away — checkpoints end when binding begins, and the difference should be felt.
+
+Binding is physical. You approach the Core, press your palm to it, and the machine cuts you. Blood meets the surface, the sphere reacts violently, and your magical signature, biological pattern, and soul resonance are recorded: *Resonance detected. Biological pattern acquired. Soul Echo established.* **BOUND.** Never write "spawn point set" — the game does not use those words and neither do the people in it. A player may bind to any Forge they reach, and on death may choose to reclaim at any Forge they have touched, which makes each new Forge a permanent widening of the map.
+
+**Where it happens first — Kestrel.** The party reaches [[forward-camp-kestrel]] and [[the-kestrel-commander]]'s first question is not about the battle: *where are you bound?* The answers characterise the party and she reads each one — deflection ("what's it to you?") earns open annoyance; *"I don't know"* earns something closer to alarm, because to Rook that means a person walking a front line with nowhere to come back to. Then she walks them to the camp's Forge and binds them herself, on the reasoning that anyone who might stay and hold this island is no use to her unbound. The scene teaches the mechanic through a character who has obvious reasons to care about it, per [[the-war-teaches]].
+
+**And it is where the party works out that Tino is not dead.** He is not at Kestrel, and no Echo of his sits in this Core — so whatever happened to him, he did not reclaim here. The inference is that he is bound somewhere else. That is all it is: an inference. Binding on every writer, per [[what-the-player-knows-about-tino]] — **a Forge can only speak about Echoes bound to it.** Kestrel's Forge cannot confirm that Tino is alive, cannot confirm he is dead, and cannot be asked. Never write a scene where an instrument settles his fate; the empty Core is the point, and the party leaving with a question is the correct outcome. A party that raises him here should set [[asked-about-tino]].
+
+**Then Kestrel is lost.** The island does not survive ([[the-fall-of-the-starting-island]]), and the camp's Forge goes with it — so both branches arrive at [[port-arcadia]] bound to a machine that no longer exists. Whether the party walked off the evacuation boats or washed ashore from the beach, the city feels wrong before anyone can name why, and the first real task on the mainland is finding a Forge and binding again.`,
+    meta: meta({
+      category: "core loop",
+      parent: "the-soul-forge",
+      pillars: [
+        "Checkpoints are scaffolding, and the game takes them away on purpose",
+        "BOUND, never 'spawn point set' — bind anywhere you reach, return to anywhere you have touched",
+        "A Forge can only speak about Echoes bound to it — it can never settle Tino",
+      ],
+      regionNotes: [
+        { region: "forward-camp-kestrel", note: "The first binding, and Rook performs it herself after asking where the party is bound. Its Core holds no Echo of Tino — which is where the party works out he did not reclaim here. Lost with the island." },
+        { region: "port-arcadia", note: "The re-binding, both branches: the party lands bound to a Forge that no longer exists, and finding a working one is the first real mainland task." },
+      ],
+      openQuestions: [
+        "Which Arcadia district holds the Forge the party binds to — and who charges for access?",
+        "What does Rook say to a party that binds and then chooses the boats anyway?",
+      ],
+    }),
+  },
+  {
+    slug: "reclamation",
+    title: "Reclamation",
+    summary: "The body stays where it fell, with everything on it. The Echo ignites, the Forge spends Essence building a vessel, and you drop onto the platform naked and breathing.",
+    body: `The second half of [[the-soul-forge]] — what the military calls the act, and what everyone watching calls the worst thing they have ever seen work.
+
+Your corpse stays exactly where it fell, and so does everything it was carrying: reclamation moves the soul, never the gear, which is what makes a death a real loss and a corpse run a real decision. Meanwhile, at your Forge, the Core ignites. Containment rings spin up, lights across the base dim, and Essence pours into the sphere. A silhouette of raw energy resolves into skeleton, then muscle, then vessels, then skin — and drops onto the platform with a *thump*. You inhale violently. You are naked, or in whatever the Forge keeps for the purpose. The machine winds down. Anyone standing in that room watched it happen, and the first time a player sees somebody else reclaim it should be genuinely hard to look away from.
+
+The cost is [[essence]], and it scales with the person: an early-game reclamation might run 47, a developed character 386, because a more magically developed body is a harder thing to build. A base therefore keeps an Essence reserve, and that reserve is a resource the party can actually run out of. **If there is not enough, the Forge builds what it can afford — and the shortfall is paid out of the person: experience is lost and levels go down.** Nobody dies permanently; they come back *less*, which is a far more interesting punishment and one the party will feel for hours.
+
+For writers: this is the pressure that sends people hunting, per [[gathering-and-harvest]] and [[the-harvest-economy]] — a settlement low on Essence is a settlement that starts making choices it would not otherwise make, and that is a quest, not a status bar. Write reclamation as an event with witnesses; write what it costs; and never write a death that skips the corpse. What happens in the gap between departure and return is [[the-soul-forge]]'s open question, and stays open.`,
+    meta: meta({
+      category: "core loop",
+      parent: "the-soul-forge",
+      dependsOn: ["soul-binding", "gathering-and-harvest"],
+      pillars: [
+        "The body and everything on it stays where it fell",
+        "Reclamation is a spectacle with witnesses, not a fade to black",
+        "Too little Essence and you come back less — levels are the shortfall",
+      ],
+      openQuestions: [
+        "Does the corpse decay, and how long does the party have to reach it?",
+        "Who sells reclamation to people with no Forge of their own, and at what price?",
+      ],
+    }),
+  },
 ];

@@ -529,6 +529,22 @@ export const storyVeilAnchorTierLabels: Record<StoryVeilAnchorTier, string> = {
   V: "Tier V — catastrophic threat, legendary and artifact returns",
 };
 
+/**
+ * Whether a place holds a Soul Forge, and what state it is in. Forges are the
+ * only places a bound player returns to, so where they stand — and where they
+ * have stopped standing — is map information a writer needs at a glance.
+ * Null on every place that has no Forge, which is most of them.
+ */
+export const storySoulForgeStates = ["active", "damaged", "destroyed"] as const;
+
+export type StorySoulForgeState = (typeof storySoulForgeStates)[number];
+
+export const storySoulForgeStateLabels: Record<StorySoulForgeState, string> = {
+  active: "Active — bindable, and people reclaim here",
+  damaged: "Damaged — running, but not to be relied on",
+  destroyed: "Destroyed — anyone bound here has nowhere to return to",
+};
+
 export type StoryRegionMeta = {
   type: (typeof storyRegionTypes)[number] | null;
   settlementTier: (typeof storySettlementTiers)[number] | null;
@@ -541,6 +557,8 @@ export type StoryRegionMeta = {
   status: string | null;
   /** Set only on places that ARE a Veil Anchor; null everywhere else. */
   veilAnchorTier: StoryVeilAnchorTier | null;
+  /** Set only on places that hold a Soul Forge; null everywhere else. */
+  soulForge: StorySoulForgeState | null;
   gameTag: string | null;
   openQuestions: string[];
 };
