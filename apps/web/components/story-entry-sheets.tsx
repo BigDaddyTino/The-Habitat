@@ -530,13 +530,16 @@ export function EventSheet({ entryId, version, meta, regions, entries }: {
 }) {
   const source = record(meta);
   const [when, setWhen] = useState(text(source.when));
+  const [yearsAgo, setYearsAgo] = useState(typeof source.timelineYearsAgo === "number" ? String(source.timelineYearsAgo) : "");
   const [where, setWhere] = useState(asArray(source.where).map(text));
   const [involved, setInvolved] = useState(asArray(source.involved).map(text));
   const [outcome, setOutcome] = useState(text(source.outcome));
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
 
+  const parsedYears = Number.parseFloat(yearsAgo);
   const composed: StoryEventMeta = {
     when: orNull(when),
+    timelineYearsAgo: Number.isFinite(parsedYears) && parsedYears >= 0 ? parsedYears : null,
     where: where.map((value) => value.trim()).filter(Boolean),
     involved: involved.map((value) => value.trim()).filter(Boolean),
     outcome: orNull(outcome),
@@ -551,7 +554,8 @@ export function EventSheet({ entryId, version, meta, regions, entries }: {
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
       <div className="sheet-grid">
-        <label>When<input maxLength={160} onChange={(event) => setWhen(event.target.value)} placeholder="prologue · 20 years before opening · chapter 1" type="text" value={when} /></label>
+        <label>When — the era, as prose<input maxLength={160} onChange={(event) => setWhen(event.target.value)} placeholder="prologue · ~2,000 years before the present" type="text" value={when} /></label>
+        <label>Years before the present — anchors it on the timeline<input min={0} onChange={(event) => setYearsAgo(event.target.value)} placeholder="Blank = the timeline cannot place it (sometimes that IS the canon)" step="any" type="number" value={yearsAgo} /></label>
       </div>
 
       <div className="sheet-rows">

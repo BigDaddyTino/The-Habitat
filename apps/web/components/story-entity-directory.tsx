@@ -156,6 +156,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
 
       <div className="entity-directory-toolbar">
         <form method="get"><Search aria-hidden="true" size={15} /><input aria-label={`Search ${collection.label}`} defaultValue={search ?? ""} name="q" placeholder={`Search ${collection.label.toLowerCase()}…`} type="search" /><button type="submit">Search</button></form>
+        {collection.kind === "EVENT" ? <Link href="/codex/timeline">See history as a timeline <ArrowRight aria-hidden="true" size={13} /></Link> : null}
         <Link href="/codex/bible">Browse every lore type <ArrowRight aria-hidden="true" size={13} /></Link>
       </div>
 

@@ -149,6 +149,10 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
 
 ### 3.6 EVENT.meta — the timeline module
 
+`timelineYearsAgo` (added 2026-08-19, additive): years before the present,
+as a sortable anchor for /codex/timeline. Fractions order same-era events;
+null = the timeline cannot place it, which is sometimes the canon.
+
 ```json
 {
   "when": "string — free-text era/date the app can sort: 'prologue', '20 years before opening', 'chapter 1'",

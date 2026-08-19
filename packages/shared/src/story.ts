@@ -658,8 +658,13 @@ export type StoryItemMeta = {
 };
 
 export type StoryEventMeta = {
-  /** Free-text era the app can sort: "prologue", "20 years before opening". */
+  /** Free-text era, shown on cards: "prologue", "~2,000 years before the present". */
   when: string | null;
+  /** Years before the present, as a sortable anchor for the timeline. Fractions
+   *  order same-era events (0.02 sits above 0.01 on the way down to now);
+   *  null = the timeline cannot place it, which is sometimes the point — the
+   *  Riftwood Breach's age being unknown is canon, not an omission. */
+  timelineYearsAgo: number | null;
   where: string[];
   /** Any entry slug — people, factions, places, items. */
   involved: string[];

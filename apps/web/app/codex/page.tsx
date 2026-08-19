@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Cog, GitBranch, Inbox, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
+import { ArrowRight, BookOpen, Cog, GitBranch, History, Inbox, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryActivity, getStoryReviewQueue, getStoryThreads, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -83,6 +83,7 @@ export default async function CodexPage() {
 
       <div className="codex-quicklinks">
         <Link className="codex-quicklink" href="/codex/bible"><BookOpen aria-hidden="true" size={18} /><span><strong>All lore</strong><small>Creatures, items, events, rules, flags, and every world entry in one searchable archive.</small></span></Link>
+        <Link className="codex-quicklink" href="/codex/timeline"><History aria-hidden="true" size={18} /><span><strong>The timeline</strong><small>Ten thousand years of the long hunt on one golden line — and where the present sits on it.</small></span></Link>
         <Link className="codex-quicklink" href="/codex/threads"><Sprout aria-hidden="true" size={18} /><span><strong>Story threads</strong><small>{threads.planted > 0 ? `${threads.planted} promise${threads.planted === 1 ? "" : "s"} planted and waiting for a payoff.` : threads.threads.length > 0 ? "Every promise the story has made, and where it stands." : "Set a flag in one scene, answer it chapters later — tracked here."}</small></span></Link>
         {/* The approval ladder is gone; the queue only resurfaces if legacy
             proposed material still exists somewhere. */}

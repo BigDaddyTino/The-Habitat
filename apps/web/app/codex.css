@@ -593,3 +593,72 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
      it, where it would cover the board it is talking about. */
   .warden-panel { right: 8px; bottom: 8px; width: calc(100% - 16px); max-height: calc(100% - 16px); }
 }
+
+/* --- The timeline: history on one golden line ---------------------------- */
+
+.codex-timeline-shell { display: grid; gap: 30px; }
+.codex-timeline-hero { max-width: 860px; }
+.codex-timeline-hero h1 { margin: 6px 0 14px; font-family: var(--font-display); font-size: clamp(30px, 4.6vw, 46px); line-height: 1.02; }
+.codex-timeline-hero blockquote { display: flex; gap: 12px; align-items: flex-start; margin: 0 0 16px; border: 1px solid rgba(198,151,76,.3); border-left: 2px solid var(--brass); padding: 13px 16px; background: linear-gradient(160deg, rgba(29,26,19,.85), rgba(17,22,18,.9)); box-shadow: 0 0 22px rgba(198,151,76,.12); }
+.codex-timeline-hero blockquote svg { flex: 0 0 auto; margin-top: 2px; color: var(--brass); }
+.codex-timeline-hero blockquote p { margin: 0; color: #d9cba6; font-size: 13px; line-height: 1.65; }
+.codex-timeline-hero blockquote a { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
+
+/* The spine: a golden line down the middle, glowing, with branch stubs out to
+   each card. Cards alternate sides; every border carries the same gold. */
+.codex-timeline-rail { position: relative; display: grid; gap: 26px; margin: 0 auto; padding: 24px 0 8px; width: 100%; max-width: 1060px; list-style: none; }
+.codex-timeline-rail::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-50%); background: linear-gradient(180deg, transparent, var(--brass) 40px, var(--brass) calc(100% - 40px), rgba(198,151,76,.25)); box-shadow: 0 0 10px rgba(198,151,76,.55), 0 0 26px rgba(198,151,76,.25); }
+.codex-timeline-entry { position: relative; display: grid; grid-template-columns: 1fr 1fr; }
+.codex-timeline-entry.is-left { justify-items: end; }
+.codex-timeline-entry.is-right { justify-items: start; }
+.codex-timeline-entry.is-left > .codex-timeline-card { grid-column: 1; margin-right: 44px; }
+.codex-timeline-entry.is-right > .codex-timeline-card { grid-column: 2; margin-left: 44px; }
+/* The branch: a golden stub from the spine to the card. */
+.codex-timeline-entry::after { content: ""; position: absolute; top: 30px; width: 44px; height: 2px; background: linear-gradient(90deg, var(--brass), rgba(198,151,76,.25)); box-shadow: 0 0 8px rgba(198,151,76,.4); }
+.codex-timeline-entry.is-left::after { right: 50%; transform: scaleX(-1); }
+.codex-timeline-entry.is-right::after { left: 50%; }
+.codex-timeline-node { position: absolute; z-index: 2; top: 24px; left: 50%; width: 13px; height: 13px; transform: translateX(-50%) rotate(45deg); border: 2px solid var(--brass); background: #14180f; box-shadow: 0 0 0 3px rgba(198,151,76,.18), 0 0 14px rgba(198,151,76,.6); }
+
+.codex-timeline-card { width: 100%; max-width: 440px; padding: 15px 17px; border: 1px solid rgba(198,151,76,.5); border-top: 2px solid var(--brass); background: linear-gradient(160deg, rgba(29,29,19,.94), rgba(15,19,14,.97)); box-shadow: 0 0 0 1px rgba(198,151,76,.14), 0 0 20px rgba(198,151,76,.14), inset 0 1px 0 rgba(226,205,151,.1); transition: box-shadow .2s ease, border-color .2s ease; }
+.codex-timeline-card:hover { border-color: rgba(226,205,151,.75); box-shadow: 0 0 0 1px rgba(198,151,76,.3), 0 0 30px rgba(198,151,76,.3), inset 0 1px 0 rgba(226,205,151,.16); }
+.codex-timeline-era { margin: 0 0 6px; color: var(--brass); font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+.codex-timeline-card h2 { margin: 0 0 7px; font-family: var(--font-display); font-size: 21px; line-height: 1.08; }
+.codex-timeline-card h2 a { color: var(--ink); text-decoration: none; }
+.codex-timeline-card h2 a:hover { color: var(--paper); }
+.codex-timeline-summary { margin: 0 0 10px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.codex-timeline-chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 0 0 10px; }
+.codex-timeline-chips a, .codex-timeline-chips .is-missing { display: inline-flex; gap: 4px; align-items: center; padding: 3px 8px; border: 1px solid rgba(198,151,76,.28); background: rgba(12,16,13,.7); color: #cbbd97; font-size: 10px; text-decoration: none; }
+.codex-timeline-chips a:hover { border-color: var(--brass); color: var(--paper); }
+.codex-timeline-chips .is-missing { border-style: dashed; color: #8c9288; }
+.codex-timeline-open { display: inline-flex; gap: 5px; align-items: center; color: var(--brass); font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; text-decoration: none; }
+.codex-timeline-open:hover { color: #e2cd9b; }
+
+/* Major moments: the ones wearing key art. */
+.codex-timeline-entry.is-major .codex-timeline-card { max-width: 480px; border-color: rgba(226,205,151,.65); box-shadow: 0 0 0 1px rgba(198,151,76,.28), 0 0 34px rgba(198,151,76,.24), inset 0 1px 0 rgba(226,205,151,.14); }
+.codex-timeline-art { display: block; margin: -15px -17px 12px; border-bottom: 1px solid rgba(198,151,76,.4); }
+.codex-timeline-art img { display: block; width: 100%; max-height: 220px; object-fit: cover; }
+
+.codex-timeline-now { position: relative; display: grid; justify-items: center; padding-top: 12px; text-align: center; }
+.codex-timeline-now .codex-timeline-node.is-now { position: static; transform: rotate(45deg); width: 17px; height: 17px; border-color: #e2cd9b; box-shadow: 0 0 0 4px rgba(198,151,76,.22), 0 0 24px rgba(226,205,151,.8); }
+.codex-timeline-now p { margin: 12px 0 0; color: var(--paper); font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
+.codex-timeline-now a { color: var(--brass); }
+
+.codex-timeline-undated { display: grid; gap: 14px; margin: 8px auto 0; width: 100%; max-width: 1060px; border: 1px dashed rgba(214,195,151,.3); padding: 18px 20px; background: rgba(17,22,18,.6); }
+.codex-timeline-undated > div p:last-child { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.codex-timeline-undated ul { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.codex-timeline-undated li a { display: flex; gap: 10px; align-items: center; padding: 9px 12px; border: 1px solid rgba(198,151,76,.3); background: rgba(12,16,13,.6); color: var(--ink); font-size: 12px; text-decoration: none; box-shadow: 0 0 12px rgba(198,151,76,.08); }
+.codex-timeline-undated li a:hover { border-color: var(--brass); }
+.codex-timeline-undated li a strong { flex: 1; }
+.codex-timeline-undated li a span { color: var(--muted); font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; }
+.codex-timeline-hint { max-width: 1060px; margin: 0 auto; }
+.codex-timeline-hint { overflow-wrap: anywhere; }
+.codex-timeline-hint code { padding: 1px 6px; border: 1px solid var(--line); background: rgba(12,16,13,.8); color: var(--paper); word-break: break-all; }
+
+@media (max-width: 760px) {
+  /* One column: the spine moves to the left edge, every card branches right. */
+  .codex-timeline-rail::before { left: 10px; }
+  .codex-timeline-entry { grid-template-columns: 1fr; }
+  .codex-timeline-entry.is-left > .codex-timeline-card, .codex-timeline-entry.is-right > .codex-timeline-card { grid-column: 1; margin: 0 0 0 40px; max-width: none; justify-self: stretch; }
+  .codex-timeline-entry::after { left: 10px !important; right: auto !important; width: 30px; transform: none !important; }
+  .codex-timeline-node { left: 10px; }
+}

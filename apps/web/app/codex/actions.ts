@@ -1008,6 +1008,10 @@ const systemMetaSchema = z.object({
 
 const eventMetaSchema = z.object({
   when: metaText(160),
+  // The timeline's sortable anchor: years before the present. Fractions order
+  // same-era events; null = deliberately unplaced (an unknown age can be
+  // canon). Bounded well past the First Hunt so nobody fat-fingers infinity.
+  timelineYearsAgo: z.number().min(0).max(1_000_000).nullable(),
   where: metaLines(20, 64),
   involved: metaLines(30, 64),
   outcome: metaText(2000),
