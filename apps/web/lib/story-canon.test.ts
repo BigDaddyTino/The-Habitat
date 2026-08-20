@@ -251,6 +251,36 @@ test("the canon navigator is always present on desktop and starts folded on mobi
   assert.doesNotMatch(source, /<details className="canon-nav canon-nav-mobile" open>/);
 });
 
+test("the opening campaign is a real branch and merge, not a hand-drawn diagram", () => {
+  type SeedNode = { key: string; continuesInArc?: string; choices: Array<{ toKey: string }> };
+  type SeedArc = { slug: string; summary: string; nodes: SeedNode[] };
+  const seed = JSON.parse(readFileSync(join(process.cwd(), "../../packages/db/prisma/story-seed/prologue.json"), "utf8")) as { arcs: SeedArc[] };
+  const arcs = new Map(seed.arcs.map((arc) => [arc.slug, arc]));
+  const node = (arcSlug: string, key: string) => arcs.get(arcSlug)?.nodes.find((candidate) => candidate.key === key);
+
+  assert.equal(node("the-island-is-already-lost", "hold-the-line")?.continuesInArc, "the-last-days-of-kestrel");
+  assert.equal(node("the-island-is-already-lost", "the-boats")?.continuesInArc, "the-evacuation");
+  assert.equal(node("the-last-days-of-kestrel", "the-sea-takes-the-island")?.continuesInArc, "binding-in-arcadia");
+  assert.equal(node("the-evacuation", "wake-of-the-island")?.continuesInArc, "binding-in-arcadia");
+
+  const binding = arcs.get("binding-in-arcadia");
+  assert.ok(binding, "the shared Arcadia campaign quest must exist");
+  assert.match(binding.summary, /beginning of Act I/);
+  assert.deepEqual(node("binding-in-arcadia", "arcadia-landfall")?.choices.map((choice) => choice.toKey), ["storm-beach", "military-docks"]);
+  assert.deepEqual(node("binding-in-arcadia", "storm-beach")?.choices.map((choice) => choice.toKey), ["find-the-soul-forge"]);
+  assert.deepEqual(node("binding-in-arcadia", "military-docks")?.choices.map((choice) => choice.toKey), ["find-the-soul-forge"]);
+  assert.deepEqual(node("binding-in-arcadia", "find-the-soul-forge")?.choices.map((choice) => choice.toKey), ["bind-to-arcadia"]);
+});
+
+test("the campaign heading opens the macro flow and the macro flow is derived from continuations", () => {
+  const navigator = readFileSync(join(process.cwd(), "components/canon-navigator.tsx"), "utf8");
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  assert.match(navigator, /href="\/codex\/stories\/campaign"/);
+  const campaign = codex.slice(codex.indexOf("export async function getCampaignFlow"), codex.indexOf("export type CanonNavRegion"));
+  assert.match(campaign, /continuesInArcId: \{ not: null \}/);
+  assert.match(campaign, /fromEndingTitle: node\.title/);
+});
+
 const newline = String.fromCharCode(10);
 
 test("the writer-facing copy on the new surfaces stays out of the machine room", () => {
@@ -258,7 +288,7 @@ test("the writer-facing copy on the new surfaces stays out of the machine room",
   // named after the database column behind it, so the visible copy on every
   // new surface is scanned for the words that leak out of the machine room.
   const jargon = new RegExp(String.raw`(meta|metaJson|slug|slugs|category|categories)`, "i");
-  for (const file of ["components/canon-navigator.tsx", "components/canon-packet-panel.tsx", "components/story-room-guide.tsx", "components/story-arc-form.tsx", "app/codex/stories/page.tsx", "app/codex/stories/canon/page.tsx"]) {
+  for (const file of ["components/canon-navigator.tsx", "components/canon-packet-panel.tsx", "components/story-room-guide.tsx", "components/story-arc-form.tsx", "components/campaign-flow.tsx", "app/codex/stories/page.tsx", "app/codex/stories/canon/page.tsx", "app/codex/stories/campaign/page.tsx"]) {
     const source = readFileSync(join(process.cwd(), file), "utf8");
     for (const raw of source.split(newline)) {
       const line = raw.trim();

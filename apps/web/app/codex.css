@@ -1,7 +1,19 @@
 /* The story codex. Shares the lodge palette but earns one accent of its own:
    an ink-blue for "written, not yet true" — proposals — so a glance at a board
    separates what the game will be built from and what is still an argument. */
-.codex-shell { --proposed: #7b93b8; --canon: #8fbf8a; padding-bottom: 96px; }
+.codex-shell { --proposed: #7b93b8; --canon: #8fbf8a; --codex-scroll-track: #2a2113; --codex-scroll-thumb: #745721; --codex-scroll-thumb-hover: #a17a34; padding-bottom: 96px; }
+
+/* Native chrome belongs to the room too. The document, board panes, drawers,
+   text areas, and compact pickers all inherit the same tarnished-brass rail
+   instead of falling back to the operating system's white scrollbar. */
+html:has(.codex-shell), html:has(.codex-board-shell) { --codex-scroll-track: #2a2113; --codex-scroll-thumb: #745721; --codex-scroll-thumb-hover: #a17a34; scrollbar-color: var(--codex-scroll-thumb) var(--codex-scroll-track); scrollbar-width: thin; }
+body:has(.codex-shell), body:has(.codex-board-shell), :is(.codex-shell, .codex-board-shell), :is(.codex-shell, .codex-board-shell) * { scrollbar-color: var(--codex-scroll-thumb) var(--codex-scroll-track); scrollbar-width: thin; }
+html:has(.codex-shell)::-webkit-scrollbar, html:has(.codex-board-shell)::-webkit-scrollbar, body:has(.codex-shell)::-webkit-scrollbar, body:has(.codex-board-shell)::-webkit-scrollbar, :is(.codex-shell, .codex-board-shell)::-webkit-scrollbar, :is(.codex-shell, .codex-board-shell) *::-webkit-scrollbar { width: 11px; height: 11px; }
+html:has(.codex-shell)::-webkit-scrollbar-track, html:has(.codex-board-shell)::-webkit-scrollbar-track, body:has(.codex-shell)::-webkit-scrollbar-track, body:has(.codex-board-shell)::-webkit-scrollbar-track, :is(.codex-shell, .codex-board-shell)::-webkit-scrollbar-track, :is(.codex-shell, .codex-board-shell) *::-webkit-scrollbar-track { border-left: 1px solid rgba(198,151,76,.32); background: linear-gradient(90deg, #171208, var(--codex-scroll-track)); }
+html:has(.codex-shell)::-webkit-scrollbar-thumb, html:has(.codex-board-shell)::-webkit-scrollbar-thumb, body:has(.codex-shell)::-webkit-scrollbar-thumb, body:has(.codex-board-shell)::-webkit-scrollbar-thumb, :is(.codex-shell, .codex-board-shell)::-webkit-scrollbar-thumb, :is(.codex-shell, .codex-board-shell) *::-webkit-scrollbar-thumb { min-height: 34px; border: 2px solid var(--codex-scroll-track); border-radius: 999px; background: linear-gradient(180deg, #8c6b2e, var(--codex-scroll-thumb)); box-shadow: inset 0 0 0 1px rgba(237,207,139,.18); }
+html:has(.codex-shell)::-webkit-scrollbar-thumb:hover, html:has(.codex-board-shell)::-webkit-scrollbar-thumb:hover, body:has(.codex-shell)::-webkit-scrollbar-thumb:hover, body:has(.codex-board-shell)::-webkit-scrollbar-thumb:hover, :is(.codex-shell, .codex-board-shell)::-webkit-scrollbar-thumb:hover, :is(.codex-shell, .codex-board-shell) *::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #b58b3e, var(--codex-scroll-thumb-hover)); }
+html:has(.codex-shell)::-webkit-scrollbar-corner, html:has(.codex-board-shell)::-webkit-scrollbar-corner, body:has(.codex-shell)::-webkit-scrollbar-corner, body:has(.codex-board-shell)::-webkit-scrollbar-corner, :is(.codex-shell, .codex-board-shell)::-webkit-scrollbar-corner, :is(.codex-shell, .codex-board-shell) *::-webkit-scrollbar-corner { background: var(--codex-scroll-track); }
+.story-inspector, .flow-panel, .flow-panel-body, .warden-log, .model-picker-grid, .canon-packet-body, .canon-nav { scrollbar-gutter: stable; }
 
 .codex-landing-hero { position: relative; isolation: isolate; display: flex; min-height: 510px; align-items: flex-end; overflow: hidden; margin-bottom: -42px; padding: 66px 48px 106px; border: 1px solid #514838; background: linear-gradient(90deg, rgba(7,10,8,.98) 0%, rgba(8,12,9,.92) 36%, rgba(8,11,9,.3) 68%, rgba(8,10,8,.08)), linear-gradient(0deg, rgba(8,11,9,.76), transparent 42%), url('/images/story-codex-archive.webp') center center / cover no-repeat; box-shadow: 0 34px 80px rgba(0,0,0,.36), inset 0 0 90px rgba(0,0,0,.28); }
 .codex-landing-hero::before { content: ""; position: absolute; z-index: -1; inset: 9px; border: 1px solid rgba(214,195,151,.16); pointer-events: none; }
@@ -218,7 +230,7 @@
 /* 123px = the 68px site header plus the 55px sticky codex nav above the shell;
    subtracting only the header leaves the bottom strip of the board unreachable
    because the body cannot scroll. */
-.codex-board-shell { --proposed: #7b93b8; --canon: #8fbf8a; display: flex; flex-direction: column; height: calc(100dvh - 123px); min-height: 620px; }
+.codex-board-shell { --proposed: #7b93b8; --canon: #8fbf8a; --codex-scroll-track: #2a2113; --codex-scroll-thumb: #745721; --codex-scroll-thumb-hover: #a17a34; display: flex; flex-direction: column; height: calc(100dvh - 123px); min-height: 620px; }
 /* auto, not hidden: when the viewport is tall enough the shell fits exactly and
    nothing scrolls; on a short window the 620px floor wins and the page must be
    able to scroll to reach the bottom of the board. */
@@ -969,19 +981,19 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
    One grid, one breakpoint: under 960px the sidebar folds into a drawer that
    is closed by default, because on a phone the boards are what you came for. */
 
-.canon-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+.canon-workspace { display: grid; grid-template-columns: 286px minmax(0, 1fr); gap: 20px; align-items: start; }
 .codex-board-shell .canon-workspace { flex: 1; min-height: 0; gap: 0; }
 .codex-board-shell .canon-workspace-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
 .canon-workspace-main { min-width: 0; }
 
-.canon-nav { position: sticky; top: 128px; max-height: calc(100dvh - 150px); overflow-y: auto; border: 1px solid var(--line); border-left: 2px solid rgba(198,151,76,.4); padding: 4px 0 14px; background: #12170f; scrollbar-width: thin; }
+.canon-nav { position: sticky; top: 128px; max-height: calc(100dvh - 150px); overflow-y: auto; border: 1px solid var(--line); border-left: 2px solid rgba(198,151,76,.52); padding: 4px 0 14px; background: radial-gradient(circle at 0 0, rgba(198,151,76,.08), transparent 28%), linear-gradient(180deg, #151a12, #10140e); box-shadow: 0 18px 44px rgba(0,0,0,.24), inset 0 1px 0 rgba(235,211,157,.05); scrollbar-width: thin; }
 .canon-nav-mobile { display: none; }
 .codex-board-shell .canon-nav { top: 0; max-height: none; height: 100%; border-top: 0; border-bottom: 0; border-left: 0; border-right: 1px solid var(--line); }
 /* On a wide screen the sidebar is simply open; the summary is the drawer
    handle a phone needs and nothing else. */
 .canon-nav > summary { display: none; }
 .canon-nav > nav { display: grid; gap: 4px; }
-.canon-nav section { padding: 12px 14px; }
+.canon-nav section { position: relative; padding: 13px 15px; }
 .canon-nav section + section { border-top: 1px solid rgba(214,195,151,.09); }
 .canon-nav .eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #a99155; font-size: 8px; }
 .canon-nav-section-link { justify-content: space-between; }
@@ -995,9 +1007,10 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
    everything the campaign passes through. */
 .canon-nav-divider { height: 0; margin: 2px 0; border: 0; border-top: 2px solid rgba(198,151,76,.5); border-bottom: 1px solid rgba(198,151,76,.22); }
 
-.canon-nav-arc { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-left: 2px solid transparent; color: #bcc3b8; font-size: 11px; text-decoration: none; transition: .15s ease; }
-.canon-nav-arc > span { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
-.canon-nav-arc > i { color: #6d766c; font-family: var(--font-mono); font-size: 8px; font-style: normal; }
+.canon-nav-arc { display: flex; align-items: flex-start; gap: 7px; min-height: 31px; padding: 7px 8px; border-left: 2px solid transparent; color: #bcc3b8; font-size: 11px; line-height: 1.35; text-decoration: none; transition: .15s ease; }
+.canon-nav-arc > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.canon-nav-arc > svg { flex: 0 0 auto; margin-top: 2px; }
+.canon-nav-arc > i { flex: 0 0 auto; margin-top: 2px; color: #7d867c; font-family: var(--font-mono); font-size: 8px; font-style: normal; white-space: nowrap; }
 .canon-nav-arc:hover { border-left-color: rgba(198,151,76,.6); background: #1a2018; color: #f0e2bd; }
 .canon-nav-arc.is-current { border-left-color: var(--brass); background: #1f2418; color: #f6e8c4; font-weight: 700; }
 /* Blue ice, the same freeze the board itself wears. */
@@ -1009,8 +1022,8 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .canon-nav-arc.is-planned > i { color: #6b6250; }
 .canon-nav-arc.is-planned:hover { color: #b3baaf; }
 
-.canon-nav-place { display: flex; align-items: center; gap: 6px; margin: 8px 0 3px; }
-.canon-nav-place a, .canon-nav-place > span { overflow: hidden; flex: 1; color: #ddc98f; font: 600 12px var(--font-serif); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.canon-nav-place { display: flex; align-items: flex-start; gap: 7px; margin: 9px 0 4px; }
+.canon-nav-place a, .canon-nav-place > span { flex: 1; min-width: 0; color: #ddc98f; font: 600 12px/1.35 var(--font-serif); overflow-wrap: anywhere; text-decoration: none; }
 .canon-nav-place a:hover { color: #f6e8c4; }
 .canon-nav-tree > li { padding-left: 0; }
 .canon-nav-tree > li.depth-1 { padding-left: 10px; }
@@ -1020,7 +1033,7 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 
 /* The bubble: canon material waiting to be woven in here. Deep-links into the
    inbox filtered to this destination. */
-.canon-nav-badge { display: grid; min-width: 17px; height: 17px; place-items: center; border: 1px solid rgba(198,151,76,.6); border-radius: 50%; padding: 0 4px; background: #2a2116; color: #f0d69b; font: 700 9px var(--font-mono); text-decoration: none; }
+.canon-nav-badge { display: grid; flex: 0 0 auto; min-width: 17px; height: 17px; place-items: center; border: 1px solid rgba(198,151,76,.6); border-radius: 50%; padding: 0 4px; background: #2a2116; color: #f0d69b; font: 700 9px var(--font-mono); text-decoration: none; }
 .canon-nav-badge:hover { border-color: var(--brass); background: #3a2c19; color: #fff2d2; }
 .canon-nav-empty { color: #79837a; font-size: 10px; line-height: 1.5; }
 .canon-nav-empty a { color: #c8a85e; text-decoration: none; }

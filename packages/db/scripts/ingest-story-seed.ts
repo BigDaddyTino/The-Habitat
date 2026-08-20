@@ -145,12 +145,17 @@ async function main() {
         });
       }
 
+      // Create every arc before any node so an ENDING can point across boards
+      // even when its target appears later in the seed file.
+      const arcIdBySlug = new Map<string, string>();
       for (const [arcIndex, arc] of arcs.entries()) {
         const arcRow = await tx.storyArc.create({
           data: {
             slug: arc.slug,
             title: arc.title,
             summary: arc.summary,
+            hook: arc.hook ?? null,
+            regionEntryId: arc.region ? entryIdBySlug.get(arc.region) : null,
             isMainline: arc.isMainline,
             // Both columns, always together — the CHECK constraint refuses a
             // row where the boolean and the category disagree.
@@ -162,24 +167,30 @@ async function main() {
           },
           select: { id: true },
         });
+        arcIdBySlug.set(arc.slug, arcRow.id);
         await tx.storyRevision.create({
           data: { entityType: "ARC", entityId: arcRow.id, arcId: arcRow.id, action: "CREATED", actorUserId: actor.id, summary: summaryOf(arc.title) },
         });
+      }
 
+      for (const arc of arcs) {
+        const arcId = arcIdBySlug.get(arc.slug) as string;
         const nodeIdByKey = new Map<string, string>();
         for (const [nodeIndex, node] of arc.nodes.entries()) {
           const speakerSlug = speakersByNodeKey[node.key];
           const nodeRow = await tx.storyNode.create({
             data: {
-              arcId: arcRow.id,
+              arcId,
               kind: node.kind,
               key: node.key,
               title: node.title,
               summary: node.summary,
               body: node.body,
+              completion: node.kind === "QUEST_STEP" ? (node.completion ?? null) : null,
               status: "CANON",
               speakerEntryId: speakerSlug ? entryIdBySlug.get(speakerSlug) : null,
               endingKind: endingKindsByNodeKey[node.key] ?? null,
+              continuesInArcId: node.continuesInArc ? arcIdBySlug.get(node.continuesInArc) : null,
               canvasX: (nodeIndex % 4) * 300,
               canvasY: Math.floor(nodeIndex / 4) * 220,
               createdByUserId: actor.id,
@@ -189,7 +200,7 @@ async function main() {
           });
           nodeIdByKey.set(node.key, nodeRow.id);
           await tx.storyRevision.create({
-            data: { entityType: "NODE", entityId: nodeRow.id, arcId: arcRow.id, action: "CREATED", actorUserId: actor.id, summary: summaryOf(node.title) },
+            data: { entityType: "NODE", entityId: nodeRow.id, arcId, action: "CREATED", actorUserId: actor.id, summary: summaryOf(node.title) },
           });
 
           for (const reference of node.references) {
@@ -198,7 +209,7 @@ async function main() {
               select: { id: true },
             });
             await tx.storyRevision.create({
-              data: { entityType: "LINK", entityId: link.id, arcId: arcRow.id, action: "LINKED", actorUserId: actor.id, summary: `Seeded "${reference.title}" into "${node.title}"` },
+              data: { entityType: "LINK", entityId: link.id, arcId, action: "LINKED", actorUserId: actor.id, summary: `Seeded "${reference.title}" into "${node.title}"` },
             });
           }
         }
@@ -215,7 +226,7 @@ async function main() {
 
             const edge = await tx.storyEdge.create({
               data: {
-                arcId: arcRow.id,
+                arcId,
                 key,
                 fromNodeId: nodeIdByKey.get(node.key) as string,
                 toNodeId: nodeIdByKey.get(choice.toKey) as string,
@@ -229,7 +240,7 @@ async function main() {
               select: { id: true },
             });
             await tx.storyRevision.create({
-              data: { entityType: "EDGE", entityId: edge.id, arcId: arcRow.id, action: "CREATED", actorUserId: actor.id, summary: `Seeded the branch "${node.title}" → "${choice.toKey}"` },
+              data: { entityType: "EDGE", entityId: edge.id, arcId, action: "CREATED", actorUserId: actor.id, summary: `Seeded the branch "${node.title}" → "${choice.toKey}"` },
             });
           }
         }

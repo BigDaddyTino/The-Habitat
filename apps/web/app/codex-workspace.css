@@ -40,35 +40,37 @@
 
 /* The region atlas: the few top-level regions as large cards, every other
    place filed inside the one whose sheet it names as parent. */
-.region-atlas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
-.region-atlas-card{display:flex;flex-direction:column;overflow:hidden;border:1px solid #3f473f;border-top:2px solid var(--region-accent,#86a06a);background:linear-gradient(150deg,#191f19,#101510);transition:.2s ease}
+.region-atlas{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;align-items:start}
+.region-atlas-card{display:grid;grid-template-columns:minmax(320px,.78fr) minmax(0,1.22fr);overflow:hidden;border:1px solid #3f473f;border-top:2px solid var(--region-accent,#86a06a);background:linear-gradient(150deg,#191f19,#101510);box-shadow:0 16px 42px #0003;transition:.2s ease}
 .region-atlas-card:hover{border-color:var(--region-accent,#9a7940);box-shadow:0 17px 38px color-mix(in srgb,var(--region-accent,#9a7940) 18%,transparent)}
-.region-atlas-head{position:relative;display:block;min-height:286px;overflow:hidden;color:inherit;text-decoration:none}
+.region-atlas-head{position:relative;display:block;min-height:340px;overflow:hidden;color:inherit;text-decoration:none}
 .region-atlas-head>img{position:absolute;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
 .region-atlas-head::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,12,9,.98) 4%,rgba(8,12,9,.76) 42%,rgba(8,12,9,.12) 76%),linear-gradient(90deg,rgba(8,12,9,.36),transparent)}
-.region-atlas-head-copy{position:relative;z-index:1;display:flex;min-height:286px;flex-direction:column;justify-content:flex-end;padding:24px}
+.region-atlas-head-copy{position:relative;z-index:1;display:flex;min-height:340px;flex-direction:column;justify-content:flex-end;padding:30px}
 .region-atlas-head .eyebrow{display:flex;align-items:center;gap:6px;color:color-mix(in srgb,var(--region-accent,#a99155) 76%,#ddd0af)}
 .region-atlas-head h2{margin:8px 0 9px;color:#f2e4c2;font:600 clamp(26px,2.6vw,34px)/1 var(--font-serif)}
 .region-atlas-head-copy>p:not(.eyebrow){display:-webkit-box;overflow:hidden;color:#afb8ad;font-size:12px;line-height:1.6;-webkit-box-orient:vertical;-webkit-line-clamp:3}
 .region-atlas-head strong{display:flex;align-items:center;gap:5px;margin-top:13px;color:var(--region-accent,#b7a574);font:700 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
 .region-atlas-head:hover h2{color:#f8ecca}
 .region-atlas-head:hover>img{transform:scale(1.025)}
-.region-atlas-places{display:flex;flex:1;flex-direction:column;border-top:1px solid #30372f;padding:15px 24px 20px;background:#111611}
-.region-atlas-places ul{display:grid;gap:4px;margin:10px 0 0;padding:0;list-style:none}
-.region-atlas-places li a{display:grid;min-height:54px;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:10px;overflow:hidden;background:#151a15;color:#dbcba2;font-size:12px;text-decoration:none;transition:.15s ease}
-.region-atlas-places li a>img,.region-place-fallback{width:72px;height:54px;object-fit:cover}.region-place-fallback{display:grid;place-items:center;background:#202820;color:#788678}.region-atlas-places li a>span:nth-child(2){display:flex;min-width:0;flex-direction:column;gap:3px}.region-atlas-places li strong{overflow:hidden;color:#ded0ab;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.region-atlas-places li a>svg{margin-right:10px;color:var(--region-accent,#9a7940)}
-.region-atlas-places li a:hover{background:#1e241d;color:#f1e3bd}
-.region-atlas-places li i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.region-atlas-places{display:flex;min-width:0;flex-direction:column;border-left:1px solid #30372f;padding:22px 24px 20px;background:radial-gradient(circle at 100% 0,color-mix(in srgb,var(--region-accent,#9a7940) 8%,transparent),transparent 34%),#111611}
+.region-atlas-places>.eyebrow{margin-bottom:2px;color:color-mix(in srgb,var(--region-accent,#a99155) 70%,#b8b6a8)}
+.region-atlas-places>ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:9px;align-content:start;margin:10px 0 18px;padding:0;list-style:none}
+.region-atlas-places>ul>li{min-width:0;border:1px solid #2e372e;background:#131913}
+.region-atlas-places>ul>li>a{display:grid;min-height:68px;grid-template-columns:86px minmax(0,1fr) auto;align-items:center;gap:12px;overflow:hidden;color:#dbcba2;font-size:12px;text-decoration:none;transition:.15s ease}
+.region-atlas-places>ul>li>a>img,.region-atlas-places>ul>li>a>.region-place-fallback{width:86px;height:68px;object-fit:cover}.region-place-fallback{display:grid;place-items:center;background:#202820;color:#788678}.region-atlas-places>ul>li>a>span:nth-child(2){display:flex;min-width:0;flex-direction:column;gap:4px}.region-atlas-places>ul>li>a strong{color:#ded0ab;font-weight:600;line-height:1.3;overflow-wrap:anywhere}.region-atlas-places>ul>li>a>svg{flex:0 0 auto;margin-right:11px;color:var(--region-accent,#9a7940)}
+.region-atlas-places>ul>li>a:hover{background:#1e241d;color:#f1e3bd}
+.region-atlas-places>ul>li>a i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
 .region-atlas-add,.entity-add-place{display:flex;align-items:center;justify-content:center;gap:7px;min-height:38px;margin:10px 0 0;border:1px dashed #6d7a5f;padding:0 12px;color:#c3cba4;font:700 9px var(--font-mono);letter-spacing:.06em;text-decoration:none;text-transform:uppercase;transition:.18s ease}
-/* order 2 puts it after the list of places; auto margin pins it to the bottom
-   of the card so the three cards' buttons line up whatever they contain. */
+/* order 2 puts it after the list of places; auto margin keeps the action at
+   the foot of its region without making a sparse neighbour equally tall. */
 .region-atlas-add{order:2;margin-top:auto;padding-top:0}
 .region-atlas-add:hover,.entity-add-place:hover{border-color:#a28247;border-style:solid;background:#1b1f16;color:#efd9a6}
 .entity-add-place{margin-top:14px}
 /* The third rung, indented under the place that holds it. The rule down the
    left is the containment: these are rooms inside that POI, not siblings. */
-.region-atlas-destinations{display:grid;gap:1px;margin:1px 0 3px 34px!important;padding-left:11px;border-left:1px solid #3a4438}
-.region-atlas-destinations li a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;background:#12170f;color:#b6c09f;font-size:11px;text-decoration:none}
+.region-atlas-destinations{display:grid;gap:1px;margin:0!important;padding:7px 8px 8px 16px!important;border-top:1px solid #2e372e;border-left:3px solid color-mix(in srgb,var(--region-accent,#9a7940) 58%,#253025);background:#0f140f;list-style:none}
+.region-atlas-destinations li a{display:flex;min-height:31px;align-items:center;justify-content:space-between;gap:8px;padding:6px 9px;background:#12170f;color:#b6c09f;font-size:11px;line-height:1.35;text-decoration:none}
 .region-atlas-destinations li a:hover{background:#1b211a;color:#e9dcb4}
 .region-atlas-destinations i{color:#79836f;font:normal 7px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
 .place-destinations{display:grid;gap:1px;margin:8px 0 0!important;padding-left:11px!important;border-left:1px solid #3a4438;list-style:none}
@@ -108,8 +110,9 @@
 .entity-contained-places li a i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
 .entity-contained-places li a:hover strong{color:#f6ead0}
 .entity-contained-places li p{display:-webkit-box;overflow:hidden;margin:6px 0 0;color:#9ca69d;font-size:10px;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-@media(max-width:1050px){.region-atlas{grid-template-columns:1fr}}
-@media(max-width:760px){.region-atlas-unplaced{grid-template-columns:1fr}.entity-contained-places ul{grid-template-columns:1fr}}
+@media(max-width:1050px){.region-atlas-card{grid-template-columns:minmax(0,1fr)}.region-atlas-head,.region-atlas-head-copy{min-height:300px}.region-atlas-places{border-top:1px solid #30372f;border-left:0}}
+@media(max-width:760px){.region-atlas-head,.region-atlas-head-copy{min-height:260px}.region-atlas-head-copy{padding:22px}.region-atlas-places{padding:18px}.region-atlas-places>ul{grid-template-columns:minmax(0,1fr)}.region-atlas-unplaced{grid-template-columns:1fr}.entity-contained-places ul{grid-template-columns:1fr}}
+@media(max-width:460px){.region-atlas-places>ul>li>a{grid-template-columns:68px minmax(0,1fr) auto}.region-atlas-places>ul>li>a>img,.region-atlas-places>ul>li>a>.region-place-fallback{width:68px}}
 
 /* The dossier's place rows use a taller art column than the atlas, so the
    unbranded fallback has to fill it rather than sit at atlas size. */
