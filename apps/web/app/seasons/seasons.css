@@ -9,3 +9,11 @@
 .season-notice{display:flex;gap:9px;align-items:center;margin:16px 0 0;padding:13px 17px;border:1px solid #6f7a5d;background:#182015;color:#dfe6cf;font-family:var(--font-mono);font-size:10px;text-transform:uppercase}.season-notice svg{flex:none;color:#9dc487}.season-notice.warn{border-color:#7d6440;background:#221a12;color:#e8d6b4}.season-notice.warn svg{color:var(--brass)}
 .trophy-eligibility{display:grid;grid-template-columns:1fr minmax(280px,42%);gap:26px;align-items:center;margin:0 0 58px;padding:26px;border:1px solid #7a6238;border-left:3px solid var(--brass);background:linear-gradient(120deg,#201b12,#141813)}.trophy-eligibility.earned{border-color:#6f8f5f;border-left-color:#8fbd84;background:linear-gradient(120deg,#18220f,#141813)}.trophy-eligibility h2{margin-top:2px;font-size:34px}.trophy-eligibility p:not(.eyebrow){margin-top:8px;color:var(--muted);font-size:11px}.trophy-eligibility strong{color:#e8cf94}.trophy-eligibility small{display:flex;gap:6px;align-items:center;margin-top:9px;color:#c0aa79;font-family:var(--font-mono);font-size:9px;text-transform:uppercase}.trophy-eligibility.earned small{color:#a3ca94}@media(max-width:760px){.trophy-eligibility{grid-template-columns:1fr;gap:14px}}
 .season-film-finale i{max-width:640px;margin:14px auto 0;color:#c2a870;font-family:var(--font-mono);font-size:9px;font-style:normal;letter-spacing:1px;text-transform:uppercase}
+
+/* A season completes before its chronicle is written. That card is the record
+   itself rather than a door into a 404, so it wears the archive's shape while
+   reading plainly as inert. */
+.season-archive>div:last-child>.is-processing,.season-archive-links>span{display:grid;grid-template-columns:90px 1fr auto;gap:12px;padding:15px;background:#141915;color:var(--muted);cursor:default}
+.season-archive-links>span{grid-template-columns:1fr;font-family:var(--font-mono);font-size:9px;text-transform:uppercase}
+.season-archive .is-processing span,.season-archive .is-processing small{color:var(--muted);font-family:var(--font-mono);font-size:8px;text-transform:uppercase}
+.season-archive .is-processing strong{color:#a49c88}

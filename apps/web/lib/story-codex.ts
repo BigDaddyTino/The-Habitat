@@ -622,6 +622,73 @@ export type CanonNavArc = {
   position: number;
 };
 
+/** One campaign chapter on the macro flow. Its detailed scene tree stays on
+ * the normal arc page; this is only the spine writers use to understand how
+ * whole quests branch and come back together. */
+export type CampaignFlowArc = {
+  slug: string;
+  title: string;
+  summary: string | null;
+  status: StoryStatus;
+  locked: boolean;
+  nodeCount: number;
+  position: number;
+};
+
+/** A real cross-board handoff, read from an ENDING's continuesInArcId. */
+export type CampaignFlowHandoff = {
+  fromArcSlug: string;
+  fromEndingTitle: string;
+  toArcSlug: string;
+};
+
+export type CampaignFlowGraph = { arcs: CampaignFlowArc[]; handoffs: CampaignFlowHandoff[] };
+
+/**
+ * The campaign overview is derived from the same structural continuation the
+ * game export consumes. No second hand-maintained diagram is allowed to drift
+ * away from the quest boards: link an ending to its next arc and the macro
+ * flow changes with it.
+ */
+export async function getCampaignFlow(): Promise<CampaignFlowGraph> {
+  const rows = await db.storyArc.findMany({
+    where: { category: "MAINLINE", status: { in: workingStatuses } },
+    select: {
+      slug: true,
+      title: true,
+      summary: true,
+      status: true,
+      position: true,
+      lockedAt: true,
+      _count: { select: { nodes: { where: { status: { in: workingStatuses } } } } },
+      nodes: {
+        where: { kind: "ENDING", status: { in: workingStatuses }, continuesInArcId: { not: null } },
+        select: { title: true, continuesIn: { select: { slug: true, category: true, status: true } } },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      },
+    },
+    orderBy: [{ position: "asc" }, { createdAt: "asc" }, { title: "asc" }],
+  });
+
+  const campaignSlugs = new Set(rows.map((row) => row.slug));
+  const arcs: CampaignFlowArc[] = rows.map((row) => ({
+    slug: row.slug,
+    title: row.title,
+    summary: row.summary,
+    status: row.status,
+    locked: row.lockedAt !== null,
+    nodeCount: row._count.nodes,
+    position: row.position,
+  }));
+  const handoffs = rows.flatMap((row) => row.nodes.flatMap((node) => {
+    const next = node.continuesIn;
+    if (!next || next.category !== "MAINLINE" || !workingStatuses.includes(next.status) || !campaignSlugs.has(next.slug)) return [];
+    return [{ fromArcSlug: row.slug, fromEndingTitle: node.title, toArcSlug: next.slug }];
+  }));
+
+  return { arcs, handoffs };
+}
+
 export type CanonNavRegion = {
   slug: string;
   title: string;
@@ -1097,11 +1164,15 @@ export async function getStoryNeedsWork() {
       },
       orderBy: [{ kind: "asc" }, { title: "asc" }],
     }),
-    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true } }),
+    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true, companionEntryId: true } }),
   ]);
 
   const known = new Set([...entries.map((entry) => entry.slug), ...arcs.map((arc) => arc.slug)]);
-  const arcRegionIds = new Set(arcs.flatMap((arc) => (arc.regionEntryId ? [arc.regionEntryId] : [])));
+  // Both ways an arc reaches into the bible: the place it is picked up, and
+  // the companion whose story it is. A character whose only tie to the world
+  // is that somebody opened their companion quest is not an orphan, and
+  // reporting them as one sends a writer chasing a problem that is not there.
+  const arcEntryIds = new Set(arcs.flatMap((arc) => [arc.regionEntryId, arc.companionEntryId].filter((id): id is string => Boolean(id))));
   const unresolvedLinks: Array<{ slug: string; title: string; target: string }> = [];
   const openQuestions: Array<{ slug: string; title: string; question: string }> = [];
   const missingMeta: Array<{ slug: string; title: string; kind: StoryEntryKind }> = [];
@@ -1173,7 +1244,7 @@ export async function getStoryNeedsWork() {
     }
 
     const meta = entry.meta as Record<string, unknown> | null;
-    const hasInbound = inbound.has(entry.slug) || entry._count.nodeLinks > 0 || entry._count.speakerOf > 0 || arcRegionIds.has(entry.id);
+    const hasInbound = inbound.has(entry.slug) || entry._count.nodeLinks > 0 || entry._count.speakerOf > 0 || arcEntryIds.has(entry.id);
     const hasOutbound = (outbound.get(entry.slug) ?? []).some((target) => known.has(target) && target !== entry.slug);
     // THEME and RULE are ambient law, and FLAG lives on the threads ledger —
     // being unreferenced is not a problem for them.

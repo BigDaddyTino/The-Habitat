@@ -37,7 +37,9 @@ export default async function SeasonsPage({ searchParams }: { searchParams: Prom
     }),
     db.season.findMany({ where: { isEnabled: true, status: "COMPLETED" }, orderBy: { endsAt: "desc" }, take: 8, include: { chronicle: { select: { id: true } }, _count: { select: { memberships: true } } } }),
   ]);
-  if (!current) return <section className="page-shell season-page"><div className="season-empty"><Trophy aria-hidden="true" /><p className="eyebrow">Seasonal expedition board</p><h1>The lodge is between seasons.</h1><p>Lifetime levels, achievements, records, and every earned trophy remain exactly where they are. A new three-month expedition will appear here only when the lodge enables one.</p>{archive.length ? <div className="season-archive-links">{archive.map((season) => <Link href={`/seasons/${season.slug}/chronicle`} key={season.id}>{season.name} chronicle</Link>)}</div> : null}</div></section>;
+  if (!current) return <section className="page-shell season-page"><div className="season-empty"><Trophy aria-hidden="true" /><p className="eyebrow">Seasonal expedition board</p><h1>The lodge is between seasons.</h1><p>Lifetime levels, achievements, records, and every earned trophy remain exactly where they are. A new three-month expedition will appear here only when the lodge enables one.</p>{archive.length ? <div className="season-archive-links">{archive.map((season) => (season.chronicle
+              ? <Link href={`/seasons/${season.slug}/chronicle`} key={season.id}>{season.name} chronicle</Link>
+              : <span key={season.id} title="The chronicle for this season is still being written.">{season.name} chronicle — processing</span>))}</div> : null}</div></section>;
 
   const phase = seasonPhase(current, now);
   const userId = session?.user?.isActive ? session.user.id : null;
@@ -93,6 +95,13 @@ export default async function SeasonsPage({ searchParams }: { searchParams: Prom
     <div className="season-quest-grid team">{teamQuests.map((quest) => <article className={quest.teamProgress?.completedAt ? "complete" : ""} key={quest.id}><p className="eyebrow">Team · {quest.ruleType.replaceAll("_", " ")}</p><h3>{quest.name}</h3><p>{quest.description}</p><ProgressRail value={quest.teamProgress?.progress ?? 0} goal={quest.threshold} label={quest.name} /><footer><span>{formatGoal(quest.ruleType, quest.teamProgress?.progress ?? 0)} / {formatGoal(quest.ruleType, quest.threshold)}</span><strong><Zap aria-hidden="true" size={13} /> {quest.xpReward} XP each</strong></footer></article>)}</div>
 
     <section className="season-reward-preview"><Award aria-hidden="true" /><div><p className="eyebrow">Permanent cabinet record</p><h2>The seasonal shelf stays.</h2><p>{current.trophyXpRequirement > 0 ? <>When the season closes, every member who banked at least <strong>{current.trophyXpRequirement.toLocaleString()} season XP</strong> receives its commemorative trophy{current.ordinal === 1 ? <>, and the same bar carries the Founder&apos;s Lantern</> : null}. Enrolling alone does not earn the shelf; the pieces awarded stay permanently.</> : <>When the season closes, enrolled members receive its commemorative trophy{current.ordinal === 1 ? <>, along with the Founder&apos;s Lantern</> : null}. Awarded pieces stay permanently.</>}</p></div><Trophy aria-hidden="true" /></section>
-    {archive.length ? <section className="season-archive"><div className="season-section-heading"><div><p className="eyebrow">Permanent record</p><h2>Past chronicles</h2></div></div><div>{archive.map((season) => <Link href={`/seasons/${season.slug}/chronicle`} key={season.id}><span>Season {season.ordinal}</span><strong>{season.name}</strong><small>{season._count.memberships} members · {season.chronicle ? "Chronicle available" : "Chronicle processing"}</small></Link>)}</div></section> : null}
+    {archive.length ? <section className="season-archive"><div className="season-section-heading"><div><p className="eyebrow">Permanent record</p><h2>Past chronicles</h2></div></div><div>{archive.map((season) => {
+      const card = <><span>Season {season.ordinal}</span><strong>{season.name}</strong><small>{season._count.memberships} members · {season.chronicle ? "Chronicle available" : "Chronicle processing"}</small></>;
+      // Only a written chronicle is a destination. Until the snapshot exists
+      // the card is the record itself, not a door into a 404.
+      return season.chronicle
+        ? <Link href={`/seasons/${season.slug}/chronicle`} key={season.id}>{card}</Link>
+        : <div className="is-processing" key={season.id} title="The chronicle for this season is still being written.">{card}</div>;
+    })}</div></section> : null}
   </section>;
 }

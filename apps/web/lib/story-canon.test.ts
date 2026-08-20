@@ -274,3 +274,15 @@ test("the writer-facing copy on the new surfaces stays out of the machine room",
     }
   }
 });
+
+test("a companion quest counts as a tie to the world, not an orphan", () => {
+  // An arc reaches into the bible two ways — the place it is picked up and the
+  // companion whose story it is — and the reachability scan only knew about
+  // the first. A character whose sole connection was that somebody opened
+  // their companion quest was reported as unconnected, which sends a writer
+  // chasing a problem that is not there.
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  assert.match(codex, /select: \{ slug: true, regionEntryId: true, companionEntryId: true \}/, "the reachability pass must read both of an arc's entry links");
+  assert.match(codex, /\[arc\.regionEntryId, arc\.companionEntryId\]/, "and count both as inbound");
+  assert.doesNotMatch(codex, /arcRegionIds/, "the region-only set is what caused the gap");
+});

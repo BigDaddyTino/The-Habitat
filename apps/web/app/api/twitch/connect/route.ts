@@ -24,7 +24,9 @@ export async function GET(request: Request) {
   const { state, stateHash } = createTwitchLinkState();
   const now = new Date();
   await db.$transaction([
-    db.twitchLinkNonce.deleteMany({ where: { userId: session.user.id, expiresAt: { lt: now } } }),
+    // Every expired nonce, not just this member’s — see the Steam route for
+    // why the per-member sweep left abandoned links behind forever.
+    db.twitchLinkNonce.deleteMany({ where: { expiresAt: { lt: now } } }),
     db.twitchLinkNonce.create({ data: { userId: session.user.id, stateHash, expiresAt: twitchLinkNonceExpiry(now) } }),
   ]);
 

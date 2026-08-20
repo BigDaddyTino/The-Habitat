@@ -16,7 +16,12 @@ export async function GET(request: Request) {
   const stateHash = createHash("sha256").update(state).digest("hex");
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
   await db.$transaction([
-    db.steamLinkNonce.deleteMany({ where: { userId: session.user.id, expiresAt: { lt: new Date() } } }),
+    // Every expired nonce, not just this member’s. These are ten-minute
+    // single-use secrets that can never be consumed once they lapse, and the
+    // per-member sweep only ever fired for somebody who came back to try
+    // again — a member who started a link and walked away left a dead row
+    // behind forever.
+    db.steamLinkNonce.deleteMany({ where: { expiresAt: { lt: new Date() } } }),
     db.steamLinkNonce.create({ data: { userId: session.user.id, stateHash, expiresAt } }),
   ]);
 

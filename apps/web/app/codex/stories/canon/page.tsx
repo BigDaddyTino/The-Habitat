@@ -91,7 +91,7 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
         <div className="canon-workspace-main">
           {writtenSections.map((section) => (
             <div className="codex-section" key={section.category}>
-              <div className="section-heading"><h2>{section.title}</h2></div>
+              <div className="section-heading"><h2>{section.category === "MAINLINE" ? <Link className="canon-section-overview-link" href="/codex/stories/campaign">{section.title}<ArrowRight aria-hidden="true" size={16} /></Link> : section.title}</h2></div>
               <div className="codex-arc-grid">
                 {section.arcs.map((arc) => (
                   <Link className={`codex-arc-card status-${arc.status.toLowerCase()}${arc.locked ? " is-locked" : ""}`} href={`/codex/arc/${arc.slug}`} key={arc.id}>

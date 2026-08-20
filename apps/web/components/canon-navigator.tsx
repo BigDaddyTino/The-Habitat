@@ -42,11 +42,14 @@ function ArcLink({ arc, current }: { arc: CanonNavArc; current: string | null })
  * showing them here: a writer sees where work is waiting on the same map they
  * use to navigate.
  */
-function NavigatorTree({ nav, currentArcSlug }: { nav: StoryCanonNavigator; currentArcSlug: string | null }) {
+function NavigatorTree({ nav, currentArcSlug, campaignOverview }: { nav: StoryCanonNavigator; currentArcSlug: string | null; campaignOverview: boolean }) {
   return (
     <nav aria-label="Canon navigator">
         <section>
-          <p className="eyebrow"><CircleDot aria-hidden="true" size={11} /> The campaign<Bubble count={nav.pending.campaign} target="campaign" what="the main story" /></p>
+          <p className={`eyebrow canon-nav-section-link${campaignOverview ? " is-current" : ""}`}>
+            <Link href="/codex/stories/campaign"><CircleDot aria-hidden="true" size={11} /> <span>The campaign</span></Link>
+            <Bubble count={nav.pending.campaign} target="campaign" what="the main story" />
+          </p>
           {nav.campaign.length > 0
             ? <ul>{nav.campaign.map((arc) => <li key={arc.slug}><ArcLink arc={arc} current={currentArcSlug} /></li>)}</ul>
             : <p className="canon-nav-empty">No chapters yet. <Link href="/codex/stories#open-a-story">Open the first chapter →</Link></p>}
@@ -134,13 +137,13 @@ function NavigatorTree({ nav, currentArcSlug }: { nav: StoryCanonNavigator; curr
   );
 }
 
-export function CanonNavigator({ nav, currentArcSlug = null }: { nav: StoryCanonNavigator; currentArcSlug?: string | null }) {
+export function CanonNavigator({ nav, currentArcSlug = null, campaignOverview = false }: { nav: StoryCanonNavigator; currentArcSlug?: string | null; campaignOverview?: boolean }) {
   return (
     <>
-      <aside className="canon-nav canon-nav-desktop"><NavigatorTree currentArcSlug={currentArcSlug} nav={nav} /></aside>
+      <aside className="canon-nav canon-nav-desktop"><NavigatorTree campaignOverview={campaignOverview} currentArcSlug={currentArcSlug} nav={nav} /></aside>
       <details className="canon-nav canon-nav-mobile">
         <summary><Compass aria-hidden="true" size={14} /> The story, section by section</summary>
-        <NavigatorTree currentArcSlug={currentArcSlug} nav={nav} />
+        <NavigatorTree campaignOverview={campaignOverview} currentArcSlug={currentArcSlug} nav={nav} />
       </details>
     </>
   );
