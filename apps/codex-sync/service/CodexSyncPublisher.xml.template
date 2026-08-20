@@ -1,0 +1,21 @@
+<service>
+  <id>CodexSyncPublisher</id>
+  <name>Martino Codex Sync Publisher</name>
+  <description>Publishes complete, immutable Story Codex bundles to a private shared folder.</description>
+  <executable>{{NODE_PATH}}</executable>
+  <arguments>apps\codex-sync\node_modules\tsx\dist\cli.mjs apps\codex-sync\src\cli.ts publish --watch</arguments>
+  <workingdirectory>{{INSTALL_ROOT}}</workingdirectory>
+  <logpath>{{LOG_PATH}}</logpath>
+  <log mode="roll-by-size-time">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>14</keepFiles>
+    <pattern>yyyyMMdd</pattern>
+  </log>
+  <env name="NODE_ENV" value="production" />
+  <env name="HABITAT_CODEX_SYNC_ROOT" value="{{SYNC_ROOT}}" />
+  <env name="HABITAT_CODEX_SYNC_INTERVAL_MS" value="{{POLL_INTERVAL_MS}}" />
+  <stoptimeout>15sec</stoptimeout>
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <onfailure action="restart" delay="60 sec" />
+</service>

@@ -1,0 +1,26 @@
+{
+  "name": "@habitat/codex-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:publish": "tsx src/cli.ts publish",
+    "sync:publish:watch": "tsx src/cli.ts publish --watch",
+    "sync:mirror": "tsx src/cli.ts mirror",
+    "sync:mirror:watch": "tsx src/cli.ts mirror --watch",
+    "sync:verify": "tsx src/cli.ts verify",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "@habitat/db": "workspace:*",
+    "@habitat/shared": "workspace:*",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

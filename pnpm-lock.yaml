@@ -64,6 +64,28 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  apps/codex-sync:
+    dependencies:
+      '@habitat/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@habitat/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.4.2
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.13.3
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.11
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   apps/web:
     dependencies:
       '@auth/prisma-adapter':

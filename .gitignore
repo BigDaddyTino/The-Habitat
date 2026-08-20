@@ -18,6 +18,9 @@ apps/agent/game-services/
 HabitatWorker.exe
 HabitatWorker.xml
 worker-logs/
+CodexSyncPublisher.exe
+CodexSyncPublisher.xml
+codex-sync-logs/
 HabitatWeb.exe
 HabitatWeb.xml
 web-logs/

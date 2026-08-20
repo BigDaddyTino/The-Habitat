@@ -1,0 +1,184 @@
+import { createHash } from "node:crypto";
+import { createReadStream } from "node:fs";
+import { mkdir, readdir, rename, stat } from "node:fs/promises";
+import path from "node:path";
+import type { CodexBundleAsset } from "@habitat/shared";
+import { fileMatches } from "./integrity";
+
+const codexArtDirectories = [
+  "characters",
+  "companion-missions",
+  "creatures",
+  "factions",
+  "flags",
+  "items",
+  "races",
+  "regions",
+  "rules",
+  "systems",
+  "themes",
+  "threads",
+  "timeline",
+] as const;
+
+const codexRootImages = new Set([
+  "codex-characters-ensemble.jpg",
+  "codex-factions-war-room.png",
+  "codex-game-systems.jpg",
+  "codex-regions-peninsula.png",
+  "codex-stories-veil-road.png",
+  "codex-theme-borrowed-power.jpg",
+  "codex-theme-harvest-economy.jpg",
+  "codex-theme-something-under-war.jpg",
+  "story-codex-archive.webp",
+]);
+
+const imageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+
+export type SourceAsset = {
+  sourcePath: string;
+  logicalPath: string;
+  bytes: number;
+  modifiedMs: number;
+};
+
+async function walk(directory: string): Promise<string[]> {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.sort((left, right) => left.name.localeCompare(right.name)).map(async (entry) => {
+      const absolute = path.join(directory, entry.name);
+      return entry.isDirectory() ? walk(absolute) : [absolute];
+    }),
+  );
+  return nested.flat();
+}
+
+export async function discoverCodexAssets(repositoryRoot: string): Promise<SourceAsset[]> {
+  const imagesRoot = path.join(repositoryRoot, "apps", "web", "public", "images");
+  const candidates: string[] = [];
+  for (const directory of codexArtDirectories) {
+    candidates.push(...(await walk(path.join(imagesRoot, directory))));
+  }
+  const rootFiles = await readdir(imagesRoot, { withFileTypes: true });
+  for (const entry of rootFiles) {
+    if (entry.isFile() && codexRootImages.has(entry.name)) candidates.push(path.join(imagesRoot, entry.name));
+  }
+
+  const assets = await Promise.all(
+    candidates
+      .filter((filename) => imageExtensions.has(path.extname(filename).toLowerCase()))
+      .sort((left, right) => left.localeCompare(right))
+      .map(async (sourcePath) => {
+        const info = await stat(sourcePath);
+        return {
+          sourcePath,
+          logicalPath: `/images/${path.relative(imagesRoot, sourcePath).split(path.sep).join("/")}`,
+          bytes: info.size,
+          modifiedMs: info.mtimeMs,
+        };
+      }),
+  );
+  return assets;
+}
+
+export function assetStatFingerprint(assets: SourceAsset[]) {
+  return createHash("sha256")
+    .update(assets.map((asset) => `${asset.logicalPath}\0${asset.bytes}\0${asset.modifiedMs}`).join("\n"))
+    .digest("hex");
+}
+
+function mimeType(filename: string) {
+  switch (path.extname(filename).toLowerCase()) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".webp":
+      return "image/webp";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+function imageDimensions(buffer: Buffer): { width: number; height: number } | null {
+  if (buffer.length >= 24 && buffer.subarray(1, 4).toString("ascii") === "PNG") {
+    return { width: buffer.readUInt32BE(16), height: buffer.readUInt32BE(20) };
+  }
+  if (buffer.length >= 30 && buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP") {
+    const kind = buffer.subarray(12, 16).toString("ascii");
+    if (kind === "VP8X") {
+      return {
+        width: 1 + buffer.readUIntLE(24, 3),
+        height: 1 + buffer.readUIntLE(27, 3),
+      };
+    }
+    if (kind === "VP8 " && buffer.length >= 30) {
+      return { width: buffer.readUInt16LE(26) & 0x3fff, height: buffer.readUInt16LE(28) & 0x3fff };
+    }
+    if (kind === "VP8L" && buffer.length >= 25) {
+      const bits = buffer.readUInt32LE(21);
+      return { width: 1 + (bits & 0x3fff), height: 1 + ((bits >>> 14) & 0x3fff) };
+    }
+  }
+  if (buffer.length >= 4 && buffer[0] === 0xff && buffer[1] === 0xd8) {
+    let offset = 2;
+    while (offset + 9 < buffer.length) {
+      if (buffer[offset] !== 0xff) {
+        offset += 1;
+        continue;
+      }
+      const marker = buffer[offset + 1];
+      if (marker === undefined || marker === 0xd9 || marker === 0xda) break;
+      const size = buffer.readUInt16BE(offset + 2);
+      if (size < 2) break;
+      if (marker >= 0xc0 && marker <= 0xc3) {
+        return { width: buffer.readUInt16BE(offset + 7), height: buffer.readUInt16BE(offset + 5) };
+      }
+      offset += 2 + size;
+    }
+  }
+  return null;
+}
+
+async function inspectAndStore(source: SourceAsset, bundleRoot: string): Promise<CodexBundleAsset> {
+  const hash = createHash("sha256");
+  const chunks: Buffer[] = [];
+  await new Promise<void>((resolve, reject) => {
+    const stream = createReadStream(source.sourcePath);
+    stream.on("data", (chunk) => {
+      const bytes = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+      hash.update(bytes);
+      chunks.push(bytes);
+    });
+    stream.on("error", reject);
+    stream.on("end", resolve);
+  });
+  const sha256 = hash.digest("hex");
+  const blobPath = `blobs/sha256/${sha256.slice(0, 2)}/${sha256}`;
+  const target = path.join(bundleRoot, ...blobPath.split("/"));
+  if (!(await fileMatches(target, sha256, source.bytes))) {
+    await mkdir(path.dirname(target), { recursive: true });
+    const temporary = `${target}.${process.pid}.${Date.now()}.next`;
+    const { copyFile } = await import("node:fs/promises");
+    await copyFile(source.sourcePath, temporary);
+    if (!(await fileMatches(temporary, sha256, source.bytes))) throw new Error(`Asset changed while copying: ${source.sourcePath}`);
+    await rename(temporary, target);
+  }
+  const dimensions = imageDimensions(Buffer.concat(chunks));
+  return {
+    path: blobPath,
+    logicalPath: source.logicalPath,
+    sha256,
+    bytes: source.bytes,
+    mimeType: mimeType(source.sourcePath),
+    width: dimensions?.width ?? null,
+    height: dimensions?.height ?? null,
+  };
+}
+
+export async function storeCodexAssets(assets: SourceAsset[], bundleRoot: string) {
+  const stored: CodexBundleAsset[] = [];
+  for (const asset of assets) stored.push(await inspectAndStore(asset, bundleRoot));
+  return stored;
+}
