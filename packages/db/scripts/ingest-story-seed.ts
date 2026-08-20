@@ -25,10 +25,12 @@ type SeedNode = {
   title: string;
   summary: string | null;
   body: string | null;
+  completion?: string | null;
+  continuesInArc?: string | null;
   choices: SeedChoice[];
   references: Array<{ kind: string; slug: string; title: string }>;
 };
-type SeedArc = { slug: string; title: string; summary: string | null; isMainline: boolean; entryNodeKeys: string[]; nodes: SeedNode[] };
+type SeedArc = { slug: string; title: string; summary: string | null; hook?: string | null; region?: string | null; isMainline: boolean; entryNodeKeys: string[]; nodes: SeedNode[] };
 type SeedEntry = {
   kind: "THEME" | "REGION" | "CREATURE" | "CHARACTER" | "FACTION" | "ITEM" | "EVENT" | "RULE";
   slug: string;
@@ -49,6 +51,7 @@ const endingKindsByNodeKey: Record<string, "SUCCESS" | "FAILURE" | "NEUTRAL"> = 
   "the-boats": "NEUTRAL",
   "the-sea-takes-the-island": "SUCCESS",
   "wake-of-the-island": "SUCCESS",
+  "bind-to-arcadia": "SUCCESS",
 };
 
 const keyShape = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -76,8 +79,10 @@ for (const entry of entries) {
 
 const arcs = prologue.arcs;
 if (worldBible.arcs.length > 0) fail("world-bible.json is expected to carry bible entries only");
+const arcSlugs = new Set(arcs.map((arc) => arc.slug));
 for (const arc of arcs) {
   if (!keyShape.test(arc.slug)) fail(`arc slug "${arc.slug}" is not a valid key`);
+  if (arc.region && !entrySlugs.has(arc.region)) fail(`${arc.slug} names missing pickup region "${arc.region}"`);
   const keys = new Set(arc.nodes.map((node) => node.key));
   if (keys.size !== arc.nodes.length) fail(`duplicate node keys in ${arc.slug}`);
   for (const node of arc.nodes) {
@@ -86,6 +91,8 @@ for (const arc of arcs) {
       if (!keys.has(choice.toKey)) fail(`${arc.slug}/${node.key} points at missing node "${choice.toKey}"`);
       if (choice.label !== null && choice.label.trim().length === 0) fail(`${arc.slug}/${node.key} has a blank choice label`);
     }
+    if (node.continuesInArc && node.kind !== "ENDING") fail(`${arc.slug}/${node.key} continues into another arc but is not an ENDING`);
+    if (node.continuesInArc && !arcSlugs.has(node.continuesInArc)) fail(`${arc.slug}/${node.key} continues into missing arc "${node.continuesInArc}"`);
     for (const reference of node.references) {
       if (!entrySlugs.has(reference.slug)) fail(`${arc.slug}/${node.key} references missing entry "${reference.slug}"`);
     }

@@ -318,6 +318,7 @@
           "summary": "Prologue ending, Defend branch chosen. Continues in the arc 'the-last-days-of-kestrel'. Intended as a NEUTRAL ending — the choice itself is neither victory nor defeat.",
           "body": "The commander nods once, and the camp changes shape around the decision: ammunition uncrated instead of loaded, walls reinforced instead of abandoned, scouts sent east along a trail of torn metal and worse.\n\nThe island is lost. That was never the question. The question is what it costs them — and whether the trail the creature left leads anywhere a friend might still be breathing.\n\nThe prologue ends here. The Last Days of Kestrel begin.",
           "choices": [],
+          "continuesInArc": "the-last-days-of-kestrel",
           "references": [
             { "kind": "REGION", "slug": "forward-camp-kestrel", "title": "Forward Camp Kestrel" }
           ]
@@ -329,6 +330,7 @@
           "summary": "Prologue ending, Flee branch chosen. Continues in the arc 'the-evacuation'. Intended as a NEUTRAL ending — the choice itself is neither victory nor defeat.",
           "body": "The commander gives the order the docks have been begging for, and Kestrel begins to pour itself into the boats: the wounded first or the ammunition first, and someone has to decide which, and that someone is about to be you.\n\nThe island burns at your back. Ahead, across violent water, is the military port, the mainland, the intelligence net that may know what hunts like the thing that took Tino — and the rest of the war.\n\nThe prologue ends here. The Evacuation begins.",
           "choices": [],
+          "continuesInArc": "the-evacuation",
           "references": [
             { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
           ]
@@ -339,7 +341,7 @@
     {
       "slug": "the-last-days-of-kestrel",
       "title": "The Last Days of Kestrel",
-      "summary": "The Defend branch, in full. The party holds Forward Camp Kestrel against escalating Tropic Pearl assaults while the thing beneath the island grows less patient — through preparation, rescue, discovery, siege, a playable last stand, and the collapse that throws the survivors into the sea. Picks up from the 'hold-the-line' ending of the prologue arc; cross-arc continuity is carried in prose because the contract does not link arcs.",
+      "summary": "The Defend branch, in full. The party holds Forward Camp Kestrel against escalating Tropic Pearl assaults while the thing beneath the island grows less patient — through preparation, rescue, discovery, siege, a playable last stand, and the collapse that throws the survivors into the sea. Picks up from the 'hold-the-line' ending and continues into Binding in Arcadia.",
       "isMainline": true,
       "entryNodeKeys": ["dig-in"],
       "nodes": [
@@ -419,6 +421,7 @@
           "summary": "Defend branch conclusion: thrown into the water in the collapse, the survivors wash ashore near a small fishing village in the Port Arcadia region. Intended as a SUCCESS ending in survival terms, carried in defeat's clothing — the contract cannot mark valence yet.",
           "body": "Water. Darkness. The muffled thunder of an island becoming seabed.\n\nThen sand, and coughing, and gray morning light on a shoreline that is not on fire — the first such shoreline in the party's living memory. A small fishing village sits up the beach, nets drying, mainland hills behind it. The Port Arcadia region, reached the hard way.\n\nThe defenders arrive with nothing but what the sea allowed: their scars, their story, the debts Pearl now owes them — and a trail gone cold across water, waiting to be found again. The island held for every meter it was worth. What it bought is what comes next.",
           "choices": [],
+          "continuesInArc": "binding-in-arcadia",
           "references": [
             { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" },
             { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
@@ -430,7 +433,7 @@
     {
       "slug": "the-evacuation",
       "title": "The Evacuation",
-      "summary": "The Flee branch, in full. Kestrel empties itself into the boats: supply triage, survivor escort, a contested harbour run, and a departure with the island burning in the wake. Picks up from 'the-boats' ending of the prologue arc; cross-arc continuity is carried in prose because the contract does not link arcs.",
+      "summary": "The Flee branch, in full. Kestrel empties itself into the boats: supply triage, survivor escort, a contested harbour run, and a departure with the island burning in the wake. Picks up from 'the-boats' ending and continues into Binding in Arcadia.",
       "isMainline": true,
       "entryNodeKeys": ["the-manifest"],
       "nodes": [
@@ -484,10 +487,90 @@
           "summary": "Flee branch conclusion: departure by boat, the crossing, and arrival at the Port Arcadia military port. Intended as a SUCCESS ending with a long shadow — the contract cannot mark valence yet.",
           "body": "The boats pull out through violent water, and nobody on deck says anything, because the view says it all: the island burning stem to stern, the smoke leaning east, and — just once, far off, where the water goes deep — a shape beneath the surface that is patient and enormous and not done.\n\nTino's plan comes to the party unbidden: a boat, a little piece of coast, cold beer, fishing. This is a boat. It is not that boat.\n\nThe military port takes the survivors in at gray dawn — Port Arcadia, the mainland, the wider war. Somewhere in its intelligence net is a file on what hunts like the thing that took him. The evacuation saved everyone it could. The list of what it couldn't is the cargo nobody declared.",
           "choices": [],
+          "continuesInArc": "binding-in-arcadia",
           "references": [
             { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" },
             { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
             { "kind": "EVENT", "slug": "the-fall-of-the-starting-island", "title": "The Fall of the Starting Island" }
+          ]
+        }
+      ],
+      "problems": []
+    },
+    {
+      "slug": "binding-in-arcadia",
+      "title": "Binding in Arcadia",
+      "summary": "The first shared mainland campaign quest and the beginning of Act I. The Defend survivors wash onto the storm beach while the Evacuation survivors enter through the military docks; both arrivals play out with their consequences intact, converge on the search for Port Arcadia's Soul Forge, and end when the party binds to it.",
+      "hook": "Kestrel's Soul Forge died with the island. Reach Port Arcadia by the road your choice earned, find the city's Forge, and bind before anyone dies for good.",
+      "region": "port-arcadia",
+      "isMainline": true,
+      "entryNodeKeys": ["arcadia-landfall"],
+      "nodes": [
+        {
+          "key": "arcadia-landfall",
+          "kind": "QUEST_START",
+          "title": "Two Roads Reach Arcadia",
+          "summary": "Act I begins with two different landfalls in the same city. The party's island choice decides which opening they play; it does not disappear when the roads converge.",
+          "body": "The island is gone, and Kestrel's Soul Forge is gone with it. Everyone who was bound there is now bound to a machine on the sea floor — which is another way of saying they are bound to nothing. Until the party reaches a living Forge, death is true death.\n\nThe Defend road begins half-drowned on a storm beach outside Port Arcadia. The Evacuation road begins inside the military docks with survivors, cargo, and a city deciding what their arrival is worth. Both are Port Arcadia. They are not the same arrival.",
+          "choices": [
+            { "order": 0, "label": "Defend road — survive the storm beach", "condition": "The party defended Forward Camp Kestrel", "toKey": "storm-beach" },
+            { "order": 1, "label": "Evacuation road — clear the military docks", "condition": "The party evacuated the island", "toKey": "military-docks" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "storm-beach",
+          "kind": "QUEST_STEP",
+          "title": "The Storm Beach",
+          "summary": "The Defend survivors wake scattered along Arcadia's outer coast and must turn a wrecked landfall into a road toward the city.",
+          "body": "The sea did not deliver the defenders neatly. People, weapons, and supplies lie scattered along black sand beneath Port Arcadia's distant walls. The first mainland objective is survival: find the living, recover what the water allowed, and reach the coastal road before the storm or the things drawn to it finish Kestrel's work.\n\nArcadia hears this party coming as a rumor from the beach — the last defenders, washed ashore with nothing, carrying a reputation before they carry dry ammunition.",
+          "completion": "The surviving defenders are gathered and the party reaches the coastal road into Port Arcadia.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "find-the-soul-forge" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "military-docks",
+          "kind": "QUEST_STEP",
+          "title": "The Arcadia Docks",
+          "summary": "The Evacuation survivors arrive with a manifest, a crowd, and every consequence of what the boats carried or left behind.",
+          "body": "The boats make the military port, but arrival is not safety. Wounded people need moving, disputed cargo needs guarding, officials want names, factions want leverage, and somebody at the gate has already decided the refugees are a problem.\n\nThe manifest becomes the opening state of Act I: who crossed, what crossed, and what the party promised on the water all play out here before Arcadia lets them through.",
+          "completion": "The evacuation survivors, their chosen cargo, and their consequences are carried through the military port into Arcadia.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "find-the-soul-forge" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "find-the-soul-forge",
+          "kind": "QUEST_STEP",
+          "title": "Find the Soul Forge",
+          "summary": "The first single objective after the branch: cross Port Arcadia, locate its living Soul Forge, and reach it while every death is still permanent.",
+          "body": "The two roads finally become one objective. Port Arcadia has a living Soul Forge somewhere inside its military, civic, and criminal machinery, but knowing a city owns a Forge is not the same thing as being allowed to touch it.\n\nFind it. Bargain, threaten, serve, steal access, or earn it — the route can remember how the party arrived, but it must end at the same machine. Until then every fight carries the one consequence Kestrel's Forge used to prevent: anyone who dies is gone.",
+          "completion": "The party locates Port Arcadia's active Soul Forge and secures physical access to its binding platform.",
+          "choices": [
+            { "order": 0, "label": null, "condition": null, "toKey": "bind-to-arcadia" }
+          ],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
+          ]
+        },
+        {
+          "key": "bind-to-arcadia",
+          "kind": "ENDING",
+          "title": "Bound to Arcadia",
+          "summary": "The branch closes and Act I truly opens: the party binds to Port Arcadia's Soul Forge, ending the true-death gap without erasing how they reached it.",
+          "body": "The Forge takes each Echo one at a time. Ancient rings wake under modern cables. The Soul Core answers. For the first time since the island fell, death is no longer automatically final.\n\nThe roads have converged, but the state has not been washed clean: beach survivors still carry the last stand; dock survivors still carry the manifest; Arcadia knows which version of the island walked into its machine.\n\nBinding completes the opening subsection. Act I begins here — one mainland campaign, carrying two different histories.",
+          "choices": [],
+          "references": [
+            { "kind": "REGION", "slug": "port-arcadia", "title": "Port Arcadia" }
           ]
         }
       ],

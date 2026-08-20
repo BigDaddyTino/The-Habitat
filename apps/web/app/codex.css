@@ -984,6 +984,10 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .canon-nav section { padding: 12px 14px; }
 .canon-nav section + section { border-top: 1px solid rgba(214,195,151,.09); }
 .canon-nav .eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #a99155; font-size: 8px; }
+.canon-nav-section-link { justify-content: space-between; }
+.canon-nav-section-link > a { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.canon-nav-section-link > a:hover, .canon-nav-section-link.is-current > a { color: #f4dfad; }
+.canon-nav-section-link.is-current { margin-inline: -7px; border-left: 2px solid var(--brass); padding: 5px 7px; background: #1f2418; }
 .canon-nav ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
 .canon-nav-eyebrow { margin: 9px 0 4px; color: #7f8a7f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .6px; text-transform: uppercase; }
 
@@ -1024,6 +1028,35 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .canon-nav-timeline { margin-top: 10px; }
 .canon-nav-timeline a { display: inline-flex; align-items: center; gap: 5px; color: #c8a85e; font: 700 8px var(--font-mono); letter-spacing: .5px; text-decoration: none; text-transform: uppercase; }
 .canon-nav-timeline a:hover { color: #f0d69b; }
+
+/* The campaign above the quest boards: whole arcs branch and merge here, while
+   each card still opens the detailed scene flow writers already use. */
+.canon-section-overview-link { display: inline-flex; align-items: center; gap: 9px; color: inherit; text-decoration: none; }
+.canon-section-overview-link:hover { color: var(--brass); }
+.codex-campaign-shell { padding-bottom: 88px; }
+.campaign-flow-intro { max-width: 900px; }
+.campaign-flow-main { min-width: 0; border: 1px solid var(--line); background: #101410; }
+.campaign-flow-heading { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(260px, .85fr); gap: 30px; align-items: end; padding: 24px 28px; border-bottom: 1px solid var(--line); background: linear-gradient(135deg, #1a2018, #121711); }
+.campaign-flow-heading h2 { max-width: 720px; margin-top: 6px; color: var(--paper); font-family: var(--font-display); font-size: clamp(28px, 3.4vw, 43px); line-height: .95; }
+.campaign-flow-heading > p { border-left: 1px solid rgba(198,151,76,.35); padding-left: 18px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.campaign-flow-canvas { width: 100%; height: 720px; background: radial-gradient(circle at 50% 22%, rgba(198,151,76,.09), transparent 30%), #0d110e; }
+.campaign-flow-canvas .react-flow__node-campaign { width: 286px; }
+.campaign-flow-card { position: relative; display: flex; min-height: 190px; flex-direction: column; border: 1px solid #4a5146; border-top: 2px solid var(--proposed); padding: 18px 19px; background: linear-gradient(145deg, rgba(27,34,29,.98), rgba(14,19,15,.99)); color: inherit; text-decoration: none; box-shadow: 0 16px 38px rgba(0,0,0,.34); transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.campaign-flow-card.status-canon { border-top-color: var(--canon); }
+.campaign-flow-card:hover { border-color: var(--brass); transform: translateY(-2px); box-shadow: 0 20px 44px rgba(0,0,0,.48), 0 0 24px rgba(198,151,76,.09); }
+.campaign-flow-card.is-locked { border-top-color: #7ec4f0; }
+.campaign-flow-kicker { display: flex; gap: 6px; align-items: center; margin-bottom: 9px; color: var(--brass); font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .65px; text-transform: uppercase; }
+.campaign-flow-card.is-locked .campaign-flow-kicker { color: #9fd2f2; }
+.campaign-flow-card > strong { color: #efe2c1; font-family: var(--font-display); font-size: 26px; font-weight: 600; line-height: .98; }
+.campaign-flow-card > small { display: -webkit-box; overflow: hidden; margin-top: 10px; color: #9fa89e; font-size: 10px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.campaign-flow-open { display: inline-flex; gap: 6px; align-items: center; margin-top: auto; padding-top: 14px; color: #cbb98d; font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+.campaign-flow-card > em { margin-top: 8px; color: var(--canon); font-family: var(--font-mono); font-size: 8px; font-style: normal; letter-spacing: .4px; text-transform: uppercase; }
+.campaign-flow-handle { width: 8px !important; height: 8px !important; opacity: 0; pointer-events: none !important; }
+.campaign-flow-canvas .react-flow__edge-text { letter-spacing: .25px; }
+.campaign-flow-canvas .react-flow__controls, .campaign-flow-canvas .react-flow__attribution { display: none; }
+.campaign-flow-law { display: flex; gap: 12px; align-items: flex-start; border-top: 1px solid rgba(198,151,76,.28); padding: 18px 22px; background: #191a13; color: #b6b29f; font-size: 11px; line-height: 1.6; }
+.campaign-flow-law svg { flex: 0 0 auto; margin-top: 2px; color: var(--brass); }
+.campaign-flow-law strong { color: #e2cd9b; }
 
 /* ---- The canon inbox ---------------------------------------------------- */
 
@@ -1154,4 +1187,7 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
   .codex-board-shell .canon-nav { height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   .codex-board-shell .canon-workspace { display: flex; flex-direction: column; }
   .warden-guide-chips { display: none; }
+  .campaign-flow-heading { grid-template-columns: 1fr; }
+  .campaign-flow-heading > p { max-width: 680px; }
+  .campaign-flow-canvas { height: 660px; }
 }
