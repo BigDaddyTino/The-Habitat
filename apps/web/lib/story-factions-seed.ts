@@ -242,6 +242,7 @@ export const compactSeed = {
   meta: {
     scope: "compact — the free peoples' defensive pact",
     parent: null,
+    independent: false,
     power: null,
     seat: null,
     leaders: [],

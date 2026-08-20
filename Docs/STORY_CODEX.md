@@ -514,6 +514,21 @@ already do: `FACTION.meta.parent` names the power a faction answers to, and
 **a major is a faction with `parent: null`**. Wings are derived from their
 own sheets and never stored twice.
 
+`FACTION.meta.independent` carries the third class. A banner nobody has
+filed wings under yet and a power that stands outside every sphere are the
+same row in the database, so the shelf cannot tell them apart by counting —
+and guessing would put a claim on the page canon never made. The writer says
+it, on one control: **Answers to** offers *no one (a major power)*, *nobody
+(stands outside every sphere)*, or a banner. Choosing nobody clears the
+banner, and the schema refuses a sheet that claims both.
+
+Everything the factions board draws — the banner cards, the wings beneath
+them, the independents, the counts — is derived from those sheets on every
+render. No surface may read the shape out of `story-factions-seed.ts`; that
+file is the filing table a seed applies once, not a description of what
+exists. A test pins this, because the board did once read from it and a
+power written in the app rendered nowhere at all.
+
 The shelf holds **thirty-five powers: ten majors, twenty-one wings, and four
 that answer to nobody** — plus the seat left open for the faction the players
 may found. One law governs how that is read, and it is written into

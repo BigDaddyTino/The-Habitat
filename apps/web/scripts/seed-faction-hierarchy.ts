@@ -25,6 +25,7 @@ const workingStatuses = ["DRAFT", "PROPOSED", "CANON"] as const;
 const emptySheet = {
   scope: null,
   parent: null,
+  independent: false,
   power: null,
   seat: null,
   leaders: [],

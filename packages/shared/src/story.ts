@@ -788,6 +788,11 @@ export type StoryFactionMeta = {
    *  the same law the regions atlas, the systems shelf, and the races
    *  library already run on, so a wing is never stored twice. */
   parent: string | null;
+  /** Whether this power stands outside every banner's sphere, rather than
+   *  simply having no wings filed under it yet. Those two look identical in
+   *  the data, so the shelf cannot infer this — it is a world fact a writer
+   *  sets, and it is never true at the same time as `parent`. */
+  independent: boolean;
   /** PLACEHOLDER. Strength is meant to be counted from what a faction
    *  physically holds — territory, cities, wealth, population, armies —
    *  and that reckoning is not built. Until it is, this is a number a

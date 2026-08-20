@@ -114,6 +114,7 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
 {
   "scope": "state | corporate | criminal | regional | religious | supernatural | string",
   "parent": "faction slug — the power this one answers to; null means this IS a major",
+  "independent": "bool — stands outside every banner's sphere; never true alongside parent",
   "power": "int | null — PLACEHOLDER, see below",
   "seat": "region slug",
   "leaders": ["character slug"],

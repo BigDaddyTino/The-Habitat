@@ -111,6 +111,15 @@ export const factionMetaSchema = z.object({
   goals: metaLines(20, 500),
   gameTag: metaText(120),
   openQuestions: metaLines(30, 300),
+  // Answering to nobody is a world fact a writer decides, never something the
+  // shelf infers. A major with no wings filed yet and a power that stands
+  // outside every sphere look identical in the data otherwise, and guessing
+  // between them would put a claim on the page that canon never made.
+  independent: z.boolean(),
+}).superRefine((sheet, ctx) => {
+  if (sheet.independent && sheet.parent) {
+    ctx.addIssue({ code: "custom", path: ["independent"], message: "A power that answers to nobody cannot also fly somebody's banner." });
+  }
 });
 
 export const creatureMetaSchema = z.object({

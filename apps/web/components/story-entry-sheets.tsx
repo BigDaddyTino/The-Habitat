@@ -23,6 +23,9 @@ type SlugOption = { slug: string; title: string };
 const splitLines = (value: string) => value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
 const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : []);
+/** The "answers to" value meaning nobody. Not a slug, so it can never collide
+ *  with a faction: slugs are lowercase and hyphenated. */
+const standsAlone = "__stands-alone__";
 const record = (value: unknown): Record<string, unknown> => (typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {});
 const orNull = (value: string) => (value.trim().length > 0 ? value.trim() : null);
 
@@ -288,7 +291,7 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
 }) {
   const source = record(meta);
   const [scope, setScope] = useState(text(source.scope));
-  const [parent, setParent] = useState(text(source.parent));
+  const [parent, setParent] = useState(source.independent === true ? standsAlone : text(source.parent));
   const [power, setPower] = useState(typeof source.power === "number" ? String(source.power) : "");
   const [seat, setSeat] = useState(text(source.seat));
   const [leaders, setLeaders] = useState(asArray(source.leaders).map(text));
@@ -302,9 +305,13 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
 
   const strength = Number.parseInt(power, 10);
+  // One control decides where a power sits, so a writer cannot file it under a
+  // banner and call it independent in the same breath. "nobody" is a choice
+  // about the world; the empty value is simply a banner with nothing above it.
   const composed: StoryFactionMeta = {
     scope: orNull(scope),
-    parent: orNull(parent),
+    parent: parent === standsAlone ? null : orNull(parent),
+    independent: parent === standsAlone,
     power: Number.isInteger(strength) && strength >= 0 ? strength : null,
     seat: orNull(seat),
     leaders: leaders.filter(Boolean),
@@ -331,9 +338,10 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
         <label>Kind of power<input maxLength={80} onChange={(event) => setScope(event.target.value)} placeholder="state, corporate, criminal, supernatural…" type="text" value={scope} /></label>
         <label>Answers to<select onChange={(event) => setParent(event.target.value)} value={parent}>
           <option value="">No one — this is a major power</option>
+          <option value={standsAlone}>Nobody — it stands outside every sphere</option>
           {factions.filter((option) => option.slug !== entrySlug).map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
         </select>
-        <small className="sheet-hint">Pick a power and this becomes one of its wings — its quests and waiting material roll up to that banner.</small></label>
+        <small className="sheet-hint">Pick a power and this becomes one of its wings — its quests and waiting material roll up to that banner. The last two are not the same: a major power is a banner that may yet gain wings, while standing outside every sphere is a fact about the world the shelf will never guess on its own.</small></label>
         <label>Strength<input inputMode="numeric" min={0} onChange={(event) => setPower(event.target.value)} placeholder="—" type="number" value={power} />
         <small className="sheet-hint">A placeholder set by hand. Strength is meant to be counted from land, cities, wealth, population, and armies, and that reckoning is not built yet.</small></label>
         <label>Seat of power<select onChange={(event) => setSeat(event.target.value)} value={seat}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>

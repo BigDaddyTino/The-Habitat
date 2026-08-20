@@ -89,15 +89,21 @@ test("every power in the table has art to show", () => {
 });
 
 test("the sheet carries a banner and a placeholder strength, and refuses a row without them", () => {
-  const sheet = { scope: null, parent: null, power: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] };
+  const sheet = { scope: null, parent: null, independent: false, power: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] };
   assert.equal(factionMetaSchema.safeParse(sheet).success, true);
   assert.equal(factionMetaSchema.safeParse({ ...sheet, parent: "national-defense-directorate", power: 40 }).success, true);
   assert.equal(factionMetaSchema.safeParse({ ...sheet, power: -1 }).success, false, "strength is never negative");
   assert.equal(factionMetaSchema.safeParse({ ...sheet, parent: "The Directorate" }).success, false, "a banner is a slug, never a name");
 
+  // Answering to nobody is a claim the sheet carries, because a banner with no
+  // wings filed yet is indistinguishable from one that stands outside every
+  // sphere — and a power cannot do both at once.
+  assert.equal(factionMetaSchema.safeParse({ ...sheet, independent: true }).success, true, "a power may stand outside every sphere");
+  assert.equal(factionMetaSchema.safeParse({ ...sheet, independent: true, parent: "the-ashen-court" }).success, false, "but never while flying somebody's banner");
+
   // The meta law: every key the schema knows is required with no default, so a
   // stored row missing one is refused whole rather than saved without it.
-  for (const missing of ["parent", "power"] as const) {
+  for (const missing of ["parent", "power", "independent"] as const) {
     const partial: Record<string, unknown> = { ...sheet };
     delete partial[missing];
     assert.equal(factionMetaSchema.safeParse(partial).success, false, `omitting ${missing} must be refused, never silently defaulted`);
@@ -238,4 +244,31 @@ test("a wing's quest rolls up to the power above it, named by the wing", () => {
   assert.match(codex, /const bannerOver = \(slug: string\) => \{/, "the navigator climbs to the top-most banner");
   assert.match(codex, /while \(current && !seen\.has\(current\.slug\)\)/, "and the climb carries a seen-set, because the field is writer-editable");
   assert.match(codex, /via: \(arc\.factionEntryId && bannerIds\.get\(arc\.factionEntryId\)\) \|\| null/, "a rolled-up quest keeps the wing it came through");
+});
+
+test("the factions board is derived from the sheets, not from the table beside it", () => {
+  // The board once read its majors and independents out of this seed file,
+  // which froze the shelf: a power written in the app rendered nowhere, and
+  // the header counted whatever the table said rather than what exists.
+  const directory = readFileSync(join(process.cwd(), "components/story-entity-directory.tsx"), "utf8");
+  assert.doesNotMatch(directory, /story-factions-seed/, "the board must not import the filing table");
+  assert.ok(directory.includes("asRecord(entry.meta).independent === true"), "independence is read off the sheet");
+  assert.ok(directory.includes("entries.filter((entry) => !systemParentOf(entry))"), "and a banner is still a faction with nothing above it");
+
+  // Visible copy may not carry a count that a writer can invalidate by saving
+  // an entry. Slogans and derived numbers are fine; frozen arithmetic is not.
+  const board = directory.slice(directory.indexOf('className="faction-power-board"'), directory.indexOf('className="entity-card-grid"'));
+  for (const stale of [/\bTen banners\b/, /\bTwenty-one wings\b/, /These four sit outside/, /\d+ major ·/]) {
+    assert.doesNotMatch(board, stale, `the board hardcodes a count that goes stale: ${stale}`);
+  }
+});
+
+test("a power that answers to nobody is one choice on the sheet, never two", () => {
+  // Splitting this across two controls would let a writer file a power under a
+  // banner and mark it independent in the same save; the schema refuses that,
+  // but the sheet should never offer the contradiction in the first place.
+  const sheets = readFileSync(join(process.cwd(), "components/story-entry-sheets.tsx"), "utf8");
+  assert.ok(sheets.includes('const standsAlone = "__stands-alone__"'), "the sentinel must not be slug-shaped, or it could collide with a faction");
+  assert.ok(sheets.includes("independent: parent === standsAlone"), "one control decides both fields");
+  assert.ok(sheets.includes("parent: parent === standsAlone ? null : orNull(parent)"), "and choosing nobody clears the banner");
 });
