@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
 import { profileUrlForPlatform, socialPlatforms } from "@/lib/social-platforms";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const equipSchema = z.object({ userTitleId: z.string().uuid() });
@@ -21,9 +22,9 @@ const avatarPresets = ["/images/avatars/campfire.svg", "/images/avatars/raven.sv
 export async function equipTitle(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = equipSchema.safeParse({ userTitleId: formData.get("userTitleId") });
-  if (!parsed.success) throw new Error("Invalid title selection.");
+  if (!parsed.success) throw refusal("Invalid title selection.");
   const title = await db.userTitle.findFirst({ where: { id: parsed.data.userTitleId, userId: user.id }, select: { id: true, titleDefinitionId: true } });
-  if (!title) throw new Error("This title is not available to equip.");
+  if (!title) throw refusal("This title is not available to equip.");
   await db.$transaction([
     db.userTitle.updateMany({ where: { userId: user.id, equipped: true }, data: { equipped: false } }),
     db.userTitle.update({ where: { id: title.id }, data: { equipped: true } }),
@@ -35,9 +36,9 @@ export async function equipTitle(formData: FormData) {
 export async function updateProfile(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = profileSchema.safeParse({ username: formData.get("username"), displayName: formData.get("displayName"), bio: formData.get("bio") });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid profile details.");
+  if (!parsed.success) throw refusal(parsed.error.issues[0]?.message ?? "Invalid profile details.");
   const conflict = await db.user.findFirst({ where: { username: parsed.data.username, id: { not: user.id } }, select: { id: true } });
-  if (conflict) throw new Error("That callsign is already claimed.");
+  if (conflict) throw refusal("That callsign is already claimed.");
   await db.$transaction([
     db.user.update({ where: { id: user.id }, data: parsed.data }),
     db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_UPDATED", entityType: "User", entityId: user.id, after: { username: parsed.data.username, displayName: parsed.data.displayName } } }),
@@ -49,10 +50,10 @@ export async function updateProfile(formData: FormData) {
 export async function addSocialAccount(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = socialSchema.safeParse({ platform: formData.get("platform"), handle: formData.get("handle") });
-  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Invalid account link.");
-  if (parsed.data.platform === "STEAM") throw new Error("Steam accounts must be verified through Steam sign-in.");
+  if (!parsed.success) throw refusal(parsed.error.issues[0]?.message ?? "Invalid account link.");
+  if (parsed.data.platform === "STEAM") throw refusal("Steam accounts must be verified through Steam sign-in.");
   const existingHandle = await db.userSocialAccount.findFirst({ where: { platform: parsed.data.platform, handle: parsed.data.handle, userId: { not: user.id } }, select: { id: true } });
-  if (existingHandle) throw new Error("That public handle is already linked to another Habitat profile.");
+  if (existingHandle) throw refusal("That public handle is already linked to another Habitat profile.");
   await db.$transaction(async (transaction) => {
     const account = await transaction.userSocialAccount.upsert({
       where: { userId_platform: { userId: user.id, platform: parsed.data.platform } },
@@ -67,10 +68,10 @@ export async function addSocialAccount(formData: FormData) {
 export async function removeSocialAccount(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = z.object({ accountId: z.string().uuid() }).safeParse({ accountId: formData.get("accountId") });
-  if (!parsed.success) throw new Error("Invalid account link.");
+  if (!parsed.success) throw refusal("Invalid account link.");
   const account = await db.userSocialAccount.findFirst({ where: { id: parsed.data.accountId, userId: user.id }, select: { id: true, platform: true, verifiedAt: true } });
-  if (!account) throw new Error("That account link is unavailable.");
-  if (account.platform === "STEAM" && account.verifiedAt) throw new Error("Use Disconnect Steam for a verified Steam account.");
+  if (!account) throw refusal("That account link is unavailable.");
+  if (account.platform === "STEAM" && account.verifiedAt) throw refusal("Use Disconnect Steam for a verified Steam account.");
   await db.$transaction([
     db.userSocialAccount.delete({ where: { id: account.id } }),
     db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_SOCIAL_ACCOUNT_REMOVED", entityType: "UserSocialAccount", entityId: account.id, before: { platform: account.platform } } }),
@@ -82,7 +83,7 @@ export async function disconnectSteam(formData: FormData) {
   const user = await requireRole("USER");
   // Disconnecting leaves already-attached identities in place, so the member is
   // shown that consequence and has to acknowledge it before the proof is removed.
-  if (formData.get("acknowledged") !== "on") throw new Error("Acknowledge the disconnect consequences before removing Steam verification.");
+  if (formData.get("acknowledged") !== "on") throw refusal("Acknowledge the disconnect consequences before removing Steam verification.");
   const account = await db.userSocialAccount.findFirst({
     where: { userId: user.id, platform: "STEAM", verifiedAt: { not: null } },
     select: { id: true, steamProfile: { select: { id: true, _count: { select: { libraryGames: true, userAchievements: true } } } } },
@@ -110,9 +111,9 @@ export async function disconnectSteam(formData: FormData) {
 
 export async function enableSteamEnrichment(formData: FormData) {
   const user = await requireRole("USER");
-  if (formData.get("consent") !== "on") throw new Error("Consent is required before Steam enrichment can be enabled.");
+  if (formData.get("consent") !== "on") throw refusal("Consent is required before Steam enrichment can be enabled.");
   const account = await db.userSocialAccount.findFirst({ where: { userId: user.id, platform: "STEAM", verifiedAt: { not: null }, providerAccountId: { not: null } }, select: { id: true } });
-  if (!account) throw new Error("Verify a Steam account before enabling enrichment.");
+  if (!account) throw refusal("Verify a Steam account before enabling enrichment.");
   const now = new Date();
   await db.$transaction(async (transaction) => {
     const profile = await transaction.steamProfile.upsert({
@@ -140,7 +141,7 @@ export async function updateSteamEnrichmentVisibility(formData: FormData) {
   const user = await requireRole("USER");
   const displayPublic = formData.get("displayPublic") === "on";
   const profile = await db.steamProfile.findFirst({ where: { socialAccount: { is: { userId: user.id, platform: "STEAM" } } }, select: { id: true } });
-  if (!profile) throw new Error("Steam enrichment is not enabled.");
+  if (!profile) throw refusal("Steam enrichment is not enabled.");
   await db.$transaction([
     db.steamProfile.update({ where: { id: profile.id }, data: { displayPublic } }),
     db.auditLog.create({ data: { actorUserId: user.id, action: "STEAM_ENRICHMENT_VISIBILITY_UPDATED", entityType: "SteamProfile", entityId: profile.id, after: { displayPublic } } }),
@@ -153,7 +154,7 @@ export async function updateSteamEnrichmentVisibility(formData: FormData) {
 export async function equipCosmetic(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = cosmeticSchema.safeParse({ kind: formData.get("kind"), code: formData.get("code") });
-  if (!parsed.success) throw new Error("Invalid cosmetic selection.");
+  if (!parsed.success) throw refusal("Invalid cosmetic selection.");
   const field = parsed.data.kind === "AVATAR_BORDER" ? "avatarBorder" : "profileLayout";
   if (parsed.data.code === "default") {
     await db.$transaction([
@@ -162,7 +163,7 @@ export async function equipCosmetic(formData: FormData) {
     ]);
   } else {
     const reward = await db.userAchievementReward.findFirst({ where: { userId: user.id, reward: { kind: parsed.data.kind, code: parsed.data.code } }, select: { id: true } });
-    if (!reward) throw new Error("That cosmetic has not been unlocked.");
+    if (!reward) throw refusal("That cosmetic has not been unlocked.");
     await db.$transaction([
       db.userAchievementReward.updateMany({ where: { userId: user.id, reward: { kind: parsed.data.kind } }, data: { equipped: false } }),
       db.userAchievementReward.update({ where: { id: reward.id }, data: { equipped: true } }),
@@ -176,7 +177,7 @@ export async function equipCosmetic(formData: FormData) {
 export async function selectAvatarPreset(formData: FormData) {
   const user = await requireRole("USER");
   const image = formData.get("image");
-  if (typeof image !== "string" || !avatarPresets.includes(image as (typeof avatarPresets)[number])) throw new Error("Invalid avatar preset.");
+  if (typeof image !== "string" || !avatarPresets.includes(image as (typeof avatarPresets)[number])) throw refusal("Invalid avatar preset.");
   await db.$transaction([
     db.user.update({ where: { id: user.id }, data: { image } }),
     db.auditLog.create({ data: { actorUserId: user.id, action: "PROFILE_AVATAR_PRESET_SELECTED", entityType: "User", entityId: user.id, after: { image } } }),

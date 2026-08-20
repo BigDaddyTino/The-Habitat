@@ -8,6 +8,7 @@ import { z } from "zod";
 import { seasonEndFor } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { effectiveSeasonStatus, seasonContentEditability, seasonGoalProblems, seasonSlugFrom } from "@/lib/season-content";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 
@@ -64,16 +65,16 @@ function seasonPaths(slug?: string) {
 /// transaction so a stale form cannot slip past the rules the page rendered.
 async function requireEditable(transaction: Prisma.TransactionClient, seasonId: string, level: "structural" | "measurable" | "presentation") {
   const season = await transaction.season.findUnique({ where: { id: seasonId }, select: { id: true, slug: true, ordinal: true, status: true, isEnabled: true, startsAt: true, endsAt: true } });
-  if (!season) throw new Error("That season no longer exists.");
+  if (!season) throw refusal("That season no longer exists.");
   const status = effectiveSeasonStatus(season);
   const editability = seasonContentEditability(status);
-  if (!editability[level]) throw new Error(editability.reason);
+  if (!editability[level]) throw refusal(editability.reason);
   return { ...season, status };
 }
 
 async function uniqueSlug(transaction: Prisma.TransactionClient, kind: "quest" | "expedition", seasonId: string, name: string) {
   const base = seasonSlugFrom(name);
-  if (!base) throw new Error("The name must contain letters or numbers.");
+  if (!base) throw refusal("The name must contain letters or numbers.");
   const taken = kind === "quest"
     ? await transaction.seasonQuestDefinition.findMany({ where: { seasonId, slug: { startsWith: base } }, select: { slug: true } })
     : await transaction.seasonExpedition.findMany({ where: { seasonId, slug: { startsWith: base } }, select: { slug: true } });
@@ -83,19 +84,19 @@ async function uniqueSlug(transaction: Prisma.TransactionClient, kind: "quest" |
     const candidate = `${base.slice(0, 76)}-${suffix}`;
     if (!used.has(candidate)) return candidate;
   }
-  throw new Error("Too many goals share that name. Choose a more distinct one.");
+  throw refusal("Too many goals share that name. Choose a more distinct one.");
 }
 
 export async function createSeason(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = createSeasonSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid season. Check the name, theme, description, and goals.");
+  if (!parsed.success) throw refusal("Invalid season. Check the name, theme, description, and goals.");
   const startsAt = new Date(`${parsed.data.startsOn}T00:00:00.000Z`);
-  if (Number.isNaN(startsAt.getTime())) throw new Error("Invalid start date.");
+  if (Number.isNaN(startsAt.getTime())) throw refusal("Invalid start date.");
   const slug = seasonSlugFrom(parsed.data.name);
-  if (!slug) throw new Error("The season name must contain letters or numbers.");
+  if (!slug) throw refusal("The season name must contain letters or numbers.");
   const season = await db.$transaction(async (transaction) => {
-    if (await transaction.season.findUnique({ where: { slug }, select: { id: true } })) throw new Error(`A season already uses the slug "${slug}".`);
+    if (await transaction.season.findUnique({ where: { slug }, select: { id: true } })) throw refusal(`A season already uses the slug "${slug}".`);
     const highest = await transaction.season.aggregate({ _max: { ordinal: true } });
     const created = await transaction.season.create({
       data: {
@@ -118,10 +119,10 @@ export async function createSeason(formData: FormData) {
 export async function createSeasonQuest(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = questSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid quest. Check the name, description, threshold, and reward.");
+  if (!parsed.success) throw refusal("Invalid quest. Check the name, description, threshold, and reward.");
   const { seasonId, ...quest } = parsed.data;
   const problems = seasonGoalProblems(quest);
-  if (problems.length) throw new Error(problems[0]);
+  if (problems.length) throw refusal(problems[0]);
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, seasonId, "structural");
     const questSlug = await uniqueSlug(transaction, "quest", season.id, quest.name);
@@ -135,14 +136,14 @@ export async function createSeasonQuest(formData: FormData) {
 export async function updateSeasonQuest(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = questSchema.extend({ id: z.string().uuid(), enabled: z.enum(["true", "false"]).transform((value) => value === "true") }).safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid quest update.");
+  if (!parsed.success) throw refusal("Invalid quest update.");
   const { seasonId, id, ...quest } = parsed.data;
   const problems = seasonGoalProblems(quest);
-  if (problems.length) throw new Error(problems[0]);
+  if (problems.length) throw refusal(problems[0]);
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, seasonId, "presentation");
     const existing = await transaction.seasonQuestDefinition.findFirst({ where: { id, seasonId: season.id } });
-    if (!existing) throw new Error("That quest no longer exists.");
+    if (!existing) throw refusal("That quest no longer exists.");
     const editability = seasonContentEditability(season.status);
     // On a running season only wording, difficulty, order, and availability move.
     // Scope, rule, game, and reward stay as members were enrolled against them.
@@ -159,15 +160,15 @@ export async function updateSeasonQuest(formData: FormData) {
 export async function removeSeasonQuest(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = removeSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid quest.");
+  if (!parsed.success) throw refusal("Invalid quest.");
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, parsed.data.seasonId, "structural");
     const quest = await transaction.seasonQuestDefinition.findFirst({ where: { id: parsed.data.id, seasonId: season.id }, select: { id: true, slug: true, name: true } });
-    if (!quest) throw new Error("That quest no longer exists.");
+    if (!quest) throw refusal("That quest no longer exists.");
     // Season XP entries reference the season, not the quest, so a quest that has
     // ever paid out must never be removed or its ledger rows would be orphaned.
     const awarded = await transaction.seasonXpEntry.count({ where: { seasonId: season.id, dedupeKey: { contains: quest.id } } });
-    if (awarded > 0) throw new Error("This quest has already awarded season XP and cannot be removed.");
+    if (awarded > 0) throw refusal("This quest has already awarded season XP and cannot be removed.");
     await transaction.seasonQuestDefinition.delete({ where: { id: quest.id } });
     await transaction.auditLog.create({ data: { actorUserId: admin.id, action: "SEASON_QUEST_REMOVED", entityType: "SeasonQuestDefinition", entityId: quest.id, before: { seasonId: season.id, slug: quest.slug, name: quest.name } } });
     return season.slug;
@@ -178,10 +179,10 @@ export async function removeSeasonQuest(formData: FormData) {
 export async function createSeasonExpedition(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = expeditionSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid expedition. Check the name, description, game, and threshold.");
+  if (!parsed.success) throw refusal("Invalid expedition. Check the name, description, game, and threshold.");
   const { seasonId, ...expedition } = parsed.data;
   const problems = seasonGoalProblems({ ruleType: expedition.ruleType, gameType: expedition.gameType, threshold: expedition.threshold });
-  if (problems.length) throw new Error(problems[0]);
+  if (problems.length) throw refusal(problems[0]);
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, seasonId, "structural");
     const expeditionSlug = await uniqueSlug(transaction, "expedition", season.id, expedition.name);
@@ -195,14 +196,14 @@ export async function createSeasonExpedition(formData: FormData) {
 export async function updateSeasonExpedition(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = expeditionSchema.extend({ id: z.string().uuid() }).safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid expedition update.");
+  if (!parsed.success) throw refusal("Invalid expedition update.");
   const { seasonId, id, ...expedition } = parsed.data;
   const problems = seasonGoalProblems({ ruleType: expedition.ruleType, gameType: expedition.gameType, threshold: expedition.threshold });
-  if (problems.length) throw new Error(problems[0]);
+  if (problems.length) throw refusal(problems[0]);
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, seasonId, "presentation");
     const existing = await transaction.seasonExpedition.findFirst({ where: { id, seasonId: season.id } });
-    if (!existing) throw new Error("That expedition no longer exists.");
+    if (!existing) throw refusal("That expedition no longer exists.");
     const editability = seasonContentEditability(season.status);
     const data = editability.measurable ? expedition : { name: expedition.name, description: expedition.description, threshold: expedition.threshold, sortOrder: expedition.sortOrder };
     await transaction.seasonExpedition.update({ where: { id: existing.id }, data });
@@ -215,11 +216,11 @@ export async function updateSeasonExpedition(formData: FormData) {
 export async function removeSeasonExpedition(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = removeSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid expedition.");
+  if (!parsed.success) throw refusal("Invalid expedition.");
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, parsed.data.seasonId, "structural");
     const expedition = await transaction.seasonExpedition.findFirst({ where: { id: parsed.data.id, seasonId: season.id }, select: { id: true, slug: true, name: true } });
-    if (!expedition) throw new Error("That expedition no longer exists.");
+    if (!expedition) throw refusal("That expedition no longer exists.");
     await transaction.seasonExpedition.delete({ where: { id: expedition.id } });
     await transaction.auditLog.create({ data: { actorUserId: admin.id, action: "SEASON_EXPEDITION_REMOVED", entityType: "SeasonExpedition", entityId: expedition.id, before: { seasonId: season.id, slug: expedition.slug, name: expedition.name } } });
     return season.slug;
@@ -230,18 +231,18 @@ export async function removeSeasonExpedition(formData: FormData) {
 export async function upsertSeasonTrophy(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = trophySchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid trophy. Codes use lowercase letters, numbers, and hyphens.");
+  if (!parsed.success) throw refusal("Invalid trophy. Codes use lowercase letters, numbers, and hyphens.");
   const { seasonId, kind, ...trophy } = parsed.data;
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, seasonId, "presentation");
     const existing = await transaction.seasonTrophy.findUnique({ where: { seasonId_kind: { seasonId: season.id, kind } }, select: { id: true, code: true, name: true, rarity: true } });
     const editability = seasonContentEditability(season.status);
-    if (!existing && !editability.structural) throw new Error(editability.reason);
+    if (!existing && !editability.structural) throw refusal(editability.reason);
     // The founding reward only ever awards in the first season, so offering one
     // anywhere else would promise a piece the worker will never hand out.
-    if (kind === "FOUNDING_MEMBER" && season.ordinal !== 1) throw new Error("The founding reward is only awarded in season 1 and would never be handed out here.");
+    if (kind === "FOUNDING_MEMBER" && season.ordinal !== 1) throw refusal("The founding reward is only awarded in season 1 and would never be handed out here.");
     const clash = await transaction.seasonTrophy.findUnique({ where: { seasonId_code: { seasonId: season.id, code: trophy.code } }, select: { id: true } });
-    if (clash && clash.id !== existing?.id) throw new Error(`Another trophy in this season already uses the code "${trophy.code}".`);
+    if (clash && clash.id !== existing?.id) throw refusal(`Another trophy in this season already uses the code "${trophy.code}".`);
     const saved = await transaction.seasonTrophy.upsert({ where: { seasonId_kind: { seasonId: season.id, kind } }, create: { seasonId: season.id, kind, ...trophy }, update: trophy });
     await transaction.auditLog.create({ data: { actorUserId: admin.id, action: existing ? "SEASON_TROPHY_UPDATED" : "SEASON_TROPHY_CREATED", entityType: "SeasonTrophy", entityId: saved.id, before: existing ?? undefined, after: { kind, ...trophy } } });
     return season.slug;
@@ -252,14 +253,14 @@ export async function upsertSeasonTrophy(formData: FormData) {
 export async function removeSeasonTrophy(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = removeSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) throw new Error("Invalid trophy.");
+  if (!parsed.success) throw refusal("Invalid trophy.");
   const slug = await db.$transaction(async (transaction) => {
     const season = await requireEditable(transaction, parsed.data.seasonId, "structural");
     const trophy = await transaction.seasonTrophy.findFirst({ where: { id: parsed.data.id, seasonId: season.id }, select: { id: true, code: true, name: true, _count: { select: { unlocks: true } } } });
-    if (!trophy) throw new Error("That trophy no longer exists.");
+    if (!trophy) throw refusal("That trophy no longer exists.");
     // Removing an awarded trophy would take a permanent piece off a member's
     // shelf. The cabinet is append-only from the member's point of view.
-    if (trophy._count.unlocks > 0) throw new Error("Members already hold this trophy. A trophy on a member's shelf is never withdrawn.");
+    if (trophy._count.unlocks > 0) throw refusal("Members already hold this trophy. A trophy on a member's shelf is never withdrawn.");
     await transaction.seasonTrophy.delete({ where: { id: trophy.id } });
     await transaction.auditLog.create({ data: { actorUserId: admin.id, action: "SEASON_TROPHY_REMOVED", entityType: "SeasonTrophy", entityId: trophy.id, before: { seasonId: season.id, code: trophy.code, name: trophy.name } } });
     return season.slug;

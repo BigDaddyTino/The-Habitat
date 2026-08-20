@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const states = ["ONLINE", "STARTING", "STOPPING", "SLEEPING", "UPDATING", "DEGRADED", "DOWN_UNEXPECTEDLY", "UNKNOWN"] as const;
@@ -34,7 +35,7 @@ export async function updateServerMetadata(formData: FormData) {
     controlEnabled: formData.get("controlEnabled") === "on",
   });
 
-  if (!parsed.success) throw new Error("Invalid server metadata.");
+  if (!parsed.success) throw refusal("Invalid server metadata.");
 
   const existing = await db.gameServer.findUniqueOrThrow({ where: { id: parsed.data.id } });
   const metadata = {

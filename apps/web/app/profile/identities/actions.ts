@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const claimSchema = z.object({ playerIdentityId: z.string().uuid() });
@@ -12,10 +13,10 @@ const claimSchema = z.object({ playerIdentityId: z.string().uuid() });
 export async function requestIdentityClaim(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = claimSchema.safeParse({ playerIdentityId: formData.get("playerIdentityId") });
-  if (!parsed.success) throw new Error("Invalid identity claim.");
+  if (!parsed.success) throw refusal("Invalid identity claim.");
 
   const identity = await db.playerIdentity.findUnique({ where: { id: parsed.data.playerIdentityId }, select: { id: true, userId: true } });
-  if (!identity || identity.userId) throw new Error("This identity is no longer available to claim.");
+  if (!identity || identity.userId) throw refusal("This identity is no longer available to claim.");
 
   await db.$transaction([
     // A rejected claim can be filed again: administrator rollback rejects the

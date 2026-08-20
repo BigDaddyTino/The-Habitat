@@ -8,6 +8,7 @@ import { seasonEndFor } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { effectiveSeasonStatus } from "@/lib/season-content";
 import { seasonAvailabilityProblems, seasonLaunchReadiness, seasonScheduleProblems } from "@/lib/season-launch";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const launchSchema = z.object({ seasonId: z.string().uuid() });
@@ -36,9 +37,9 @@ async function assertLaunchable(transaction: Prisma.TransactionClient, seasonId:
     where: { id: seasonId },
     select: { id: true, name: true, status: true, isEnabled: true, startsAt: true, endsAt: true, _count: { select: { trophies: true, quests: true, expeditions: true, xpEntries: true } } },
   });
-  if (!season) throw new Error("That season no longer exists.");
+  if (!season) throw refusal("That season no longer exists.");
   const readiness = seasonLaunchReadiness({ status: effectiveSeasonStatus(season, now), trophyCount: season._count.trophies, questCount: season._count.quests, expeditionCount: season._count.expeditions, xpEntryCount: season._count.xpEntries });
-  if (!readiness.launchable) throw new Error(readiness.blockers[0]);
+  if (!readiness.launchable) throw refusal(readiness.blockers[0]);
   return season;
 }
 
@@ -47,13 +48,13 @@ async function assertNoRunningSeason(transaction: Prisma.TransactionClient, seas
     where: { id: { not: seasonId }, status: { not: "COMPLETED" }, OR: [{ isEnabled: true }, { status: "ACTIVE" }], startsAt: { lt: endsAt }, endsAt: { gt: startsAt } },
     select: { name: true, startsAt: true, endsAt: true },
   });
-  if (clash) throw new Error(`${clash.name} already occupies that window. Only one season runs at a time.`);
+  if (clash) throw refusal(`${clash.name} already occupies that window. Only one season runs at a time.`);
 }
 
 export async function launchSeason(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = launchSchema.safeParse({ seasonId: formData.get("seasonId") });
-  if (!parsed.success) throw new Error("Invalid season.");
+  if (!parsed.success) throw refusal("Invalid season.");
   const now = new Date();
   const endsAt = seasonEndFor(now);
   await db.$transaction(async (transaction) => {
@@ -70,12 +71,12 @@ export async function launchSeason(formData: FormData) {
 export async function scheduleSeason(formData: FormData) {
   const admin = await requireRole("ADMIN");
   const parsed = scheduleSchema.safeParse({ seasonId: formData.get("seasonId"), startsOn: formData.get("startsOn") });
-  if (!parsed.success) throw new Error("Invalid season start date.");
+  if (!parsed.success) throw refusal("Invalid season start date.");
   const startsAt = new Date(`${parsed.data.startsOn}T00:00:00.000Z`);
-  if (Number.isNaN(startsAt.getTime())) throw new Error("Invalid season start date.");
+  if (Number.isNaN(startsAt.getTime())) throw refusal("Invalid season start date.");
   const now = new Date();
   const scheduleProblems = seasonScheduleProblems(startsAt, now);
-  if (scheduleProblems.length) throw new Error(scheduleProblems[0]);
+  if (scheduleProblems.length) throw refusal(scheduleProblems[0]);
   // seasonEndFor mirrors the Postgres `startsAt + INTERVAL '3 months'` CHECK, so
   // a month-end start date lands on a date the database will actually accept.
   const endsAt = seasonEndFor(startsAt);
@@ -94,18 +95,18 @@ export async function updateSeasonSettings(formData: FormData) {
     seasonId: formData.get("seasonId"), name: formData.get("name"), theme: formData.get("theme"), description: formData.get("description"),
     communityXpGoal: formData.get("communityXpGoal"), trophyXpRequirement: formData.get("trophyXpRequirement"), isEnabled: formData.get("isEnabled"),
   });
-  if (!parsed.success) throw new Error("Invalid season settings.");
+  if (!parsed.success) throw refusal("Invalid season settings.");
   const { seasonId, ...settings } = parsed.data;
   await db.$transaction(async (transaction) => {
     const existing = await transaction.season.findUnique({ where: { id: seasonId }, select: { id: true, name: true, theme: true, description: true, communityXpGoal: true, trophyXpRequirement: true, isEnabled: true, status: true, startsAt: true, endsAt: true } });
-    if (!existing) throw new Error("That season no longer exists.");
+    if (!existing) throw refusal("That season no longer exists.");
     // A completed season is a published record: its Chronicle already states the
     // bar it was judged against, so its goals stay frozen.
     const now = new Date();
     const effectiveStatus = effectiveSeasonStatus(existing, now);
-    if (effectiveStatus === "COMPLETED") throw new Error("A completed season is a published record and cannot be edited.");
+    if (effectiveStatus === "COMPLETED") throw refusal("A completed season is a published record and cannot be edited.");
     const availabilityProblems = seasonAvailabilityProblems(effectiveStatus, settings.isEnabled, { wasEnabled: existing.isEnabled, startsAt: existing.startsAt, now });
-    if (availabilityProblems.length) throw new Error(availabilityProblems[0]);
+    if (availabilityProblems.length) throw refusal(availabilityProblems[0]);
     await transaction.season.update({ where: { id: existing.id }, data: settings });
     await transaction.auditLog.create({ data: { actorUserId: admin.id, action: "SEASON_SETTINGS_UPDATED", entityType: "Season", entityId: existing.id, before: existing, after: { ...settings } } });
   });

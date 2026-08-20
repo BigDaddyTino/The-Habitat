@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
 import { generateStoryExportToken, hashStoryExportToken } from "@/lib/story-export";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 
@@ -38,7 +39,7 @@ export async function issueExportToken(_previous: IssueTokenState, formData: For
 export async function revokeExportToken(formData: FormData) {
   const user = await requireRole("ADMIN");
   const tokenId = z.string().uuid().safeParse(formData.get("tokenId"));
-  if (!tokenId.success) throw new Error("Invalid token.");
+  if (!tokenId.success) throw refusal("Invalid token.");
 
   await db.$transaction(async (tx) => {
     const updated = await tx.storyExportToken.updateMany({ where: { id: tokenId.data, revokedAt: null }, data: { revokedAt: new Date() } });

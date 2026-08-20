@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const commandSchema = z.object({ serverId: z.string().uuid(), action: z.enum(["START", "STOP", "RESTART", "UPDATE"]), confirmation: z.string().trim().max(12) });
@@ -12,10 +13,10 @@ const commandSchema = z.object({ serverId: z.string().uuid(), action: z.enum(["S
 export async function requestServerCommand(formData: FormData) {
   const actor = await requireRole("ADMIN");
   const parsed = commandSchema.safeParse({ serverId: formData.get("serverId"), action: formData.get("action"), confirmation: formData.get("confirmation") ?? "" });
-  if (!parsed.success) throw new Error("Invalid server command.");
-  if (parsed.data.action !== "START" && parsed.data.confirmation !== parsed.data.action) throw new Error(`Type ${parsed.data.action} to authorize this command.`);
+  if (!parsed.success) throw refusal("Invalid server command.");
+  if (parsed.data.action !== "START" && parsed.data.confirmation !== parsed.data.action) throw refusal(`Type ${parsed.data.action} to authorize this command.`);
   const server = await db.gameServer.findUnique({ where: { id: parsed.data.serverId }, select: { id: true, displayName: true, controlEnabled: true, desiredState: true } });
-  if (!server?.controlEnabled) throw new Error("Lifecycle controls are not enabled for this world.");
+  if (!server?.controlEnabled) throw refusal("Lifecycle controls are not enabled for this world.");
   const now = new Date();
   const requestedState = parsed.data.action === "START" ? "STARTING" : parsed.data.action === "STOP" || parsed.data.action === "RESTART" ? "STOPPING" : "UPDATING";
   await db.$transaction(async (transaction) => {

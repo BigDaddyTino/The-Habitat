@@ -4,6 +4,7 @@ import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 
@@ -16,7 +17,7 @@ export async function updateTwitchShowcaseVisibility(formData: FormData): Promis
   const user = await requireRole("USER");
   const showcaseEnabled = formData.get("showcaseEnabled") === "on";
   const channel = await db.twitchChannel.findUnique({ where: { userId: user.id }, select: { id: true, showcaseEnabled: true } });
-  if (!channel) throw new Error("Verify a Twitch channel before choosing showcase visibility.");
+  if (!channel) throw refusal("Verify a Twitch channel before choosing showcase visibility.");
   if (channel.showcaseEnabled === showcaseEnabled) return;
   await db.$transaction([
     db.twitchChannel.update({ where: { id: channel.id }, data: { showcaseEnabled } }),

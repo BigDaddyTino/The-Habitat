@@ -37,6 +37,7 @@ import { metaSchemasByKind, metaSlug, threadMetaSchema } from "@/lib/story-meta-
 import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 
@@ -183,7 +184,7 @@ function readArcForm(formData: FormData, isAdmin: boolean) {
 /** The one message the arc form answers with, whatever went wrong. */
 function arcFormError(parsed: { error: z.ZodError }) {
   const first = parsed.error.issues.find((issue) => issue.code === "custom");
-  return new Error(first?.message ?? "Give the story a title of 120 characters or fewer, with a summary and hook under 500 each.");
+  return refusal(first?.message ?? "Give the story a title of 120 characters or fewer, with a summary and hook under 500 each.");
 }
 
 /**
@@ -199,10 +200,10 @@ function arcFormError(parsed: { error: z.ZodError }) {
  */
 async function assertArcUnlocked(tx: Transaction, arcId: string) {
   const arc = await tx.storyArc.findUnique({ where: { id: arcId }, select: { lockedAt: true, title: true, lockedBy: { select: { displayName: true, name: true, username: true } } } });
-  if (!arc) throw new Error("That arc no longer exists.");
+  if (!arc) throw refusal("That arc no longer exists.");
   if (!arc.lockedAt) return;
   const locker = arc.lockedBy ? storyMemberName(arc.lockedBy) : null;
-  throw new Error(locker
+  throw refusal(locker
     ? `"${arc.title}" is locked — ${locker} settled this flow. An admin has to unlock it before anything here can change.`
     : `"${arc.title}" is locked. An admin has to unlock it before anything here can change.`);
 }
@@ -211,7 +212,7 @@ async function assertArcUnlocked(tx: Transaction, arcId: string) {
 async function assertRegionEntry(tx: Transaction, regionEntryId: string | null) {
   if (!regionEntryId) return;
   const region = await tx.storyEntry.findUnique({ where: { id: regionEntryId }, select: { kind: true } });
-  if (!region || region.kind !== "REGION") throw new Error("A pickup place has to be a region from the bible.");
+  if (!region || region.kind !== "REGION") throw refusal("A pickup place has to be a region from the bible.");
 }
 
 /**
@@ -223,7 +224,7 @@ async function assertRegionEntry(tx: Transaction, regionEntryId: string | null) 
 async function assertCompanionEntry(tx: Transaction, companionEntryId: string | null) {
   if (!companionEntryId) return;
   const character = await tx.storyEntry.findUnique({ where: { id: companionEntryId }, select: { kind: true } });
-  if (!character || character.kind !== "CHARACTER") throw new Error("A companion quest belongs to a character from the bible.");
+  if (!character || character.kind !== "CHARACTER") throw refusal("A companion quest belongs to a character from the bible.");
 }
 
 /**
@@ -234,7 +235,7 @@ async function assertCompanionEntry(tx: Transaction, companionEntryId: string | 
 async function assertFactionEntry(tx: Transaction, factionEntryId: string | null) {
   if (!factionEntryId) return;
   const faction = await tx.storyEntry.findUnique({ where: { id: factionEntryId }, select: { kind: true } });
-  if (!faction || faction.kind !== "FACTION") throw new Error("A faction quest belongs to a faction from the bible.");
+  if (!faction || faction.kind !== "FACTION") throw refusal("A faction quest belongs to a faction from the bible.");
 }
 
 /**
@@ -271,10 +272,10 @@ export async function createArc(formData: FormData) {
   if (!parsed.success) throw arcFormError(parsed);
 
   const slug = slugifyStoryKey(parsed.data.title);
-  if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
+  if (!isValidStoryKey(slug)) throw refusal("That title needs at least one letter or number.");
 
   const existing = await db.storyArc.findUnique({ where: { slug }, select: { id: true } });
-  if (existing) throw new Error("A story with that name already exists.");
+  if (existing) throw refusal("A story with that name already exists.");
 
   const fromThread = z.string().uuid().safeParse(formData.get("fromThreadId"));
 
@@ -323,7 +324,7 @@ export async function updateArc(formData: FormData) {
 
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: parsed.data.arcId } });
-    if (!arc) throw new Error("That arc no longer exists.");
+    if (!arc) throw refusal("That arc no longer exists.");
     await assertArcUnlocked(tx, arc.id);
     await assertRegionEntry(tx, parsed.data.regionEntryId);
     await assertCompanionEntry(tx, parsed.data.companionEntryId);
@@ -404,7 +405,7 @@ async function availableNodeKey(tx: Transaction, arcId: string, title: string) {
     const candidate = `${base}-${suffix}`;
     if (!taken.has(candidate)) return candidate;
   }
-  throw new Error("Too many nodes share that name. Give this one a different title.");
+  throw refusal("Too many nodes share that name. Give this one a different title.");
 }
 
 export async function createNode(formData: FormData) {
@@ -417,10 +418,10 @@ export async function createNode(formData: FormData) {
     canvasX: formData.get("canvasX"),
     canvasY: formData.get("canvasY"),
   });
-  if (!parsed.success) throw new Error("A card needs a valid kind, a title of 160 characters or fewer, and a summary under 500.");
+  if (!parsed.success) throw refusal("A card needs a valid kind, a title of 160 characters or fewer, and a summary under 500.");
 
   const arc = await db.storyArc.findUnique({ where: { id: parsed.data.arcId }, select: { id: true, slug: true } });
-  if (!arc) throw new Error("That arc no longer exists.");
+  if (!arc) throw refusal("That arc no longer exists.");
 
   await db.$transaction(async (tx) => {
     await assertArcUnlocked(tx, arc.id);
@@ -478,7 +479,7 @@ export async function updateNode(formData: FormData) {
     rewards: formData.get("rewards") ?? "",
     continuesInArcId: formData.get("continuesInArcId") || null,
   });
-  if (!parsed.success) throw new Error("That edit needs a valid kind, a title of 160 characters or fewer, a summary under 500, and scene text under 20,000.");
+  if (!parsed.success) throw refusal("That edit needs a valid kind, a title of 160 characters or fewer, a summary under 500, and scene text under 20,000.");
 
   // Ending valence and continuation belong to endings, completion to quest
   // steps. Enforced by clearing rather than refusing: a writer who turns an
@@ -489,20 +490,20 @@ export async function updateNode(formData: FormData) {
 
   const arcSlug = await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, include: { arc: { select: { slug: true } } } });
-    if (!node) throw new Error("That node no longer exists.");
+    if (!node) throw refusal("That node no longer exists.");
     await assertArcUnlocked(tx, node.arcId);
 
     // A speaker is a character from the bible, never free text — the importer
     // resolves the attribution against a real asset, so it must exist here.
     if (parsed.data.speakerEntryId) {
       const speaker = await tx.storyEntry.findUnique({ where: { id: parsed.data.speakerEntryId }, select: { kind: true } });
-      if (!speaker || speaker.kind !== "CHARACTER") throw new Error("A speaker has to be a character from the bible.");
+      if (!speaker || speaker.kind !== "CHARACTER") throw refusal("A speaker has to be a character from the bible.");
     }
 
     if (continuesInArcId) {
-      if (continuesInArcId === node.arcId) throw new Error("An ending cannot continue into its own arc.");
+      if (continuesInArcId === node.arcId) throw refusal("An ending cannot continue into its own arc.");
       const nextArc = await tx.storyArc.findUnique({ where: { id: continuesInArcId }, select: { id: true } });
-      if (!nextArc) throw new Error("The arc this ending continues into no longer exists.");
+      if (!nextArc) throw refusal("The arc this ending continues into no longer exists.");
     }
 
     // Optimistic concurrency, not the courtesy lock, is what actually protects
@@ -529,7 +530,7 @@ export async function updateNode(formData: FormData) {
       },
     });
     if (updated.count !== 1) {
-      throw new Error("Somebody saved this node while you were writing. Reopen it to see their version before saving yours.");
+      throw refusal("Somebody saved this node while you were writing. Reopen it to see their version before saving yours.");
     }
 
     await recordRevision(tx, {
@@ -563,11 +564,11 @@ const moveNodeSchema = z.object({
 export async function moveNode(input: { nodeId: string; canvasX: number; canvasY: number }) {
   const user = await requireRole(storyReadRole);
   const parsed = moveNodeSchema.safeParse(input);
-  if (!parsed.success) throw new Error("That position is off the board.");
+  if (!parsed.success) throw refusal("That position is off the board.");
 
   await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { id: true, arcId: true, title: true, canvasX: true, canvasY: true } });
-    if (!node) throw new Error("That node no longer exists.");
+    if (!node) throw refusal("That node no longer exists.");
     if (node.canvasX === parsed.data.canvasX && node.canvasY === parsed.data.canvasY) return;
     await assertArcUnlocked(tx, node.arcId);
 
@@ -588,11 +589,11 @@ export async function moveNode(input: { nodeId: string; canvasX: number; canvasY
 export async function deleteNode(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const nodeId = z.string().uuid().safeParse(formData.get("nodeId"));
-  if (!nodeId.success) throw new Error("Invalid node.");
+  if (!nodeId.success) throw refusal("Invalid node.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const node = await tx.storyNode.findUnique({ where: { id: nodeId.data }, include: { arc: { select: { slug: true } } } });
-    if (!node) throw new Error("That node no longer exists.");
+    if (!node) throw refusal("That node no longer exists.");
     await assertArcUnlocked(tx, node.arcId);
 
     // Canon is what the game was built from. Removing it outright would tear a
@@ -608,7 +609,7 @@ export async function deleteNode(formData: FormData) {
     // Archived is terminal for this action. Without this, a second delete —
     // one stale tab away — fell through to the hard delete below and erased
     // the very node the archive path had just protected.
-    if (node.status === "ARCHIVED") throw new Error("That node is already archived. An administrator can restore it from the revision trail.");
+    if (node.status === "ARCHIVED") throw refusal("That node is already archived. An administrator can restore it from the revision trail.");
 
     // The node's edges go with it via the DB cascade, and each is a choice
     // asset the Unreal side may have built. Every one gets its own DELETED
@@ -649,7 +650,7 @@ async function availableChoiceKey(tx: Transaction, arcId: string, fromKey: strin
     const candidate = `${base}-${suffix}`;
     if (!taken.has(candidate)) return candidate;
   }
-  throw new Error("That card has too many branches to key another one.");
+  throw refusal("That card has too many branches to key another one.");
 }
 
 export async function createEdge(input: { fromNodeId: string; toNodeId: string; label?: string | null }) {
@@ -657,18 +658,18 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
   const parsed = z
     .object({ fromNodeId: z.string().uuid(), toNodeId: z.string().uuid(), label: optionalText(200).optional() })
     .safeParse(input);
-  if (!parsed.success) throw new Error("That transition is not valid.");
-  if (parsed.data.fromNodeId === parsed.data.toNodeId) throw new Error("A node cannot continue into itself.");
+  if (!parsed.success) throw refusal("That transition is not valid.");
+  if (parsed.data.fromNodeId === parsed.data.toNodeId) throw refusal("A node cannot continue into itself.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const [from, to] = await Promise.all([
       tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, title: true, key: true, arc: { select: { slug: true } } } }),
       tx.storyNode.findUnique({ where: { id: parsed.data.toNodeId }, select: { id: true, arcId: true, title: true } }),
     ]);
-    if (!from || !to) throw new Error("One end of that transition no longer exists.");
+    if (!from || !to) throw refusal("One end of that transition no longer exists.");
     // Enforced here rather than by a composite foreign key; see the note on
     // StoryEdge in schema.prisma.
-    if (from.arcId !== to.arcId) throw new Error("A transition has to stay inside one arc.");
+    if (from.arcId !== to.arcId) throw refusal("A transition has to stay inside one arc.");
     await assertArcUnlocked(tx, from.arcId);
 
     // Several branches between the same pair of nodes are legitimate — three
@@ -702,11 +703,11 @@ export async function updateEdge(formData: FormData) {
   const parsed = z
     .object({ edgeId: z.string().uuid(), toNodeId: z.string().uuid().nullable(), label: optionalText(200), condition: optionalText(300), effects: effectsList })
     .safeParse({ edgeId: formData.get("edgeId"), toNodeId: formData.get("toNodeId") || null, label: formData.get("label") ?? "", condition: formData.get("condition") ?? "", effects: formData.get("effects") ?? "" });
-  if (!parsed.success) throw new Error("That transition is not valid.");
+  if (!parsed.success) throw refusal("That transition is not valid.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: parsed.data.edgeId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
-    if (!edge) throw new Error("That transition no longer exists.");
+    if (!edge) throw refusal("That transition no longer exists.");
     await assertArcUnlocked(tx, edge.arcId);
 
     // Retargeting keeps the edge — and above all its key — so pointing a
@@ -716,9 +717,9 @@ export async function updateEdge(formData: FormData) {
     let targetTitle = edge.toNode.title;
     if (toNodeId !== edge.toNodeId) {
       const target = await tx.storyNode.findUnique({ where: { id: toNodeId }, select: { arcId: true, title: true } });
-      if (!target) throw new Error("The card that branch should lead to no longer exists.");
-      if (target.arcId !== edge.arcId) throw new Error("A transition has to stay inside one arc.");
-      if (toNodeId === edge.fromNodeId) throw new Error("A node cannot continue into itself.");
+      if (!target) throw refusal("The card that branch should lead to no longer exists.");
+      if (target.arcId !== edge.arcId) throw refusal("A transition has to stay inside one arc.");
+      if (toNodeId === edge.fromNodeId) throw refusal("A node cannot continue into itself.");
       targetTitle = target.title;
     }
 
@@ -751,11 +752,11 @@ export async function reorderEdge(formData: FormData) {
   const parsed = z
     .object({ edgeId: z.string().uuid(), direction: z.enum(["up", "down"]) })
     .safeParse({ edgeId: formData.get("edgeId"), direction: formData.get("direction") });
-  if (!parsed.success) throw new Error("Invalid reorder.");
+  if (!parsed.success) throw refusal("Invalid reorder.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: parsed.data.edgeId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } } } });
-    if (!edge) throw new Error("That transition no longer exists.");
+    if (!edge) throw refusal("That transition no longer exists.");
     await assertArcUnlocked(tx, edge.arcId);
 
     const siblings = await tx.storyEdge.findMany({ where: { fromNodeId: edge.fromNodeId }, orderBy: { position: "asc" }, select: { id: true, position: true } });
@@ -809,21 +810,21 @@ export async function addBranch(formData: FormData) {
       newTitle: formData.get("newTitle") ?? "",
       newKind: formData.get("newKind") ?? "SCENE",
     });
-  if (!parsed.success) throw new Error("That branch is not valid.");
-  if (!parsed.data.targetNodeId && !parsed.data.newTitle) throw new Error("Pick a card for the branch to lead to, or give the new card a title.");
+  if (!parsed.success) throw refusal("That branch is not valid.");
+  if (!parsed.data.targetNodeId && !parsed.data.newTitle) throw refusal("Pick a card for the branch to lead to, or give the new card a title.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const from = await tx.storyNode.findUnique({ where: { id: parsed.data.fromNodeId }, select: { id: true, arcId: true, key: true, title: true, canvasX: true, canvasY: true, arc: { select: { slug: true } } } });
-    if (!from) throw new Error("The card this branch starts from no longer exists.");
+    if (!from) throw refusal("The card this branch starts from no longer exists.");
     await assertArcUnlocked(tx, from.arcId);
 
     let toNodeId = parsed.data.targetNodeId;
     let toTitle: string;
     if (toNodeId) {
-      if (toNodeId === from.id) throw new Error("A node cannot continue into itself.");
+      if (toNodeId === from.id) throw refusal("A node cannot continue into itself.");
       const target = await tx.storyNode.findUnique({ where: { id: toNodeId }, select: { arcId: true, title: true } });
-      if (!target) throw new Error("The card that branch should lead to no longer exists.");
-      if (target.arcId !== from.arcId) throw new Error("A transition has to stay inside one arc.");
+      if (!target) throw refusal("The card that branch should lead to no longer exists.");
+      if (target.arcId !== from.arcId) throw refusal("A transition has to stay inside one arc.");
       toTitle = target.title;
     } else {
       const title = parsed.data.newTitle as string;
@@ -870,11 +871,11 @@ export async function addBranch(formData: FormData) {
 export async function deleteEdge(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const edgeId = z.string().uuid().safeParse(formData.get("edgeId"));
-  if (!edgeId.success) throw new Error("Invalid transition.");
+  if (!edgeId.success) throw refusal("Invalid transition.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const edge = await tx.storyEdge.findUnique({ where: { id: edgeId.data }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
-    if (!edge) throw new Error("That transition no longer exists.");
+    if (!edge) throw refusal("That transition no longer exists.");
     await assertArcUnlocked(tx, edge.arcId);
 
     // Open writers' room: anyone can cut a branch, and the audit log shows
@@ -916,10 +917,10 @@ function oneSlug(formData: FormData, field: string) {
 export async function createEntry(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = entrySchema.safeParse({ kind: formData.get("kind"), title: formData.get("title"), summary: formData.get("summary") ?? "", body: formData.get("body") ?? "" });
-  if (!parsed.success) throw new Error("A bible entry needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
+  if (!parsed.success) throw refusal("A bible entry needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
   const slug = slugifyStoryKey(parsed.data.title);
-  if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
+  if (!isValidStoryKey(slug)) throw refusal("That title needs at least one letter or number.");
 
   // The slug is the key the canon export ships under, so it is frozen at
   // creation and a later rename never moves it. That makes a collision
@@ -930,7 +931,7 @@ export async function createEntry(formData: FormData) {
   // existed anywhere in the bible. Say which entry actually holds the key.
   const existing = await db.storyEntry.findUnique({ where: { slug }, select: { title: true } });
   if (existing) {
-    throw new Error(existing.title === parsed.data.title
+    throw refusal(existing.title === parsed.data.title
       ? "The bible already has an entry with that name."
       : `That name needs the key "${slug}", which is still held by "${existing.title}" — it was written under this name and renamed afterwards. Open /codex/bible/${slug} to rename it back, or give this one a different name.`);
   }
@@ -1118,11 +1119,11 @@ export async function updateEntry(formData: FormData) {
     summary: formData.get("summary") ?? "",
     body: formData.get("body") ?? "",
   });
-  if (!parsed.success) throw new Error("That edit needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
+  if (!parsed.success) throw refusal("That edit needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId } });
-    if (!entry) throw new Error("That entry no longer exists.");
+    if (!entry) throw refusal("That entry no longer exists.");
 
     // A kind change must not orphan structural references that were validated
     // against the old kind at link time: a dialogue speaker has to stay a
@@ -1132,11 +1133,11 @@ export async function updateEntry(formData: FormData) {
     if (parsed.data.kind !== entry.kind) {
       if (entry.kind === "CHARACTER") {
         const speaks = await tx.storyNode.count({ where: { speakerEntryId: entry.id, status: { in: ["DRAFT", "PROPOSED", "CANON"] } } });
-        if (speaks > 0) throw new Error(`"${entry.title}" speaks in ${speaks} scene${speaks === 1 ? "" : "s"}. Recast those speakers before changing what kind of entry this is.`);
+        if (speaks > 0) throw refusal(`"${entry.title}" speaks in ${speaks} scene${speaks === 1 ? "" : "s"}. Recast those speakers before changing what kind of entry this is.`);
       }
       if (entry.kind === "REGION") {
         const pickups = await tx.storyArc.count({ where: { regionEntryId: entry.id, status: { in: ["DRAFT", "PROPOSED", "CANON"] } } });
-        if (pickups > 0) throw new Error(`"${entry.title}" is the pickup place of ${pickups} quest${pickups === 1 ? "" : "s"}. Repoint those arcs before changing what kind of entry this is.`);
+        if (pickups > 0) throw refusal(`"${entry.title}" is the pickup place of ${pickups} quest${pickups === 1 ? "" : "s"}. Repoint those arcs before changing what kind of entry this is.`);
       }
     }
 
@@ -1144,7 +1145,7 @@ export async function updateEntry(formData: FormData) {
       where: { id: entry.id, version: parsed.data.version },
       data: { kind: parsed.data.kind, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, updatedByUserId: user.id, version: { increment: 1 }, lockedByUserId: null, lockExpiresAt: null },
     });
-    if (updated.count !== 1) throw new Error("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
+    if (updated.count !== 1) throw refusal("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
 
     await recordRevision(tx, {
       entityType: "ENTRY",
@@ -1173,11 +1174,11 @@ export async function updateEntry(formData: FormData) {
 export async function archiveEntry(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const entryId = z.string().uuid().safeParse(formData.get("entryId"));
-  if (!entryId.success) throw new Error("Invalid story entry.");
+  if (!entryId.success) throw refusal("Invalid story entry.");
 
   const entry = await db.$transaction(async (tx) => {
     const current = await tx.storyEntry.findUnique({ where: { id: entryId.data }, select: { id: true, slug: true, title: true, kind: true, status: true } });
-    if (!current) throw new Error("That entry no longer exists.");
+    if (!current) throw refusal("That entry no longer exists.");
     await tx.storyEntry.update({ where: { id: current.id }, data: { status: "ARCHIVED", updatedByUserId: user.id, lockedByUserId: null, lockExpiresAt: null } });
     await recordRevision(tx, {
       entityType: "ENTRY",
@@ -1210,29 +1211,29 @@ export async function updateEntryMeta(formData: FormData) {
   const parsed = z
     .object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), metaJson: z.string().max(30000) })
     .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), metaJson: formData.get("metaJson") });
-  if (!parsed.success) throw new Error("That sheet could not be read.");
+  if (!parsed.success) throw refusal("That sheet could not be read.");
 
   let raw: unknown;
   try {
     raw = JSON.parse(parsed.data.metaJson);
   } catch {
-    throw new Error("That sheet could not be read.");
+    throw refusal("That sheet could not be read.");
   }
 
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId }, select: { id: true, kind: true, slug: true, title: true, meta: true, status: true } });
-    if (!entry) throw new Error("That entry no longer exists.");
+    if (!entry) throw refusal("That entry no longer exists.");
 
     const schema = metaSchemasByKind[entry.kind];
-    if (!schema) throw new Error(`${entry.kind} entries do not have a sheet yet.`);
+    if (!schema) throw refusal(`${entry.kind} entries do not have a sheet yet.`);
     const meta = schema.safeParse(raw);
-    if (!meta.success) throw new Error("Some fields on that sheet are too long or the wrong shape. Nothing was saved.");
+    if (!meta.success) throw refusal("Some fields on that sheet are too long or the wrong shape. Nothing was saved.");
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: parsed.data.version },
       data: { meta: meta.data as Prisma.InputJsonValue, updatedByUserId: user.id, version: { increment: 1 } },
     });
-    if (updated.count !== 1) throw new Error("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
+    if (updated.count !== 1) throw refusal("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
 
     await recordRevision(tx, {
       entityType: "ENTRY",
@@ -1253,14 +1254,14 @@ export async function updateEntryMeta(formData: FormData) {
 export async function linkEntryToNode(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z.object({ nodeId: z.string().uuid(), entryId: z.string().uuid() }).safeParse({ nodeId: formData.get("nodeId"), entryId: formData.get("entryId") });
-  if (!parsed.success) throw new Error("Invalid reference.");
+  if (!parsed.success) throw refusal("Invalid reference.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const [node, entry] = await Promise.all([
       tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { id: true, arcId: true, title: true, status: true, arc: { select: { slug: true } } } }),
       tx.storyEntry.findUnique({ where: { id: parsed.data.entryId }, select: { id: true, title: true } }),
     ]);
-    if (!node || !entry) throw new Error("That reference no longer exists.");
+    if (!node || !entry) throw refusal("That reference no longer exists.");
     await assertArcUnlocked(tx, node.arcId);
 
     const existing = await tx.storyEntryLink.findUnique({ where: { nodeId_entryId: { nodeId: node.id, entryId: entry.id } }, select: { id: true } });
@@ -1277,7 +1278,7 @@ export async function linkEntryToNode(formData: FormData) {
 export async function unlinkEntryFromNode(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z.object({ nodeId: z.string().uuid(), entryId: z.string().uuid() }).safeParse({ nodeId: formData.get("nodeId"), entryId: formData.get("entryId") });
-  if (!parsed.success) throw new Error("Invalid reference.");
+  if (!parsed.success) throw refusal("Invalid reference.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const link = await tx.storyEntryLink.findUnique({
@@ -1329,11 +1330,11 @@ async function withThreadPackets(
 ) {
   return db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: input.entryId }, select: { id: true, kind: true, slug: true, title: true, meta: true } });
-    if (!entry) throw new Error("That story thread no longer exists.");
-    if (entry.kind !== "THREAD") throw new Error("Only a story thread carries canon packets.");
+    if (!entry) throw refusal("That story thread no longer exists.");
+    if (entry.kind !== "THREAD") throw refusal("Only a story thread carries canon packets.");
 
     const current = threadMetaSchema.safeParse(entry.meta);
-    if (!current.success) throw new Error("This thread's sheet has to be saved once before it can push anything to canon.");
+    if (!current.success) throw refusal("This thread's sheet has to be saved once before it can push anything to canon.");
 
     const changed = change(current.data.canonPackets as StoryCanonPacket[], current.data as StoryThreadMeta);
     const next = threadMetaSchema.safeParse({
@@ -1341,13 +1342,13 @@ async function withThreadPackets(
       canonPackets: changed.packets,
       arcs: changed.arcs ?? current.data.arcs,
     });
-    if (!next.success) throw new Error("That could not be saved — some part of it is the wrong shape.");
+    if (!next.success) throw refusal("That could not be saved — some part of it is the wrong shape.");
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: input.version },
       data: { meta: next.data as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
     });
-    if (updated.count !== 1) throw new Error("Somebody saved this thread while you were writing. Reopen it to see their version before saving yours.");
+    if (updated.count !== 1) throw refusal("Somebody saved this thread while you were writing. Reopen it to see their version before saving yours.");
 
     await recordRevision(tx, {
       entityType: "ENTRY",
@@ -1386,7 +1387,7 @@ export async function pushCanonPacket(formData: FormData) {
     targetCompanion: formData.get("targetCompanion") || null,
     targetFaction: formData.get("targetFaction") || null,
   });
-  if (!parsed.success) throw new Error("Give it a short name and the settled text, and say where it belongs.");
+  if (!parsed.success) throw refusal("Give it a short name and the settled text, and say where it belongs.");
 
   // Only the fields that belong to the chosen destination survive, so a
   // writer switching the target picker cannot leave a stale place attached to
@@ -1394,7 +1395,7 @@ export async function pushCanonPacket(formData: FormData) {
   const targetRegion = parsed.data.targetKind === "region" ? parsed.data.targetRegion : null;
   const targetCompanion = parsed.data.targetKind === "companions" ? parsed.data.targetCompanion : null;
   const targetFaction = parsed.data.targetKind === "factions" ? parsed.data.targetFaction : null;
-  if (parsed.data.targetKind === "region" && !targetRegion) throw new Error("Say which place this belongs to.");
+  if (parsed.data.targetKind === "region" && !targetRegion) throw refusal("Say which place this belongs to.");
 
   const entries = [...new Set(formData.getAll("entries").flatMap((value) => {
     const slug = metaSlug.safeParse(value);
@@ -1405,15 +1406,15 @@ export async function pushCanonPacket(formData: FormData) {
   // bubble nobody can open.
   if (targetRegion) {
     const region = await db.storyEntry.findUnique({ where: { slug: targetRegion }, select: { kind: true, status: true } });
-    if (!region || region.kind !== "REGION" || !["DRAFT", "PROPOSED", "CANON"].includes(region.status)) throw new Error("That place is not in the bible.");
+    if (!region || region.kind !== "REGION" || !["DRAFT", "PROPOSED", "CANON"].includes(region.status)) throw refusal("That place is not in the bible.");
   }
   if (targetCompanion) {
     const character = await db.storyEntry.findUnique({ where: { slug: targetCompanion }, select: { kind: true, status: true } });
-    if (!character || character.kind !== "CHARACTER" || !["DRAFT", "PROPOSED", "CANON"].includes(character.status)) throw new Error("That companion is not in the bible.");
+    if (!character || character.kind !== "CHARACTER" || !["DRAFT", "PROPOSED", "CANON"].includes(character.status)) throw refusal("That companion is not in the bible.");
   }
   if (targetFaction) {
     const faction = await db.storyEntry.findUnique({ where: { slug: targetFaction }, select: { kind: true, status: true } });
-    if (!faction || faction.kind !== "FACTION" || !["DRAFT", "PROPOSED", "CANON"].includes(faction.status)) throw new Error("That faction is not in the bible.");
+    if (!faction || faction.kind !== "FACTION" || !["DRAFT", "PROPOSED", "CANON"].includes(faction.status)) throw refusal("That faction is not in the bible.");
   }
 
   const pushedBy = await storyActorName(user.id);
@@ -1452,7 +1453,7 @@ export async function markCanonPacketWoven(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z.object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), packetId: z.string().uuid() })
     .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), packetId: formData.get("packetId") });
-  if (!parsed.success) throw new Error("That packet could not be read.");
+  if (!parsed.success) throw refusal("That packet could not be read.");
 
   const wovenInto = [...new Set(formData.getAll("wovenInto").flatMap((value) => {
     const slug = metaSlug.safeParse(value);
@@ -1464,10 +1465,10 @@ export async function markCanonPacketWoven(formData: FormData) {
     { entryId: parsed.data.entryId, version: parsed.data.version, actorUserId: user.id, summary: "Wove canon material in" },
     (packets, meta) => {
       const packet = packets.find((row) => row.id === parsed.data.packetId);
-      if (!packet) throw new Error("That packet is no longer on this thread.");
+      if (!packet) throw refusal("That packet is no longer on this thread.");
       // Weaving is a one-way door on purpose: re-weaving would rewrite who did
       // it and when, and the trace is the whole point of the record.
-      if (packet.status === "woven") throw new Error(`"${packet.title}" was already woven in${packet.wovenBy ? ` by ${packet.wovenBy}` : ""}.`);
+      if (packet.status === "woven") throw refusal(`"${packet.title}" was already woven in${packet.wovenBy ? ` by ${packet.wovenBy}` : ""}.`);
       const woven: StoryCanonPacket = { ...packet, status: "woven", wovenAt: new Date().toISOString(), wovenBy, wovenInto };
       return {
         packets: packets.map((row) => (row.id === packet.id ? woven : row)),
@@ -1487,14 +1488,14 @@ export async function withdrawCanonPacket(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z.object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), packetId: z.string().uuid() })
     .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), packetId: formData.get("packetId") });
-  if (!parsed.success) throw new Error("That packet could not be read.");
+  if (!parsed.success) throw refusal("That packet could not be read.");
 
   const slug = await withThreadPackets(
     { entryId: parsed.data.entryId, version: parsed.data.version, actorUserId: user.id, summary: "Withdrew canon material from the inbox" },
     (packets) => {
       const packet = packets.find((row) => row.id === parsed.data.packetId);
-      if (!packet) throw new Error("That packet is no longer on this thread.");
-      if (packet.status === "woven") throw new Error(`"${packet.title}" has already been woven in — that is history now, not a pending push.`);
+      if (!packet) throw refusal("That packet is no longer on this thread.");
+      if (packet.status === "woven") throw refusal(`"${packet.title}" has already been woven in — that is history now, not a pending push.`);
       return { packets: packets.filter((row) => row.id !== packet.id) };
     },
   );
@@ -1516,13 +1517,13 @@ const reviewSchema = z.object({
 export async function setStoryStatus(formData: FormData) {
   const user = await requireRole(storyReviewRole);
   const parsed = reviewSchema.safeParse({ entityType: formData.get("entityType"), entityId: formData.get("entityId"), status: formData.get("status") });
-  if (!parsed.success) throw new Error("Invalid review decision.");
+  if (!parsed.success) throw refusal("Invalid review decision.");
   const { entityType, entityId, status } = parsed.data;
 
   const arcSlug = await db.$transaction(async (tx) => {
     if (entityType === "ARC") {
       const arc = await tx.storyArc.findUnique({ where: { id: entityId } });
-      if (!arc) throw new Error("That arc no longer exists.");
+      if (!arc) throw refusal("That arc no longer exists.");
       await assertArcUnlocked(tx, arc.id);
       await tx.storyArc.update({ where: { id: arc.id }, data: { status } });
       await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked the arc "${arc.title}" ${status.toLowerCase()}`, before: { status: arc.status }, after: { status } });
@@ -1531,7 +1532,7 @@ export async function setStoryStatus(formData: FormData) {
 
     if (entityType === "NODE") {
       const node = await tx.storyNode.findUnique({ where: { id: entityId }, include: { arc: true } });
-      if (!node) throw new Error("That node no longer exists.");
+      if (!node) throw refusal("That node no longer exists.");
       await assertArcUnlocked(tx, node.arcId);
       await tx.storyNode.update({ where: { id: node.id }, data: { status } });
       await recordRevision(tx, { entityType: "NODE", entityId: node.id, arcId: node.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked "${node.title}" ${status.toLowerCase()}`, before: { status: node.status }, after: { status } });
@@ -1547,7 +1548,7 @@ export async function setStoryStatus(formData: FormData) {
 
     if (entityType === "EDGE") {
       const edge = await tx.storyEdge.findUnique({ where: { id: entityId }, include: { arc: { select: { slug: true } }, fromNode: { select: { title: true } }, toNode: { select: { title: true } } } });
-      if (!edge) throw new Error("That transition no longer exists.");
+      if (!edge) throw refusal("That transition no longer exists.");
       await assertArcUnlocked(tx, edge.arcId);
       await tx.storyEdge.update({ where: { id: edge.id }, data: { status } });
       await recordRevision(tx, { entityType: "EDGE", entityId: edge.id, arcId: edge.arcId, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked the branch "${edge.fromNode.title}" → "${edge.toNode.title}" ${status.toLowerCase()}`, before: { status: edge.status }, after: { status } });
@@ -1555,7 +1556,7 @@ export async function setStoryStatus(formData: FormData) {
     }
 
     const entry = await tx.storyEntry.findUnique({ where: { id: entityId } });
-    if (!entry) throw new Error("That entry no longer exists.");
+    if (!entry) throw refusal("That entry no longer exists.");
     await tx.storyEntry.update({ where: { id: entry.id }, data: { status } });
     await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "STATUS_CHANGED", actorUserId: user.id, summary: `Marked "${entry.title}" ${status.toLowerCase()}`, before: { status: entry.status }, after: { status } });
     return null;
@@ -1601,12 +1602,12 @@ export async function setStoryStatus(formData: FormData) {
 export async function archiveArc(formData: FormData) {
   const user = await requireRole(storyReviewRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
-  if (!arcId.success) throw new Error("Invalid arc.");
+  if (!arcId.success) throw refusal("Invalid arc.");
 
   await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, status: true, category: true } });
-    if (!arc) throw new Error("That story no longer exists.");
-    if (arc.status === "ARCHIVED") throw new Error("That story is already archived. An administrator can restore it from the revision trail.");
+    if (!arc) throw refusal("That story no longer exists.");
+    if (arc.status === "ARCHIVED") throw refusal("That story is already archived. An administrator can restore it from the revision trail.");
     await assertArcUnlocked(tx, arc.id);
 
     await tx.storyArc.update({ where: { id: arc.id }, data: { status: "ARCHIVED", lockedByUserId: null } });
@@ -1629,11 +1630,11 @@ export async function archiveArc(formData: FormData) {
 export async function lockArc(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
-  if (!arcId.success) throw new Error("Invalid arc.");
+  if (!arcId.success) throw refusal("Invalid arc.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, lockedAt: true } });
-    if (!arc) throw new Error("That arc no longer exists.");
+    if (!arc) throw refusal("That arc no longer exists.");
     if (arc.lockedAt) return arc.slug;
 
     await tx.storyArc.update({ where: { id: arc.id }, data: { lockedAt: new Date(), lockedByUserId: user.id } });
@@ -1647,11 +1648,11 @@ export async function lockArc(formData: FormData) {
 export async function unlockArc(formData: FormData) {
   const user = await requireRole(storyReviewRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
-  if (!arcId.success) throw new Error("Invalid arc.");
+  if (!arcId.success) throw refusal("Invalid arc.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, lockedAt: true } });
-    if (!arc) throw new Error("That arc no longer exists.");
+    if (!arc) throw refusal("That arc no longer exists.");
     if (!arc.lockedAt) return arc.slug;
 
     await tx.storyArc.update({ where: { id: arc.id }, data: { lockedAt: null, lockedByUserId: null } });
@@ -1665,11 +1666,11 @@ export async function unlockArc(formData: FormData) {
 export async function canoniseArc(formData: FormData) {
   const user = await requireRole(storyReviewRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
-  if (!arcId.success) throw new Error("Invalid arc.");
+  if (!arcId.success) throw refusal("Invalid arc.");
 
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: arcId.data } });
-    if (!arc) throw new Error("That arc no longer exists.");
+    if (!arc) throw refusal("That arc no longer exists.");
     await assertArcUnlocked(tx, arc.id);
 
     const [nodes, edges] = await Promise.all([
@@ -1703,8 +1704,8 @@ export async function addComment(formData: FormData) {
   const parsed = z
     .object({ nodeId: z.string().uuid().nullable(), entryId: z.string().uuid().nullable(), body: z.string().trim().min(1).max(2000) })
     .safeParse({ nodeId: formData.get("nodeId") || null, entryId: formData.get("entryId") || null, body: formData.get("body") });
-  if (!parsed.success) throw new Error("Write something first.");
-  if (Boolean(parsed.data.nodeId) === Boolean(parsed.data.entryId)) throw new Error("A note belongs to one node or one entry.");
+  if (!parsed.success) throw refusal("Write something first.");
+  if (Boolean(parsed.data.nodeId) === Boolean(parsed.data.entryId)) throw refusal("A note belongs to one node or one entry.");
 
   const target = await db.$transaction(async (tx) => {
     await tx.storyComment.create({ data: { nodeId: parsed.data.nodeId, entryId: parsed.data.entryId, authorUserId: user.id, body: parsed.data.body } });
@@ -1731,7 +1732,7 @@ export async function addComment(formData: FormData) {
 export async function resolveComment(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const commentId = z.string().uuid().safeParse(formData.get("commentId"));
-  if (!commentId.success) throw new Error("Invalid note.");
+  if (!commentId.success) throw refusal("Invalid note.");
 
   const target = await db.$transaction(async (tx) => {
     const comment = await tx.storyComment.findUnique({

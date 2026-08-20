@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { RotateCcw, TriangleAlert } from "lucide-react";
+import { refusalMessage } from "@/lib/writer-refusal";
 
 /**
  * The codex's own landing pad for a failed save.
@@ -15,8 +16,12 @@ import { RotateCcw, TriangleAlert } from "lucide-react";
  * (reload the page and reopen the card, which also picks up whatever the
  * other writer saved).
  */
-export default function CodexError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function CodexError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const router = useRouter();
+  // When the codex refused the write on purpose, it said why in the room's own
+  // words. Show that instead of guessing at causes — a writer whose only
+  // problem is an unpicked dropdown should not have to read three theories.
+  const refused = refusalMessage(error.digest);
 
   return (
     <section className="page-shell codex-shell codex-error">
@@ -25,13 +30,22 @@ export default function CodexError({ reset }: { error: Error & { digest?: string
           <TriangleAlert aria-hidden="true" size={14} /> That did not save
         </p>
         <div style={{ padding: "10px 16px 16px", fontSize: 13, lineHeight: 1.65 }}>
-          <p>The most common reasons, in order:</p>
-          <ul style={{ margin: "8px 0 14px", paddingLeft: 20 }}>
-            <li>Somebody else saved the same card or entry while you were writing — reopen it to see their version before saving yours.</li>
-            <li>This tab predates a codex update — a hard refresh (Ctrl+Shift+R) fixes that.</li>
-            <li>Something you typed was longer than a field allows.</li>
-          </ul>
-          <p>Nothing already saved has been lost. If you had unsaved text, copy it before leaving this page.</p>
+          {refused ? (
+            <>
+              <p style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.5, margin: "0 0 10px" }}>{refused}</p>
+              <p>Go back, fix that, and save again. Nothing already saved has been lost — if you had unsaved text, copy it before leaving this page.</p>
+            </>
+          ) : (
+            <>
+              <p>The most common reasons, in order:</p>
+              <ul style={{ margin: "8px 0 14px", paddingLeft: 20 }}>
+                <li>Somebody else saved the same card or entry while you were writing — reopen it to see their version before saving yours.</li>
+                <li>This tab predates a codex update — a hard refresh (Ctrl+Shift+R) fixes that.</li>
+                <li>Something you typed was longer than a field allows.</li>
+              </ul>
+              <p>Nothing already saved has been lost. If you had unsaved text, copy it before leaving this page.</p>
+            </>
+          )}
           <button
             className="save-server"
             onClick={() => { router.refresh(); reset(); }}

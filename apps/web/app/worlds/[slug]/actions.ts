@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const wakeRequestSchema = z.object({ serverId: z.string().uuid() });
@@ -16,12 +17,12 @@ function isUniqueConstraintError(error: unknown) {
 export async function requestWake(formData: FormData) {
   const user = await requireRole("USER");
   const parsed = wakeRequestSchema.safeParse({ serverId: formData.get("serverId") });
-  if (!parsed.success) throw new Error("Invalid Habitat world.");
+  if (!parsed.success) throw refusal("Invalid Habitat world.");
   let result: { slug: string };
   try {
     result = await db.$transaction(async (transaction) => {
       const server = await transaction.gameServer.findUnique({ where: { id: parsed.data.serverId }, select: { id: true, slug: true, displayName: true, gameType: true, enabled: true, actualState: true } });
-      if (!server?.enabled || server.actualState !== "SLEEPING") throw new Error("Only intentionally sleeping worlds can receive a wake request.");
+      if (!server?.enabled || server.actualState !== "SLEEPING") throw refusal("Only intentionally sleeping worlds can receive a wake request.");
       let request = await transaction.wakeRequest.findFirst({ where: { serverId: server.id, status: "PENDING" }, select: { id: true } });
       if (!request) {
         request = await transaction.wakeRequest.create({ data: { serverId: server.id, requesterUserId: user.id }, select: { id: true } });

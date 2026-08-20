@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const snowflake = z.string().trim().regex(/^\d{15,22}$/);
@@ -43,7 +44,7 @@ export async function saveDiscordConfiguration(formData: FormData) {
     notifyWakeRequest: formData.get("notifyWakeRequest") === "on",
     notifyOperationalAlert: formData.get("notifyOperationalAlert") === "on",
   });
-  if (!parsed.success) throw new Error("Discord configuration must use valid Discord server and channel IDs.");
+  if (!parsed.success) throw refusal("Discord configuration must use valid Discord server and channel IDs.");
   // The form's record id is only used to validate an existing configuration;
   // guildId is the safe upsert key and Prisma must never receive a client id.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

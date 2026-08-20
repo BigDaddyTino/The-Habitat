@@ -5,6 +5,7 @@ import { getPrismaClient } from "@habitat/db/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
+import { refusal } from "@/lib/writer-refusal";
 
 const db = getPrismaClient();
 const reactionSchema = z.object({
@@ -15,10 +16,10 @@ const reactionSchema = z.object({
 export async function toggleChronicleReaction(formData: FormData) {
   const actor = await requireRole("USER");
   const parsed = reactionSchema.safeParse({ eventId: formData.get("eventId"), reactionType: formData.get("reactionType") });
-  if (!parsed.success) throw new Error("Invalid Chronicle reaction.");
+  if (!parsed.success) throw refusal("Invalid Chronicle reaction.");
 
   const event = await db.serverEvent.findUnique({ where: { id: parsed.data.eventId }, select: { id: true } });
-  if (!event) throw new Error("Chronicle event not found.");
+  if (!event) throw refusal("Chronicle event not found.");
 
   const existing = await db.chronicleReaction.findUnique({
     where: { serverEventId_userId_reactionType: { serverEventId: event.id, userId: actor.id, reactionType: parsed.data.reactionType } },
