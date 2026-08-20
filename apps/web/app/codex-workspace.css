@@ -143,3 +143,61 @@
 
 @media(max-width:860px){.codex-stories-hero{grid-template-columns:1fr}}
 @media(max-width:520px){.codex-stories-card{grid-template-columns:auto minmax(0,1fr);padding:20px}.codex-stories-card>svg:last-child{display:none}.arc-kind-picker{grid-template-columns:1fr}}
+
+/* Factions are a political map, not a flat card dump. Major banners hold the
+   wings in their sphere; the four true independents get a separate horizon. */
+.faction-power-board{display:grid;gap:34px}
+.faction-power-heading{align-items:end;margin:4px 0 17px;padding-bottom:15px;border-bottom:1px solid #3a4138}
+.faction-power-heading .eyebrow{display:flex;align-items:center;gap:7px;color:#b59a5f}
+.faction-power-heading h2{margin:6px 0 0;color:#f0e1bc;font:600 clamp(27px,3vw,38px)/1 var(--font-serif)}
+.faction-power-heading>p{max-width:660px;color:#98a298;font-size:11px;line-height:1.7}
+.faction-power-heading>p strong{color:#dbc991;font-weight:700}
+.faction-banner-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.faction-banner-card{display:flex;overflow:hidden;flex-direction:column;border:1px solid #3e463e;border-top:2px solid var(--faction-accent,#9a7940);background:radial-gradient(circle at 100% 0,color-mix(in srgb,var(--faction-accent,#9a7940) 8%,transparent),transparent 38%),#111612;box-shadow:0 18px 44px rgba(0,0,0,.24);transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+.faction-banner-card:hover{border-color:var(--faction-accent,#9a7940);transform:translateY(-2px);box-shadow:0 22px 48px color-mix(in srgb,var(--faction-accent,#9a7940) 15%,transparent)}
+.faction-banner-hero{position:relative;display:block;min-height:235px;overflow:hidden;color:inherit;text-decoration:none;background:#182018}
+.faction-banner-hero>img{position:absolute;width:100%;height:100%;object-fit:cover;transition:transform .5s ease,filter .5s ease}
+.faction-banner-hero:hover>img{transform:scale(1.025);filter:saturate(1.06)}
+.faction-banner-shade{position:absolute;inset:0;background:linear-gradient(0deg,#0c110d 2%,rgba(8,12,9,.72) 40%,rgba(8,12,9,.08) 75%),linear-gradient(90deg,rgba(8,12,9,.3),transparent 58%)}
+.faction-banner-identity{position:absolute;right:22px;bottom:18px;left:22px;display:grid;grid-template-columns:78px minmax(0,1fr);align-items:end;gap:15px}
+.faction-banner-logo{display:grid;width:78px;height:78px;place-items:center;filter:drop-shadow(0 9px 14px rgba(0,0,0,.78))}
+.faction-banner-logo img{width:100%;height:100%;object-fit:contain}
+.faction-banner-identity>span:last-child{display:grid;gap:3px;min-width:0}
+.faction-banner-identity small,.faction-banner-identity em{color:#c2c7b8;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+.faction-banner-identity strong{color:#f4e6c5;font:600 clamp(24px,2.5vw,34px)/1.02 var(--font-serif);text-shadow:0 3px 16px #000}
+.faction-banner-identity em{color:color-mix(in srgb,var(--faction-accent,#b69a60) 76%,#e7ddc5)}
+.faction-banner-copy{display:flex;flex:1;flex-direction:column;gap:13px;padding:18px 20px 19px}
+.faction-banner-copy>p{color:#aab3a8;font-size:11px;line-height:1.65}
+.faction-banner-copy>small{min-height:34px;border-left:2px solid color-mix(in srgb,var(--faction-accent,#9a7940) 56%,#394037);padding-left:10px;color:#78847b;font-size:9px;line-height:1.55}
+.faction-wing-list{margin-top:2px;border-top:1px solid #303830;padding-top:13px}
+.faction-wing-list>.eyebrow{color:color-mix(in srgb,var(--faction-accent,#a99155) 72%,#aaa)}
+.faction-wing-list ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:9px 0 0;padding:0;list-style:none}
+.faction-wing-list li{min-width:0}
+.faction-wing-list li a{display:grid;min-height:52px;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:8px;border:1px solid #30382f;padding:6px 8px 6px 6px;background:#141a14;color:inherit;text-decoration:none;transition:.16s ease}
+.faction-wing-list li a:hover{border-color:color-mix(in srgb,var(--faction-accent,#9a7940) 65%,#4a5147);background:#1b221a}
+.faction-wing-list img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 3px 6px #000a)}
+.faction-wing-list li span{display:grid;min-width:0;gap:2px}
+.faction-wing-list li strong{overflow:hidden;color:#d9cba8;font:600 11px/1.2 var(--font-serif);text-overflow:ellipsis;white-space:nowrap}
+.faction-wing-list li small{overflow:hidden;color:#78847b;font:7px var(--font-mono);letter-spacing:.03em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.faction-wing-list li svg{color:var(--faction-accent,#9a7940)}
+.faction-banner-open{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:auto;color:var(--faction-accent,#b69a60);font:700 8px var(--font-mono);letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
+.faction-banner-open:hover{color:#f0ddb0}
+.faction-independent-section{padding-top:3px}
+.faction-independent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.faction-independent-card{position:relative;display:block;min-height:190px;overflow:hidden;border:1px solid #3e463e;border-top:2px solid var(--faction-accent,#9a7940);color:inherit;text-decoration:none;background:#111612;transition:.2s ease}
+.faction-independent-card:hover{border-color:var(--faction-accent,#9a7940);transform:translateY(-2px);box-shadow:0 18px 36px color-mix(in srgb,var(--faction-accent,#9a7940) 16%,transparent)}
+.faction-independent-art{position:absolute;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
+.faction-independent-card:hover .faction-independent-art{transform:scale(1.03)}
+.faction-independent-shade{position:absolute;inset:0;background:linear-gradient(90deg,#0a0e0be8 0%,#0a0e0bb8 58%,#0a0e0b40),linear-gradient(0deg,#0a0e0be8,transparent 56%)}
+.faction-independent-copy{position:absolute;right:18px;bottom:17px;left:18px;display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:end;gap:13px}
+.faction-independent-logo{display:grid;width:62px;height:62px;place-items:center;filter:drop-shadow(0 7px 12px #000c)}
+.faction-independent-logo img{width:100%;height:100%;object-fit:contain}
+.faction-independent-copy>span:nth-child(2){display:grid;min-width:0;gap:3px}
+.faction-independent-copy small{color:var(--faction-accent,#b69a60);font:700 8px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.faction-independent-copy strong{color:#f0e2bd;font:600 22px/1.05 var(--font-serif)}
+.faction-independent-copy em{display:-webkit-box;overflow:hidden;color:#aab3a9;font:normal 10px/1.45 var(--font-sans);-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.faction-independent-copy>svg{color:var(--faction-accent,#b69a60)}
+
+@media(max-width:1050px){.faction-banner-grid{grid-template-columns:1fr}.faction-banner-copy>small{min-height:0}}
+@media(max-width:760px){.faction-power-heading{align-items:start}.faction-wing-list ul,.faction-independent-grid{grid-template-columns:1fr}.faction-banner-hero{min-height:215px}}
+@media(max-width:520px){.faction-banner-identity{right:16px;bottom:15px;left:16px;grid-template-columns:62px minmax(0,1fr);gap:11px}.faction-banner-logo{width:62px;height:62px}.faction-banner-identity strong{font-size:24px}.faction-banner-copy{padding:16px}.faction-independent-copy{right:14px;bottom:14px;left:14px;grid-template-columns:52px minmax(0,1fr) auto;gap:10px}.faction-independent-logo{width:52px;height:52px}.faction-independent-copy strong{font-size:19px}}

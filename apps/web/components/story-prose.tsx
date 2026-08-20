@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { parseStoryProse, splitStoryParagraphs, unwrittenLinkLabel, type ProseToken } from "@/lib/story-prose";
+import { parseStoryProse, splitStoryParagraphs, storyProseLinkLabel, unwrittenLinkLabel, type ProseToken } from "@/lib/story-prose";
 
 /**
  * Renders codex prose: bold, italic, and `[[slug]]` cross-references as real
@@ -23,9 +23,10 @@ function Tokens({ tokens, resolve }: { tokens: ProseToken[]; resolve: ProseResol
         if (token.kind === "bold") return <strong key={index}><Tokens resolve={resolve} tokens={token.children} /></strong>;
         if (token.kind === "italic") return <em key={index}><Tokens resolve={resolve} tokens={token.children} /></em>;
         const target = resolve(token.slug);
+        const label = storyProseLinkLabel(target?.title ?? unwrittenLinkLabel(token.slug), token.elideLeadingThe);
         return target
-          ? <Link className="prose-link" href={target.href} key={index}>{target.title}</Link>
-          : <span className="prose-link is-unwritten" key={index} title="Nobody has written this yet — link now, fill later">{unwrittenLinkLabel(token.slug)}</span>;
+          ? <Link className="prose-link" href={target.href} key={index}>{label}</Link>
+          : <span className="prose-link is-unwritten" key={index} title="Nobody has written this yet — link now, fill later">{label}</span>;
       })}
     </>
   );

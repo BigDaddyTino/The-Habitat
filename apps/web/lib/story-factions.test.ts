@@ -6,6 +6,7 @@ import { isValidStoryKey, storyArcCategories, storyArcCategoryLabels } from "@ha
 import { bodyPatches, compactSeed, factionAssignments, factionMapRewrite, independentPowers, legionBodyPatch, majorPowers } from "./story-factions-seed";
 import { factionMetaSchema } from "./story-meta-schemas";
 import { brandedFactionSlugs } from "./faction-branding";
+import { factionSheetSeeds } from "./story-faction-sheets-seed";
 
 /**
  * The faction shelf has a spine: ten banners, the wings that fly beneath them,
@@ -121,6 +122,19 @@ test("the Compact is written the way every other faction is written", () => {
   assert.equal(peoples.length, 5, "five peoples signed");
   assert.ok(peoples.includes("drifter-renegade-camps"), "the camps that signed are the fifth people");
   for (const slug of peoples) assert.ok(compactSeed.body.includes(`[[${slug}]]`), `the Compact's own prose never names ${slug}`);
+});
+
+test("every formerly prose-only power has a valid, conservative starter sheet", () => {
+  assert.equal(factionSheetSeeds.length, 13);
+  assert.equal(new Set(factionSheetSeeds.map((seed) => seed.slug)).size, 13);
+  for (const seed of factionSheetSeeds) {
+    assert.ok(majors.has(seed.slug) || independents.has(seed.slug), `${seed.slug} is not a banner or an independent power`);
+    assert.equal(seed.meta.parent, null);
+    assert.equal(seed.meta.power, null, `${seed.slug} invents a strength score`);
+    assert.equal(seed.meta.seat, null, `${seed.slug} invents a seat`);
+    assert.deepEqual(seed.meta.leaders, [], `${seed.slug} invents a leader`);
+    assert.equal(factionMetaSchema.safeParse(seed.meta).success, true, `${seed.slug} does not validate`);
+  }
 });
 
 test("each faction's own dossier records what the filing means, in its own voice", () => {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseStoryProse, plainStoryProse, splitStoryParagraphs, storyProseLinks, unwrittenLinkLabel, type ProseToken } from "./story-prose";
+import { parseStoryProse, plainStoryProse, splitStoryParagraphs, storyProseLinkLabel, storyProseLinks, unwrittenLinkLabel, type ProseToken } from "./story-prose";
 
 /** Flattens tokens to a readable shape so assertions stay legible. */
 const shape = (tokens: ProseToken[]): unknown =>
@@ -60,6 +60,15 @@ test("an unwritten reference reads as words, not as a key", () => {
   assert.equal(unwrittenLinkLabel("the-captivity-arc"), "the captivity arc");
 });
 
+test("a title-leading The is elided only when prose already supplies an article", () => {
+  assert.equal(storyProseLinkLabel("The Long Game", true), "Long Game");
+  assert.equal(storyProseLinkLabel("the veil", true), "veil");
+  assert.equal(storyProseLinkLabel("The Long Game", false), "The Long Game");
+  assert.equal(plainStoryProse("a [[the-soul-forge]]; an [[the-old-hunger]]; the [[the-long-game]]"), "a soul forge; an old hunger; the long game");
+  assert.equal(plainStoryProse("Meet [[the-old-hunger]]."), "Meet the old hunger.");
+  assert.equal(plainStoryProse("a **[[the-soul-forge]]**"), "a soul forge");
+});
+
 test("parsing is not left holding state between calls", () => {
   // The pattern is module-level and global; forgetting lastIndex would make the
   // second identical call return something different from the first.
@@ -70,7 +79,7 @@ test("parsing is not left holding state between calls", () => {
 
 test("plain rendering strips markup without ever leaving a raw marker", () => {
   assert.equal(plainStoryProse("The counterpart of [[fled-the-island]]."), "The counterpart of fled the island.");
-  assert.equal(plainStoryProse("**Most battles are about a [[the-soul-forge]].**"), "Most battles are about a the soul forge.");
+  assert.equal(plainStoryProse("**Most battles are about a [[the-soul-forge]].**"), "Most battles are about a soul forge.");
   assert.equal(plainStoryProse("nothing to strip"), "nothing to strip");
   // Whatever a card shows, it never shows the source markers.
   for (const sample of ["a [[b-c]] d", "**x**", "*y*", "[[z]]"]) {

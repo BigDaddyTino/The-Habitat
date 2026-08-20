@@ -17,7 +17,7 @@ export type ProseToken =
   | { kind: "text"; text: string }
   | { kind: "bold"; children: ProseToken[] }
   | { kind: "italic"; children: ProseToken[] }
-  | { kind: "link"; slug: string };
+  | { kind: "link"; slug: string; elideLeadingThe: boolean };
 
 // Order matters: the link form is tried first, then bold, then italic — so the
 // two asterisks of `**` can never be eaten by the single-asterisk rule.
@@ -28,7 +28,16 @@ export type ProseToken =
 // match forever. matchAll iterates over its own clone, so recursion is safe.
 const MARKUP = /\[\[([a-z0-9]+(?:-[a-z0-9]+)*)\]\]|\*\*([^*]+)\*\*|\*([^*\n]+)\*/g;
 
-export function parseStoryProse(input: string): ProseToken[] {
+const ARTICLE_BEFORE_LINK = /(?:^|[\s(])(?:a|an|the)\s+$/i;
+
+function tokenText(tokens: ProseToken[]): string {
+  return tokens.map((token) =>
+    token.kind === "text" ? token.text
+      : token.kind === "link" ? unwrittenLinkLabel(token.slug)
+      : tokenText(token.children)).join("");
+}
+
+function parseWithPrefix(input: string, prefix: string): ProseToken[] {
   const tokens: ProseToken[] = [];
   let cursor = 0;
 
@@ -36,14 +45,19 @@ export function parseStoryProse(input: string): ProseToken[] {
     const at = match.index ?? 0;
     if (at > cursor) tokens.push({ kind: "text", text: input.slice(cursor, at) });
     const [, slug, bold, italic] = match;
-    if (slug !== undefined) tokens.push({ kind: "link", slug });
-    else if (bold !== undefined) tokens.push({ kind: "bold", children: parseStoryProse(bold) });
-    else if (italic !== undefined) tokens.push({ kind: "italic", children: parseStoryProse(italic) });
+    const precedingText = prefix + tokenText(tokens);
+    if (slug !== undefined) tokens.push({ kind: "link", slug, elideLeadingThe: ARTICLE_BEFORE_LINK.test(precedingText) });
+    else if (bold !== undefined) tokens.push({ kind: "bold", children: parseWithPrefix(bold, precedingText) });
+    else if (italic !== undefined) tokens.push({ kind: "italic", children: parseWithPrefix(italic, precedingText) });
     cursor = at + match[0].length;
   }
 
   if (cursor < input.length) tokens.push({ kind: "text", text: input.slice(cursor) });
   return tokens;
+}
+
+export function parseStoryProse(input: string): ProseToken[] {
+  return parseWithPrefix(input, "");
 }
 
 /** Paragraphs, split on blank lines the way the editor's textarea implies. */
@@ -61,6 +75,11 @@ export function unwrittenLinkLabel(slug: string): string {
   return slug.replaceAll("-", " ");
 }
 
+/** Avoids prose such as "a the Soul Forge" without changing the stored copy. */
+export function storyProseLinkLabel(label: string, elideLeadingThe: boolean): string {
+  return elideLeadingThe ? label.replace(/^the\s+/i, "") : label;
+}
+
 /**
  * The same prose with its markup removed rather than rendered — for dense card
  * grids and list rows, where a one-line summary should read cleanly but a link
@@ -71,7 +90,7 @@ export function plainStoryProse(input: string): string {
   const flatten = (tokens: ProseToken[]): string =>
     tokens.map((token) =>
       token.kind === "text" ? token.text
-        : token.kind === "link" ? unwrittenLinkLabel(token.slug)
+        : token.kind === "link" ? storyProseLinkLabel(unwrittenLinkLabel(token.slug), token.elideLeadingThe)
         : flatten(token.children)).join("");
   return flatten(parseStoryProse(input));
 }

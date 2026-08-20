@@ -8,6 +8,7 @@ import { StoryWarden } from "@/components/story-warden";
 import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { getFactionBranding } from "@/lib/faction-branding";
+import { independentPowers, majorPowers } from "@/lib/story-factions-seed";
 import { getRegionBranding } from "@/lib/region-branding";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
@@ -138,6 +139,21 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
         return ordered;
         })()
       : entries;
+  const factionEntryBySlug = new Map(entries.map((entry) => [entry.slug, entry]));
+  const majorFactionEntries = isFactionsLibrary && !search
+    ? majorPowers.flatMap((power) => { const entry = factionEntryBySlug.get(power.faction); return entry ? [entry] : []; })
+    : [];
+  const independentFactionEntries = isFactionsLibrary && !search
+    ? independentPowers.flatMap((power) => { const entry = factionEntryBySlug.get(power.faction); return entry ? [entry] : []; })
+    : [];
+  const factionWings = new Map<string, typeof entries>();
+  if (isFactionsLibrary && !search) for (const entry of entries) {
+    const banner = systemParentOf(entry);
+    if (!banner) continue;
+    const bucket = factionWings.get(banner);
+    if (bucket) bucket.push(entry); else factionWings.set(banner, [entry]);
+  }
+  const factionBoardActive = isFactionsLibrary && !search && majorFactionEntries.length > 0;
   const castingImages = modelGalleryImages.filter((image) => image.pack === "Warriors_Pack" || image.pack === "CitySampleCrowd").slice(0, 6);
 
   // The regions library reads as an atlas, not a card dump: the world's few
@@ -168,7 +184,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   const raceParents = isRacesLibrary ? entries.filter((entry) => !systemParentOf(entry)).sort((a, b) => a.title.localeCompare(b.title)) : [];
   /** Only major powers may be a banner — offering a wing would build a rung
    *  the shelf does not render. Same law as the races parent picker. */
-  const factionBanners = isFactionsLibrary ? entries.filter((entry) => !systemParentOf(entry)).sort((a, b) => a.title.localeCompare(b.title)) : [];
+  const factionBanners = isFactionsLibrary ? majorFactionEntries : [];
   /** Places sitting directly in a top-level region, each with its own inside. */
   const contained = new Map<string, Array<{ place: (typeof entries)[number]; inside: typeof entries }>>();
   const unplaced: typeof entries = [];
@@ -201,7 +217,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <p>{collection.description}</p>
           <div className="entity-directory-actions">
             <a className="primary-link" href="#new-entry"><Plus aria-hidden="true" size={14} /> Add {collection.singular}</a>
-            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : isFactionsLibrary && !search ? `${orderedEntries.length} major powers` : `${entries.length} in the Codex`}</span>
+            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : isFactionsLibrary && !search ? `${majorFactionEntries.length} major · ${[...factionWings.values()].reduce((sum, wings) => sum + wings.length, 0)} wings · ${independentFactionEntries.length} independent` : `${entries.length} in the Codex`}</span>
           </div>
         </div>
         {collection.kind === "CHARACTER" ? <div className="casting-strip" aria-label="Available in-game model previews">{castingImages.map((image) => <img alt="" key={image.ref} src={`/model-gallery/${image.image}`} />)}<span>{modelGalleryImages.length} models ready to cast</span></div> : null}
@@ -318,7 +334,66 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <p>Open each one and pick its parent region on the region sheet so it files into the atlas above.</p></div>
           <ul>{unplaced.map((place) => <li key={place.id}><Link href={`/codex/bible/${place.slug}`}>{place.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
         </section> : null}
-      </> : entries.length > 0 ? <div className="entity-card-grid">
+      </> : factionBoardActive ? <div className="faction-power-board">
+        <section className="faction-major-section">
+          <div className="section-heading faction-power-heading">
+            <div><p className="eyebrow"><GitBranch aria-hidden="true" size={12} /> The balance of power</p><h2>Ten banners. Twenty-one wings.</h2></div>
+            <p><strong>Major does not mean important.</strong> It means a power can move the world’s balance on its own. A wing may be more famous, dangerous, or present in the player’s story; the filing shows political gravity, not a chain of command.</p>
+          </div>
+          <div className="faction-banner-grid">
+            {majorFactionEntries.map((entry) => {
+              const meta = asRecord(entry.meta);
+              const brand = getFactionBranding(entry.slug);
+              const wings = [...(factionWings.get(entry.slug) ?? [])].sort((a, b) => a.title.localeCompare(b.title));
+              const reason = majorPowers.find((power) => power.faction === entry.slug)?.because;
+              return <article className="faction-banner-card" key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
+                <Link className="faction-banner-hero" href={`/codex/bible/${entry.slug}`}>
+                  {brand ? <img alt={`${entry.title} faction key art`} src={brand.keyart} /> : null}
+                  <span className="faction-banner-shade" />
+                  <span className="faction-banner-identity">
+                    {brand ? <span className="faction-banner-logo"><img alt="" src={brand.logo} /></span> : null}
+                    <span><small>{[meta.scope, meta.seat].filter(Boolean).join(" · ") || "Major power"}</small><strong>{entry.title}</strong><em>{wings.length} wing{wings.length === 1 ? "" : "s"} beneath this banner</em></span>
+                  </span>
+                </Link>
+                <div className="faction-banner-copy">
+                  <p>{entry.summary ? plainStoryProse(entry.summary) : "This power still needs its one-line pitch."}</p>
+                  {reason ? <small>{plainStoryProse(reason)}</small> : null}
+                  <div className="faction-wing-list">
+                    <p className="eyebrow">Inside its sphere</p>
+                    {wings.length ? <ul>{wings.map((wing) => {
+                      const wingBrand = getFactionBranding(wing.slug);
+                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}>{wingBrand ? <img alt="" src={wingBrand.logo} /> : null}<span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
+                    })}</ul> : <p className="story-inspector-hint">No wings are filed beneath this power.</p>}
+                  </div>
+                  <Link className="faction-banner-open" href={`/codex/bible/${entry.slug}`}>Open full dossier <ArrowRight aria-hidden="true" size={12} /></Link>
+                </div>
+              </article>;
+            })}
+          </div>
+        </section>
+
+        <section className="faction-independent-section">
+          <div className="section-heading faction-power-heading">
+            <div><p className="eyebrow"><Sparkles aria-hidden="true" size={12} /> Answering to nobody</p><h2>Independent powers</h2></div>
+            <p>These four sit outside every banner’s political sphere. Independence is a specific world fact here — not an unfinished parent field.</p>
+          </div>
+          <div className="faction-independent-grid">
+            {independentFactionEntries.map((entry) => {
+              const brand = getFactionBranding(entry.slug);
+              const reason = independentPowers.find((power) => power.faction === entry.slug)?.because;
+              return <Link className="faction-independent-card" href={`/codex/bible/${entry.slug}`} key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
+                {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={brand.keyart} /> : null}
+                <span className="faction-independent-shade" />
+                <span className="faction-independent-copy">
+                  {brand ? <span className="faction-independent-logo"><img alt="" src={brand.logo} /></span> : null}
+                  <span><small>Independent power</small><strong>{entry.title}</strong><em>{entry.summary ? plainStoryProse(entry.summary) : reason ? plainStoryProse(reason) : "Open dossier"}</em></span>
+                  <ArrowRight aria-hidden="true" size={13} />
+                </span>
+              </Link>;
+            })}
+          </div>
+        </section>
+      </div> : entries.length > 0 ? <div className="entity-card-grid">
         {orderedEntries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
@@ -413,7 +488,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             {systemParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {isFactionsLibrary ? <label>Which power it answers to<select defaultValue={addingInside?.slug ?? ""} name="parent">
-            <option value="">No one above it — this IS a major power</option>
+            <option value="">No one above it — major or deliberately independent</option>
             {factionBanners.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {isRacesLibrary ? <label>Which race it belongs to<select defaultValue={addingInside?.slug ?? ""} name="parent">

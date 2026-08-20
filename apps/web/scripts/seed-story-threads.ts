@@ -61,8 +61,8 @@ async function main() {
           title: seed.title,
           summary: seed.summary,
           body: seed.body,
-          // Amanda is PROPOSED — a character awaiting the room's approval.
-          // Threads and missions land at the room's working status like every
+          // Amanda is a canon character. Threads and missions land at the
+          // room's working status like every
           // other save; their development truth is the meta status, which is
           // "brainstorming", and every surface shows that instead.
           status,
@@ -78,7 +78,7 @@ async function main() {
     created += 1;
   };
 
-  await seedEntry(amandaSeed, "CHARACTER", "PROPOSED", `Proposed the character "${amandaSeed.title}" (Am~hors~ormen~da) — brainstorming, Lizzarnix identity ending-gated`, true);
+  await seedEntry(amandaSeed, "CHARACTER", "CANON", `Established the character "${amandaSeed.title}" (Am~hors~ormen~da); her relationship storyline remains brainstorming and ending-gated`, true);
   await seedEntry(lizzarnixSeed, "CREATURE", "CANON", `Established the mythical creature "${lizzarnixSeed.title}" and its lost place in the origin of magic`, true);
   await seedEntry(emptyCribsSeed, "THREAD", "CANON", `Proposed the story thread "${emptyCribsSeed.title}" — brainstorming, not confirmed canon`, true);
   for (const seed of companionMissionSeeds) {
