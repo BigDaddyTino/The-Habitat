@@ -1012,7 +1012,7 @@ export async function createEntry(formData: FormData) {
         aliases: [],
         pronouns: null,
         sex: null,
-        species: null,
+        species: oneSlug(formData, "species"),
         age: null,
         appearance: null,
         voice: null,
@@ -1069,6 +1069,7 @@ export async function createEntry(formData: FormData) {
       : creatureMeta?.parent ? `, one of the ${creatureMeta.parent}`
       : threadMeta?.parent ? `, growing out of ${threadMeta.parent}`
       : missionMeta?.companion ? `, in ${missionMeta.companion}'s chain`
+      : characterMeta?.species ? `, one of the ${characterMeta.species}`
       : characterMeta?.home ? `, out of ${characterMeta.home}`
       : factionMeta?.seat ? `, seated at ${factionMeta.seat}`
       : "";

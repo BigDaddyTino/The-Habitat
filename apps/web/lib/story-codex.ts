@@ -379,6 +379,12 @@ export async function getStoryEntry(slug: string) {
     if (referencesSlug(meta.seat)) add("is based here");
     if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this race" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
+    // A character's race. `species` is slug-or-prose like `home` and `origin`:
+    // Amanda's reads "Lizzarnix — half lizard, half phoenix; publicly passes
+    // as a lizardwoman", which is the spoiler-tier truth and must stay prose.
+    // An exact match against a real race is a link either way, so the race's
+    // dossier finally lists the people who are one.
+    if (referencesSlug(meta.species)) add("is one of this race");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
     if (Array.isArray(meta.where) && meta.where.some(referencesSlug)) add("happened here");
@@ -1114,7 +1120,7 @@ export async function getStoryNeedsWork() {
     if (meta) {
       // `companion` is a slug on a mission and a capability object on a
       // character; slugOf ignores the object, so one line serves both.
-      for (const value of [meta.home, meta.seat, meta.parent, meta.origin, meta.companion]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      for (const value of [meta.home, meta.seat, meta.parent, meta.origin, meta.companion, meta.species]) { const slug = slugOf(value); if (slug) targets.push(slug); }
       // The string-list fields. `factions` is object rows on a character but
       // plain slugs on a thread; slugOf skips the objects, so listing it here
       // only picks up the thread shape.
@@ -1183,11 +1189,26 @@ export async function getStoryNeedsWork() {
       const slug = slugOf(target);
       if (slug && !known.has(slug)) planned.push({ slug: entry.slug, title: entry.title, field, target: slug });
     };
+    /** Slug-or-prose fields: only a multi-word kebab value could have been
+     *  meant as a link, so "a fishing village on the coast" stays prose and
+     *  a renamed `riftwood-interior` still surfaces as a break. */
+    const checkIfSlugShaped = (field: string, target: unknown) => {
+      const slug = slugOf(target);
+      if (slug && slug.includes("-") && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) check(field, slug);
+    };
     if (entry.kind === "CHARACTER") {
       check("home", meta.home);
+      checkIfSlugShaped("race", meta.species);
       for (const row of rows(meta.factions)) check("faction", row.faction);
       for (const row of rows(meta.relationships)) check("relationship", row.character);
       for (const row of rows(meta.involvement)) check("involvement", row.arc);
+    }
+    if (entry.kind === "CREATURE") {
+      // The race is a strict slug field on the sheet, never prose, so it is
+      // checked outright — a member filed under a race nobody wrote is the
+      // orphan the whole parent-child library exists to prevent.
+      check("race", meta.parent);
+      for (const habitat of Array.isArray(meta.biomes) ? meta.biomes : []) checkIfSlugShaped("habitat", habitat);
     }
     if (entry.kind === "REGION") {
       check("parent", meta.parent);

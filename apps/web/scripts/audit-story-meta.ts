@@ -102,6 +102,11 @@ async function main() {
     check("home", maybeSlugs(one(meta.home)), known, "entry");
     check("seat", maybeSlugs(one(meta.seat)), known, "entry");
     check("origin", maybeSlugs(one(meta.origin)), known, "entry");
+    // A character's race and a creature's habitats — slug-or-prose both, and
+    // the two the audit had never looked at even though the comment above
+    // claimed biomes were already handled.
+    check("species", maybeSlugs(one(meta.species)), known, "entry");
+    check("biomes", maybeSlugs(strings(meta.biomes)), known, "entry");
     check("where", strings(meta.where), known, "entry");
     check("involved", strings(meta.involved), known, "entry");
     check("leaders", maybeSlugs(strings(meta.leaders)), known, "entry");

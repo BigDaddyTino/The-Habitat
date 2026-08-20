@@ -109,3 +109,53 @@ test("race prose links only ever reach for well-formed slugs", () => {
   const human = raceMemberSeeds.find((seed) => seed.slug === "human");
   assert.ok(storyProseLinks(human?.body ?? "").includes("the-seven-phases-of-corruption"));
 });
+
+test("a character's people is a real edge, in both directions", () => {
+  // The races shelf became a first-class library, but the one field that ties
+  // a person to a people — `species` on the character sheet — was never read
+  // by the connection scanner. Four characters already named `human` and the
+  // Human dossier listed none of them: the shelf existed, and nothing in the
+  // world pointed into it.
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  assert.match(codex, /if \(referencesSlug\(meta\.species\)\) add\("is one of this race"\)/, "a race must list the people who are one");
+  // And the outbound half, so a character whose only tie is their people is
+  // not reported as unconnected.
+  assert.match(codex, /meta\.origin, meta\.companion, meta\.species\]/, "species must count as an outbound reference");
+});
+
+test("the races shelf is watched by the needs-work dashboard like every other kind", () => {
+  // CREATURE was the one kind whose own references nothing ever checked, so a
+  // member filed under a deleted race, or a habitat naming a place nobody
+  // wrote, rotted silently while every other kind was scanned.
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  const block = codex.slice(codex.indexOf('if (entry.kind === "CREATURE") {'), codex.indexOf('if (entry.kind === "REGION") {', codex.indexOf('if (entry.kind === "CREATURE") {')));
+  assert.ok(block.length > 0, "CREATURE must have its own reference checks");
+  assert.match(block, /check\("race", meta\.parent\)/, "the race is a strict slug field and is checked outright");
+  assert.match(block, /checkIfSlugShaped\("habitat", habitat\)/, "habitats are slug-or-prose, so only slug-shaped ones are reported");
+
+  // The slug-or-prose rule itself: Amanda's race reads "Lizzarnix — half
+  // lizard, half phoenix; publicly passes as a lizardwoman", which is the
+  // spoiler-tier truth and must never be reported as a broken link.
+  assert.match(codex, /const checkIfSlugShaped = \(field: string, target: unknown\) => \{/);
+  assert.match(codex, /slug\.includes\("-"\) && \/\^\[a-z0-9\]\+\(-\[a-z0-9\]\+\)\*\$\/\.test\(slug\)/, "only a multi-word kebab value could have been meant as a link");
+});
+
+test("the stored-meta audit looks at the two fields it used to skip", () => {
+  const audit = readFileSync(join(process.cwd(), "scripts/audit-story-meta.ts"), "utf8");
+  assert.match(audit, /check\("species", maybeSlugs\(one\(meta\.species\)\), known, "entry"\)/);
+  assert.match(audit, /check\("biomes", maybeSlugs\(strings\(meta\.biomes\)\), known, "entry"\)/);
+});
+
+test("the sheet and the create form both offer the whole shelf, not just the umbrellas", () => {
+  // A character is one of a *people* — Tino is a Human, and Human is a member
+  // of the race Humanoid. A picker that only offered top-level races would
+  // lose exactly the distinction the parent-child shelf was built to make.
+  const sheets = readFileSync(join(process.cwd(), "components/story-entry-sheets.tsx"), "utf8");
+  assert.match(sheets, /<label>Race — their people<input aria-label="Race" list=\{raceListId\}/, "the character sheet must offer the shelf");
+  const directory = readFileSync(join(process.cwd(), "components/story-entity-directory.tsx"), "utf8");
+  assert.match(directory, /<optgroup key=\{race\.slug\} label=\{race\.title\}>/, "the create form groups peoples under their race");
+  assert.match(directory, /name="species"/, "a character is born knowing their people");
+  // And the birth meta actually writes it.
+  const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
+  assert.match(actions, /species: oneSlug\(formData, "species"\)/);
+});

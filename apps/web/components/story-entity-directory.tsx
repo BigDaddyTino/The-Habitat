@@ -45,6 +45,14 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   const wantsRegionPicker = ["CHARACTER", "FACTION", "ITEM", "EVENT", "CREATURE"].includes(collection.kind);
   const regionsForPickers = wantsRegionPicker ? await listStoryEntries({ kind: "REGION" }) : [];
   const factionsForPickers = collection.kind === "CHARACTER" ? await listStoryEntries({ kind: "FACTION" }) : [];
+  // The whole races shelf, grouped: a character is one of a *people* (Tino is
+  // a Human) and the race above it is the umbrella, so the picker offers both
+  // rungs with the peoples filed under the race they belong to.
+  const shelfForPickers = collection.kind === "CHARACTER" ? await listStoryEntries({ kind: "CREATURE" }) : [];
+  const raceOf = (option: (typeof shelfForPickers)[number]) => { const parent = asRecord(option.meta).parent; return typeof parent === "string" && parent.trim() ? parent.trim() : null; };
+  const peoplesByRace = shelfForPickers
+    .filter((option) => !raceOf(option))
+    .map((race) => ({ race, peoples: shelfForPickers.filter((option) => raceOf(option) === race.slug) }));
   const missionChains = new Map<string, typeof entries>();
   const looseMissions: typeof entries = [];
   if (isMissionsLibrary && !search) {
@@ -405,6 +413,16 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             {raceParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {collection.kind === "CHARACTER" ? <>
+            {peoplesByRace.length ? <label>What are their people?<select defaultValue="" name="species">
+              <option value="">Not decided yet</option>
+              {peoplesByRace.map(({ race, peoples }) => (
+                <optgroup key={race.slug} label={race.title}>
+                  <option value={race.slug}>{race.title} — the race itself</option>
+                  {peoples.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+                </optgroup>
+              ))}
+            </select>
+            <small className="sheet-hint">Their race’s dossier will list them back. You can write something more complicated on the sheet later.</small></label> : null}
             <label>Where do they call home?<select defaultValue="" name="home">
               <option value="">Not decided yet</option>
               {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}

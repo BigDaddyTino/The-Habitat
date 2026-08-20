@@ -92,7 +92,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   // mission in it alike.
   // The races tree: a creature with nothing above it IS a race, and its
   // members are derived from their own parent rather than stored twice.
-  const creatureEntries = entry.kind === "CREATURE" ? everyEntry.filter((candidate) => candidate.kind === "CREATURE") : [];
+  const creatureEntries = entry.kind === "CREATURE" || entry.kind === "CHARACTER" ? everyEntry.filter((candidate) => candidate.kind === "CREATURE") : [];
   const creatureParentOf = (candidate: { meta: Record<string, unknown> | null }) => {
     const value = candidate.meta?.parent;
     return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -226,6 +226,15 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
+                  // The whole shelf, races and their peoples alike: Tino is a
+                  // Human, which is a people inside Humanoid — filing him under
+                  // the umbrella would lose the distinction the shelf exists
+                  // to make. Each option says which race it sits in.
+                  races={creatureEntries.map((option) => {
+                    const race = creatureParentOf(option);
+                    const raceTitle = race ? creatureEntries.find((candidate) => candidate.slug === race)?.title ?? race : null;
+                    return { slug: option.slug, title: raceTitle ? `${option.title} — one of the ${raceTitle}` : option.title };
+                  })}
                   regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />

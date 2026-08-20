@@ -84,7 +84,7 @@ function ModelPicker({ value, onChange }: { value: string; onChange: (ref: strin
 // Character sheet
 // ---------------------------------------------------------------------------
 
-export function CharacterSheet({ entryId, version, meta, factions, regions, characters, arcs }: {
+export function CharacterSheet({ entryId, version, meta, factions, regions, characters, arcs, races = [] }: {
   entryId: string;
   version: number;
   meta: Record<string, unknown> | null;
@@ -92,6 +92,8 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   regions: SlugOption[];
   characters: SlugOption[];
   arcs: SlugOption[];
+  /** The races shelf, so a character's people resolve to a real dossier. */
+  races?: SlugOption[];
 }) {
   const source = record(meta);
   const magic = record(source.magic);
@@ -118,6 +120,7 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   const [involvement, setInvolvement] = useState(asArray(source.involvement).map((row) => ({ arc: text(record(row).arc), how: text(record(row).how) })));
   const [gameId, setGameId] = useState(text(source.gameId));
   const [model, setModel] = useState(text(source.model));
+  const raceListId = `character-race-${entryId}`;
   const companionSource = record(source.companion);
   const [companionCapable, setCompanionCapable] = useState(companionSource.capable === true ? "yes" : companionSource.capable === false ? "no" : "");
   const [companionAvailability, setCompanionAvailability] = useState(text(companionSource.availability));
@@ -168,7 +171,9 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
         <label>Full name<input maxLength={160} onChange={(event) => setFullName(event.target.value)} type="text" value={fullName} /></label>
         <label>Pronouns<input maxLength={40} onChange={(event) => setPronouns(event.target.value)} placeholder="null = writers use they/them" type="text" value={pronouns} /></label>
         <label>Sex<input maxLength={40} onChange={(event) => setSex(event.target.value)} type="text" value={sex} /></label>
-        <label>Species<input maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" type="text" value={species} /></label>
+        <label>Race — their people<input aria-label="Race" list={raceListId} maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" type="text" value={species} />
+        <datalist id={raceListId}>{races.map((race) => <option key={race.slug} value={race.slug}>{race.title}</option>)}</datalist>
+        <small className="sheet-hint">Pick one of the races and their dossier lists this character back. Free text still works when the truth is more complicated than a name.</small></label>
         <label>Age<input maxLength={80} onChange={(event) => setAge(event.target.value)} placeholder="late twenties" type="text" value={age} /></label>
         <label>Home<select onChange={(event) => setHome(event.target.value)} value={home}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
       </div>
