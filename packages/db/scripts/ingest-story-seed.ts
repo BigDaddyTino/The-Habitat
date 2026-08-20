@@ -145,6 +145,9 @@ async function main() {
             title: arc.title,
             summary: arc.summary,
             isMainline: arc.isMainline,
+            // Both columns, always together — the CHECK constraint refuses a
+            // row where the boolean and the category disagree.
+            category: arc.isMainline ? "MAINLINE" : "SIDE_QUEST",
             status: "CANON",
             position: arcIndex,
             createdByUserId: actor.id,

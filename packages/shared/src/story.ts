@@ -422,6 +422,47 @@ export type StoryExportNode = {
   references: StoryExportReference[];
 };
 
+/**
+ * What kind of story an arc is — the filing the writers' room works in.
+ *
+ * MAINLINE is the spine. SIDE_QUEST is optional story. CONTRACT is a bounty
+ * posted at a place (so it is always filed to a region). COMPANION_QUEST is
+ * one companion's own story (so it is always filed to a character).
+ * INCURSION is something that comes through. WORLD_EVENT is something that
+ * happens to the world rather than to the party.
+ *
+ * MAINLINE and `StoryArc.isMainline` mean exactly the same thing, and a
+ * database CHECK keeps them that way — see the schema note. Every writer of
+ * an arc sets both.
+ */
+export const storyArcCategories = ["MAINLINE", "SIDE_QUEST", "CONTRACT", "COMPANION_QUEST", "INCURSION", "WORLD_EVENT"] as const;
+
+export type StoryArcCategory = (typeof storyArcCategories)[number];
+
+export const storyArcCategoryLabels: Record<StoryArcCategory, string> = {
+  MAINLINE: "Mainline chapter",
+  SIDE_QUEST: "Side quest",
+  CONTRACT: "Contract",
+  COMPANION_QUEST: "Companion quest",
+  INCURSION: "Incursion",
+  WORLD_EVENT: "World event",
+};
+
+/** One line of plain help per category, used wherever a writer picks one. */
+export const storyArcCategoryHints: Record<StoryArcCategory, string> = {
+  MAINLINE: "A chapter of the main story. Only an admin opens one.",
+  SIDE_QUEST: "Optional story the party can find and finish on its own.",
+  CONTRACT: "A bounty posted at a place — say where it is posted.",
+  COMPANION_QUEST: "One companion's own story — say whose it is.",
+  INCURSION: "Something that comes through and has to be pushed back.",
+  WORLD_EVENT: "Something that happens to the world, party or no party.",
+};
+
+/** True for the categories that keep `isMainline` true. */
+export function isMainlineArcCategory(category: StoryArcCategory) {
+  return category === "MAINLINE";
+}
+
 export type StoryExportArc = {
   slug: string;
   title: string;
@@ -431,6 +472,12 @@ export type StoryExportArc = {
   /** Where it is picked up, resolved from a REGION bible entry. */
   region: { slug: string; title: string } | null;
   isMainline: boolean;
+  /** What kind of story this is. Additive to the v1 contract; `isMainline`
+   *  stays authoritative for importers that only know the boolean, and the
+   *  two can never disagree. */
+  category: StoryArcCategory;
+  /** The companion whose story this is, for COMPANION_QUEST arcs. */
+  companion: { slug: string; title: string } | null;
   /**
    * Nodes nothing transitions into. Several are legitimate — a side quest can
    * be enterable from more than one place — but importers that must store
@@ -1075,6 +1122,64 @@ export const storyThreadPriorities = ["low", "medium", "high", "critical"] as co
 export const storySpoilerLevels = ["none", "minor", "major", "ending"] as const;
 
 /**
+ * Where a canon packet is headed — the section of the canon navigator whose
+ * inbox it lands in. "region" and "companions" narrow further through
+ * `targetRegion` / `targetCompanion`, which is what lights one place's
+ * bubble rather than the whole section's.
+ */
+export const storyCanonPacketTargetKinds = ["campaign", "region", "companions", "incursions", "events"] as const;
+
+export type StoryCanonPacketTargetKind = (typeof storyCanonPacketTargetKinds)[number];
+
+export const storyCanonPacketTargetLabels: Record<StoryCanonPacketTargetKind, string> = {
+  campaign: "The main story",
+  region: "A place on the map",
+  companions: "A companion",
+  incursions: "Incursions",
+  events: "World events",
+};
+
+/**
+ * A settled piece of a story thread, pushed out of the development room and
+ * waiting in the canon inbox for a writer to weave it into a flow.
+ *
+ * This is deliberately NOT a freeze. Pushing changes nothing about what is
+ * canon; the arc padlock remains the only thing that settles story. A packet
+ * is a hand-off: "this part of the argument is done, here is the material, it
+ * belongs over there". It stays `pending` until somebody marks it woven and
+ * says which arcs it became.
+ *
+ * Packets live inside the thread's own meta rather than in a table of their
+ * own, so a packet can never outlive or drift from the thread it came out of,
+ * and the export — which withholds threads entirely — never has to learn about
+ * them.
+ */
+export type StoryCanonPacket = {
+  /** UUID minted server-side when the packet is pushed. */
+  id: string;
+  title: string;
+  /** The settled material itself, in the same prose the codex reads elsewhere. */
+  body: string;
+  targetKind: StoryCanonPacketTargetKind;
+  /** REGION slug — required when `targetKind` is "region", null otherwise. */
+  targetRegion: string | null;
+  /** CHARACTER slug — optional when `targetKind` is "companions"; null means
+   *  the general companions bucket rather than one companion's bubble. */
+  targetCompanion: string | null;
+  /** Entry slugs this material touches, so the packet shows up on their
+   *  dossiers the same way every other connection does. */
+  entries: string[];
+  status: "pending" | "woven";
+  pushedAt: string;
+  pushedBy: string;
+  wovenAt: string | null;
+  wovenBy: string | null;
+  /** Arc slugs the material actually became. Unioned into the thread's
+   *  `arcs` on weave, which is how a thread keeps its shipped trace. */
+  wovenInto: string[];
+};
+
+/**
  * The narrative-development sheet. Every related-* field is entry or arc
  * slugs — real relationships, never names as text — under the same
  * link-now-fill-later law the rest of the codex runs on. `parent` nests
@@ -1102,6 +1207,8 @@ export type StoryThreadMeta = {
   companionMissions: string[];
   /** Slugs of the entries (characters, creatures) fought as bosses in this thread. */
   bosses: string[];
+  /** Settled material pushed toward canon, still waiting to be woven in. */
+  canonPackets: StoryCanonPacket[];
   tags: string[];
   openQuestions: string[];
 };
@@ -1143,6 +1250,10 @@ export const storyCompanionMissionStatusLabels: Record<StoryCompanionMissionStat
 export type StoryCompanionMissionMeta = {
   /** CHARACTER slug whose arc this mission belongs to. */
   companion: string | null;
+  /** The canon arc slug this mission actually became, once someone built it.
+   *  Null means planned but not yet a board — which is how the canon
+   *  navigator tells an implemented chain step from a written-down one. */
+  arc: string | null;
   /** Position in the companion's mission chain, 1-first. */
   order: number | null;
   missionStatus: StoryCompanionMissionStatus | null;
@@ -1161,6 +1272,29 @@ export type StoryCompanionMissionMeta = {
   threads: string[];
   openQuestions: string[];
 };
+
+/**
+ * Files companion missions under the companion they belong to, each chain in
+ * `order`, with anything unfiled kept aside rather than dropped.
+ *
+ * Two surfaces need exactly this grouping — the missions library and the canon
+ * navigator's companion sections — and a second copy would be the kind that
+ * drifts: one sorting by order, the other by title, and the same chain reading
+ * differently in two places.
+ */
+export function groupStoryMissionChains<T extends { slug: string; title: string; meta: Record<string, unknown> | null }>(missions: T[]): { chains: Map<string, T[]>; loose: T[] } {
+  const slugOf = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
+  const orderOf = (mission: T) => (typeof mission.meta?.order === "number" ? (mission.meta.order as number) : 99);
+  const chains = new Map<string, T[]>();
+  const loose: T[] = [];
+  for (const mission of [...missions].sort((left, right) => orderOf(left) - orderOf(right) || left.title.localeCompare(right.title))) {
+    const companion = slugOf(mission.meta?.companion);
+    if (!companion) { loose.push(mission); continue; }
+    const bucket = chains.get(companion);
+    if (bucket) bucket.push(mission); else chains.set(companion, [mission]);
+  }
+  return { chains, loose };
+}
 
 /**
  * A character's companion capability, shown as the COMPANION badge on cards

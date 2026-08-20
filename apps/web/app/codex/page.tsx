@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Cog, GitBranch, History, Inbox, Lightbulb, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
-import { hasRole, requireRole } from "@/lib/authorization";
-import { getStoryActivity, getStoryPromises, getStoryReviewQueue, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { ArrowRight, BookOpen, Cog, GitBranch, History, Map, Shield, Sparkles, UsersRound } from "lucide-react";
+import { requireRole } from "@/lib/authorization";
+import { getStoryActivity, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
-import { createArc } from "./actions";
 
 export const metadata = { title: "Story Codex" };
 
@@ -42,11 +41,13 @@ function auditTone(action: string, statusTo: string | null): { label: string; to
 
 export default async function CodexPage() {
   await requireRole(storyReadRole);
-  const canReview = await hasRole("ADMIN");
-  const [arcs, activity, queue, rules, regions, themes, characters, factions, systems, promises, threadEntries] = await Promise.all([
-    listStoryArcs(), getStoryActivity(50), canReview ? getStoryReviewQueue() : Promise.resolve(null),
-    listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "THEME" }),
-    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }), getStoryPromises(), listStoryEntries({ kind: "THREAD" }),
+  // Story lives at /codex/stories now — the arcs, the create form, the room
+  // law, and the links between them. This page keeps the world compass, the
+  // libraries, and the audit log, and hands story off through card 5.
+  const [arcs, activity, regions, themes, characters, factions, systems] = await Promise.all([
+    listStoryArcs(), getStoryActivity(50),
+    listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "THEME" }),
+    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }),
   ]);
   // The core system spotlight: the mechanic big enough to headline the codex.
   // Swap the slug to feature a different system; everything else follows it.
@@ -59,10 +60,6 @@ export default async function CodexPage() {
       return typeof meta === "object" && meta !== null && (meta as Record<string, unknown>).parent === spotlightSlug;
     })
     .sort((a, b) => a.title.localeCompare(b.title));
-  const mainline = arcs.filter((arc) => arc.isMainline);
-  const side = arcs.filter((arc) => !arc.isMainline);
-  const laws = rules.filter((rule) => rule.status === "CANON");
-
   return (
     <section className="page-shell codex-shell codex-landing-shell">
       <StoryLiveSync />
@@ -107,67 +104,14 @@ export default async function CodexPage() {
           <Link href="/codex/library/factions"><Shield aria-hidden="true" /><span><small>{factions.length} factions</small><strong>Factions</strong><p>Leadership, territory, goals, allies, enemies, and influence.</p></span><ArrowRight aria-hidden="true" /></Link>
           <Link href="/codex/library/regions"><Map aria-hidden="true" /><span><small>{regions.length} regions</small><strong>Regions</strong><p>World hierarchy, control, travel connections, and game tags.</p></span><ArrowRight aria-hidden="true" /></Link>
           <Link href="/codex/library/systems"><Cog aria-hidden="true" /><span><small>{systems.length} systems</small><strong>Game systems</strong><p>The mechanics the game will ship, and when the story hands each one to the player.</p></span><ArrowRight aria-hidden="true" /></Link>
-          <Link href="#stories"><GitBranch aria-hidden="true" /><span><small>{arcs.length} arcs</small><strong>Stories &amp; quests</strong><p>Scene flow, decisions, consequences, rewards, and endings.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link href="/codex/stories"><GitBranch aria-hidden="true" /><span><small>{arcs.length} stories</small><strong>Stories &amp; quests</strong><p>The campaign, side quests, contracts, companion roads, and everything that comes through.</p></span><ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
 
       <div className="codex-quicklinks">
         <Link className="codex-quicklink" href="/codex/bible"><BookOpen aria-hidden="true" size={18} /><span><strong>All lore</strong><small>Creatures, items, events, rules, flags, and every world entry in one searchable archive.</small></span></Link>
         <Link className="codex-quicklink" href="/codex/timeline"><History aria-hidden="true" size={18} /><span><strong>The timeline</strong><small>Ten thousand years of the long hunt on one golden line — and where the present sits on it.</small></span></Link>
-        <Link className="codex-quicklink" href="/codex/threads"><Lightbulb aria-hidden="true" size={18} /><span><strong>Story threads</strong><small>{threadEntries.length > 0 ? `${threadEntries.length} narrative concept${threadEntries.length === 1 ? "" : "s"} being argued from brainstorm toward canon.` : "Propose a major story concept — attributed, discussed, and statused until the room decides."}</small></span></Link>
-        <Link className="codex-quicklink" href="/codex/promises"><Sprout aria-hidden="true" size={18} /><span><strong>Story promises</strong><small>{promises.planted > 0 ? `${promises.planted} promise${promises.planted === 1 ? "" : "s"} planted and waiting for a payoff.` : promises.threads.length > 0 ? "Every promise the story has made, and where it stands." : "Set a flag in one scene, answer it chapters later — tracked here."}</small></span></Link>
-        {/* The approval ladder is gone; the queue only resurfaces if legacy
-            proposed material still exists somewhere. */}
-        {canReview && queue && queue.total > 0 ? <Link className="codex-quicklink" href="/codex/review"><Inbox aria-hidden="true" size={18} /><span><strong>Review queue</strong><small>{`${queue.total} older contribution${queue.total === 1 ? "" : "s"} still marked proposed.`}</small></span></Link> : null}
-      </div>
-
-      {laws.length > 0 ? (
-        <div className="codex-laws">
-          <p className="eyebrow"><Scale aria-hidden="true" size={12} /> Writers&apos; room law — read before you write, binding on every contribution</p>
-          <ul>
-            {laws.map((law) => (
-              <li key={law.id}>
-                <Link href={`/codex/bible/${law.slug}`}>{law.title}</Link>
-                {law.summary ? <span>{law.summary}</span> : null}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      {[{ title: "The mainline", arcs: mainline }, { title: "Side quests", arcs: side }].map((group) => (
-        <div className="codex-section" id={group.title === "The mainline" ? "stories" : undefined} key={group.title}>
-          <div className="section-heading"><h2>{group.title}</h2></div>
-          {group.arcs.length === 0 ? (
-            <div className="empty-data"><GitBranch aria-hidden="true" size={24} /><div><h2>No arcs yet.</h2><p>Open one below and start laying down scenes.</p></div></div>
-          ) : (
-            <div className="codex-arc-grid">
-              {group.arcs.map((arc) => (
-                <Link className={`codex-arc-card status-${arc.status.toLowerCase()}`} href={`/codex/arc/${arc.slug}`} key={arc.id}>
-                  <p className="eyebrow">{arc.status === "CANON" ? "Canon" : arc.status === "PROPOSED" ? "Proposed" : "Draft"}</p>
-                  <h3>{arc.title}</h3>
-                  {arc.summary ? <p className="codex-arc-summary">{arc.summary}</p> : null}
-                  <footer><span>{arc.nodeCount} scene{arc.nodeCount === 1 ? "" : "s"}</span><span>by {arc.author}</span><span className="codex-arc-open">Read the story →</span></footer>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-
-      <div className="codex-lower">
-        <form action={createArc} className="story-form codex-new-arc">
-          <p className="eyebrow"><Plus aria-hidden="true" size={12} /> Open a new arc</p>
-          <label>Title<input maxLength={120} name="title" placeholder="The drowned chapel" required type="text" /></label>
-          <label>Summary<textarea maxLength={500} name="summary" placeholder="What is this chapter or side quest about?" rows={3} /></label>
-          <label>Picked up in<select defaultValue="" name="regionEntryId">
-            <option value="">No particular place</option>
-            {regions.map((region) => <option key={region.id} value={region.id}>{region.title}</option>)}
-          </select></label>
-          <label>Hook — how the party finds it<textarea maxLength={500} name="hook" placeholder="A notice board. A dying stranger. A rumor nobody should repeat." rows={2} /></label>
-          {canReview ? <label className="enabled-toggle"><input name="isMainline" type="checkbox" /> Part of the mainline</label> : null}
-          <button className="save-server" type="submit">Open arc</button>
-        </form>
+        <Link className="codex-quicklink" href="/codex/stories"><GitBranch aria-hidden="true" size={18} /><span><strong>Stories &amp; quests</strong><small>Canon, story threads, promises, and the road between them — all in one room.</small></span></Link>
       </div>
 
       <div className="codex-audit">

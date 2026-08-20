@@ -42,6 +42,7 @@ export default async function StoryThreadsPage({ searchParams }: { searchParams:
   ]);
   const titles = new Map(everything.map((entry) => [entry.slug, entry.title]));
   const characters = everything.filter((entry) => entry.kind === "CHARACTER");
+  const locations = everything.filter((entry) => entry.kind === "REGION");
 
   const metaOf = (thread: (typeof threads)[number]) => thread.meta ?? {};
   const statusOf = (thread: (typeof threads)[number]): StoryThreadStatus | null => {
@@ -82,7 +83,7 @@ export default async function StoryThreadsPage({ searchParams }: { searchParams:
     <section className="page-shell codex-shell codex-threads-shell">
       <StoryLiveSync />
       <div className="page-intro">
-        <Link className="codex-back" href="/codex"><ArrowLeft aria-hidden="true" size={13} /> Story codex</Link>
+        <Link className="codex-back" href="/codex/stories"><ArrowLeft aria-hidden="true" size={13} /> Stories &amp; quests</Link>
         <p className="eyebrow"><Lightbulb aria-hidden="true" size={12} /> Martino — story threads</p>
         <h1>Where the story gets argued into existence</h1>
         <p>
@@ -164,6 +165,16 @@ export default async function StoryThreadsPage({ searchParams }: { searchParams:
           <div className="thread-create-taxonomy">
             <fieldset><legend>Categories</legend>{storyThreadCategories.map((category) => <label key={category}><input name="categories" type="checkbox" value={category} /> {storyThreadCategoryLabels[category]}</label>)}</fieldset>
             <fieldset><legend>Story stages it touches</legend>{storyStoryStages.map((stage) => <label key={stage}><input name="stages" type="checkbox" value={stage} /> {storyStoryStageLabels[stage]}</label>)}</fieldset>
+          </div>
+          <div className="sheet-grid">
+            <label>Who is it about?<select multiple name="characters" size={4}>
+              {characters.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select>
+            <small className="sheet-hint">Hold Ctrl (or ⌘) to pick more than one. You can add the rest later.</small></label>
+            <label>Where does it happen?<select multiple name="locations" size={4}>
+              {locations.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select>
+            <small className="sheet-hint">Everywhere the idea touches — the thread shows up on each of those pages.</small></label>
           </div>
           {parents.length ? <label>Grew out of which thread<select defaultValue="" name="parent">
             <option value="">Nothing — a top-level thread</option>

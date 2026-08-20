@@ -1,6 +1,6 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
-import { metaSchemasByKind } from "../lib/story-meta-schemas";
+import { canonPacketSchema, metaSchemasByKind } from "../lib/story-meta-schemas";
 
 /**
  * Audits every stored entry's `meta` against the schema its sheet enforces,
@@ -44,6 +44,8 @@ async function main() {
   const knownArcs = new Set(arcs.map((arc) => arc.slug));
 
   const rejected: string[] = [];
+  /** Packets that would fail their own schema — settled material at risk. */
+  const badPackets: string[] = [];
   const dropped: string[] = [];
   const dangling: string[] = [];
   let validated = 0;
@@ -70,6 +72,16 @@ async function main() {
     }
 
     if (!meta) continue;
+
+    if (entry.kind === "THREAD") {
+      const rows = Array.isArray(meta.canonPackets) ? meta.canonPackets : null;
+      if (rows === null) badPackets.push(`THREAD:${entry.slug} — no canonPackets key at all (the sheet will refuse the next save)`);
+      else for (const [index, row] of rows.entries()) {
+        const parsed = canonPacketSchema.safeParse(row);
+        if (!parsed.success) badPackets.push(`THREAD:${entry.slug} .canonPackets[${index}] — ${parsed.error.issues.slice(0, 2).map((issue) => `${issue.path.join(".") || "(root)"}: ${issue.message}`).join("; ")}`);
+      }
+    }
+
     const check = (field: string, values: string[], pool: Set<string>, poolName: string) => {
       for (const value of values) {
         references += 1;
@@ -102,6 +114,19 @@ async function main() {
     check("regionNotes[].region", rowField(meta.regionNotes, "region"), known, "entry");
     check("unlockArc", one(meta.unlockArc), knownArcs, "arc");
     check("involvement[].arc", rowField(meta.involvement, "arc"), knownArcs, "arc");
+    // The development room's newest references. A mission points at the board
+    // it became; a canon packet points at where it is headed and everyone it
+    // names. Checked here so the database-level audit and the zod schemas
+    // cannot drift apart on the fields nothing else scans.
+    check("arc", one(meta.arc), knownArcs, "arc");
+    for (const row of Array.isArray(meta.canonPackets) ? meta.canonPackets : []) {
+      const packet = asRecord(row);
+      if (!packet) continue;
+      check("canonPackets[].targetRegion", one(packet.targetRegion), known, "entry");
+      check("canonPackets[].targetCompanion", one(packet.targetCompanion), known, "entry");
+      check("canonPackets[].entries", strings(packet.entries), known, "entry");
+      check("canonPackets[].wovenInto", strings(packet.wovenInto), knownArcs, "arc");
+    }
   }
 
   // Body [[links]] — the prose half of the same question.
@@ -122,11 +147,12 @@ async function main() {
   console.log(`entries: ${entries.length} (${validated} carrying meta a sheet validates)`);
   console.log(`references checked: ${references} typed, ${links} body links`);
   report("REJECTED — would fail on the next sheet save", rejected);
+  report("PACKETS — settled material the canon inbox cannot read", badPackets);
   report("DROPPED — keys the next save would silently discard", dropped);
   report("DANGLING — references with no target", dangling);
   report("UNWRITTEN — body links to entries nobody has written", brokenLinks);
 
-  const fatal = rejected.length + dropped.length;
+  const fatal = rejected.length + dropped.length + badPackets.length;
   console.log(`\n${fatal === 0 ? "PASS" : "FAIL"} — ${fatal} stability problem${fatal === 1 ? "" : "s"}; ${dangling.length + brokenLinks.length} unresolved reference${dangling.length + brokenLinks.length === 1 ? "" : "s"} (fill-later is legitimate, review them).`);
   if (fatal > 0) process.exitCode = 1;
 }

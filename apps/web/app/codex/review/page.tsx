@@ -25,7 +25,7 @@ export default async function CodexReviewPage() {
     <section className="page-shell codex-shell">
       <StoryLiveSync />
       <div className="page-intro">
-        <Link className="codex-back" href="/codex"><ArrowLeft aria-hidden="true" size={13} /> Story codex</Link>
+        <Link className="codex-back" href="/codex/stories"><ArrowLeft aria-hidden="true" size={13} /> Stories &amp; quests</Link>
         <p className="eyebrow">Martino — review</p>
         <h1>Waiting on you</h1>
         <p>Nothing below is in the game yet. Approving a node also makes its arc canon so the export can carry it; rejecting keeps it on the board, marked, so the writer can see what happened to it.</p>

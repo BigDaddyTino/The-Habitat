@@ -388,6 +388,24 @@ enum StoryEndingKind {
   NEUTRAL
 }
 
+/// What kind of story an arc is — the categories the room actually files by:
+/// the mainline chapters, side quests, the contracts posted at a place, a
+/// companion’s own quest, an incursion, a world event.
+///
+/// `StoryArc.isMainline` stays alongside this and stays in lockstep. The
+/// export contract, the arc ordering, and every arc picker read the boolean,
+/// and a CHECK constraint refuses any row where the two disagree — so a writer
+/// that sets one column and forgets the other fails loudly instead of shipping
+/// a mainline chapter the game reads as a side quest.
+enum StoryArcCategory {
+  MAINLINE
+  SIDE_QUEST
+  CONTRACT
+  COMPANION_QUEST
+  INCURSION
+  WORLD_EVENT
+}
+
 /// Why an assistant exchange ended the way it did. Every outcome is recorded,
 /// including the ones where no request ever reached Gemini — an audit that only
 /// kept successful answers would hide exactly the pattern worth looking for.
@@ -2004,6 +2022,13 @@ model StoryArc {
   /// place always resolves to a real asset on the game side.
   regionEntryId   String?     @db.Uuid
   isMainline      Boolean     @default(false)
+  /// The filing category, kept in lockstep with `isMainline` by a CHECK
+  /// constraint — see the enum for why both columns exist.
+  category        StoryArcCategory @default(SIDE_QUEST)
+  /// Whose story this is when the category is COMPANION_QUEST — a CHARACTER
+  /// bible entry, so the companion always resolves to a real dossier. Mirrors
+  /// `regionEntryId` exactly.
+  companionEntryId String?    @db.Uuid
   status          StoryStatus @default(PROPOSED)
   position        Int         @default(0)
   /// The writers' room is open by default: nothing is frozen until somebody
@@ -2023,6 +2048,7 @@ model StoryArc {
   creator         User        @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
   lockedBy        User?       @relation("StoryArcLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
   region          StoryEntry? @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
+  companion       StoryEntry? @relation("StoryArcCompanion", fields: [companionEntryId], references: [id], onDelete: SetNull)
   nodes           StoryNode[]
   edges           StoryEdge[]
   continuedFrom   StoryNode[] @relation("StoryContinuation")
@@ -2030,6 +2056,7 @@ model StoryArc {
   assistantMessages StoryAssistantMessage[]
 
   @@index([status, isMainline, position])
+  @@index([category, position])
 }
 
 /// One beat, scene, choice, or ending on a board.
@@ -2170,6 +2197,7 @@ model StoryEntry {
   comments        StoryComment[]
   speakerOf       StoryNode[]      @relation("StoryNodeSpeaker")
   regionOf        StoryArc[]       @relation("StoryArcRegion")
+  companionOf     StoryArc[]       @relation("StoryArcCompanion")
 
   @@index([kind, status, title])
   @@index([status, updatedAt])

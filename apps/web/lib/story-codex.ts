@@ -3,10 +3,13 @@ import { getPrismaClient } from "@habitat/db/client";
 import {
   analyzeStoryGraph,
   findStoryEntryNodeKeys,
+  groupStoryMissionChains,
   isStoryPresenceFresh,
   storyPlaceAncestry,
   storyPlaceDescendants,
   storyPresenceTtlMs,
+  type StoryArcCategory,
+  type StoryCanonPacket,
   type StoryEntryKind,
   type StoryGraphEdge,
   type StoryGraphNode,
@@ -16,6 +19,7 @@ import {
   type StoryPlaceLink,
   type StoryStatus,
 } from "@habitat/shared";
+import { canonPacketSchema } from "@/lib/story-meta-schemas";
 
 const db = getPrismaClient();
 
@@ -96,7 +100,9 @@ export type StoryBoard = {
     summary: string | null;
     hook: string | null;
     region: { id: string; slug: string; title: string } | null;
+    companion: { id: string; slug: string; title: string } | null;
     isMainline: boolean;
+    category: StoryArcCategory;
     status: StoryStatus;
     author: string;
     /** Non-null only while an admin's freeze stands. `by` decays to null if
@@ -146,6 +152,10 @@ export async function listStoryArcs() {
     title: arc.title,
     summary: arc.summary,
     isMainline: arc.isMainline,
+    category: arc.category,
+    regionEntryId: arc.regionEntryId,
+    companionEntryId: arc.companionEntryId,
+    locked: arc.lockedAt !== null,
     status: arc.status,
     author: storyMemberName(arc.creator),
     nodeCount: arc._count.nodes,
@@ -157,7 +167,12 @@ export async function listStoryArcs() {
 export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
   const arc = await db.storyArc.findUnique({
     where: { slug },
-    include: { creator: { select: writerSelect }, lockedBy: { select: writerSelect }, region: { select: { id: true, slug: true, title: true } } },
+    include: {
+      creator: { select: writerSelect },
+      lockedBy: { select: writerSelect },
+      region: { select: { id: true, slug: true, title: true } },
+      companion: { select: { id: true, slug: true, title: true } },
+    },
   });
   if (!arc) return null;
 
@@ -234,7 +249,9 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       summary: arc.summary,
       hook: arc.hook,
       region: arc.region,
+      companion: arc.companion,
       isMainline: arc.isMainline,
+      category: arc.category,
       status: arc.status,
       author: storyMemberName(arc.creator),
       // Read off the timestamp, never off the relation: an admin's account can
@@ -389,6 +406,20 @@ export async function getStoryEntry(slug: string) {
       if (names(meta.factions)) add(inThread ? "involves this faction in a story thread" : "involves this faction");
       if (names(meta.threads)) add("is advanced by this companion mission");
       if (names(meta.companionMissions)) add("is part of this story thread");
+      // A mission that has actually been built names the board it became.
+      if (referencesSlug(meta.arc)) add("became this mission's canon quest");
+    }
+
+    // Canon packets are part of the same connection web as everything else: a
+    // packet that names this entry, or is aimed at this place or companion,
+    // shows up on this dossier rather than only inside the thread it came
+    // from. Read defensively — a malformed row is skipped, never thrown on.
+    if (inThread) {
+      for (const row of rows(meta.canonPackets)) {
+        if (row.status === "woven") continue;
+        if (Array.isArray(row.entries) && row.entries.some(referencesSlug)) add("is named in canon material waiting to be woven in");
+        if (referencesSlug(row.targetRegion) || referencesSlug(row.targetCompanion)) add("has canon material waiting to be woven in here");
+      }
     }
   }
 
@@ -397,7 +428,9 @@ export async function getStoryEntry(slug: string) {
   // read that back the other way, so a place could be the door into a quest
   // and say nothing about it.
   let placeAncestry: Array<{ slug: string; title: string }> = [];
-  let arcsHere: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }> = [];
+  let arcsHere: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }> = [];
+  /** The companion mirror of `arcsHere`: the quests filed to this character. */
+  let companionArcs: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }> = [];
 
   if (entry.kind === "REGION") {
     const places = possibleConnections.filter((candidate) => candidate.kind === "REGION");
@@ -424,7 +457,7 @@ export async function getStoryEntry(slug: string) {
     const hereIds = [entry.id, ...inside.flatMap((child) => (idOf.has(child) ? [idOf.get(child) as string] : []))];
     const arcs = await db.storyArc.findMany({
       where: { status: { in: workingStatuses }, regionEntryId: { in: hereIds } },
-      select: { slug: true, title: true, isMainline: true, hook: true, regionEntryId: true },
+      select: { slug: true, title: true, isMainline: true, category: true, hook: true, regionEntryId: true },
       orderBy: [{ isMainline: "desc" }, { title: "asc" }],
     });
     const placeById = new Map(places.map((place) => [place.id, { slug: place.slug, title: place.title }]));
@@ -432,14 +465,28 @@ export async function getStoryEntry(slug: string) {
       slug: arc.slug,
       title: arc.title,
       isMainline: arc.isMainline,
+      category: arc.category,
       hook: arc.hook,
       where: arc.regionEntryId && arc.regionEntryId !== entry.id ? placeById.get(arc.regionEntryId) ?? null : null,
     }));
   }
 
+  // A companion's own quests, read off the arcs rather than maintained on
+  // the character — the same derivation the region dossier uses for the
+  // quests that begin there.
+  if (entry.kind === "CHARACTER") {
+    const theirs = await db.storyArc.findMany({
+      where: { status: { in: workingStatuses }, companionEntryId: entry.id },
+      select: { slug: true, title: true, category: true, hook: true, summary: true, lockedAt: true, position: true },
+      orderBy: [{ position: "asc" }, { title: "asc" }],
+    });
+    companionArcs = theirs.map((arc) => ({ slug: arc.slug, title: arc.title, category: arc.category, hook: arc.hook, summary: arc.summary, locked: arc.lockedAt !== null }));
+  }
+
   return {
     placeAncestry,
     arcsHere,
+    companionArcs,
     id: entry.id,
     kind: entry.kind,
     slug: entry.slug,
@@ -465,6 +512,392 @@ export async function getStoryEntry(slug: string) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Canon: the inbox settled thread material lands in, and the navigator that
+// files every board where a reader expects to find it.
+// ---------------------------------------------------------------------------
+
+/** A packet with the thread it came out of attached. */
+export type StoryCanonPacketRow = StoryCanonPacket & {
+  thread: { slug: string; title: string; entryId: string; version: number; author: string };
+};
+
+/**
+ * How many packets are still waiting, per place in the navigator. The regions
+ * and companions maps are keyed by slug; the companions map's `""` key is the
+ * general bucket — material for the companions section that names nobody in
+ * particular.
+ */
+export type StoryCanonPending = {
+  campaign: number;
+  regions: Record<string, number>;
+  companions: Record<string, number>;
+  incursions: number;
+  events: number;
+  total: number;
+};
+
+/**
+ * Reads a thread's packets out of its stored meta.
+ *
+ * Deliberately forgiving: a row that does not validate is skipped, never
+ * thrown on. A single malformed packet must not be able to take down the canon
+ * workspace, the navigator, and every arc page that renders the sidebar — the
+ * audit script is where malformed rows get reported, not the reader's page.
+ */
+function readCanonPackets(meta: unknown): StoryCanonPacket[] {
+  if (typeof meta !== "object" || meta === null || Array.isArray(meta)) return [];
+  const rows = (meta as Record<string, unknown>).canonPackets;
+  if (!Array.isArray(rows)) return [];
+  const packets: StoryCanonPacket[] = [];
+  for (const row of rows) {
+    const parsed = canonPacketSchema.safeParse(row);
+    if (parsed.success) packets.push(parsed.data as StoryCanonPacket);
+  }
+  return packets;
+}
+
+/**
+ * Everything the development room has pushed toward canon, newest first, with
+ * the pending counts the navigator's bubbles read from.
+ *
+ * Packets live inside their thread's meta, so this is one query over the
+ * threads rather than a table scan — and a packet can never outlive the thread
+ * that produced it.
+ */
+export async function getCanonInbox(): Promise<{ packets: StoryCanonPacketRow[]; pending: StoryCanonPending }> {
+  const threads = await db.storyEntry.findMany({
+    where: { kind: "THREAD", status: { in: workingStatuses } },
+    select: { id: true, slug: true, title: true, version: true, meta: true, creator: { select: writerSelect } },
+    orderBy: { title: "asc" },
+  });
+
+  const packets: StoryCanonPacketRow[] = [];
+  for (const thread of threads) {
+    const author = storyMemberName(thread.creator);
+    for (const packet of readCanonPackets(thread.meta)) {
+      packets.push({ ...packet, thread: { slug: thread.slug, title: thread.title, entryId: thread.id, version: thread.version, author } });
+    }
+  }
+  // Newest push first: the inbox reads like an inbox.
+  packets.sort((left, right) => right.pushedAt.localeCompare(left.pushedAt) || left.title.localeCompare(right.title));
+
+  const pending: StoryCanonPending = { campaign: 0, regions: {}, companions: {}, incursions: 0, events: 0, total: 0 };
+  for (const packet of packets) {
+    if (packet.status !== "pending") continue;
+    pending.total += 1;
+    if (packet.targetKind === "campaign") pending.campaign += 1;
+    else if (packet.targetKind === "incursions") pending.incursions += 1;
+    else if (packet.targetKind === "events") pending.events += 1;
+    else if (packet.targetKind === "region" && packet.targetRegion) pending.regions[packet.targetRegion] = (pending.regions[packet.targetRegion] ?? 0) + 1;
+    else if (packet.targetKind === "companions") {
+      const key = packet.targetCompanion ?? "";
+      pending.companions[key] = (pending.companions[key] ?? 0) + 1;
+    }
+  }
+
+  return { packets, pending };
+}
+
+/** One board as the navigator lists it. */
+export type CanonNavArc = {
+  slug: string;
+  title: string;
+  category: StoryArcCategory;
+  status: StoryStatus;
+  locked: boolean;
+  nodeCount: number;
+  position: number;
+};
+
+export type CanonNavRegion = {
+  slug: string;
+  title: string;
+  /** How deep in the place tree, so the sidebar can indent rather than nest. */
+  depth: number;
+  sideQuests: CanonNavArc[];
+  contracts: CanonNavArc[];
+  /** Packets waiting here or anywhere inside here. */
+  pendingPackets: number;
+};
+
+export type CanonNavCompanionStep = {
+  order: number | null;
+  title: string;
+  missionSlug: string;
+  /** The board this step became, or null while it is only written down. */
+  arc: CanonNavArc | null;
+};
+
+export type CanonNavCompanion = {
+  slug: string;
+  title: string;
+  chain: CanonNavCompanionStep[];
+  /** Companion quests no mission in the chain claims. */
+  looseArcs: CanonNavArc[];
+  pendingPackets: number;
+};
+
+export type StoryCanonNavigator = {
+  campaign: CanonNavArc[];
+  regions: CanonNavRegion[];
+  /** Side quests and contracts nobody has filed to a place yet. */
+  unfiled: CanonNavArc[];
+  companions: CanonNavCompanion[];
+  incursions: CanonNavArc[];
+  events: CanonNavArc[];
+  pending: StoryCanonPending;
+};
+
+/**
+ * The articy-style navigator: the whole settled story as one tree — the
+ * campaign spine, then the map, then the companions, then what comes through
+ * and what happens to the world.
+ *
+ * This runs on every arc page, so it stays four narrow selects and one inbox
+ * read. Everything else here is arithmetic over what those returned.
+ */
+export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
+  const [arcs, regionEntries, missions, characters, inbox] = await Promise.all([
+    db.storyArc.findMany({
+      where: { status: { in: workingStatuses } },
+      select: { slug: true, title: true, category: true, status: true, position: true, lockedAt: true, regionEntryId: true, companionEntryId: true, _count: { select: { nodes: { where: { status: { in: workingStatuses } } } } } },
+      orderBy: [{ position: "asc" }, { title: "asc" }],
+    }),
+    db.storyEntry.findMany({
+      where: { kind: "REGION", status: { in: workingStatuses } },
+      select: { id: true, slug: true, title: true, meta: true },
+      orderBy: { title: "asc" },
+    }),
+    db.storyEntry.findMany({
+      where: { kind: "COMPANION_MISSION", status: { in: workingStatuses } },
+      select: { slug: true, title: true, meta: true },
+      orderBy: { title: "asc" },
+    }),
+    db.storyEntry.findMany({
+      where: { kind: "CHARACTER", status: { in: workingStatuses } },
+      select: { id: true, slug: true, title: true },
+      orderBy: { title: "asc" },
+    }),
+    getCanonInbox(),
+  ]);
+
+  const navArc = (arc: (typeof arcs)[number]): CanonNavArc => ({
+    slug: arc.slug,
+    title: arc.title,
+    category: arc.category,
+    status: arc.status,
+    locked: arc.lockedAt !== null,
+    nodeCount: arc._count.nodes,
+    position: arc.position,
+  });
+
+  const campaign = arcs.filter((arc) => arc.category === "MAINLINE").map(navArc);
+  const incursions = arcs.filter((arc) => arc.category === "INCURSION").map(navArc);
+  const events = arcs.filter((arc) => arc.category === "WORLD_EVENT").map(navArc);
+
+  // --- the map ---------------------------------------------------------------
+  const parentOf = (meta: unknown) => {
+    const value = (meta as Record<string, unknown> | null)?.parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  };
+  const placeLinks: StoryPlaceLink[] = regionEntries.map((region) => ({ slug: region.slug, parent: parentOf(region.meta) }));
+  const knownPlace = new Set(regionEntries.map((region) => region.slug));
+  const regionById = new Map(regionEntries.map((region) => [region.id, region]));
+  const depthOf = new Map(regionEntries.map((region) => [region.slug, storyPlaceAncestry(region.slug, placeLinks).length]));
+  const descendantsOf = new Map(regionEntries.map((region) => [region.slug, storyPlaceDescendants(region.slug, placeLinks)]));
+
+  const filedArcs = arcs.filter((arc) => arc.category === "SIDE_QUEST" || arc.category === "CONTRACT");
+  const arcsBySlug = new Map<string, (typeof arcs)>();
+  const unfiled: CanonNavArc[] = [];
+  for (const arc of filedArcs) {
+    // A region entry the arc points at but that is archived or gone is the
+    // same situation as no region at all — the arc surfaces in "not filed"
+    // where somebody can put it somewhere real.
+    const region = arc.regionEntryId ? regionById.get(arc.regionEntryId) : null;
+    if (!region) { unfiled.push(navArc(arc)); continue; }
+    const bucket = arcsBySlug.get(region.slug);
+    if (bucket) bucket.push(arc); else arcsBySlug.set(region.slug, [arc]);
+  }
+
+  const packetsAt = (slug: string) => inbox.pending.regions[slug] ?? 0;
+  // A packet aimed at a room in a tavern in a city lights the city too, so a
+  // writer scanning the map sees there is something waiting down there.
+  const rolledPackets = (slug: string) =>
+    packetsAt(slug) + (descendantsOf.get(slug) ?? []).reduce((total, child) => total + packetsAt(child), 0);
+
+  const built = new Map<string, CanonNavRegion>();
+  for (const region of regionEntries) {
+    const here = arcsBySlug.get(region.slug) ?? [];
+    built.set(region.slug, {
+      slug: region.slug,
+      title: region.title,
+      depth: depthOf.get(region.slug) ?? 0,
+      sideQuests: here.filter((arc) => arc.category === "SIDE_QUEST").map(navArc),
+      contracts: here.filter((arc) => arc.category === "CONTRACT").map(navArc),
+      pendingPackets: rolledPackets(region.slug),
+    });
+  }
+
+  // A point of interest with no quest, no contract, and nothing waiting is not
+  // navigation — it is noise. Its own dossier is where it lives; the sidebar
+  // only shows the places that lead somewhere.
+  const worthShowing = (slug: string): boolean => {
+    const row = built.get(slug);
+    if (!row) return false;
+    if (row.sideQuests.length > 0 || row.contracts.length > 0 || row.pendingPackets > 0) return true;
+    return (descendantsOf.get(slug) ?? []).some((child) => {
+      const inner = built.get(child);
+      return Boolean(inner && (inner.sideQuests.length > 0 || inner.contracts.length > 0 || inner.pendingPackets > 0));
+    });
+  };
+
+  const childrenOf = new Map<string, string[]>();
+  for (const link of placeLinks) {
+    if (!link.parent || link.parent === link.slug || !knownPlace.has(link.parent)) continue;
+    const siblings = childrenOf.get(link.parent);
+    if (siblings) siblings.push(link.slug); else childrenOf.set(link.parent, [link.slug]);
+  }
+  const byTitle = (left: string, right: string) => (built.get(left)?.title ?? left).localeCompare(built.get(right)?.title ?? right);
+
+  const regions: CanonNavRegion[] = [];
+  const walked = new Set<string>();
+  const walk = (slug: string) => {
+    // The place tree is writer-editable free text, so it can cycle; the walk
+    // carries a seen-set and stops rather than hanging the sidebar.
+    if (walked.has(slug)) return;
+    walked.add(slug);
+    const row = built.get(slug);
+    if (row && worthShowing(slug)) regions.push(row);
+    for (const child of [...(childrenOf.get(slug) ?? [])].sort(byTitle)) walk(child);
+  };
+  const roots = regionEntries
+    .filter((region) => { const parent = parentOf(region.meta); return !parent || !knownPlace.has(parent) || parent === region.slug; })
+    .map((region) => region.slug)
+    .sort(byTitle);
+  for (const root of roots) walk(root);
+  // A place inside a cycle is never reached from a root; it still deserves a
+  // line rather than disappearing out of the navigator entirely.
+  for (const region of regionEntries) if (!walked.has(region.slug)) walk(region.slug);
+
+  // --- the companions --------------------------------------------------------
+  const arcBySlugAll = new Map(arcs.map((arc) => [arc.slug, arc]));
+  const { chains } = groupStoryMissionChains(missions.map((mission) => ({ slug: mission.slug, title: mission.title, meta: (mission.meta as Record<string, unknown> | null) ?? null })));
+  const companionArcs = arcs.filter((arc) => arc.category === "COMPANION_QUEST");
+  const companionSlugById = new Map(characters.map((character) => [character.id, character.slug]));
+  const characterBySlug = new Map(characters.map((character) => [character.slug, character]));
+
+  const arcsByCompanion = new Map<string, (typeof arcs)>();
+  const companionless: CanonNavArc[] = [];
+  for (const arc of companionArcs) {
+    const slug = arc.companionEntryId ? companionSlugById.get(arc.companionEntryId) : null;
+    if (!slug) { companionless.push(navArc(arc)); continue; }
+    const bucket = arcsByCompanion.get(slug);
+    if (bucket) bucket.push(arc); else arcsByCompanion.set(slug, [arc]);
+  }
+
+  const companionSlugs = [...new Set([...chains.keys(), ...arcsByCompanion.keys()])]
+    .sort((left, right) => (characterBySlug.get(left)?.title ?? left).localeCompare(characterBySlug.get(right)?.title ?? right));
+
+  const companions: CanonNavCompanion[] = companionSlugs.map((slug) => {
+    const steps = chains.get(slug) ?? [];
+    const claimed = new Set<string>();
+    const chain: CanonNavCompanionStep[] = steps.map((mission) => {
+      const meta = (mission.meta ?? {}) as Record<string, unknown>;
+      const arcSlug = typeof meta.arc === "string" && meta.arc.trim() ? meta.arc.trim() : null;
+      const arc = arcSlug ? arcBySlugAll.get(arcSlug) ?? null : null;
+      if (arc) claimed.add(arc.slug);
+      return {
+        order: typeof meta.order === "number" ? meta.order : null,
+        title: mission.title,
+        missionSlug: mission.slug,
+        arc: arc ? navArc(arc) : null,
+      };
+    });
+    return {
+      slug,
+      title: characterBySlug.get(slug)?.title ?? slug.replaceAll("-", " "),
+      chain,
+      looseArcs: (arcsByCompanion.get(slug) ?? []).filter((arc) => !claimed.has(arc.slug)).map(navArc),
+      pendingPackets: inbox.pending.companions[slug] ?? 0,
+    };
+  });
+
+  // A companion quest filed to nobody would vanish; it goes in the general
+  // bucket beside the packets that name no one either.
+  if (companionless.length > 0 || (inbox.pending.companions[""] ?? 0) > 0) {
+    companions.push({ slug: "", title: "Not filed to a companion yet", chain: [], looseArcs: companionless, pendingPackets: inbox.pending.companions[""] ?? 0 });
+  }
+
+  return { campaign, regions, unfiled, companions, incursions, events, pending: inbox.pending };
+}
+
+/**
+ * The one pass over every working scene and branch that finds where each flag
+ * is set and where it is checked.
+ *
+ * Two ledgers are derived from it — the promises page (is this promise planted,
+ * answered, both, or neither?) and the ripples web (which quest pays off in
+ * which other quest?) — and they have to agree, because they are the same
+ * reading of the same board. Two scanners drifted the moment one of them
+ * learned about a site the other did not.
+ */
+type StoryFlagSite = {
+  label: string;
+  detail: string;
+  arcSlug: string;
+  arcTitle: string;
+  arcCategory: StoryArcCategory;
+  isMainline: boolean;
+  /** The arc's position, so a ripple can be ordered by where it lands. */
+  position: number;
+  /** The node a `?node=` deep link opens, so a ripple row lands on the scene. */
+  nodeId: string;
+};
+
+async function scanStoryFlagSites() {
+  const [flags, nodes, edges] = await Promise.all([
+    db.storyEntry.findMany({
+      where: { kind: "FLAG", status: { in: workingStatuses } },
+      select: { id: true, slug: true, title: true, summary: true },
+      orderBy: { title: "asc" },
+    }),
+    db.storyNode.findMany({
+      where: { status: { in: workingStatuses } },
+      select: { id: true, key: true, title: true, effects: true, arc: { select: { slug: true, title: true, category: true, isMainline: true, position: true } } },
+    }),
+    db.storyEdge.findMany({
+      where: { status: { in: workingStatuses } },
+      select: { id: true, label: true, condition: true, effects: true, fromNodeId: true, fromNode: { select: { title: true } }, arc: { select: { slug: true, title: true, category: true, isMainline: true, position: true } } },
+    }),
+  ]);
+
+  // Word-boundary-ish match so one slug never matches inside a longer one.
+  const touches = (text: string | null, slug: string) =>
+    text !== null && new RegExp(`(^|[^a-z0-9-])${slug}([^a-z0-9-]|$)`).test(text);
+
+  const arcOf = (arc: { slug: string; title: string; category: StoryArcCategory; isMainline: boolean; position: number }) =>
+    ({ arcSlug: arc.slug, arcTitle: arc.title, arcCategory: arc.category, isMainline: arc.isMainline, position: arc.position });
+
+  const setAt = new Map<string, StoryFlagSite[]>();
+  const checkedAt = new Map<string, StoryFlagSite[]>();
+  for (const flag of flags) {
+    setAt.set(flag.slug, [
+      ...nodes
+        .filter((node) => node.effects.some((line) => touches(line, flag.slug)))
+        .map((node) => ({ label: node.title, detail: "scene effect", nodeId: node.id, ...arcOf(node.arc) })),
+      ...edges
+        .filter((edge) => edge.effects.some((line) => touches(line, flag.slug)))
+        .map((edge) => ({ label: edge.label ?? "Continue", detail: `choice out of "${edge.fromNode.title}"`, nodeId: edge.fromNodeId, ...arcOf(edge.arc) })),
+    ]);
+    checkedAt.set(flag.slug, edges
+      .filter((edge) => touches(edge.condition, flag.slug))
+      .map((edge) => ({ label: edge.label ?? "Continue", detail: `condition on a choice out of "${edge.fromNode.title}"`, nodeId: edge.fromNodeId, ...arcOf(edge.arc) })));
+  }
+
+  return { flags, setAt, checkedAt };
+}
+
 /**
  * The promises ledger: every FLAG, where the story plants it and where
  * the story answers it, derived entirely by scanning effects and conditions
@@ -474,45 +907,20 @@ export async function getStoryEntry(slug: string) {
  * never planted is a payoff nothing sets up.
  */
 export async function getStoryPromises() {
-  const [flags, nodes, edges] = await Promise.all([
-    db.storyEntry.findMany({
-      where: { kind: "FLAG", status: { in: workingStatuses } },
-      select: { id: true, slug: true, title: true, summary: true },
-      orderBy: { title: "asc" },
-    }),
-    db.storyNode.findMany({
-      where: { status: { in: workingStatuses } },
-      select: { id: true, key: true, title: true, effects: true, arc: { select: { slug: true, title: true } } },
-    }),
-    db.storyEdge.findMany({
-      where: { status: { in: workingStatuses } },
-      select: { id: true, label: true, condition: true, effects: true, fromNodeId: true, fromNode: { select: { title: true } }, arc: { select: { slug: true, title: true } } },
-    }),
-  ]);
+  const { flags, setAt, checkedAt } = await scanStoryFlagSites();
 
-  // Word-boundary-ish match so one slug never matches inside a longer one.
-  const touches = (text: string | null, slug: string) =>
-    text !== null && new RegExp(`(^|[^a-z0-9-])${slug}([^a-z0-9-]|$)`).test(text);
-
+  // Projected back down to the five fields the promises page has always
+  // carried. The scanner knows more now; the ledger's shape is not where that
+  // gets spent.
   type ThreadSite = { label: string; detail: string; arcSlug: string; arcTitle: string; nodeId: string };
+  const site = (row: StoryFlagSite): ThreadSite => ({ label: row.label, detail: row.detail, arcSlug: row.arcSlug, arcTitle: row.arcTitle, nodeId: row.nodeId });
 
   const threads = flags.map((flag) => {
-    const setAt: ThreadSite[] = [
-      ...nodes
-        .filter((node) => node.effects.some((line) => touches(line, flag.slug)))
-        .map((node) => ({ label: node.title, detail: "scene effect", arcSlug: node.arc.slug, arcTitle: node.arc.title, nodeId: node.id })),
-      ...edges
-        .filter((edge) => edge.effects.some((line) => touches(line, flag.slug)))
-        .map((edge) => ({ label: edge.label ?? "Continue", detail: `choice out of "${edge.fromNode.title}"`, arcSlug: edge.arc.slug, arcTitle: edge.arc.title, nodeId: edge.fromNodeId })),
-    ];
-    const checkedAt: ThreadSite[] = edges
-      .filter((edge) => touches(edge.condition, flag.slug))
-      .map((edge) => ({ label: edge.label ?? "Continue", detail: `condition on a choice out of "${edge.fromNode.title}"`, arcSlug: edge.arc.slug, arcTitle: edge.arc.title, nodeId: edge.fromNodeId }));
-
+    const planted = (setAt.get(flag.slug) ?? []).map(site);
+    const answered = (checkedAt.get(flag.slug) ?? []).map(site);
     const state: "planted" | "unset" | "wired" | "dormant" =
-      setAt.length > 0 && checkedAt.length > 0 ? "wired" : setAt.length > 0 ? "planted" : checkedAt.length > 0 ? "unset" : "dormant";
-
-    return { slug: flag.slug, title: flag.title, summary: flag.summary, state, setAt, checkedAt };
+      planted.length > 0 && answered.length > 0 ? "wired" : planted.length > 0 ? "planted" : answered.length > 0 ? "unset" : "dormant";
+    return { slug: flag.slug, title: flag.title, summary: flag.summary, state, setAt: planted, checkedAt: answered };
   });
 
   const order: Record<string, number> = { planted: 0, unset: 1, dormant: 2, wired: 3 };
@@ -524,6 +932,129 @@ export async function getStoryPromises() {
     unset: threads.filter((thread) => thread.state === "unset").length,
     wired: threads.filter((thread) => thread.state === "wired").length,
     dormant: threads.filter((thread) => thread.state === "dormant").length,
+  };
+}
+
+export type StoryRippleSite = StoryFlagSite;
+
+/** One quest reaching into another: a flag set here, read over there. */
+export type StoryRipple = { flag: string; flagTitle: string; from: StoryRippleSite; to: StoryRippleSite };
+
+/** An ending that hands the story on to another board. */
+export type StoryRippleChain = {
+  from: { arcSlug: string; arcTitle: string; nodeId: string; nodeTitle: string };
+  to: { arcSlug: string; arcTitle: string };
+};
+
+/**
+ * A connection that is real but not walkable yet — the amber rows. A promise
+ * nobody plants, a promise nobody collects, or material still sitting in the
+ * canon inbox. None of these are errors: they are the parts of the web that
+ * get written down before they get built.
+ */
+export type StoryFutureRipple = {
+  flag: string;
+  flagTitle: string;
+  kind: "unset" | "planted" | "packet";
+  detail: string;
+  /** Where the written half of the connection lives, when there is one. */
+  where: StoryRippleSite | null;
+  /** The thread the material is still waiting in, for `packet` rows. */
+  packet: { threadSlug: string; threadTitle: string; packetTitle: string } | null;
+};
+
+export type StoryRippleWeb = { ripples: StoryRipple[]; chains: StoryRippleChain[]; future: StoryFutureRipple[] };
+
+/**
+ * The cross-quest connection web: everything one quest does that another quest
+ * can see. Derived, never maintained — the same reading of effects and
+ * conditions the promises ledger does, asked a different question.
+ */
+export async function getStoryRipples(): Promise<StoryRippleWeb> {
+  const [{ flags, setAt, checkedAt }, continuations, inbox] = await Promise.all([
+    scanStoryFlagSites(),
+    db.storyNode.findMany({
+      where: { status: { in: workingStatuses }, continuesInArcId: { not: null } },
+      select: { id: true, title: true, arc: { select: { slug: true, title: true } }, continuesIn: { select: { slug: true, title: true } } },
+    }),
+    getCanonInbox(),
+  ]);
+
+  const ripples: StoryRipple[] = [];
+  const future: StoryFutureRipple[] = [];
+  const pending = inbox.packets.filter((packet) => packet.status === "pending");
+  // Matched the way the scanner matches effects: a flag named inside a longer
+  // slug is not a mention of it.
+  const mentions = (text: string, slug: string) => new RegExp(`(^|[^a-z0-9-])${slug}([^a-z0-9-]|$)`).test(text);
+
+  for (const flag of flags) {
+    const planted = setAt.get(flag.slug) ?? [];
+    const answered = checkedAt.get(flag.slug) ?? [];
+
+    for (const from of planted) {
+      for (const to of answered) {
+        // A flag set and checked inside one arc is that arc's own machinery,
+        // not a ripple into anywhere. Only crossings count.
+        if (from.arcSlug === to.arcSlug) continue;
+        ripples.push({ flag: flag.slug, flagTitle: flag.title, from, to });
+      }
+    }
+
+    if (planted.length === 0 && answered.length > 0) {
+      for (const where of answered) {
+        future.push({ flag: flag.slug, flagTitle: flag.title, kind: "unset", detail: "Something reads this, but no quest sets it yet.", where, packet: null });
+      }
+    }
+    if (planted.length > 0 && answered.length === 0) {
+      for (const where of planted) {
+        future.push({ flag: flag.slug, flagTitle: flag.title, kind: "planted", detail: "Planted here, still waiting for a quest to pay it off.", where, packet: null });
+      }
+    }
+
+    for (const packet of pending) {
+      if (!packet.entries.includes(flag.slug) && !mentions(packet.body, flag.slug)) continue;
+      future.push({
+        flag: flag.slug,
+        flagTitle: flag.title,
+        kind: "packet",
+        detail: `Arrives with “${packet.title}”, still waiting to be woven in.`,
+        where: null,
+        packet: { threadSlug: packet.thread.slug, threadTitle: packet.thread.title, packetTitle: packet.title },
+      });
+    }
+  }
+
+  const chains: StoryRippleChain[] = continuations.flatMap((node) => (node.continuesIn
+    ? [{ from: { arcSlug: node.arc.slug, arcTitle: node.arc.title, nodeId: node.id, nodeTitle: node.title }, to: { arcSlug: node.continuesIn.slug, arcTitle: node.continuesIn.title } }]
+    : []));
+
+  // Ordered by their mainline anchor: whichever end sits furthest up the spine
+  // is what a reader places the connection against.
+  const anchor = (ripple: StoryRipple) => [ripple.from, ripple.to]
+    .sort((left, right) => Number(right.isMainline) - Number(left.isMainline) || left.position - right.position)[0];
+  ripples.sort((left, right) => {
+    const a = anchor(left);
+    const b = anchor(right);
+    return Number(b.isMainline) - Number(a.isMainline) || a.position - b.position || a.arcTitle.localeCompare(b.arcTitle) || left.flag.localeCompare(right.flag);
+  });
+  future.sort((left, right) => left.kind.localeCompare(right.kind) || left.flagTitle.localeCompare(right.flagTitle));
+  chains.sort((left, right) => left.from.arcTitle.localeCompare(right.from.arcTitle) || left.to.arcTitle.localeCompare(right.to.arcTitle));
+
+  return { ripples, chains, future };
+}
+
+/**
+ * One arc's slice of the web, ready to render beside its board: what this
+ * quest sets that something else reads, what reads back into it, where it
+ * hands the story on, and the connections written down but not built yet.
+ */
+export function ripplesForArc(web: StoryRippleWeb, arcSlug: string) {
+  return {
+    outgoing: web.ripples.filter((ripple) => ripple.from.arcSlug === arcSlug && ripple.to.arcSlug !== arcSlug),
+    incoming: web.ripples.filter((ripple) => ripple.to.arcSlug === arcSlug && ripple.from.arcSlug !== arcSlug),
+    continues: web.chains.filter((chain) => chain.from.arcSlug === arcSlug),
+    continuedFrom: web.chains.filter((chain) => chain.to.arcSlug === arcSlug),
+    future: web.future.filter((row) => row.where?.arcSlug === arcSlug),
   };
 }
 
@@ -594,6 +1125,15 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.control)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.connections)) { const slug = slugOf(row.to); if (slug) targets.push(slug); }
       for (const row of rows(meta.involvement)) { const slug = slugOf(row.arc); if (slug) targets.push(slug); }
+      // The development room's newest links. A packet naming an entry
+      // nobody wrote, or a mission pointing at an arc that was deleted, is an
+      // unresolved link like any other — reported here rather than rotting
+      // quietly inside a meta object nothing scans.
+      { const slug = slugOf(meta.arc); if (slug) targets.push(slug); }
+      for (const row of rows(meta.canonPackets)) {
+        for (const value of [row.targetRegion, row.targetCompanion]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+        for (const list of [row.entries, row.wovenInto]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      }
     }
     return targets;
   };
@@ -671,9 +1211,16 @@ export async function getStoryNeedsWork() {
       for (const [field, list] of [["character", meta.characters], ["companion", meta.companions], ["faction", meta.factions], ["location", meta.locations], ["arc", meta.arcs], ["companion mission", meta.companionMissions], ["boss", meta.bosses]] as const) {
         for (const target of Array.isArray(list) ? list : []) check(field, target);
       }
+      for (const row of rows(meta.canonPackets)) {
+        check("canon packet target", row.targetRegion);
+        check("canon packet companion", row.targetCompanion);
+        for (const target of Array.isArray(row.entries) ? row.entries : []) check("canon packet mentions", target);
+        for (const target of Array.isArray(row.wovenInto) ? row.wovenInto : []) check("woven into", target);
+      }
     }
     if (entry.kind === "COMPANION_MISSION") {
       check("companion", meta.companion);
+      check("became arc", meta.arc);
       for (const [field, list] of [["character", meta.characters], ["location", meta.locations], ["faction", meta.factions], ["thread", meta.threads]] as const) {
         for (const target of Array.isArray(list) ? list : []) check(field, target);
       }

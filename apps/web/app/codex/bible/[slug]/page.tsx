@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
-import { storyEntryKindLabels, storyPlaceDescendants, type StoryPlaceLink } from "@habitat/shared";
+import { storyEntryKindLabels, storyPlaceDescendants, type StoryCanonPacket, type StoryPlaceLink } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -10,9 +10,11 @@ import { CharacterSheet, CompanionMissionSheet, CreatureSheet, EventSheet, Facti
 import { StoryEntityProfile } from "@/components/story-entity-profile";
 import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button";
 import { StoryWarden } from "@/components/story-warden";
+import { CanonPacketPanel } from "@/components/canon-packet-panel";
 import { addComment, resolveComment, setStoryStatus } from "@/app/codex/actions";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { collectionForKind, defaultChildPlaceKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
+import { canonPacketSchema } from "@/lib/story-meta-schemas";
 
 export default async function StoryEntryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ created?: string }> }) {
   const user = await requireRole(storyReadRole);
@@ -116,6 +118,15 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       })()
     : null;
 
+  // Read straight off the stored sheet, and forgivingly: a packet whose shape
+  // does not validate is skipped rather than taking the whole dossier down.
+  const threadPackets = entry.kind === "THREAD"
+    ? (Array.isArray(entry.meta?.canonPackets) ? entry.meta.canonPackets : []).flatMap((row) => {
+        const parsed = canonPacketSchema.safeParse(row);
+        return parsed.success ? [parsed.data as StoryCanonPacket] : [];
+      })
+    : [];
+
   const threadEntries = everyEntry.filter((candidate) => candidate.kind === "THREAD");
   const missionEntries = everyEntry.filter((candidate) => candidate.kind === "COMPANION_MISSION");
   const metaText = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -185,6 +196,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       <StoryEntityProfile
         addChildKind={defaultChildPlaceKind(entry.meta?.type)}
         arcsHere={entry.arcsHere}
+        companionArcs={entry.companionArcs}
         containedPlaces={containedPlaces}
         entry={entry}
         arcTitles={Object.fromEntries(allArcs.map((option) => [option.slug, option.title]))}
@@ -294,6 +306,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                 />
               ) : entry.kind === "COMPANION_MISSION" ? (
                 <CompanionMissionSheet
+                  arcs={arcs.map((arc) => ({ slug: arc.slug, title: arc.title }))}
                   characters={characters.map((option) => ({ slug: option.slug, title: option.title }))}
                   entryId={entry.id}
                   factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
@@ -312,6 +325,19 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
               <form action={setStoryStatus}><input name="entityType" type="hidden" value="ENTRY" /><input name="entityId" type="hidden" value={entry.id} /><input name="status" type="hidden" value="CANON" /><button className="save-server" type="submit">Make canon</button></form>
               <form action={setStoryStatus}><input name="entityType" type="hidden" value="ENTRY" /><input name="entityId" type="hidden" value={entry.id} /><input name="status" type="hidden" value="REJECTED" /><button className="save-server" type="submit">Reject</button></form>
             </div>
+          ) : null}
+
+          {entry.kind === "THREAD" ? (
+            <CanonPacketPanel
+              companions={characters.map((option) => ({ slug: option.slug, title: option.title }))}
+              entries={everyEntry.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+              entryId={entry.id}
+              key={`packets-${entry.version}`}
+              packets={threadPackets}
+              regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+              threadTitle={entry.title}
+              version={entry.version}
+            />
           ) : null}
 
           <div className="entry-danger-zone"><div><p className="eyebrow">Remove from the working Codex</p><p>Archive keeps its history and relationships recoverable, but removes this entry from the game export.</p></div><StoryArchiveEntryButton entryId={entry.id} title={entry.title} /></div>

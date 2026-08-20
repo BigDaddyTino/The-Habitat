@@ -14,10 +14,10 @@ import {
   type NodeProps,
   type ReactFlowInstance,
 } from "@xyflow/react";
-import { useCallback, useMemo, useRef, useState, useTransition, useEffect } from "react";
+import { useCallback, useMemo, useRef, useState, useTransition, useEffect, type CSSProperties } from "react";
 import Link from "next/link";
 import { CornerDownRight, Flag, GitBranch, PenLine, RotateCcw, Settings2, Sparkles, Undo2, X } from "lucide-react";
-import { storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels } from "@habitat/shared";
+import { storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels, type StoryNodeKind } from "@habitat/shared";
 import { addBranch, createEdge, createNode } from "@/app/codex/actions";
 import { EdgeEditor, NodeEditor, type StoryArcRef } from "@/components/story-workbench";
 import { StoryFlowLock } from "@/components/story-flow-lock";
@@ -50,7 +50,7 @@ type FlowNode = Node<FlowNodeData, "flow">;
 function FlowNodeCard({ data }: NodeProps<FlowNode>) {
   const { node, state, walkIndex, frozen } = data;
   return (
-    <article className={`flow-card is-${state} kind-${node.kind.toLowerCase()}${frozen ? " is-frozen" : ""}`}>
+    <article className={`flow-card is-${state} kind-${node.kind.toLowerCase()}${node.kind === "ENDING" && node.endingKind ? ` ending-${node.endingKind.toLowerCase()}` : ""}${frozen ? " is-frozen" : ""}`}>
       <Handle position={Position.Top} type="target" />
       {walkIndex !== null ? <span className="flow-step-badge">{walkIndex}</span> : null}
       <span className="flow-card-kind">{storyNodeKindLabels[node.kind]}{node.status !== "CANON" ? ` · ${node.status.toLowerCase()}` : ""}</span>
@@ -62,6 +62,35 @@ function FlowNodeCard({ data }: NodeProps<FlowNode>) {
 }
 
 const nodeTypes = { flow: FlowNodeCard };
+
+/**
+ * What each kind of card is worth at a glance: gold opens a quest, cool grey
+ * is somebody talking, green is a decision, violet is the story checking
+ * something, crimson is an ending that went badly.
+ *
+ * The same values live as CSS custom properties on `.flow-card`. They are
+ * duplicated here rather than read back out of the stylesheet because the
+ * minimap paints to a canvas and has no element to read a computed style
+ * from — the legend below renders from this map, so a colour that drifts
+ * shows up in the legend immediately.
+ */
+const kindColors: Record<string, string> = {
+  QUEST_START: "#c6974c",
+  QUEST_STEP: "#b0985c",
+  SCENE: "#9aa79b",
+  BEAT: "#77837a",
+  DIALOGUE: "#8fa3b5",
+  CHOICE: "#8fbf8a",
+  CONDITION: "#a58fd0",
+  ENDING: "#c6974c",
+};
+
+const endingColors: Record<string, string> = { SUCCESS: "#8fbf8a", FAILURE: "#c05b5b", NEUTRAL: "#c6974c" };
+
+function flowKindColor(node: StoryBoardNode) {
+  if (node.kind === "ENDING" && node.endingKind) return endingColors[node.endingKind] ?? kindColors.ENDING;
+  return kindColors[node.kind] ?? "#4b554a";
+}
 
 const ROW_GAP = 185;
 const CARD_GAP = 272;
@@ -405,13 +434,23 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
             // The minimap ices over with the board, or a locked flow would
             // still read as brass and green in the corner.
             if (data.frozen) return data.state === "dim" ? "#2b3a45" : "#7ec4f0";
-            return data.state === "walked" || data.state === "current" ? "#c6974c" : data.state === "offered" ? "#8fbf8a" : "#39413a";
+            if (data.state === "walked" || data.state === "current") return "#c6974c";
+            if (data.state === "offered") return "#8fbf8a";
+            // Everything the walk has no opinion about is tinted by what kind
+            // of card it is, so the minimap reads as the shape of the story
+            // rather than as one grey mass with a brass thread through it.
+            return flowKindColor(data.node);
           }} pannable zoomable /> : null}
         </ReactFlow>
         <div className="flow-guide">
           <span className="is-current">You are here</span>
           <span className="is-choice">Green — your next choices</span>
           <span>Click any card to read or edit it</span>
+          <span className="flow-kind-legend">
+            {(Object.keys(kindColors) as StoryNodeKind[]).map((kind) => (
+              <i key={kind} style={{ "--kind-swatch": kindColors[kind] } as CSSProperties}>{storyNodeKindLabels[kind]}</i>
+            ))}
+          </span>
         </div>
         <StoryFlowLock arcId={board.arc.id} canReview={canReview} locked={locked} />
         <StoryWarden arcId={board.arc.id} available={assistantAvailable} nodeId={shown?.id ?? null} />

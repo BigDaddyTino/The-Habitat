@@ -21,7 +21,9 @@ Two halves, severable:
 
 | Route | Who | What |
 | --- | --- | --- |
-| `/codex` | USER | Story premise, core themes, world libraries, arcs, recent work |
+| `/codex` | USER | Story premise, core themes, world libraries, and the audit log |
+| `/codex/stories` | USER | The stories room: canon and threads, the room law, and where a new story is opened |
+| `/codex/stories/canon` | USER | The canon workspace: the navigator, every board by kind, the canon inbox, and the connection web |
 | `/codex/library/[collection]` | USER | Visual, searchable libraries for characters, factions, regions, creatures, items, events, themes, and rules |
 | `/codex/arc/[slug]` | USER | The board: cards, branches, inspector, presence |
 | `/codex/bible` | USER | The lore bible, filterable by kind |
@@ -186,6 +188,11 @@ enterable from more than one place — so multiple entry points are not flagged.
     "hook": "A notice board in the fishing village.", // how the party finds it; free text
     "region": { "slug": "port-arcadia", "title": "Port Arcadia" }, // pickup place, from a REGION entry
     "isMainline": false,
+    // Added 2026-08-20, additive to contract v1. An importer that only knows
+    // `isMainline` keeps reading exactly what it always read; a database CHECK
+    // guarantees the two can never disagree.
+    "category": "SIDE_QUEST",  // MAINLINE | SIDE_QUEST | CONTRACT | COMPANION_QUEST | INCURSION | WORLD_EVENT
+    "companion": null,         // COMPANION_QUEST only: the CHARACTER whose story it is
     "entryNodeKeys": ["the-gate"], // oldest-first; [0] is the importer's canonical start
     "nodes": [{
       "key": "the-gate",        // stable across retitling — the importer's handle
@@ -422,6 +429,97 @@ only the focused node's neighbourhood rather than the entire arc.
 
 ---
 
+## Canon packets — the road out of the development room
+
+Story threads are the room arguing with itself. Canon is what it settled on.
+A **canon packet** is the one road between them.
+
+```
+a thread        →   the canon inbox        →   a story board        →   locked
+(an argument)       (settled, waiting)         (built by a writer)      (finished)
+```
+
+A writer opens a thread's dossier, writes down the part that has stopped
+being an argument, says where it belongs, and sends it. It lands in the canon
+inbox on `/codex/stories/canon`, and the navigator shows a counted bubble
+beside whatever it is aimed at until somebody weaves it in.
+
+**Pushing settles nothing.** It is a hand-off, not an approval and not a
+freeze — the arc padlock is still the only thing in the codex that makes
+anything settled, and it is unchanged by any of this. Marking a packet woven
+is a writer saying "I built this", and it records which boards it became;
+those arc slugs are unioned into the thread's own `arcs` list, which is how a
+thread keeps a permanent trace of what it shipped.
+
+Packets live inside the thread's own `meta.canonPackets`, not in a table of
+their own, for two reasons: a packet can never outlive or drift from the
+thread it came out of, and the export — which withholds THREAD entries
+entirely — never has to learn they exist. Nothing about a packet ever reaches
+the game.
+
+Three properties worth knowing before touching one:
+
+- `canonPackets` is **required with no default** in `threadMetaSchema`. A
+  sheet that forgets to pass it through is refused whole rather than saved
+  without it. The alternative — a default of `[]` — would silently delete
+  every packet on the thread the next time anybody edited the sheet.
+- Every packet write (`pushCanonPacket`, `markCanonPacketWoven`,
+  `withdrawCanonPacket`) re-validates the **whole** meta object through
+  `threadMetaSchema` and is version-guarded like any other sheet save.
+- Weaving is a one-way door and withdrawing only reaches pending packets:
+  woven material is history, and re-weaving would rewrite who did it and when.
+
+`scripts/sweep-story-legacy.ts` reports any packet the inbox cannot read, and
+`scripts/audit-story-meta.ts` validates every stored packet against the same
+schema the sheet enforces.
+
+---
+
+## What kind of story is this?
+
+Every arc carries a `category`: `MAINLINE`, `SIDE_QUEST`, `CONTRACT`,
+`COMPANION_QUEST`, `INCURSION`, or `WORLD_EVENT`. It is what the canon
+navigator files by — the campaign spine, then the map (side quests and the
+contracts posted at each place), then the companions, then what comes through
+and what happens to the world.
+
+Two categories are defined by what they are filed to, and the server refuses
+one without it: a `CONTRACT` needs a region (being posted somewhere is what
+makes it a contract) and a `COMPANION_QUEST` needs a character.
+
+`StoryArc.isMainline` is **not** replaced. It is the export contract, the
+ordering key, and what every arc picker reads, and it stays in lockstep with
+the category — a database CHECK refuses any row where the two disagree, so a
+writer that sets one column and forgets the other fails loudly instead of
+shipping a mainline chapter the game files as a side quest. Three places write
+an arc: `createArc`, `updateArc`, and `packages/db/scripts/ingest-story-seed.ts`.
+
+---
+
+## Ripples — what one quest does that another quest can see
+
+The same scan that builds the promises ledger answers a second question: if a
+flag is set in one quest and read in another, those two quests are connected,
+and both boards should say so. `getStoryRipples()` derives that web — nobody
+maintains it — and it renders twice: as a panel under each board ("this quest
+ripples into…", "…and is shaped by"), and as the whole web in campaign order
+on the canon workspace.
+
+A flag set and read inside one arc is that arc's own machinery, not a ripple;
+only crossings count. `StoryNode.continuesInArcId` is carried as a chain in
+both directions.
+
+Amber rows are **future** connections — real, but not walkable yet: a promise
+nothing plants, a promise nothing collects, or a flag named in a packet still
+sitting in the canon inbox. None of these are errors. They are the parts of
+the web that get written down before they get built.
+
+`getStoryPromises` and `getStoryRipples` read one shared `scanStoryFlagSites()`
+pass, because two scanners drifted the moment one of them learned about a site
+the other did not, and the two pages would then disagree about the same board.
+
+---
+
 ## Schema
 
 New tables, all added by `20260817120000_add_story_codex`:
@@ -447,6 +545,11 @@ Constraints that live in the migration SQL (documented with `///` comments in
 - `StoryComment_targets_exactly_one` — a comment attached to both a node and an
   entry would appear in two discussions and be resolved from one.
 - `StoryExportToken_hash_is_sha256_hex` — catches a raw token in the hash column.
+- `StoryArc_mainline_category_agree` — `isMainline` and `category` say the same
+  thing, or the write fails. Added by `20260820120000_add_story_arc_category`,
+  which also backfills `canonPackets: []` onto every THREAD and `arc: null`
+  onto every COMPANION_MISSION, because a stored row that is missing a key the
+  schema requires would be refused on its next sheet save.
 
 Both ends of an edge living in the same arc is enforced in the server action
 rather than by a composite foreign key, because a two-relation composite FK

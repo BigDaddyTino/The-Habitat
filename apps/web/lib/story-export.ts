@@ -93,6 +93,7 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       orderBy: [{ isMainline: "desc" }, { position: "asc" }, { createdAt: "asc" }],
       include: {
         region: { select: { slug: true, title: true, status: true } },
+        companion: { select: { slug: true, title: true, status: true } },
         nodes: {
           where: { status: exportableStoryStatus },
           orderBy: { key: "asc" },
@@ -191,6 +192,12 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       hook: arc.hook,
       region: arc.region && arc.region.status === exportableStoryStatus ? { slug: arc.region.slug, title: arc.region.title } : null,
       isMainline: arc.isMainline,
+      // Additive to the v1 contract, and never a replacement: an importer that
+      // only knows `isMainline` keeps reading exactly what it always read,
+      // and the database CHECK guarantees the two can never disagree.
+      category: arc.category,
+      // Withheld like every other reference whose target is not itself canon.
+      companion: arc.companion && arc.companion.status === exportableStoryStatus ? { slug: arc.companion.slug, title: arc.companion.title } : null,
       entryNodeKeys: findStoryEntryNodeKeys(graphNodesByAge, graphEdges),
       nodes,
       // Reported, never enforced. The importer decides whether a story with

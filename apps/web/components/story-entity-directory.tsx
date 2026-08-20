@@ -37,6 +37,14 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // filed under its companion, in chain order, wearing its development
   // status. Falls back to the flat grid for search results.
   const companionsForMissions = isMissionsLibrary ? await listStoryEntries({ kind: "CHARACTER" }) : [];
+  // An entry is born connected. Every create panel below asks the one
+  // question that files the new entry into the world — where a character
+  // calls home, where a faction sits, where an item came from, where an
+  // event happened — because an entry created loose is one somebody has to
+  // remember to adopt, and nobody does.
+  const wantsRegionPicker = ["CHARACTER", "FACTION", "ITEM", "EVENT", "CREATURE"].includes(collection.kind);
+  const regionsForPickers = wantsRegionPicker ? await listStoryEntries({ kind: "REGION" }) : [];
+  const factionsForPickers = collection.kind === "CHARACTER" ? await listStoryEntries({ kind: "FACTION" }) : [];
   const missionChains = new Map<string, typeof entries>();
   const looseMissions: typeof entries = [];
   if (isMissionsLibrary && !search) {
@@ -396,6 +404,32 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             <option value="">Nothing above it — this IS a new race</option>
             {raceParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
+          {collection.kind === "CHARACTER" ? <>
+            <label>Where do they call home?<select defaultValue="" name="home">
+              <option value="">Not decided yet</option>
+              {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select></label>
+            {factionsForPickers.length ? <label>Who do they run with?<select multiple name="factions" size={4}>
+              {factionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select>
+            <small className="sheet-hint">Hold Ctrl (or ⌘) to pick more than one. Leave it empty if they answer to nobody.</small></label> : null}
+          </> : null}
+          {collection.kind === "FACTION" ? <label>Where is their seat of power?<select defaultValue="" name="seat">
+            <option value="">Not decided yet</option>
+            {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select></label> : null}
+          {collection.kind === "ITEM" ? <label>Where did it come from?<select defaultValue="" name="origin">
+            <option value="">Not decided yet</option>
+            {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select></label> : null}
+          {collection.kind === "EVENT" ? <label>Where did it happen?<select multiple name="where" size={4}>
+            {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select>
+          <small className="sheet-hint">Hold Ctrl (or ⌘) if it happened in more than one place.</small></label> : null}
+          {isRacesLibrary && regionsForPickers.length ? <label>Where does it live?<select multiple name="biomes" size={4}>
+            {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select>
+          <small className="sheet-hint">Hold Ctrl (or ⌘) to pick more than one range.</small></label> : null}
           {isMissionsLibrary ? <div className="sheet-grid">
             <label>Whose companion arc<select defaultValue="" name="companion">
               <option value="">Not decided yet</option>

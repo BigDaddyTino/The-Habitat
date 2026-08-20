@@ -830,6 +830,11 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
     arcs: cleanSlugs(arcList),
     companionMissions: cleanSlugs(missionList),
     bosses: cleanSlugs(bosses),
+    // Carried through untouched. The sheet serializes the WHOLE meta object
+    // and zod strips what it does not see, so dropping this line would delete
+    // every canon packet the thread holds on the next save. Packets are
+    // written by the push/weave/withdraw actions, never edited here.
+    canonPackets: asArray(source.canonPackets) as StoryThreadMeta["canonPackets"],
     tags: splitLines(tags),
     openQuestions: splitLines(openQuestions),
   };
@@ -879,7 +884,7 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
 // Companion mission sheet
 // ---------------------------------------------------------------------------
 
-export function CompanionMissionSheet({ entryId, version, meta, characters, factions, regions, threads }: {
+export function CompanionMissionSheet({ entryId, version, meta, characters, factions, regions, threads, arcs = [] }: {
   entryId: string;
   version: number;
   meta: Record<string, unknown> | null;
@@ -887,9 +892,12 @@ export function CompanionMissionSheet({ entryId, version, meta, characters, fact
   factions: SlugOption[];
   regions: SlugOption[];
   threads: SlugOption[];
+  /** Quest boards, so a mission can say which one it actually became. */
+  arcs?: SlugOption[];
 }) {
   const source = record(meta);
   const [companion, setCompanion] = useState(text(source.companion));
+  const [arc, setArc] = useState(text(source.arc));
   const [order, setOrder] = useState(typeof source.order === "number" ? String(source.order) : "");
   const [missionStatus, setMissionStatus] = useState(text(source.missionStatus));
   const [stage, setStage] = useState(text(source.stage));
@@ -906,6 +914,7 @@ export function CompanionMissionSheet({ entryId, version, meta, characters, fact
   const orderNumber = Number.parseInt(order, 10);
   const composed: StoryCompanionMissionMeta = {
     companion: orNull(companion),
+    arc: orNull(arc),
     order: Number.isInteger(orderNumber) && orderNumber >= 1 && orderNumber <= 99 ? orderNumber : null,
     missionStatus: (storyCompanionMissionStatuses as readonly string[]).includes(missionStatus) ? (missionStatus as StoryCompanionMissionMeta["missionStatus"]) : null,
     stage: (storyStoryStages as readonly string[]).includes(stage) ? (stage as StoryCompanionMissionMeta["stage"]) : null,
@@ -936,6 +945,12 @@ export function CompanionMissionSheet({ entryId, version, meta, characters, fact
         <label>Status<select onChange={(event) => setMissionStatus(event.target.value)} value={missionStatus}><option value="">No status yet</option>{storyCompanionMissionStatuses.map((option) => <option key={option} value={option}>{storyCompanionMissionStatusLabels[option]}</option>)}</select></label>
         <label>Story stage<select onChange={(event) => setStage(event.target.value)} value={stage}><option value="">Not decided</option>{storyStoryStages.map((option) => <option key={option} value={option}>{storyStoryStageLabels[option]}</option>)}</select></label>
       </div>
+
+      <label>Has this been built yet?<select onChange={(event) => setArc(event.target.value)} value={arc}>
+        <option value="">Not built yet — still just written down</option>
+        {arcs.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+      </select>
+      <small className="sheet-hint">Pick the quest board this mission became. Until you do, it shows in {companion ? companion.replaceAll("-", " ") : "the companion"}&apos;s chain as planned.</small></label>
 
       <label>Unlock conditions — what has to be true before this opens<textarea maxLength={1000} onChange={(event) => setUnlockConditions(event.target.value)} placeholder="Amanda recruited; the party has heard Tino's name spoken twice." rows={2} value={unlockConditions} /></label>
       <label>Rewards — one per line<textarea onChange={(event) => setRewards(event.target.value)} placeholder={"Amanda's trust deepens\nA keepsake from the old tavern"} rows={2} value={rewards} /></label>

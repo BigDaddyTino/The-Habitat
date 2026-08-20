@@ -67,7 +67,7 @@ async function main() {
 
   const collections = ["characters", "factions", "regions", "races", "items", "events", "themes", "rules", "systems", "companion-missions"];
   const surfaces = [
-    "/codex", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises",
+    "/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises",
     ...collections.map((c) => `/codex/library/${c}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}/flow`),
@@ -121,6 +121,20 @@ async function main() {
   // The landing page headlines the current core system.
   must("/codex", "core system spotlight", "codex-system-spotlight");
 
+  // The stories room: both doors, the create form, and the room law that
+  // used to live inline on the landing page.
+  must("/codex/stories", "canon door", "/codex/stories/canon");
+  must("/codex/stories", "threads door", "/codex/threads");
+  must("/codex/stories", "open-a-story form", "open-a-story");
+  must("/codex/stories", "kind-of-story picker on the create form", 'name="category"');
+  must("/codex/stories", "title field on the create form", 'name="title"');
+  must("/codex/stories", "writers' room law", "codex-laws");
+
+  // The canon workspace: the navigator, the inbox, and the connection web.
+  must("/codex/stories/canon", "canon navigator", "canon-nav");
+  must("/codex/stories/canon", "canon inbox", "canon-inbox");
+  must("/codex/stories/canon", "connections overview", "story-ripples");
+
   // Places and systems must offer the parent picker at creation, or new work
   // arrives orphaned and has to be adopted afterwards.
   must("/codex/library/regions", "parent picker on the create form", 'name="parent"');
@@ -142,6 +156,10 @@ async function main() {
     const path = `/codex/arc/${arc.slug}`;
     must(path, "arc settings", "Arc settings");
     must(path, "lock control", "flow-lock");
+    // Every board carries the navigator and its own slice of the web.
+    must(path, "canon navigator", "canon-nav");
+    must(path, "ripples panel", "story-ripples");
+    must(path, "kind-of-story picker in settings", 'name="category"');
   }
 
   // --- locks: none held, and the control reads as unlocked -------------------

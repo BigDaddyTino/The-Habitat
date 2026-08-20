@@ -186,6 +186,95 @@ sees snow); the region dossier shows the same rows back.
 
 No meta needed now. Optionally `appliesTo: [kind]` later so the app can surface "rules that govern characters" on character-editing screens (e.g. the Tino rule appearing wherever someone edits his status).
 
+### 3.9 THREAD.meta — the development room
+
+A thread is an evolving narrative concept — an arc, a mystery, a betrayal, a
+boss, an ending — argued in the open and never confirmed canon until the room
+decides. The development truth lives in `threadStatus`, not in the entry's own
+status: the room's open-write law lands every save as a working entry, so the
+entry status says nothing about whether the idea is settled.
+
+Every `related-*` field is slugs, never names as text, under the same
+link-now-fill-later law the rest of the codex runs on.
+
+```json
+{
+  "threadStatus": "brainstorming | under-discussion | planned | approved | in-development | implemented | on-hold | rejected | archived",
+  "categories": ["main-story | character-arc | companion-arc | mystery | boss-encounter | ending | …"],
+  "stages": ["peninsula | endgame | post-credits | …"],
+  "priority": "low | medium | high | critical",
+  "spoilerLevel": "none | minor | major | ending",
+  "parent": "thread slug — the thread this one grew out of; children are derived, never stored twice",
+  "characters": ["character slug"],
+  "companions": ["character slug, in their companion capacity"],
+  "factions": ["faction slug"],
+  "locations": ["region slug"],
+  "arcs": ["arc slug — the story boards this thread touches, and the trace of what it shipped"],
+  "companionMissions": ["companion mission slug"],
+  "bosses": ["any slug — a boss can be a character or a creature"],
+  "canonPackets": [{
+    "id": "uuid, minted server-side",
+    "title": "string ≤120",
+    "body": "the settled material itself, ≤8000",
+    "targetKind": "campaign | region | companions | incursions | events",
+    "targetRegion": "region slug — required iff targetKind is region, null otherwise",
+    "targetCompanion": "character slug — optional on a companions packet; null is the general bucket",
+    "entries": ["any slug this material names"],
+    "status": "pending | woven",
+    "pushedAt": "ISO timestamp", "pushedBy": "member name",
+    "wovenAt": "ISO timestamp | null", "wovenBy": "member name | null",
+    "wovenInto": ["arc slug this material actually became"]
+  }],
+  "tags": ["string"],
+  "openQuestions": ["string"]
+}
+```
+
+`canonPackets` is **required with no default**, and that is deliberate. The
+sheet composes the whole meta object client-side and zod strips what it does
+not know, so a default of `[]` would mean a sheet that forgot the field
+silently deleted every packet on the thread. Required-with-no-default turns
+that into a refused save instead. Packets are written only by the three server
+actions (`pushCanonPacket`, `markCanonPacketWoven`, `withdrawCanonPacket`) and
+carried through untouched by the sheet — see the Canon packets section of
+`Docs/STORY_CODEX.md` for the whole road.
+
+THREAD entries are development-room records: the export withholds them
+entirely, and a scene that references one exports without that reference.
+
+### 3.10 COMPANION_MISSION.meta — one step in a companion's chain
+
+A first-class record rather than a text field on the character. `companion`
+and `order` file it: `companion` names the CHARACTER whose arc it belongs to,
+and `order` places it in their chain (Amanda's runs 1–9).
+
+```json
+{
+  "companion": "character slug",
+  "arc": "arc slug this mission actually became, or null while it is only planned",
+  "order": 1,
+  "missionStatus": "brainstorming | concept | planned | approved | in-development | implemented | cut | archived",
+  "stage": "peninsula | endgame | post-credits | …",
+  "unlockConditions": "prose — what has to be true before this opens",
+  "rewards": ["string"],
+  "relationshipEffects": "prose",
+  "consequences": "prose — what it changes in the world or the story",
+  "characters": ["character slug"],
+  "locations": ["region slug"],
+  "factions": ["faction slug"],
+  "threads": ["thread slug this mission advances"],
+  "openQuestions": ["string"]
+}
+```
+
+`arc` (added 2026-08-20) is what tells an implemented chain step from a
+written-down one. The canon navigator links a step to its board when the arc
+resolves and renders it dimmed, linking the mission dossier, when it does not —
+so a companion's chain shows the whole plan with the built half highlighted,
+rather than only the parts somebody got around to building.
+
+Like THREAD, COMPANION_MISSION is withheld from the export.
+
 ---
 
 ## 4. How Narrative Tales consumes each module

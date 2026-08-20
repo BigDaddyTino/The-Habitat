@@ -8,14 +8,30 @@ import { askWarden, type WardenState } from "@/app/codex/actions";
 const initialState: WardenState = { turns: [] };
 
 /**
+ * The questions a writer who is new to this room actually has, phrased the way
+ * they would phrase them. Shown as chips beside the dock on the story surfaces,
+ * because the hardest part of asking for help is knowing what to ask for.
+ *
+ * All four are directions questions. That is the whole guide mode: the Warden
+ * points at the right form and explains what it does. He never fills one in.
+ */
+const guidePrompts = [
+  "Where should this idea go?",
+  "What is waiting on me?",
+  "Walk me through sending something to canon",
+  "Is this thread ready to send?",
+];
+
+/**
  * The Warden's panel, floating over the board.
  *
  * Everything he says is advisory and stays on screen — nothing here writes to
  * the codex. A suggestion becomes story only when a writer types it into a card
  * themselves, which is what keeps the review ladder meaningful.
  */
-export function StoryWarden({ arcId, nodeId, available }: { arcId: string | null; nodeId: string | null; available: boolean }) {
+export function StoryWarden({ arcId, nodeId, available, guide = false }: { arcId: string | null; nodeId: string | null; available: boolean; guide?: boolean }) {
   const [open, setOpen] = useState(false);
+  const [seed, setSeed] = useState("");
   const [state, formAction, pending] = useActionState(askWarden, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
@@ -27,12 +43,21 @@ export function StoryWarden({ arcId, nodeId, available }: { arcId: string | null
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [turnCount]);
 
+  const ask = (question: string) => { setSeed(question); setOpen(true); };
+
   if (!open) {
     return (
-      <button className="warden-summon" onClick={() => setOpen(true)} type="button">
-        <Flame aria-hidden="true" size={15} />
-        Ask {storyAssistantName}
-      </button>
+      <div className={guide ? "warden-dock has-guide" : "warden-dock"}>
+        {guide && available ? (
+          <div className="warden-guide-chips">
+            {guidePrompts.map((prompt) => <button key={prompt} onClick={() => ask(prompt)} type="button">{prompt}</button>)}
+          </div>
+        ) : null}
+        <button className="warden-summon" onClick={() => setOpen(true)} type="button">
+          <Flame aria-hidden="true" size={15} />
+          Ask {storyAssistantName}
+        </button>
+      </div>
     );
   }
 
@@ -66,16 +91,27 @@ export function StoryWarden({ arcId, nodeId, available }: { arcId: string | null
 
       {state.error ? <p className="warden-error" role="alert">{state.error}</p> : null}
 
-      <form action={formAction} ref={formRef}>
+      {guide && available && state.turns.length === 0 ? (
+        <div className="warden-guide-chips is-inline">
+          {guidePrompts.map((prompt) => <button key={prompt} onClick={() => setSeed(prompt)} type="button">{prompt}</button>)}
+        </div>
+      ) : null}
+
+      {/* The box empties as the question goes, not in an effect afterwards:
+          React has already built the FormData by the time this runs. */}
+      <form action={(payload: FormData) => { setSeed(""); formAction(payload); }} ref={formRef}>
         <input name="arcId" type="hidden" value={arcId ?? ""} />
         <input name="nodeId" type="hidden" value={nodeId ?? ""} />
+        {guide ? <input name="guide" type="hidden" value="on" /> : null}
         <textarea
           disabled={!available}
           maxLength={2000}
           name="question"
+          onChange={(event) => setSeed(event.target.value)}
           placeholder={available ? "Does the Ashwarden ever leave the fen?" : "Unavailable until a key is configured."}
           required
           rows={2}
+          value={seed}
         />
         <button aria-label="Ask" className="save-server" disabled={pending || !available} type="submit">
           <Send aria-hidden="true" size={13} />

@@ -58,6 +58,13 @@ const ungatedActions = [
   "updateEntry",
   "updateEntryMeta",
   "archiveEntry",
+  // Canon packets write the THREAD entry and nothing else. Pushing settled
+  // material toward canon is a hand-off, not a freeze and not an approval —
+  // the arc padlock is still the only thing that settles a flow — so a locked
+  // arc has no say over what the development room hands across.
+  "pushCanonPacket",
+  "markCanonPacketWoven",
+  "withdrawCanonPacket",
   "addComment",
   "resolveComment",
   "claimNodeLock",

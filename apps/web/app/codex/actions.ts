@@ -1,19 +1,29 @@
 "use server";
 
 import "@/lib/environment";
+import { randomUUID } from "node:crypto";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
   isValidStoryKey,
   parseStoryPlaceKind,
   slugifyStoryKey,
+  storyArcCategories,
+  storyArcCategoryLabels,
+  storyCanonPacketTargetKinds,
   storyEndingKinds,
   storyEntryKinds,
   storyLockTtlMs,
   storyNodeKinds,
   storyStoryStages,
   storyThreadCategories,
+  type StoryArcCategory,
+  type StoryCanonPacket,
+  type StoryCharacterMeta,
   type StoryCompanionMissionMeta,
   type StoryCreatureMeta,
+  type StoryEventMeta,
+  type StoryFactionMeta,
+  type StoryItemMeta,
   type StoryRegionMeta,
   type StoryStatus,
   type StorySystemMeta,
@@ -23,7 +33,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
-import { metaSchemasByKind, metaSlug } from "@/lib/story-meta-schemas";
+import { metaSchemasByKind, metaSlug, threadMetaSchema } from "@/lib/story-meta-schemas";
 import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
@@ -85,6 +95,8 @@ function creationStatus(): StoryStatus {
  */
 function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex");
+  revalidatePath("/codex/stories");
+  revalidatePath("/codex/stories/canon");
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
   revalidatePath("/codex/threads");
@@ -129,8 +141,44 @@ const arcSchema = z.object({
   summary: optionalText(500),
   hook: optionalText(500),
   regionEntryId: z.string().uuid().nullable(),
-  isMainline: z.boolean(),
+  companionEntryId: z.string().uuid().nullable(),
+  category: z.enum(storyArcCategories),
+}).superRefine((arc, ctx) => {
+  // Two categories are defined by what they are filed to, so a missing filing
+  // is not a detail to fix later — it is the thing itself missing. Said in the
+  // writers' room's words, because this is the message a writer actually sees.
+  if (arc.category === "CONTRACT" && !arc.regionEntryId) {
+    ctx.addIssue({ code: "custom", path: ["regionEntryId"], message: "A contract is a bounty posted somewhere — pick where it is posted." });
+  }
+  if (arc.category === "COMPANION_QUEST" && !arc.companionEntryId) {
+    ctx.addIssue({ code: "custom", path: ["companionEntryId"], message: "A companion quest belongs to a companion — pick whose story this is." });
+  }
 });
+
+/**
+ * Reads the arc form. Everything a writer picked, plus the one clamp: only an
+ * admin opens a mainline chapter, and everybody else's attempt lands as a side
+ * quest rather than being refused — the same quiet clamp the mainline checkbox
+ * has always had.
+ */
+function readArcForm(formData: FormData, isAdmin: boolean) {
+  const picked = formData.get("category");
+  const category = (storyArcCategories as readonly unknown[]).includes(picked) ? (picked as StoryArcCategory) : "SIDE_QUEST";
+  return {
+    title: formData.get("title"),
+    summary: formData.get("summary") ?? "",
+    hook: formData.get("hook") ?? "",
+    regionEntryId: formData.get("regionEntryId") || null,
+    companionEntryId: formData.get("companionEntryId") || null,
+    category: !isAdmin && category === "MAINLINE" ? "SIDE_QUEST" : category,
+  };
+}
+
+/** The one message the arc form answers with, whatever went wrong. */
+function arcFormError(parsed: { error: z.ZodError }) {
+  const first = parsed.error.issues.find((issue) => issue.code === "custom");
+  return new Error(first?.message ?? "Give the story a title of 120 characters or fewer, with a summary and hook under 500 each.");
+}
 
 /**
  * The one gate that freezes story. Every mutation that touches an arc — its
@@ -160,30 +208,82 @@ async function assertRegionEntry(tx: Transaction, regionEntryId: string | null) 
   if (!region || region.kind !== "REGION") throw new Error("A pickup place has to be a region from the bible.");
 }
 
+/**
+ * And the companion is a CHARACTER entry, for the same reason: the quest links
+ * to a real dossier rather than a name somebody typed. Whether that character
+ * is marked companion-capable is advisory sheet data, not a gate — a writer
+ * routinely opens the quest before filling in the badge.
+ */
+async function assertCompanionEntry(tx: Transaction, companionEntryId: string | null) {
+  if (!companionEntryId) return;
+  const character = await tx.storyEntry.findUnique({ where: { id: companionEntryId }, select: { kind: true } });
+  if (!character || character.kind !== "CHARACTER") throw new Error("A companion quest belongs to a character from the bible.");
+}
+
+/**
+ * Records on the thread that it grew into this arc.
+ *
+ * The whole thread meta is re-validated on the way through, exactly like a
+ * sheet save: a partial write here would be the one path into the database
+ * that skips the schema, and the next writer to open the sheet would be the
+ * one who found out.
+ */
+async function linkThreadToArc(tx: Transaction, threadEntryId: string, arcSlug: string, actorUserId: string) {
+  const thread = await tx.storyEntry.findUnique({ where: { id: threadEntryId }, select: { id: true, kind: true, title: true, meta: true } });
+  if (!thread || thread.kind !== "THREAD") return;
+  const current = threadMetaSchema.safeParse(thread.meta);
+  if (!current.success) return;
+  if (current.data.arcs.includes(arcSlug)) return;
+  const next = threadMetaSchema.safeParse({ ...current.data, arcs: [...current.data.arcs, arcSlug] });
+  if (!next.success) return;
+  await tx.storyEntry.update({ where: { id: thread.id }, data: { meta: next.data as Prisma.InputJsonValue, updatedByUserId: actorUserId, version: { increment: 1 } } });
+  await recordRevision(tx, {
+    entityType: "ENTRY",
+    entityId: thread.id,
+    action: "UPDATED",
+    actorUserId,
+    summary: `"${thread.title}" grew into the quest ${arcSlug}`,
+    before: { arcs: current.data.arcs },
+    after: { arcs: next.data.arcs },
+  });
+}
+
 export async function createArc(formData: FormData) {
   const user = await requireRole(storyReadRole);
-  const parsed = arcSchema.safeParse({
-    title: formData.get("title"),
-    summary: formData.get("summary") ?? "",
-    hook: formData.get("hook") ?? "",
-    regionEntryId: formData.get("regionEntryId") || null,
-    // Only a reviewer decides what counts as the spine of the story.
-    isMainline: user.role === "ADMIN" && formData.get("isMainline") === "on",
-  });
-  if (!parsed.success) throw new Error("Give the arc a title of 120 characters or fewer, with a summary and hook under 500 each.");
+  const parsed = arcSchema.safeParse(readArcForm(formData, user.role === "ADMIN"));
+  if (!parsed.success) throw arcFormError(parsed);
 
   const slug = slugifyStoryKey(parsed.data.title);
   if (!isValidStoryKey(slug)) throw new Error("That title needs at least one letter or number.");
 
   const existing = await db.storyArc.findUnique({ where: { slug }, select: { id: true } });
-  if (existing) throw new Error("An arc with that name already exists.");
+  if (existing) throw new Error("A story with that name already exists.");
+
+  const fromThread = z.string().uuid().safeParse(formData.get("fromThreadId"));
 
   await db.$transaction(async (tx) => {
     await assertRegionEntry(tx, parsed.data.regionEntryId);
+    await assertCompanionEntry(tx, parsed.data.companionEntryId);
     const arc = await tx.storyArc.create({
-      data: { slug, title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, isMainline: parsed.data.isMainline, status: creationStatus(), createdByUserId: user.id },
+      data: {
+        slug,
+        title: parsed.data.title,
+        summary: parsed.data.summary,
+        hook: parsed.data.hook,
+        regionEntryId: parsed.data.regionEntryId,
+        companionEntryId: parsed.data.companionEntryId,
+        category: parsed.data.category,
+        // Both columns, always together. The database CHECK refuses a row
+        // where they disagree, which is what turns "somebody forgot one" into
+        // a failed save rather than a mainline chapter the game files as a
+        // side quest.
+        isMainline: parsed.data.category === "MAINLINE",
+        status: creationStatus(),
+        createdByUserId: user.id,
+      },
     });
-    await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "CREATED", actorUserId: user.id, summary: `Opened the arc "${arc.title}"` });
+    await recordRevision(tx, { entityType: "ARC", entityId: arc.id, arcId: arc.id, action: "CREATED", actorUserId: user.id, summary: `Opened the ${storyArcCategoryLabels[parsed.data.category].toLowerCase()} "${arc.title}"` });
+    if (fromThread.success) await linkThreadToArc(tx, fromThread.data, slug, user.id);
   });
 
   refreshCodex(slug);
@@ -197,23 +297,21 @@ export async function createArc(formData: FormData) {
 export async function updateArc(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = arcSchema.extend({ arcId: z.string().uuid() }).safeParse({
+    ...readArcForm(formData, user.role === "ADMIN"),
     arcId: formData.get("arcId"),
-    title: formData.get("title"),
-    summary: formData.get("summary") ?? "",
-    hook: formData.get("hook") ?? "",
-    regionEntryId: formData.get("regionEntryId") || null,
-    isMainline: user.role === "ADMIN" && formData.get("isMainline") === "on",
   });
-  if (!parsed.success) throw new Error("An arc needs a title of 120 characters or fewer, with a summary and hook under 500 each.");
+  if (!parsed.success) throw arcFormError(parsed);
 
   const arcSlug = await db.$transaction(async (tx) => {
     const arc = await tx.storyArc.findUnique({ where: { id: parsed.data.arcId } });
     if (!arc) throw new Error("That arc no longer exists.");
     await assertArcUnlocked(tx, arc.id);
     await assertRegionEntry(tx, parsed.data.regionEntryId);
+    await assertCompanionEntry(tx, parsed.data.companionEntryId);
 
-    // Mainline stays a reviewer's call; everyone else's edit keeps it as-is.
-    const nextIsMainline = user.role === "ADMIN" ? parsed.data.isMainline : arc.isMainline;
+    // Mainline stays a reviewer's call; everyone else's edit leaves a mainline
+    // chapter exactly as mainline as they found it.
+    const nextCategory = user.role !== "ADMIN" && arc.category === "MAINLINE" ? arc.category : parsed.data.category;
     await tx.storyArc.update({
       where: { id: arc.id },
       data: {
@@ -221,7 +319,9 @@ export async function updateArc(formData: FormData) {
         summary: parsed.data.summary,
         hook: parsed.data.hook,
         regionEntryId: parsed.data.regionEntryId,
-        isMainline: nextIsMainline,
+        companionEntryId: parsed.data.companionEntryId,
+        category: nextCategory,
+        isMainline: nextCategory === "MAINLINE",
       },
     });
     await recordRevision(tx, {
@@ -230,9 +330,9 @@ export async function updateArc(formData: FormData) {
       arcId: arc.id,
       action: "UPDATED",
       actorUserId: user.id,
-      summary: `Reworked the arc "${parsed.data.title}"`,
-      before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, isMainline: arc.isMainline },
-      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, isMainline: nextIsMainline },
+      summary: `Reworked the story "${parsed.data.title}"`,
+      before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, companionEntryId: arc.companionEntryId, category: arc.category, isMainline: arc.isMainline },
+      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, companionEntryId: parsed.data.companionEntryId, category: nextCategory, isMainline: nextCategory === "MAINLINE" },
     });
     return arc.slug;
   });
@@ -778,6 +878,20 @@ const entrySchema = z.object({
   body: optionalText(20000),
 });
 
+/** Every slug-shaped value a multi-select sent, deduped and bounded. */
+function slugList(formData: FormData, field: string, max = 30) {
+  return [...new Set(formData.getAll(field).flatMap((value) => {
+    const slug = metaSlug.safeParse(value);
+    return slug.success ? [slug.data] : [];
+  }))].slice(0, max);
+}
+
+/** One slug-shaped value from a picker, or null when nothing was chosen. */
+function oneSlug(formData: FormData, field: string) {
+  const slug = metaSlug.safeParse(formData.get(field));
+  return slug.success ? slug.data : null;
+}
+
 export async function createEntry(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = entrySchema.safeParse({ kind: formData.get("kind"), title: formData.get("title"), summary: formData.get("summary") ?? "", body: formData.get("body") ?? "" });
@@ -836,8 +950,10 @@ export async function createEntry(formData: FormData) {
   // the deliberate way to declare a new race.
   const raceParent = parsed.data.kind === "CREATURE" ? metaSlug.safeParse(formData.get("parent")) : null;
   const creatureMeta: StoryCreatureMeta | null = raceParent?.success
-    ? { category: null, parent: raceParent.data, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [] }
-    : null;
+    ? { category: null, parent: raceParent.data, biomes: slugList(formData, "biomes"), threat: null, harvest: null, gameId: null, openQuestions: [] }
+    : parsed.data.kind === "CREATURE" && slugList(formData, "biomes").length > 0
+      ? { category: null, parent: null, biomes: slugList(formData, "biomes"), threat: null, harvest: null, gameId: null, openQuestions: [] }
+      : null;
 
   // A story thread is born brainstorming — visibly unconfirmed until the room
   // moves it — carrying whatever categories and stages the proposer picked.
@@ -849,13 +965,14 @@ export async function createEntry(formData: FormData) {
         priority: null,
         spoilerLevel: null,
         parent: metaSlug.safeParse(formData.get("parent")).success ? String(formData.get("parent")) : null,
-        characters: [],
+        characters: slugList(formData, "characters"),
         companions: [],
         factions: [],
-        locations: [],
+        locations: slugList(formData, "locations"),
         arcs: [],
         companionMissions: [],
         bosses: [],
+        canonPackets: [],
         tags: [],
         openQuestions: [],
       }
@@ -869,6 +986,7 @@ export async function createEntry(formData: FormData) {
   const missionMeta: StoryCompanionMissionMeta | null = parsed.data.kind === "COMPANION_MISSION"
     ? {
         companion: missionCompanion?.success ? missionCompanion.data : null,
+        arc: null,
         order: missionOrder?.success ? missionOrder.data : null,
         missionStatus: "brainstorming",
         stage: null,
@@ -882,6 +1000,46 @@ export async function createEntry(formData: FormData) {
         threads: [],
         openQuestions: [],
       }
+    : null;
+
+  // A character, faction, item, or event is born connected too: the create
+  // panels ask the one question that files the entry into the world, and it
+  // is written as a real sheet rather than left null for somebody to adopt
+  // later — the same law places, systems, races, and missions already follow.
+  const characterMeta: StoryCharacterMeta | null = parsed.data.kind === "CHARACTER"
+    ? {
+        fullName: null,
+        aliases: [],
+        pronouns: null,
+        sex: null,
+        species: null,
+        age: null,
+        appearance: null,
+        voice: null,
+        magic: { origin: null, schools: [], corruptionPhase: null, notes: null },
+        factions: slugList(formData, "factions").map((faction) => ({ faction, role: null, standing: null })),
+        home: oneSlug(formData, "home"),
+        status: { known: null, actual: null },
+        relationships: [],
+        storyRole: null,
+        involvement: [],
+        gameId: null,
+        model: null,
+        companion: { capable: null, availability: null, status: null },
+        openQuestions: [],
+      }
+    : null;
+
+  const factionMeta: StoryFactionMeta | null = parsed.data.kind === "FACTION"
+    ? { scope: null, seat: oneSlug(formData, "seat"), leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] }
+    : null;
+
+  const itemMeta: StoryItemMeta | null = parsed.data.kind === "ITEM"
+    ? { category: null, rarity: null, origin: oneSlug(formData, "origin"), gameId: null, openQuestions: [] }
+    : null;
+
+  const eventMeta: StoryEventMeta | null = parsed.data.kind === "EVENT"
+    ? { when: null, timelineYearsAgo: null, where: slugList(formData, "where"), involved: [], outcome: null, openQuestions: [] }
     : null;
 
   await db.$transaction(async (tx) => {
@@ -899,6 +1057,10 @@ export async function createEntry(formData: FormData) {
           : creatureMeta ? { meta: creatureMeta as unknown as Prisma.InputJsonValue }
           : threadMeta ? { meta: threadMeta as unknown as Prisma.InputJsonValue }
           : missionMeta ? { meta: missionMeta as unknown as Prisma.InputJsonValue }
+          : characterMeta ? { meta: characterMeta as unknown as Prisma.InputJsonValue }
+          : factionMeta ? { meta: factionMeta as unknown as Prisma.InputJsonValue }
+          : itemMeta ? { meta: itemMeta as unknown as Prisma.InputJsonValue }
+          : eventMeta ? { meta: eventMeta as unknown as Prisma.InputJsonValue }
           : {}),
       },
     });
@@ -907,6 +1069,8 @@ export async function createEntry(formData: FormData) {
       : creatureMeta?.parent ? `, one of the ${creatureMeta.parent}`
       : threadMeta?.parent ? `, growing out of ${threadMeta.parent}`
       : missionMeta?.companion ? `, in ${missionMeta.companion}'s chain`
+      : characterMeta?.home ? `, out of ${characterMeta.home}`
+      : factionMeta?.seat ? `, seated at ${factionMeta.seat}`
       : "";
     await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"${placed}` });
   });
@@ -1103,6 +1267,206 @@ export async function unlinkEntryFromNode(formData: FormData) {
   });
 
   refreshCodex(arcSlug);
+}
+
+// ---------------------------------------------------------------------------
+// Canon packets — the road out of the development room
+// ---------------------------------------------------------------------------
+
+/**
+ * Pushing settled thread material toward canon is NOT a freeze and NOT an
+ * approval. Nothing about the story changes when a packet is pushed: it lands
+ * in the canon inbox, a writer weaves it into a flow by hand, and the arc
+ * padlock remains the only thing that ever settles anything.
+ *
+ * All three actions below write exactly one row — the THREAD entry that owns
+ * the packet — which is why none of them passes through the arc freeze. They
+ * are version-guarded like any sheet save, and every one of them re-validates
+ * the whole meta object through `threadMetaSchema` on the way out, so a packet
+ * write can never be the path that puts a shape in the database the sheet
+ * would then refuse.
+ */
+/**
+ * The name a push or a weave is recorded under. The session carries a display
+ * name but not the codex's full naming chain, and a packet keeps its author
+ * as text forever — so it is read off the member row, the same source every
+ * other attribution in the codex uses.
+ */
+async function storyActorName(userId: string) {
+  const row = await db.user.findUnique({ where: { id: userId }, select: { displayName: true, name: true, username: true } });
+  return storyMemberName(row);
+}
+
+async function withThreadPackets(
+  input: { entryId: string; version: number; actorUserId: string; summary: string },
+  change: (packets: StoryCanonPacket[], meta: StoryThreadMeta) => { packets: StoryCanonPacket[]; arcs?: string[] },
+) {
+  return db.$transaction(async (tx) => {
+    const entry = await tx.storyEntry.findUnique({ where: { id: input.entryId }, select: { id: true, kind: true, slug: true, title: true, meta: true } });
+    if (!entry) throw new Error("That story thread no longer exists.");
+    if (entry.kind !== "THREAD") throw new Error("Only a story thread carries canon packets.");
+
+    const current = threadMetaSchema.safeParse(entry.meta);
+    if (!current.success) throw new Error("This thread's sheet has to be saved once before it can push anything to canon.");
+
+    const changed = change(current.data.canonPackets as StoryCanonPacket[], current.data as StoryThreadMeta);
+    const next = threadMetaSchema.safeParse({
+      ...current.data,
+      canonPackets: changed.packets,
+      arcs: changed.arcs ?? current.data.arcs,
+    });
+    if (!next.success) throw new Error("That could not be saved — some part of it is the wrong shape.");
+
+    const updated = await tx.storyEntry.updateMany({
+      where: { id: entry.id, version: input.version },
+      data: { meta: next.data as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
+    });
+    if (updated.count !== 1) throw new Error("Somebody saved this thread while you were writing. Reopen it to see their version before saving yours.");
+
+    await recordRevision(tx, {
+      entityType: "ENTRY",
+      entityId: entry.id,
+      action: "UPDATED",
+      actorUserId: input.actorUserId,
+      summary: input.summary,
+      before: { canonPackets: current.data.canonPackets, arcs: current.data.arcs },
+      after: { canonPackets: next.data.canonPackets, arcs: next.data.arcs },
+    });
+    return entry.slug;
+  });
+}
+
+const packetPushSchema = z.object({
+  entryId: z.string().uuid(),
+  version: z.coerce.number().int().min(1),
+  title: z.string().trim().min(1).max(120),
+  body: z.string().trim().min(1).max(8000),
+  targetKind: z.enum(storyCanonPacketTargetKinds),
+  targetRegion: metaSlug.nullable(),
+  targetCompanion: metaSlug.nullable(),
+});
+
+/** Sends one settled piece of a thread to the canon inbox. */
+export async function pushCanonPacket(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = packetPushSchema.safeParse({
+    entryId: formData.get("entryId"),
+    version: formData.get("version"),
+    title: formData.get("title"),
+    body: formData.get("body"),
+    targetKind: formData.get("targetKind"),
+    targetRegion: formData.get("targetRegion") || null,
+    targetCompanion: formData.get("targetCompanion") || null,
+  });
+  if (!parsed.success) throw new Error("Give it a short name and the settled text, and say where it belongs.");
+
+  // Only the fields that belong to the chosen destination survive, so a
+  // writer switching the target picker cannot leave a stale place attached to
+  // a packet that is no longer aimed at one.
+  const targetRegion = parsed.data.targetKind === "region" ? parsed.data.targetRegion : null;
+  const targetCompanion = parsed.data.targetKind === "companions" ? parsed.data.targetCompanion : null;
+  if (parsed.data.targetKind === "region" && !targetRegion) throw new Error("Say which place this belongs to.");
+
+  const entries = [...new Set(formData.getAll("entries").flatMap((value) => {
+    const slug = metaSlug.safeParse(value);
+    return slug.success ? [slug.data] : [];
+  }))].slice(0, 30);
+
+  // The destination has to resolve to something real, or the packet lands in a
+  // bubble nobody can open.
+  if (targetRegion) {
+    const region = await db.storyEntry.findUnique({ where: { slug: targetRegion }, select: { kind: true, status: true } });
+    if (!region || region.kind !== "REGION" || !["DRAFT", "PROPOSED", "CANON"].includes(region.status)) throw new Error("That place is not in the bible.");
+  }
+  if (targetCompanion) {
+    const character = await db.storyEntry.findUnique({ where: { slug: targetCompanion }, select: { kind: true, status: true } });
+    if (!character || character.kind !== "CHARACTER" || !["DRAFT", "PROPOSED", "CANON"].includes(character.status)) throw new Error("That companion is not in the bible.");
+  }
+
+  const pushedBy = await storyActorName(user.id);
+  const packet: StoryCanonPacket = {
+    id: randomUUID(),
+    title: parsed.data.title,
+    body: parsed.data.body,
+    targetKind: parsed.data.targetKind,
+    targetRegion,
+    targetCompanion,
+    entries,
+    status: "pending",
+    pushedAt: new Date().toISOString(),
+    pushedBy,
+    wovenAt: null,
+    wovenBy: null,
+    wovenInto: [],
+  };
+
+  const slug = await withThreadPackets(
+    { entryId: parsed.data.entryId, version: parsed.data.version, actorUserId: user.id, summary: `Pushed "${packet.title}" to the canon inbox` },
+    (packets) => ({ packets: [...packets, packet] }),
+  );
+
+  refreshCodex();
+  revalidatePath(`/codex/bible/${slug}`);
+}
+
+/**
+ * Marks a packet woven in, and says which boards it became. Those arc slugs
+ * are unioned into the thread's own `arcs` list, which is how a thread keeps a
+ * permanent trace of what it actually shipped.
+ */
+export async function markCanonPacketWoven(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = z.object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), packetId: z.string().uuid() })
+    .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), packetId: formData.get("packetId") });
+  if (!parsed.success) throw new Error("That packet could not be read.");
+
+  const wovenInto = [...new Set(formData.getAll("wovenInto").flatMap((value) => {
+    const slug = metaSlug.safeParse(value);
+    return slug.success ? [slug.data] : [];
+  }))].slice(0, 30);
+
+  const wovenBy = await storyActorName(user.id);
+  const slug = await withThreadPackets(
+    { entryId: parsed.data.entryId, version: parsed.data.version, actorUserId: user.id, summary: "Wove canon material in" },
+    (packets, meta) => {
+      const packet = packets.find((row) => row.id === parsed.data.packetId);
+      if (!packet) throw new Error("That packet is no longer on this thread.");
+      // Weaving is a one-way door on purpose: re-weaving would rewrite who did
+      // it and when, and the trace is the whole point of the record.
+      if (packet.status === "woven") throw new Error(`"${packet.title}" was already woven in${packet.wovenBy ? ` by ${packet.wovenBy}` : ""}.`);
+      const woven: StoryCanonPacket = { ...packet, status: "woven", wovenAt: new Date().toISOString(), wovenBy, wovenInto };
+      return {
+        packets: packets.map((row) => (row.id === packet.id ? woven : row)),
+        // Unioned, never replaced — a thread that shipped four arcs keeps all
+        // four, whichever packet each came out of.
+        arcs: [...new Set([...meta.arcs, ...wovenInto])],
+      };
+    },
+  );
+
+  refreshCodex();
+  revalidatePath(`/codex/bible/${slug}`);
+}
+
+/** Takes a packet back out of the inbox. Pending only — woven is history. */
+export async function withdrawCanonPacket(formData: FormData) {
+  const user = await requireRole(storyReadRole);
+  const parsed = z.object({ entryId: z.string().uuid(), version: z.coerce.number().int().min(1), packetId: z.string().uuid() })
+    .safeParse({ entryId: formData.get("entryId"), version: formData.get("version"), packetId: formData.get("packetId") });
+  if (!parsed.success) throw new Error("That packet could not be read.");
+
+  const slug = await withThreadPackets(
+    { entryId: parsed.data.entryId, version: parsed.data.version, actorUserId: user.id, summary: "Withdrew canon material from the inbox" },
+    (packets) => {
+      const packet = packets.find((row) => row.id === parsed.data.packetId);
+      if (!packet) throw new Error("That packet is no longer on this thread.");
+      if (packet.status === "woven") throw new Error(`"${packet.title}" has already been woven in — that is history now, not a pending push.`);
+      return { packets: packets.filter((row) => row.id !== packet.id) };
+    },
+  );
+
+  refreshCodex();
+  revalidatePath(`/codex/bible/${slug}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -1393,15 +1757,17 @@ export type WardenState = { turns: WardenTurn[]; error?: string };
 export async function askWarden(previous: WardenState, formData: FormData): Promise<WardenState> {
   const user = await requireRole(storyReadRole);
   const parsed = z
-    .object({ arcId: z.string().uuid().nullable(), nodeId: z.string().uuid().nullable(), question: z.string().trim().min(1).max(2000) })
+    .object({ arcId: z.string().uuid().nullable(), nodeId: z.string().uuid().nullable(), question: z.string().trim().min(1).max(2000), guide: z.boolean() })
     .safeParse({
       arcId: formData.get("arcId") || null,
       nodeId: formData.get("nodeId") || null,
       question: formData.get("question"),
+      // The story surfaces ask him to guide; a board asks him about the story.
+      guide: formData.get("guide") === "on",
     });
   if (!parsed.success) return { ...previous, error: "Ask him something first." };
 
-  const reply = await askStoryAssistant({ userId: user.id, arcId: parsed.data.arcId, nodeId: parsed.data.nodeId, question: parsed.data.question });
+  const reply = await askStoryAssistant({ userId: user.id, arcId: parsed.data.arcId, nodeId: parsed.data.nodeId, question: parsed.data.question, guide: parsed.data.guide });
   if (!reply.ok) return { ...previous, error: reply.message };
 
   return {

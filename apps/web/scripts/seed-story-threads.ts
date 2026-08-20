@@ -115,6 +115,31 @@ async function main() {
     }
   }
 
+  // The races shelf may already have filed this entry under Mythical, which
+  // increments its version without changing its prose. Update only the prose
+  // and pitch so that parent assignment and every other sheet field survive.
+  const lizzarnix = await db.storyEntry.findUnique({ where: { slug: "lizzarnix" }, select: { id: true, title: true, summary: true, body: true } });
+  if (lizzarnix && !(lizzarnix.body ?? "").includes("upright humanoid people")) {
+    await db.$transaction(async (tx) => {
+      await tx.storyEntry.update({ where: { id: lizzarnix.id }, data: { summary: lizzarnixSeed.summary, body: lizzarnixSeed.body, version: { increment: 1 }, updatedByUserId: author.id } });
+      await tx.storyRevision.create({
+        data: {
+          entityType: "ENTRY",
+          entityId: lizzarnix.id,
+          action: "UPDATED",
+          actorUserId: author.id,
+          summary: `Refined "${lizzarnix.title}" as an upright humanoid people with distinct adult male and female forms`,
+          before: { summary: lizzarnix.summary, body: lizzarnix.body },
+          after: { summary: lizzarnixSeed.summary, body: lizzarnixSeed.body },
+        },
+      });
+    });
+    console.log("  patched lizzarnix — upright humanoid male and female forms");
+    created += 1;
+  } else if (lizzarnix) {
+    console.log("  skip   lizzarnix humanoid anatomy (already integrated)");
+  }
+
   // The Lizzarnix are older than Amanda's thread, so the revelation belongs in
   // the load-bearing world entries too. Append only: these records have been
   // edited since their original seed and must never be replaced wholesale.

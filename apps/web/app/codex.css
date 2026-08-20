@@ -345,6 +345,28 @@ body:has(.codex-board-shell) > .site-footer { display: none; }
 .flow-card-kind { display: block; margin-bottom: 5px; color: var(--brass); font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; }
 .flow-card .react-flow__handle { width: 7px; height: 7px; border: 1px solid #8a7356; background: #232a24; pointer-events: none; }
 
+
+/* What each card is worth, before the walk has an opinion about it: gold opens
+   a quest, cool grey is somebody talking, green is a decision, violet is the
+   story checking something, crimson is an ending that went badly. Declared
+   here — after the base card, before every state rule below — so walked,
+   current, offered, and the whole frozen block still win. The same values live
+   in story-flow.tsx for the minimap, which paints to a canvas and cannot read
+   a computed style. */
+.flow-card { --kind-accent: #4b554a; border-left-color: var(--kind-accent); }
+.flow-card.kind-quest_start { --kind-accent: #c6974c; }
+.flow-card.kind-quest_step { --kind-accent: #b0985c; }
+.flow-card.kind-scene { --kind-accent: #9aa79b; }
+.flow-card.kind-beat { --kind-accent: #77837a; }
+.flow-card.kind-dialogue { --kind-accent: #8fa3b5; }
+.flow-card.kind-choice { --kind-accent: #8fbf8a; }
+.flow-card.kind-condition { --kind-accent: #a58fd0; }
+.flow-card.kind-ending { --kind-accent: #c6974c; }
+.flow-card.kind-ending.ending-failure { --kind-accent: #c05b5b; }
+.flow-card.kind-ending.ending-success { --kind-accent: #8fbf8a; }
+.flow-card.kind-ending.ending-neutral { --kind-accent: #c6974c; }
+.flow-card .flow-card-kind { color: var(--kind-accent); }
+
 .flow-card.is-dim { opacity: .34; }
 .flow-card.is-peek { border-color: var(--brass); border-style: dashed; opacity: 1; box-shadow: 0 0 0 1px rgba(198,151,76,.5), 0 0 22px rgba(198,151,76,.25); }
 .flow-card.is-walked { border-color: rgba(198,151,76,.5); border-left-color: var(--brass); box-shadow: 0 0 16px rgba(198,151,76,.16); opacity: .92; }
@@ -918,3 +940,185 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 /* The members block on a race dossier reuses the contained-places row; the
    art column just needs centring for a creature portrait. */
 .entity-race-members ul > li > img { object-position: center; }
+
+/* ---- The canon workspace ------------------------------------------------ */
+/* The navigator down the left of every canon surface, the boards on the right.
+   One grid, one breakpoint: under 960px the sidebar folds into a drawer that
+   is closed by default, because on a phone the boards are what you came for. */
+
+.canon-workspace { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+.codex-board-shell .canon-workspace { flex: 1; min-height: 0; gap: 0; }
+.codex-board-shell .canon-workspace-main { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
+.canon-workspace-main { min-width: 0; }
+
+.canon-nav { position: sticky; top: 128px; max-height: calc(100dvh - 150px); overflow-y: auto; border: 1px solid var(--line); border-left: 2px solid rgba(198,151,76,.4); padding: 4px 0 14px; background: #12170f; scrollbar-width: thin; }
+.codex-board-shell .canon-nav { top: 0; max-height: none; height: 100%; border-top: 0; border-bottom: 0; border-left: 0; border-right: 1px solid var(--line); }
+/* On a wide screen the sidebar is simply open; the summary is the drawer
+   handle a phone needs and nothing else. */
+.canon-nav > summary { display: none; }
+.canon-nav > nav { display: grid; gap: 4px; }
+.canon-nav section { padding: 12px 14px; }
+.canon-nav section + section { border-top: 1px solid rgba(214,195,151,.09); }
+.canon-nav .eyebrow { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; color: #a99155; font-size: 8px; }
+.canon-nav ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.canon-nav-eyebrow { margin: 9px 0 4px; color: #7f8a7f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .6px; text-transform: uppercase; }
+
+/* The heavy rule: above it is the spine of the campaign, below it is
+   everything the campaign passes through. */
+.canon-nav-divider { height: 0; margin: 2px 0; border: 0; border-top: 2px solid rgba(198,151,76,.5); border-bottom: 1px solid rgba(198,151,76,.22); }
+
+.canon-nav-arc { display: flex; align-items: center; gap: 6px; padding: 5px 7px; border-left: 2px solid transparent; color: #bcc3b8; font-size: 11px; text-decoration: none; transition: .15s ease; }
+.canon-nav-arc > span { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+.canon-nav-arc > i { color: #6d766c; font-family: var(--font-mono); font-size: 8px; font-style: normal; }
+.canon-nav-arc:hover { border-left-color: rgba(198,151,76,.6); background: #1a2018; color: #f0e2bd; }
+.canon-nav-arc.is-current { border-left-color: var(--brass); background: #1f2418; color: #f6e8c4; font-weight: 700; }
+/* Blue ice, the same freeze the board itself wears. */
+.canon-nav-arc.is-locked { color: #9fd2f2; }
+.canon-nav-arc.is-locked svg { color: #7ec4f0; }
+.canon-nav-arc.is-locked.is-current { border-left-color: #7ec4f0; background: #16222b; }
+/* Written down, no board built yet. Dimmed and links to the writing. */
+.canon-nav-arc.is-planned { color: #79837a; font-style: italic; }
+.canon-nav-arc.is-planned > i { color: #6b6250; }
+.canon-nav-arc.is-planned:hover { color: #b3baaf; }
+
+.canon-nav-place { display: flex; align-items: center; gap: 6px; margin: 8px 0 3px; }
+.canon-nav-place a, .canon-nav-place > span { overflow: hidden; flex: 1; color: #ddc98f; font: 600 12px var(--font-serif); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+.canon-nav-place a:hover { color: #f6e8c4; }
+.canon-nav-tree > li { padding-left: 0; }
+.canon-nav-tree > li.depth-1 { padding-left: 10px; }
+.canon-nav-tree > li.depth-2 { padding-left: 20px; }
+.canon-nav-tree > li.depth-3 { padding-left: 28px; }
+.canon-nav-companion + .canon-nav-companion { margin-top: 4px; }
+
+/* The bubble: canon material waiting to be woven in here. Deep-links into the
+   inbox filtered to this destination. */
+.canon-nav-badge { display: grid; min-width: 17px; height: 17px; place-items: center; border: 1px solid rgba(198,151,76,.6); border-radius: 50%; padding: 0 4px; background: #2a2116; color: #f0d69b; font: 700 9px var(--font-mono); text-decoration: none; }
+.canon-nav-badge:hover { border-color: var(--brass); background: #3a2c19; color: #fff2d2; }
+.canon-nav-empty { color: #79837a; font-size: 10px; line-height: 1.5; }
+.canon-nav-empty a { color: #c8a85e; text-decoration: none; }
+.canon-nav-empty a:hover { color: #f0d69b; text-decoration: underline; }
+.canon-nav-timeline { margin-top: 10px; }
+.canon-nav-timeline a { display: inline-flex; align-items: center; gap: 5px; color: #c8a85e; font: 700 8px var(--font-mono); letter-spacing: .5px; text-decoration: none; text-transform: uppercase; }
+.canon-nav-timeline a:hover { color: #f0d69b; }
+
+/* ---- The canon inbox ---------------------------------------------------- */
+
+.canon-inbox-intro { max-width: 720px; margin-bottom: 14px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.canon-inbox-intro a { color: #dcc58d; }
+.canon-packet-cards { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.canon-packet-cards > li { display: grid; gap: 11px; border: 1px solid var(--line); border-left: 2px solid var(--brass); padding: 18px 20px; background: linear-gradient(150deg, #191f19, #101510); }
+.canon-packet-cards h3 { margin: 3px 0 0; color: #eddfba; font: 600 20px/1.15 var(--font-serif); }
+.canon-packet-source { color: #808b82; font-size: 10px; }
+.canon-packet-source a { color: #dcc58d; }
+.canon-packet-body { max-height: 260px; overflow-y: auto; border-top: 1px solid #2f362f; border-bottom: 1px solid #2f362f; padding: 12px 0; color: #b3bbb1; font-size: 13px; line-height: 1.75; }
+.canon-packet-body p + p { margin-top: 11px; }
+.canon-packet-touches { display: flex; flex-wrap: wrap; gap: 6px; }
+.canon-packet-touches a { border: 1px solid #414a41; padding: 3px 8px; color: #c3b48a; font-family: var(--font-mono); font-size: 9px; text-decoration: none; }
+.canon-packet-touches a:hover { border-color: #9a7940; color: #f0d69b; }
+.canon-packet-actions { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.canon-packet-actions form { display: grid; gap: 7px; }
+.canon-packet-actions label { display: grid; gap: 5px; color: #9aa59a; font-family: var(--font-mono); font-size: 9px; letter-spacing: .4px; text-transform: uppercase; }
+.canon-inbox-history { margin-top: 18px; border-top: 1px solid #2f362f; padding-top: 14px; }
+.canon-inbox-history ul { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+.canon-inbox-history li { display: grid; gap: 3px; opacity: .78; }
+.canon-inbox-history strong { color: #cdbf99; font-size: 12px; }
+.canon-inbox-history span { color: #808b82; font-size: 10px; }
+.canon-inbox-history a { color: #dcc58d; }
+
+/* ---- Push to canon, on a thread's dossier -------------------------------- */
+
+.canon-packet-panel { margin: 18px 0; border: 1px solid #4a4f43; border-top: 2px solid var(--brass); padding: 20px 22px; background: #141914; }
+.canon-packet-panel .section-heading h2 { display: flex; align-items: center; gap: 9px; }
+.canon-packet-intro { max-width: 640px; margin: 8px 0 14px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.canon-packet-list { display: grid; gap: 9px; margin: 12px 0 18px; padding: 0; list-style: none; }
+.canon-packet-list > li { display: grid; gap: 4px; border: 1px solid #3a423a; border-left: 2px solid var(--brass); padding: 11px 13px; background: #111611; }
+.canon-packet-list > li.is-woven { border-left-color: var(--canon); opacity: .8; }
+.canon-packet-list strong { color: #e3d3aa; font-size: 13px; }
+.canon-packet-list span { color: #808b82; font-size: 10px; }
+.canon-packet-list span a { color: #dcc58d; }
+.canon-packet-list span a + a::before { content: " · "; color: #5f6a60; }
+.canon-packet-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 6px; }
+.canon-packet-open { display: inline-flex; align-items: center; gap: 5px; color: #c8a85e; font: 700 8px var(--font-mono); letter-spacing: .5px; text-decoration: none; text-transform: uppercase; }
+.canon-packet-open:hover { color: #f0d69b; }
+.canon-packet-step { margin: 16px 0 8px; color: #c8a85e; font: 700 9px var(--font-mono); letter-spacing: .6px; text-transform: uppercase; }
+.canon-packet-form { margin: 0; }
+.canon-packet-preview { margin: 14px 0 4px; border-left: 2px solid var(--brass); padding: 10px 12px; background: #181c14; color: #a9b2a6; font-size: 11px; line-height: 1.65; }
+.canon-packet-preview strong { color: #e6d3a3; }
+
+/* ---- Ripples: what one quest does that another quest can see ------------- */
+
+.story-ripples { margin: 22px 0; }
+.story-ripples .section-heading h2 { display: flex; align-items: center; gap: 9px; }
+.story-ripple-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.story-ripple-columns > div { border: 1px solid var(--line); padding: 16px 18px; background: #151a16; }
+.story-ripple-columns ul { display: grid; gap: 10px; margin: 10px 0 0; padding: 0; list-style: none; }
+.story-ripple-columns li { border-left: 2px solid rgba(198,151,76,.45); padding-left: 10px; }
+.story-ripple-columns li a { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; color: #dcc58d; font-size: 12px; text-decoration: none; }
+.story-ripple-columns li a strong { color: #ecdcb2; font-weight: 600; }
+.story-ripple-columns li a span { color: #94a094; font-size: 10px; }
+.story-ripple-columns li a:hover strong { color: #f8ecca; }
+.story-ripple-detail { display: block; margin-top: 3px; color: #7f8a80; font-size: 10px; line-height: 1.5; }
+.story-ripple-detail em { color: #b7a574; font-style: normal; }
+
+/* Amber: written down, not built yet. Never red — an unbuilt connection is a
+   plan, not a fault. */
+.story-ripples li.is-future { border-left-color: #d09a3f; }
+.story-ripples li.is-future a strong, .story-ripples li.is-future > em { color: #e5b569; }
+
+.story-ripple-web { display: grid; gap: 6px; margin: 12px 0 0; padding: 0; list-style: none; }
+.story-ripple-web > li { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; border-left: 2px solid rgba(198,151,76,.45); padding: 8px 12px; background: #141a15; font-size: 12px; }
+.story-ripple-web a { color: #dcc58d; text-decoration: none; }
+.story-ripple-web a:hover { color: #f6e8c4; }
+.story-ripple-web em { color: #b7a574; font-family: var(--font-mono); font-size: 9px; font-style: normal; letter-spacing: .4px; text-transform: uppercase; }
+.story-ripple-web > li > span { color: #8b958a; font-size: 10px; }
+
+/* ---- The guided story form ---------------------------------------------- */
+
+.arc-kind-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; margin: 0 0 6px; border: 0; padding: 0; }
+.arc-kind-picker > legend { margin-bottom: 9px; padding: 0; color: #ddc993; font: 700 10px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.arc-kind-picker label { display: flex; gap: 9px; align-items: flex-start; border: 1px solid #414a41; padding: 11px 12px; background: #121711; cursor: pointer; transition: .15s ease; }
+.arc-kind-picker label:hover { border-color: #9a7940; }
+.arc-kind-picker label.is-picked { border-color: var(--brass); background: #1c2016; }
+.arc-kind-picker input { margin-top: 3px; accent-color: #c6974c; }
+.arc-kind-picker span { display: grid; gap: 3px; }
+.arc-kind-picker strong { color: #e6d7b5; font: 600 14px var(--font-serif); }
+.arc-kind-picker small { color: #8d988e; font-size: 10px; line-height: 1.45; }
+
+/* The one-line answer to "what does this field want?", under anything a writer
+   should not have to guess at. */
+.sheet-hint { display: block; margin-top: 5px; color: #7f8a80; font-size: 10px; font-weight: 400; line-height: 1.5; letter-spacing: 0; text-transform: none; }
+
+/* ---- The stories hub ----------------------------------------------------- */
+
+.stories-room-guide { position: relative; margin: 18px 0; border: 1px solid #4a4f43; border-left: 2px solid var(--brass); padding: 18px 22px; background: #141914; }
+.stories-room-guide > .icon-action { position: absolute; top: 12px; right: 12px; }
+.stories-room-guide ol { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; counter-reset: step; }
+.stories-room-guide li { display: flex; gap: 9px; align-items: center; color: #b3bbb1; font-size: 12px; line-height: 1.6; }
+.stories-room-guide li svg { flex: 0 0 auto; color: var(--brass); }
+.stories-room-guide strong { color: #e6d7b5; }
+.stories-room-guide-foot { display: flex; align-items: center; gap: 6px; margin-top: 12px; color: #808b82; font-size: 10px; }
+
+/* ---- The Warden's guide chips ------------------------------------------- */
+/* `display: contents` keeps the summon button positioned against the same
+   ancestor it always was, so nothing about the dock moves. */
+.warden-dock { display: contents; }
+.warden-guide-chips { position: absolute; z-index: 6; right: 16px; bottom: 62px; display: flex; max-width: min(430px, calc(100% - 32px)); flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.warden-guide-chips button { border: 1px solid rgba(214,195,151,.2); padding: 6px 10px; background: rgba(12,16,13,.9); color: #b7ab8e; font: inherit; font-size: 10px; cursor: pointer; backdrop-filter: blur(8px); transition: .15s ease; }
+.warden-guide-chips button:hover { border-color: var(--ember); color: #ffd0bb; }
+.warden-guide-chips.is-inline { position: static; max-width: none; justify-content: flex-start; padding: 0 16px 12px; backdrop-filter: none; }
+
+/* ---- Kind swatches on the flow legend ------------------------------------ */
+
+.flow-kind-legend { flex-wrap: wrap; gap: 7px !important; padding: 5px 8px; }
+.flow-kind-legend i { display: inline-flex; align-items: center; gap: 4px; color: #8c9288; font-style: normal; }
+.flow-kind-legend i::before { content: ""; width: 7px; height: 7px; background: var(--kind-swatch, #4b554a); }
+
+@media (max-width: 960px) {
+  .canon-workspace { grid-template-columns: minmax(0, 1fr); }
+  .canon-nav { position: static; max-height: none; padding: 0; }
+  .canon-nav > summary { display: flex; align-items: center; gap: 8px; padding: 13px 15px; color: #ddc993; font: 700 10px var(--font-mono); letter-spacing: .06em; cursor: pointer; text-transform: uppercase; }
+  .canon-nav > nav { border-top: 1px solid rgba(214,195,151,.09); }
+  .codex-board-shell .canon-nav { height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .codex-board-shell .canon-workspace { display: flex; flex-direction: column; }
+  .warden-guide-chips { display: none; }
+}

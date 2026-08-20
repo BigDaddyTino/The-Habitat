@@ -3,9 +3,12 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { isStoryFlowEditable, storyLockNotice } from "@habitat/shared";
-import { getStoryBoard, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getCanonNavigator, getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { StoryFlow } from "@/components/story-flow";
+import { CanonNavigator } from "@/components/canon-navigator";
+import { RipplePanel } from "@/components/story-ripples";
+import { ArcFields } from "@/components/story-arc-form";
 import { canoniseArc, updateArc } from "@/app/codex/actions";
 
 /**
@@ -19,7 +22,14 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const [{ slug }, { node: initialNodeId }] = await Promise.all([params, searchParams]);
   const board = await getStoryBoard(slug);
   if (!board) notFound();
-  const [arcRefs, regions, allSystems] = await Promise.all([listStoryArcRefs(), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "SYSTEM" })]);
+  const [arcRefs, regions, characters, allSystems, nav, web] = await Promise.all([
+    listStoryArcRefs(),
+    listStoryEntries({ kind: "REGION" }),
+    listStoryEntries({ kind: "CHARACTER" }),
+    listStoryEntries({ kind: "SYSTEM" }),
+    getCanonNavigator(),
+    getStoryRipples(),
+  ]);
   // The other end of the release gate: each system's sheet names the arc that
   // unlocks it, and the arc page answers "what does finishing this hand the
   // player" without anyone opening nineteen dossiers to find out.
@@ -32,10 +42,14 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const canEditArc = isStoryFlowEditable(board.arc.locked !== null);
 
   return (
+    // The board keeps its own full-height shell; the ripples panel sits below
+    // it as a sibling so a short screen scrolls to reach it rather than
+    // squeezing the flow canvas to make room.
+    <>
     <section className="codex-board-shell">
       <header className="codex-board-head">
         <div>
-          <Link className="codex-back" href="/codex"><ArrowLeft aria-hidden="true" size={13} /> All arcs</Link>
+          <Link className="codex-back" href="/codex/stories/canon"><ArrowLeft aria-hidden="true" size={13} /> Story navigator</Link>
           <h1>{board.arc.title}</h1>
           {board.arc.summary ? <p>{board.arc.summary}</p> : null}
           {board.arc.region || board.arc.hook ? (
@@ -80,19 +94,24 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
 
       {canEditArc ? (
         <details className="codex-problems codex-arc-settings">
-          <summary><Settings2 aria-hidden="true" size={14} /> Arc settings — title, pickup place, hook</summary>
+          <summary><Settings2 aria-hidden="true" size={14} /> Arc settings — what kind of story it is, where it is picked up, and how</summary>
           <form action={updateArc} className="story-form">
             <input name="arcId" type="hidden" value={board.arc.id} />
-            <label>Title<input defaultValue={board.arc.title} maxLength={120} name="title" required type="text" /></label>
-            <label>Summary<textarea defaultValue={board.arc.summary ?? ""} maxLength={500} name="summary" rows={2} /></label>
-            <label>Picked up in<select defaultValue={board.arc.region?.id ?? ""} name="regionEntryId">
-              <option value="">No particular place</option>
-              {regions.map((region) => <option key={region.id} value={region.id}>{region.title}</option>)}
-            </select></label>
-            <label>Hook — how the party finds it<textarea defaultValue={board.arc.hook ?? ""} maxLength={500} name="hook" placeholder="A notice board in the fishing village. A dying stranger on the coast road. A rumor in the tavern." rows={2} /></label>
-            {canReview ? <label className="enabled-toggle"><input defaultChecked={board.arc.isMainline} name="isMainline" type="checkbox" /> Part of the mainline</label> : null}
-            <p className="story-inspector-hint">The export slug <code>{board.arc.slug}</code> never changes — it is the identity the game matches this arc&apos;s assets on.</p>
-            <button className="save-server" type="submit">Save arc</button>
+            <ArcFields
+              canReview={canReview}
+              characters={characters.map((character) => ({ id: character.id, title: character.title }))}
+              defaults={{
+                title: board.arc.title,
+                summary: board.arc.summary ?? "",
+                hook: board.arc.hook ?? "",
+                regionEntryId: board.arc.region?.id ?? "",
+                companionEntryId: board.arc.companion?.id ?? "",
+                category: board.arc.category,
+              }}
+              regions={regions.map((region) => ({ id: region.id, title: region.title }))}
+              submitLabel="Save it"
+            />
+            <p className="story-inspector-hint">The export slug <code>{board.arc.slug}</code> never changes — it is the identity the game matches this story&apos;s assets on.</p>
           </form>
         </details>
       ) : null}
@@ -104,14 +123,22 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
         </details>
       ) : null}
 
-      <StoryFlow
-        arcRefs={arcRefs}
-        assistantAvailable={isStoryAssistantAvailable()}
-        board={board}
-        canReview={canReview}
-        initialNodeId={initialNodeId ?? null}
-        viewerUserId={user.id}
-      />
+      <div className="canon-workspace">
+        <CanonNavigator currentArcSlug={slug} nav={nav} />
+        <div className="canon-workspace-main">
+          <StoryFlow
+            arcRefs={arcRefs}
+            assistantAvailable={isStoryAssistantAvailable()}
+            board={board}
+            canReview={canReview}
+            initialNodeId={initialNodeId ?? null}
+            viewerUserId={user.id}
+          />
+        </div>
+      </div>
+
     </section>
+    <RipplePanel arcSlug={slug} arcTitle={board.arc.title} web={web} />
+    </>
   );
 }

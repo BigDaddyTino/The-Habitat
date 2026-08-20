@@ -211,6 +211,7 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
     factions: [],
     locations: ["the-peninsula", "port-arcadia"],
     arcs: ["the-captivity-arc"],
+    canonPackets: [],
     companionMissions: [
       "the-woman-in-the-peninsula",
       "smoke-in-her-hair",
@@ -250,6 +251,7 @@ const mission = (
   body,
   meta: {
     companion: "amanda",
+    arc: null,
     order,
     missionStatus: "brainstorming",
     stage: null,

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Activity, ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import {
   isUnconfirmedThreadStatus,
+  storyArcCategoryLabels,
   storyCompanionMissionStatusLabels,
   storyBodyWithoutCorruptionLadder,
   storyCorruptionLadderSlugs,
@@ -13,6 +14,7 @@ import {
   storyStoryStageLabels,
   storyThreadCategoryLabels,
   storyThreadStatusLabels,
+  type StoryArcCategory,
   type StoryCompanionMissionStatus,
   type StoryEntryKind,
   type StoryStatus,
@@ -51,7 +53,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], companionArcs = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -63,7 +65,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }>; /** A companion's own quests, derived from the arcs filed to them. */ companionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
   // Entries resolve to the bible, arcs to their board, and anything nobody has
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
@@ -418,10 +420,17 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               <p>{system.note}</p>
             </li>)}</ul>
           </div> : null}
+          {isCharacter && companionArcs.length ? <div className="entity-quests-here">
+            <p className="eyebrow"><Compass aria-hidden="true" size={12} /> Their quests</p>
+            <ul>{companionArcs.map((arc) => <li key={arc.slug}>
+              <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{arc.locked ? "settled" : storyArcCategoryLabels[arc.category].toLowerCase()}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {arc.hook ?? arc.summary ? <p>{arc.hook ?? arc.summary}</p> : null}
+            </li>)}</ul>
+          </div> : null}
           {isRegion && arcsHere.length ? <div className="entity-quests-here">
             <p className="eyebrow"><Compass aria-hidden="true" size={12} /> Quests that begin here</p>
             <ul>{arcsHere.map((arc) => <li key={arc.slug}>
-              <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{arc.isMainline ? "mainline" : "side quest"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{storyArcCategoryLabels[arc.category].toLowerCase()}</i><ArrowRight aria-hidden="true" size={11} /></Link>
               {arc.hook ? <p>{arc.hook}</p> : null}
               {arc.where ? <span>picked up at <Link href={`/codex/bible/${arc.where.slug}`}>{arc.where.title}</Link>, inside this</span> : null}
             </li>)}</ul>
@@ -452,7 +461,20 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           <section>
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> World connections</p>
             {entityLinks.length || asideConnections.length ? <ul>
-              {entityLinks.map((connection, index) => <li key={`${connection.slug}-${index}`}><LoreLink slug={connection.slug}>{connection.slug.replaceAll("-", " ")}</LoreLink><span>{connection.detail}</span></li>)}
+              {entityLinks.map((connection, index) => {
+                // Link now, fill later is canon law, and it applies here too:
+                // a sheet field naming something nobody has written renders as
+                // the same marked todo the prose links use, not as a link into
+                // a 404. Written targets get their real title rather than a
+                // de-slugged guess at it.
+                const written = slugTitles[connection.slug];
+                return <li key={`${connection.slug}-${index}`}>
+                  {written
+                    ? <LoreLink slug={connection.slug}>{written}</LoreLink>
+                    : <strong className="planned-unwritten" title="Nobody has written this yet — link now, fill later">{connection.slug.replaceAll("-", " ")}</strong>}
+                  <span>{connection.detail}</span>
+                </li>;
+              })}
               {asideConnections.map((connection) => <li key={`${connection.slug}-${connection.relation}`}><LoreLink slug={connection.slug}>{connection.title}</LoreLink><span>{connection.relation}</span></li>)}
             </ul> : entry.connections.length > 0
               // Everything that points here is already rendered in full in

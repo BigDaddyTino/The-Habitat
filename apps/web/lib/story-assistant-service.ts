@@ -1,5 +1,6 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
+import { getCanonInbox, getCanonNavigator } from "@/lib/story-codex";
 import {
   buildStoryAssistantPrompt,
   describeStoryAssistantContext,
@@ -10,7 +11,9 @@ import {
   type StoryAssistantContext,
   type StoryAssistantEntry,
   type StoryAssistantNode,
+  type StoryAssistantRoom,
 } from "@habitat/shared";
+import { storyCanonPacketTargetLabels } from "@habitat/shared";
 import { analyzeStoryGraph, type StoryGraphEdge, type StoryGraphNode } from "@habitat/shared";
 
 const db = getPrismaClient();
@@ -67,6 +70,50 @@ async function countAssistantRequest() {
  * Archived and rejected material is excluded — a writer asking "what is true"
  * should not be answered from a branch that was thrown out.
  */
+/**
+ * The state of the writers' room, for the surfaces where the Warden is a
+ * guide rather than a lore reference — the story hub and the canon
+ * workspace. It answers "what is waiting on me?" without the writer having
+ * to already know where to look.
+ *
+ * Built off the same readers the pages themselves use, so a number he quotes
+ * and a number on screen can never disagree.
+ */
+async function buildAssistantRoom(userId: string): Promise<StoryAssistantRoom> {
+  const [inbox, nav, queued, mine] = await Promise.all([
+    getCanonInbox(),
+    getCanonNavigator(),
+    db.storyArc.count({ where: { status: "PROPOSED" } }),
+    db.storyRevision.findMany({
+      where: { actorUserId: userId, action: { not: "MOVED" } },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 6,
+      select: { summary: true },
+    }),
+  ]);
+
+  const titleOf = new Map(nav.regions.map((region) => [region.slug, region.title]));
+  for (const companion of nav.companions) titleOf.set(companion.slug, companion.title);
+
+  return {
+    pendingPackets: inbox.packets
+      .filter((packet) => packet.status === "pending")
+      .slice(0, 20)
+      .map((packet) => ({
+        title: packet.title,
+        thread: packet.thread.title,
+        destination: packet.targetKind === "region" && packet.targetRegion
+          ? (titleOf.get(packet.targetRegion) ?? packet.targetRegion)
+          : packet.targetKind === "companions" && packet.targetCompanion
+            ? (titleOf.get(packet.targetCompanion) ?? packet.targetCompanion)
+            : storyCanonPacketTargetLabels[packet.targetKind],
+      })),
+    unfiledArcs: nav.unfiled.map((arc) => arc.title).slice(0, 20),
+    reviewQueue: queued,
+    recentlyByThem: mine.map((revision) => revision.summary),
+  };
+}
+
 export async function buildAssistantContext(arcId: string | null, nodeId: string | null): Promise<StoryAssistantContext> {
   const workingStatuses = ["DRAFT", "PROPOSED", "CANON"] as const;
 
@@ -147,6 +194,8 @@ type AskInput = {
   arcId: string | null;
   nodeId: string | null;
   question: string;
+  /** True on the hub and the canon workspace, where he guides rather than recites. */
+  guide?: boolean;
 };
 
 /**
@@ -197,15 +246,19 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
   // catch below reports that plainly.
   await countAssistantRequest();
 
-  const [context, newestRevision, priorTurns] = await Promise.all([
+  const [context, room, newestRevision, priorTurns] = await Promise.all([
     buildAssistantContext(input.arcId, input.nodeId),
+    // Only asked for where he is standing in as the room's guide; on a board
+    // the question is about the story, not about the paperwork.
+    input.guide ? buildAssistantRoom(input.userId) : Promise.resolve(null),
     db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } }),
     // A short memory, so "what about the other one?" means something. Only this
     // member's own answered exchanges on this arc, and only a few — history is
     // paid for in tokens on every subsequent question.
     getAssistantThread(input.userId, input.arcId, 4),
   ]);
-  const contextSummary = describeStoryAssistantContext(context);
+  const guided: StoryAssistantContext = room ? { ...context, room } : context;
+  const contextSummary = describeStoryAssistantContext(guided);
   const revisionCursor = newestRevision?.id ?? null;
 
   const startedAt = Date.now();
@@ -219,7 +272,7 @@ export async function askStoryAssistant(input: AskInput): Promise<AssistantReply
         { role: "user" as const, text: turn.question },
         { role: "model" as const, text: turn.answer ?? "" },
       ]),
-      question: buildStoryAssistantPrompt(context, question),
+      question: buildStoryAssistantPrompt(guided, question),
       temperature: 0.7,
       // Flash 3.7 reasons before it writes, and that reasoning is drawn from
       // this same allowance — a live probe spent 108 thinking tokens to produce

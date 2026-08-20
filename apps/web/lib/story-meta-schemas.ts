@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  storyCanonPacketTargetKinds,
   storyCompanionMissionStatuses,
   storyControlKinds,
   storyCreatureCategories,
@@ -162,6 +163,43 @@ export const eventMetaSchema = z.object({
  * the entry status, is what says "brainstorming, not confirmed canon". Every
  * related-* field is slugs: real relationships, never names as text.
  */
+/**
+ * One packet of settled thread material on its way to canon.
+ *
+ * `targetRegion` is required exactly when the packet is aimed at a place —
+ * checked here rather than left to the form, because a region packet with no
+ * region has nowhere to land and would sit invisible in the inbox forever.
+ * `targetCompanion` stays optional on a companions packet: null is the
+ * general bucket, a slug lights that one companion's bubble.
+ */
+export const canonPacketSchema = z
+  .object({
+    id: z.string().uuid(),
+    title: z.string().trim().min(1).max(120),
+    body: z.string().trim().min(1).max(8000),
+    targetKind: z.enum(storyCanonPacketTargetKinds),
+    targetRegion: metaSlug.nullable(),
+    targetCompanion: metaSlug.nullable(),
+    entries: z.array(metaSlug).max(30),
+    status: z.enum(["pending", "woven"]),
+    pushedAt: z.string().trim().min(1).max(40),
+    pushedBy: z.string().trim().min(1).max(120),
+    wovenAt: z.string().trim().min(1).max(40).nullable(),
+    wovenBy: z.string().trim().min(1).max(120).nullable(),
+    wovenInto: z.array(metaSlug).max(30),
+  })
+  .superRefine((packet, ctx) => {
+    if (packet.targetKind === "region" && !packet.targetRegion) {
+      ctx.addIssue({ code: "custom", path: ["targetRegion"], message: "A packet aimed at a place has to say which place." });
+    }
+    if (packet.targetKind !== "region" && packet.targetRegion) {
+      ctx.addIssue({ code: "custom", path: ["targetRegion"], message: "Only a packet aimed at a place carries a place." });
+    }
+    if (packet.targetKind !== "companions" && packet.targetCompanion) {
+      ctx.addIssue({ code: "custom", path: ["targetCompanion"], message: "Only a packet aimed at a companion carries a companion." });
+    }
+  });
+
 export const threadMetaSchema = z.object({
   threadStatus: z.enum(storyThreadStatuses).nullable(),
   categories: z.array(z.enum(storyThreadCategories)).max(storyThreadCategories.length),
@@ -176,6 +214,10 @@ export const threadMetaSchema = z.object({
   arcs: z.array(metaSlug).max(30),
   companionMissions: z.array(metaSlug).max(30),
   bosses: z.array(metaSlug).max(12),
+  // Deliberately required with NO default. A sheet that forgets to pass the
+  // packets through gets a loud validation failure instead of a silent save
+  // that deletes every packet the thread was carrying.
+  canonPackets: z.array(canonPacketSchema).max(60),
   tags: metaLines(20, 40),
   openQuestions: metaLines(30, 500),
 });
@@ -183,6 +225,8 @@ export const threadMetaSchema = z.object({
 /** One mission in a companion's chain — `companion` + `order` file it. */
 export const companionMissionMetaSchema = z.object({
   companion: metaSlug.nullable(),
+  /** The canon arc this mission became; null while it is still only planned. */
+  arc: metaSlug.nullable(),
   order: z.number().int().min(1).max(99).nullable(),
   missionStatus: z.enum(storyCompanionMissionStatuses).nullable(),
   stage: z.enum(storyStoryStages).nullable(),

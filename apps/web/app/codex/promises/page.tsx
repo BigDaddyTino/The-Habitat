@@ -48,7 +48,7 @@ export default async function StoryPromisesPage() {
     <section className="page-shell codex-shell">
       <StoryLiveSync />
       <div className="page-intro">
-        <Link className="codex-back" href="/codex"><ArrowLeft aria-hidden="true" size={13} /> Story codex</Link>
+        <Link className="codex-back" href="/codex/stories"><ArrowLeft aria-hidden="true" size={13} /> Stories &amp; quests</Link>
         <p className="eyebrow">Martino — story promises</p>
         <h1>Every promise the story has made</h1>
         <p>
