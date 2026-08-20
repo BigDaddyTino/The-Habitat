@@ -79,8 +79,13 @@ export function ArcFields({ regions, characters, factions = [], canReview, threa
 
       <label hidden={hide(!needsCompanion)}>
         {needsRegion ? "Where is the bounty posted?" : "Where does the party pick this up?"}
-        <select defaultValue={defaults?.regionEntryId ?? ""} name="regionEntryId">
-          <option value="">Nowhere in particular yet</option>
+        {/* Asked for in the browser, not only on the server. The server's
+            refusal is written in the room's own words, but a thrown message
+            from a server action is redacted in production down to the generic
+            "that did not save" page — so the one error the writer can actually
+            fix looked identical to somebody else saving over them. */}
+        <select defaultValue={defaults?.regionEntryId ?? ""} name="regionEntryId" required={needsRegion}>
+          <option value="">{needsRegion ? "Pick where it is posted" : "Nowhere in particular yet"}</option>
           {regions.map((region) => <option key={region.id} value={region.id}>{region.title}</option>)}
         </select>
         <small className="sheet-hint">{needsRegion
@@ -90,8 +95,8 @@ export function ArcFields({ regions, characters, factions = [], canReview, threa
 
       <label hidden={hide(needsCompanion)}>
         Whose story is this?
-        <select defaultValue={defaults?.companionEntryId ?? ""} name="companionEntryId">
-          <option value="">Nobody in particular</option>
+        <select defaultValue={defaults?.companionEntryId ?? ""} name="companionEntryId" required={needsCompanion}>
+          <option value="">{needsCompanion ? "Pick whose story this is" : "Nobody in particular"}</option>
           {characters.map((character) => <option key={character.id} value={character.id}>{character.title}</option>)}
         </select>
         <small className="sheet-hint">A companion quest belongs to one companion. It files itself into their chain.</small>
@@ -99,8 +104,8 @@ export function ArcFields({ regions, characters, factions = [], canReview, threa
 
       <label hidden={hide(needsFaction)}>
         Whose banner does it fly?
-        <select defaultValue={defaults?.factionEntryId ?? ""} name="factionEntryId">
-          <option value="">No faction in particular yet</option>
+        <select defaultValue={defaults?.factionEntryId ?? ""} name="factionEntryId" required={needsFaction}>
+          <option value="">{needsFaction ? "Pick whose banner it flies" : "No faction in particular yet"}</option>
           {factions.map((faction) => <option key={faction.id} value={faction.id}>{faction.title}</option>)}
         </select>
         <small className="sheet-hint">A faction quest belongs to one power. Pick a wing and it still files under the power that wing answers to.</small>

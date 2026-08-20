@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
+import { Archive, ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { isStoryFlowEditable, storyLockNotice } from "@habitat/shared";
 import { getCanonNavigator, getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
@@ -9,7 +9,7 @@ import { StoryFlow } from "@/components/story-flow";
 import { CanonNavigator } from "@/components/canon-navigator";
 import { RipplePanel } from "@/components/story-ripples";
 import { ArcFields } from "@/components/story-arc-form";
-import { canoniseArc, updateArc } from "@/app/codex/actions";
+import { archiveArc, canoniseArc, updateArc } from "@/app/codex/actions";
 
 /**
  * The arc page IS the story: one top-down tree, read top to bottom, walked
@@ -121,6 +121,13 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
             />
             <p className="story-inspector-hint">The export slug <code>{board.arc.slug}</code> never changes — it is the identity the game matches this story&apos;s assets on.</p>
           </form>
+          {canReview ? (
+            <form action={archiveArc} className="codex-arc-archive">
+              <input name="arcId" type="hidden" value={board.arc.id} />
+              <button className="danger-link" type="submit"><Archive aria-hidden="true" size={13} /> Archive this story</button>
+              <small className="story-inspector-hint">Takes it off the stories page, the navigator, and the export. Its scenes, branches, and history are kept — an administrator can bring it back from the revision trail. Use this for a board that should never have been opened.</small>
+            </form>
+          ) : null}
         </details>
       ) : null}
 

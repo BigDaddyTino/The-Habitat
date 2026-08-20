@@ -44,6 +44,10 @@ const gatedActions = [
   "unlinkEntryFromNode",
   "setStoryStatus",
   "canoniseArc",
+  // Closing a board is the most final thing that can happen to one, so the
+  // freeze binds it hardest: a settled flow has to be deliberately unlocked
+  // before anybody can take it off the shelf.
+  "archiveArc",
 ];
 
 /**

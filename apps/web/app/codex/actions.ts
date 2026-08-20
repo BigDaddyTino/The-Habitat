@@ -1586,6 +1586,46 @@ export async function setStoryStatus(formData: FormData) {
  * that is already held keeps its original time and holder, so the trail says
  * when the story was actually settled and not when somebody last clicked.
  */
+/**
+ * Takes a quest board out of the working codex.
+ *
+ * Archived rather than erased, the same law entries and canon scenes already
+ * run on: a board carries scenes, branches, revisions, and whatever the game
+ * has already imported from it, and none of that should vanish because
+ * somebody cleaned up a test. ARCHIVED is outside `workingStatuses`, so the
+ * board leaves the stories page, the navigator, and the export, while its
+ * trail stays readable and an admin can set it back.
+ *
+ * The freeze binds here too. A settled flow is settled: unlock it first.
+ */
+export async function archiveArc(formData: FormData) {
+  const user = await requireRole(storyReviewRole);
+  const arcId = z.string().uuid().safeParse(formData.get("arcId"));
+  if (!arcId.success) throw new Error("Invalid arc.");
+
+  await db.$transaction(async (tx) => {
+    const arc = await tx.storyArc.findUnique({ where: { id: arcId.data }, select: { id: true, slug: true, title: true, status: true, category: true } });
+    if (!arc) throw new Error("That story no longer exists.");
+    if (arc.status === "ARCHIVED") throw new Error("That story is already archived. An administrator can restore it from the revision trail.");
+    await assertArcUnlocked(tx, arc.id);
+
+    await tx.storyArc.update({ where: { id: arc.id }, data: { status: "ARCHIVED", lockedByUserId: null } });
+    await recordRevision(tx, {
+      entityType: "ARC",
+      entityId: arc.id,
+      arcId: arc.id,
+      action: "STATUS_CHANGED",
+      actorUserId: user.id,
+      summary: `Archived the ${storyArcCategoryLabels[arc.category].toLowerCase()} "${arc.title}"`,
+      before: { status: arc.status },
+      after: { status: "ARCHIVED" },
+    });
+  });
+
+  refreshCodex();
+  redirect("/codex/stories");
+}
+
 export async function lockArc(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const arcId = z.string().uuid().safeParse(formData.get("arcId"));
