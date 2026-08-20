@@ -335,3 +335,36 @@ test("holding a Forge is written as how ground is held", () => {
   // Taking a settlement means taking its Forge intact, not levelling it.
   assert.match(bySlugBody("battle-management"), /intact/i, "sieges must want the Forge whole");
 });
+
+test("the release gate is a real edge, and a broken one is reported", () => {
+  // `dependsOn` was written by the sheet and read by nobody: a system that
+  // cannot ship without another said so on its own page, and the system it
+  // depended on knew nothing about it. Same one-way edge the races shelf had.
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  assert.match(codex, /meta\.dependsOn\.some\(referencesSlug\)\) add\("cannot ship without this system"\)/, "a system must list what cannot ship without it");
+
+  // SYSTEM was the last kind with no reference checks of its own, so a system
+  // gated on a renamed arc was silently unreleasable and nothing said so.
+  const block = codex.slice(codex.indexOf('if (entry.kind === "SYSTEM") {'), codex.indexOf('if (entry.kind === "CREATURE") {'));
+  assert.ok(block.length > 0, "SYSTEM must have its own reference checks");
+  for (const field of ['check("parent system", meta.parent)', 'check("unlock arc", meta.unlockArc)', 'check("depends on", target)', 'check("region note", row.region)']) {
+    assert.ok(block.includes(field), `the release gate must check ${field}`);
+  }
+
+  // And all four have to count as reachability, or a system whose only tie is
+  // its gate reads as an orphan on the needs-work dashboard.
+  assert.match(codex, /meta\.arcs, meta\.factions, meta\.dependsOn\]/, "dependsOn must count as an outbound reference");
+  assert.match(codex, /rows\(meta\.regionNotes\)\) \{ const slug = slugOf\(row\.region\)/, "regionNotes must count as an outbound reference");
+  assert.match(codex, /\{ const slug = slugOf\(meta\.unlockArc\); if \(slug\) targets\.push\(slug\); \}/, "unlockArc must count as an outbound reference");
+});
+
+test("every kind that can name another entry has its references checked", () => {
+  // The gap this closes is structural, not about any one field: a kind with no
+  // block here is a kind whose broken links rot silently, which is how both
+  // CREATURE and SYSTEM sat unwatched while every other kind was scanned.
+  const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
+  const needsWork = codex.slice(codex.indexOf("export async function getStoryNeedsWork()"));
+  for (const kind of ["CHARACTER", "REGION", "FACTION", "EVENT", "SYSTEM", "CREATURE", "THREAD", "COMPANION_MISSION"]) {
+    assert.ok(needsWork.includes(`if (entry.kind === "${kind}") {`), `${kind} names other entries and must have its references checked`);
+  }
+});

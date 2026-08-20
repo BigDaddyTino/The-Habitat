@@ -394,6 +394,12 @@ export async function getStoryEntry(slug: string) {
     if (rows(meta.relations).some((row) => referencesSlug(row.faction))) add("has a faction relationship");
     if (rows(meta.control).some((row) => referencesSlug(row.faction))) add("is controlled or influenced by this faction");
     if (rows(meta.connections).some((row) => referencesSlug(row.to))) add("connects to this region");
+    // The release gate, read from the other side: a system nothing can ship
+    // without should say so on its own page, the way a faction says who
+    // leads it. `regionNotes` is deliberately absent — the region dossier
+    // already has a purpose-built panel for those, and a connection row
+    // would print the same fact twice.
+    if (Array.isArray(meta.dependsOn) && meta.dependsOn.some(referencesSlug)) add("cannot ship without this system");
 
     // The narrative-development room's relationships, read back the same way:
     // a thread or mission naming this entry shows up on this entry's dossier.
@@ -1124,13 +1130,15 @@ export async function getStoryNeedsWork() {
       // The string-list fields. `factions` is object rows on a character but
       // plain slugs on a thread; slugOf skips the objects, so listing it here
       // only picks up the thread shape.
-      for (const list of [meta.leaders, meta.biomes, meta.where, meta.involved, meta.characters, meta.companions, meta.locations, meta.bosses, meta.companionMissions, meta.threads, meta.arcs, meta.factions]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      for (const list of [meta.leaders, meta.biomes, meta.where, meta.involved, meta.characters, meta.companions, meta.locations, meta.bosses, meta.companionMissions, meta.threads, meta.arcs, meta.factions, meta.dependsOn]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
       for (const row of rows(meta.factions)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.relationships)) { const slug = slugOf(row.character); if (slug) targets.push(slug); }
       for (const row of rows(meta.relations)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.control)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.connections)) { const slug = slugOf(row.to); if (slug) targets.push(slug); }
       for (const row of rows(meta.involvement)) { const slug = slugOf(row.arc); if (slug) targets.push(slug); }
+      for (const row of rows(meta.regionNotes)) { const slug = slugOf(row.region); if (slug) targets.push(slug); }
+      { const slug = slugOf(meta.unlockArc); if (slug) targets.push(slug); }
       // The development room's newest links. A packet naming an entry
       // nobody wrote, or a mission pointing at an arc that was deleted, is an
       // unresolved link like any other — reported here rather than rotting
@@ -1202,6 +1210,16 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.factions)) check("faction", row.faction);
       for (const row of rows(meta.relationships)) check("relationship", row.character);
       for (const row of rows(meta.involvement)) check("involvement", row.arc);
+    }
+    if (entry.kind === "SYSTEM") {
+      // The release gate is the point of this sheet: a system gated on an arc
+      // that was renamed or archived is silently unreleasable, and a
+      // dependency on a system nobody wrote is a ship-order that cannot be
+      // satisfied. Both are slug fields on the sheet, never prose.
+      check("parent system", meta.parent);
+      check("unlock arc", meta.unlockArc);
+      for (const target of Array.isArray(meta.dependsOn) ? meta.dependsOn : []) check("depends on", target);
+      for (const row of rows(meta.regionNotes)) check("region note", row.region);
     }
     if (entry.kind === "CREATURE") {
       // The race is a strict slug field on the sheet, never prose, so it is
