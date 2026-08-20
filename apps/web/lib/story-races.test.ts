@@ -4,6 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { isValidStoryKey, storyCreatureCategories } from "@habitat/shared";
 import { existingRaceSheets, raceAssignments, raceMemberSeeds, raceSeeds } from "./story-races-seed";
+import { habitatAssignments, unplacedCreatures } from "./story-habitats-seed";
 import { creatureMetaSchema } from "./story-meta-schemas";
 import { isStoryCollectionSlug, renamedStoryCollections, storyCollections } from "./story-library";
 import { storyProseLinks } from "./story-prose";
@@ -158,4 +159,36 @@ test("the sheet and the create form both offer the whole shelf, not just the umb
   // And the birth meta actually writes it.
   const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
   assert.match(actions, /species: oneSlug\(formData, "species"\)/);
+});
+
+test("every creature is filed on ground the world actually has", () => {
+  // The races shelf was wired to its own tree but not to the map: twelve
+  // creatures, not one naming a place that resolved, so no region dossier
+  // could say what lived there. These placements are quoted from canon, and
+  // the citation travels with them — a placement whose reason nobody can
+  // check is one nobody can correct.
+  const worldRegions = ["the-starting-island", "the-ocean", "the-peninsula"];
+  for (const assignment of habitatAssignments) {
+    assert.ok(assignment.regions.length > 0, `${assignment.creature} is listed as placed but names no ground`);
+    for (const region of assignment.regions) {
+      assert.ok(worldRegions.includes(region), `${assignment.creature} is filed in ${region}, which is not one of the three regions the world has`);
+    }
+    assert.ok(assignment.because.length > 40, `${assignment.creature} needs the sentence it was read from, not an assertion`);
+    assert.ok(isValidStoryKey(assignment.creature), `${assignment.creature} is not a well-formed slug`);
+  }
+
+  // A creature is either placed or deliberately unplaced — never merely
+  // forgotten, which is the state the whole shelf was in.
+  const placed = new Set(habitatAssignments.map((row) => row.creature));
+  for (const row of unplacedCreatures) {
+    assert.ok(!placed.has(row.creature), `${row.creature} is both placed and left off the map`);
+    assert.ok(row.because.length > 40, `${row.creature} needs a reason it was left off, so nobody re-litigates it blind`);
+  }
+
+  // Every race and member the seed knows about is accounted for one way or
+  // the other, so a creature added later cannot quietly go unplaced.
+  const known = new Set([...raceSeeds, ...raceMemberSeeds].map((seed) => seed.slug));
+  for (const slug of known) {
+    assert.ok(placed.has(slug) || unplacedCreatures.some((row) => row.creature === slug), `${slug} is neither placed on the map nor deliberately left off it`);
+  }
 });
