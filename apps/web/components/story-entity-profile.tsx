@@ -1,7 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, History, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
-import { storyEntryKindLabels, type StoryEntryKind, type StoryStatus } from "@habitat/shared";
+import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import {
+  isUnconfirmedThreadStatus,
+  storyCompanionMissionStatusLabels,
+  storyEntryKindLabels,
+  storyStoryStageLabels,
+  storyThreadCategoryLabels,
+  storyThreadStatusLabels,
+  type StoryCompanionMissionStatus,
+  type StoryEntryKind,
+  type StoryStatus,
+  type StoryStoryStage,
+  type StoryThreadCategory,
+  type StoryThreadStatus,
+} from "@habitat/shared";
 import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getEventArt } from "@/lib/event-art";
 import { timelineEraLabel } from "@/lib/story-timeline";
@@ -12,6 +25,8 @@ import { modelPreview } from "@/lib/story-library";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
+/** One mission in a companion's chain, in order, statused. */
+type ChainMission = { slug: string; title: string; summary: string | null; order: number | null; missionStatus: string | null; stage: string | null };
 /** A place directly inside this one, with whatever sits inside it in turn. */
 type ContainedPlace = { slug: string; title: string; summary: string | null; label: string; inside?: Array<{ slug: string; title: string; label: string }> };
 type Appearance = { id: string; title: string; via: "referenced" | "speaks"; arc: { slug: string; title: string } };
@@ -30,7 +45,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {} }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -42,7 +57,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string> }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null }) {
   // Entries resolve to the bible, arcs to their board, and anything nobody has
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
@@ -61,6 +76,19 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const isRegion = entry.kind === "REGION";
   const characterKeyart = isCharacter ? getCharacterKeyart(entry.slug) : null;
   const isSystem = entry.kind === "SYSTEM";
+  const isThread = entry.kind === "THREAD";
+  const isMission = entry.kind === "COMPANION_MISSION";
+  // Development state for the narrative room's kinds. The room's open-write
+  // law lands every entry CANON, so for these two kinds the meta status — not
+  // the entry status — is the truth every surface shows.
+  const threadStatus = isThread && typeof meta.threadStatus === "string" ? (meta.threadStatus as StoryThreadStatus) : null;
+  const missionStatus = isMission && typeof meta.missionStatus === "string" ? (meta.missionStatus as StoryCompanionMissionStatus) : null;
+  const threadUnconfirmed = isThread && isUnconfirmedThreadStatus(threadStatus);
+  const stageLabel = (value: unknown) => (typeof value === "string" && value in storyStoryStageLabels ? storyStoryStageLabels[value as StoryStoryStage] : null);
+  // The COMPANION badge: worn by any character whose sheet says they can join
+  // the party, with the recruitment window and their standing now beside it.
+  const companion = record(meta.companion);
+  const isCompanionCapable = entry.kind === "CHARACTER" && companion.capable === true;
   const systemArt = isSystem ? getSystemArt(entry.slug) : null;
   const eventArt = entry.kind === "EVENT" ? getEventArt(entry.slug) : null;
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
@@ -88,7 +116,16 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     // the aside — places when the atlas block runs, subsystems when the
     // system tree does.
     !(containedPlaces.length && connection.relation === "belongs inside this region") &&
-    !(systemFamily && connection.relation === "is a subsystem of this"));
+    !(systemFamily && connection.relation === "is a subsystem of this") &&
+    // A thread's forward links already name its missions; the missions
+    // pointing back is the same fact twice in one list.
+    !(isThread && connection.relation === "is advanced by this companion mission" && words(meta.companionMissions).includes(connection.slug)) &&
+    // A character's mission chain is rendered in full in the narrative
+    // column, so the chain's rows do not repeat in the aside.
+    !(companionChain && companionChain.missions.some((mission) => mission.slug === connection.slug) && (connection.relation === "belongs to their companion arc" || connection.relation === "features them in a companion mission")) &&
+    // A mission already says which threads it advances; the thread naming it
+    // back is the same edge read from the other end.
+    !(isMission && connection.relation === "is part of this story thread" && words(meta.threads).includes(connection.slug)));
   const entityLinks: Array<{ slug: string; detail: string }> = [];
 
   if (isCharacter) {
@@ -114,6 +151,23 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     for (const place of words(meta.where)) if (slugShaped(place)) entityLinks.push({ slug: place, detail: "Happened here" });
     for (const participant of words(meta.involved)) if (slugShaped(participant)) entityLinks.push({ slug: participant, detail: "Involved" });
   }
+  if (isThread) {
+    const companionSlugs = new Set(words(meta.companions));
+    for (const slug of words(meta.characters)) entityLinks.push({ slug, detail: companionSlugs.has(slug) ? "Character & companion in this thread" : "Character in this thread" });
+    for (const slug of words(meta.companions)) if (!words(meta.characters).includes(slug)) entityLinks.push({ slug, detail: "Companion in this thread" });
+    for (const slug of words(meta.factions)) entityLinks.push({ slug, detail: "Faction involved" });
+    for (const slug of words(meta.locations)) entityLinks.push({ slug, detail: "Where it happens" });
+    for (const slug of words(meta.bosses)) entityLinks.push({ slug, detail: "Proposed boss encounter" });
+    for (const slug of words(meta.companionMissions)) entityLinks.push({ slug, detail: "Companion mission in this thread" });
+    if (label(meta.parent)) entityLinks.push({ slug: String(meta.parent), detail: "Grew out of this thread" });
+  }
+  if (isMission) {
+    if (label(meta.companion)) entityLinks.push({ slug: String(meta.companion), detail: "Whose companion arc this is" });
+    for (const slug of words(meta.characters)) if (slug !== meta.companion) entityLinks.push({ slug, detail: "Features in this mission" });
+    for (const slug of words(meta.locations)) entityLinks.push({ slug, detail: "Where it happens" });
+    for (const slug of words(meta.factions)) entityLinks.push({ slug, detail: "Faction involved" });
+    for (const slug of words(meta.threads)) entityLinks.push({ slug, detail: "Advances this story thread" });
+  }
 
   return (
     <>
@@ -129,7 +183,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
-          <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {entry.status === "CANON" ? "Canon" : entry.status}</p>
+          <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {isThread
+            ? (threadStatus ? storyThreadStatusLabels[threadStatus] : "No status yet")
+            : isMission
+              ? (missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : "No status yet")
+              : entry.status === "CANON" ? "Canon" : entry.status}</p>
+          {threadUnconfirmed ? <p className="thread-canon-banner"><Lightbulb aria-hidden="true" size={13} /> <strong>{threadStatus ? storyThreadStatusLabels[threadStatus] : "Unstatused"} — not confirmed canon.</strong> This is a proposal under development. Discuss it, revise it, move its status — nothing in it binds the game until the room decides.</p> : null}
+          {isMission && (missionStatus === null || missionStatus === "brainstorming" || missionStatus === "concept") ? <p className="thread-canon-banner"><Lightbulb aria-hidden="true" size={13} /> <strong>{missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : "Unstatused"} — not confirmed canon.</strong> A development record: editable, arguable, and binding on nothing until its status says otherwise.</p> : null}
           {/* A destination three rungs down is meaningless without its address. */}
           {placeAncestry.length ? <nav aria-label="Where this sits" className="place-trail">
             {placeAncestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
@@ -146,11 +206,15 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               <ArrowRight aria-hidden="true" size={12} />
             </Link>)}
           </div> : null}
-          <p className="entity-profile-byline">Created by {entry.author}{entry.lastEditor && entry.lastEditor !== entry.author ? ` · last shaped by ${entry.lastEditor}` : ""}</p>
+          {isCompanionCapable ? <div className="companion-badge" title="This character can join the party as an active companion.">
+            <Handshake aria-hidden="true" size={15} />
+            <span><strong>Companion</strong>{label(companion.availability) ? <em>{String(companion.availability)}</em> : null}{label(companion.status) ? <i>{String(companion.status)}</i> : null}</span>
+          </div> : null}
+          <p className="entity-profile-byline">{isThread || isMission ? "Submitted by" : "Created by"} {entry.author}{entry.lastEditor && entry.lastEditor !== entry.author ? ` · last shaped by ${entry.lastEditor}` : ""}</p>
         </div>
       </header>
 
-      {(isCharacter || isFaction || isRegion || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
+      {(isCharacter || isFaction || isRegion || isThread || isMission || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
         {isCharacter ? <><Fact label="Full name" value={meta.fullName} /><Fact label="Species" value={meta.species} /><Fact label="Pronouns" value={meta.pronouns} /><Fact label="Magic" value={magic.origin} /><Fact label="Known status" value={status.known} /></> : null}
         {isFaction ? <><Fact label="Power" value={meta.scope} /><Fact label="Seat" value={meta.seat} /><Fact label="Game tag" value={meta.gameTag} /><Fact label="Leaders" value={words(meta.leaders).length ? `${words(meta.leaders).length} named` : null} /></> : null}
         {isRegion ? <><Fact label="Place type" value={meta.type} /><Fact label="Biome" value={meta.biome} /><Fact label="Population" value={meta.population} /><Fact label="World state" value={meta.status} />{label(meta.veilAnchorTier) ? <Fact label="Veil Anchor" value={`Tier ${String(meta.veilAnchorTier)}`} /> : null}{label(meta.soulForge) ? <Fact label="Soul Forge" value={String(meta.soulForge)} /> : null}<Fact label="Game tag" value={meta.gameTag} /></> : null}
@@ -158,6 +222,19 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         {entry.kind === "ITEM" ? <><Fact label="Category" value={meta.category} /><Fact label="Rarity" value={meta.rarity} /><Fact label="Origin" value={meta.origin} /></> : null}
         {entry.kind === "EVENT" ? <><Fact label="When" value={meta.when} /><Fact label="On the timeline" value={typeof meta.timelineYearsAgo === "number" ? timelineEraLabel(meta.timelineYearsAgo) : "not placed yet"} /><Fact label="Where" value={words(meta.where).length ? words(meta.where).map((slug) => slugTitles[slug] ?? slug.replaceAll("-", " ")).join(", ") : null} /><Fact label="Involved" value={words(meta.involved).length ? `${words(meta.involved).length} named` : null} /></> : null}
         {isSystem ? <><Fact label="Category" value={meta.category} /><Fact label="Build status" value={meta.buildStatus} /><Fact label="Unlocks" value={label(meta.unlockStage) ?? (label(meta.unlockArc) ? `with ${String(meta.unlockArc).replaceAll("-", " ")}` : systemFamily?.ancestry.length ? "with its parent system" : null)} /><Fact label="Game tag" value={meta.gameTag} /></> : null}
+        {isThread ? <>
+          <Fact label="Status" value={threadStatus ? storyThreadStatusLabels[threadStatus] : null} />
+          <Fact label="Categories" value={words(meta.categories).length ? words(meta.categories).map((category) => storyThreadCategoryLabels[category as StoryThreadCategory] ?? category).join(" · ") : null} />
+          <Fact label="Story stages" value={words(meta.stages).length ? words(meta.stages).map((stage) => stageLabel(stage) ?? stage).join(" → ") : null} />
+          <Fact label="Priority" value={meta.priority} />
+          <Fact label="Spoiler level" value={meta.spoilerLevel} />
+        </> : null}
+        {isMission ? <>
+          <Fact label="Companion" value={label(meta.companion) ? (slugTitles[String(meta.companion)] ?? String(meta.companion).replaceAll("-", " ")) : null} />
+          <Fact label="Chain position" value={typeof meta.order === "number" ? `Mission ${meta.order}` : null} />
+          <Fact label="Status" value={missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : null} />
+          <Fact label="Story stage" value={stageLabel(meta.stage)} />
+        </> : null}
       </dl> : null}
 
       <div className="entity-profile-layout">
@@ -165,6 +242,44 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           <p className="eyebrow"><BookOpen aria-hidden="true" size={12} /> Writer briefing</p>
           {entry.body ? <StoryProse body={entry.body} resolve={resolveProse} /> : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
           {isCharacter && label(meta.storyRole) ? <blockquote><Sparkles aria-hidden="true" size={16} /><div><strong>Why this character exists</strong><p>{String(meta.storyRole)}</p></div></blockquote> : null}
+          {isMission ? <div className="mission-detail-grid">
+            {label(meta.unlockConditions) ? <div className="mission-detail"><p className="eyebrow">Unlocks when</p><p>{String(meta.unlockConditions)}</p></div> : null}
+            {words(meta.rewards).length ? <div className="mission-detail"><p className="eyebrow">Rewards</p><ul>{words(meta.rewards).map((reward) => <li key={reward}>{reward}</li>)}</ul></div> : null}
+            {label(meta.relationshipEffects) ? <div className="mission-detail"><p className="eyebrow">Relationship effects</p><p>{String(meta.relationshipEffects)}</p></div> : null}
+            {label(meta.consequences) ? <div className="mission-detail"><p className="eyebrow">Consequences</p><p>{String(meta.consequences)}</p></div> : null}
+          </div> : null}
+          {companionChain && companionChain.missions.length ? <div className="companion-chain">
+            <p className="eyebrow"><ListOrdered aria-hidden="true" size={12} /> {companionChain.companion
+              ? <>{isCharacter ? "Their companion mission chain" : <>In <Link href={`/codex/bible/${companionChain.companion.slug}`}>{companionChain.companion.title}</Link>&apos;s companion mission chain</>}</>
+              : "Companion mission chain"}</p>
+            <ol>
+              {companionChain.missions.map((mission) => <li className={mission.slug === entry.slug ? "is-here" : ""} key={mission.slug}>
+                <span className="companion-chain-order">{mission.order ?? "·"}</span>
+                <div>
+                  {mission.slug === entry.slug ? <strong>{mission.title} <em>this one</em></strong> : <Link href={`/codex/bible/${mission.slug}`}><strong>{mission.title}</strong><ArrowRight aria-hidden="true" size={11} /></Link>}
+                  {mission.summary ? <p><StoryProseLine resolve={resolveProse} text={mission.summary} /></p> : null}
+                  <span className="companion-chain-facts">{[
+                    mission.missionStatus ? storyCompanionMissionStatusLabels[mission.missionStatus as StoryCompanionMissionStatus] ?? mission.missionStatus : null,
+                    stageLabel(mission.stage),
+                  ].filter(Boolean).join(" · ")}</span>
+                </div>
+              </li>)}
+            </ol>
+          </div> : null}
+          {isThread && words(meta.arcs).length ? <div className="entity-region-notes">
+            <p className="eyebrow"><GitBranch aria-hidden="true" size={12} /> Missions &amp; quest arcs this thread touches</p>
+            <ul>{words(meta.arcs).map((arcSlug) => <li key={arcSlug}>
+              {arcTitles[arcSlug] ? <Link href={`/codex/arc/${arcSlug}`}>{arcTitles[arcSlug]}</Link> : <span className="entity-region-missing" title="This arc has not been opened yet — link now, write later">{arcSlug.replaceAll("-", " ")}</span>}
+            </li>)}</ul>
+          </div> : null}
+          {isThread && threadChildren.length ? <div className="entity-contained-places entity-system-children">
+            <p className="eyebrow"><Lightbulb aria-hidden="true" size={12} /> Threads that grew out of this one</p>
+            <ul>{threadChildren.map((child) => <li key={child.slug}>
+              <div><Link href={`/codex/bible/${child.slug}`}><strong>{child.title}</strong><i>child thread</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {child.summary ? <p><StoryProseLine resolve={resolveProse} text={child.summary} /></p> : null}</div>
+            </li>)}</ul>
+          </div> : null}
+          {isThread && words(meta.tags).length ? <p className="thread-board-tags is-profile">{words(meta.tags).map((tag) => <Link href={`/codex/threads?tag=${encodeURIComponent(tag)}`} key={tag}>#{tag}</Link>)}</p> : null}
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
           {isRegion ? <div className="entity-contained-places">
             <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>

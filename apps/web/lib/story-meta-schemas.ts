@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  storyCompanionMissionStatuses,
   storyControlKinds,
   storyCreatureCategories,
   storyEntryKinds,
@@ -7,9 +8,14 @@ import {
   storyMagicOrigins,
   storyRegionTypes,
   storySettlementTiers,
+  storySpoilerLevels,
+  storyStoryStages,
   storySystemCategories,
   storySystemStatuses,
   storySoulForgeStates,
+  storyThreadCategories,
+  storyThreadPriorities,
+  storyThreadStatuses,
   storyVeilAnchorTiers,
 } from "@habitat/shared";
 
@@ -57,6 +63,9 @@ export const characterMetaSchema = z.object({
   involvement: z.array(z.object({ arc: metaSlug, how: metaText(300) })).max(20),
   gameId: metaText(120),
   model: metaText(200),
+  // The COMPANION badge. `capable` is the machine fact; availability and
+  // status are prose because recruitment windows and fates are narrative.
+  companion: z.object({ capable: z.boolean().nullable(), availability: metaText(300), status: metaText(300) }),
   openQuestions: metaLines(30, 300),
 });
 
@@ -144,6 +153,47 @@ export const eventMetaSchema = z.object({
   openQuestions: metaLines(30, 300),
 });
 
+/**
+ * The narrative-development sheet. Development state lives here — the room's
+ * open-write law lands every save as a working entry, so `threadStatus`, not
+ * the entry status, is what says "brainstorming, not confirmed canon". Every
+ * related-* field is slugs: real relationships, never names as text.
+ */
+export const threadMetaSchema = z.object({
+  threadStatus: z.enum(storyThreadStatuses).nullable(),
+  categories: z.array(z.enum(storyThreadCategories)).max(storyThreadCategories.length),
+  stages: z.array(z.enum(storyStoryStages)).max(storyStoryStages.length),
+  priority: z.enum(storyThreadPriorities).nullable(),
+  spoilerLevel: z.enum(storySpoilerLevels).nullable(),
+  parent: metaSlug.nullable(),
+  characters: z.array(metaSlug).max(30),
+  companions: z.array(metaSlug).max(30),
+  factions: z.array(metaSlug).max(30),
+  locations: z.array(metaSlug).max(30),
+  arcs: z.array(metaSlug).max(30),
+  companionMissions: z.array(metaSlug).max(30),
+  bosses: z.array(metaSlug).max(12),
+  tags: metaLines(20, 40),
+  openQuestions: metaLines(30, 500),
+});
+
+/** One mission in a companion's chain — `companion` + `order` file it. */
+export const companionMissionMetaSchema = z.object({
+  companion: metaSlug.nullable(),
+  order: z.number().int().min(1).max(99).nullable(),
+  missionStatus: z.enum(storyCompanionMissionStatuses).nullable(),
+  stage: z.enum(storyStoryStages).nullable(),
+  unlockConditions: metaText(1000),
+  rewards: metaLines(12, 300),
+  relationshipEffects: metaText(1000),
+  consequences: metaText(1000),
+  characters: z.array(metaSlug).max(30),
+  locations: z.array(metaSlug).max(30),
+  factions: z.array(metaSlug).max(30),
+  threads: z.array(metaSlug).max(12),
+  openQuestions: metaLines(30, 500),
+});
+
 export const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number], z.ZodTypeAny>> = {
   CHARACTER: characterMetaSchema,
   FACTION: factionMetaSchema,
@@ -152,6 +202,8 @@ export const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number],
   ITEM: itemMetaSchema,
   EVENT: eventMetaSchema,
   SYSTEM: systemMetaSchema,
+  THREAD: threadMetaSchema,
+  COMPANION_MISSION: companionMissionMetaSchema,
 };
 
 

@@ -49,7 +49,14 @@ export default async function StoryBiblePage({ searchParams }: { searchParams: P
               <p className="eyebrow">{storyEntryKindLabels[entry.kind]}</p>
               <h3>{entry.title}</h3>
               {entry.summary ? <p>{plainStoryProse(entry.summary)}</p> : null}
-              <footer><span>{entry.status === "CANON" ? "Canon" : entry.status === "PROPOSED" ? "Proposed" : "Draft"}</span><span>{entry.appearanceCount} appearance{entry.appearanceCount === 1 ? "" : "s"}</span></footer>
+              <footer><span>{
+                // Development-room kinds carry their truth in meta — showing
+                // "Canon" on a brainstorming thread would be a lie.
+                entry.kind === "THREAD" && typeof entry.meta?.threadStatus === "string" ? String(entry.meta.threadStatus).replaceAll("-", " ")
+                  : entry.kind === "COMPANION_MISSION" && typeof entry.meta?.missionStatus === "string" ? String(entry.meta.missionStatus).replaceAll("-", " ")
+                  : entry.kind === "THREAD" || entry.kind === "COMPANION_MISSION" ? "unstatused"
+                  : entry.status === "CANON" ? "Canon" : entry.status === "PROPOSED" ? "Proposed" : "Draft"
+              }</span><span>{entry.appearanceCount} appearance{entry.appearanceCount === 1 ? "" : "s"}</span></footer>
             </Link>
           ))}
         </div>

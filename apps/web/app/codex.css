@@ -727,3 +727,130 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .prose-link.is-unwritten { color: #9aa79b; text-decoration-style: dashed; text-decoration-color: rgba(154,167,155,.5); cursor: help; }
 .entity-profile-narrative strong, .flow-panel-body strong { color: #e6d7b5; font-weight: 700; }
 .entity-profile-narrative em, .flow-panel-body em { color: #cdbf9a; }
+
+/* --- Story threads: the narrative development room ------------------------ */
+
+.thread-board-toolbar { margin-bottom: 26px; border: 1px solid var(--line); background: var(--panel); padding: 14px 16px; }
+.thread-board-toolbar form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.thread-board-search { display: flex; flex: 1 1 240px; align-items: center; gap: 8px; border: 1px solid var(--line); background: rgba(12,16,13,.7); padding: 7px 10px; color: var(--muted); }
+.thread-board-search input { flex: 1; border: 0; background: transparent; color: var(--paper); font-size: 12px; outline: none; }
+.thread-board-toolbar select, .thread-board-toolbar input[type="text"] { border: 1px solid var(--line); background: rgba(12,16,13,.7); color: var(--paper); font-size: 11px; padding: 7px 8px; }
+.thread-board-toolbar input[type="text"] { width: 90px; }
+.thread-board-clear { color: var(--muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; }
+.thread-board-clear:hover { color: var(--paper); }
+
+.thread-board-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; margin-bottom: 34px; }
+.thread-board-card { display: flex; flex-direction: column; gap: 9px; border: 1px solid var(--line); border-top: 2px solid #7a8271; background: var(--panel); padding: 18px 19px; }
+.thread-board-card.is-unconfirmed { border-top-style: dashed; }
+.thread-board-card.status-brainstorming { border-top-color: #d8a657; }
+.thread-board-card.status-under-discussion { border-top-color: #7b93b8; }
+.thread-board-card.status-planned { border-top-color: #81b2b8; }
+.thread-board-card.status-approved { border-top-color: var(--canon); }
+.thread-board-card.status-in-development { border-top-color: var(--brass); }
+.thread-board-card.status-implemented { border-top-color: #e2cd97; }
+.thread-board-card.status-rejected { border-top-color: #c45c40; }
+.thread-board-card.status-on-hold, .thread-board-card.status-archived, .thread-board-card.status-unstatused { border-top-color: #5c635a; }
+.thread-board-card header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.thread-board-card h2 { margin: 0; font-family: var(--font-display); font-size: 25px; line-height: 1.04; }
+.thread-board-card h2 a { color: var(--paper); }
+.thread-board-card h2 a:hover { color: var(--brass); }
+
+.thread-status-badge { display: inline-block; padding: 3px 9px; border: 1px solid #5c635a; background: rgba(92,99,90,.1); color: #aab3a7; font-family: var(--font-mono); font-size: 8px; letter-spacing: .7px; text-transform: uppercase; }
+.thread-status-badge.tone-brainstorming { border-color: rgba(216,166,87,.6); border-style: dashed; background: rgba(216,166,87,.08); color: #d8a657; }
+.thread-status-badge.tone-under-discussion { border-color: rgba(123,147,184,.55); background: rgba(123,147,184,.08); color: var(--proposed); }
+.thread-status-badge.tone-planned { border-color: rgba(129,178,184,.55); background: rgba(129,178,184,.08); color: #81b2b8; }
+.thread-status-badge.tone-approved { border-color: rgba(143,191,138,.55); background: rgba(143,191,138,.08); color: var(--canon); }
+.thread-status-badge.tone-in-development { border-color: rgba(198,151,76,.6); background: rgba(198,151,76,.1); color: var(--brass); }
+.thread-status-badge.tone-implemented { border-color: rgba(226,205,151,.65); background: rgba(226,205,151,.12); color: #e2cd97; }
+.thread-status-badge.tone-rejected { border-color: rgba(196,92,64,.6); background: rgba(196,92,64,.1); color: #e08d74; }
+.thread-unconfirmed-mark { padding: 3px 8px; border: 1px dashed rgba(224,141,116,.5); color: #e08d74; font-family: var(--font-mono); font-size: 8px; letter-spacing: .7px; text-transform: uppercase; }
+
+.thread-board-taxonomy { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; }
+.thread-chip { padding: 2px 8px; border: 1px solid var(--line); color: #b9b29b; font-family: var(--font-mono); font-size: 8px; letter-spacing: .5px; text-transform: uppercase; }
+.thread-chip.is-stage { border-color: rgba(129,178,184,.4); color: #93b6ba; }
+.thread-board-summary { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.thread-board-cast { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin: 0; color: var(--muted); font-size: 11px; }
+.thread-board-cast svg { color: var(--brass); }
+.thread-board-cast a { color: #cbbd97; text-decoration: underline; text-decoration-color: rgba(198,151,76,.4); text-underline-offset: 2px; }
+.thread-board-cast a:hover { color: var(--paper); }
+.thread-board-tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; }
+.thread-board-tags a { color: #9aa79b; font-family: var(--font-mono); font-size: 10px; }
+.thread-board-tags a:hover { color: var(--brass); }
+.thread-board-tags.is-profile { margin-top: 16px; }
+.thread-board-card footer { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.05); color: var(--muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: .4px; text-transform: uppercase; }
+.thread-board-card footer strong { color: #d9cba6; }
+.thread-lineage a { color: #cbbd97; }
+.thread-board-open { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; color: var(--brass); }
+.thread-board-open:hover { color: var(--paper); }
+
+.thread-create-taxonomy { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.thread-create-taxonomy fieldset { border: 1px solid var(--line); background: rgba(12,16,13,.45); padding: 10px 12px 12px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.thread-create-taxonomy legend { padding: 0 6px; color: var(--muted); font-family: var(--font-mono); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; }
+.thread-create-taxonomy label { display: inline-flex; gap: 6px; align-items: center; color: #b9b29b; font-size: 11px; }
+.thread-footnote svg { color: var(--brass); vertical-align: -2px; }
+
+/* The loud part: a proposal must never read as settled story. */
+.thread-canon-banner { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0 2px; border: 1px dashed rgba(216,166,87,.55); background: rgba(216,166,87,.07); padding: 9px 12px; color: #cbb894; font-size: 11.5px; line-height: 1.55; }
+.thread-canon-banner svg { flex: none; margin-top: 2px; color: #d8a657; }
+.thread-canon-banner strong { color: #e8cf9a; }
+
+/* --- The COMPANION badge --------------------------------------------------- */
+
+.companion-badge { display: inline-flex; gap: 9px; align-items: center; justify-self: start; margin: 10px 0 2px; border: 1px solid rgba(198,151,76,.55); background: linear-gradient(120deg, rgba(198,151,76,.16), rgba(29,26,19,.85)); box-shadow: 0 0 14px rgba(198,151,76,.12), inset 0 1px 0 rgba(226,205,151,.14); padding: 7px 13px; }
+.companion-badge svg { color: var(--brass); }
+.companion-badge strong { color: #e8cf9a; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; }
+.companion-badge em { display: block; color: #b9b29b; font-size: 10.5px; font-style: normal; }
+.companion-badge i { display: block; color: #9aa79b; font-size: 10px; font-style: italic; }
+.companion-badge.is-card { position: absolute; left: 8px; bottom: 7px; z-index: 2; margin: 0; gap: 5px; padding: 4px 9px; background: linear-gradient(120deg, rgba(29,26,19,.92), rgba(29,26,19,.85)); color: #e8cf9a; font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+/* --- Companion mission dossier panels -------------------------------------- */
+
+.mission-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; margin: 18px 0; }
+.mission-detail { border: 1px solid var(--line); border-left: 2px solid var(--brass); background: rgba(21,26,23,.8); padding: 12px 14px; }
+.mission-detail p:not(.eyebrow) { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.mission-detail ul { margin: 6px 0 0; padding-left: 16px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+
+.companion-chain { margin: 20px 0; border: 1px solid var(--line); background: rgba(21,26,23,.7); padding: 15px 17px; }
+.companion-chain ol { display: grid; gap: 0; margin: 12px 0 0; padding: 0; list-style: none; }
+.companion-chain li { position: relative; display: flex; gap: 12px; padding: 9px 0 9px 4px; }
+.companion-chain li + li { border-top: 1px solid rgba(255,255,255,.05); }
+.companion-chain li.is-here { background: rgba(198,151,76,.07); outline: 1px dashed rgba(198,151,76,.35); outline-offset: -4px; }
+.companion-chain-order { display: grid; flex: none; width: 24px; height: 24px; margin-top: 1px; place-items: center; border: 1px solid rgba(198,151,76,.5); border-radius: 50%; color: var(--brass); font-family: var(--font-mono); font-size: 10px; }
+.companion-chain li > div { display: grid; gap: 3px; }
+.companion-chain li a { display: inline-flex; gap: 6px; align-items: center; color: var(--paper); }
+.companion-chain li a:hover { color: var(--brass); }
+.companion-chain li strong em { color: var(--brass); font-family: var(--font-mono); font-size: 8px; font-style: normal; letter-spacing: .6px; text-transform: uppercase; }
+.companion-chain li p { margin: 0; color: var(--muted); font-size: 11.5px; line-height: 1.55; }
+.companion-chain-facts { color: #9aa79b; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; }
+
+/* --- Companion missions library: chains, not a card dump ------------------- */
+
+.companion-mission-chains { display: grid; gap: 16px; margin-bottom: 34px; }
+.companion-mission-chain-card { border: 1px solid var(--line); background: var(--panel); }
+.companion-mission-chain-head { display: flex; gap: 14px; align-items: center; border-bottom: 1px solid var(--line); background: rgba(29,26,19,.55); padding: 13px 16px; color: inherit; }
+.companion-mission-chain-head:hover strong { color: var(--brass); }
+.companion-mission-chain-head img { width: 64px; height: 64px; flex: none; border: 1px solid rgba(198,151,76,.4); object-fit: cover; }
+.companion-chain-fallback { display: grid; width: 64px; height: 64px; flex: none; place-items: center; border: 1px dashed var(--line); color: var(--brass); }
+.companion-mission-chain-head > span { display: grid; gap: 2px; }
+.companion-mission-chain-head small { display: inline-flex; gap: 5px; align-items: center; color: var(--brass); font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .7px; text-transform: uppercase; }
+.companion-mission-chain-head strong { color: var(--paper); font-family: var(--font-display); font-size: 24px; line-height: 1; }
+.companion-mission-chain-head em { color: var(--muted); font-size: 11px; font-style: normal; }
+.companion-mission-chain-head > svg { margin-left: auto; color: var(--brass); }
+.companion-mission-chain-card ol { display: grid; margin: 0; padding: 6px 16px 12px; list-style: none; }
+.companion-mission-chain-card ol li { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; }
+.companion-mission-chain-card ol li + li { border-top: 1px solid rgba(255,255,255,.045); }
+.companion-mission-chain-card ol li > a { display: grid; flex: 1; gap: 2px; color: inherit; min-width: 0; }
+.companion-mission-chain-card ol li > a strong { color: var(--paper); font-size: 14px; }
+.companion-mission-chain-card ol li > a:hover strong { color: var(--brass); }
+.companion-mission-chain-card ol li > a span { color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+.companion-mission-chain-card ol .companion-chain-order { align-self: flex-start; margin-top: 3px; }
+.companion-mission-chain-card ol .companion-chain-facts { flex: none; max-width: 220px; text-align: right; }
+
+@media (max-width: 700px) {
+  .thread-board-grid { grid-template-columns: 1fr; }
+  .thread-board-toolbar form { flex-direction: column; align-items: stretch; }
+  .thread-board-search { flex: none; }
+  .thread-board-toolbar input[type="text"] { width: auto; }
+  .companion-mission-chain-card ol li { flex-wrap: wrap; }
+  .companion-mission-chain-card ol .companion-chain-facts { max-width: none; text-align: left; }
+}

@@ -18,6 +18,8 @@ export const storyEntryKinds = [
   "RULE",
   "FLAG",
   "SYSTEM",
+  "THREAD",
+  "COMPANION_MISSION",
 ] as const;
 
 export type StoryEntryKind = (typeof storyEntryKinds)[number];
@@ -98,6 +100,8 @@ export const storyEntryKindLabels: Record<StoryEntryKind, string> = {
   RULE: "Rule",
   FLAG: "Flag",
   SYSTEM: "Game system",
+  THREAD: "Story thread",
+  COMPANION_MISSION: "Companion mission",
 };
 
 export const storyNodeKindLabels: Record<StoryNodeKind, string> = {
@@ -494,6 +498,8 @@ export type StoryCharacterMeta = {
   gameId: string | null;
   /** In-engine asset reference, e.g. "/Game/Creatures_Pack/Mesh/SK_Daemon". */
   model: string | null;
+  /** Whether and when this character can join the party — the COMPANION badge. */
+  companion: StoryCompanionCapability;
   openQuestions: string[];
 };
 
@@ -762,6 +768,233 @@ export type StorySystemMeta = {
   regionNotes: Array<{ region: string; note: string }>;
   gameTag: string | null;
   openQuestions: string[];
+};
+
+// ---------------------------------------------------------------------------
+// Story threads & companion missions — the narrative development room
+// ---------------------------------------------------------------------------
+
+/**
+ * Where a story thread stands. A THREAD is an evolving narrative concept —
+ * an arc, a mystery, a betrayal, an ending — worked the way brainstorms are:
+ * proposed, argued over in comments, revised, and eventually approved or
+ * rejected without ever losing who proposed it or the discussion around it.
+ *
+ * This status is the thread's truth, deliberately separate from the entry's
+ * CANON/PROPOSED status: the room's open-write law lands every save as a
+ * working entry, but a thread marked "brainstorming" is NOT confirmed canon
+ * and every surface says so. Threads never reach the game export at all —
+ * an implemented thread's content ships as real arcs and entries, not as the
+ * discussion that produced them.
+ */
+export const storyThreadStatuses = [
+  "brainstorming",
+  "under-discussion",
+  "planned",
+  "approved",
+  "in-development",
+  "implemented",
+  "on-hold",
+  "rejected",
+  "archived",
+] as const;
+
+export type StoryThreadStatus = (typeof storyThreadStatuses)[number];
+
+export const storyThreadStatusLabels: Record<StoryThreadStatus, string> = {
+  "brainstorming": "Brainstorming",
+  "under-discussion": "Under discussion",
+  "planned": "Planned",
+  "approved": "Approved",
+  "in-development": "In development",
+  "implemented": "Implemented",
+  "on-hold": "On hold",
+  "rejected": "Rejected",
+  "archived": "Archived",
+};
+
+/** Statuses that mean "this is not settled story" — badged loudly. */
+export function isUnconfirmedThreadStatus(status: StoryThreadStatus | null) {
+  return status === null || status === "brainstorming" || status === "under-discussion" || status === "on-hold";
+}
+
+export const storyThreadCategories = [
+  "main-story",
+  "character-arc",
+  "companion-arc",
+  "mystery",
+  "relationship",
+  "lore",
+  "faction-conflict",
+  "boss-encounter",
+  "world-event",
+  "side-story",
+  "reveal",
+  "ending",
+  "future-content",
+  "expansion-sequel",
+] as const;
+
+export type StoryThreadCategory = (typeof storyThreadCategories)[number];
+
+export const storyThreadCategoryLabels: Record<StoryThreadCategory, string> = {
+  "main-story": "Main story",
+  "character-arc": "Character arc",
+  "companion-arc": "Companion arc",
+  "mystery": "Mystery",
+  "relationship": "Relationship",
+  "lore": "Lore",
+  "faction-conflict": "Faction conflict",
+  "boss-encounter": "Boss encounter",
+  "world-event": "World event",
+  "side-story": "Side story",
+  "reveal": "Reveal",
+  "ending": "Ending",
+  "future-content": "Future content",
+  "expansion-sequel": "Expansion / sequel setup",
+};
+
+/**
+ * Approximate placement in the campaign. A thread can span several — the
+ * Amanda/Tino line runs Peninsula to post-credits — so threads carry an array
+ * while a single companion mission carries one.
+ */
+export const storyStoryStages = [
+  "prologue",
+  "tutorial",
+  "peninsula",
+  "early-game",
+  "mid-game",
+  "late-game",
+  "endgame",
+  "final-boss",
+  "epilogue",
+  "post-credits",
+  "unknown",
+] as const;
+
+export type StoryStoryStage = (typeof storyStoryStages)[number];
+
+export const storyStoryStageLabels: Record<StoryStoryStage, string> = {
+  "prologue": "Prologue",
+  "tutorial": "Tutorial",
+  "peninsula": "Peninsula",
+  "early-game": "Early game",
+  "mid-game": "Mid game",
+  "late-game": "Late game",
+  "endgame": "Endgame",
+  "final-boss": "Final boss",
+  "epilogue": "Epilogue",
+  "post-credits": "Post-credits",
+  "unknown": "Unknown / TBD",
+};
+
+export const storyThreadPriorities = ["low", "medium", "high", "critical"] as const;
+
+export const storySpoilerLevels = ["none", "minor", "major", "ending"] as const;
+
+/**
+ * The narrative-development sheet. Every related-* field is entry or arc
+ * slugs — real relationships, never names as text — under the same
+ * link-now-fill-later law the rest of the codex runs on. `parent` nests
+ * threads: the child-abduction mystery can grow out of The Empty Cribs
+ * without either losing its own discussion.
+ */
+export type StoryThreadMeta = {
+  threadStatus: StoryThreadStatus | null;
+  categories: StoryThreadCategory[];
+  stages: StoryStoryStage[];
+  priority: (typeof storyThreadPriorities)[number] | null;
+  spoilerLevel: (typeof storySpoilerLevels)[number] | null;
+  /** Slug of the THREAD this one grew out of; children are derived, never stored. */
+  parent: string | null;
+  /** CHARACTER slugs this thread is about. */
+  characters: string[];
+  /** CHARACTER slugs specifically in their companion capacity. */
+  companions: string[];
+  factions: string[];
+  /** REGION slugs. */
+  locations: string[];
+  /** Quest arc slugs — the missions this thread touches. */
+  arcs: string[];
+  /** COMPANION_MISSION slugs. */
+  companionMissions: string[];
+  /** Slugs of the entries (characters, creatures) fought as bosses in this thread. */
+  bosses: string[];
+  tags: string[];
+  openQuestions: string[];
+};
+
+/**
+ * How real a companion mission currently is. Same idea as the thread status:
+ * the development truth, separate from the entry's room status, badged
+ * everywhere the mission is listed.
+ */
+export const storyCompanionMissionStatuses = [
+  "brainstorming",
+  "concept",
+  "planned",
+  "approved",
+  "in-development",
+  "implemented",
+  "cut",
+  "archived",
+] as const;
+
+export type StoryCompanionMissionStatus = (typeof storyCompanionMissionStatuses)[number];
+
+export const storyCompanionMissionStatusLabels: Record<StoryCompanionMissionStatus, string> = {
+  "brainstorming": "Brainstorming",
+  "concept": "Concept",
+  "planned": "Planned",
+  "approved": "Approved",
+  "in-development": "In development",
+  "implemented": "Implemented",
+  "cut": "Cut",
+  "archived": "Archived",
+};
+
+/**
+ * A companion's personal mission — a first-class record, not a text field on
+ * the character. `companion` names the CHARACTER whose arc this belongs to,
+ * and `order` places it in that companion's chain (Amanda's runs 1–9).
+ */
+export type StoryCompanionMissionMeta = {
+  /** CHARACTER slug whose arc this mission belongs to. */
+  companion: string | null;
+  /** Position in the companion's mission chain, 1-first. */
+  order: number | null;
+  missionStatus: StoryCompanionMissionStatus | null;
+  stage: StoryStoryStage | null;
+  /** What has to be true before this mission opens — prose intent. */
+  unlockConditions: string | null;
+  rewards: string[];
+  /** How completing it moves the companion relationship. */
+  relationshipEffects: string | null;
+  /** What it changes in the world or the story. */
+  consequences: string | null;
+  characters: string[];
+  locations: string[];
+  factions: string[];
+  /** THREAD slugs this mission advances. */
+  threads: string[];
+  openQuestions: string[];
+};
+
+/**
+ * A character's companion capability, shown as the COMPANION badge on cards
+ * and dossiers. `capable` is the machine-readable fact; the two prose fields
+ * carry the story shape ("Peninsula / Early game", "Former companion —
+ * deceased") because recruitment windows and fates are narrative, not enums.
+ * A character record is never deleted or overwritten when their companion
+ * story ends — Amanda remains a character forever; only this object changes.
+ */
+export type StoryCompanionCapability = {
+  capable: boolean | null;
+  /** When the player can recruit them. */
+  availability: string | null;
+  /** Where they stand now: active, future, former — deceased. */
+  status: string | null;
 };
 
 /**

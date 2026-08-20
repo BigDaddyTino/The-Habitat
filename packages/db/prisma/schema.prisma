@@ -342,6 +342,17 @@ enum StoryEntryKind {
   /// actually do — so quests are written toward systems that exist. Its meta
   /// carries the release gate: the arc that switches the system on.
   SYSTEM
+  /// An evolving narrative concept — an arc, a mystery, a betrayal, an ending
+  /// — worked like a brainstorm. Its development status (brainstorming →
+  /// approved → implemented) lives in meta, its discussion in comments, and
+  /// the export never carries it: an implemented thread ships as real arcs
+  /// and entries, not as the argument that produced them.
+  THREAD
+  /// One mission in a companion's personal chain — a first-class record with
+  /// its own status, order, unlock conditions, and consequences, so a
+  /// companion arc is nine linked dossiers rather than a wall of text on the
+  /// character. Withheld from the export for the same reason threads are.
+  COMPANION_MISSION
 }
 
 /// Contribution status. Anyone below ADMIN writes at PROPOSED, and only CANON

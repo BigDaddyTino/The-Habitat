@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySystemCategories, storySystemStatuses, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta } from "@habitat/shared";
+import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -118,6 +118,10 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   const [involvement, setInvolvement] = useState(asArray(source.involvement).map((row) => ({ arc: text(record(row).arc), how: text(record(row).how) })));
   const [gameId, setGameId] = useState(text(source.gameId));
   const [model, setModel] = useState(text(source.model));
+  const companionSource = record(source.companion);
+  const [companionCapable, setCompanionCapable] = useState(companionSource.capable === true ? "yes" : companionSource.capable === false ? "no" : "");
+  const [companionAvailability, setCompanionAvailability] = useState(text(companionSource.availability));
+  const [companionStatus, setCompanionStatus] = useState(text(companionSource.status));
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
 
   const composed: StoryCharacterMeta = {
@@ -145,6 +149,11 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
     involvement: involvement.filter((row) => row.arc.trim()).map((row) => ({ arc: row.arc.trim(), how: orNull(row.how) })),
     gameId: orNull(gameId),
     model: orNull(model),
+    companion: {
+      capable: companionCapable === "yes" ? true : companionCapable === "no" ? false : null,
+      availability: orNull(companionAvailability),
+      status: orNull(companionStatus),
+    },
     openQuestions: splitLines(openQuestions),
   };
 
@@ -170,6 +179,16 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       <label>Appearance<textarea maxLength={2000} onChange={(event) => setAppearance(event.target.value)} rows={2} value={appearance} /></label>
       <label>Voice — what their dialogue sounds like<textarea maxLength={2000} onChange={(event) => setVoice(event.target.value)} rows={3} value={voice} /></label>
       <label>Story role — why this character exists<textarea maxLength={500} onChange={(event) => setStoryRole(event.target.value)} rows={2} value={storyRole} /></label>
+
+      <div className="sheet-grid sheet-companion-grid">
+        <label>Can become a companion — the COMPANION badge<select onChange={(event) => setCompanionCapable(event.target.value)} value={companionCapable}>
+          <option value="">Not decided</option>
+          <option value="yes">Yes — can join the party</option>
+          <option value="no">No — never a companion</option>
+        </select></label>
+        <label>Recruitment window<input maxLength={300} onChange={(event) => setCompanionAvailability(event.target.value)} placeholder={'"Peninsula / early game", "late game — after events TBD"'} type="text" value={companionAvailability} /></label>
+        <label>Companion status now<input maxLength={300} onChange={(event) => setCompanionStatus(event.target.value)} placeholder={'"Active companion", "Former companion — deceased"'} type="text" value={companionStatus} /></label>
+      </div>
 
       <div className="sheet-grid">
         <label>Magic origin<select onChange={(event) => setOrigin(event.target.value)} value={origin}><option value="">Not decided</option>{storyMagicOrigins.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
@@ -706,6 +725,212 @@ export function SystemSheet({ entryId, version, meta, arcs, systems, regions }: 
       <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="SYS_* once one exists" type="text" value={gameTag} /></label>
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
       <SheetSubmit label="Save system sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Slug-list rows — the shared shape of every related-* field on the
+// narrative-development sheets: pick from what exists, type what doesn't yet.
+// ---------------------------------------------------------------------------
+
+function SlugRows({ label, values, onChange, options, listId, placeholder }: {
+  label: string;
+  values: string[];
+  onChange: (next: string[]) => void;
+  options: SlugOption[];
+  listId: string;
+  placeholder: string;
+}) {
+  return (
+    <div className="sheet-rows">
+      <p className="eyebrow">{label} <RowButton label={`Add to ${label}`} onClick={() => onChange([...values, ""])} /></p>
+      <datalist id={listId}>{options.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}</datalist>
+      {values.map((value, index) => (
+        <div className="sheet-row sheet-row-compact" key={index}>
+          <input aria-label={label} list={listId} maxLength={64} onChange={(event) => onChange(values.map((current, at) => (at === index ? event.target.value : current)))} placeholder={placeholder} value={value} />
+          <RowButton label={`Remove from ${label}`} onClick={() => onChange(values.filter((_, at) => at !== index))} remove />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const cleanSlugs = (values: string[]) => values.map((value) => value.trim()).filter(Boolean);
+
+// ---------------------------------------------------------------------------
+// Story thread sheet
+// ---------------------------------------------------------------------------
+
+export function ThreadSheet({ entryId, version, meta, characters, factions, regions, arcs, threads, missions, everything }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  characters: SlugOption[];
+  factions: SlugOption[];
+  regions: SlugOption[];
+  /** Quest arcs, for the related-missions rows. */
+  arcs: SlugOption[];
+  /** Every other thread, for the parent picker. */
+  threads: SlugOption[];
+  /** Companion missions, for the related rows. */
+  missions: SlugOption[];
+  /** Every entry — a boss can be a character or a creature. */
+  everything: SlugOption[];
+}) {
+  const source = record(meta);
+  const [threadStatus, setThreadStatus] = useState(text(source.threadStatus));
+  const [categories, setCategories] = useState(asArray(source.categories).map(text));
+  const [stages, setStages] = useState(asArray(source.stages).map(text));
+  const [priority, setPriority] = useState(text(source.priority));
+  const [spoilerLevel, setSpoilerLevel] = useState(text(source.spoilerLevel));
+  const [parent, setParent] = useState(text(source.parent));
+  const [cast, setCast] = useState(asArray(source.characters).map(text));
+  const [companions, setCompanions] = useState(asArray(source.companions).map(text));
+  const [factionList, setFactionList] = useState(asArray(source.factions).map(text));
+  const [locations, setLocations] = useState(asArray(source.locations).map(text));
+  const [arcList, setArcList] = useState(asArray(source.arcs).map(text));
+  const [missionList, setMissionList] = useState(asArray(source.companionMissions).map(text));
+  const [bosses, setBosses] = useState(asArray(source.bosses).map(text));
+  const [tags, setTags] = useState(asArray(source.tags).map(text).join("\n"));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+
+  const toggle = (values: string[], set: (next: string[]) => void, value: string) =>
+    set(values.includes(value) ? values.filter((current) => current !== value) : [...values, value]);
+
+  const composed: StoryThreadMeta = {
+    threadStatus: (storyThreadStatuses as readonly string[]).includes(threadStatus) ? (threadStatus as StoryThreadMeta["threadStatus"]) : null,
+    categories: categories.filter((value): value is StoryThreadMeta["categories"][number] => (storyThreadCategories as readonly string[]).includes(value)),
+    stages: stages.filter((value): value is StoryThreadMeta["stages"][number] => (storyStoryStages as readonly string[]).includes(value)),
+    priority: (storyThreadPriorities as readonly string[]).includes(priority) ? (priority as StoryThreadMeta["priority"]) : null,
+    spoilerLevel: (storySpoilerLevels as readonly string[]).includes(spoilerLevel) ? (spoilerLevel as StoryThreadMeta["spoilerLevel"]) : null,
+    parent: orNull(parent),
+    characters: cleanSlugs(cast),
+    companions: cleanSlugs(companions),
+    factions: cleanSlugs(factionList),
+    locations: cleanSlugs(locations),
+    arcs: cleanSlugs(arcList),
+    companionMissions: cleanSlugs(missionList),
+    bosses: cleanSlugs(bosses),
+    tags: splitLines(tags),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Thread sheet — status, placement, and every relationship this concept touches</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Status — where the room stands on this<select onChange={(event) => setThreadStatus(event.target.value)} value={threadStatus}>
+          <option value="">No status yet</option>
+          {storyThreadStatuses.map((option) => <option key={option} value={option}>{storyThreadStatusLabels[option]}</option>)}
+        </select></label>
+        <label>Priority<select onChange={(event) => setPriority(event.target.value)} value={priority}><option value="">Not decided</option>{storyThreadPriorities.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+        <label>Spoiler level<select onChange={(event) => setSpoilerLevel(event.target.value)} value={spoilerLevel}><option value="">Not decided</option>{storySpoilerLevels.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+      </div>
+
+      <div className="thread-create-taxonomy">
+        <fieldset><legend>Categories</legend>{storyThreadCategories.map((option) => <label key={option}><input checked={categories.includes(option)} onChange={() => toggle(categories, setCategories, option)} type="checkbox" /> {storyThreadCategoryLabels[option]}</label>)}</fieldset>
+        <fieldset><legend>Story stages it touches</legend>{storyStoryStages.map((option) => <label key={option}><input checked={stages.includes(option)} onChange={() => toggle(stages, setStages, option)} type="checkbox" /> {storyStoryStageLabels[option]}</label>)}</fieldset>
+      </div>
+
+      <label>Grew out of which thread<select onChange={(event) => setParent(event.target.value)} value={parent}>
+        <option value="">Nothing — a top-level thread</option>
+        {threads.map((thread) => <option key={thread.slug} value={thread.slug}>{thread.title}</option>)}
+      </select></label>
+
+      <SlugRows label="Related characters" listId={`thread-cast-${entryId}`} onChange={setCast} options={characters} placeholder="amanda" values={cast} />
+      <SlugRows label="Related companions" listId={`thread-companions-${entryId}`} onChange={setCompanions} options={characters} placeholder="amanda" values={companions} />
+      <SlugRows label="Related factions" listId={`thread-factions-${entryId}`} onChange={setFactionList} options={factions} placeholder="stormglass-cartel" values={factionList} />
+      <SlugRows label="Related locations" listId={`thread-locations-${entryId}`} onChange={setLocations} options={regions} placeholder="port-arcadia" values={locations} />
+      <SlugRows label="Related missions (quest arcs)" listId={`thread-arcs-${entryId}`} onChange={setArcList} options={arcs} placeholder="the-captivity-arc" values={arcList} />
+      <SlugRows label="Related companion missions" listId={`thread-missions-${entryId}`} onChange={setMissionList} options={missions} placeholder="two-empty-cribs" values={missionList} />
+      <SlugRows label="Related bosses" listId={`thread-bosses-${entryId}`} onChange={setBosses} options={everything} placeholder="tino" values={bosses} />
+
+      <label>Tags — one per line<textarea onChange={(event) => setTags(event.target.value)} placeholder={"amanda\nmissing-children"} rows={2} value={tags} /></label>
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save thread sheet" />
+    </form>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Companion mission sheet
+// ---------------------------------------------------------------------------
+
+export function CompanionMissionSheet({ entryId, version, meta, characters, factions, regions, threads }: {
+  entryId: string;
+  version: number;
+  meta: Record<string, unknown> | null;
+  characters: SlugOption[];
+  factions: SlugOption[];
+  regions: SlugOption[];
+  threads: SlugOption[];
+}) {
+  const source = record(meta);
+  const [companion, setCompanion] = useState(text(source.companion));
+  const [order, setOrder] = useState(typeof source.order === "number" ? String(source.order) : "");
+  const [missionStatus, setMissionStatus] = useState(text(source.missionStatus));
+  const [stage, setStage] = useState(text(source.stage));
+  const [unlockConditions, setUnlockConditions] = useState(text(source.unlockConditions));
+  const [rewards, setRewards] = useState(asArray(source.rewards).map(text).join("\n"));
+  const [relationshipEffects, setRelationshipEffects] = useState(text(source.relationshipEffects));
+  const [consequences, setConsequences] = useState(text(source.consequences));
+  const [cast, setCast] = useState(asArray(source.characters).map(text));
+  const [locations, setLocations] = useState(asArray(source.locations).map(text));
+  const [factionList, setFactionList] = useState(asArray(source.factions).map(text));
+  const [threadList, setThreadList] = useState(asArray(source.threads).map(text));
+  const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
+
+  const orderNumber = Number.parseInt(order, 10);
+  const composed: StoryCompanionMissionMeta = {
+    companion: orNull(companion),
+    order: Number.isInteger(orderNumber) && orderNumber >= 1 && orderNumber <= 99 ? orderNumber : null,
+    missionStatus: (storyCompanionMissionStatuses as readonly string[]).includes(missionStatus) ? (missionStatus as StoryCompanionMissionMeta["missionStatus"]) : null,
+    stage: (storyStoryStages as readonly string[]).includes(stage) ? (stage as StoryCompanionMissionMeta["stage"]) : null,
+    unlockConditions: orNull(unlockConditions),
+    rewards: splitLines(rewards),
+    relationshipEffects: orNull(relationshipEffects),
+    consequences: orNull(consequences),
+    characters: cleanSlugs(cast),
+    locations: cleanSlugs(locations),
+    factions: cleanSlugs(factionList),
+    threads: cleanSlugs(threadList),
+    openQuestions: splitLines(openQuestions),
+  };
+
+  const companionListId = `mission-companion-${entryId}`;
+
+  return (
+    <form action={updateEntryMeta} className="story-form entry-sheet">
+      <p className="eyebrow">Companion mission sheet — whose arc, where in the chain, and what it costs</p>
+      <input name="entryId" type="hidden" value={entryId} />
+      <input name="version" type="hidden" value={version} />
+      <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <div className="sheet-grid">
+        <label>Whose companion arc<input aria-label="Companion" list={companionListId} maxLength={64} onChange={(event) => setCompanion(event.target.value)} placeholder="amanda" value={companion} /></label>
+        <datalist id={companionListId}>{characters.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}</datalist>
+        <label>Order in their chain<input inputMode="numeric" max={99} min={1} onChange={(event) => setOrder(event.target.value)} placeholder="1" type="number" value={order} /></label>
+        <label>Status<select onChange={(event) => setMissionStatus(event.target.value)} value={missionStatus}><option value="">No status yet</option>{storyCompanionMissionStatuses.map((option) => <option key={option} value={option}>{storyCompanionMissionStatusLabels[option]}</option>)}</select></label>
+        <label>Story stage<select onChange={(event) => setStage(event.target.value)} value={stage}><option value="">Not decided</option>{storyStoryStages.map((option) => <option key={option} value={option}>{storyStoryStageLabels[option]}</option>)}</select></label>
+      </div>
+
+      <label>Unlock conditions — what has to be true before this opens<textarea maxLength={1000} onChange={(event) => setUnlockConditions(event.target.value)} placeholder="Amanda recruited; the party has heard Tino's name spoken twice." rows={2} value={unlockConditions} /></label>
+      <label>Rewards — one per line<textarea onChange={(event) => setRewards(event.target.value)} placeholder={"Amanda's trust deepens\nA keepsake from the old tavern"} rows={2} value={rewards} /></label>
+      <label>Relationship effects<textarea maxLength={1000} onChange={(event) => setRelationshipEffects(event.target.value)} rows={2} value={relationshipEffects} /></label>
+      <label>Consequences — what it changes in the world or the story<textarea maxLength={1000} onChange={(event) => setConsequences(event.target.value)} rows={2} value={consequences} /></label>
+
+      <SlugRows label="Related characters" listId={`mission-cast-${entryId}`} onChange={setCast} options={characters} placeholder="tino" values={cast} />
+      <SlugRows label="Related locations" listId={`mission-locations-${entryId}`} onChange={setLocations} options={regions} placeholder="the-peninsula" values={locations} />
+      <SlugRows label="Related factions" listId={`mission-factions-${entryId}`} onChange={setFactionList} options={factions} placeholder="stormglass-cartel" values={factionList} />
+      <SlugRows label="Advances which story threads" listId={`mission-threads-${entryId}`} onChange={setThreadList} options={threads} placeholder="the-empty-cribs" values={threadList} />
+
+      <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
+      <SheetSubmit label="Save mission sheet" />
     </form>
   );
 }

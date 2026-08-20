@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { BookMarked, BookOpen, Castle, Cog, GitBranch, History, Map, Shield, UsersRound } from "lucide-react";
+import { BookMarked, BookOpen, Castle, Cog, GitBranch, History, Lightbulb, Map, Shield, UsersRound } from "lucide-react";
 
 const destinations = [
   { href: "/codex", label: "Overview", icon: BookMarked },
   { href: "/codex#stories", label: "Stories", icon: GitBranch },
+  { href: "/codex/threads", label: "Threads", icon: Lightbulb },
   { href: "/codex/library/characters", label: "Characters", icon: UsersRound },
   { href: "/codex/library/factions", label: "Factions", icon: Shield },
   { href: "/codex/library/regions", label: "Regions", icon: Map },

@@ -288,7 +288,7 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
     },
     include: {
       creator: { select: writerSelect },
-      _count: { select: { nodeLinks: { where: { node: { status: { in: workingStatuses } } } } } },
+      _count: { select: { nodeLinks: { where: { node: { status: { in: workingStatuses } } } }, comments: true } },
     },
     orderBy: [{ kind: "asc" }, { title: "asc" }],
   });
@@ -303,6 +303,7 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
     status: entry.status,
     author: storyMemberName(entry.creator),
     appearanceCount: entry._count.nodeLinks,
+    commentCount: entry._count.comments,
     updatedAt: entry.updatedAt,
   }));
 }
@@ -359,7 +360,7 @@ export async function getStoryEntry(slug: string) {
     };
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
-    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : "belongs inside this region");
+    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
@@ -370,6 +371,25 @@ export async function getStoryEntry(slug: string) {
     if (rows(meta.relations).some((row) => referencesSlug(row.faction))) add("has a faction relationship");
     if (rows(meta.control).some((row) => referencesSlug(row.faction))) add("is controlled or influenced by this faction");
     if (rows(meta.connections).some((row) => referencesSlug(row.to))) add("connects to this region");
+
+    // The narrative-development room's relationships, read back the same way:
+    // a thread or mission naming this entry shows up on this entry's dossier.
+    const inThread = candidate.kind === "THREAD";
+    const inMission = candidate.kind === "COMPANION_MISSION";
+    if (inThread || inMission) {
+      const names = (value: unknown) => Array.isArray(value) && value.some(referencesSlug);
+      // One row per candidate, not one per field: a companion is necessarily
+      // also a character, and a mission's companion is also in its cast, so
+      // the most specific relation wins instead of the same link twice.
+      if (names(meta.companions)) add("names them as a companion in this thread");
+      else if (referencesSlug(meta.companion)) add("belongs to their companion arc");
+      else if (names(meta.characters)) add(inThread ? "discusses this character in a story thread" : "features them in a companion mission");
+      if (names(meta.locations)) add(inThread ? "is set here, per this story thread" : "takes place here");
+      if (names(meta.bosses)) add("proposes them as a boss encounter");
+      if (names(meta.factions)) add(inThread ? "involves this faction in a story thread" : "involves this faction");
+      if (names(meta.threads)) add("is advanced by this companion mission");
+      if (names(meta.companionMissions)) add("is part of this story thread");
+    }
   }
 
   // The world hierarchy — region > place > destination — and the quests that
@@ -446,14 +466,14 @@ export async function getStoryEntry(slug: string) {
 }
 
 /**
- * The story-threads ledger: every FLAG, where the story plants it and where
+ * The promises ledger: every FLAG, where the story plants it and where
  * the story answers it, derived entirely by scanning effects and conditions
  * for the canonical slugs. Nobody maintains this list — that is the point of
  * flags having exactly one name each. A thread that is planted but never
  * checked is a promise still waiting for its payoff; one that is checked but
  * never planted is a payoff nothing sets up.
  */
-export async function getStoryThreads() {
+export async function getStoryPromises() {
   const [flags, nodes, edges] = await Promise.all([
     db.storyEntry.findMany({
       where: { kind: "FLAG", status: { in: workingStatuses } },

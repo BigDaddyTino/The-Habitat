@@ -6,7 +6,7 @@ import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryEntryEditor } from "@/components/story-entry-editor";
-import { CharacterSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet, SystemSheet } from "@/components/story-entry-sheets";
+import { CharacterSheet, CompanionMissionSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet, SystemSheet, ThreadSheet } from "@/components/story-entry-sheets";
 import { StoryEntityProfile } from "@/components/story-entity-profile";
 import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button";
 import { StoryWarden } from "@/components/story-warden";
@@ -21,7 +21,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const entry = await getStoryEntry(slug);
   if (!entry) notFound();
 
-  const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT", "SYSTEM"] as const;
+  const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT", "SYSTEM", "THREAD", "COMPANION_MISSION"] as const;
   const needsPickers = (sheetKinds as readonly string[]).includes(entry.kind);
   const [factions, regions, characters, arcs] = needsPickers
     ? await Promise.all([
@@ -84,6 +84,39 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const [everyEntry, allArcs] = await Promise.all([listStoryEntries({}), listStoryArcRefs()]);
   const collection = collectionForKind(entry.kind);
 
+  // The narrative development room. Threads nest (children are derived from
+  // their parent field, never stored twice), and a companion's missions read
+  // as one ordered chain — on the companion's own dossier and on every
+  // mission in it alike.
+  const threadEntries = everyEntry.filter((candidate) => candidate.kind === "THREAD");
+  const missionEntries = everyEntry.filter((candidate) => candidate.kind === "COMPANION_MISSION");
+  const metaText = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
+  const threadChildren = entry.kind === "THREAD"
+    ? threadEntries.filter((candidate) => metaText(candidate.meta?.parent) === entry.slug).map((child) => ({ slug: child.slug, title: child.title, summary: child.summary }))
+    : [];
+  const chainCompanionSlug = entry.kind === "CHARACTER" ? entry.slug : entry.kind === "COMPANION_MISSION" ? metaText(entry.meta?.companion) : null;
+  const chainMissions = chainCompanionSlug
+    ? missionEntries
+        .filter((candidate) => metaText(candidate.meta?.companion) === chainCompanionSlug)
+        .map((mission) => ({
+          slug: mission.slug,
+          title: mission.title,
+          summary: mission.summary,
+          order: typeof mission.meta?.order === "number" ? (mission.meta.order as number) : null,
+          missionStatus: metaText(mission.meta?.missionStatus),
+          stage: metaText(mission.meta?.stage),
+        }))
+        .sort((a, b) => (a.order ?? 99) - (b.order ?? 99) || a.title.localeCompare(b.title))
+    : [];
+  const companionChain = chainMissions.length
+    ? {
+        companion: chainCompanionSlug
+          ? { slug: chainCompanionSlug, title: everyEntry.find((candidate) => candidate.slug === chainCompanionSlug)?.title ?? chainCompanionSlug.replaceAll("-", " ") }
+          : null,
+        missions: chainMissions,
+      }
+    : null;
+
   // A region dossier IS the "what's in here" page: every place whose sheet
   // names this region as its parent, ordered settlements-first, each carrying
   // whatever sits inside it in turn — the region > place > destination rungs.
@@ -118,7 +151,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   return (
     <section className="page-shell codex-shell codex-entry-shell">
       <StoryLiveSync refreshOnHeartbeat />
-      <Link className="codex-back entity-profile-back" href={collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {collection ?? "the bible"}</Link>
+      <Link className="codex-back entity-profile-back" href={entry.kind === "THREAD" ? "/codex/threads" : collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {entry.kind === "THREAD" ? "story threads" : collection ?? "the bible"}</Link>
       <StoryEntityProfile
         addChildKind={defaultChildPlaceKind(entry.meta?.type)}
         arcsHere={entry.arcsHere}
@@ -128,6 +161,8 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         slugTitles={Object.fromEntries(everyEntry.map((option) => [option.slug, option.title]))}
         systemFamily={systemFamily}
         systemsHere={systemsHere}
+        threadChildren={threadChildren}
+        companionChain={companionChain}
         existingArcSlugs={arcs.map((arc) => arc.slug)}
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}
         placeAncestry={entry.placeAncestry}
@@ -204,6 +239,31 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
                   regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "THREAD" ? (
+                <ThreadSheet
+                  arcs={arcs.map((arc) => ({ slug: arc.slug, title: arc.title }))}
+                  characters={characters.map((option) => ({ slug: option.slug, title: option.title }))}
+                  entryId={entry.id}
+                  everything={everyEntry.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+                  factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  missions={missionEntries.map((option) => ({ slug: option.slug, title: option.title }))}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  threads={threadEntries.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
+                  version={entry.version}
+                />
+              ) : entry.kind === "COMPANION_MISSION" ? (
+                <CompanionMissionSheet
+                  characters={characters.map((option) => ({ slug: option.slug, title: option.title }))}
+                  entryId={entry.id}
+                  factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  key={`sheet-${entry.version}`}
+                  meta={entry.meta}
+                  regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
+                  threads={threadEntries.map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />
               ) : entry.meta ? <MetaView meta={entry.meta} /> : null}

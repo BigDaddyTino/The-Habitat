@@ -90,6 +90,17 @@ export const storyCollections = {
     placeholder: "Kingdom Management",
     summaryPlaceholder: "What does this system let the player do, in one line?",
   },
+  "companion-missions": {
+    kind: "COMPANION_MISSION",
+    label: "Companion missions",
+    singular: "companion mission",
+    eyebrow: "The inner circle",
+    title: "The people who travel with you",
+    description: "Each companion's personal arc, one mission at a time — what unlocks it, what it reveals, what it costs. Development records: a mission is not confirmed until its status says so.",
+    hero: "/images/story-codex-archive.webp",
+    placeholder: "The Woman in the Peninsula",
+    summaryPlaceholder: "What happens, and what does the player learn about them?",
+  },
   rules: {
     kind: "RULE",
     label: "Rules",

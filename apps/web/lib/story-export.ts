@@ -110,7 +110,12 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       },
     }),
     db.storyEntry.findMany({
-      where: { status: exportableStoryStatus },
+      // THREAD and COMPANION_MISSION are the writers' room arguing with
+      // itself — statused in meta, canon only in the sense that the room owns
+      // them. The game is never built from a brainstorm: an implemented
+      // thread ships as real arcs and entries, so the export withholds the
+      // discussion records entirely rather than trusting a status field.
+      where: { status: exportableStoryStatus, kind: { notIn: ["THREAD", "COMPANION_MISSION"] } },
       orderBy: [{ kind: "asc" }, { slug: "asc" }],
       select: { kind: true, slug: true, title: true, summary: true, body: true, meta: true },
     }),

@@ -10,9 +10,13 @@ import {
   storyEntryKinds,
   storyLockTtlMs,
   storyNodeKinds,
+  storyStoryStages,
+  storyThreadCategories,
+  type StoryCompanionMissionMeta,
   type StoryRegionMeta,
   type StoryStatus,
   type StorySystemMeta,
+  type StoryThreadMeta,
 } from "@habitat/shared";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -83,6 +87,7 @@ function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
   revalidatePath("/codex/threads");
+  revalidatePath("/codex/promises");
   revalidatePath("/codex/timeline");
   for (const collection of Object.keys(storyCollections)) revalidatePath(`/codex/library/${collection}`);
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
@@ -825,6 +830,51 @@ export async function createEntry(formData: FormData) {
     ? { category: null, buildStatus: "concept", parent: systemParent.data, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
     : null;
 
+  // A story thread is born brainstorming — visibly unconfirmed until the room
+  // moves it — carrying whatever categories and stages the proposer picked.
+  const threadMeta: StoryThreadMeta | null = parsed.data.kind === "THREAD"
+    ? {
+        threadStatus: "brainstorming",
+        categories: formData.getAll("categories").filter((value): value is StoryThreadMeta["categories"][number] => (storyThreadCategories as readonly unknown[]).includes(value)),
+        stages: formData.getAll("stages").filter((value): value is StoryThreadMeta["stages"][number] => (storyStoryStages as readonly unknown[]).includes(value)),
+        priority: null,
+        spoilerLevel: null,
+        parent: metaSlug.safeParse(formData.get("parent")).success ? String(formData.get("parent")) : null,
+        characters: [],
+        companions: [],
+        factions: [],
+        locations: [],
+        arcs: [],
+        companionMissions: [],
+        bosses: [],
+        tags: [],
+        openQuestions: [],
+      }
+    : null;
+
+  // A companion mission is born filed under its companion and slotted into
+  // their chain — created loose it would be exactly the orphan threads and
+  // places are protected against.
+  const missionCompanion = parsed.data.kind === "COMPANION_MISSION" ? metaSlug.safeParse(formData.get("companion")) : null;
+  const missionOrder = parsed.data.kind === "COMPANION_MISSION" ? z.coerce.number().int().min(1).max(99).safeParse(formData.get("order")) : null;
+  const missionMeta: StoryCompanionMissionMeta | null = parsed.data.kind === "COMPANION_MISSION"
+    ? {
+        companion: missionCompanion?.success ? missionCompanion.data : null,
+        order: missionOrder?.success ? missionOrder.data : null,
+        missionStatus: "brainstorming",
+        stage: null,
+        unlockConditions: null,
+        rewards: [],
+        relationshipEffects: null,
+        consequences: null,
+        characters: [],
+        locations: [],
+        factions: [],
+        threads: [],
+        openQuestions: [],
+      }
+    : null;
+
   await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.create({
       data: {
@@ -835,10 +885,18 @@ export async function createEntry(formData: FormData) {
         body: parsed.data.body,
         status: creationStatus(),
         createdByUserId: user.id,
-        ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue } : systemMeta ? { meta: systemMeta as unknown as Prisma.InputJsonValue } : {}),
+        ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue }
+          : systemMeta ? { meta: systemMeta as unknown as Prisma.InputJsonValue }
+          : threadMeta ? { meta: threadMeta as unknown as Prisma.InputJsonValue }
+          : missionMeta ? { meta: missionMeta as unknown as Prisma.InputJsonValue }
+          : {}),
       },
     });
-    const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}` : systemMeta?.parent ? `, inside ${systemMeta.parent}` : "";
+    const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}`
+      : systemMeta?.parent ? `, inside ${systemMeta.parent}`
+      : threadMeta?.parent ? `, growing out of ${threadMeta.parent}`
+      : missionMeta?.companion ? `, in ${missionMeta.companion}'s chain`
+      : "";
     await recordRevision(tx, { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: user.id, summary: `Wrote the ${entry.kind.toLowerCase()} "${entry.title}"${placed}` });
   });
 

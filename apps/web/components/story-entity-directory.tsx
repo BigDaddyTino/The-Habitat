@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, Boxes, CalendarClock, Cog, Compass, GitBranch, MapPin, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
+import { ArrowRight, Boxes, CalendarClock, Cog, Compass, GitBranch, Handshake, MapPin, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
+import { storyCompanionMissionStatusLabels, storyStoryStageLabels, type StoryCompanionMissionStatus, type StoryStoryStage } from "@habitat/shared";
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
@@ -28,6 +29,27 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   const collection = storyCollections[collectionSlug];
   const entries = await listStoryEntries({ kind: collection.kind, search });
   const isSystemsLibrary = collection.kind === "SYSTEM";
+  const isMissionsLibrary = collection.kind === "COMPANION_MISSION";
+
+  // The missions library reads as chains, not a card dump: every mission
+  // filed under its companion, in chain order, wearing its development
+  // status. Falls back to the flat grid for search results.
+  const companionsForMissions = isMissionsLibrary ? await listStoryEntries({ kind: "CHARACTER" }) : [];
+  const missionChains = new Map<string, typeof entries>();
+  const looseMissions: typeof entries = [];
+  if (isMissionsLibrary && !search) {
+    const orderOf = (mission: (typeof entries)[number]) => (typeof asRecord(mission.meta).order === "number" ? (asRecord(mission.meta).order as number) : 99);
+    for (const mission of [...entries].sort((a, b) => orderOf(a) - orderOf(b) || a.title.localeCompare(b.title))) {
+      const companion = asRecord(mission.meta).companion;
+      if (typeof companion === "string" && companion.trim()) {
+        const bucket = missionChains.get(companion.trim());
+        if (bucket) bucket.push(mission); else missionChains.set(companion.trim(), [mission]);
+      } else looseMissions.push(mission);
+    }
+  }
+  const missionChainsActive = isMissionsLibrary && !search && entries.length > 0;
+  const missionStatusLabel = (value: unknown) => (typeof value === "string" && value in storyCompanionMissionStatusLabels ? storyCompanionMissionStatusLabels[value as StoryCompanionMissionStatus] : null);
+  const missionStageLabel = (value: unknown) => (typeof value === "string" && value in storyStoryStageLabels ? storyStoryStageLabels[value as StoryStoryStage] : null);
 
   // The release plan: every system filed under the moment the story hands it
   // to the player. An arc link beats a stage note beats nothing — and nothing
@@ -187,7 +209,42 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
         </div>
       </section> : null}
 
-      {atlasActive ? <>
+      {missionChainsActive ? <div className="companion-mission-chains">
+        {[...missionChains.entries()].map(([companionSlug, missions]) => {
+          const companion = companionsForMissions.find((candidate) => candidate.slug === companionSlug) ?? null;
+          const companionArt = companion ? getCharacterKeyart(companion.slug) : null;
+          return <article className="companion-mission-chain-card" key={companionSlug}>
+            <Link className="companion-mission-chain-head" href={`/codex/bible/${companionSlug}`}>
+              {companionArt ? <img alt={`${companion?.title ?? companionSlug} key art`} src={companionArt} /> : <span className="companion-chain-fallback"><Handshake aria-hidden="true" size={20} /></span>}
+              <span>
+                <small><Handshake aria-hidden="true" size={11} /> Companion arc{companion ? "" : " — character not written yet"}</small>
+                <strong>{companion?.title ?? companionSlug.replaceAll("-", " ")}</strong>
+                <em>{missions.length} mission{missions.length === 1 ? "" : "s"} in the chain</em>
+              </span>
+              <ArrowRight aria-hidden="true" size={13} />
+            </Link>
+            <ol>
+              {missions.map((mission) => {
+                const meta = asRecord(mission.meta);
+                const status = missionStatusLabel(meta.missionStatus);
+                return <li key={mission.id}>
+                  <span className="companion-chain-order">{typeof meta.order === "number" ? String(meta.order) : "·"}</span>
+                  <Link href={`/codex/bible/${mission.slug}`}>
+                    <strong>{mission.title}</strong>
+                    <span>{mission.summary ? plainStoryProse(mission.summary) : "No summary yet."}</span>
+                  </Link>
+                  <span className="companion-chain-facts">{[status, missionStageLabel(meta.stage)].filter(Boolean).join(" · ") || "unstatused"}</span>
+                </li>;
+              })}
+            </ol>
+          </article>;
+        })}
+        {looseMissions.length ? <section className="region-atlas-unplaced">
+          <div><p className="eyebrow"><Handshake aria-hidden="true" size={11} /> Not filed under a companion yet</p>
+          <p>Open each one and set whose arc it belongs to on the mission sheet.</p></div>
+          <ul>{looseMissions.map((mission) => <li key={mission.id}><Link href={`/codex/bible/${mission.slug}`}>{mission.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+        </section> : null}
+      </div> : atlasActive ? <>
         <div className="region-atlas">
           {topRegions.map((region) => {
             const regionMeta = asRecord(region.meta);
@@ -262,7 +319,13 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                       meta.category,
                       typeof meta.unlockStage === "string" && meta.unlockStage ? meta.unlockStage : meta.unlockArc ? "story-gated" : null,
                     ].filter(Boolean).join(" · ")
-                  : "";
+                  : entry.kind === "COMPANION_MISSION"
+                    ? [
+                        typeof meta.companion === "string" && meta.companion ? `${String(meta.companion).replaceAll("-", " ")}'s arc` : null,
+                        typeof meta.order === "number" ? `mission ${meta.order}` : null,
+                        missionStageLabel(meta.stage),
+                      ].filter(Boolean).join(" · ")
+                    : "";
           return <Link
             className={`entity-card${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
             href={`/codex/bible/${entry.slug}`}
@@ -278,7 +341,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}
               </span> : null}
-              <i>{entry.status === "CANON" ? "Canon" : entry.status}</i>
+              {entry.kind === "CHARACTER" && asRecord(meta.companion).capable === true ? <span className="companion-badge is-card" title={[asRecord(meta.companion).availability, asRecord(meta.companion).status].filter((value) => typeof value === "string" && value).join(" · ") || "Can join the party as an active companion"}>
+                <Handshake aria-hidden="true" size={12} /> Companion
+              </span> : null}
+              <i>{entry.kind === "COMPANION_MISSION" ? missionStatusLabel(meta.missionStatus) ?? "Unstatused" : entry.status === "CANON" ? "Canon" : entry.status}</i>
             </div>
             <div className="entity-card-copy">
               <p className="eyebrow">{detail || collection.singular}</p>
@@ -311,6 +377,13 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             <option value="">Nothing — a top-level system</option>
             {systemParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
+          {isMissionsLibrary ? <div className="sheet-grid">
+            <label>Whose companion arc<select defaultValue="" name="companion">
+              <option value="">Not decided yet</option>
+              {companionsForMissions.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+            </select></label>
+            <label>Order in their chain<input max={99} min={1} name="order" placeholder="1" type="number" /></label>
+          </div> : null}
           <label>One-line pitch<textarea maxLength={500} name="summary" placeholder={collection.summaryPlaceholder} rows={2} /></label>
           <label>What writers need to know<textarea maxLength={20000} name="body" placeholder="Write naturally. You can refine this later from the dossier." rows={6} /></label>
           <button className="save-server" type="submit"><Sparkles aria-hidden="true" size={14} /> Create and open dossier</button>

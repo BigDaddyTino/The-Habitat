@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Cog, GitBranch, History, Inbox, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
+import { ArrowRight, BookOpen, Cog, GitBranch, History, Inbox, Lightbulb, Map, Plus, Scale, Shield, Sparkles, Sprout, UsersRound } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { getStoryActivity, getStoryReviewQueue, getStoryThreads, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getStoryActivity, getStoryPromises, getStoryReviewQueue, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
@@ -43,10 +43,10 @@ function auditTone(action: string, statusTo: string | null): { label: string; to
 export default async function CodexPage() {
   await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
-  const [arcs, activity, queue, rules, regions, themes, characters, factions, systems, threads] = await Promise.all([
+  const [arcs, activity, queue, rules, regions, themes, characters, factions, systems, promises, threadEntries] = await Promise.all([
     listStoryArcs(), getStoryActivity(50), canReview ? getStoryReviewQueue() : Promise.resolve(null),
     listStoryEntries({ kind: "RULE" }), listStoryEntries({ kind: "REGION" }), listStoryEntries({ kind: "THEME" }),
-    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }), getStoryThreads(),
+    listStoryEntries({ kind: "CHARACTER" }), listStoryEntries({ kind: "FACTION" }), listStoryEntries({ kind: "SYSTEM" }), getStoryPromises(), listStoryEntries({ kind: "THREAD" }),
   ]);
   // The core system spotlight: the mechanic big enough to headline the codex.
   // Swap the slug to feature a different system; everything else follows it.
@@ -114,7 +114,8 @@ export default async function CodexPage() {
       <div className="codex-quicklinks">
         <Link className="codex-quicklink" href="/codex/bible"><BookOpen aria-hidden="true" size={18} /><span><strong>All lore</strong><small>Creatures, items, events, rules, flags, and every world entry in one searchable archive.</small></span></Link>
         <Link className="codex-quicklink" href="/codex/timeline"><History aria-hidden="true" size={18} /><span><strong>The timeline</strong><small>Ten thousand years of the long hunt on one golden line — and where the present sits on it.</small></span></Link>
-        <Link className="codex-quicklink" href="/codex/threads"><Sprout aria-hidden="true" size={18} /><span><strong>Story threads</strong><small>{threads.planted > 0 ? `${threads.planted} promise${threads.planted === 1 ? "" : "s"} planted and waiting for a payoff.` : threads.threads.length > 0 ? "Every promise the story has made, and where it stands." : "Set a flag in one scene, answer it chapters later — tracked here."}</small></span></Link>
+        <Link className="codex-quicklink" href="/codex/threads"><Lightbulb aria-hidden="true" size={18} /><span><strong>Story threads</strong><small>{threadEntries.length > 0 ? `${threadEntries.length} narrative concept${threadEntries.length === 1 ? "" : "s"} being argued from brainstorm toward canon.` : "Propose a major story concept — attributed, discussed, and statused until the room decides."}</small></span></Link>
+        <Link className="codex-quicklink" href="/codex/promises"><Sprout aria-hidden="true" size={18} /><span><strong>Story promises</strong><small>{promises.planted > 0 ? `${promises.planted} promise${promises.planted === 1 ? "" : "s"} planted and waiting for a payoff.` : promises.threads.length > 0 ? "Every promise the story has made, and where it stands." : "Set a flag in one scene, answer it chapters later — tracked here."}</small></span></Link>
         {/* The approval ladder is gone; the queue only resurfaces if legacy
             proposed material still exists somewhere. */}
         {canReview && queue && queue.total > 0 ? <Link className="codex-quicklink" href="/codex/review"><Inbox aria-hidden="true" size={18} /><span><strong>Review queue</strong><small>{`${queue.total} older contribution${queue.total === 1 ? "" : "s"} still marked proposed.`}</small></span></Link> : null}
