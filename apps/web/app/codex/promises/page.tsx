@@ -39,7 +39,7 @@ export default async function StoryPromisesPage() {
     {
       state: "wired" as const,
       title: "Wired — set and answered",
-      hint: "Planted somewhere, checked somewhere else. These threads are working.",
+      hint: "Planted somewhere, checked somewhere else. These promises are working.",
       icon: Flag,
     },
   ];

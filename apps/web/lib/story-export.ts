@@ -3,8 +3,10 @@ import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import {
   analyzeStoryGraph,
+  developmentOnlyStoryKinds,
   exportableStoryStatus,
   findStoryEntryNodeKeys,
+  isDevelopmentOnlyStoryKind,
   storyExportContractVersion,
   type MartinoStoryExport,
   type StoryExportArc,
@@ -115,7 +117,7 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       // them. The game is never built from a brainstorm: an implemented
       // thread ships as real arcs and entries, so the export withholds the
       // discussion records entirely rather than trusting a status field.
-      where: { status: exportableStoryStatus, kind: { notIn: ["THREAD", "COMPANION_MISSION"] } },
+      where: { status: exportableStoryStatus, kind: { notIn: [...developmentOnlyStoryKinds] } },
       orderBy: [{ kind: "asc" }, { slug: "asc" }],
       select: { kind: true, slug: true, title: true, summary: true, body: true, meta: true },
     }),
@@ -159,9 +161,12 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
         choices,
         // A reference to a bible entry that is still proposed is dropped: the
         // importer would otherwise resolve it against an asset that does not
-        // exist on the game side.
+        // exist on the game side. Development-room kinds are dropped for the
+        // same reason from the other direction — the bible withholds threads
+        // and companion missions entirely, so a scene that cites one in the
+        // room must not export a reference nothing in the payload resolves.
         references: node.entryLinks
-          .filter((link) => link.entry.status === exportableStoryStatus)
+          .filter((link) => link.entry.status === exportableStoryStatus && !isDevelopmentOnlyStoryKind(link.entry.kind))
           .map((link) => ({ kind: link.entry.kind, slug: link.entry.slug, title: link.entry.title })),
       };
     });

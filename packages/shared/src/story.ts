@@ -787,6 +787,19 @@ export type StorySystemMeta = {
  * an implemented thread's content ships as real arcs and entries, not as the
  * discussion that produced them.
  */
+/**
+ * The kinds that are the writers' room arguing with itself rather than world
+ * truth. The game export withholds them completely — the bible never carries
+ * them, and a scene that links one exports without that reference — because
+ * an implemented thread ships as real arcs and entries, never as the
+ * discussion that produced them.
+ */
+export const developmentOnlyStoryKinds = ["THREAD", "COMPANION_MISSION"] as const satisfies readonly StoryEntryKind[];
+
+export function isDevelopmentOnlyStoryKind(kind: StoryEntryKind): boolean {
+  return (developmentOnlyStoryKinds as readonly StoryEntryKind[]).includes(kind);
+}
+
 export const storyThreadStatuses = [
   "brainstorming",
   "under-discussion",

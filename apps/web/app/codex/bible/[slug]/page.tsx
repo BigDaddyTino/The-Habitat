@@ -92,7 +92,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const missionEntries = everyEntry.filter((candidate) => candidate.kind === "COMPANION_MISSION");
   const metaText = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
   const threadChildren = entry.kind === "THREAD"
-    ? threadEntries.filter((candidate) => metaText(candidate.meta?.parent) === entry.slug).map((child) => ({ slug: child.slug, title: child.title, summary: child.summary }))
+    // The self-guard matters: a thread whose parent field somehow names
+    // itself must not list itself as its own child.
+    ? threadEntries.filter((candidate) => candidate.slug !== entry.slug && metaText(candidate.meta?.parent) === entry.slug).map((child) => ({ slug: child.slug, title: child.title, summary: child.summary }))
     : [];
   const chainCompanionSlug = entry.kind === "CHARACTER" ? entry.slug : entry.kind === "COMPANION_MISSION" ? metaText(entry.meta?.companion) : null;
   const chainMissions = chainCompanionSlug

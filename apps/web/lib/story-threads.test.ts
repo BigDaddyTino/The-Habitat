@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
 import {
+  developmentOnlyStoryKinds,
+  isDevelopmentOnlyStoryKind,
   isUnconfirmedThreadStatus,
   isValidStoryKey,
   storyCompanionMissionStatuses,
@@ -104,6 +108,20 @@ test("Amanda is companion-capable; Tino's patch proposes without deciding his fa
   assert.match(String(tinoCompanionPatch.availability), /brainstorming/i);
   // The existing canon lock: nothing may touch his fate without the rule.
   assert.match(String(tinoCompanionPatch.status), /what-the-player-knows-about-tino/);
+});
+
+test("the export withholds development-room kinds — bible and references both", () => {
+  // The room argues in THREAD and COMPANION_MISSION entries; the game must
+  // never see them. Two doors lead out of the codex: the bible query, and
+  // the per-node reference list (a scene can link a thread in the room, and
+  // exporting that reference would dangle against a bible that withholds the
+  // entry). This reads the exporter's source the way story-lock.test.ts
+  // reads the actions', so removing either filter fails a test.
+  assert.deepEqual([...developmentOnlyStoryKinds], ["THREAD", "COMPANION_MISSION"]);
+  assert.ok(isDevelopmentOnlyStoryKind("THREAD") && isDevelopmentOnlyStoryKind("COMPANION_MISSION") && !isDevelopmentOnlyStoryKind("SYSTEM"));
+  const exporter = readFileSync(join(process.cwd(), "lib/story-export.ts"), "utf8");
+  assert.match(exporter, /kind:\s*\{\s*notIn:\s*\[\.\.\.developmentOnlyStoryKinds\]\s*\}/, "the bible query must exclude development-only kinds");
+  assert.match(exporter, /!isDevelopmentOnlyStoryKind\(link\.entry\.kind\)/, "node references must drop development-only kinds");
 });
 
 test("every cross-reference the seed bodies make is kebab-case and intact", () => {

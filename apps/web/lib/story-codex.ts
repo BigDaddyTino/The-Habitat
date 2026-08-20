@@ -581,8 +581,13 @@ export async function getStoryNeedsWork() {
     for (const match of `${entry.summary ?? ""}\n${entry.body ?? ""}`.matchAll(/\[\[([a-z0-9-]+)\]\]/g)) targets.push(match[1]);
     const meta = entry.meta as Record<string, unknown> | null;
     if (meta) {
-      for (const value of [meta.home, meta.seat, meta.parent, meta.origin]) { const slug = slugOf(value); if (slug) targets.push(slug); }
-      for (const list of [meta.leaders, meta.biomes, meta.where, meta.involved]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      // `companion` is a slug on a mission and a capability object on a
+      // character; slugOf ignores the object, so one line serves both.
+      for (const value of [meta.home, meta.seat, meta.parent, meta.origin, meta.companion]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      // The string-list fields. `factions` is object rows on a character but
+      // plain slugs on a thread; slugOf skips the objects, so listing it here
+      // only picks up the thread shape.
+      for (const list of [meta.leaders, meta.biomes, meta.where, meta.involved, meta.characters, meta.companions, meta.locations, meta.bosses, meta.companionMissions, meta.threads, meta.arcs, meta.factions]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
       for (const row of rows(meta.factions)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.relationships)) { const slug = slugOf(row.character); if (slug) targets.push(slug); }
       for (const row of rows(meta.relations)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
@@ -657,6 +662,21 @@ export async function getStoryNeedsWork() {
     if (entry.kind === "EVENT") {
       for (const place of Array.isArray(meta.where) ? meta.where : []) check("where", place);
       for (const participant of Array.isArray(meta.involved) ? meta.involved : []) check("involved", participant);
+    }
+    // The development room's link-now-fill-later markers: a thread naming an
+    // arc nobody has opened, a mission filed under a character nobody has
+    // written — exactly the pick-it-up-later signals this list exists for.
+    if (entry.kind === "THREAD") {
+      check("parent thread", meta.parent);
+      for (const [field, list] of [["character", meta.characters], ["companion", meta.companions], ["faction", meta.factions], ["location", meta.locations], ["arc", meta.arcs], ["companion mission", meta.companionMissions], ["boss", meta.bosses]] as const) {
+        for (const target of Array.isArray(list) ? list : []) check(field, target);
+      }
+    }
+    if (entry.kind === "COMPANION_MISSION") {
+      check("companion", meta.companion);
+      for (const [field, list] of [["character", meta.characters], ["location", meta.locations], ["faction", meta.factions], ["thread", meta.threads]] as const) {
+        for (const target of Array.isArray(list) ? list : []) check(field, target);
+      }
     }
   }
 

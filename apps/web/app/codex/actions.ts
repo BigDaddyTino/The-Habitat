@@ -991,7 +991,10 @@ export async function archiveEntry(formData: FormData) {
   });
 
   refreshCodex();
-  const collection = entry.kind === "CHARACTER" ? "characters" : entry.kind === "FACTION" ? "factions" : entry.kind === "REGION" ? "regions" : "all";
+  // Land the writer back on the shelf the entry lived on — threads have
+  // their own board rather than a library collection.
+  if (entry.kind === "THREAD") redirect("/codex/threads");
+  const collection = entry.kind === "CHARACTER" ? "characters" : entry.kind === "FACTION" ? "factions" : entry.kind === "REGION" ? "regions" : entry.kind === "COMPANION_MISSION" ? "companion-missions" : "all";
   redirect(collection === "all" ? "/codex/bible" : `/codex/library/${collection}`);
 }
 
