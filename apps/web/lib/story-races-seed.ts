@@ -20,6 +20,7 @@ import type { StoryCreatureMeta } from "@habitat/shared";
  */
 
 export type RaceSeed = { slug: string; title: string; summary: string; body: string; meta: StoryCreatureMeta };
+export type RaceMemberSeed = RaceSeed;
 
 const race = (
   slug: string,
@@ -36,21 +37,37 @@ const race = (
   meta: { category, parent: null, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [], ...extra },
 });
 
+const member = (
+  slug: string,
+  title: string,
+  summary: string,
+  body: string,
+  parent: string,
+  category: StoryCreatureMeta["category"],
+  extra: Partial<StoryCreatureMeta> = {},
+): RaceMemberSeed => ({
+  slug,
+  title,
+  summary,
+  body,
+  meta: { category, parent, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [], ...extra },
+});
+
 /** Races that need creating. */
 export const raceSeeds: RaceSeed[] = [
   race(
     "mythical",
     "Mythical",
-    "The world's original magical bloodlines — the creatures magic came from, hunted so thoroughly that the reason for the hunt was lost with them.",
-    `The oldest living things in the world, and the reason there is magic in it at all. A mythical creature is not simply a powerful animal: it is native to magic the way a fish is native to water, it predates every nation that later catalogued it, and it is almost always the last or nearly the last of its kind.
+    "The rarest category in the Codex. Only one mythical creature is known at present: the Lizzarnix.",
+    `Mythical is not a crowded bestiary tier. It is the name for beings so rare that one discovery changes history. **Only one mythical creature exists in the Codex right now: the [[lizzarnix]].** Do not populate this parent casually. An entry belongs here only when the story is willing to carry the weight of a species almost erased from the world.
 
-**They are defined by absence.** Every mythical race in this world is a story about what was killed to build the present. The [[lizzarnix]] are the clearest case and the one canon has decided: half lizard and half phoenix, givers of the third origin in [[the-three-origins-of-magic]], burned into ash and reborn from a scaled egg — until [[the-harvest-economy]] discovered that the ash and the egg were worth more than the covenant. The world does not remember what it did. That forgetting is the point.
+**Rarity is the philosophy.** A mythical creature is native to magic rather than merely touched by it, older than the nations that tried to catalogue it, and likely the last or nearly the last of its kind. The Lizzarnix are the only confirmed example: half lizard and half phoenix, givers behind the first and third origins in [[the-three-origins-of-magic]], burned into ash and reborn from a scaled egg — until [[the-harvest-economy]] discovered that the ash and the egg were worth more than the covenant.
 
 **Writing them.** Rarity is the whole texture: a mythical creature should never be an encounter type, a spawn table, or a species the player farms. One of them appearing is an event the world reacts to. If a scene needs a dangerous animal, it needs [[beasts]] — reach for this race only when the story is willing to carry the weight of what the creature means.
 
-What else survived alongside the Lizzarnix, and whether anything else in this race is still drawing breath, is deliberately open.`,
+Future mythical beings may be proposed, but none are canon now. Until the room makes that exceptional decision, Mythical means Lizzarnix and Lizzarnix alone.`,
     "magical",
-    { threat: "Individually enormous, but the real danger to a party is political: whoever finds out what they are looking at will want it.", harvest: "Legendary-grade essence and worse. Every mythical race in this world was hunted to the edge for what could be cut out of it — see [[the-harvest-economy]].", openQuestions: ["Which other mythical races existed, and whether any besides the Lizzarnix survived.", "Whether the world's other magical creatures descend from mythical bloodlines or arose separately."] },
+    { threat: "Individually enormous, but the real danger to a party is political: whoever finds out what they are looking at will want it.", harvest: "Legendary-grade essence and worse. The Lizzarnix were hunted to apparent extinction for what could be cut out of them — see [[the-harvest-economy]].", openQuestions: ["Whether the world's other magical creatures descend from the Lizzarnix or arose separately."] },
   ),
   race(
     "beasts",
@@ -60,21 +77,21 @@ What else survived alongside the Lizzarnix, and whether anything else in this ra
 
 **They are the harvest economy's raw material.** A beast with any magic in it at all is worth cutting open, and [[the-harvest-economy]] has industrialised exactly that. Most essence in circulation started as an animal. That is the quiet horror the setting rests on: the trade did not begin with people, it merely arrived there.
 
-**Writing them.** A beast can be terrifying without being evil, and the best beast encounters in this game are weather rather than enemies — the [[the-hypogriff-riders]] teach that lesson on a rooftop in the prologue, and Steve fails it. Give them behaviour before statistics: a search pattern, a territory, a thing they want. A player who learns an animal's habits and survives it has learned more about this world than one who out-damaged it.`,
+**Writing them.** A beast can be terrifying without being evil, and the best beast encounters in this game are weather rather than enemies — the [[hippogriff]] teaches that lesson on a rooftop in the prologue, and Steve fails it. Give them behaviour before statistics: a search pattern, a territory, a thing they want. A player who learns an animal's habits and survives it has learned more about this world than one who out-damaged it.`,
     "natural",
     { threat: "Enormously variable, and rarely the point. The dangerous ones are dangerous the way terrain is.", harvest: "The economy's staple. Hides, venom, organs, and whatever magic the creature carried — extraction kills the source, which is the whole law of [[essence]]." },
   ),
   race(
-    "humans",
-    "Humans",
-    "The race that built the extraction economy, fights the war, and reads this codex. The default the whole setting is measured against.",
-    `Almost everyone in this story is human: the player, the squads, the cartels, the refiners, the officers who sign for the doses, and nearly every name in the codex. Recording them as a race is not a formality — it is what makes every other entry on this shelf legible. [[amanda]] being something else only means something because the room she walks into is human.
+    "humanoid",
+    "Humanoid",
+    "Upright peoples with recognisably human form. Human is the only child filed here at present.",
+    `Humanoid is a parent shape, not a synonym for Human and not a claim that every upright people shares one ancestry. It gives the Codex a clean place for recognisably human-bodied peoples without confusing them with individual species. **Human is the only child filed here right now.** [[amanda]] being something else only means something because the room she walks into is human.
 
-**They are the only race that does this to itself.** [[the-seven-phases-of-corruption]] is a human road. Infusion, hidden tremors, bribed doctors, and the thing at the end of the seven phases are what happens when a species that cannot hold magic natively decides to buy it anyway — which is the second origin in [[the-three-origins-of-magic]], and the reason [[abominations]] exist as a race at all. No beast chose this. No mythical creature needed to.
+**The child is the species.** Open [[human]] for the people who built the extraction economy, fight the war, and move through the seven phases. Future humanoid peoples belong here only if canon establishes them as a distinct species; a profession, faction, culture, mutation, or rider is never a race.
 
-**Writing them.** Humanity in this setting is neither the villain nor the victim; it is the participant. The extraction trade is not run by monsters, it is run by people with quotas, and the most useful human character a writer can put on the page is one who is decent, employed, and downstream of something unforgivable. Nobody in this world woke up evil — [[the-long-hunt]] is explicit that canon never answers whether humanity caused the collapse, and every faction answers differently.`,
+**Writing them.** Keep the parent clean and broad. Put human history and moral responsibility on the Human child; use Humanoid to answer only the structural question: what kind of people are these?`,
     "natural",
-    { threat: "Organised. The only race on this shelf that arrives with logistics.", harvest: "The one nobody says out loud. [[the-soul-breakthrough]] made people harvestable, and refined [[essence]] has been soul-stuff ever since.", openQuestions: ["Whether any human population carries inherited magic from the old Lizzarnix covenant, and whether they know it."] },
+    { threat: "Varies by the child species; the parent describes body plan, not allegiance or power.", harvest: "Humanoid peoples can be harvested, which is a crime the world's industries have learned to describe as supply." },
   ),
   race(
     "supernaturals",
@@ -87,6 +104,36 @@ What else survived alongside the Lizzarnix, and whether anything else in this ra
 **Writing them.** Never explain the hierarchy fully, and never let a scene resolve into a demon simply being a strong enemy. What raises [[the-risen]] and what it wants with a battlefield's worth of dead belongs to [[something-under-the-war]] — the glimpse discipline governs every appearance here.`,
     "supernatural",
     { threat: "Categorical rather than numerical: the danger is what they can offer, and what accepting it costs.", harvest: "Attempted, historically, by people who are no longer available for comment." },
+  ),
+];
+
+/** Canon children created alongside the parent taxonomy. */
+export const raceMemberSeeds: RaceMemberSeed[] = [
+  member(
+    "hippogriff",
+    "Hippogriff",
+    "An intelligent eagle-and-horse beast of the old world, dangerous in its own right and entirely separate from the human who may ride it.",
+    `A Hippogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.
+
+The prologue's rooftop hunter is one of these animals fitted into Tropic Pearl doctrine. The human rider brings the weapon, orders, and faction allegiance; the [[hippogriff]] brings flight, senses, learned search behaviour, and the old-world presence that makes the silhouette unforgettable. Separating the two matters because a beast cannot inherit its rider's guilt.
+
+**Writing them.** Give the animal behaviour before statistics. A Hippogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]`,
+    "beasts",
+    "natural",
+    { biomes: ["highlands", "coastal cliffs", "urban roosts"], threat: "Severe in exposed terrain. Its eyesight, speed, and aerial reach make timing and cover more important than damage.", harvest: "Feathers, organs, and magical essence make the species valuable to handlers and harvesters alike." },
+  ),
+  member(
+    "human",
+    "Human",
+    "The mortal species that built the extraction economy, fights the war, and reads this Codex.",
+    `Most people in this story are Human: the player, the squads, the cartels, the refiners, the officers who sign for doses, and nearly every name in the Codex. Filing Human beneath [[humanoid]] makes the distinction explicit: Humanoid is the parent body plan; Human is the species with this history.
+
+**They are the only species that does this to itself.** [[the-seven-phases-of-corruption]] is a human road. Infusion, hidden tremors, bribed doctors, and the thing at the end of the seven phases are what happens when a species that cannot hold magic natively decides to buy it anyway — the second origin in [[the-three-origins-of-magic]], and the reason [[abominations]] exist at all. No beast chose this. No mythical creature needed to.
+
+**Writing them.** Humanity is neither the villain nor the victim; it is the participant. The extraction trade is run by people with quotas, and the most useful human character is often decent, employed, and downstream of something unforgivable. Nobody woke up evil — [[the-long-hunt]] never answers whether humanity caused the collapse, and every faction answers differently.`,
+    "humanoid",
+    "natural",
+    { threat: "Organised. Humans arrive with logistics, institutions, weapons, and stories that justify all three.", harvest: "The one nobody says out loud. [[the-soul-breakthrough]] made people harvestable, and refined [[essence]] has been soul-stuff ever since.", openQuestions: ["Whether any human population carries inherited magic from the old Lizzarnix covenant, and whether they know it."] },
   ),
 ];
 
@@ -104,12 +151,13 @@ export const existingRaceSheets: Array<{ slug: string; category: StoryCreatureMe
 /**
  * Where every creature that is not itself a race belongs. Each assignment
  * follows the taxonomy law rather than taste: the Arcadian Devil is an animal,
- * the hypogriff is a war-beast, true demons are the supernatural the rule
+ * the Hippogriff is a beast, true demons are the supernatural the rule
  * names, and the Lizzarnix are the mythical bloodline the ending turns on.
  */
 export const raceAssignments: Array<{ slug: string; parent: string; category: StoryCreatureMeta["category"] }> = [
   { slug: "arcadian-devil", parent: "beasts", category: "natural" },
-  { slug: "the-hypogriff-riders", parent: "beasts", category: "natural" },
+  { slug: "hippogriff", parent: "beasts", category: "natural" },
+  { slug: "human", parent: "humanoid", category: "natural" },
   { slug: "true-demons", parent: "supernaturals", category: "supernatural" },
   { slug: "lizzarnix", parent: "mythical", category: "magical" },
 ];

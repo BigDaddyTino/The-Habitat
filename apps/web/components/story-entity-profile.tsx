@@ -377,7 +377,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             ? <>Sits on <Link href="/codex/timeline">the timeline</Link>, {timelineEraLabel(meta.timelineYearsAgo)}.</>
             : <>Not on <Link href="/codex/timeline">the timeline</Link> yet — set &ldquo;years before the present&rdquo; on the sheet below, or leave it off if the unknown age is the canon.</>}</p> : null}
           {isRace && raceFamily ? <div className="entity-contained-places entity-race-members">
-            <p className="eyebrow"><Network aria-hidden="true" size={12} /> The {entry.title}</p>
+            <p className="eyebrow"><Network aria-hidden="true" size={12} /> Children of {entry.title}</p>
             {raceFamily.members.length ? <ul>{raceFamily.members.map((member) => {
               const memberArt = getCreatureKeyart(member.slug);
               return <li key={member.slug}>
@@ -387,7 +387,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               </li>;
             })}</ul> : <p className="story-inspector-hint">Nothing is filed under this race yet — it is a race waiting for its members.</p>}
             <Link className="entity-add-place" href={`/codex/library/races?parent=${entry.slug}#new-entry`}>
-              <Plus aria-hidden="true" size={13} /> Add one of the {entry.title}
+              <Plus aria-hidden="true" size={13} /> Add a child to {entry.title}
             </Link>
           </div> : null}
           {isSystem && systemFamily ? <div className="entity-contained-places entity-system-children">

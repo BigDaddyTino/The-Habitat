@@ -1,15 +1,16 @@
 import "../lib/environment";
+import { isDeepStrictEqual } from "node:util";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import { existingRaceSheets, raceAssignments, raceSeeds } from "../lib/story-races-seed";
+import { existingRaceSheets, raceAssignments, raceMemberSeeds, raceSeeds } from "../lib/story-races-seed";
 
 /**
  * Builds the races shelf: creates the races that were missing, marks the
  * umbrella entries that were already doing the job, and files every existing
  * creature under the race it belongs to.
  *
- * Idempotent throughout. A race that exists is left exactly as it stands, and
- * an assignment is only written when the entry does not already name a parent
- * — so a writer who re-files something by hand is never overruled by a rerun.
+ * Idempotent throughout. Managed taxonomy records are reconciled to this seed;
+ * other existing races remain writer-owned, and assignments never overrule a
+ * creature that a writer has already re-filed by hand.
  *
  *   pnpm --filter @habitat/web exec tsx scripts/seed-story-races.ts
  */
@@ -22,11 +23,74 @@ async function main() {
   console.log(`author: ${author.username}`);
   let written = 0;
 
-  // 1. The races that did not exist yet.
-  for (const seed of raceSeeds) {
-    const existing = await db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true, kind: true } });
+  // Earlier versions treated Humans as a parent race and the Hippogriff plus
+  // its rider as one creature. Rename those records in place so node links,
+  // comments, revisions, and story appearances stay attached to their ids.
+  const migrations = [
+    { from: "humans", to: raceSeeds.find((seed) => seed.slug === "humanoid") },
+    { from: "the-hypogriff-riders", to: raceMemberSeeds.find((seed) => seed.slug === "hippogriff") },
+  ] as const;
+  for (const migration of migrations) {
+    const seed = migration.to;
+    if (!seed) throw new Error(`Missing race migration target for ${migration.from}`);
+    const [legacy, target] = await Promise.all([
+      db.storyEntry.findUnique({ where: { slug: migration.from }, select: { id: true, title: true, summary: true, body: true, meta: true, status: true } }),
+      db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true } }),
+    ]);
+    if (legacy && !target) {
+      await db.$transaction(async (tx) => {
+        await tx.storyEntry.update({
+          where: { id: legacy.id },
+          data: { slug: seed.slug, title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as unknown as Prisma.InputJsonValue, version: { increment: 1 }, updatedByUserId: author.id },
+        });
+        await tx.storyRevision.create({
+          data: { entityType: "ENTRY", entityId: legacy.id, action: "UPDATED", actorUserId: author.id, summary: `Separated the taxonomy: renamed "${legacy.title}" to "${seed.title}"`, before: { slug: migration.from, title: legacy.title, summary: legacy.summary, body: legacy.body, meta: legacy.meta }, after: { slug: seed.slug, title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as unknown as Prisma.InputJsonValue } },
+        });
+      });
+      console.log(`  migrated ${migration.from} -> ${seed.slug}`);
+      written += 1;
+    } else if (legacy && target && legacy.status !== "ARCHIVED") {
+      await db.$transaction(async (tx) => {
+        await tx.storyEntry.update({ where: { id: legacy.id }, data: { status: "ARCHIVED", version: { increment: 1 }, updatedByUserId: author.id } });
+        await tx.storyRevision.create({ data: { entityType: "ENTRY", entityId: legacy.id, action: "STATUS_CHANGED", actorUserId: author.id, summary: `Archived superseded combined taxonomy record "${legacy.title}"`, before: { status: legacy.status }, after: { status: "ARCHIVED", replacement: seed.slug } } });
+      });
+      console.log(`  archived ${migration.from} (replaced by ${seed.slug})`);
+      written += 1;
+    }
+  }
+
+  // Rewrite authored wiki links after the in-place rename. Plain story prose
+  // can still say "rider"; only the entity target changes to the beast itself.
+  const linked = await db.storyEntry.findMany({
+    where: { OR: [{ summary: { contains: "[[the-hypogriff-riders]]" } }, { body: { contains: "[[the-hypogriff-riders]]" } }] },
+    select: { id: true, title: true, summary: true, body: true },
+  });
+  for (const entry of linked) {
+    const summary = entry.summary?.replaceAll("[[the-hypogriff-riders]]", "[[hippogriff]]") ?? null;
+    const body = entry.body?.replaceAll("[[the-hypogriff-riders]]", "[[hippogriff]]") ?? null;
+    await db.$transaction(async (tx) => {
+      await tx.storyEntry.update({ where: { id: entry.id }, data: { summary, body, version: { increment: 1 }, updatedByUserId: author.id } });
+      await tx.storyRevision.create({ data: { entityType: "ENTRY", entityId: entry.id, action: "UPDATED", actorUserId: author.id, summary: `Repointed the Hippogriff lore link in "${entry.title}"`, before: { summary: entry.summary, body: entry.body }, after: { summary, body } } });
+    });
+    written += 1;
+  }
+
+  // 1. The parent races and the two newly separated children.
+  for (const seed of [...raceSeeds, ...raceMemberSeeds]) {
+    const existing = await db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true, kind: true, title: true, summary: true, body: true, meta: true } });
     if (existing) {
-      console.log(`  skip   ${seed.slug} (already exists as ${existing.kind})`);
+      const managed = seed.slug === "mythical" || seed.slug === "humanoid" || raceMemberSeeds.some((member) => member.slug === seed.slug);
+      const needsUpdate = managed && (existing.title !== seed.title || existing.summary !== seed.summary || existing.body !== seed.body || !isDeepStrictEqual(existing.meta, seed.meta));
+      if (!needsUpdate) {
+        console.log(`  skip   ${seed.slug} (already exists as ${existing.kind})`);
+        continue;
+      }
+      await db.$transaction(async (tx) => {
+        await tx.storyEntry.update({ where: { id: existing.id }, data: { title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as unknown as Prisma.InputJsonValue, version: { increment: 1 }, updatedByUserId: author.id } });
+        await tx.storyRevision.create({ data: { entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: author.id, summary: `Aligned "${seed.title}" with the parent-and-child race taxonomy`, before: { title: existing.title, summary: existing.summary, body: existing.body, meta: existing.meta }, after: { title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as unknown as Prisma.InputJsonValue } } });
+      });
+      console.log(`  updated ${seed.slug}`);
+      written += 1;
       continue;
     }
     await db.$transaction(async (tx) => {
@@ -43,10 +107,10 @@ async function main() {
         },
       });
       await tx.storyRevision.create({
-        data: { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: author.id, summary: `Named the race "${entry.title}"`, after: { kind: "CREATURE", title: seed.title, race: true } },
+        data: { entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: author.id, summary: `Named the ${seed.meta.parent ? "race child" : "race"} "${entry.title}"`, after: { kind: "CREATURE", title: seed.title, race: !seed.meta.parent, parent: seed.meta.parent } },
       });
     });
-    console.log(`  seeded race ${seed.slug}`);
+    console.log(`  seeded ${seed.meta.parent ? "race child" : "race"} ${seed.slug}`);
     written += 1;
   }
 

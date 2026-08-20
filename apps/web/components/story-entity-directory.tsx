@@ -88,10 +88,8 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     ...[...releaseByArc.keys()].filter((slug) => !arcRefs.some((arc) => arc.slug === slug)).map((slug) => ({ slug, title: slug, linked: false, systems: releaseByArc.get(slug) as typeof entries })),
   ];
   const releasePlanActive = isSystemsLibrary && !search && entries.length > 0;
-  // The grid reads as a tree flattened: each top-level entry followed by its
-  // children (marked as such), so Environment's weather and sky never drift
-  // alphabetically away from it — and the Lizzarnix stay under Mythical.
-  // Systems and races run the same `parent` law, so they share the walk.
+  // Systems read as a flattened tree. Races keep the landing page to the top
+  // rung; opening a parent reveals its children on that race's dossier.
   const systemParentOf = (entry: (typeof entries)[number]) => {
     const value = asRecord(entry.meta).parent;
     return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -99,8 +97,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // Real titles, not de-slugged guesses: "the-sun-and-moon" is titled
   // "The Sun & Moon", and the ampersand does not survive a replaceAll.
   const systemTitles = new Map(entries.map((entry) => [entry.slug, entry.title]));
-  const orderedEntries = (isSystemsLibrary || isRacesLibrary) && !search
-    ? (() => {
+  const orderedEntries = isRacesLibrary && !search
+    ? entries.filter((entry) => !systemParentOf(entry))
+    : isSystemsLibrary && !search
+      ? (() => {
         const bySlug = new Map(entries.map((entry) => [entry.slug, entry]));
         const childrenOf = new Map<string, typeof entries>();
         const tops: typeof entries = [];
@@ -119,8 +119,8 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
         };
         for (const top of tops) walk(top);
         return ordered;
-      })()
-    : entries;
+        })()
+      : entries;
   const castingImages = modelGalleryImages.filter((image) => image.pack === "Warriors_Pack" || image.pack === "CitySampleCrowd").slice(0, 6);
 
   // The regions library reads as an atlas, not a card dump: the world's few
@@ -181,7 +181,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <p>{collection.description}</p>
           <div className="entity-directory-actions">
             <a className="primary-link" href="#new-entry"><Plus aria-hidden="true" size={14} /> Add {collection.singular}</a>
-            <span>{entries.length} in the Codex</span>
+            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : `${entries.length} in the Codex`}</span>
           </div>
         </div>
         {collection.kind === "CHARACTER" ? <div className="casting-strip" aria-label="Available in-game model previews">{castingImages.map((image) => <img alt="" key={image.ref} src={`/model-gallery/${image.image}`} />)}<span>{modelGalleryImages.length} models ready to cast</span></div> : null}
@@ -365,7 +365,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               <p className="eyebrow">{detail || collection.singular}</p>
               <h2>{entry.title}</h2>
               <p>{entry.summary ? plainStoryProse(entry.summary) : `Open this ${collection.singular} and give the next writer something to build on.`}</p>
-              <footer><span>{entry.appearanceCount} story connection{entry.appearanceCount === 1 ? "" : "s"}</span><strong>Open dossier <ArrowRight aria-hidden="true" size={12} /></strong></footer>
+              <footer><span>{entry.appearanceCount} story connection{entry.appearanceCount === 1 ? "" : "s"}</span><strong>{isRacesLibrary ? "See its children" : "Open dossier"} <ArrowRight aria-hidden="true" size={12} /></strong></footer>
             </div>
           </Link>;
         })}

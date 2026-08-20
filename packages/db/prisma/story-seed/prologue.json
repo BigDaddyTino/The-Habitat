@@ -96,7 +96,7 @@
           "references": [
             { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
             { "kind": "CHARACTER", "slug": "steve", "title": "Steve" },
-            { "kind": "CREATURE", "slug": "the-hypogriff-riders", "title": "The Hypogriff Riders" }
+            { "kind": "CREATURE", "slug": "hippogriff", "title": "Hippogriff" }
           ]
         },
         {
@@ -528,7 +528,7 @@
       "slug": "tropic-pearl-trade-house",
       "title": "The Tropic Pearl Trade House",
       "summary": "The enemy of the opening: a polished commercial power that buys wars wholesale — hired mercenaries, battlefield technology, exotic creatures in restraints, and contracts signed far from the smoke.",
-      "body": "Pearl is never narrated as villainous; it is shown operating. Mercenaries being paid. Polished officers observing violence from safety. Cargo manifests. A contract signed while a prisoner is dragged through frame. Their assault on the Starting Island is a seizure, not a crusade — the island is an asset, the war an acquisition cost.\n\nTheir contractors are professionals, not monsters, and occasionally funny about their own side ('Stormglass is folding.' 'Then why are we still getting shot at?'). Their hypogriff riders — see [[the-hypogriff-riders]] — are the committed visual of how Pearl wages war: old power, new money, modern kit."
+      "body": "Pearl is never narrated as villainous; it is shown operating. Mercenaries being paid. Polished officers observing violence from safety. Cargo manifests. A contract signed while a prisoner is dragged through frame. Their assault on the Starting Island is a seizure, not a crusade — the island is an asset, the war an acquisition cost.\n\nTheir contractors are professionals, not monsters, and occasionally funny about their own side ('Stormglass is folding.' 'Then why are we still getting shot at?'). Their riders weaponize the [[hippogriff]], the committed visual of how Pearl wages war: old power, new money, modern kit."
     },
     {
       "kind": "REGION",
@@ -553,10 +553,10 @@
     },
     {
       "kind": "CREATURE",
-      "slug": "the-hypogriff-riders",
-      "title": "The Hypogriff Riders",
-      "summary": "Tropic Pearl's airborne hunters: armored war-beasts of the old world fitted with machine guns of the new one.",
-      "body": "The rooftop hunter of the prologue is the committed visual: an old war-beast integrated with modern kit, not a placeholder gunship. A rider sweeps rooftops in a learnable search pattern, fires through weak cover to punish passive hiding, and cannot be beaten by damage in the open — only outlasted, out-timed, and out-thought.\n\nThey are the game's first lesson that some threats are weather: you do not fight the storm, you learn when it looks away. Steve did not learn. [[steve]]"
+      "slug": "hippogriff",
+      "title": "Hippogriff",
+      "summary": "An intelligent eagle-and-horse beast of the old world, dangerous in its own right and entirely separate from the human who may ride it.",
+      "body": "A Hippogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.\n\nThe prologue's rooftop hunter is one of these animals fitted into Tropic Pearl doctrine. The human rider brings the weapon, orders, and faction allegiance; the Hippogriff brings flight, senses, learned search behaviour, and the old-world presence that makes the silhouette unforgettable. Separating the two matters because a beast cannot inherit its rider's guilt.\n\nGive the animal behaviour before statistics. A Hippogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]"
     },
     {
       "kind": "CREATURE",

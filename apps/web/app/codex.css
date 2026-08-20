@@ -909,6 +909,12 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 .entity-card-nested .entity-card-copy > .eyebrow { color: #a2946f; }
 .entity-card.entity-card-nested:hover { border-left-color: var(--brass); }
 
+/* The races landing page is intentionally parents-only. Give the category
+   cards enough visual presence to feel like doors into their child lists. */
+.directory-races .entity-card-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); }
+.directory-races .entity-card-visual { min-height: 220px; }
+.directory-races .entity-card-keyart { object-position: center; }
+
 /* The members block on a race dossier reuses the contained-places row; the
    art column just needs centring for a creature portrait. */
 .entity-race-members ul > li > img { object-position: center; }

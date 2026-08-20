@@ -5,7 +5,18 @@ import test from "node:test";
 import { getCreatureKeyart, illustratedCreatureSlugs } from "./creature-keyart";
 
 test("every illustrated creature has project-local key art", () => {
-  assert.deepEqual(illustratedCreatureSlugs, ["lizzarnix"]);
+  assert.deepEqual(illustratedCreatureSlugs, [
+    "abominations",
+    "beasts",
+    "hippogriff",
+    "human",
+    "humanoid",
+    "lizzarnix",
+    "monstrosities",
+    "mythical",
+    "supernaturals",
+    "the-risen",
+  ]);
 
   for (const slug of illustratedCreatureSlugs) {
     const keyart = getCreatureKeyart(slug);
