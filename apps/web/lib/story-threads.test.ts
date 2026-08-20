@@ -18,7 +18,7 @@ import {
   storyThreadStatuses,
   storyThreadStatusLabels,
 } from "@habitat/shared";
-import { amandaSeed, companionMissionSeeds, emptyCribsSeed, tinoCompanionPatch } from "./story-threads-seed";
+import { amandaSeed, companionMissionSeeds, emptyCribsSeed, lizzarnixLorePatches, lizzarnixSeed, tinoCompanionPatch } from "./story-threads-seed";
 import { companionMissionMetaSchema, metaSchemasByKind, threadMetaSchema } from "./story-meta-schemas";
 import { storyProseLinks } from "./story-prose";
 
@@ -51,6 +51,11 @@ test("every seeded record validates against the schema its sheet enforces", () =
   assert.ok(character, "CHARACTER must have a sheet schema");
   const amanda = character.safeParse(amandaSeed.meta);
   assert.ok(amanda.success, `amanda meta invalid: ${amanda.success ? "" : amanda.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
+
+  const creature = metaSchemasByKind.CREATURE;
+  assert.ok(creature, "CREATURE must have a sheet schema");
+  const lizzarnix = creature.safeParse(lizzarnixSeed.meta);
+  assert.ok(lizzarnix.success, `lizzarnix meta invalid: ${lizzarnix.success ? "" : lizzarnix.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
 
   const thread = threadMetaSchema.safeParse(emptyCribsSeed.meta);
   assert.ok(thread.success, `thread meta invalid: ${thread.success ? "" : thread.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join("; ")}`);
@@ -90,15 +95,40 @@ test("the thread's mission list and the seeded chain are the same nine slugs", (
   assert.deepEqual(emptyCribsSeed.meta.companionMissions, companionMissionSeeds.map((seed) => seed.slug));
 });
 
-test("the thread lands loudly unconfirmed, with its mysteries kept", () => {
+test("the thread lands loudly unconfirmed, with its remaining mysteries kept", () => {
   assert.equal(emptyCribsSeed.meta.threadStatus, "brainstorming");
   assert.ok(isUnconfirmedThreadStatus(emptyCribsSeed.meta.threadStatus));
-  // The locks the spec insists on: culprit TBD, species TBD, the private
-  // joke never explained. They live in the body and the open questions.
+  // The Lizzarnix identity is decided. The culprit and the private joke stay
+  // locked, and the rebirth details remain questions for the room.
   assert.match(emptyCribsSeed.body, /\*\*Status: brainstorming\. Nothing below is confirmed canon\.\*\*/);
   assert.ok(emptyCribsSeed.meta.openQuestions.some((question) => /Who took the children — TBD/.test(question)));
-  assert.ok(emptyCribsSeed.meta.openQuestions.some((question) => /true mythical species — TBD/.test(question)));
+  assert.match(String(amandaSeed.meta.species), /Lizzarnix/);
+  assert.match(emptyCribsSeed.body, /Ash and egg/);
+  assert.match(emptyCribsSeed.body, /Tino lifts the egg from the ashes/);
+  assert.ok(emptyCribsSeed.meta.openQuestions.some((question) => /When Amanda's egg hatches/.test(question)));
   assert.match(emptyCribsSeed.body, /no codex entry may ever provide one/);
+});
+
+test("the Lizzarnix deepen existing magic law without creating a fourth origin", () => {
+  assert.equal(lizzarnixSeed.slug, "lizzarnix");
+  assert.equal(lizzarnixSeed.meta.category, "magical");
+  assert.match(lizzarnixSeed.body, /half lizard and half phoenix/i);
+  assert.match(lizzarnixSeed.body, /upright humanoid people who stand and walk on two legs/i);
+  assert.match(String(amandaSeed.meta.appearance), /golden eyes.*almost luminous.*without actually glowing/i);
+  assert.match(String(amandaSeed.meta.appearance), /scaled tail.*lower spine/i);
+  assert.match(lizzarnixSeed.body, /ash became egg, egg became life/i);
+  assert.match(lizzarnixSeed.body, /It is not a fourth origin/i);
+  assert.match(lizzarnixSeed.meta.harvest ?? "", /eggs.*above kingdoms/i);
+
+  assert.deepEqual(lizzarnixLorePatches.map((patch) => patch.slug), [
+    "the-three-origins-of-magic",
+    "the-taxonomy-of-monsters",
+    "the-harvest-economy",
+    "essence",
+    "magic",
+    "the-soul-forge",
+  ]);
+  for (const patch of lizzarnixLorePatches) assert.match(patch.body, /\[\[lizzarnix\]\]/, `${patch.slug} must link the creature dossier`);
 });
 
 test("Amanda is companion-capable; Tino's patch proposes without deciding his fate", () => {
@@ -127,7 +157,7 @@ test("the export withholds development-room kinds — bible and references both"
 test("every cross-reference the seed bodies make is kebab-case and intact", () => {
   // Prose links render as todos when unwritten — that is legal — but a
   // malformed slug can never resolve, so it would sit broken forever.
-  for (const body of [amandaSeed.body, emptyCribsSeed.body, ...companionMissionSeeds.map((seed) => seed.body)]) {
+  for (const body of [amandaSeed.body, lizzarnixSeed.body, emptyCribsSeed.body, ...lizzarnixLorePatches.map((patch) => patch.body), ...companionMissionSeeds.map((seed) => seed.body)]) {
     for (const slug of storyProseLinks(body)) assert.ok(isValidStoryKey(slug), `body links malformed slug ${slug}`);
   }
   // The chain's bodies link the thread; the thread links Amanda and Tino.

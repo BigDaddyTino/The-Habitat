@@ -107,6 +107,9 @@ export const factionMetaSchema = z.object({
 
 export const creatureMetaSchema = z.object({
   category: z.enum(storyCreatureCategories).nullable(),
+  // The race this belongs to; null means this entry is itself a race. Same
+  // shape as the region and system trees, so the atlas logic transfers.
+  parent: metaSlug.nullable(),
   biomes: metaLines(20, 160),
   threat: metaText(500),
   harvest: metaText(500),

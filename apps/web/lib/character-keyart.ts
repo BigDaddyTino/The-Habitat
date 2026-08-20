@@ -1,4 +1,5 @@
 const characterKeyart = {
+  amanda: "/images/characters/keyart/amanda.jpg",
   steve: "/images/characters/keyart/steve.png",
   "the-kestrel-commander": "/images/characters/keyart/the-kestrel-commander.png",
   "the-war-correspondent": "/images/characters/keyart/the-war-correspondent.png",

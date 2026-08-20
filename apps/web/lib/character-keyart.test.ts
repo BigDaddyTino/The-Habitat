@@ -6,6 +6,7 @@ import { getCharacterKeyart, illustratedCharacterSlugs } from "./character-keyar
 
 test("every illustrated character has project-local key art", () => {
   assert.deepEqual(illustratedCharacterSlugs, [
+    "amanda",
     "steve",
     "the-kestrel-commander",
     "the-war-correspondent",

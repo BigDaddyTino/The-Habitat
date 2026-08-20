@@ -21,6 +21,7 @@ import {
   type StoryThreadStatus,
 } from "@habitat/shared";
 import { getCharacterKeyart } from "@/lib/character-keyart";
+import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { getEventArt } from "@/lib/event-art";
 import { timelineEraLabel } from "@/lib/story-timeline";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
@@ -50,7 +51,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -62,7 +63,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; hook: string | null; where: { slug: string; title: string } | null }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
   // Entries resolve to the bible, arcs to their board, and anything nobody has
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
@@ -77,9 +78,14 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const status = record(meta.status);
   const preview = modelPreview(meta.model);
   const isCharacter = entry.kind === "CHARACTER";
+  const isCreature = entry.kind === "CREATURE";
+  // A race is a creature entry with nothing above it. Members are derived
+  // from their own `parent`, never stored twice.
+  const isRace = isCreature && !label(meta.parent);
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
   const characterKeyart = isCharacter ? getCharacterKeyart(entry.slug) : null;
+  const creatureKeyart = isCreature ? getCreatureKeyart(entry.slug) : null;
   const isSystem = entry.kind === "SYSTEM";
   const isThread = entry.kind === "THREAD";
   const isMission = entry.kind === "COMPANION_MISSION";
@@ -129,6 +135,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     // system tree does.
     !(containedPlaces.length && connection.relation === "belongs inside this region") &&
     !(systemFamily && connection.relation === "is a subsystem of this") &&
+    // The race's own member list already shows these in full.
+    !(isRace && connection.relation === "belongs to this race") &&
     // A thread's forward links already name its missions; the missions
     // pointing back is the same fact twice in one list.
     !(isThread && connection.relation === "is advanced by this companion mission" && words(meta.companionMissions).includes(connection.slug)) &&
@@ -157,7 +165,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   }
   // Free-text values are legal in these fields; only slug-shaped ones can link.
   const slugShaped = (value: unknown): value is string => typeof value === "string" && /^[a-z0-9]+(-[a-z0-9]+)*$/.test(value);
-  if (entry.kind === "CREATURE") for (const habitat of words(meta.biomes)) if (slugShaped(habitat)) entityLinks.push({ slug: habitat, detail: "Habitat" });
+  if (entry.kind === "CREATURE") {
+    // The race reads back on the member the same way a parent region reads
+    // back on a place: the breadcrumb is navigation, this is the graph, and
+    // a member whose aside knows nothing about its race is a one-way edge.
+    if (label(meta.parent)) entityLinks.push({ slug: String(meta.parent), detail: "Belongs to this race" });
+    for (const habitat of words(meta.biomes)) if (slugShaped(habitat)) entityLinks.push({ slug: habitat, detail: "Habitat" });
+  }
   if (entry.kind === "ITEM" && slugShaped(meta.origin)) entityLinks.push({ slug: meta.origin, detail: "Origin" });
   if (entry.kind === "EVENT") {
     for (const place of words(meta.where)) if (slugShaped(place)) entityLinks.push({ slug: place, detail: "Happened here" });
@@ -191,11 +205,14 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {factionBrand ? <>
             <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
             <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-profile-keyart" src={systemArt} /> : eventArt ? <img alt={`${entry.title} timeline key art`} className="entity-profile-keyart" src={eventArt} /> : isSystem ? <div className="system-art-slot system-art-slot-hero"><Settings2 aria-hidden="true" size={30} /><span>Key art slot</span><code>{systemArtSlot(entry.slug)}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-profile-keyart" src={systemArt} /> : eventArt ? <img alt={`${entry.title} timeline key art`} className="entity-profile-keyart" src={eventArt} /> : isSystem ? <div className="system-art-slot system-art-slot-hero"><Settings2 aria-hidden="true" size={30} /><span>Key art slot</span><code>{systemArtSlot(entry.slug)}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : creatureKeyart ? <span>Mythical creature · original key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
-          <p className="eyebrow">{storyEntryKindLabels[entry.kind]} dossier · {isThread
+          {/* A race and one of its members are the same kind but not the
+              same thing, and calling Mythical a "creature dossier" reads as
+              a filing mistake. */}
+          <p className="eyebrow">{isRace ? "Race" : storyEntryKindLabels[entry.kind]} dossier · {isThread
             ? (threadStatus ? storyThreadStatusLabels[threadStatus] : "No status yet")
             : isMission
               ? (missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : "No status yet")
@@ -205,6 +222,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {/* A destination three rungs down is meaningless without its address. */}
           {placeAncestry.length ? <nav aria-label="Where this sits" className="place-trail">
             {placeAncestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
+          </nav> : null}
+          {raceFamily?.race ? <nav aria-label="Which race this belongs to" className="place-trail">
+            <span><Link href={`/codex/bible/${raceFamily.race.slug}`}>{raceFamily.race.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>
           </nav> : null}
           {systemFamily?.ancestry.length ? <nav aria-label="Part of which system" className="place-trail">
             {systemFamily.ancestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
@@ -356,6 +376,20 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {entry.kind === "EVENT" ? <p className="entity-map-note is-prose"><History aria-hidden="true" size={13} /> {typeof meta.timelineYearsAgo === "number"
             ? <>Sits on <Link href="/codex/timeline">the timeline</Link>, {timelineEraLabel(meta.timelineYearsAgo)}.</>
             : <>Not on <Link href="/codex/timeline">the timeline</Link> yet — set &ldquo;years before the present&rdquo; on the sheet below, or leave it off if the unknown age is the canon.</>}</p> : null}
+          {isRace && raceFamily ? <div className="entity-contained-places entity-race-members">
+            <p className="eyebrow"><Network aria-hidden="true" size={12} /> The {entry.title}</p>
+            {raceFamily.members.length ? <ul>{raceFamily.members.map((member) => {
+              const memberArt = getCreatureKeyart(member.slug);
+              return <li key={member.slug}>
+                {memberArt ? <img alt="" src={memberArt} /> : <span className="region-place-fallback"><Sparkles aria-hidden="true" size={18} /></span>}
+                <div><Link href={`/codex/bible/${member.slug}`}><strong>{member.title}</strong><i>{member.category ?? "uncategorised"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+                {member.summary ? <p><StoryProseLine resolve={resolveProse} text={member.summary} /></p> : null}</div>
+              </li>;
+            })}</ul> : <p className="story-inspector-hint">Nothing is filed under this race yet — it is a race waiting for its members.</p>}
+            <Link className="entity-add-place" href={`/codex/library/races?parent=${entry.slug}#new-entry`}>
+              <Plus aria-hidden="true" size={13} /> Add one of the {entry.title}
+            </Link>
+          </div> : null}
           {isSystem && systemFamily ? <div className="entity-contained-places entity-system-children">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Inside {entry.title}</p>
             {systemFamily.children.length ? <ul>{systemFamily.children.map((child) => <li key={child.slug}>
@@ -420,7 +454,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             {entityLinks.length || asideConnections.length ? <ul>
               {entityLinks.map((connection, index) => <li key={`${connection.slug}-${index}`}><LoreLink slug={connection.slug}>{connection.slug.replaceAll("-", " ")}</LoreLink><span>{connection.detail}</span></li>)}
               {asideConnections.map((connection) => <li key={`${connection.slug}-${connection.relation}`}><LoreLink slug={connection.slug}>{connection.title}</LoreLink><span>{connection.relation}</span></li>)}
-            </ul> : <p className="story-inspector-hint">Nothing else in the world points here yet.</p>}
+            </ul> : entry.connections.length > 0
+              // Everything that points here is already rendered in full in
+              // the narrative column — members, subsystems, contained places.
+              // Claiming nothing points here would flatly contradict the list
+              // sitting a few inches to the left.
+              ? <p className="story-inspector-hint">Everything that points here is listed alongside the briefing.</p>
+              : <p className="story-inspector-hint">Nothing else in the world points here yet.</p>}
           </section>
 
           {questions.length ? <section className="entity-open-questions"><p className="eyebrow"><CircleHelp aria-hidden="true" size={12} /> Open writing</p><ul>{questions.map((question) => <li key={question}>{question}</li>)}</ul></section> : null}

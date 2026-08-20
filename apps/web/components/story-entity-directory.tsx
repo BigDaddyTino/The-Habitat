@@ -6,6 +6,7 @@ import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { getCharacterKeyart } from "@/lib/character-keyart";
+import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
@@ -30,6 +31,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   const entries = await listStoryEntries({ kind: collection.kind, search });
   const isSystemsLibrary = collection.kind === "SYSTEM";
   const isMissionsLibrary = collection.kind === "COMPANION_MISSION";
+  const isRacesLibrary = collection.kind === "CREATURE";
 
   // The missions library reads as chains, not a card dump: every mission
   // filed under its companion, in chain order, wearing its development
@@ -86,9 +88,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     ...[...releaseByArc.keys()].filter((slug) => !arcRefs.some((arc) => arc.slug === slug)).map((slug) => ({ slug, title: slug, linked: false, systems: releaseByArc.get(slug) as typeof entries })),
   ];
   const releasePlanActive = isSystemsLibrary && !search && entries.length > 0;
-  // The grid reads as a tree flattened: each top-level system followed by its
+  // The grid reads as a tree flattened: each top-level entry followed by its
   // children (marked as such), so Environment's weather and sky never drift
-  // alphabetically away from it.
+  // alphabetically away from it — and the Lizzarnix stay under Mythical.
+  // Systems and races run the same `parent` law, so they share the walk.
   const systemParentOf = (entry: (typeof entries)[number]) => {
     const value = asRecord(entry.meta).parent;
     return typeof value === "string" && value.trim() ? value.trim() : null;
@@ -96,7 +99,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // Real titles, not de-slugged guesses: "the-sun-and-moon" is titled
   // "The Sun & Moon", and the ampersand does not survive a replaceAll.
   const systemTitles = new Map(entries.map((entry) => [entry.slug, entry.title]));
-  const orderedEntries = isSystemsLibrary && !search
+  const orderedEntries = (isSystemsLibrary || isRacesLibrary) && !search
     ? (() => {
         const bySlug = new Map(entries.map((entry) => [entry.slug, entry]));
         const childrenOf = new Map<string, typeof entries>();
@@ -142,6 +145,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
     : [];
   const addingInside = parent ? entries.find((entry) => entry.slug === parent) ?? null : null;
   const systemParents = isSystemsLibrary ? [...entries].sort((a, b) => a.title.localeCompare(b.title)) : [];
+  // Only actual races can be picked as a parent — a race is one with nothing
+  // above it, so offering a member here would build a third rung the library
+  // does not render.
+  const raceParents = isRacesLibrary ? entries.filter((entry) => !systemParentOf(entry)).sort((a, b) => a.title.localeCompare(b.title)) : [];
   /** Places sitting directly in a top-level region, each with its own inside. */
   const contained = new Map<string, Array<{ place: (typeof entries)[number]; inside: typeof entries }>>();
   const unplaced: typeof entries = [];
@@ -296,6 +303,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
           const characterKeyart = entry.kind === "CHARACTER" ? getCharacterKeyart(entry.slug) : null;
+          const creatureKeyart = entry.kind === "CREATURE" ? getCreatureKeyart(entry.slug) : null;
           const systemArt = entry.kind === "SYSTEM" ? getSystemArt(entry.slug) : null;
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
@@ -319,6 +327,11 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                       meta.category,
                       typeof meta.unlockStage === "string" && meta.unlockStage ? meta.unlockStage : meta.unlockArc ? "story-gated" : null,
                     ].filter(Boolean).join(" · ")
+                  : entry.kind === "CREATURE"
+                    ? [
+                        typeof meta.parent === "string" && meta.parent ? `one of the ${systemTitles.get(meta.parent) ?? String(meta.parent).replaceAll("-", " ")}` : "a race",
+                        meta.category,
+                      ].filter(Boolean).join(" · ")
                   : entry.kind === "COMPANION_MISSION"
                     ? [
                         typeof meta.companion === "string" && meta.companion ? `${String(meta.companion).replaceAll("-", " ")}'s arc` : null,
@@ -327,7 +340,9 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                       ].filter(Boolean).join(" · ")
                     : "";
           return <Link
-            className={`entity-card${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
+            // A child in a flattened tree needs to look like one, or the
+            // grid reads as a flat list that happens to be oddly sorted.
+            className={`entity-card${(isRacesLibrary || isSystemsLibrary) && systemParentOf(entry) ? " entity-card-nested" : ""}${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
             href={`/codex/bible/${entry.slug}`}
             key={entry.id}
             style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
@@ -336,7 +351,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-card-keyart" src={systemArt} /> : entry.kind === "SYSTEM" ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{systemArtSlot(entry.slug)}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-card-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-card-keyart" src={systemArt} /> : entry.kind === "SYSTEM" ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{systemArtSlot(entry.slug)}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}
@@ -358,7 +373,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
 
       <details className="entity-create-panel" id="new-entry" open={(entries.length === 0 && !search) || Boolean(addingInside) || Boolean(placeKind)}>
         <summary><Plus aria-hidden="true" size={15} /><span>
-          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : `Add a new ${collection.singular}`}</strong>
+          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : isRacesLibrary ? (addingInside ? `Add one of the ${addingInside.title}` : "Add a race, or something that belongs to one") : `Add a new ${collection.singular}`}</strong>
           <small>{isRegionLibrary ? "A point of interest, a settlement, a zone, or a whole region — say where it sits and it files itself." : "Start with the pitch. The full visual sheet opens next."}</small>
         </span></summary>
         <form action={createEntry} className="story-form">
@@ -376,6 +391,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           {isSystemsLibrary ? <label>Part of which system<select defaultValue={addingInside?.slug ?? ""} name="parent">
             <option value="">Nothing — a top-level system</option>
             {systemParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select></label> : null}
+          {isRacesLibrary ? <label>Which race it belongs to<select defaultValue={addingInside?.slug ?? ""} name="parent">
+            <option value="">Nothing above it — this IS a new race</option>
+            {raceParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {isMissionsLibrary ? <div className="sheet-grid">
             <label>Whose companion arc<select defaultValue="" name="companion">

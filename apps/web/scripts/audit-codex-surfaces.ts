@@ -65,7 +65,7 @@ async function main() {
     db.storyArc.findMany({ where: { status: { in: ["DRAFT", "PROPOSED", "CANON"] } }, select: { slug: true } }),
   ]);
 
-  const collections = ["characters", "factions", "regions", "creatures", "items", "events", "themes", "rules", "systems", "companion-missions"];
+  const collections = ["characters", "factions", "regions", "races", "items", "events", "themes", "rules", "systems", "companion-missions"];
   const surfaces = [
     "/codex", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises",
     ...collections.map((c) => `/codex/library/${c}`),

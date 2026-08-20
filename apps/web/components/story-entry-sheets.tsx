@@ -455,14 +455,17 @@ export function RegionSheet({ entryId, version, meta, factions, regions }: {
 // Creature sheet — taxonomy is a picker (the law), habitat links to regions
 // ---------------------------------------------------------------------------
 
-export function CreatureSheet({ entryId, version, meta, regions }: {
+export function CreatureSheet({ entryId, version, meta, regions, races }: {
   entryId: string;
   version: number;
   meta: Record<string, unknown> | null;
   regions: SlugOption[];
+  /** Every other creature, for the race picker — a race is one with no parent. */
+  races: SlugOption[];
 }) {
   const source = record(meta);
   const [category, setCategory] = useState(text(source.category));
+  const [parent, setParent] = useState(text(source.parent));
   const [biomes, setBiomes] = useState(asArray(source.biomes).map(text));
   const [threat, setThreat] = useState(text(source.threat));
   const [harvest, setHarvest] = useState(text(source.harvest));
@@ -472,6 +475,7 @@ export function CreatureSheet({ entryId, version, meta, regions }: {
 
   const composed: StoryCreatureMeta = {
     category: (storyCreatureCategories as readonly string[]).includes(category) ? (category as StoryCreatureMeta["category"]) : null,
+    parent: orNull(parent),
     biomes: biomes.map((value) => value.trim()).filter(Boolean),
     threat: orNull(threat),
     harvest: orNull(harvest),
@@ -481,10 +485,15 @@ export function CreatureSheet({ entryId, version, meta, regions }: {
 
   return (
     <form action={updateEntryMeta} className="story-form entry-sheet">
-      <p className="eyebrow">Creature sheet — pick a region for each habitat so the bestiary stays wired to the map</p>
+      <p className="eyebrow">Race sheet — file it under its race, and pick a region for each habitat so the bestiary stays wired to the map</p>
       <input name="entryId" type="hidden" value={entryId} />
       <input name="version" type="hidden" value={version} />
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
+
+      <label>Which race this belongs to<select onChange={(event) => setParent(event.target.value)} value={parent}>
+        <option value="">Nothing above it — this entry IS a race</option>
+        {races.map((race) => <option key={race.slug} value={race.slug}>{race.title}</option>)}
+      </select></label>
 
       <div className="sheet-grid">
         <label>Category — the taxonomy law<select onChange={(event) => setCategory(event.target.value)} value={category}><option value="">Not decided</option>{storyCreatureCategories.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
@@ -505,7 +514,7 @@ export function CreatureSheet({ entryId, version, meta, regions }: {
       <label>Threat — what makes it dangerous<textarea maxLength={500} onChange={(event) => setThreat(event.target.value)} rows={2} value={threat} /></label>
       <label>Harvest — what the extraction economy wants from it<textarea maxLength={500} onChange={(event) => setHarvest(event.target.value)} rows={2} value={harvest} /></label>
       <label>Open questions — one per line<textarea onChange={(event) => setOpenQuestions(event.target.value)} rows={2} value={openQuestions} /></label>
-      <SheetSubmit label="Save creature sheet" />
+      <SheetSubmit label="Save race sheet" />
     </form>
   );
 }

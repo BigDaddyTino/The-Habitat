@@ -13,6 +13,7 @@ import {
   storyStoryStages,
   storyThreadCategories,
   type StoryCompanionMissionMeta,
+  type StoryCreatureMeta,
   type StoryRegionMeta,
   type StoryStatus,
   type StorySystemMeta,
@@ -830,6 +831,14 @@ export async function createEntry(formData: FormData) {
     ? { category: null, buildStatus: "concept", parent: systemParent.data, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
     : null;
 
+  // And the same for races: a creature is born inside the race it belongs to,
+  // rather than created loose and adopted later. Leaving the picker empty is
+  // the deliberate way to declare a new race.
+  const raceParent = parsed.data.kind === "CREATURE" ? metaSlug.safeParse(formData.get("parent")) : null;
+  const creatureMeta: StoryCreatureMeta | null = raceParent?.success
+    ? { category: null, parent: raceParent.data, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [] }
+    : null;
+
   // A story thread is born brainstorming — visibly unconfirmed until the room
   // moves it — carrying whatever categories and stages the proposer picked.
   const threadMeta: StoryThreadMeta | null = parsed.data.kind === "THREAD"
@@ -887,6 +896,7 @@ export async function createEntry(formData: FormData) {
         createdByUserId: user.id,
         ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue }
           : systemMeta ? { meta: systemMeta as unknown as Prisma.InputJsonValue }
+          : creatureMeta ? { meta: creatureMeta as unknown as Prisma.InputJsonValue }
           : threadMeta ? { meta: threadMeta as unknown as Prisma.InputJsonValue }
           : missionMeta ? { meta: missionMeta as unknown as Prisma.InputJsonValue }
           : {}),
@@ -894,6 +904,7 @@ export async function createEntry(formData: FormData) {
     });
     const placed = placeMeta?.parent ? `, inside ${placeMeta.parent}`
       : systemMeta?.parent ? `, inside ${systemMeta.parent}`
+      : creatureMeta?.parent ? `, one of the ${creatureMeta.parent}`
       : threadMeta?.parent ? `, growing out of ${threadMeta.parent}`
       : missionMeta?.companion ? `, in ${missionMeta.companion}'s chain`
       : "";

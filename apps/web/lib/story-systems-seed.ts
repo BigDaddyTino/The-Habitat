@@ -452,13 +452,15 @@ For writers: the eclipse is the ambush the sky writes. Its power is that dayligh
     summary: "The whole magical order in one system: where power comes from, what it costs, and why the world went to war over it.",
     body: `The parent system for everything arcane, built directly on [[the-three-origins-of-magic]]: the gifted are born with power that cost no one anything — which in this world is nearly a miracle; the infused rent power dose by dose from [[essence]], with [[the-corruption-system]] keeping the ledger inside this family; and creatures carry magic natively, which is exactly why [[the-harvest-economy]] exists to render them into product.
 
+**The forgotten beginning.** The three origins are still the law; [[lizzarnix]] explains why the law has the shape it does. Before written history, those half-lizard, half-phoenix beings gave magic willingly by dying, passing the gift, and returning from scaled eggs in their ashes. Direct gifts became the third origin. Some gifts endured through descendants and became bloodlines whose children are now called born casters. Civilization inherited both roads, exterminated the givers for their legendary Essence and eggs, and forgot where either road began. Only the oldest murals still show flame, gift, ash, egg, and return — usually miscatalogued as sun worship.
+
 Magic is the setting's economy, its war, and its horror in one mechanism, so this system owns the rules the others borrow: what a dose does, what a gifted caster risks, what extraction takes, and what magic can never do.
 
 For writers: magic has prices, not exceptions. Before a scene lets power solve a problem, name which origin paid and what it cost — free magic anywhere unravels the whole bargain the setting is built on. The gifted are precious, hunted, and rare; write them accordingly.`,
     meta: meta({
       category: "progression",
       unlockStage: "Day one",
-      pillars: ["Three origins, three prices", "No free magic anywhere", "The magical order is the war's cause, not its backdrop"],
+      pillars: ["Three origins, three prices", "No free magic anywhere", "The Lizzarnix are the forgotten giver behind gifted magic and the first born bloodlines", "The magical order is the war's cause, not its backdrop"],
       openQuestions: ["Can the player character be gifted, or only infused?", "What are the hard nevers — what can magic not do at any price?"],
     }),
   },
@@ -678,6 +680,8 @@ And that is the setting's moral engine, finally stated plainly. People do not sl
 
 **What reclamation burns is not neutral.** [[essence]] is soul-stuff, so a body rebuilt with it is paid for out of something that was alive and is not any more — which is why a settlement’s Essence reserve is a moral position as much as a supply line. A Forge running on soul essence brings people back cheaply and quickly. A Forge running on nature-drawn essence ([[stormglass]]) needs far more of it for the same body, and the people who insist on it know exactly what they are paying extra for. Both are canon; which one a settlement chose is one of the fastest ways to characterise it.
 
+The one natural cycle that rhymes with a Forge belongs to the supposedly extinct [[lizzarnix]]. They could die, give magic outward, and return from scaled eggs without a Core, a stored Echo, or harvested fuel. Ancient Forge ornament repeats the same flame-ash-egg sequence found in their oldest murals, but resemblance is not proof: nobody knows whether Forge builders copied the Lizzarnix, served them, or merely understood the same law of soul and vessel. Preserve that uncertainty.
+
 **And Forges are how ground is actually held.** A city or outpost with a working, protected Forge is a place whose defenders come back and whose attackers do not — hold it and every casualty you take is temporary, lose it and your own dead stop returning. That is why taking a settlement means taking its Forge intact rather than levelling it, why garrisons are built around Forge rooms instead of walls, and why the first thing a competent occupier does is re-bind the population to a machine they control. Whoever owns the Forge owns who is allowed to be permanent. See [[outpost-and-city-management]] for running one, [[battle-management]] for fighting over one, and [[the-power-balance]] for what it does to a map.
 
 Humanity operates Forges. It does not understand them. Some were discovered whole, some reverse-engineered, and modern builds still carry ancient components nobody can manufacture. One fact troubles everyone who reads the instruments honestly: **nobody knows where the soul goes in between.** Departure is measurable. Resonance is measurable. Between them is a gap, and then the soul returns. Some who have died remember nothing. Some describe impossible places. Some hear voices. Some are certain something followed them back. Writers: that gap is yours to use and is deliberately **not** tied to [[the-veil]] — leaving it unattached keeps both mysteries alive.`,
@@ -693,6 +697,7 @@ Humanity operates Forges. It does not understand them. Some were discovered whol
         "Reclamation burns Essence — death costs the world something real",
         "This is why humanity harvests: magic brings the dead back",
         "Humanity operates Forges without understanding them, and nobody knows where the soul goes in between",
+        "Lizzarnix rebirth is the only natural cycle that resembles reclamation, but the connection remains unproven",
       ],
       openQuestions: [
         "Who built the first Forges, and is that the same question as who built the Veil Anchors?",

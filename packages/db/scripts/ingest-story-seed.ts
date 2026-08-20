@@ -16,7 +16,7 @@
  */
 import "dotenv/config";
 import { readFileSync } from "node:fs";
-import { getPrismaClient } from "../src/client";
+import { getPrismaClient, type Prisma } from "../src/client";
 
 type SeedChoice = { order: number; label: string | null; condition: string | null; toKey: string };
 type SeedNode = {
@@ -35,6 +35,7 @@ type SeedEntry = {
   title: string;
   summary: string | null;
   body: string | null;
+  meta?: unknown;
 };
 type SeedFile = { contractVersion: number; arcs: SeedArc[]; bible: SeedEntry[] };
 
@@ -124,6 +125,7 @@ async function main() {
             title: entry.title,
             summary: entry.summary,
             body: entry.body,
+            meta: entry.meta === undefined ? undefined : entry.meta as Prisma.InputJsonValue,
             status: "CANON",
             createdByUserId: actor.id,
             createdAt,

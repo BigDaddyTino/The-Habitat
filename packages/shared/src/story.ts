@@ -839,8 +839,18 @@ export function storyPlaceRoot(slug: string, places: StoryPlaceLink[], isRoot: (
 /** The taxonomy law as a picker — never free text. */
 export const storyCreatureCategories = ["natural", "magical", "monstrosity", "abomination", "supernatural"] as const;
 
+/**
+ * The races library is a two-rung tree, the same law regions and systems
+ * already run on: a top-level entry (`parent: null`) IS a race — Mythical,
+ * Beasts, Humans, the Risen — and everything else names the race it belongs
+ * to. Nothing marks a race except having nobody above it, so a race with no
+ * members yet is still visibly a race, and a member can never be orphaned
+ * into a category that does not exist.
+ */
 export type StoryCreatureMeta = {
   category: (typeof storyCreatureCategories)[number] | null;
+  /** Slug of the race this belongs to. Null = this entry is itself a race. */
+  parent: string | null;
   /** Region slugs where they resolve, free-text biomes where they don't. */
   biomes: string[];
   threat: string | null;

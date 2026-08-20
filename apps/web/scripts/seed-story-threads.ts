@@ -1,6 +1,6 @@
 import "../lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
-import { amandaSeed, companionMissionSeeds, emptyCribsSeed, tinoCompanionPatch } from "../lib/story-threads-seed";
+import { amandaSeed, companionMissionSeeds, emptyCribsSeed, lizzarnixLorePatches, lizzarnixSeed, tinoCompanionPatch } from "../lib/story-threads-seed";
 
 /**
  * Seeds the founding narrative-development room: Amanda, The Empty Cribs
@@ -25,9 +25,31 @@ async function main() {
   console.log(`author: ${author.username}`);
 
   let created = 0;
-  const seedEntry = async (seed: { slug: string; title: string; summary: string; body: string; meta: unknown }, kind: "CHARACTER" | "THREAD" | "COMPANION_MISSION", status: "PROPOSED" | "CANON", summaryLine: string) => {
-    const existing = await db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true, kind: true } });
+  const seedEntry = async (seed: { slug: string; title: string; summary: string; body: string; meta: unknown }, kind: "CHARACTER" | "CREATURE" | "THREAD" | "COMPANION_MISSION", status: "PROPOSED" | "CANON", summaryLine: string, refreshSeedVersionOne = false) => {
+    const existing = await db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true, kind: true, version: true, title: true, summary: true, body: true, meta: true } });
     if (existing) {
+      if (refreshSeedVersionOne && existing.version === 1 && existing.kind === kind) {
+        await db.$transaction(async (tx) => {
+          await tx.storyEntry.update({
+            where: { id: existing.id },
+            data: { title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as Prisma.InputJsonValue, version: { increment: 1 }, updatedByUserId: author.id },
+          });
+          await tx.storyRevision.create({
+            data: {
+              entityType: "ENTRY",
+              entityId: existing.id,
+              action: "UPDATED",
+              actorUserId: author.id,
+              summary: `Integrated the Lizzarnix revelation into "${seed.title}"`.slice(0, 300),
+              before: { title: existing.title, summary: existing.summary, body: existing.body, meta: existing.meta as Prisma.InputJsonValue },
+              after: { title: seed.title, summary: seed.summary, body: seed.body, meta: seed.meta as Prisma.InputJsonValue },
+            },
+          });
+        });
+        console.log(`  updated ${seed.slug} (${kind}, Lizzarnix integration)`);
+        created += 1;
+        return;
+      }
       console.log(`  skip   ${seed.slug} (already exists as ${existing.kind})`);
       return;
     }
@@ -56,10 +78,77 @@ async function main() {
     created += 1;
   };
 
-  await seedEntry(amandaSeed, "CHARACTER", "PROPOSED", `Proposed the character "${amandaSeed.title}" (Am~hors~ormen~da) — brainstorming, species TBD`);
-  await seedEntry(emptyCribsSeed, "THREAD", "CANON", `Proposed the story thread "${emptyCribsSeed.title}" — brainstorming, not confirmed canon`);
+  await seedEntry(amandaSeed, "CHARACTER", "PROPOSED", `Proposed the character "${amandaSeed.title}" (Am~hors~ormen~da) — brainstorming, Lizzarnix identity ending-gated`, true);
+  await seedEntry(lizzarnixSeed, "CREATURE", "CANON", `Established the mythical creature "${lizzarnixSeed.title}" and its lost place in the origin of magic`, true);
+  await seedEntry(emptyCribsSeed, "THREAD", "CANON", `Proposed the story thread "${emptyCribsSeed.title}" — brainstorming, not confirmed canon`, true);
   for (const seed of companionMissionSeeds) {
-    await seedEntry(seed, "COMPANION_MISSION", "CANON", `Proposed companion mission ${seed.meta.order} of Amanda's arc: "${seed.title}" — brainstorming`);
+    await seedEntry(seed, "COMPANION_MISSION", "CANON", `Proposed companion mission ${seed.meta.order} of Amanda's arc: "${seed.title}" — brainstorming`, seed.slug === "am-hors-ormen-da");
+  }
+
+  // Amanda's visual revision arrived after the first Lizzarnix migration.
+  // Replace only the appearance field so any live edits elsewhere on her
+  // character sheet remain exactly as the room left them.
+  const amanda = await db.storyEntry.findUnique({ where: { slug: "amanda" }, select: { id: true, title: true, meta: true } });
+  if (amanda) {
+    const meta = (amanda.meta as Record<string, unknown> | null) ?? {};
+    const appearance = typeof meta.appearance === "string" ? meta.appearance : "";
+    if (!appearance.includes("lower spine")) {
+      const next = { ...meta, appearance: amandaSeed.meta.appearance };
+      await db.$transaction(async (tx) => {
+        await tx.storyEntry.update({ where: { id: amanda.id }, data: { meta: next as Prisma.InputJsonValue, version: { increment: 1 }, updatedByUserId: author.id } });
+        await tx.storyRevision.create({
+          data: {
+            entityType: "ENTRY",
+            entityId: amanda.id,
+            action: "UPDATED",
+            actorUserId: author.id,
+            summary: `Refined "${amanda.title}" with near-luminous golden eyes and her naturally integrated Lizzarnix tail`,
+            before: { appearance },
+            after: { appearance: amandaSeed.meta.appearance },
+          },
+        });
+      });
+      console.log("  patched amanda — golden eyes and integrated tail");
+      created += 1;
+    } else {
+      console.log("  skip   amanda visual anatomy (already integrated)");
+    }
+  }
+
+  // The Lizzarnix are older than Amanda's thread, so the revelation belongs in
+  // the load-bearing world entries too. Append only: these records have been
+  // edited since their original seed and must never be replaced wholesale.
+  for (const patch of lizzarnixLorePatches) {
+    const entry = await db.storyEntry.findUnique({ where: { slug: patch.slug }, select: { id: true, title: true, body: true, meta: true } });
+    if (!entry) {
+      console.log(`  skip   ${patch.slug} (lore target not found)`);
+      continue;
+    }
+    if ((entry.body ?? "").includes("[[lizzarnix]]")) {
+      console.log(`  skip   ${patch.slug} (Lizzarnix lore already present)`);
+      continue;
+    }
+    const meta = (entry.meta as Record<string, unknown> | null) ?? null;
+    const nextMeta = patch.pillar && meta
+      ? { ...meta, pillars: [...new Set([...(Array.isArray(meta.pillars) ? meta.pillars.filter((value): value is string => typeof value === "string") : []), patch.pillar])] }
+      : meta;
+    const nextBody = [entry.body?.trim(), patch.body].filter(Boolean).join("\n\n");
+    await db.$transaction(async (tx) => {
+      await tx.storyEntry.update({ where: { id: entry.id }, data: { body: nextBody, ...(nextMeta ? { meta: nextMeta as Prisma.InputJsonValue } : {}), version: { increment: 1 }, updatedByUserId: author.id } });
+      await tx.storyRevision.create({
+        data: {
+          entityType: "ENTRY",
+          entityId: entry.id,
+          action: "UPDATED",
+          actorUserId: author.id,
+          summary: `Connected "${entry.title}" to the forgotten Lizzarnix origin of magic`,
+          before: { body: entry.body, meta: entry.meta } as Prisma.InputJsonValue,
+          after: { body: nextBody, meta: nextMeta } as Prisma.InputJsonValue,
+        },
+      });
+    });
+    console.log(`  patched ${patch.slug} — Lizzarnix lore`);
+    created += 1;
   }
 
   // Tino: companion-capable, later availability — additive, and only while

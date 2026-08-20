@@ -899,3 +899,16 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
 @media (max-width: 700px) {
   .corruption-ladder li { gap: 10px; padding-left: 10px; }
 }
+
+/* --- Races: a flattened tree needs to read as a tree ---------------------- */
+
+/* A member card sits visibly under its race rather than beside it: a brass
+   tick on the left edge standing in for the indent a grid cannot give it,
+   and a slightly recessed ground so the races stay the loud rung. */
+.entity-card.entity-card-nested { border-left: 3px solid rgba(198,151,76,.5); background: linear-gradient(135deg, #141816, #0e1210); }
+.entity-card-nested .entity-card-copy > .eyebrow { color: #a2946f; }
+.entity-card.entity-card-nested:hover { border-left-color: var(--brass); }
+
+/* The members block on a race dossier reuses the contained-places row; the
+   art column just needs centring for a creature portrait. */
+.entity-race-members ul > li > img { object-position: center; }

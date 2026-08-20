@@ -35,16 +35,16 @@ export const storyCollections = {
     placeholder: "The Sunken Reach",
     summaryPlaceholder: "What makes this place matter to the story?",
   },
-  creatures: {
+  races: {
     kind: "CREATURE",
-    label: "Creatures",
-    singular: "creature",
-    eyebrow: "The bestiary",
-    title: "What waits beyond the firelight",
-    description: "Track the natural, magical, engineered, and supernatural life that gives each region its danger and identity.",
+    label: "Races",
+    singular: "race",
+    eyebrow: "The peoples & the bestiary",
+    title: "Everything alive, and what kind of thing it is",
+    description: "The world's races and everything that belongs to them — the mythical bloodlines, the beasts, the made, the fallen, the returned, and the people reading this. Open a race to see its members; file a new creature under the race it belongs to.",
     hero: "/images/story-codex-archive.webp",
     placeholder: "Glasswing Manticore",
-    summaryPlaceholder: "What is it, where does it live, and why is it dangerous?",
+    summaryPlaceholder: "What is it, where does it live, and why does it matter?",
   },
   items: {
     kind: "ITEM",
@@ -129,6 +129,19 @@ export type StoryCollectionSlug = keyof typeof storyCollections;
 export function isStoryCollectionSlug(value: string): value is StoryCollectionSlug {
   return value in storyCollections;
 }
+
+/**
+ * Shelves that have been renamed, old address to new. The codex is full of
+ * links written by hand, so a rename that simply 404s the old URL reads to a
+ * writer as "the section is gone". Every entry here is permanent — the cost
+ * of keeping one is a map lookup, and the cost of dropping one is a dead link
+ * somebody wrote in good faith.
+ */
+export const renamedStoryCollections: Record<string, StoryCollectionSlug> = {
+  // Renamed 2026-08-20: the bestiary became the races library when creatures
+  // gained the race they belong to.
+  creatures: "races",
+};
 
 export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | null {
   const match = Object.entries(storyCollections).find(([, collection]) => collection.kind === kind);

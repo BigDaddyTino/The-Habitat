@@ -1,4 +1,4 @@
-import type { StoryCharacterMeta, StoryCompanionCapability, StoryCompanionMissionMeta, StoryThreadMeta } from "@habitat/shared";
+import type { StoryCharacterMeta, StoryCompanionCapability, StoryCompanionMissionMeta, StoryCreatureMeta, StoryThreadMeta } from "@habitat/shared";
 
 /**
  * The founding narrative-development seed: Amanda, The Empty Cribs, and her
@@ -6,7 +6,7 @@ import type { StoryCharacterMeta, StoryCompanionCapability, StoryCompanionMissio
  * as BRAINSTORMING material.
  *
  * Everything here is a proposal, and the seed says so in its own text: the
- * kidnappers are TBD, Amanda's true species is TBD, the private joke is never
+ * kidnappers are TBD, Amanda's true species is the Lizzarnix, the private joke is never
  * to be written, and all quoted dialogue is conceptual. What existing canon
  * already settles (Tino captured alive, the captivity arc owner-gated, the
  * player as his war buddy) is treated as the ground this proposal stands on,
@@ -21,7 +21,7 @@ export const amandaSeed: { slug: string; title: string; summary: string; body: s
   slug: "amanda",
   title: "Amanda",
   summary:
-    "A lizardwoman sorceress with red hair that smokes when she is angry and catches fire when she is furious — brilliant, vulgar, dangerous, and hunting two answers: where her children went, and what happened to Tino.",
+    "A beautiful Lizzarnix hiding as a lizardwoman sorceress — brilliant, vulgar, dangerous, and hunting two answers: where her children went, and what happened to Tino.",
   body: `Her true name is **Am~hors~ormen~da** — her name in the lizard tongue, which most humans cannot pronounce. Somebody once gave up halfway through and called her **Amanda**, and the name stuck. She introduces herself in the lizard tongue first, watches you fail to hold it, then snarls: *someone called me Amanda once. I guess you can just use that.*
 
 She is almost unnaturally attractive — beauty that crosses species boundaries, which should eventually read as a quiet clue that she is not an ordinary lizardwoman at all. People notice Amanda. Men notice her. Women notice her. Creatures notice her. She knows exactly what effect she has and is completely comfortable using it: she flirts, she makes people uncomfortable on purpose, she weaponises attraction when it is the cheapest tool in reach, and she makes deeply inappropriate jokes at the worst possible moments. The game is Mature 17+ and she is written accordingly — but she is never reducible to it. She is also extremely intelligent, magically powerful far beyond what she shows, opinionated, arrogant, funny, fiercely protective of children, and capable of both brutality and immense love.
@@ -30,7 +30,9 @@ She is almost unnaturally attractive — beauty that crosses species boundaries,
 
 **The tell.** Whenever someone mentions [[tino]], her body betrays her. Her scales flush red. Smoke coils out of her red hair. When she is truly furious, **her hair catches fire**. The other companions learn to read it — someone tells a Tino story, a thin curl of smoke starts, and everybody in the party goes *oh shit*. It becomes a running joke that is never safe to laugh at out loud.
 
-**What she is actually is a mythical magical creature** — something ancient, powerful, beautiful, and terrifying — and her exact true species is deliberately **TBD**: an owner-level decision nobody may invent without approval. An ancient creature will eventually recognise her and speak her true name, and it will either bow or be afraid. Possibly both.
+**What she actually is: [[lizzarnix]].** Half lizard and half phoenix, Amanda belongs to a mythical people the world believes were exterminated for the legendary value of their Essence and the still-greater value of their eggs. Her impossible beauty, heat, smoking hair, instinct for restoration, and the fire beneath her scales are all one truth hiding in plain sight. An ancient creature will eventually recognise her and speak her true name, and it will either bow or be afraid. Possibly both.
+
+The oldest truth is bigger than Amanda. The Lizzarnix gave magic to the races of the world by dying willingly, passing the gift, and being born again from the scaled egg left in their ashes. Civilization kept the magic and forgot its giver. In the deepest structures, weathered murals still show the cycle — flame, gift, ash, egg, return — but no living culture reads them correctly.
 
 Her whole story — the family she built with Tino, the night everything broke, her nine companion missions, her true form, and what she finally does with it — is proposed in [[the-empty-cribs]]. **Nothing in that thread is confirmed canon yet.**`,
   meta: {
@@ -38,18 +40,18 @@ Her whole story — the family she built with Tino, the night everything broke, 
     aliases: ["Amanda"],
     pronouns: "she/her",
     sex: "female",
-    species: "lizardwoman (claimed) — truly a mythical magical creature, species TBD",
+    species: "Lizzarnix — half lizard, half phoenix; publicly passes as a lizardwoman",
     age: null,
     appearance:
-      "Red-haired lizardwoman sorceress, almost unnaturally beautiful — attraction that crosses species lines, which is itself a clue. Scales flush red when Tino is mentioned; smoke rises from her hair when she is angry, and it ignites when she is furious.",
+      "Beautiful adult Lizzarnix passing as a red-haired lizardwoman sorceress: fine jewel-toned scales, golden eyes that catch light so intensely they seem almost luminous without actually glowing, and a long elegant scaled tail integrated naturally from her lower spine. Her attraction crosses species lines. Her scales flush red when Tino is mentioned; smoke rises from her hair when she is angry, and it ignites when she is furious.",
     voice:
       "Sharp, vulgar, funny, and faster than everyone else in the room. Flirts as easily as she threatens, often in the same sentence. Under the blade-work there are flashes of the woman who used to sing and dance — a genuine laugh that escapes before she can kill it.",
-    magic: { origin: "born", schools: [], corruptionPhase: null, notes: "Powerful sorcery — and abilities far beyond what she shows anyone, belonging to whatever she truly is. The full extent is part of the ending proposed in [[the-empty-cribs]]." },
+    magic: { origin: "born", schools: ["fire", "restoration", "gift"], corruptionPhase: null, notes: "Native Lizzarnix magic. Her kind gave magic through willing death and resurrection: the gift passed outward, while the giver returned from a scaled egg in the ashes. Amanda hides almost all of that power until [[the-empty-cribs]]." },
     factions: [],
     home: null,
     status: {
       known: "a dangerous, brilliant lizardwoman mercenary-sorceress in the Peninsula, recruitable early",
-      actual: "a mythical magical creature (species TBD, owner-gated), mother of two abducted children, Tino's former partner — and, if The Empty Cribs holds, the one who eventually trades her life to restore him",
+      actual: "a surviving Lizzarnix, mother of two abducted children, Tino's former partner — and, if The Empty Cribs holds, the one who burns herself away to restore him and leaves a scaled egg in her ashes",
     },
     relationships: [
       { character: "tino", who: null, type: "former partner — they built a life and had two children; she believes he abandoned the family, and does not know whether she wants to embrace him or kill him. Probably both." },
@@ -62,16 +64,82 @@ Her whole story — the family she built with Tino, the night everything broke, 
     companion: {
       capable: true,
       availability: "Peninsula / early game — she rescues the player, violently, then joins when she learns who they are looking for",
-      status: "Proposed companion (brainstorming) — later beats propose: former companion, deceased, replaced in the roster by Tino",
+      status: "Proposed companion (brainstorming) — later beats propose: absent from the roster after her sacrificial burning; her scaled egg remains alive in Tino's care",
     },
     openQuestions: [
-      "Her true mythical species — TBD, owner-level, do not invent without approval.",
       "Who took the children — TBD; deliberately unresolved, potentially its own story thread later.",
       "The private joke she shares with Tino at the reunion — never to be explained anywhere, including this codex.",
-      "What exactly her restoration ability is, what it costs, and why it demands a life.",
+      "When Amanda's egg hatches, what she remembers, and what form her rebirth takes.",
     ],
   },
 };
+
+export const lizzarnixSeed: { slug: string; title: string; summary: string; body: string; meta: StoryCreatureMeta } = {
+  slug: "lizzarnix",
+  title: "Lizzarnix",
+  summary:
+    "The lost upright humanoid half-lizard, half-phoenix givers of magic: slain for legendary Essence and priceless eggs until the world forgot that every gift once ended in ash, rebirth, and another gift.",
+  body: `A **Lizzarnix** is half lizard and half phoenix: a tall upright humanoid people who stand and walk on two legs, with intelligent clawed hands, elegant reptilian faces, long scaled tails, and great phoenix wings rising from their backs. Adult males are commonly taller and broader, adult females more finely built, but both are scaled, feather-crested, fire-blooded, impossibly beautiful, and equally powerful. Their gold eyes can appear almost luminous in direct light without emitting any light of their own. They are built around a cycle no other creature shares. When one dies, the body burns completely. The flame collapses into a bed of warm ash, and in that ash remains a beautiful scaled egg. Given time and protection, the Lizzarnix is born again.
+
+**They gave magic to the races of the world.** Before infusion rigs, extraction refineries, or schools that could name what they taught, a Lizzarnix could choose to die and pass part of its native magic into another living soul. Death was the price of the gift, but not the end of the giver: ash became egg, egg became life, and the restored Lizzarnix could one day give again. The third origin in [[the-three-origins-of-magic]] is the surviving shape of that covenant. It is not a fourth origin and never was.
+
+That truth is gone from living history. No modern nation remembers where gifted magic began. The deepest pre-state ruins still carry murals of scaled fire-creatures surrounded by the ancestors of many races: flame leaving an opened breast, kneeling figures rising crowned in light, then ash, egg, hatching, and the same creature returning. Scholars catalogue the sequence as solar worship, a funeral cult, or dynastic allegory because the name **Lizzarnix** disappeared before their languages began.
+
+**The extinction was an industry.** Lizzarnix Essence was legendary in purity, density, and stability. Their eggs were worth more still: concentrated life, rebirth, magic, and a future supply of all three inside one shell. Hunters, kings, early refiners, and the ancestors of today's extraction powers turned the covenant into inventory. Forced extraction killed without completing the sacred cycle; viable eggs were stolen, consumed, dissected, or locked away. The world calls the species extinct because greed succeeded so completely that even the reason for the slaughter was lost. [[the-harvest-economy]] is not merely similar to that crime. It descends from it.
+
+The ending proposed in [[the-empty-cribs]] reveals [[amanda]] as a surviving Lizzarnix. When she spends herself restoring [[tino]], she does not leave a corpse. She burns into a column of living fire, collapses into ash, and leaves one radiant, beautifully scaled egg. Tino carries it after the facility — wrapped, guarded, spoken to when nobody is listening — while the world continues believing the Lizzarnix are gone.
+
+For writers: public knowledge stops at *extinct mythical creature; Essence legendary; eggs priceless*. The origin of gifted magic, the voluntary death-and-return covenant, Amanda's identity, and the egg Tino carries are ending-tier truths. Ancient walls may show the truth, but nobody should correctly explain those images before Amanda makes them readable.`,
+  meta: {
+    category: "magical",
+    parent: "mythical",
+    biomes: [],
+    threat: "Legendary when threatened; a Lizzarnix can weaponize fire, restoration, and the same life-giving force ancient peoples received as magic.",
+    harvest: "Legendary-grade Essence; scaled rebirth eggs historically valued above kingdoms. Forced extraction interrupts the resurrection cycle and kills permanently.",
+    gameId: null,
+    openQuestions: [
+      "Where Amanda's line survived while the rest were exterminated.",
+      "When Amanda's egg hatches, what she remembers, and whether rebirth changes her apparent age or form.",
+      "Whether any stolen Lizzarnix eggs remain sealed in an ancient vault or private collection.",
+      "Who took Amanda and Tino's children — still deliberately TBD.",
+    ],
+  },
+};
+
+/**
+ * Additive live-Codex patches for records that predate the Lizzarnix decision.
+ * The original world-bible and system seeds carry the integrated versions for
+ * clean installs; these paragraphs migrate an existing writers' room without
+ * overwriting the work already done there.
+ */
+export const lizzarnixLorePatches: ReadonlyArray<{ slug: string; body: string; pillar?: string }> = [
+  {
+    slug: "the-three-origins-of-magic",
+    body: `**The buried origin.** Before written history, the [[lizzarnix]] gave magic to the races of the world. They died willingly, passed native magic into another soul, and returned from scaled eggs in their ashes. Direct gifts became the third origin; gifts that endured through descendants seeded some bloodlines now called born magic. This is not a fourth origin — it is the forgotten beginning of the first and third.`,
+  },
+  {
+    slug: "the-taxonomy-of-monsters",
+    body: `The [[lizzarnix]] are native magical creatures: neither demons, monstrosities, nor abominations, despite the frightened categories later cultures forced onto them. Their half-lizard, half-phoenix form and death-and-rebirth cycle belong to the world's original magical ecology.`,
+  },
+  {
+    slug: "the-harvest-economy",
+    body: `The oldest atrocity in the harvest economy is the apparent extinction of the [[lizzarnix]]. Their Essence was legendary; their scaled rebirth eggs were worth more still. Early hunters learned to turn a willing gift-and-return covenant into forced death without return. The modern industry inherited that crime and forgot what it had destroyed.`,
+  },
+  {
+    slug: "essence",
+    body: `[[lizzarnix]] Essence survives in the oldest ledgers as the legendary upper bound: unnaturally pure, stable across incompatible schools, and valuable beyond modern assay. Their eggs were priced higher still because each held concentrated magic, resurrection, and a future source in one living shell.`,
+  },
+  {
+    slug: "magic",
+    body: `**The forgotten beginning.** [[lizzarnix]] explains why the three origins have their shape. Those half-lizard, half-phoenix beings gave magic willingly through death and rebirth; direct gifts became gifted magic, while gifts carried through descendants seeded born bloodlines. Civilization kept both roads, exterminated the givers for their Essence and eggs, and forgot where either began.`,
+    pillar: "The Lizzarnix are the forgotten giver behind gifted magic and the first born bloodlines",
+  },
+  {
+    slug: "the-soul-forge",
+    body: `The only natural cycle that resembles reclamation belongs to the supposedly extinct [[lizzarnix]]. They could die, give magic outward, and return from scaled eggs without a Core, stored Echo, or harvested fuel. Ancient Forge ornament repeats the same flame-ash-egg sequence, but resemblance is not proof: nobody knows whether Forge builders copied the Lizzarnix, served them, or merely understood the same law of soul and vessel.`,
+    pillar: "Lizzarnix rebirth is the only natural cycle that resembles reclamation, but the connection remains unproven",
+  },
+];
 
 /**
  * Tino's companion capability, applied to his existing CANON dossier without
@@ -89,14 +157,14 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
   slug: "the-empty-cribs",
   title: "The Empty Cribs",
   summary:
-    "The Amanda/Tino storyline: two stolen children, a family that broke looking for them, the legendary Tino boss fight, Amanda's sacrifice, and the ending where MARTINO fades to TINO. Brainstorming — argue with it here.",
-  body: `**Status: brainstorming. Nothing below is confirmed canon.** The culprit is TBD, Amanda's true species is TBD, every quoted line is conceptual, and the room owns all of it. What this thread deliberately builds on top of: existing canon already holds that [[tino]] was **captured alive by an unidentified force** (see [[what-the-player-knows-about-tino]]), that the captivity arc is unwritten and owner-gated, and that his life before the war is an open question. This thread is a proposed answer to those questions.
+    "The Amanda/Tino storyline: two stolen children, a lost Lizzarnix bloodline, the legendary Tino boss fight, Amanda's fiery restoration and rebirth egg, and the ending where MARTINO fades to TINO. Brainstorming — argue with it here.",
+  body: `**Status: brainstorming. Nothing below is confirmed canon.** The culprit is TBD, every quoted line is conceptual, and the room owns all of it. Amanda's true species is now decided: she is a [[lizzarnix]], one of the supposedly extinct half-lizard, half-phoenix beings that first gave magic to the world's races through death and rebirth. What this thread deliberately builds on top of: existing canon already holds that [[tino]] was **captured alive by an unidentified force** (see [[what-the-player-knows-about-tino]]), that the captivity arc is unwritten and owner-gated, and that his life before the war is an open question. This thread is a proposed answer to those questions.
 
 **The core.** [[amanda]] and [[tino]] were deeply in love — not merely lovers. They built a life. They had **two children**, and for a while they were genuinely happy, young enough to believe they might get to keep it.
 
 **The night everything broke.** One evening they leave the children safely at home and go out — together, alone, for once with nothing terrible happening. No war. No monsters. No mission. No fucking apocalypse. They drink, they dance, they sing, they laugh; maybe Tino embarrasses himself, maybe Amanda embarrasses him worse; they stumble home half drunk, still laughing at some stupid private joke. This memory matters enormously later — it is perhaps the last truly happy night either of them ever had. They open the door. The house is too quiet. In the children's room stand two cribs. **Both are empty.**
 
-**The abduction.** Deliberate, not an accident — there are signs. Who took them is **TBD** and must stay TBD until the room decides: a faction, magical creatures, essence hunters, someone interested in Amanda's bloodline, in Tino, in what their children might become, an ancient enemy, or something nobody has named. The mystery is big enough to become its own thread later.
+**The abduction.** Deliberate, not an accident — there are signs. Who took them is **TBD** and must stay TBD until the room decides. What changes now is the scale of the motive: Amanda's children may carry the first surviving Lizzarnix bloodline in ages. A faction, magical creatures, essence hunters, someone who knows what a Lizzarnix child or egg is worth, an ancient enemy, or something nobody has named could be responsible. The answer stays locked; the legendary value of Amanda's blood makes the empty cribs more dangerous.
 
 **What it does to Amanda.** She turns inward. The wild, laughing, singing woman becomes withdrawn, cold, mean, suspicious, vicious — obsessed with finding the children, her grief disguised as aggression. She is still capable of love; she just refuses to let anyone close enough to hurt her like that again.
 
@@ -120,11 +188,13 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
 
 **Tino dies.** His body cannot survive the accumulated damage. And Amanda realises what she can do.
 
-**Amanda's true form.** One of the game's great visual reveals: not a beautiful lizardwoman — something ancient, mythical, extraordinarily powerful, terrifying, and beautiful. Exact form **TBD, owner-gated**.
+**Amanda's true form — the Lizzarnix.** One of the game's great visual reveals: the beautiful lizardwoman shape opens into something older and more impossible, still upright and recognisably humanoid but unmistakably half lizard and half phoenix — jewel-bright scales, a long living tail, a crown and mantle of fire, feathered wings edged like molten glass, and the terrible grace of a people the world murdered into myth. The facility's instruments identify the energy as impossible-quality Essence. The player who has seen the oldest ruin murals finally understands that those walls were not depicting a sun god. They were recording a people.
 
-**The restoration.** Not resurrection — restoration. Her magic rebuilds Tino as he should have been: corruption stripped, foreign essence purged, mutations undone, the experiments essentially erased. The price is equivalent and non-negotiable: **her life.** He wakes; she is dying beside him. Now the children can finally be spoken of out loud — he tries to tell her he never stopped searching, and she already knows, which makes the sacrifice mean more: she is not saving the man who abandoned them, she is saving the man who destroyed himself trying to bring their family home. She refuses to let her last moment turn sentimental. Conceptual line: *"You disappear looking for our children again without telling anyone and I swear to whatever gods are listening, I will come back from the dead and rip your fucking balls off."* Tino, crying, laughs: *"Fair."* She smiles. Then she dies.
+**The restoration.** The distinction between restoration and resurrection matters. A Lizzarnix once gave magic by dying willingly, passing the gift, and returning from the scaled egg left in its ashes; [[the-three-origins-of-magic]] remembers the gift but history forgot the giver. Amanda turns that first covenant toward Tino. Her fire passes through him, strips the foreign Essence, purges the mutations, and rebuilds him as he should have been. The price is equivalent and non-negotiable: **this body, this life, all at once.** He wakes while she is burning beside him. Now the children can finally be spoken of out loud — he tries to tell her he never stopped searching, and she already knows, which makes the sacrifice mean more: she is not saving the man who abandoned them, she is saving the man who destroyed himself trying to bring their family home. She refuses to let her last moment turn sentimental. Conceptual line: *"You disappear looking for our children again without telling anyone and I swear to whatever gods are listening, I will come back from the dead and rip your fucking balls off."* Tino, crying, laughs: *"Fair."* She smiles. Then the fire takes her.
 
-**After.** Amanda's record is never deleted or overwritten — she remains a character and a former companion permanently; her status becomes *former companion — deceased*. **Tino becomes an active companion in her place** and stays through the rest of the main story: the player needs time with the person she died to save. His companion dialogue carries Amanda, the children, the search, the captivity, guilt, grief, what he learned, whether the children are alive, whether they would recognise him, whether they would hate him, whether Amanda would forgive him. He is still Tino — he jokes, he laughs, he is an asshole — but changed. Because of the mythic transfer he should carry some power of hers — perhaps restoration turned outward: healing. He fights in the final boss encounter clean: no corruption, no forced power. Just Tino, and whatever she left in him.
+**Ash and egg.** Amanda does not leave a body. She burns completely, fierce enough to drive everyone back, then the chamber goes quiet. In the center of the ash lies one beautiful egg covered in overlapping red, gold, and obsidian scales, warm as a heartbeat. This is not a loophole that undoes the sacrifice: the companion the player knew is gone from the roster, Tino has been restored, and nobody knows when Amanda will hatch or what death has carried away from her. But she was telling the truth about coming back. Tino lifts the egg from the ashes, wraps it in his coat, and carries it with him from that moment forward.
+
+**After.** Amanda's record is never deleted or overwritten — she remains a character and former companion permanently; her status becomes *between lives — rebirth egg in Tino's care*. **Tino becomes an active companion in her place** and stays through the rest of the main story: the player needs time with the person she burned to save. He carries the egg physically, not as inventory hidden in a menu: a protected sling against his chest or a hard case on his kit, moved carefully before combat, checked beside campfires, and spoken to when he thinks the player is asleep. His companion dialogue carries Amanda, the children, the search, the captivity, guilt, grief, what he learned, whether the children are alive, whether they would recognise him, whether they would hate him, and whether the woman inside the egg will remember him. He is still Tino — he jokes, he laughs, he is an asshole — but changed. Because of the mythic gift he should carry some power of hers — restoration turned outward as healing — while the egg remains the visible promise that her story is not finished. He fights in the final boss encounter clean: no corruption, no forced power. Just Tino, and what she entrusted to him.
 
 **Only after the final boss does he leave** — mirroring his original departure with the meaning inverted. Then there is no family left to restore; now he goes to find **their children** anyway, because they may still be alive, and he owes it to them, to Amanda, and to himself. The children stay deliberately undefined — one may want him, one may hate him, one may blame him for Amanda, they may be grown, they may be important, they may be with the kidnappers — all of it future-content territory for DLC, expansions, postgame, sequel.
 
@@ -153,14 +223,14 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
       "the-man-she-never-stopped-loving",
     ],
     bosses: ["tino"],
-    tags: ["amanda", "tino", "missing-children", "martino-ending", "soul-forge"],
+    tags: ["amanda", "tino", "lizzarnix", "missing-children", "martino-ending", "soul-forge", "origin-of-magic", "rebirth-egg"],
     openQuestions: [
       "Who took the children — TBD by design; do not decide without approval. Big enough to become its own thread.",
       "Which faction or organization holds and experiments on Tino — TBD.",
-      "Amanda's true mythical species — TBD, owner-level.",
       "How the player's vision-link to Tino squares with existing canon (war buddy, what-the-player-knows-about-tino).",
       "The final essence set for the boss rotation must match approved systems.",
-      "Tino's post-restoration power from the mythic transfer — healing? — needs design.",
+      "How Tino's inherited restoration expresses as companion healing without replacing medics or trivialising Soul Forges.",
+      "When Amanda's egg hatches, what she remembers, and whether the reborn Amanda is physically the same age.",
       "All quoted dialogue is conceptual until specifically approved.",
     ],
   },
@@ -250,11 +320,13 @@ Amanda is confronted with it, and it hits her harder than the cribs: she has spe
     { stage: "late-game", consequences: "The search gains a direction: whatever took Tino is findable.", openQuestions: ["Which faction's trail he was on when he was taken — TBD, same lock as the thread."] }),
 
   mission(8, "am-hors-ormen-da", "Am~hors~ormen~da",
-    "An ancient creature recognises Amanda — not as Amanda. It speaks her true name, and possibly bows, and possibly fears her. She is not an ordinary lizardwoman at all.",
+    "An ancient creature recognises Amanda as Lizzarnix and names the extinct fire-blooded people who gave magic to the world's races through death and rebirth.",
     `During the continued search, Amanda's true nature begins to surface. An ancient creature recognises her — not as Amanda. It speaks: **Am~hors~ormen~da.** Possibly it bows. Possibly it fears her. Possibly both.
 
-The player learns she is a **mythical magical creature** — species deliberately TBD, owner-gated, not to be invented — and that she possesses abilities far beyond anything she has shown. This mission exists to set up what she does at the end of [[the-empty-cribs]].`,
-    { stage: "late-game", openQuestions: ["What the ancient creature is, and what it knows about her kind — TBD."] }),
+The creature calls her **[[lizzarnix]]**: half lizard, half phoenix, one of a mythical species the modern world believes was exterminated for legendary Essence and still-more-valuable eggs. It does not explain the whole truth. Instead it leads the party into one of the deepest ancient structures, where a wall shows the same being dying in flame before many different races, those witnesses rising with magic in their hands, and a scaled egg hatching behind them. Amanda cannot dismiss the image because it depicts the fire she has spent her whole life hiding.
+
+This is where the player learns the outline: the Lizzarnix gave magic willingly, died, and returned to give again; civilization harvested them until both the creatures and the truth vanished. The mission still withholds exactly how Amanda's own cycle will matter. Its job is to make the fire, ash, and egg at the end of [[the-empty-cribs]] feel inevitable in retrospect rather than invented in the final scene.`,
+    { stage: "late-game", consequences: "The party can finally name Amanda's species and recognise Lizzarnix murals; the full ash-and-egg consequence remains hidden until the finale.", openQuestions: ["What ancient creature recognises her, and why did it survive with the name when every modern culture lost it?"] }),
 
   mission(9, "the-man-she-never-stopped-loving", "The Man She Never Stopped Loving",
     "The finale: the facility, the failed subjects, Tino's records — and the containment cell. Amanda is coming, and no party system in the game gets to say otherwise.",

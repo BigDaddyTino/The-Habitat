@@ -88,6 +88,34 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   // their parent field, never stored twice), and a companion's missions read
   // as one ordered chain — on the companion's own dossier and on every
   // mission in it alike.
+  // The races tree: a creature with nothing above it IS a race, and its
+  // members are derived from their own parent rather than stored twice.
+  const creatureEntries = entry.kind === "CREATURE" ? everyEntry.filter((candidate) => candidate.kind === "CREATURE") : [];
+  const creatureParentOf = (candidate: { meta: Record<string, unknown> | null }) => {
+    const value = candidate.meta?.parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  };
+  const raceFamily = entry.kind === "CREATURE"
+    ? (() => {
+        const parentSlug = creatureParentOf(entry);
+        const race = parentSlug ? creatureEntries.find((candidate) => candidate.slug === parentSlug) ?? null : null;
+        return {
+          // Null when this entry is itself a race, or when its race names a
+          // slug nobody has written — the breadcrumb stays quiet either way.
+          race: race ? { slug: race.slug, title: race.title } : null,
+          members: creatureEntries
+            .filter((candidate) => candidate.slug !== entry.slug && creatureParentOf(candidate) === entry.slug)
+            .map((member) => ({
+              slug: member.slug,
+              title: member.title,
+              summary: member.summary,
+              category: typeof member.meta?.category === "string" ? (member.meta.category as string) : null,
+            }))
+            .sort((a, b) => a.title.localeCompare(b.title)),
+        };
+      })()
+    : null;
+
   const threadEntries = everyEntry.filter((candidate) => candidate.kind === "THREAD");
   const missionEntries = everyEntry.filter((candidate) => candidate.kind === "COMPANION_MISSION");
   const metaText = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -165,6 +193,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         systemsHere={systemsHere}
         threadChildren={threadChildren}
         companionChain={companionChain}
+        raceFamily={raceFamily}
         existingArcSlugs={arcs.map((arc) => arc.slug)}
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}
         placeAncestry={entry.placeAncestry}
@@ -212,6 +241,12 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   entryId={entry.id}
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
+                  // Only actual races can be picked as a parent, and never
+                  // this entry itself — either would build a rung the
+                  // library does not render.
+                  races={creatureEntries
+                    .filter((option) => option.slug !== entry.slug && !creatureParentOf(option))
+                    .map((option) => ({ slug: option.slug, title: option.title }))}
                   regions={regions.map((option) => ({ slug: option.slug, title: option.title }))}
                   version={entry.version}
                 />

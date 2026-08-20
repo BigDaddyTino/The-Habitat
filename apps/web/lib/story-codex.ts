@@ -360,7 +360,7 @@ export async function getStoryEntry(slug: string) {
     };
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
-    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : "belongs inside this region");
+    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this race" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
