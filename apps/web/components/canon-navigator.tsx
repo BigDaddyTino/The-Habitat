@@ -42,11 +42,9 @@ function ArcLink({ arc, current }: { arc: CanonNavArc; current: string | null })
  * showing them here: a writer sees where work is waiting on the same map they
  * use to navigate.
  */
-export function CanonNavigator({ nav, currentArcSlug = null }: { nav: StoryCanonNavigator; currentArcSlug?: string | null }) {
+function NavigatorTree({ nav, currentArcSlug }: { nav: StoryCanonNavigator; currentArcSlug: string | null }) {
   return (
-    <details className="canon-nav" open>
-      <summary><Compass aria-hidden="true" size={14} /> The story, section by section</summary>
-      <nav aria-label="Canon navigator">
+    <nav aria-label="Canon navigator">
         <section>
           <p className="eyebrow"><CircleDot aria-hidden="true" size={11} /> The campaign<Bubble count={nav.pending.campaign} target="campaign" what="the main story" /></p>
           {nav.campaign.length > 0
@@ -132,8 +130,19 @@ export function CanonNavigator({ nav, currentArcSlug = null }: { nav: StoryCanon
             : <p className="canon-nav-empty">Nothing happens to the world on its own yet. <Link href="/codex/stories#open-a-story">Write the first world event →</Link></p>}
           <p className="canon-nav-timeline"><Link href="/codex/timeline">Deep history — the timeline <ArrowRight aria-hidden="true" size={11} /></Link></p>
         </section>
-      </nav>
-    </details>
+    </nav>
+  );
+}
+
+export function CanonNavigator({ nav, currentArcSlug = null }: { nav: StoryCanonNavigator; currentArcSlug?: string | null }) {
+  return (
+    <>
+      <aside className="canon-nav canon-nav-desktop"><NavigatorTree currentArcSlug={currentArcSlug} nav={nav} /></aside>
+      <details className="canon-nav canon-nav-mobile">
+        <summary><Compass aria-hidden="true" size={14} /> The story, section by section</summary>
+        <NavigatorTree currentArcSlug={currentArcSlug} nav={nav} />
+      </details>
+    </>
   );
 }
 

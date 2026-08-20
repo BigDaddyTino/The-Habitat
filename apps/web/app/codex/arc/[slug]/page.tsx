@@ -51,13 +51,18 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
         <div>
           <Link className="codex-back" href="/codex/stories/canon"><ArrowLeft aria-hidden="true" size={13} /> Story navigator</Link>
           <h1>{board.arc.title}</h1>
-          {board.arc.summary ? <p>{board.arc.summary}</p> : null}
-          {board.arc.region || board.arc.hook ? (
-            <p className="codex-arc-pickup">
-              <MapPin aria-hidden="true" size={12} />
-              {board.arc.region ? <Link href={`/codex/bible/${board.arc.region.slug}`}>{board.arc.region.title}</Link> : "No pickup place yet"}
-              {board.arc.hook ? <span> — {board.arc.hook}</span> : null}
-            </p>
+          {board.arc.summary || board.arc.region || board.arc.hook ? (
+            <details className="codex-board-brief">
+              <summary>Story brief</summary>
+              {board.arc.summary ? <p>{board.arc.summary}</p> : null}
+              {board.arc.region || board.arc.hook ? (
+                <p className="codex-arc-pickup">
+                  <MapPin aria-hidden="true" size={12} />
+                  {board.arc.region ? <Link href={`/codex/bible/${board.arc.region.slug}`}>{board.arc.region.title}</Link> : "No pickup place yet"}
+                  {board.arc.hook ? <span> — {board.arc.hook}</span> : null}
+                </p>
+              ) : null}
+            </details>
           ) : null}
           {unlockedSystems.length > 0 ? (
             <p className="codex-arc-unlocks">

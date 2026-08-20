@@ -43,16 +43,9 @@ export function StoryWarden({ arcId, nodeId, available, guide = false }: { arcId
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: "smooth" });
   }, [turnCount]);
 
-  const ask = (question: string) => { setSeed(question); setOpen(true); };
-
   if (!open) {
     return (
       <div className={guide ? "warden-dock has-guide" : "warden-dock"}>
-        {guide && available ? (
-          <div className="warden-guide-chips">
-            {guidePrompts.map((prompt) => <button key={prompt} onClick={() => ask(prompt)} type="button">{prompt}</button>)}
-          </div>
-        ) : null}
         <button className="warden-summon" onClick={() => setOpen(true)} type="button">
           <Flame aria-hidden="true" size={15} />
           Ask {storyAssistantName}

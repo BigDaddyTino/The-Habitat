@@ -244,6 +244,13 @@ test("the canon inbox reads its packets forgivingly and its destinations exactly
   for (const kind of storyCanonPacketTargetKinds) assert.ok(inbox.includes(`"${kind}"`), `the inbox must count ${kind} packets`);
 });
 
+test("the canon navigator is always present on desktop and starts folded on mobile", () => {
+  const source = readFileSync(join(process.cwd(), "components/canon-navigator.tsx"), "utf8");
+  assert.match(source, /<aside className="canon-nav canon-nav-desktop">/);
+  assert.match(source, /<details className="canon-nav canon-nav-mobile">/);
+  assert.doesNotMatch(source, /<details className="canon-nav canon-nav-mobile" open>/);
+});
+
 const newline = String.fromCharCode(10);
 
 test("the writer-facing copy on the new surfaces stays out of the machine room", () => {

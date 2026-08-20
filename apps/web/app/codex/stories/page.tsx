@@ -56,6 +56,7 @@ export default async function StoryHubPage() {
           that comes through the Veil. Settled story lives in <strong>canon</strong>; ideas still being argued live in
           <strong> threads</strong>, and travel across when the room stops arguing about them.
         </p>
+        <Link className="primary-link story-open-shortcut" href="#open-a-story"><Plus aria-hidden="true" size={14} /> Open a new story</Link>
       </div>
 
       <StoryRoomGuide />
@@ -96,9 +97,28 @@ export default async function StoryHubPage() {
         {canReview && queue && queue.total > 0 ? <Link className="codex-quicklink" href="/codex/review"><Inbox aria-hidden="true" size={18} /><span><strong>Review queue</strong><small>{`${queue.total} older contribution${queue.total === 1 ? "" : "s"} still marked proposed.`}</small></span></Link> : null}
       </div>
 
+      <span aria-hidden="true" className="story-form-anchor" id="open-a-story" />
+      <div className="codex-lower story-start-band">
+        <form action={createArc} className="story-form codex-new-arc">
+          <div className="story-start-heading">
+            <p className="eyebrow"><Plus aria-hidden="true" size={12} /> Open a new story</p>
+            <h2>Start with the spark.</h2>
+            <p>Name it, choose what kind of story it is, and give the party a way in. The new board opens unlocked so the room can build its beats together.</p>
+          </div>
+          <ArcFields
+            canReview={canReview}
+            characters={characters.map((character) => ({ id: character.id, title: character.title }))}
+            regions={regions.map((region) => ({ id: region.id, title: region.title }))}
+            submitLabel="Open the board"
+            threads={threads.map((thread) => ({ id: thread.id, title: thread.title }))}
+          />
+        </form>
+      </div>
+
       {laws.length > 0 ? (
-        <div className="codex-laws">
-          <p className="eyebrow"><Scale aria-hidden="true" size={12} /> Writers&apos; room law — read before you write, binding on every contribution</p>
+        <details className="codex-laws">
+          <summary><Scale aria-hidden="true" size={12} /><span>Writers&apos; room law</span><b>{laws.length} binding rule{laws.length === 1 ? "" : "s"}</b></summary>
+          <p className="codex-laws-intro">Read these before you write. They are the load-bearing rules every story contribution has to honor.</p>
           <ul>
             {laws.map((law) => (
               <li key={law.id}>
@@ -107,21 +127,8 @@ export default async function StoryHubPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       ) : null}
-
-      <div className="codex-lower">
-        <form action={createArc} className="story-form codex-new-arc" id="open-a-story">
-          <p className="eyebrow"><Plus aria-hidden="true" size={12} /> Open a new story</p>
-          <ArcFields
-            canReview={canReview}
-            characters={characters.map((character) => ({ id: character.id, title: character.title }))}
-            regions={regions.map((region) => ({ id: region.id, title: region.title }))}
-            submitLabel="Open it"
-            threads={threads.map((thread) => ({ id: thread.id, title: thread.title }))}
-          />
-        </form>
-      </div>
 
       <StoryWarden arcId={null} available={isStoryAssistantAvailable()} guide nodeId={null} />
     </section>

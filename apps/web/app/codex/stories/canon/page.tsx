@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Check, Compass, GitBranch, Inbox, Undo2, Waves } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Compass, GitBranch, Inbox, Undo2, Waves } from "lucide-react";
 import { storyArcCategories, storyArcCategoryLabels, storyCanonPacketTargetLabels, type StoryArcCategory } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { getCanonInbox, getCanonNavigator, getStoryRipples, listStoryArcs, listStoryEntries, storyReadRole, type StoryCanonPacketRow } from "@/lib/story-codex";
@@ -69,6 +69,11 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
     { category: "WORLD_EVENT", title: "World events", empty: "Nothing happens to the world on its own yet. Write the first one →" },
   ];
   const known = new Set(storyArcCategories);
+  const sectionRows = sections
+    .filter((section) => known.has(section.category))
+    .map((section) => ({ ...section, arcs: arcs.filter((arc) => arc.category === section.category) }));
+  const writtenSections = sectionRows.filter((section) => section.arcs.length > 0);
+  const openSections = sectionRows.filter((section) => section.arcs.length === 0);
 
   return (
     <section className="page-shell codex-shell codex-canon-shell">
@@ -84,32 +89,37 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
         <CanonNavigator nav={nav} />
 
         <div className="canon-workspace-main">
-          {sections.map((section) => {
-            const here = arcs.filter((arc) => arc.category === section.category);
-            if (!known.has(section.category)) return null;
-            return (
-              <div className="codex-section" key={section.category}>
-                <div className="section-heading"><h2>{section.title}</h2></div>
-                {here.length === 0 ? (
-                  <div className="empty-data"><GitBranch aria-hidden="true" size={22} /><div>
-                    <h2>{storyArcCategoryLabels[section.category]}s</h2>
-                    <p><Link href="/codex/stories#open-a-story">{section.empty}</Link></p>
-                  </div></div>
-                ) : (
-                  <div className="codex-arc-grid">
-                    {here.map((arc) => (
-                      <Link className={`codex-arc-card status-${arc.status.toLowerCase()}${arc.locked ? " is-locked" : ""}`} href={`/codex/arc/${arc.slug}`} key={arc.id}>
-                        <p className="eyebrow">{arc.locked ? "Settled" : storyArcCategoryLabels[arc.category]}</p>
-                        <h3>{arc.title}</h3>
-                        {arc.summary ? <p className="codex-arc-summary">{arc.summary}</p> : null}
-                        <footer><span>{arc.nodeCount} scene{arc.nodeCount === 1 ? "" : "s"}</span><span>by {arc.author}</span><span className="codex-arc-open">Read the story →</span></footer>
-                      </Link>
-                    ))}
-                  </div>
-                )}
+          {writtenSections.map((section) => (
+            <div className="codex-section" key={section.category}>
+              <div className="section-heading"><h2>{section.title}</h2></div>
+              <div className="codex-arc-grid">
+                {section.arcs.map((arc) => (
+                  <Link className={`codex-arc-card status-${arc.status.toLowerCase()}${arc.locked ? " is-locked" : ""}`} href={`/codex/arc/${arc.slug}`} key={arc.id}>
+                    <p className="eyebrow">{arc.locked ? "Settled" : storyArcCategoryLabels[arc.category]}</p>
+                    <h3>{arc.title}</h3>
+                    {arc.summary ? <p className="codex-arc-summary">{arc.summary}</p> : null}
+                    <footer><span>{arc.nodeCount} scene{arc.nodeCount === 1 ? "" : "s"}</span><span>by {arc.author}</span><span className="codex-arc-open">Read the story →</span></footer>
+                  </Link>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
+
+          {openSections.length > 0 ? (
+            <div className="codex-section canon-open-roads">
+              <div className="section-heading"><h2>Open roads</h2></div>
+              <p className="canon-inbox-intro">These parts of the story have room for their first board. Pick one and the new-story form will already be waiting.</p>
+              <div className="canon-open-road-grid">
+                {openSections.map((section) => (
+                  <Link href="/codex/stories#open-a-story" key={section.category}>
+                    <GitBranch aria-hidden="true" size={18} />
+                    <span><strong>{section.title}</strong><small>{section.empty.replace(/\s*→$/, "")}</small></span>
+                    <ArrowRight aria-hidden="true" size={13} />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="codex-section canon-inbox" id="canon-inbox">
             <div className="section-heading"><h2><Inbox aria-hidden="true" size={19} /> The canon inbox</h2></div>
