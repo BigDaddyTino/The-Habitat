@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
+import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -192,8 +192,17 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
 
       <div className="sheet-grid">
         <label>Magic origin<select onChange={(event) => setOrigin(event.target.value)} value={origin}><option value="">Not decided</option>{storyMagicOrigins.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-        <label>Corruption phase (0–7)<select onChange={(event) => setCorruptionPhase(event.target.value)} value={corruptionPhase}><option value="">Not decided</option>{Array.from({ length: 8 }, (_, phase) => <option key={phase} value={phase}>{phase}</option>)}</select></label>
+        <label>Corruption phase<select onChange={(event) => setCorruptionPhase(event.target.value)} value={corruptionPhase}>
+          <option value="">Not decided</option>
+          {storyCorruptionPhases.map((row) => <option key={row.phase} value={row.phase}>{row.phase === 0 ? "0 — Clean, never dosed" : `${row.phase} — ${row.name}`}{row.playable ? "" : " (they are gone)"}</option>)}
+        </select></label>
       </div>
+      {/* The chosen phase explains itself in place, so nobody has to leave
+          the sheet to find out what the number they just picked means. */}
+      {storyCorruptionPhase(corruptionPhase === "" ? null : Number(corruptionPhase)) ? <p className="sheet-phase-note">
+        <strong>{storyCorruptionPhaseLabel(Number(corruptionPhase))}.</strong> {storyCorruptionPhase(Number(corruptionPhase))?.tell}{" "}
+        <em>{storyCorruptionPhase(Number(corruptionPhase))?.hiding}</em>
+      </p> : null}
       <label>Magic schools — one per line<textarea onChange={(event) => setSchools(event.target.value)} rows={2} value={schools} /></label>
       <label>Magic notes<textarea maxLength={2000} onChange={(event) => setMagicNotes(event.target.value)} rows={2} value={magicNotes} /></label>
 

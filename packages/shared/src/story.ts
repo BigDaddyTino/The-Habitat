@@ -466,6 +466,164 @@ export type StoryExportEntry = {
 /** Magic origins, mirroring the game's Magic.Origin.* tags. */
 export const storyMagicOrigins = ["none", "born", "infused", "gifted"] as const;
 
+// ---------------------------------------------------------------------------
+// The seven phases of corruption
+// ---------------------------------------------------------------------------
+
+/**
+ * The ladder every infused character descends, one dose at a time.
+ *
+ * This lives in code rather than only in the rule's prose because the phases
+ * are referenced from three places that must never disagree: the character
+ * sheet's picker, the character dossier that reads a phase back, and the
+ * rule and system dossiers that document the ladder. A writer choosing "4"
+ * from a bare 0–7 number picker was choosing blind — which is exactly why no
+ * character in the codex had a phase set at all.
+ *
+ * The first four phases are not invented here. Canon already named the tells
+ * in order — "tremors, veins, appetite, sensitivity to things others cannot
+ * feel" ([[the-corruption-system]]) — so phases one through four are that
+ * sentence made explicit, and five through seven carry it the rest of the way
+ * to the abomination the rule already promises.
+ *
+ * Two laws bind every row, both from [[the-seven-phases-of-corruption]]: a
+ * phase is a floor nobody descends below once reached, and corruption can be
+ * hidden but never erased.
+ */
+export type StoryCorruptionPhase = {
+  /** 0–7, matching the character sheet's stored `magic.corruptionPhase`. */
+  phase: number;
+  name: string;
+  /** The one visible sign — what a scene shows instead of a number. */
+  tell: string;
+  /** What is actually happening to the person at this phase. */
+  detail: string;
+  /** How it gets concealed at this phase, and what the concealment costs. */
+  hiding: string;
+  /**
+   * Whether a person at this phase is still a playable, writable character.
+   * False only at the end: phase seven is not a condition somebody has, it is
+   * somebody who is gone.
+   */
+  playable: boolean;
+};
+
+export const storyCorruptionPhases: readonly StoryCorruptionPhase[] = [
+  {
+    phase: 0,
+    name: "Clean",
+    tell: "Nothing at all.",
+    detail:
+      "No dose has ever landed. The only phase a person can leave and never return to, and the reason a character who refuses infusion in a crisis is making a real choice with a real cost.",
+    hiding: "Nothing to hide — though plenty of people at phase one would like to be believed to be here.",
+    playable: true,
+  },
+  {
+    phase: 1,
+    name: "The Tremor",
+    tell: "The hand shakes — under stress, after a dose, reaching for something small.",
+    detail:
+      "A self that is not theirs is inside them, and nothing has been lost yet that cannot be worked back. This is the floor most infused soldiers never fall below again, and the first payment the player ever witnesses.",
+    hiding:
+      "A pocket, a glove, a joke, something to blame. Tino hides his in a grocery store and the player almost misses it — the canonical way to play this phase is a tell, not a lecture.",
+    playable: true,
+  },
+  {
+    phase: 2,
+    name: "The Veining",
+    tell: "Tracery under the skin, darkest at the injection sites, following the vessels outward.",
+    detail:
+      "The borrowed grain is now visible in tissue. It does not hurt, which is part of why people let it get this far — at phase two the bargain still looks like it is working.",
+    hiding:
+      "Long sleeves, high collars, and a doctor willing to write it up as a circulatory condition. Most infused soldiers live here, and most of their officers know exactly what they are looking at.",
+    playable: true,
+  },
+  {
+    phase: 3,
+    name: "The Appetite",
+    tell: "The body starts asking on its own schedule rather than the user's.",
+    detail:
+      "The first phase where the person's choices change instead of their body. Cravings arrive between doses; a foul mood lifts the moment one lands. People at phase three start making the decisions that carry them to phase four.",
+    hiding:
+      "Trivially hidden from strangers and nearly impossible to hide from anyone who shares a room with them. This is where companions start lying for each other.",
+    playable: true,
+  },
+  {
+    phase: 4,
+    name: "The Sensitivity",
+    tell: "They perceive what nobody around them can — essence residue, another infused across a room, a Veil Anchor going thin.",
+    detail:
+      "The phase that pays. Prospectors, trackers, and Anchor scouts are worth hiring precisely because they are this far down, which is the setting's cruellest employment market. It also does not switch off: crowds become unbearable and sleep stops being reliable.",
+    hiding:
+      "There is nothing on the body to conceal. What gives them away is behaviour — flinching at a quiet room, knowing something they had no way to know.",
+    playable: true,
+  },
+  {
+    phase: 5,
+    name: "The Drift",
+    tell: "A memory that is not theirs. A preference they never had. One sentence in a cadence their friends do not recognise, and a long silence afterwards.",
+    detail:
+      "The borrowed self begins contributing. Souls do not share, and this is the phase where that stops being an abstraction — some of what is looking out is not theirs, and they know it before anyone else does.",
+    hiding:
+      "Where concealment finally fails, and not because the body shows. Masks, forged scans and bribed doctors all still work perfectly. The disguise is intact; the friend is not.",
+    playable: true,
+  },
+  {
+    phase: 6,
+    name: "The Turning",
+    tell: "Mutation no clothing covers — structural, permanent, and obvious to any layperson at ten paces.",
+    detail:
+      "Reportable in most places, and the point at which the Abomination Containment Authority opens a file. Still a person, and that is the part that matters: almost everything genuinely cruel in this setting happens to people at phase six.",
+    hiding: "Over. What is left to decide is where they go and who goes with them.",
+    playable: true,
+  },
+  {
+    phase: 7,
+    name: "The Completion",
+    tell: "None. An abomination stands where they stood.",
+    detail:
+      "Their own soul finally loses the argument. No reversal has ever been recorded, and every abomination in the world used to be someone — which is the whole reason they are written as grief rather than as monsters.",
+    hiding: "Nothing left to hide, and nobody left to hide it.",
+    playable: false,
+  },
+];
+
+/** The phase a stored `magic.corruptionPhase` names, or null when unset. */
+export function storyCorruptionPhase(value: unknown): StoryCorruptionPhase | null {
+  return typeof value === "number" && Number.isInteger(value)
+    ? storyCorruptionPhases.find((row) => row.phase === value) ?? null
+    : null;
+}
+
+/** How a phase reads wherever it is shown: "Phase 3 — The Appetite". */
+export function storyCorruptionPhaseLabel(value: unknown): string | null {
+  const phase = storyCorruptionPhase(value);
+  return phase ? (phase.phase === 0 ? "Phase 0 — Clean" : `Phase ${phase.phase} — ${phase.name}`) : null;
+}
+
+/**
+ * The two dossiers that document the ladder itself, and so render it in full
+ * from the constant above rather than restating it in prose that could drift.
+ */
+export const storyCorruptionLadderSlugs = ["the-seven-phases-of-corruption", "the-corruption-system"] as const;
+
+/**
+ * Where the generated enumeration begins inside a rule's stored body.
+ *
+ * The phases have to exist as prose because the game export ships bodies, not
+ * web pages — but a reader on the dossier gets the rendered ladder, so the
+ * generated block is cut from what the page shows. Both the script that
+ * writes the block and the page that hides it read this one marker, so the
+ * seam can never drift.
+ */
+export const storyCorruptionLadderMarker = "**The ladder, phase by phase.**";
+
+/** The hand-written half of a body, with the generated enumeration removed. */
+export function storyBodyWithoutCorruptionLadder(body: string): string {
+  const at = body.indexOf(storyCorruptionLadderMarker);
+  return at === -1 ? body : body.slice(0, at).trimEnd();
+}
+
 export type StoryCharacterMeta = {
   fullName: string | null;
   aliases: string[];

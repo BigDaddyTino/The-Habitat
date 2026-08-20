@@ -854,3 +854,48 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
   .companion-mission-chain-card ol li { flex-wrap: wrap; }
   .companion-mission-chain-card ol .companion-chain-facts { max-width: none; text-align: left; }
 }
+
+/* --- The seven phases of corruption -------------------------------------- */
+
+/* A per-phase accent that darkens down the ladder: clean green at the top,
+   through brass and rust, to the dead red of the phase nobody comes back from. */
+.phase-0 { --phase-accent: #8fbf8a; }
+.phase-1 { --phase-accent: #b8bb7e; }
+.phase-2 { --phase-accent: #d8a657; }
+.phase-3 { --phase-accent: #c98f4a; }
+.phase-4 { --phase-accent: #bd7440; }
+.phase-5 { --phase-accent: #b05a3c; }
+.phase-6 { --phase-accent: #9d4038; }
+.phase-7 { --phase-accent: #7d2f30; }
+
+.corruption-standing { margin: 20px 0; border: 1px solid var(--line); border-left: 3px solid var(--phase-accent, var(--brass)); background: linear-gradient(100deg, color-mix(in srgb, var(--phase-accent, var(--brass)) 9%, transparent), rgba(21,26,23,.75) 60%); padding: 15px 18px; }
+.corruption-standing .eyebrow svg { color: var(--phase-accent, var(--brass)); }
+.corruption-standing .eyebrow a { color: inherit; text-decoration: underline; text-decoration-color: rgba(198,151,76,.45); text-underline-offset: 2px; }
+.corruption-standing .eyebrow a:hover { color: var(--paper); }
+.corruption-standing h3 { margin: 7px 0 0; color: var(--phase-accent, var(--paper)); font-family: var(--font-display); font-size: 24px; line-height: 1.05; }
+.corruption-standing p:not(.eyebrow):not(.story-inspector-hint) { margin: 7px 0 0; color: var(--muted); font-size: 12.5px; line-height: 1.65; }
+.corruption-standing .story-inspector-hint { margin-top: 11px; }
+.corruption-standing.is-gone { border-left-style: double; border-left-width: 5px; }
+
+.corruption-tell { color: #ded5be !important; font-style: italic; }
+.corruption-hiding strong, .corruption-hiding em { color: #cbbd97; font-style: normal; }
+
+.corruption-ladder { margin: 22px 0; border: 1px solid var(--line); background: rgba(21,26,23,.7); padding: 17px 19px; }
+.corruption-ladder-intro { margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+.corruption-ladder ol { display: grid; gap: 0; margin: 14px 0 0; padding: 0; list-style: none; }
+.corruption-ladder li { display: flex; gap: 14px; border-left: 2px solid var(--phase-accent); padding: 12px 0 12px 14px; }
+.corruption-ladder li + li { border-top: 1px solid rgba(255,255,255,.05); }
+.corruption-ladder li.is-gone { background: linear-gradient(90deg, color-mix(in srgb, var(--phase-accent) 12%, transparent), transparent 70%); }
+.corruption-ladder-number { display: grid; width: 26px; height: 26px; flex: none; place-items: center; align-self: flex-start; border: 1px solid var(--phase-accent); border-radius: 50%; color: var(--phase-accent); font-family: var(--font-mono); font-size: 11px; }
+.corruption-ladder li > div { display: grid; gap: 4px; min-width: 0; }
+.corruption-ladder li strong { color: var(--phase-accent); font-family: var(--font-display); font-size: 19px; line-height: 1; }
+.corruption-ladder li p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+/* The sheet's inline explainer for whichever phase is currently picked. */
+.sheet-phase-note { margin: -4px 0 4px; border-left: 2px solid var(--brass); background: rgba(29,26,19,.55); padding: 8px 12px; color: var(--muted); font-size: 11.5px; line-height: 1.6; }
+.sheet-phase-note strong { color: #e8cf9a; }
+.sheet-phase-note em { color: #b9b29b; }
+
+@media (max-width: 700px) {
+  .corruption-ladder li { gap: 10px; padding-left: 10px; }
+}

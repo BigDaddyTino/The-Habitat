@@ -1,9 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { Activity, ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import {
   isUnconfirmedThreadStatus,
   storyCompanionMissionStatusLabels,
+  storyBodyWithoutCorruptionLadder,
+  storyCorruptionLadderSlugs,
+  storyCorruptionPhase,
+  storyCorruptionPhaseLabel,
+  storyCorruptionPhases,
   storyEntryKindLabels,
   storyStoryStageLabels,
   storyThreadCategoryLabels,
@@ -89,6 +94,13 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   // the party, with the recruitment window and their standing now beside it.
   const companion = record(meta.companion);
   const isCompanionCapable = entry.kind === "CHARACTER" && companion.capable === true;
+  // Where this character stands on the seven-phase ladder, read back with the
+  // tell a scene would actually show. Null when nobody has decided — which is
+  // an answer too, and the sheet is where it gets given.
+  const corruption = isCharacter ? storyCorruptionPhase(magic.corruptionPhase) : null;
+  // The two dossiers that document the ladder render it in full, from the
+  // same constant the character sheet's picker offers.
+  const showsLadder = (storyCorruptionLadderSlugs as readonly string[]).includes(entry.slug);
   const systemArt = isSystem ? getSystemArt(entry.slug) : null;
   const eventArt = entry.kind === "EVENT" ? getEventArt(entry.slug) : null;
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
@@ -215,7 +227,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
       </header>
 
       {(isCharacter || isFaction || isRegion || isThread || isMission || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
-        {isCharacter ? <><Fact label="Full name" value={meta.fullName} /><Fact label="Species" value={meta.species} /><Fact label="Pronouns" value={meta.pronouns} /><Fact label="Magic" value={magic.origin} /><Fact label="Known status" value={status.known} /></> : null}
+        {isCharacter ? <><Fact label="Full name" value={meta.fullName} /><Fact label="Species" value={meta.species} /><Fact label="Pronouns" value={meta.pronouns} /><Fact label="Magic" value={magic.origin} />{corruption ? <Fact label="Corruption" value={storyCorruptionPhaseLabel(magic.corruptionPhase)} /> : null}<Fact label="Known status" value={status.known} /></> : null}
         {isFaction ? <><Fact label="Power" value={meta.scope} /><Fact label="Seat" value={meta.seat} /><Fact label="Game tag" value={meta.gameTag} /><Fact label="Leaders" value={words(meta.leaders).length ? `${words(meta.leaders).length} named` : null} /></> : null}
         {isRegion ? <><Fact label="Place type" value={meta.type} /><Fact label="Biome" value={meta.biome} /><Fact label="Population" value={meta.population} /><Fact label="World state" value={meta.status} />{label(meta.veilAnchorTier) ? <Fact label="Veil Anchor" value={`Tier ${String(meta.veilAnchorTier)}`} /> : null}{label(meta.soulForge) ? <Fact label="Soul Forge" value={String(meta.soulForge)} /> : null}<Fact label="Game tag" value={meta.gameTag} /></> : null}
         {entry.kind === "CREATURE" ? <><Fact label="Category" value={meta.category} /><Fact label="Habitats" value={words(meta.biomes).length ? words(meta.biomes).join(", ") : null} /><Fact label="Threat" value={meta.threat} /></> : null}
@@ -240,8 +252,39 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
       <div className="entity-profile-layout">
         <article className="entity-profile-narrative">
           <p className="eyebrow"><BookOpen aria-hidden="true" size={12} /> Writer briefing</p>
-          {entry.body ? <StoryProse body={entry.body} resolve={resolveProse} /> : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
+          {/* On the dossiers that render the ladder, the generated prose
+              enumeration is cut: it exists so the game export carries the
+              phases, and showing it here would print all seven twice. */}
+          {entry.body ? <StoryProse body={showsLadder ? storyBodyWithoutCorruptionLadder(entry.body) : entry.body} resolve={resolveProse} /> : <p className="story-inspector-hint">No briefing has been written yet. Open the editing workspace below and give the next writer a foundation.</p>}
           {isCharacter && label(meta.storyRole) ? <blockquote><Sparkles aria-hidden="true" size={16} /><div><strong>Why this character exists</strong><p>{String(meta.storyRole)}</p></div></blockquote> : null}
+          {/* A phase is only useful to a writer as the thing a scene shows,
+              so the dossier reads it back as its tell rather than a number. */}
+          {corruption ? <div className={`corruption-standing phase-${corruption.phase}${corruption.playable ? "" : " is-gone"}`}>
+            <p className="eyebrow"><Activity aria-hidden="true" size={12} /> Where they stand on <Link href="/codex/bible/the-seven-phases-of-corruption">the seven phases</Link></p>
+            <h3>{storyCorruptionPhaseLabel(magic.corruptionPhase)}</h3>
+            <p className="corruption-tell">{corruption.tell}</p>
+            <p>{corruption.detail}</p>
+            <p className="corruption-hiding"><strong>Hiding it:</strong> {corruption.hiding}</p>
+            <p className="story-inspector-hint">A phase is a floor — write them at this level or deeper, never shallower, and never write a cure.</p>
+          </div> : null}
+          {showsLadder ? <div className="corruption-ladder">
+            <p className="eyebrow"><Activity aria-hidden="true" size={12} /> The ladder, phase by phase</p>
+            <p className="corruption-ladder-intro">
+              Each phase is a floor nobody climbs back above once they reach it, and every one of them can be hidden without being erased.
+              Set a character&apos;s phase on their sheet and their dossier reads it back with the tell a scene should show.
+            </p>
+            <ol>
+              {storyCorruptionPhases.map((row) => <li className={`phase-${row.phase}${row.playable ? "" : " is-gone"}`} key={row.phase}>
+                <span className="corruption-ladder-number">{row.phase}</span>
+                <div>
+                  <strong>{row.name}</strong>
+                  <p className="corruption-tell">{row.tell}</p>
+                  <p>{row.detail}</p>
+                  <p className="corruption-hiding"><em>Hiding it:</em> {row.hiding}</p>
+                </div>
+              </li>)}
+            </ol>
+          </div> : null}
           {isMission ? <div className="mission-detail-grid">
             {label(meta.unlockConditions) ? <div className="mission-detail"><p className="eyebrow">Unlocks when</p><p>{String(meta.unlockConditions)}</p></div> : null}
             {words(meta.rewards).length ? <div className="mission-detail"><p className="eyebrow">Rewards</p><ul>{words(meta.rewards).map((reward) => <li key={reward}>{reward}</li>)}</ul></div> : null}
