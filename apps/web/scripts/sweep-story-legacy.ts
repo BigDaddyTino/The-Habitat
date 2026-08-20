@@ -38,7 +38,7 @@ async function main() {
   const [arcs, entries, proposedNodes, proposedEdges] = await Promise.all([
     db.storyArc.findMany({
       where: { status: { in: [...workingStatuses] } },
-      select: { id: true, slug: true, title: true, status: true, category: true, isMainline: true, regionEntryId: true, companionEntryId: true },
+      select: { id: true, slug: true, title: true, status: true, category: true, isMainline: true, regionEntryId: true, companionEntryId: true, factionEntryId: true },
       orderBy: { title: "asc" },
     }),
     db.storyEntry.findMany({
@@ -67,6 +67,7 @@ async function main() {
   const unfiled = arcs.filter((arc) => (arc.category === "SIDE_QUEST" || arc.category === "CONTRACT") && !arc.regionEntryId);
   const contractsWithoutPlace = unfiled.filter((arc) => arc.category === "CONTRACT");
   const companionQuestsWithoutCompanion = arcs.filter((arc) => arc.category === "COMPANION_QUEST" && !arc.companionEntryId);
+  const factionQuestsWithoutFaction = arcs.filter((arc) => arc.category === "FACTION_QUEST" && !arc.factionEntryId);
 
   // --- the pair the database already guards ----------------------------------
   const drifted = arcs.filter((arc) => arc.isMainline !== (arc.category === "MAINLINE"));
@@ -84,6 +85,9 @@ async function main() {
       check(`${at} .parent`, slugOf(meta.parent), knownEntries, "place");
       for (const row of Array.isArray(meta.connections) ? meta.connections : []) check(`${at} .connections[].to`, slugOf(asRecord(row)?.to), knownEntries, "place");
     }
+    if (entry.kind === "FACTION") {
+      check(`${at} .parent`, slugOf(meta.parent), knownEntries, "faction");
+    }
     if (entry.kind === "COMPANION_MISSION") {
       check(`${at} .companion`, slugOf(meta.companion), knownEntries, "character");
       check(`${at} .arc`, slugOf(meta.arc), knownArcs, "story board");
@@ -98,6 +102,7 @@ async function main() {
         if (!packet) continue;
         check(`${at} .canonPackets[${index}].targetRegion`, slugOf(packet.targetRegion), knownEntries, "place");
         check(`${at} .canonPackets[${index}].targetCompanion`, slugOf(packet.targetCompanion), knownEntries, "character");
+        check(`${at} .canonPackets[${index}].targetFaction`, slugOf(packet.targetFaction), knownEntries, "faction");
         for (const value of Array.isArray(packet.entries) ? packet.entries : []) check(`${at} .canonPackets[${index}].entries`, slugOf(value), knownEntries, "entry");
         for (const value of Array.isArray(packet.wovenInto) ? packet.wovenInto : []) check(`${at} .canonPackets[${index}].wovenInto`, slugOf(value), knownArcs, "story board");
       }
@@ -170,6 +175,12 @@ async function main() {
   );
 
   report(
+    "FACTION QUESTS FLYING NO BANNER",
+    factionQuestsWithoutFaction.map((arc) => `${arc.slug} — /codex/arc/${arc.slug}`),
+    "the navigator files these under \"Flying no banner yet\" until somebody says whose operation it is.",
+  );
+
+  report(
     "ORPHAN MISSIONS — a companion mission belonging to nobody",
     orphanMissions.map((entry) => `${entry.slug} — /codex/bible/${entry.slug}`),
     "the missions library already shows these under \"Not filed\"; pick a companion on the mission's sheet.",
@@ -207,7 +218,7 @@ async function main() {
   }
 
   const urgent = unreadablePackets.length + drifted.length;
-  console.log(`\n${urgent === 0 ? "CLEAN" : "ATTENTION"} — ${urgent} problem(s) worth acting on today; ${stillProposed + unfiled.length + orphanMissions.length + dangling.length + looped.length} item(s) listed for a human to decide about.`);
+  console.log(`\n${urgent === 0 ? "CLEAN" : "ATTENTION"} — ${urgent} problem(s) worth acting on today; ${stillProposed + unfiled.length + companionQuestsWithoutCompanion.length + factionQuestsWithoutFaction.length + orphanMissions.length + dangling.length + looped.length} item(s) listed for a human to decide about.`);
   if (!apply && drifted.length > 0) console.log("Nothing was written. Re-run with --apply to repair the column drift.");
   if (unreadablePackets.length > 0) process.exitCode = 1;
 }

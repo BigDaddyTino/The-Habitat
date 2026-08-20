@@ -402,6 +402,7 @@ enum StoryArcCategory {
   SIDE_QUEST
   CONTRACT
   COMPANION_QUEST
+  FACTION_QUEST
   INCURSION
   WORLD_EVENT
 }
@@ -2029,6 +2030,10 @@ model StoryArc {
   /// bible entry, so the companion always resolves to a real dossier. Mirrors
   /// `regionEntryId` exactly.
   companionEntryId String?    @db.Uuid
+  /// Whose banner this quest flies when the category is FACTION_QUEST — a
+  /// FACTION bible entry, so the faction always resolves to a real dossier.
+  /// Mirrors `companionEntryId` exactly.
+  factionEntryId  String?     @db.Uuid
   status          StoryStatus @default(PROPOSED)
   position        Int         @default(0)
   /// The writers' room is open by default: nothing is frozen until somebody
@@ -2049,6 +2054,7 @@ model StoryArc {
   lockedBy        User?       @relation("StoryArcLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
   region          StoryEntry? @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
   companion       StoryEntry? @relation("StoryArcCompanion", fields: [companionEntryId], references: [id], onDelete: SetNull)
+  faction         StoryEntry? @relation("StoryArcFaction", fields: [factionEntryId], references: [id], onDelete: SetNull)
   nodes           StoryNode[]
   edges           StoryEdge[]
   continuedFrom   StoryNode[] @relation("StoryContinuation")
@@ -2198,6 +2204,7 @@ model StoryEntry {
   speakerOf       StoryNode[]      @relation("StoryNodeSpeaker")
   regionOf        StoryArc[]       @relation("StoryArcRegion")
   companionOf     StoryArc[]       @relation("StoryArcCompanion")
+  factionOf       StoryArc[]       @relation("StoryArcFaction")
 
   @@index([kind, status, title])
   @@index([status, updatedAt])

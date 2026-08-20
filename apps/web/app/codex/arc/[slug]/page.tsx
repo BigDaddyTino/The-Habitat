@@ -22,10 +22,11 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const [{ slug }, { node: initialNodeId }] = await Promise.all([params, searchParams]);
   const board = await getStoryBoard(slug);
   if (!board) notFound();
-  const [arcRefs, regions, characters, allSystems, nav, web] = await Promise.all([
+  const [arcRefs, regions, characters, factions, allSystems, nav, web] = await Promise.all([
     listStoryArcRefs(),
     listStoryEntries({ kind: "REGION" }),
     listStoryEntries({ kind: "CHARACTER" }),
+    listStoryEntries({ kind: "FACTION" }),
     listStoryEntries({ kind: "SYSTEM" }),
     getCanonNavigator(),
     getStoryRipples(),
@@ -111,8 +112,10 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
                 hook: board.arc.hook ?? "",
                 regionEntryId: board.arc.region?.id ?? "",
                 companionEntryId: board.arc.companion?.id ?? "",
+                factionEntryId: board.arc.faction?.id ?? "",
                 category: board.arc.category,
               }}
+              factions={factions.map((faction) => ({ id: faction.id, title: faction.title }))}
               regions={regions.map((region) => ({ id: region.id, title: region.title }))}
               submitLabel="Save it"
             />

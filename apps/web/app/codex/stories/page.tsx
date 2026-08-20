@@ -25,13 +25,14 @@ export const metadata = { title: "Stories & quests | Story Codex" };
 export default async function StoryHubPage() {
   await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
-  const [arcs, inbox, threads, rules, regions, characters, queue] = await Promise.all([
+  const [arcs, inbox, threads, rules, regions, characters, factions, queue] = await Promise.all([
     listStoryArcs(),
     getCanonInbox(),
     listStoryEntries({ kind: "THREAD" }),
     listStoryEntries({ kind: "RULE" }),
     listStoryEntries({ kind: "REGION" }),
     listStoryEntries({ kind: "CHARACTER" }),
+    listStoryEntries({ kind: "FACTION" }),
     canReview ? getStoryReviewQueue() : Promise.resolve(null),
   ]);
 
@@ -108,6 +109,7 @@ export default async function StoryHubPage() {
           <ArcFields
             canReview={canReview}
             characters={characters.map((character) => ({ id: character.id, title: character.title }))}
+            factions={factions.map((faction) => ({ id: faction.id, title: faction.title }))}
             regions={regions.map((region) => ({ id: region.id, title: region.title }))}
             submitLabel="Open the board"
             threads={threads.map((thread) => ({ id: thread.id, title: thread.title }))}

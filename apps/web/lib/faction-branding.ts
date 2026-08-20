@@ -33,6 +33,7 @@ const factionAccents = {
   "stormglass-cartel": "#438ee8",
   "the-ashen-court": "#b8323f",
   "the-choir-below": "#4bb4be",
+  "the-free-peoples-compact": "#7c9a52",
   "the-old-hunger": "#9f2737",
   "the-pale-embassy": "#d9c7a1",
   "the-riftbound-legion": "#c72f3e",

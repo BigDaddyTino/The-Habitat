@@ -28,6 +28,7 @@ const packet = (over: Record<string, unknown> = {}): Record<string, unknown> => 
   targetKind: "campaign",
   targetRegion: null,
   targetCompanion: null,
+  targetFaction: null,
   entries: ["amanda"],
   status: "pending",
   pushedAt: new Date("2026-08-20T12:00:00.000Z").toISOString(),
@@ -305,14 +306,31 @@ test("the writer-facing copy on the new surfaces stays out of the machine room",
   }
 });
 
-test("a companion quest counts as a tie to the world, not an orphan", () => {
-  // An arc reaches into the bible two ways — the place it is picked up and the
-  // companion whose story it is — and the reachability scan only knew about
-  // the first. A character whose sole connection was that somebody opened
-  // their companion quest was reported as unconnected, which sends a writer
-  // chasing a problem that is not there.
+test("a quest filed to somebody counts as a tie to the world, not an orphan", () => {
+  // An arc reaches into the bible three ways — the place it is picked up, the
+  // companion whose story it is, and the power whose banner it flies — and the
+  // reachability scan first knew only about the place. Anyone whose sole
+  // connection was that somebody opened their quest read as unconnected, which
+  // sends a writer chasing a problem that is not there.
   const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
-  assert.match(codex, /select: \{ slug: true, regionEntryId: true, companionEntryId: true \}/, "the reachability pass must read both of an arc's entry links");
-  assert.match(codex, /\[arc\.regionEntryId, arc\.companionEntryId\]/, "and count both as inbound");
+  assert.match(codex, /select: \{ slug: true, regionEntryId: true, companionEntryId: true, factionEntryId: true \}/, "the reachability pass must read every one of an arc's entry links");
+  assert.match(codex, /\[arc\.regionEntryId, arc\.companionEntryId, arc\.factionEntryId\]/, "and count all three as inbound");
   assert.doesNotMatch(codex, /arcRegionIds/, "the region-only set is what caused the gap");
+});
+
+test("a packet can be aimed at one banner, or at the factions in general", () => {
+  // Same law as the companions bucket: a named faction lights that power's
+  // bubble, no name lights the section. Aiming it at a wing is legitimate —
+  // the navigator rolls the bubble up to the banner above it.
+  assert.equal(canonPacketSchema.safeParse(packet({ targetKind: "factions" })).success, true);
+  assert.equal(canonPacketSchema.safeParse(packet({ targetKind: "factions", targetFaction: "stormglass-cartel" })).success, true);
+  // And the symmetric refusal: a faction attached to anything else is a stale
+  // value from a picker somebody switched.
+  assert.equal(canonPacketSchema.safeParse(packet({ targetKind: "campaign", targetFaction: "stormglass-cartel" })).success, false);
+  assert.equal(canonPacketSchema.safeParse(packet({ targetKind: "region", targetRegion: "the-peninsula", targetFaction: "stormglass-cartel" })).success, false);
+  // Omitting the key is refused whole, never defaulted — the stored packets
+  // were backfilled by the migration for exactly this reason.
+  const withoutFaction: Record<string, unknown> = { ...packet({}) };
+  delete withoutFaction.targetFaction;
+  assert.equal(canonPacketSchema.safeParse(withoutFaction).success, false, "omitting targetFaction must be refused");
 });

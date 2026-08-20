@@ -5,7 +5,7 @@ import test from "node:test";
 import { brandedFactionCount, brandedFactionSlugs, getFactionBranding } from "./faction-branding";
 
 test("every branded faction has its paired optimized key art and transparent logo", () => {
-  assert.equal(brandedFactionCount, 34);
+  assert.equal(brandedFactionCount, 35);
 
   for (const slug of brandedFactionSlugs) {
     const brand = getFactionBranding(slug);

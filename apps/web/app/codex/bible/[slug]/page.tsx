@@ -127,6 +127,43 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
       })
     : [];
 
+  // The faction tree, read the same way the races tree is: a major is a
+  // faction with nothing above it, and its wings are derived from their own
+  // sheets rather than stored twice.
+  const factionEntries = entry.kind === "FACTION" ? everyEntry.filter((candidate) => candidate.kind === "FACTION") : [];
+  const answersToOf = (candidate: { meta: Record<string, unknown> | null }) => {
+    const value = candidate.meta?.parent;
+    return typeof value === "string" && value.trim() ? value.trim() : null;
+  };
+  const powerOf = (candidate: { meta: Record<string, unknown> | null }) => (typeof candidate.meta?.power === "number" ? (candidate.meta.power as number) : null);
+  const factionFamily = entry.kind === "FACTION"
+    ? (() => {
+        const bannerSlug = answersToOf(entry);
+        const banner = bannerSlug ? factionEntries.find((candidate) => candidate.slug === bannerSlug) ?? null : null;
+        const wings = factionEntries
+          .filter((candidate) => candidate.slug !== entry.slug && answersToOf(candidate) === entry.slug)
+          .map((wing) => ({
+            slug: wing.slug,
+            title: wing.title,
+            summary: wing.summary,
+            scope: typeof wing.meta?.scope === "string" ? (wing.meta.scope as string) : null,
+            power: powerOf(wing),
+          }))
+          .sort((a, b) => a.title.localeCompare(b.title));
+        const own = powerOf(entry);
+        const fromWings = wings.some((wing) => wing.power !== null)
+          ? wings.reduce((total, wing) => total + (wing.power ?? 0), 0)
+          : null;
+        return {
+          // Null when this entry is itself a major, or when its banner names
+          // a faction nobody has written — the breadcrumb stays quiet either way.
+          banner: banner ? { slug: banner.slug, title: banner.title } : null,
+          wings,
+          power: { own, fromWings },
+        };
+      })()
+    : null;
+
   const threadEntries = everyEntry.filter((candidate) => candidate.kind === "THREAD");
   const missionEntries = everyEntry.filter((candidate) => candidate.kind === "COMPANION_MISSION");
   const metaText = (value: unknown) => (typeof value === "string" && value.trim() ? value.trim() : null);
@@ -197,6 +234,8 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         addChildKind={defaultChildPlaceKind(entry.meta?.type)}
         arcsHere={entry.arcsHere}
         companionArcs={entry.companionArcs}
+        factionArcs={entry.factionArcs}
+        factionFamily={factionFamily}
         containedPlaces={containedPlaces}
         entry={entry}
         arcTitles={Object.fromEntries(allArcs.map((option) => [option.slug, option.title]))}
@@ -242,6 +281,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                 <FactionSheet
                   characters={characters.map((option) => ({ slug: option.slug, title: option.title }))}
                   entryId={entry.id}
+                  entrySlug={entry.slug}
                   factions={factions.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}
@@ -339,6 +379,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
           {entry.kind === "THREAD" ? (
             <CanonPacketPanel
               companions={characters.map((option) => ({ slug: option.slug, title: option.title }))}
+              factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
               entries={everyEntry.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
               entryId={entry.id}
               key={`packets-${entry.version}`}

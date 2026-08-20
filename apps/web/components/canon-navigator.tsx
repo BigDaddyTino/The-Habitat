@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CircleDot, Compass, Flame, History, Lock, MapPin, UsersRound } from "lucide-react";
+import { ArrowRight, CircleDot, Compass, Flame, History, Lock, MapPin, Shield, UsersRound } from "lucide-react";
 import { storyArcCategoryLabels } from "@habitat/shared";
 import type { CanonNavArc, StoryCanonNavigator } from "@/lib/story-codex";
 
@@ -117,6 +117,27 @@ function NavigatorTree({ nav, currentArcSlug, campaignOverview }: { nav: StoryCa
               {companion.looseArcs.length > 0 ? <ul>{companion.looseArcs.map((arc) => <li key={arc.slug}><ArcLink arc={arc} current={currentArcSlug} /></li>)}</ul> : null}
             </div>
           )) : <p className="canon-nav-empty">No companion has a quest yet. <Link href="/codex/stories#open-a-story">Give one their own story →</Link></p>}
+        </section>
+
+        <section>
+          <p className="eyebrow"><Shield aria-hidden="true" size={11} /> The factions</p>
+          {nav.factions.length > 0 ? nav.factions.map((faction) => (
+            <div className="canon-nav-companion" key={faction.slug || "unbannered"}>
+              <p className="canon-nav-place">
+                {faction.slug
+                  ? <Link href={`/codex/bible/${faction.slug}`}>{faction.title}</Link>
+                  : <span>{faction.title}</span>}
+                <Bubble count={faction.pendingPackets} target={faction.slug ? `faction:${faction.slug}` : "factions"} what={faction.title} />
+              </p>
+              {faction.ownArcs.length > 0 ? <ul>{faction.ownArcs.map((arc) => <li key={arc.slug}><ArcLink arc={arc} current={currentArcSlug} /></li>)}</ul> : null}
+              {faction.wings.map((wing) => (
+                <div key={wing.slug}>
+                  <p className="canon-nav-eyebrow">{wing.title}</p>
+                  <ul>{wing.arcs.map((arc) => <li key={arc.slug}><ArcLink arc={arc} current={currentArcSlug} /></li>)}</ul>
+                </div>
+              ))}
+            </div>
+          )) : <p className="canon-nav-empty">No power runs its own operation yet. <Link href="/codex/stories#open-a-story">Fly the first banner →</Link></p>}
         </section>
 
         <section>

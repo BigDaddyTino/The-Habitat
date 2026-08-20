@@ -94,6 +94,13 @@ export const regionMetaSchema = z.object({
 
 export const factionMetaSchema = z.object({
   scope: metaText(80),
+  // The faction this one answers to; null means this IS a major power. Same
+  // tree law as the regions atlas, the systems shelf, and the races library.
+  parent: metaSlug.nullable(),
+  // A placeholder a writer sets by hand. Strength is meant to be counted from
+  // what a faction physically holds — territory, cities, wealth, population,
+  // armies — and that reckoning is not built yet. Nothing computes from it.
+  power: z.number().int().min(0).max(1_000_000).nullable(),
   seat: metaText(64),
   leaders: metaLines(20, 64),
   relations: z.array(z.object({
@@ -170,7 +177,8 @@ export const eventMetaSchema = z.object({
  * checked here rather than left to the form, because a region packet with no
  * region has nowhere to land and would sit invisible in the inbox forever.
  * `targetCompanion` stays optional on a companions packet: null is the
- * general bucket, a slug lights that one companion's bubble.
+ * general bucket, a slug lights that one companion's bubble. A packet aimed at
+ * the factions works the same way.
  */
 export const canonPacketSchema = z
   .object({
@@ -180,6 +188,7 @@ export const canonPacketSchema = z
     targetKind: z.enum(storyCanonPacketTargetKinds),
     targetRegion: metaSlug.nullable(),
     targetCompanion: metaSlug.nullable(),
+    targetFaction: metaSlug.nullable(),
     entries: z.array(metaSlug).max(30),
     status: z.enum(["pending", "woven"]),
     pushedAt: z.string().trim().min(1).max(40),
@@ -197,6 +206,9 @@ export const canonPacketSchema = z
     }
     if (packet.targetKind !== "companions" && packet.targetCompanion) {
       ctx.addIssue({ code: "custom", path: ["targetCompanion"], message: "Only a packet aimed at a companion carries a companion." });
+    }
+    if (packet.targetKind !== "factions" && packet.targetFaction) {
+      ctx.addIssue({ code: "custom", path: ["targetFaction"], message: "Only a packet aimed at a faction carries a faction." });
     }
   });
 

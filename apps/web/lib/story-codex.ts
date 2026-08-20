@@ -101,6 +101,7 @@ export type StoryBoard = {
     hook: string | null;
     region: { id: string; slug: string; title: string } | null;
     companion: { id: string; slug: string; title: string } | null;
+    faction: { id: string; slug: string; title: string } | null;
     isMainline: boolean;
     category: StoryArcCategory;
     status: StoryStatus;
@@ -155,6 +156,7 @@ export async function listStoryArcs() {
     category: arc.category,
     regionEntryId: arc.regionEntryId,
     companionEntryId: arc.companionEntryId,
+    factionEntryId: arc.factionEntryId,
     locked: arc.lockedAt !== null,
     status: arc.status,
     author: storyMemberName(arc.creator),
@@ -172,6 +174,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       lockedBy: { select: writerSelect },
       region: { select: { id: true, slug: true, title: true } },
       companion: { select: { id: true, slug: true, title: true } },
+      faction: { select: { id: true, slug: true, title: true } },
     },
   });
   if (!arc) return null;
@@ -250,6 +253,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       hook: arc.hook,
       region: arc.region,
       companion: arc.companion,
+      faction: arc.faction,
       isMainline: arc.isMainline,
       category: arc.category,
       status: arc.status,
@@ -377,7 +381,7 @@ export async function getStoryEntry(slug: string) {
     };
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
-    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this race" : "belongs inside this region");
+    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this race" : candidate.kind === "FACTION" ? "answers to this power" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
     // A character's race. `species` is slug-or-prose like `home` and `origin`:
     // Amanda's reads "Lizzarnix — half lizard, half phoenix; publicly passes
@@ -430,7 +434,7 @@ export async function getStoryEntry(slug: string) {
       for (const row of rows(meta.canonPackets)) {
         if (row.status === "woven") continue;
         if (Array.isArray(row.entries) && row.entries.some(referencesSlug)) add("is named in canon material waiting to be woven in");
-        if (referencesSlug(row.targetRegion) || referencesSlug(row.targetCompanion)) add("has canon material waiting to be woven in here");
+        if (referencesSlug(row.targetRegion) || referencesSlug(row.targetCompanion) || referencesSlug(row.targetFaction)) add("has canon material waiting to be woven in here");
       }
     }
   }
@@ -443,6 +447,10 @@ export async function getStoryEntry(slug: string) {
   let arcsHere: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }> = [];
   /** The companion mirror of `arcsHere`: the quests filed to this character. */
   let companionArcs: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }> = [];
+  /** The same for a faction, plus the quests its wings fly — `via` names the
+   *  wing a rolled-up quest came through, so a major's page never claims
+   *  work that belongs to somebody beneath it. */
+  let factionArcs: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean; via: { slug: string; title: string } | null }> = [];
 
   if (entry.kind === "REGION") {
     const places = possibleConnections.filter((candidate) => candidate.kind === "REGION");
@@ -495,9 +503,38 @@ export async function getStoryEntry(slug: string) {
     companionArcs = theirs.map((arc) => ({ slug: arc.slug, title: arc.title, category: arc.category, hook: arc.hook, summary: arc.summary, locked: arc.lockedAt !== null }));
   }
 
+  // A faction's own quests and the ones its wings fly. The rollup is what
+  // makes a major worth opening: the room tracks the majors, so a major's
+  // page has to show what is happening beneath it — labelled, never
+  // absorbed.
+  if (entry.kind === "FACTION") {
+    const wings = possibleConnections.filter((candidate) => {
+      if (candidate.kind !== "FACTION") return false;
+      const parent = (candidate.meta as Record<string, unknown> | null)?.parent;
+      return typeof parent === "string" && parent.trim() === entry.slug;
+    });
+    const bannerIds = new Map<string, { slug: string; title: string } | null>([[entry.id, null]]);
+    for (const wing of wings) bannerIds.set(wing.id, { slug: wing.slug, title: wing.title });
+    const flown = await db.storyArc.findMany({
+      where: { status: { in: workingStatuses }, factionEntryId: { in: [...bannerIds.keys()] } },
+      select: { slug: true, title: true, category: true, hook: true, summary: true, lockedAt: true, position: true, factionEntryId: true },
+      orderBy: [{ position: "asc" }, { title: "asc" }],
+    });
+    factionArcs = flown.map((arc) => ({
+      slug: arc.slug,
+      title: arc.title,
+      category: arc.category,
+      hook: arc.hook,
+      summary: arc.summary,
+      locked: arc.lockedAt !== null,
+      via: (arc.factionEntryId && bannerIds.get(arc.factionEntryId)) || null,
+    }));
+  }
+
   return {
     placeAncestry,
     arcsHere,
+    factionArcs,
     companionArcs,
     id: entry.id,
     kind: entry.kind,
@@ -535,15 +572,15 @@ export type StoryCanonPacketRow = StoryCanonPacket & {
 };
 
 /**
- * How many packets are still waiting, per place in the navigator. The regions
- * and companions maps are keyed by slug; the companions map's `""` key is the
- * general bucket — material for the companions section that names nobody in
- * particular.
+ * How many packets are still waiting, per place in the navigator. The regions,
+ * companions, and factions maps are keyed by slug; a `""` key is the general
+ * bucket — material for that section which names nobody in particular.
  */
 export type StoryCanonPending = {
   campaign: number;
   regions: Record<string, number>;
   companions: Record<string, number>;
+  factions: Record<string, number>;
   incursions: number;
   events: number;
   total: number;
@@ -594,7 +631,7 @@ export async function getCanonInbox(): Promise<{ packets: StoryCanonPacketRow[];
   // Newest push first: the inbox reads like an inbox.
   packets.sort((left, right) => right.pushedAt.localeCompare(left.pushedAt) || left.title.localeCompare(right.title));
 
-  const pending: StoryCanonPending = { campaign: 0, regions: {}, companions: {}, incursions: 0, events: 0, total: 0 };
+  const pending: StoryCanonPending = { campaign: 0, regions: {}, companions: {}, factions: {}, incursions: 0, events: 0, total: 0 };
   for (const packet of packets) {
     if (packet.status !== "pending") continue;
     pending.total += 1;
@@ -602,6 +639,10 @@ export async function getCanonInbox(): Promise<{ packets: StoryCanonPacketRow[];
     else if (packet.targetKind === "incursions") pending.incursions += 1;
     else if (packet.targetKind === "events") pending.events += 1;
     else if (packet.targetKind === "region" && packet.targetRegion) pending.regions[packet.targetRegion] = (pending.regions[packet.targetRegion] ?? 0) + 1;
+    else if (packet.targetKind === "factions") {
+      const key = packet.targetFaction ?? "";
+      pending.factions[key] = (pending.factions[key] ?? 0) + 1;
+    }
     else if (packet.targetKind === "companions") {
       const key = packet.targetCompanion ?? "";
       pending.companions[key] = (pending.companions[key] ?? 0) + 1;
@@ -717,12 +758,30 @@ export type CanonNavCompanion = {
   pendingPackets: number;
 };
 
+/** One wing of a major, with whatever it flies. */
+export type CanonNavFactionWing = {
+  slug: string;
+  title: string;
+  arcs: CanonNavArc[];
+};
+
+export type CanonNavFaction = {
+  slug: string;
+  title: string;
+  /** Quests flown under the major's own banner. */
+  ownArcs: CanonNavArc[];
+  wings: CanonNavFactionWing[];
+  /** Waiting material aimed at this power or anything beneath it. */
+  pendingPackets: number;
+};
+
 export type StoryCanonNavigator = {
   campaign: CanonNavArc[];
   regions: CanonNavRegion[];
   /** Side quests and contracts nobody has filed to a place yet. */
   unfiled: CanonNavArc[];
   companions: CanonNavCompanion[];
+  factions: CanonNavFaction[];
   incursions: CanonNavArc[];
   events: CanonNavArc[];
   pending: StoryCanonPending;
@@ -730,17 +789,17 @@ export type StoryCanonNavigator = {
 
 /**
  * The articy-style navigator: the whole settled story as one tree — the
- * campaign spine, then the map, then the companions, then what comes through
- * and what happens to the world.
+ * campaign spine, then the map, then the companions, then the factions, then
+ * what comes through and what happens to the world.
  *
- * This runs on every arc page, so it stays four narrow selects and one inbox
+ * This runs on every arc page, so it stays five narrow selects and one inbox
  * read. Everything else here is arithmetic over what those returned.
  */
 export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
-  const [arcs, regionEntries, missions, characters, inbox] = await Promise.all([
+  const [arcs, regionEntries, missions, characters, factionEntries, inbox] = await Promise.all([
     db.storyArc.findMany({
       where: { status: { in: workingStatuses } },
-      select: { slug: true, title: true, category: true, status: true, position: true, lockedAt: true, regionEntryId: true, companionEntryId: true, _count: { select: { nodes: { where: { status: { in: workingStatuses } } } } } },
+      select: { slug: true, title: true, category: true, status: true, position: true, lockedAt: true, regionEntryId: true, companionEntryId: true, factionEntryId: true, _count: { select: { nodes: { where: { status: { in: workingStatuses } } } } } },
       orderBy: [{ position: "asc" }, { title: "asc" }],
     }),
     db.storyEntry.findMany({
@@ -756,6 +815,11 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
     db.storyEntry.findMany({
       where: { kind: "CHARACTER", status: { in: workingStatuses } },
       select: { id: true, slug: true, title: true },
+      orderBy: { title: "asc" },
+    }),
+    db.storyEntry.findMany({
+      where: { kind: "FACTION", status: { in: workingStatuses } },
+      select: { id: true, slug: true, title: true, meta: true },
       orderBy: { title: "asc" },
     }),
     getCanonInbox(),
@@ -908,7 +972,78 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
     companions.push({ slug: "", title: "Not filed to a companion yet", chain: [], looseArcs: companionless, pendingPackets: inbox.pending.companions[""] ?? 0 });
   }
 
-  return { campaign, regions, unfiled, companions, incursions, events, pending: inbox.pending };
+  // --- the factions ----------------------------------------------------------
+  // The room tracks majors, so the shelf is majors: a quest flown by a wing
+  // rolls up under the power that wing answers to, named by the wing so the
+  // provenance survives the rollup.
+  const factionBySlug = new Map(factionEntries.map((faction) => [faction.slug, faction]));
+  const factionById = new Map(factionEntries.map((faction) => [faction.id, faction]));
+  const answersTo = (faction: (typeof factionEntries)[number]) => {
+    const value = (faction.meta as Record<string, unknown> | null)?.parent;
+    const slug = typeof value === "string" && value.trim() ? value.trim() : null;
+    return slug && slug !== faction.slug && factionBySlug.has(slug) ? slug : null;
+  };
+  // `parent` is writer-editable, so the climb carries a seen-set and stops
+  // rather than hanging the sidebar — the same guard the place tree uses.
+  const bannerOver = (slug: string) => {
+    let current = factionBySlug.get(slug);
+    const seen = new Set<string>();
+    while (current && !seen.has(current.slug)) {
+      seen.add(current.slug);
+      const above = answersTo(current);
+      if (!above) return current;
+      current = factionBySlug.get(above);
+    }
+    return current ?? factionBySlug.get(slug);
+  };
+
+  const factionQuests = arcs.filter((arc) => arc.category === "FACTION_QUEST");
+  const ownByMajor = new Map<string, CanonNavArc[]>();
+  const wingArcs = new Map<string, Map<string, CanonNavArc[]>>();
+  const bannerless: CanonNavArc[] = [];
+  for (const arc of factionQuests) {
+    const flown = arc.factionEntryId ? factionById.get(arc.factionEntryId) : null;
+    if (!flown) { bannerless.push(navArc(arc)); continue; }
+    const major = bannerOver(flown.slug);
+    if (!major) { bannerless.push(navArc(arc)); continue; }
+    if (major.slug === flown.slug) {
+      const bucket = ownByMajor.get(major.slug);
+      if (bucket) bucket.push(navArc(arc)); else ownByMajor.set(major.slug, [navArc(arc)]);
+      continue;
+    }
+    const wings = wingArcs.get(major.slug) ?? new Map<string, CanonNavArc[]>();
+    const bucket = wings.get(flown.slug);
+    if (bucket) bucket.push(navArc(arc)); else wings.set(flown.slug, [navArc(arc)]);
+    wingArcs.set(major.slug, wings);
+  }
+
+  // Material waiting on a wing lights the power above it too, so a writer
+  // scanning the shelf sees there is something down there — the same rollup
+  // the map does for a packet aimed at a room inside a city.
+  const bannerPacketsAt = (slug: string) => inbox.pending.factions[slug] ?? 0;
+  const rolledBannerPackets = (majorSlug: string) => factionEntries
+    .filter((faction) => faction.slug === majorSlug || bannerOver(faction.slug)?.slug === majorSlug)
+    .reduce((total, faction) => total + bannerPacketsAt(faction.slug), 0);
+
+  const majors = factionEntries.filter((faction) => !answersTo(faction));
+  const factions: CanonNavFaction[] = majors
+    .map((major) => ({
+      slug: major.slug,
+      title: major.title,
+      ownArcs: ownByMajor.get(major.slug) ?? [],
+      wings: [...(wingArcs.get(major.slug) ?? new Map<string, CanonNavArc[]>()).entries()]
+        .map(([slug, arcsFlown]) => ({ slug, title: factionBySlug.get(slug)?.title ?? slug.replaceAll("-", " "), arcs: arcsFlown }))
+        .sort((left, right) => left.title.localeCompare(right.title)),
+      pendingPackets: rolledBannerPackets(major.slug),
+    }))
+    // A power with nothing flying and nothing waiting is not navigation — its
+    // own dossier is where it lives. The same law prunes empty places.
+    .filter((faction) => faction.ownArcs.length > 0 || faction.wings.length > 0 || faction.pendingPackets > 0);
+
+  if (bannerless.length > 0 || (inbox.pending.factions[""] ?? 0) > 0) {
+    factions.push({ slug: "", title: "Flying no banner yet", ownArcs: bannerless, wings: [], pendingPackets: inbox.pending.factions[""] ?? 0 });
+  }
+  return { campaign, regions, unfiled, companions, factions, incursions, events, pending: inbox.pending };
 }
 
 /**
@@ -1164,7 +1299,7 @@ export async function getStoryNeedsWork() {
       },
       orderBy: [{ kind: "asc" }, { title: "asc" }],
     }),
-    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true, companionEntryId: true } }),
+    db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true, companionEntryId: true, factionEntryId: true } }),
   ]);
 
   const known = new Set([...entries.map((entry) => entry.slug), ...arcs.map((arc) => arc.slug)]);
@@ -1172,7 +1307,7 @@ export async function getStoryNeedsWork() {
   // the companion whose story it is. A character whose only tie to the world
   // is that somebody opened their companion quest is not an orphan, and
   // reporting them as one sends a writer chasing a problem that is not there.
-  const arcEntryIds = new Set(arcs.flatMap((arc) => [arc.regionEntryId, arc.companionEntryId].filter((id): id is string => Boolean(id))));
+  const arcEntryIds = new Set(arcs.flatMap((arc) => [arc.regionEntryId, arc.companionEntryId, arc.factionEntryId].filter((id): id is string => Boolean(id))));
   const unresolvedLinks: Array<{ slug: string; title: string; target: string }> = [];
   const openQuestions: Array<{ slug: string; title: string; question: string }> = [];
   const missingMeta: Array<{ slug: string; title: string; kind: StoryEntryKind }> = [];
@@ -1216,7 +1351,7 @@ export async function getStoryNeedsWork() {
       // quietly inside a meta object nothing scans.
       { const slug = slugOf(meta.arc); if (slug) targets.push(slug); }
       for (const row of rows(meta.canonPackets)) {
-        for (const value of [row.targetRegion, row.targetCompanion]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+        for (const value of [row.targetRegion, row.targetCompanion, row.targetFaction]) { const slug = slugOf(value); if (slug) targets.push(slug); }
         for (const list of [row.entries, row.wovenInto]) for (const value of Array.isArray(list) ? list : []) { const slug = slugOf(value); if (slug) targets.push(slug); }
       }
     }
@@ -1305,6 +1440,10 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.connections)) check("connection", row.to);
     }
     if (entry.kind === "FACTION") {
+      // The power this one answers to. A strict slug field on the sheet, never
+      // prose, so a wing filed under a banner nobody wrote is caught the way
+      // an orphaned race member is.
+      check("answers to", meta.parent);
       check("seat", meta.seat);
       for (const leader of Array.isArray(meta.leaders) ? meta.leaders : []) check("leader", leader);
       for (const row of rows(meta.relations)) check("relation", row.faction);
@@ -1324,6 +1463,7 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.canonPackets)) {
         check("canon packet target", row.targetRegion);
         check("canon packet companion", row.targetCompanion);
+        check("canon packet banner", row.targetFaction);
         for (const target of Array.isArray(row.entries) ? row.entries : []) check("canon packet mentions", target);
         for (const target of Array.isArray(row.wovenInto) ? row.wovenInto : []) check("woven into", target);
       }

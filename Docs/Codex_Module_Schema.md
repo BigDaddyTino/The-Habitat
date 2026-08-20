@@ -113,6 +113,8 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
 ```json
 {
   "scope": "state | corporate | criminal | regional | religious | supernatural | string",
+  "parent": "faction slug — the power this one answers to; null means this IS a major",
+  "power": "int | null — PLACEHOLDER, see below",
   "seat": "region slug",
   "leaders": ["character slug"],
   "relations": [{ "faction": "slug", "stance": "ally | enemy | rival | client | unknown", "notes": "string" }],
@@ -121,6 +123,16 @@ Settlements are not a new kind — a village is a REGION with a tier, matching t
   "openQuestions": ["string"]
 }
 ```
+
+`parent` runs the same tree law as REGION, SYSTEM, and CREATURE: a major is a
+faction with nothing above it, and its wings are derived from their own sheets
+rather than stored twice. The shelf is one rung deep — a wing is never itself
+a banner.
+
+`power` is a placeholder a writer sets by hand. Strength is meant to derive
+from what a power physically holds — territory, cities, wealth, population,
+armies — and that algorithm is not built. A major's dossier shows its own
+number plus its wings'; nothing else reads it.
 
 ### 3.4 CREATURE.meta
 

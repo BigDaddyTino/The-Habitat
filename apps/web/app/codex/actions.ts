@@ -97,6 +97,7 @@ function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex");
   revalidatePath("/codex/stories");
   revalidatePath("/codex/stories/canon");
+  revalidatePath("/codex/stories/campaign");
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
   revalidatePath("/codex/threads");
@@ -142,9 +143,10 @@ const arcSchema = z.object({
   hook: optionalText(500),
   regionEntryId: z.string().uuid().nullable(),
   companionEntryId: z.string().uuid().nullable(),
+  factionEntryId: z.string().uuid().nullable(),
   category: z.enum(storyArcCategories),
 }).superRefine((arc, ctx) => {
-  // Two categories are defined by what they are filed to, so a missing filing
+  // Three categories are defined by what they are filed to, so a missing filing
   // is not a detail to fix later — it is the thing itself missing. Said in the
   // writers' room's words, because this is the message a writer actually sees.
   if (arc.category === "CONTRACT" && !arc.regionEntryId) {
@@ -152,6 +154,9 @@ const arcSchema = z.object({
   }
   if (arc.category === "COMPANION_QUEST" && !arc.companionEntryId) {
     ctx.addIssue({ code: "custom", path: ["companionEntryId"], message: "A companion quest belongs to a companion — pick whose story this is." });
+  }
+  if (arc.category === "FACTION_QUEST" && !arc.factionEntryId) {
+    ctx.addIssue({ code: "custom", path: ["factionEntryId"], message: "A faction quest belongs to a faction — pick whose banner it flies." });
   }
 });
 
@@ -170,6 +175,7 @@ function readArcForm(formData: FormData, isAdmin: boolean) {
     hook: formData.get("hook") ?? "",
     regionEntryId: formData.get("regionEntryId") || null,
     companionEntryId: formData.get("companionEntryId") || null,
+    factionEntryId: formData.get("factionEntryId") || null,
     category: !isAdmin && category === "MAINLINE" ? "SIDE_QUEST" : category,
   };
 }
@@ -221,6 +227,17 @@ async function assertCompanionEntry(tx: Transaction, companionEntryId: string | 
 }
 
 /**
+ * And the banner is a FACTION entry, same law again. A wing is as valid a
+ * banner as a major power — the navigator rolls a wing's quest up under the
+ * power it answers to, so filing one to a wing loses nothing.
+ */
+async function assertFactionEntry(tx: Transaction, factionEntryId: string | null) {
+  if (!factionEntryId) return;
+  const faction = await tx.storyEntry.findUnique({ where: { id: factionEntryId }, select: { kind: true } });
+  if (!faction || faction.kind !== "FACTION") throw new Error("A faction quest belongs to a faction from the bible.");
+}
+
+/**
  * Records on the thread that it grew into this arc.
  *
  * The whole thread meta is re-validated on the way through, exactly like a
@@ -264,6 +281,7 @@ export async function createArc(formData: FormData) {
   await db.$transaction(async (tx) => {
     await assertRegionEntry(tx, parsed.data.regionEntryId);
     await assertCompanionEntry(tx, parsed.data.companionEntryId);
+    await assertFactionEntry(tx, parsed.data.factionEntryId);
     const arc = await tx.storyArc.create({
       data: {
         slug,
@@ -272,6 +290,7 @@ export async function createArc(formData: FormData) {
         hook: parsed.data.hook,
         regionEntryId: parsed.data.regionEntryId,
         companionEntryId: parsed.data.companionEntryId,
+        factionEntryId: parsed.data.factionEntryId,
         category: parsed.data.category,
         // Both columns, always together. The database CHECK refuses a row
         // where they disagree, which is what turns "somebody forgot one" into
@@ -308,6 +327,7 @@ export async function updateArc(formData: FormData) {
     await assertArcUnlocked(tx, arc.id);
     await assertRegionEntry(tx, parsed.data.regionEntryId);
     await assertCompanionEntry(tx, parsed.data.companionEntryId);
+    await assertFactionEntry(tx, parsed.data.factionEntryId);
 
     // Mainline stays a reviewer's call; everyone else's edit leaves a mainline
     // chapter exactly as mainline as they found it.
@@ -320,6 +340,7 @@ export async function updateArc(formData: FormData) {
         hook: parsed.data.hook,
         regionEntryId: parsed.data.regionEntryId,
         companionEntryId: parsed.data.companionEntryId,
+        factionEntryId: parsed.data.factionEntryId,
         category: nextCategory,
         isMainline: nextCategory === "MAINLINE",
       },
@@ -331,8 +352,8 @@ export async function updateArc(formData: FormData) {
       action: "UPDATED",
       actorUserId: user.id,
       summary: `Reworked the story "${parsed.data.title}"`,
-      before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, companionEntryId: arc.companionEntryId, category: arc.category, isMainline: arc.isMainline },
-      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, companionEntryId: parsed.data.companionEntryId, category: nextCategory, isMainline: nextCategory === "MAINLINE" },
+      before: { title: arc.title, summary: arc.summary, hook: arc.hook, regionEntryId: arc.regionEntryId, companionEntryId: arc.companionEntryId, factionEntryId: arc.factionEntryId, category: arc.category, isMainline: arc.isMainline },
+      after: { title: parsed.data.title, summary: parsed.data.summary, hook: parsed.data.hook, regionEntryId: parsed.data.regionEntryId, companionEntryId: parsed.data.companionEntryId, factionEntryId: parsed.data.factionEntryId, category: nextCategory, isMainline: nextCategory === "MAINLINE" },
     });
     return arc.slug;
   });
@@ -1030,8 +1051,10 @@ export async function createEntry(formData: FormData) {
       }
     : null;
 
+  // A faction is born knowing who it answers to, the same way a place is born
+  // inside a region: filed later is filed never.
   const factionMeta: StoryFactionMeta | null = parsed.data.kind === "FACTION"
-    ? { scope: null, seat: oneSlug(formData, "seat"), leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] }
+    ? { scope: null, parent: oneSlug(formData, "parent"), power: null, seat: oneSlug(formData, "seat"), leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] }
     : null;
 
   const itemMeta: StoryItemMeta | null = parsed.data.kind === "ITEM"
@@ -1345,6 +1368,7 @@ const packetPushSchema = z.object({
   targetKind: z.enum(storyCanonPacketTargetKinds),
   targetRegion: metaSlug.nullable(),
   targetCompanion: metaSlug.nullable(),
+  targetFaction: metaSlug.nullable(),
 });
 
 /** Sends one settled piece of a thread to the canon inbox. */
@@ -1358,6 +1382,7 @@ export async function pushCanonPacket(formData: FormData) {
     targetKind: formData.get("targetKind"),
     targetRegion: formData.get("targetRegion") || null,
     targetCompanion: formData.get("targetCompanion") || null,
+    targetFaction: formData.get("targetFaction") || null,
   });
   if (!parsed.success) throw new Error("Give it a short name and the settled text, and say where it belongs.");
 
@@ -1366,6 +1391,7 @@ export async function pushCanonPacket(formData: FormData) {
   // a packet that is no longer aimed at one.
   const targetRegion = parsed.data.targetKind === "region" ? parsed.data.targetRegion : null;
   const targetCompanion = parsed.data.targetKind === "companions" ? parsed.data.targetCompanion : null;
+  const targetFaction = parsed.data.targetKind === "factions" ? parsed.data.targetFaction : null;
   if (parsed.data.targetKind === "region" && !targetRegion) throw new Error("Say which place this belongs to.");
 
   const entries = [...new Set(formData.getAll("entries").flatMap((value) => {
@@ -1383,6 +1409,10 @@ export async function pushCanonPacket(formData: FormData) {
     const character = await db.storyEntry.findUnique({ where: { slug: targetCompanion }, select: { kind: true, status: true } });
     if (!character || character.kind !== "CHARACTER" || !["DRAFT", "PROPOSED", "CANON"].includes(character.status)) throw new Error("That companion is not in the bible.");
   }
+  if (targetFaction) {
+    const faction = await db.storyEntry.findUnique({ where: { slug: targetFaction }, select: { kind: true, status: true } });
+    if (!faction || faction.kind !== "FACTION" || !["DRAFT", "PROPOSED", "CANON"].includes(faction.status)) throw new Error("That faction is not in the bible.");
+  }
 
   const pushedBy = await storyActorName(user.id);
   const packet: StoryCanonPacket = {
@@ -1392,6 +1422,7 @@ export async function pushCanonPacket(formData: FormData) {
     targetKind: parsed.data.targetKind,
     targetRegion,
     targetCompanion,
+    targetFaction,
     entries,
     status: "pending",
     pushedAt: new Date().toISOString(),

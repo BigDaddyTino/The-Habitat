@@ -18,19 +18,21 @@ type Option = { slug: string; title: string };
  * canon inbox; a writer weaves it into a flow by hand; and only the padlock on
  * a board ever freezes anything.
  */
-export function CanonPacketPanel({ entryId, version, threadTitle, packets, regions, companions, entries }: {
+export function CanonPacketPanel({ entryId, version, threadTitle, packets, regions, companions, factions, entries }: {
   entryId: string;
   version: number;
   threadTitle: string;
   packets: StoryCanonPacket[];
   regions: Option[];
   companions: Option[];
+  factions: Option[];
   /** Everything in the bible, for "who or what does this touch". */
   entries: Option[];
 }) {
   const [targetKind, setTargetKind] = useState<StoryCanonPacketTargetKind>("campaign");
   const [targetRegion, setTargetRegion] = useState("");
   const [targetCompanion, setTargetCompanion] = useState("");
+  const [targetFaction, setTargetFaction] = useState("");
 
   const pending = packets.filter((packet) => packet.status === "pending");
   const woven = packets.filter((packet) => packet.status === "woven");
@@ -39,7 +41,9 @@ export function CanonPacketPanel({ entryId, version, threadTitle, packets, regio
     ? (regions.find((region) => region.slug === targetRegion)?.title ?? "a place you have not picked yet")
     : targetKind === "companions"
       ? (companions.find((option) => option.slug === targetCompanion)?.title ?? "the companions")
-      : storyCanonPacketTargetLabels[targetKind];
+      : targetKind === "factions"
+        ? (factions.find((option) => option.slug === targetFaction)?.title ?? "the factions")
+        : storyCanonPacketTargetLabels[targetKind];
 
   return (
     <section className="canon-packet-panel">
@@ -54,11 +58,11 @@ export function CanonPacketPanel({ entryId, version, threadTitle, packets, regio
         <ul className="canon-packet-list">
           {pending.map((packet) => (
             <li key={packet.id}>
-              <p className="eyebrow">Waiting to be woven in — {packet.targetKind === "region" ? (regions.find((r) => r.slug === packet.targetRegion)?.title ?? packet.targetRegion) : packet.targetKind === "companions" && packet.targetCompanion ? (companions.find((c) => c.slug === packet.targetCompanion)?.title ?? packet.targetCompanion) : storyCanonPacketTargetLabels[packet.targetKind]}</p>
+              <p className="eyebrow">Waiting to be woven in — {packet.targetKind === "region" ? (regions.find((r) => r.slug === packet.targetRegion)?.title ?? packet.targetRegion) : packet.targetKind === "companions" && packet.targetCompanion ? (companions.find((c) => c.slug === packet.targetCompanion)?.title ?? packet.targetCompanion) : packet.targetKind === "factions" && packet.targetFaction ? (factions.find((f) => f.slug === packet.targetFaction)?.title ?? packet.targetFaction) : storyCanonPacketTargetLabels[packet.targetKind]}</p>
               <strong>{packet.title}</strong>
               <span>pushed by {packet.pushedBy}</span>
               <div className="canon-packet-row">
-                <Link className="canon-packet-open" href={`/codex/stories/canon?target=${encodeURIComponent(packet.targetKind === "region" ? `region:${packet.targetRegion}` : packet.targetKind === "companions" && packet.targetCompanion ? `companion:${packet.targetCompanion}` : packet.targetKind)}#canon-inbox`}>
+                <Link className="canon-packet-open" href={`/codex/stories/canon?target=${encodeURIComponent(packet.targetKind === "region" ? `region:${packet.targetRegion}` : packet.targetKind === "companions" && packet.targetCompanion ? `companion:${packet.targetCompanion}` : packet.targetKind === "factions" && packet.targetFaction ? `faction:${packet.targetFaction}` : packet.targetKind)}#canon-inbox`}>
                   See it in the inbox <ArrowRight aria-hidden="true" size={11} />
                 </Link>
                 <form action={withdrawCanonPacket}>
@@ -106,6 +110,13 @@ export function CanonPacketPanel({ entryId, version, threadTitle, packets, regio
             {companions.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select>
           <small className="sheet-hint">Leave it general if the material is not about one person in particular.</small></label>
+        ) : null}
+        {targetKind === "factions" ? (
+          <label>Which faction<select name="targetFaction" onChange={(event) => setTargetFaction(event.target.value)} value={targetFaction}>
+            <option value="">Factions in general</option>
+            {factions.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select>
+          <small className="sheet-hint">Leave it general if the material is not about one power in particular. Aiming it at a wing lights the banner it answers to as well.</small></label>
         ) : null}
 
         <p className="canon-packet-step">3 — Who or what does it touch?</p>

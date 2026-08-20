@@ -22,9 +22,11 @@ type Option = { id: string; title: string };
  * full form rather than a form missing the field it needs. The server
  * validates the combination either way — this is ergonomics, not enforcement.
  */
-export function ArcFields({ regions, characters, canReview, threads = [], defaults, submitLabel }: {
+export function ArcFields({ regions, characters, factions = [], canReview, threads = [], defaults, submitLabel }: {
   regions: Option[];
   characters: Option[];
+  /** The powers a quest can fly under — majors and their wings alike. */
+  factions?: Option[];
   /** Only an admin opens a mainline chapter, so only an admin is offered one. */
   canReview: boolean;
   /** Threads this story can be recorded as having grown out of; create only. */
@@ -35,6 +37,7 @@ export function ArcFields({ regions, characters, canReview, threads = [], defaul
     hook?: string;
     regionEntryId?: string;
     companionEntryId?: string;
+    factionEntryId?: string;
     category?: StoryArcCategory;
   };
   submitLabel: string;
@@ -47,6 +50,7 @@ export function ArcFields({ regions, characters, canReview, threads = [], defaul
   const offered = storyArcCategories.filter((option) => option !== "MAINLINE" || canReview);
   const needsRegion = category === "CONTRACT";
   const needsCompanion = category === "COMPANION_QUEST";
+  const needsFaction = category === "FACTION_QUEST";
   const hide = (applies: boolean) => guided && !applies;
 
   return (
@@ -91,6 +95,15 @@ export function ArcFields({ regions, characters, canReview, threads = [], defaul
           {characters.map((character) => <option key={character.id} value={character.id}>{character.title}</option>)}
         </select>
         <small className="sheet-hint">A companion quest belongs to one companion. It files itself into their chain.</small>
+      </label>
+
+      <label hidden={hide(needsFaction)}>
+        Whose banner does it fly?
+        <select defaultValue={defaults?.factionEntryId ?? ""} name="factionEntryId">
+          <option value="">No faction in particular yet</option>
+          {factions.map((faction) => <option key={faction.id} value={faction.id}>{faction.title}</option>)}
+        </select>
+        <small className="sheet-hint">A faction quest belongs to one power. Pick a wing and it still files under the power that wing answers to.</small>
       </label>
 
       <label>How does the party find it?<textarea defaultValue={defaults?.hook ?? ""} maxLength={500} name="hook" placeholder="A notice board. A dying stranger. A rumor nobody should repeat." rows={2} /></label>

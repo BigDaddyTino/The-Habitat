@@ -53,7 +53,7 @@ function LoreLink({ slug, children }: { slug: string; children: React.ReactNode 
   return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
-export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], companionArcs = [], addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
+export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], companionArcs = [], factionArcs = [], factionFamily = null, addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
   kind: StoryEntryKind;
   slug: string;
   title: string;
@@ -65,7 +65,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }>; /** A companion's own quests, derived from the arcs filed to them. */ companionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }>; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }>; /** A companion's own quests, derived from the arcs filed to them. */ companionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }>; /** A faction's own quests plus the ones its wings fly, `via` naming the wing. */ factionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean; via: { slug: string; title: string } | null }>; /** The power above this one and the wings beneath it, derived from their own sheets. */ factionFamily?: { banner: { slug: string; title: string } | null; wings: Array<{ slug: string; title: string; summary: string | null; scope: string | null; power: number | null }>; power: { own: number | null; fromWings: number | null } } | null; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
   // Entries resolve to the bible, arcs to their board, and anything nobody has
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
@@ -214,7 +214,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {/* A race and one of its members are the same kind but not the
               same thing, and calling Mythical a "creature dossier" reads as
               a filing mistake. */}
-          <p className="eyebrow">{isRace ? "Race" : storyEntryKindLabels[entry.kind]} dossier · {isThread
+          <p className="eyebrow">{isRace ? "Race" : isFaction && factionFamily ? (factionFamily.banner ? "Wing" : "Major power") : storyEntryKindLabels[entry.kind]} dossier · {isThread
             ? (threadStatus ? storyThreadStatusLabels[threadStatus] : "No status yet")
             : isMission
               ? (missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : "No status yet")
@@ -227,6 +227,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           </nav> : null}
           {raceFamily?.race ? <nav aria-label="Which race this belongs to" className="place-trail">
             <span><Link href={`/codex/bible/${raceFamily.race.slug}`}>{raceFamily.race.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>
+          </nav> : null}
+          {factionFamily?.banner ? <nav aria-label="Which power this answers to" className="place-trail">
+            <span><Link href={`/codex/bible/${factionFamily.banner.slug}`}>{factionFamily.banner.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>
           </nav> : null}
           {systemFamily?.ancestry.length ? <nav aria-label="Part of which system" className="place-trail">
             {systemFamily.ancestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
@@ -392,6 +395,25 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               <Plus aria-hidden="true" size={13} /> Add a child to {entry.title}
             </Link>
           </div> : null}
+          {isFaction && factionFamily ? <div className="entity-contained-places entity-race-members">
+            <p className="eyebrow"><Network aria-hidden="true" size={12} /> Wings of {entry.title}</p>
+            {factionFamily.power.own !== null || factionFamily.power.fromWings !== null ? (
+              <p className="entity-map-note is-prose"><Swords aria-hidden="true" size={13} /> Strength <strong>{(factionFamily.power.own ?? 0) + (factionFamily.power.fromWings ?? 0)}</strong>
+                {factionFamily.power.fromWings !== null ? <> — {factionFamily.power.fromWings} of it flying under its wings</> : null}
+                . A placeholder until strength is counted from land, cities, wealth, and armies.</p>
+            ) : null}
+            {factionFamily.wings.length ? <ul>{factionFamily.wings.map((wing) => {
+              const wingBrand = getFactionBranding(wing.slug);
+              return <li key={wing.slug}>
+                {wingBrand ? <img alt="" className="entity-card-keyart" src={wingBrand.keyart} /> : <span className="region-place-fallback"><Shield aria-hidden="true" size={18} /></span>}
+                <div><Link href={`/codex/bible/${wing.slug}`}><strong>{wing.title}</strong><i>{wing.scope ?? "a wing"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+                {wing.summary ? <p><StoryProseLine resolve={resolveProse} text={wing.summary} /></p> : null}</div>
+              </li>;
+            })}</ul> : <p className="story-inspector-hint">No one answers to this power yet — it stands on its own.</p>}
+            <Link className="entity-add-place" href={`/codex/library/factions?parent=${entry.slug}#new-entry`}>
+              <Plus aria-hidden="true" size={13} /> Add a wing of {entry.title}
+            </Link>
+          </div> : null}
           {isSystem && systemFamily ? <div className="entity-contained-places entity-system-children">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Inside {entry.title}</p>
             {systemFamily.children.length ? <ul>{systemFamily.children.map((child) => <li key={child.slug}>
@@ -425,6 +447,14 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             <ul>{companionArcs.map((arc) => <li key={arc.slug}>
               <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{arc.locked ? "settled" : storyArcCategoryLabels[arc.category].toLowerCase()}</i><ArrowRight aria-hidden="true" size={11} /></Link>
               {arc.hook ?? arc.summary ? <p>{arc.hook ?? arc.summary}</p> : null}
+            </li>)}</ul>
+          </div> : null}
+          {isFaction && factionArcs.length ? <div className="entity-quests-here">
+            <p className="eyebrow"><Compass aria-hidden="true" size={12} /> Quests under this banner</p>
+            <ul>{factionArcs.map((arc) => <li key={arc.slug}>
+              <Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{arc.locked ? "settled" : storyArcCategoryLabels[arc.category].toLowerCase()}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+              {arc.hook ?? arc.summary ? <p>{arc.hook ?? arc.summary}</p> : null}
+              {arc.via ? <span>flown by <Link href={`/codex/bible/${arc.via.slug}`}>{arc.via.title}</Link></span> : null}
             </li>)}</ul>
           </div> : null}
           {isRegion && arcsHere.length ? <div className="entity-quests-here">

@@ -42,8 +42,10 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
     if (!target) return true;
     if (target === "campaign" || target === "incursions" || target === "events") return packet.targetKind === target;
     if (target === "companions") return packet.targetKind === "companions";
+    if (target === "factions") return packet.targetKind === "factions";
     if (target.startsWith("region:")) return packet.targetKind === "region" && packet.targetRegion === target.slice(7);
     if (target.startsWith("companion:")) return packet.targetKind === "companions" && packet.targetCompanion === target.slice(10);
+    if (target.startsWith("faction:")) return packet.targetKind === "factions" && packet.targetFaction === target.slice(8);
     return true;
   };
 
@@ -56,7 +58,9 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
       ? (titleOf.get(packet.targetRegion) ?? packet.targetRegion.replaceAll("-", " "))
       : packet.targetKind === "companions" && packet.targetCompanion
         ? (titleOf.get(packet.targetCompanion) ?? packet.targetCompanion.replaceAll("-", " "))
-        : storyCanonPacketTargetLabels[packet.targetKind];
+        : packet.targetKind === "factions" && packet.targetFaction
+          ? (titleOf.get(packet.targetFaction) ?? packet.targetFaction.replaceAll("-", " "))
+          : storyCanonPacketTargetLabels[packet.targetKind];
 
   // Every section of the right-hand column, in the same order as the navigator
   // — so scrolling the boards and scanning the sidebar are the same journey.
@@ -65,6 +69,7 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
     { category: "SIDE_QUEST", title: "Side quests", empty: "No side quests yet. Write one the party can stumble into →" },
     { category: "CONTRACT", title: "Contracts", empty: "No contracts posted yet. Post the first bounty →" },
     { category: "COMPANION_QUEST", title: "Companion quests", empty: "No companion has their own story yet. Give one to a companion →" },
+    { category: "FACTION_QUEST", title: "Faction quests", empty: "No power runs its own operation yet. Fly the first banner →" },
     { category: "INCURSION", title: "Incursions", empty: "Nothing has come through yet. Open the first incursion →" },
     { category: "WORLD_EVENT", title: "World events", empty: "Nothing happens to the world on its own yet. Write the first one →" },
   ];

@@ -32,6 +32,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   const isSystemsLibrary = collection.kind === "SYSTEM";
   const isMissionsLibrary = collection.kind === "COMPANION_MISSION";
   const isRacesLibrary = collection.kind === "CREATURE";
+  const isFactionsLibrary = collection.kind === "FACTION";
 
   // The missions library reads as chains, not a card dump: every mission
   // filed under its companion, in chain order, wearing its development
@@ -113,7 +114,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // Real titles, not de-slugged guesses: "the-sun-and-moon" is titled
   // "The Sun & Moon", and the ampersand does not survive a replaceAll.
   const systemTitles = new Map(entries.map((entry) => [entry.slug, entry.title]));
-  const orderedEntries = isRacesLibrary && !search
+  const orderedEntries = (isRacesLibrary || isFactionsLibrary) && !search
     ? entries.filter((entry) => !systemParentOf(entry))
     : isSystemsLibrary && !search
       ? (() => {
@@ -165,6 +166,9 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // above it, so offering a member here would build a third rung the library
   // does not render.
   const raceParents = isRacesLibrary ? entries.filter((entry) => !systemParentOf(entry)).sort((a, b) => a.title.localeCompare(b.title)) : [];
+  /** Only major powers may be a banner — offering a wing would build a rung
+   *  the shelf does not render. Same law as the races parent picker. */
+  const factionBanners = isFactionsLibrary ? entries.filter((entry) => !systemParentOf(entry)).sort((a, b) => a.title.localeCompare(b.title)) : [];
   /** Places sitting directly in a top-level region, each with its own inside. */
   const contained = new Map<string, Array<{ place: (typeof entries)[number]; inside: typeof entries }>>();
   const unplaced: typeof entries = [];
@@ -197,7 +201,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <p>{collection.description}</p>
           <div className="entity-directory-actions">
             <a className="primary-link" href="#new-entry"><Plus aria-hidden="true" size={14} /> Add {collection.singular}</a>
-            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : `${entries.length} in the Codex`}</span>
+            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : isFactionsLibrary && !search ? `${orderedEntries.length} major powers` : `${entries.length} in the Codex`}</span>
           </div>
         </div>
         {collection.kind === "CHARACTER" ? <div className="casting-strip" aria-label="Available in-game model previews">{castingImages.map((image) => <img alt="" key={image.ref} src={`/model-gallery/${image.image}`} />)}<span>{modelGalleryImages.length} models ready to cast</span></div> : null}
@@ -358,7 +362,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           return <Link
             // A child in a flattened tree needs to look like one, or the
             // grid reads as a flat list that happens to be oddly sorted.
-            className={`entity-card${(isRacesLibrary || isSystemsLibrary) && systemParentOf(entry) ? " entity-card-nested" : ""}${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
+            className={`entity-card${(isRacesLibrary || isSystemsLibrary || isFactionsLibrary) && systemParentOf(entry) ? " entity-card-nested" : ""}${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
             href={`/codex/bible/${entry.slug}`}
             key={entry.id}
             style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
@@ -381,7 +385,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               <p className="eyebrow">{detail || collection.singular}</p>
               <h2>{entry.title}</h2>
               <p>{entry.summary ? plainStoryProse(entry.summary) : `Open this ${collection.singular} and give the next writer something to build on.`}</p>
-              <footer><span>{entry.appearanceCount} story connection{entry.appearanceCount === 1 ? "" : "s"}</span><strong>{isRacesLibrary ? "See its children" : "Open dossier"} <ArrowRight aria-hidden="true" size={12} /></strong></footer>
+              <footer><span>{entry.appearanceCount} story connection{entry.appearanceCount === 1 ? "" : "s"}</span><strong>{isRacesLibrary ? "See its children" : isFactionsLibrary && !systemParentOf(entry) ? "See its wings" : "Open dossier"} <ArrowRight aria-hidden="true" size={12} /></strong></footer>
             </div>
           </Link>;
         })}
@@ -389,7 +393,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
 
       <details className="entity-create-panel" id="new-entry" open={(entries.length === 0 && !search) || Boolean(addingInside) || Boolean(placeKind)}>
         <summary><Plus aria-hidden="true" size={15} /><span>
-          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : isRacesLibrary ? (addingInside ? `Add one of the ${addingInside.title}` : "Add a race, or something that belongs to one") : `Add a new ${collection.singular}`}</strong>
+          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : isRacesLibrary ? (addingInside ? `Add one of the ${addingInside.title}` : "Add a race, or something that belongs to one") : isFactionsLibrary ? (addingInside ? `Add a wing of ${addingInside.title}` : "Add a power, or a wing of one") : `Add a new ${collection.singular}`}</strong>
           <small>{isRegionLibrary ? "A point of interest, a settlement, a zone, or a whole region — say where it sits and it files itself." : "Start with the pitch. The full visual sheet opens next."}</small>
         </span></summary>
         <form action={createEntry} className="story-form">
@@ -407,6 +411,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           {isSystemsLibrary ? <label>Part of which system<select defaultValue={addingInside?.slug ?? ""} name="parent">
             <option value="">Nothing — a top-level system</option>
             {systemParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+          </select></label> : null}
+          {isFactionsLibrary ? <label>Which power it answers to<select defaultValue={addingInside?.slug ?? ""} name="parent">
+            <option value="">No one above it — this IS a major power</option>
+            {factionBanners.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {isRacesLibrary ? <label>Which race it belongs to<select defaultValue={addingInside?.slug ?? ""} name="parent">
             <option value="">Nothing above it — this IS a new race</option>

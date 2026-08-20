@@ -63,8 +63,10 @@ test("Hippogriff and Human are distinct children of the requested parents", () =
 });
 
 test("the races landing page shows parent cards only", () => {
+  // The factions shelf joined the races on this rule — majors only, with the
+  // wings behind them — so the condition names both libraries now.
   const directory = readFileSync(join(process.cwd(), "components/story-entity-directory.tsx"), "utf8");
-  assert.match(directory, /isRacesLibrary && !search\s*\? entries\.filter\(\(entry\) => !systemParentOf\(entry\)\)/);
+  assert.match(directory, /\(isRacesLibrary \|\| isFactionsLibrary\) && !search\s*\? entries\.filter\(\(entry\) => !systemParentOf\(entry\)\)/);
   assert.match(directory, /See its children/);
 });
 

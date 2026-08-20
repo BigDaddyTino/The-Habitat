@@ -77,7 +77,7 @@ async function main() {
     }
 
     // ---- arc + node + edge: the board's whole CRUD --------------------------
-    await post("/codex/stories", "createArc", [["title", "TMPCRUD Board"], ["summary", ""], ["hook", ""], ["category", "SIDE_QUEST"], ["regionEntryId", ""], ["companionEntryId", ""]]);
+    await post("/codex/stories", "createArc", [["title", "TMPCRUD Board"], ["summary", ""], ["hook", ""], ["category", "SIDE_QUEST"], ["regionEntryId", ""], ["companionEntryId", ""], ["factionEntryId", ""]]);
     const arc = await db.storyArc.findUnique({ where: { slug: "tmpcrud-board" }, select: { id: true, slug: true, title: true } });
     check(Boolean(arc), "CREATE  a story board is opened");
     if (!arc) throw new Error("cannot continue without the probe arc");

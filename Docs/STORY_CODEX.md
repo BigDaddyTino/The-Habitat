@@ -24,6 +24,10 @@ Two halves, severable:
 | `/codex` | USER | Story premise, core themes, world libraries, and the audit log |
 | `/codex/stories` | USER | The stories room: canon and threads, the room law, and where a new story is opened |
 | `/codex/stories/canon` | USER | The canon workspace: the navigator, every board by kind, the canon inbox, and the connection web |
+| `/codex/stories/campaign` | USER | The macro board: which chapter hands to which, derived from the endings themselves |
+| `/codex/threads` | USER | The development room: story threads argued from brainstorm toward canon |
+| `/codex/promises` | USER | The flag ledger: every promise a scene plants and where it comes due |
+| `/codex/timeline` | USER | Ten thousand years of the long hunt on one line |
 | `/codex/library/[collection]` | USER | Visual, searchable libraries for characters, factions, regions, creatures, items, events, themes, and rules |
 | `/codex/arc/[slug]` | USER | The board: cards, branches, inspector, presence |
 | `/codex/bible` | USER | The lore bible, filterable by kind |
@@ -478,14 +482,20 @@ schema the sheet enforces.
 ## What kind of story is this?
 
 Every arc carries a `category`: `MAINLINE`, `SIDE_QUEST`, `CONTRACT`,
-`COMPANION_QUEST`, `INCURSION`, or `WORLD_EVENT`. It is what the canon
-navigator files by — the campaign spine, then the map (side quests and the
-contracts posted at each place), then the companions, then what comes through
-and what happens to the world.
+`COMPANION_QUEST`, `FACTION_QUEST`, `INCURSION`, or `WORLD_EVENT`. It is what
+the canon navigator files by — the campaign spine, then the map (side quests
+and the contracts posted at each place), then the companions, then the
+factions, then what comes through and what happens to the world.
 
-Two categories are defined by what they are filed to, and the server refuses
+Three categories are defined by what they are filed to, and the server refuses
 one without it: a `CONTRACT` needs a region (being posted somewhere is what
-makes it a contract) and a `COMPANION_QUEST` needs a character.
+makes it a contract), a `COMPANION_QUEST` needs a character, and a
+`FACTION_QUEST` needs a faction.
+
+A faction quest may fly a wing's banner rather than a major's. The navigator
+rolls it up under the power that wing answers to and names the wing it came
+through, so the shelf stays short without losing who actually did the work —
+see the faction hierarchy below.
 
 `StoryArc.isMainline` is **not** replaced. It is the export contract, the
 ordering key, and what every arc picker reads, and it stays in lockstep with
@@ -493,6 +503,72 @@ the category — a database CHECK refuses any row where the two disagree, so a
 writer that sets one column and forgets the other fails loudly instead of
 shipping a mainline chapter the game files as a side quest. Three places write
 an arc: `createArc`, `updateArc`, and `packages/db/scripts/ingest-story-seed.ts`.
+
+---
+
+## Major powers and their wings
+
+The faction shelf grew past what the room can hold in view, so it runs the
+same tree the regions atlas, the systems shelf, and the races library
+already do: `FACTION.meta.parent` names the power a faction answers to, and
+**a major is a faction with `parent: null`**. Wings are derived from their
+own sheets and never stored twice.
+
+The shelf holds **thirty-five powers: ten majors, twenty-one wings, and four
+that answer to nobody** — plus the seat left open for the faction the players
+may found. One law governs how that is read, and it is written into
+`the-faction-map` in canon rather than only here:
+
+> **Major does not mean important.** A major is a geopolitical umbrella —
+> something that can move the world's balance on its own. A wing lives inside
+> that banner's economic, political, religious, territorial, or military
+> sphere, and may be more famous, more dangerous, and far more present in a
+> player's story than the power above it. Independence is reserved for what
+> operates outside those spheres altogether.
+
+The tree is a **political ecosystem, not a chain of command**. Several wings
+despise their banner and say so in their own dossiers — the Foundry Workers
+Union organizes industries it cannot strike without stopping Aegis lines; the
+Black Tithe insists that stealing from the Stormglass Cartel constitutes
+independence; the Meridian Arcane Institute claims academic freedom until the
+invoices come due. Being inside a sphere is a fact about where the money, the
+ground, and the licences come from, never a statement of loyalty.
+
+What that buys, day to day:
+
+- The factions library lists majors; a wing lives behind the major's dossier,
+  exactly as a race member lives behind its race.
+- A wing's faction quests roll up to its banner in the navigator and on the
+  major's dossier, labelled with the wing they came through.
+- Canon material aimed at a wing lights the major's bubble too, the same
+  rollup a packet aimed at a room inside a city already gets.
+
+`FACTION.meta.power` is a **placeholder**. Strength is meant to be counted
+from what a power physically holds — territory, cities, wealth, population,
+armies — and that reckoning is not built. Until it is, a writer sets the
+number by hand and a major's dossier shows its own plus its wings'. Nothing
+computes anything from it, and `the-power-balance` remains the design entry
+describing what will.
+
+The filing itself lives in `apps/web/lib/story-factions-seed.ts` — one row
+per wing, each carrying the sentence it was read from and how strongly canon
+supports it (CANON / ALIGNED / OWNER-CALL). It also carries the prose: one
+additive paragraph per faction recording what the filing means from where
+that faction stands, in that faction's own voice, slotted in before its
+closing paragraph on the Drain. Alongside them sit the one power the
+restructuring invented — **The Free Peoples Compact**, five free peoples who
+agree on nothing except that their land is not for sale — and the rewritten
+`the-faction-map`. Apply or re-apply the whole thing with:
+
+```
+pnpm --filter @habitat/web exec tsx scripts/seed-faction-hierarchy.ts
+pnpm --filter @habitat/web exec tsx scripts/seed-faction-hierarchy.ts --apply
+```
+
+It never overrules a faction a writer has filed by hand, never adds a
+paragraph a dossier already carries, and re-validates the whole sheet before
+writing — a seed is not a way around the sheet. Dry run by default; the
+printed plan is the review gate.
 
 ---
 

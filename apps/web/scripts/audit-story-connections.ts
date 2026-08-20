@@ -30,7 +30,7 @@ const check = (ok: boolean, what: string) => results.push({ ok, what });
 const blank: Record<string, Record<string, unknown>> = {
   CHARACTER: { fullName: null, aliases: [], pronouns: null, sex: null, species: null, age: null, appearance: null, voice: null, magic: { origin: null, schools: [], corruptionPhase: null, notes: null }, factions: [], home: null, status: { known: null, actual: null }, relationships: [], storyRole: null, involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [] },
   REGION: { type: null, settlementTier: null, parent: null, biome: null, control: [], population: null, connections: [], status: null, veilAnchorTier: null, soulForge: null, gameTag: null, openQuestions: [] },
-  FACTION: { scope: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] },
+  FACTION: { scope: null, parent: null, power: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] },
   CREATURE: { category: null, parent: null, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [] },
   ITEM: { category: null, rarity: null, origin: null, gameId: null, openQuestions: [] },
   EVENT: { when: null, timelineYearsAgo: null, where: [], involved: [], outcome: null, openQuestions: [] },
@@ -41,7 +41,7 @@ const blank: Record<string, Record<string, unknown>> = {
 
 const packet = (over: Record<string, unknown>) => ({
   id: randomUUID(), title: "probe", body: "probe", targetKind: "campaign", targetRegion: null,
-  targetCompanion: null, entries: [], status: "pending", pushedAt: new Date().toISOString(),
+  targetCompanion: null, targetFaction: null, entries: [], status: "pending", pushedAt: new Date().toISOString(),
   pushedBy: "audit", wovenAt: null, wovenBy: null, wovenInto: [], ...over,
 });
 
@@ -56,6 +56,7 @@ const cases: Case[] = [
   { field: "REGION.control[].faction", from: "REGION", to: "FACTION", plant: (t) => ({ control: [{ faction: t, kind: null }] }) },
   { field: "REGION.connections[].to", from: "REGION", to: "REGION", plant: (t) => ({ connections: [{ to: t, by: null, notes: null }] }) },
   { field: "FACTION.seat", from: "FACTION", to: "REGION", plant: (t) => ({ seat: t }) },
+  { field: "FACTION.parent (its banner)", from: "FACTION", to: "FACTION", plant: (t) => ({ parent: t }) },
   { field: "FACTION.leaders[]", from: "FACTION", to: "CHARACTER", plant: (t) => ({ leaders: [t] }) },
   { field: "FACTION.relations[].faction", from: "FACTION", to: "FACTION", plant: (t) => ({ relations: [{ faction: t, stance: null, notes: null }] }) },
   { field: "CREATURE.parent (its race)", from: "CREATURE", to: "CREATURE", plant: (t) => ({ parent: t }) },
@@ -75,6 +76,7 @@ const cases: Case[] = [
   { field: "THREAD.canonPackets[].entries[]", from: "THREAD", to: "CHARACTER", plant: (t) => ({ canonPackets: [packet({ entries: [t] })] }) },
   { field: "THREAD.canonPackets[].targetRegion", from: "THREAD", to: "REGION", plant: (t) => ({ canonPackets: [packet({ targetKind: "region", targetRegion: t })] }) },
   { field: "THREAD.canonPackets[].targetCompanion", from: "THREAD", to: "CHARACTER", plant: (t) => ({ canonPackets: [packet({ targetKind: "companions", targetCompanion: t })] }) },
+  { field: "THREAD.canonPackets[].targetFaction", from: "THREAD", to: "FACTION", plant: (t) => ({ canonPackets: [packet({ targetKind: "factions", targetFaction: t })] }) },
   { field: "COMPANION_MISSION.companion", from: "COMPANION_MISSION", to: "CHARACTER", plant: (t) => ({ companion: t }) },
   { field: "COMPANION_MISSION.characters[]", from: "COMPANION_MISSION", to: "CHARACTER", plant: (t) => ({ characters: [t] }) },
   { field: "COMPANION_MISSION.locations[]", from: "COMPANION_MISSION", to: "REGION", plant: (t) => ({ locations: [t] }) },
@@ -112,16 +114,25 @@ async function main() {
       check(Boolean(edge), `${testCase.field.padEnd(38)} ${edge ? `→ "${edge.relation}"` : "→ NOT SHOWN on the target's dossier"}`);
     }
 
-    // The arc axis: arcs are not entries, so they carry their own two edges.
+    // The arc axis: arcs are not entries, so they carry their own edges.
     const place = await mint("REGION", "arc-place", { ...blank.REGION });
     const person = await mint("CHARACTER", "arc-person", { ...blank.CHARACTER });
+    const banner = await mint("FACTION", "arc-banner", { ...blank.FACTION });
+    const wing = await mint("FACTION", "arc-wing", { ...blank.FACTION, parent: `${PREFIX}-arc-banner` });
     const placeId = (await db.storyEntry.findUniqueOrThrow({ where: { slug: place }, select: { id: true } })).id;
     const personId = (await db.storyEntry.findUniqueOrThrow({ where: { slug: person }, select: { id: true } })).id;
+    const wingId = (await db.storyEntry.findUniqueOrThrow({ where: { slug: wing }, select: { id: true } })).id;
     const contract = await db.storyArc.create({ data: { slug: `${PREFIX}-contract`, title: "TMPCONN contract", category: "CONTRACT", isMainline: false, status: "CANON", regionEntryId: placeId, createdByUserId: actor.id } });
     const quest = await db.storyArc.create({ data: { slug: `${PREFIX}-quest`, title: "TMPCONN quest", category: "COMPANION_QUEST", isMainline: false, status: "CANON", companionEntryId: personId, createdByUserId: actor.id } });
-    madeArcs.push(contract.id, quest.id);
+    const banners = await db.storyArc.create({ data: { slug: `${PREFIX}-banner-quest`, title: "TMPCONN banner quest", category: "FACTION_QUEST", isMainline: false, status: "CANON", factionEntryId: wingId, createdByUserId: actor.id } });
+    madeArcs.push(contract.id, quest.id, banners.id);
     check((await getStoryEntry(place))?.arcsHere.some((a) => a.slug === contract.slug) === true, "StoryArc.regionEntryId".padEnd(38) + " → the place lists the quests posted there");
     check((await getStoryEntry(person))?.companionArcs.some((a) => a.slug === quest.slug) === true, "StoryArc.companionEntryId".padEnd(38) + " → the companion lists their own quests");
+    check((await getStoryEntry(wing))?.factionArcs.some((a) => a.slug === banners.slug) === true, "StoryArc.factionEntryId".padEnd(38) + " → the faction lists the quests under its banner");
+    // The rollup: a wing's quest reads on the power above it, named by the
+    // wing it came through rather than absorbed into the major.
+    const rolled = (await getStoryEntry(banner))?.factionArcs.find((a) => a.slug === banners.slug);
+    check(rolled?.via?.slug === wing, "StoryArc.factionEntryId (rolled up)".padEnd(38) + ` → the banner shows its wing's quest${rolled?.via ? ` via ${rolled.via.slug}` : " — NOT ROLLED UP"}`);
 
     // Reachability: nothing genuinely connected may read as an orphan.
     const needs = await getStoryNeedsWork();

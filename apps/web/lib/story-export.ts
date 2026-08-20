@@ -94,6 +94,7 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       include: {
         region: { select: { slug: true, title: true, status: true } },
         companion: { select: { slug: true, title: true, status: true } },
+        faction: { select: { slug: true, title: true, status: true } },
         nodes: {
           where: { status: exportableStoryStatus },
           orderBy: { key: "asc" },
@@ -198,6 +199,9 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       category: arc.category,
       // Withheld like every other reference whose target is not itself canon.
       companion: arc.companion && arc.companion.status === exportableStoryStatus ? { slug: arc.companion.slug, title: arc.companion.title } : null,
+      // Withheld unless the faction is itself canon, same as every other
+      // reference: the importer must never resolve a banner the game lacks.
+      faction: arc.faction && arc.faction.status === exportableStoryStatus ? { slug: arc.faction.slug, title: arc.faction.title } : null,
       entryNodeKeys: findStoryEntryNodeKeys(graphNodesByAge, graphEdges),
       nodes,
       // Reported, never enforced. The importer decides whether a story with

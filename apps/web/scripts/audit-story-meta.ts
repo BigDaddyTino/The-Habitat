@@ -101,6 +101,8 @@ async function main() {
     check("parent", one(meta.parent), known, "entry");
     check("home", maybeSlugs(one(meta.home)), known, "entry");
     check("seat", maybeSlugs(one(meta.seat)), known, "entry");
+    // The power a faction answers to — a strict slug field, never prose.
+    check("answers to", one(meta.parent), known, "entry");
     check("origin", maybeSlugs(one(meta.origin)), known, "entry");
     // A character's race and a creature's habitats — slug-or-prose both, and
     // the two the audit had never looked at even though the comment above

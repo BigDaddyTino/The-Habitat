@@ -67,7 +67,7 @@ test("every codex surface a write can change is revalidated", () => {
   const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
   const refresh = actions.slice(actions.indexOf("function refreshCodex"), actions.indexOf("function refreshCodex") + 1200);
   assert.match(refresh, /Object\.keys\(storyCollections\)/, "library paths must be derived, never hand-listed");
-  for (const page of ["/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises", "/codex/review"]) {
+  for (const page of ["/codex", "/codex/stories", "/codex/stories/canon", "/codex/stories/campaign", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises", "/codex/review"]) {
     assert.ok(refresh.includes(`"${page}"`), `${page} must be revalidated after a write`);
   }
 });

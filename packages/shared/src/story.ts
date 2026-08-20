@@ -428,14 +428,15 @@ export type StoryExportNode = {
  * MAINLINE is the spine. SIDE_QUEST is optional story. CONTRACT is a bounty
  * posted at a place (so it is always filed to a region). COMPANION_QUEST is
  * one companion's own story (so it is always filed to a character).
- * INCURSION is something that comes through. WORLD_EVENT is something that
+ * FACTION_QUEST is one faction's own operation (so it is always filed to a
+ * faction). INCURSION is something that comes through. WORLD_EVENT is something that
  * happens to the world rather than to the party.
  *
  * MAINLINE and `StoryArc.isMainline` mean exactly the same thing, and a
  * database CHECK keeps them that way — see the schema note. Every writer of
  * an arc sets both.
  */
-export const storyArcCategories = ["MAINLINE", "SIDE_QUEST", "CONTRACT", "COMPANION_QUEST", "INCURSION", "WORLD_EVENT"] as const;
+export const storyArcCategories = ["MAINLINE", "SIDE_QUEST", "CONTRACT", "COMPANION_QUEST", "FACTION_QUEST", "INCURSION", "WORLD_EVENT"] as const;
 
 export type StoryArcCategory = (typeof storyArcCategories)[number];
 
@@ -444,6 +445,7 @@ export const storyArcCategoryLabels: Record<StoryArcCategory, string> = {
   SIDE_QUEST: "Side quest",
   CONTRACT: "Contract",
   COMPANION_QUEST: "Companion quest",
+  FACTION_QUEST: "Faction quest",
   INCURSION: "Incursion",
   WORLD_EVENT: "World event",
 };
@@ -454,6 +456,7 @@ export const storyArcCategoryHints: Record<StoryArcCategory, string> = {
   SIDE_QUEST: "Optional story the party can find and finish on its own.",
   CONTRACT: "A bounty posted at a place — say where it is posted.",
   COMPANION_QUEST: "One companion's own story — say whose it is.",
+  FACTION_QUEST: "One faction's own operation — say whose banner it flies.",
   INCURSION: "Something that comes through and has to be pushed back.",
   WORLD_EVENT: "Something that happens to the world, party or no party.",
 };
@@ -478,6 +481,8 @@ export type StoryExportArc = {
   category: StoryArcCategory;
   /** The companion whose story this is, for COMPANION_QUEST arcs. */
   companion: { slug: string; title: string } | null;
+  /** The faction whose banner this flies, for FACTION_QUEST arcs. */
+  faction: { slug: string; title: string } | null;
   /**
    * Nodes nothing transitions into. Several are legitimate — a side quest can
    * be enterable from more than one place — but importers that must store
@@ -779,6 +784,16 @@ export const storyFactionStances = ["ally", "enemy", "rival", "client", "unknown
 export type StoryFactionMeta = {
   /** Intentionally open text: new kinds of power can emerge without a contract bump. */
   scope: string | null;
+  /** The faction this one answers to. Null means this IS a major power —
+   *  the same law the regions atlas, the systems shelf, and the races
+   *  library already run on, so a wing is never stored twice. */
+  parent: string | null;
+  /** PLACEHOLDER. Strength is meant to be counted from what a faction
+   *  physically holds — territory, cities, wealth, population, armies —
+   *  and that reckoning is not built. Until it is, this is a number a
+   *  writer sets by hand, and a major's standing reads as its own plus
+   *  its wings'. Nothing computes anything from it yet. */
+  power: number | null;
   seat: string | null;
   leaders: string[];
   relations: Array<{
@@ -1123,11 +1138,11 @@ export const storySpoilerLevels = ["none", "minor", "major", "ending"] as const;
 
 /**
  * Where a canon packet is headed — the section of the canon navigator whose
- * inbox it lands in. "region" and "companions" narrow further through
- * `targetRegion` / `targetCompanion`, which is what lights one place's
- * bubble rather than the whole section's.
+ * inbox it lands in. "region", "companions", and "factions" narrow further
+ * through `targetRegion` / `targetCompanion` / `targetFaction`, which is what
+ * lights one place's bubble rather than the whole section's.
  */
-export const storyCanonPacketTargetKinds = ["campaign", "region", "companions", "incursions", "events"] as const;
+export const storyCanonPacketTargetKinds = ["campaign", "region", "companions", "factions", "incursions", "events"] as const;
 
 export type StoryCanonPacketTargetKind = (typeof storyCanonPacketTargetKinds)[number];
 
@@ -1135,6 +1150,7 @@ export const storyCanonPacketTargetLabels: Record<StoryCanonPacketTargetKind, st
   campaign: "The main story",
   region: "A place on the map",
   companions: "A companion",
+  factions: "A faction",
   incursions: "Incursions",
   events: "World events",
 };
@@ -1166,6 +1182,9 @@ export type StoryCanonPacket = {
   /** CHARACTER slug — optional when `targetKind` is "companions"; null means
    *  the general companions bucket rather than one companion's bubble. */
   targetCompanion: string | null;
+  /** FACTION slug — optional when `targetKind` is "factions"; null means the
+   *  general factions bucket rather than one banner's bubble. */
+  targetFaction: string | null;
   /** Entry slugs this material touches, so the packet shows up on their
    *  dossiers the same way every other connection does. */
   entries: string[];

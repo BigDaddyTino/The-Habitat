@@ -276,8 +276,10 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
 // Faction sheet — power, territory, leadership, and conflict
 // ---------------------------------------------------------------------------
 
-export function FactionSheet({ entryId, version, meta, factions, regions, characters }: {
+export function FactionSheet({ entryId, entrySlug, version, meta, factions, regions, characters }: {
   entryId: string;
+  /** This faction's own slug, so it can never be offered as its own banner. */
+  entrySlug: string;
   version: number;
   meta: Record<string, unknown> | null;
   factions: SlugOption[];
@@ -286,6 +288,8 @@ export function FactionSheet({ entryId, version, meta, factions, regions, charac
 }) {
   const source = record(meta);
   const [scope, setScope] = useState(text(source.scope));
+  const [parent, setParent] = useState(text(source.parent));
+  const [power, setPower] = useState(typeof source.power === "number" ? String(source.power) : "");
   const [seat, setSeat] = useState(text(source.seat));
   const [leaders, setLeaders] = useState(asArray(source.leaders).map(text));
   const [relations, setRelations] = useState(asArray(source.relations).map((row) => ({
@@ -297,8 +301,11 @@ export function FactionSheet({ entryId, version, meta, factions, regions, charac
   const [gameTag, setGameTag] = useState(text(source.gameTag));
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
 
+  const strength = Number.parseInt(power, 10);
   const composed: StoryFactionMeta = {
     scope: orNull(scope),
+    parent: orNull(parent),
+    power: Number.isInteger(strength) && strength >= 0 ? strength : null,
     seat: orNull(seat),
     leaders: leaders.filter(Boolean),
     relations: relations
@@ -322,6 +329,13 @@ export function FactionSheet({ entryId, version, meta, factions, regions, charac
 
       <div className="sheet-grid">
         <label>Kind of power<input maxLength={80} onChange={(event) => setScope(event.target.value)} placeholder="state, corporate, criminal, supernatural…" type="text" value={scope} /></label>
+        <label>Answers to<select onChange={(event) => setParent(event.target.value)} value={parent}>
+          <option value="">No one — this is a major power</option>
+          {factions.filter((option) => option.slug !== entrySlug).map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+        </select>
+        <small className="sheet-hint">Pick a power and this becomes one of its wings — its quests and waiting material roll up to that banner.</small></label>
+        <label>Strength<input inputMode="numeric" min={0} onChange={(event) => setPower(event.target.value)} placeholder="—" type="number" value={power} />
+        <small className="sheet-hint">A placeholder set by hand. Strength is meant to be counted from land, cities, wealth, population, and armies, and that reckoning is not built yet.</small></label>
         <label>Seat of power<select onChange={(event) => setSeat(event.target.value)} value={seat}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
         <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Faction.Stormglass" type="text" value={gameTag} /></label>
       </div>
