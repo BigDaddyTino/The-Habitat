@@ -368,3 +368,27 @@ test("every kind that can name another entry has its references checked", () => 
     assert.ok(needsWork.includes(`if (entry.kind === "${kind}") {`), `${kind} names other entries and must have its references checked`);
   }
 });
+
+test("a system and a race are born with their sheet, whether or not anything is above them", () => {
+  // Both sheets used to be composed only when the parent picker had been
+  // filled, so a top-level system and a brand-new race arrived with no sheet
+  // at all — no build status on the dossier, and nothing for the reference
+  // checks above to read. What decides whether a sheet is written is the kind
+  // being created, never how much of the form was filled in.
+  const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
+  const createEntry = actions.slice(actions.indexOf("export async function createEntry("), actions.indexOf("export async function updateEntry("));
+  assert.ok(createEntry.length > 0, "createEntry must exist");
+
+  for (const [meta, kind] of [["systemMeta", "SYSTEM"], ["creatureMeta", "CREATURE"]] as const) {
+    const composed = new RegExp(`const ${meta}: Story\\w+ \\| null = parsed\\.data\\.kind === "${kind}"`);
+    assert.match(createEntry, composed, `${meta} must be written for every ${kind}, not only a filed one`);
+  }
+
+  // The specific regression: gating the sheet on the parent slug parsing.
+  assert.doesNotMatch(createEntry, /const systemMeta: \w+ \| null = systemParent\?\.success/, "a top-level system must still get its sheet");
+  assert.doesNotMatch(createEntry, /const creatureMeta: \w+ \| null = raceParent\?\.success/, "a race with nothing above it must still get its sheet");
+
+  // A parent that was picked still has to reach the sheet.
+  assert.match(createEntry, /parent: systemParent\?\.success \? systemParent\.data : null/, "a filed system keeps its parent");
+  assert.match(createEntry, /parent: raceParent\?\.success \? raceParent\.data : null/, "a filed creature keeps its race");
+});

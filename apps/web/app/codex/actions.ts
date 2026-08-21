@@ -925,21 +925,24 @@ export async function createEntry(formData: FormData) {
     : null;
 
   // Same law for systems: Weather is born inside Environment, not created
-  // loose and adopted later — which is how orphans happen.
+  // loose and adopted later — which is how orphans happen. A system with
+  // nothing above it is still born with its sheet: answering "no parent" is an
+  // answer, not a reason to leave the entry with no sheet at all. Filing it
+  // under the conditional meant a top-level system arrived carrying nothing —
+  // no build status, and nothing for the needs-work checks to read.
   const systemParent = parsed.data.kind === "SYSTEM" ? metaSlug.safeParse(formData.get("parent")) : null;
-  const systemMeta: StorySystemMeta | null = systemParent?.success
-    ? { category: null, buildStatus: "concept", parent: systemParent.data, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
+  const systemMeta: StorySystemMeta | null = parsed.data.kind === "SYSTEM"
+    ? { category: null, buildStatus: "concept", parent: systemParent?.success ? systemParent.data : null, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
     : null;
 
   // And the same for races: a creature is born inside the race it belongs to,
   // rather than created loose and adopted later. Leaving the picker empty is
-  // the deliberate way to declare a new race.
+  // the deliberate way to declare a new race — and a race is an entry like any
+  // other, so it is born with its sheet too.
   const raceParent = parsed.data.kind === "CREATURE" ? metaSlug.safeParse(formData.get("parent")) : null;
-  const creatureMeta: StoryCreatureMeta | null = raceParent?.success
-    ? { category: null, parent: raceParent.data, biomes: slugList(formData, "biomes"), threat: null, harvest: null, gameId: null, openQuestions: [] }
-    : parsed.data.kind === "CREATURE" && slugList(formData, "biomes").length > 0
-      ? { category: null, parent: null, biomes: slugList(formData, "biomes"), threat: null, harvest: null, gameId: null, openQuestions: [] }
-      : null;
+  const creatureMeta: StoryCreatureMeta | null = parsed.data.kind === "CREATURE"
+    ? { category: null, parent: raceParent?.success ? raceParent.data : null, biomes: slugList(formData, "biomes"), threat: null, harvest: null, gameId: null, openQuestions: [] }
+    : null;
 
   // A story thread is born brainstorming — visibly unconfirmed until the room
   // moves it — carrying whatever categories and stages the proposer picked.
