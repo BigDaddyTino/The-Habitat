@@ -32,8 +32,36 @@ function jpegDimensions(path: string) {
   throw new Error(`${path} has no readable JPEG frame`);
 }
 
-test("every canonical region and POI has optimized cinematic key art", () => {
-  assert.equal(brandedRegionCount, 14);
+test("every illustrated canonical region and POI has optimized cinematic key art", () => {
+  assert.equal(brandedRegionCount, 26);
+  assert.deepEqual(brandedRegionSlugs, [
+    "arcadian-soverign-guard",
+    "arcadian-special-intelligence-service",
+    "blackreef-harbour",
+    "census-office",
+    "chancellory-of-arcadia",
+    "east-side",
+    "embassy-row",
+    "exclusion-area",
+    "fort-tempest",
+    "forward-camp-kestrel",
+    "glasswater-village",
+    "lower-westside",
+    "northwatch-relay",
+    "pearl-beachhead",
+    "port-arcadia",
+    "riftwood-interior",
+    "shattermarket",
+    "stormglass-landing",
+    "stormglass-quarry",
+    "the-northside",
+    "the-ocean",
+    "the-peninsula",
+    "the-southside",
+    "the-starting-island",
+    "upper-westside",
+    "waterfront-district",
+  ]);
 
   for (const slug of brandedRegionSlugs) {
     const brand = getRegionBranding(slug);
