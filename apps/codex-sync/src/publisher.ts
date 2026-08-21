@@ -33,12 +33,18 @@ function timestampId(date: Date) {
   return date.toISOString().replaceAll("-", "").replaceAll(":", "").replace(".", "");
 }
 
-function sourceContentHash(snapshot: Awaited<ReturnType<typeof buildCodexSnapshot>>, assets: Awaited<ReturnType<typeof storeCodexAssets>>) {
+function sourceContentHash(
+  snapshot: Awaited<ReturnType<typeof buildCodexSnapshot>>,
+  compatibility: ReturnType<typeof buildCanonCompatibilityExport>,
+  assets: Awaited<ReturnType<typeof storeCodexAssets>>,
+) {
   const stableSnapshot = { ...snapshot, generatedAt: "" };
+  const stableCompatibility = { ...compatibility, generatedAt: "", revisionCursor: null };
   return sha256Bytes(
     JSON.stringify({
       releaseLayoutVersion: 1,
       snapshot: stableSnapshot,
+      compatibility: stableCompatibility,
       assets: assets.map((asset) => ({ logicalPath: asset.logicalPath, sha256: asset.sha256, bytes: asset.bytes })),
     }),
   );
@@ -88,13 +94,13 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
     buildCodexSnapshot(generatedAt),
     storeCodexAssets(sourceAssets, syncRoot),
   ]);
-  const contentSha256 = sourceContentHash(snapshot, assets);
+  const compatibility = buildCanonCompatibilityExport(snapshot);
+  const contentSha256 = sourceContentHash(snapshot, compatibility, assets);
   const current = await readCurrentPointer(syncRoot);
   if (current?.sourceContentSha256 === contentSha256) {
     return { changed: false, snapshotId: current.snapshotId, contentSha256, assets: assets.length };
   }
 
-  const compatibility = buildCanonCompatibilityExport(snapshot);
   const contentBytes = jsonBytes(snapshot);
   const compatibilityBytes = jsonBytes(compatibility);
   const snapshotId = `${timestampId(generatedAt)}-${contentSha256.slice(0, 12)}`;

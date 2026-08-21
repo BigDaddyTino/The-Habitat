@@ -5,7 +5,7 @@ import {
   analyzeStoryGraph,
   developmentOnlyStoryKinds,
   exportableStoryStatus,
-  findStoryEntryNodeKeys,
+  findStoryArcEntryNodeKeys,
   isDevelopmentOnlyStoryKind,
   storyExportContractVersion,
   type MartinoStoryExport,
@@ -202,7 +202,7 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
       // Withheld unless the faction is itself canon, same as every other
       // reference: the importer must never resolve a banner the game lacks.
       faction: arc.faction && arc.faction.status === exportableStoryStatus ? { slug: arc.faction.slug, title: arc.faction.title } : null,
-      entryNodeKeys: findStoryEntryNodeKeys(graphNodesByAge, graphEdges),
+      entryNodeKeys: findStoryArcEntryNodeKeys(arc.slug, graphNodesByAge, graphEdges),
       nodes,
       // Reported, never enforced. The importer decides whether a story with
       // loose ends is worth building; the codex only refuses to hide them.

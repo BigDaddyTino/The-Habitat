@@ -2,7 +2,7 @@ import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import {
   analyzeStoryGraph,
-  findStoryEntryNodeKeys,
+  findStoryArcEntryNodeKeys,
   groupStoryMissionChains,
   isStoryPresenceFresh,
   storyPlaceAncestry,
@@ -279,7 +279,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       updatedAt: edge.updatedAt,
     })),
     libraryEntries,
-    entryNodeKeys: findStoryEntryNodeKeys(graphNodes, graphEdges),
+    entryNodeKeys: findStoryArcEntryNodeKeys(arc.slug, graphNodes, graphEdges),
     problems: analyzeStoryGraph(graphNodes, graphEdges),
     present: presence
       .filter((row) => isStoryPresenceFresh(row.lastSeenAt, now))

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   analyzeStoryGraph,
+  findStoryArcEntryNodeKeys,
   findStoryEntryNodeKeys,
   isStoryLockHeld,
   isStoryFlowEditable,
@@ -58,6 +59,23 @@ test("the opening is the node nothing leads into", () => {
   const nodes = [scene("gate"), scene("hall"), ending("out")];
   const edges = [link("gate", "hall"), link("hall", "out")];
   assert.deepEqual(findStoryEntryNodeKeys(nodes, edges), ["gate"]);
+});
+
+test("the true-death binding scene is also an importer root without cutting its visible quest branch", () => {
+  const nodes = [scene("nothing-answers"), scene("find-a-forge"), scene("bind-again"), ending("safe")];
+  const edges = [
+    link("nothing-answers", "find-a-forge"),
+    link("find-a-forge", "bind-again"),
+    link("bind-again", "safe"),
+  ];
+  assert.deepEqual(findStoryArcEntryNodeKeys("the-danger-of-true-death", nodes, edges), ["nothing-answers", "bind-again"]);
+  assert.deepEqual(findStoryEntryNodeKeys(nodes, edges), ["nothing-answers"], "the underlying graph remains connected");
+  assert.deepEqual(findStoryArcEntryNodeKeys("another-arc", nodes, edges), ["nothing-answers"]);
+  assert.equal(
+    findStoryArcEntryNodeKeys("the-danger-of-true-death", nodes.filter((node) => node.key !== "bind-again"), edges).includes("bind-again"),
+    false,
+    "a withheld or removed secondary root is never invented",
+  );
 });
 
 test("a scene with no way out is a dead end, but an ending is not", () => {

@@ -234,6 +234,29 @@ export function findStoryEntryNodeKeys(nodes: StoryGraphNode[], edges: StoryGrap
 }
 
 /**
+ * A small number of authored cards are independent subsystem roots as well as
+ * steps reached through the visible quest flow. They stay connected on the
+ * board, but the game importer must also be able to address them as roots when
+ * it merges the relevant dialogue graph.
+ *
+ * Keep these exceptions explicit and key-based. The natural graph openings
+ * remain first (and therefore keep the canonical start stable), and a stale
+ * exception is ignored when its card is absent from the exported node set.
+ */
+const additionalStoryEntryNodeKeys: Readonly<Record<string, readonly string[]>> = {
+  "the-danger-of-true-death": ["bind-again"],
+};
+
+export function findStoryArcEntryNodeKeys(arcSlug: string, nodes: StoryGraphNode[], edges: StoryGraphEdge[]) {
+  const entryKeys = findStoryEntryNodeKeys(nodes, edges);
+  const knownKeys = new Set(nodes.map((node) => node.key));
+  for (const key of additionalStoryEntryNodeKeys[arcSlug] ?? []) {
+    if (knownKeys.has(key) && !entryKeys.includes(key)) entryKeys.push(key);
+  }
+  return entryKeys;
+}
+
+/**
  * The problems panel behind every board, and the gate the export reports on.
  *
  * These are warnings rather than errors on purpose: a story in progress is

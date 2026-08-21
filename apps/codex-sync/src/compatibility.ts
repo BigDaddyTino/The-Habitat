@@ -1,7 +1,7 @@
 import {
   analyzeStoryGraph,
   developmentOnlyStoryKinds,
-  findStoryEntryNodeKeys,
+  findStoryArcEntryNodeKeys,
   isDevelopmentOnlyStoryKind,
   storyExportContractVersion,
   type MartinoCodexSnapshot,
@@ -106,7 +106,7 @@ export function buildCanonCompatibilityExport(snapshot: MartinoCodexSnapshot): M
         category: arc.category as StoryArcCategory,
         companion: companion?.status === canon ? { slug: companion.slug, title: companion.title } : null,
         faction: faction?.status === canon ? { slug: faction.slug, title: faction.title } : null,
-        entryNodeKeys: findStoryEntryNodeKeys(graphNodesByAge, graphEdges),
+        entryNodeKeys: findStoryArcEntryNodeKeys(arc.slug, graphNodesByAge, graphEdges),
         nodes,
         problems: analyzeStoryGraph(graphNodes, graphEdges),
       };
