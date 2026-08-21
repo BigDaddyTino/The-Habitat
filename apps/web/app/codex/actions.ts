@@ -904,10 +904,16 @@ export async function createEntry(formData: FormData) {
   // through the sheet is what left new POIs sitting in "not placed in a region
   // yet" — so where it sits and what kind of place it is are asked here, and
   // written as a real region sheet rather than left null.
+  //
+  // Asked, but not required. The library panel always sends a place kind; the
+  // bible's generic form asks neither that nor a parent, and gating the sheet
+  // on one of them arriving meant a region created there was born with no sheet
+  // at all — unplaced AND unwatched, because the needs-work checks read meta.
+  // A place with nothing filled in yet is still a place.
   const place = parsed.data.kind === "REGION" ? parseStoryPlaceKind(formData.get("placeKind")) : null;
   const parentSlug = parsed.data.kind === "REGION" ? metaSlug.safeParse(formData.get("parent")) : null;
   const parent = parentSlug?.success ? parentSlug.data : null;
-  const placeMeta = place || parent
+  const placeMeta: StoryRegionMeta | null = parsed.data.kind === "REGION"
     ? {
         type: place?.type ?? null,
         settlementTier: place?.settlementTier ?? null,
@@ -921,7 +927,7 @@ export async function createEntry(formData: FormData) {
         soulForge: null,
         gameTag: null,
         openQuestions: [],
-      } satisfies StoryRegionMeta
+      }
     : null;
 
   // Same law for systems: Weather is born inside Environment, not created

@@ -369,26 +369,64 @@ test("every kind that can name another entry has its references checked", () => 
   }
 });
 
-test("a system and a race are born with their sheet, whether or not anything is above them", () => {
-  // Both sheets used to be composed only when the parent picker had been
-  // filled, so a top-level system and a brand-new race arrived with no sheet
-  // at all — no build status on the dossier, and nothing for the reference
-  // checks above to read. What decides whether a sheet is written is the kind
-  // being created, never how much of the form was filled in.
+/**
+ * The variable `createEntry` composes each kind's starter sheet into. Only the
+ * kinds with a sheet appear here, and the list is checked against
+ * `metaSchemasByKind` below so a tenth sheeted kind cannot be added without
+ * being named — which is the whole point: three kinds grew this hole one at a
+ * time, and nobody noticed until each was created by hand.
+ */
+// Not keyed on `keyof typeof metaSchemasByKind`: that map is a Partial over
+// every entry kind, so its key type spans the sheetless ones too. The keys are
+// reconciled against the real ones at runtime instead, which is the check that
+// actually keeps this honest.
+const sheetVariables: Record<string, string> = {
+  CHARACTER: "characterMeta",
+  FACTION: "factionMeta",
+  REGION: "placeMeta",
+  CREATURE: "creatureMeta",
+  ITEM: "itemMeta",
+  EVENT: "eventMeta",
+  SYSTEM: "systemMeta",
+  THREAD: "threadMeta",
+  COMPANION_MISSION: "missionMeta",
+};
+
+test("every kind with a sheet is born carrying it, however little of the form was filled in", () => {
+  // Three kinds grew the same hole. SYSTEM and CREATURE composed their sheet
+  // only when the parent picker was filled; REGION only when a place kind or a
+  // parent arrived, which the bible's generic create form never sends. Each
+  // time, the entry was born with meta null — no facts on its dossier, and
+  // nothing for the per-kind reference checks in getStoryNeedsWork to read, so
+  // its links could rot silently.
+  //
+  // What decides whether a sheet is written is the kind being created. Never
+  // how much of the form was filled in. This asserts that for every sheeted
+  // kind at once, so a fourth cannot quietly grow it.
   const actions = readFileSync(join(process.cwd(), "app/codex/actions.ts"), "utf8");
   const createEntry = actions.slice(actions.indexOf("export async function createEntry("), actions.indexOf("export async function updateEntry("));
   assert.ok(createEntry.length > 0, "createEntry must exist");
 
-  for (const [meta, kind] of [["systemMeta", "SYSTEM"], ["creatureMeta", "CREATURE"]] as const) {
-    const composed = new RegExp(`const ${meta}: Story\\w+ \\| null = parsed\\.data\\.kind === "${kind}"`);
-    assert.match(createEntry, composed, `${meta} must be written for every ${kind}, not only a filed one`);
+  // The map above has to keep up with the schemas, or the net has a hole in it.
+  assert.deepEqual(
+    Object.keys(sheetVariables).sort(),
+    Object.keys(metaSchemasByKind).sort(),
+    "every kind with a meta schema needs its createEntry variable named here",
+  );
+
+  for (const [kind, variable] of Object.entries(sheetVariables)) {
+    const composed = new RegExp(`const ${variable}: Story\\w+ \\| null = parsed\\.data\\.kind === "${kind}"`);
+    assert.match(createEntry, composed, `${variable} must be written for every ${kind}, whatever else the form carried`);
   }
 
-  // The specific regression: gating the sheet on the parent slug parsing.
+  // The three specific regressions: gating a sheet on an optional field parsing.
   assert.doesNotMatch(createEntry, /const systemMeta: \w+ \| null = systemParent\?\.success/, "a top-level system must still get its sheet");
   assert.doesNotMatch(createEntry, /const creatureMeta: \w+ \| null = raceParent\?\.success/, "a race with nothing above it must still get its sheet");
+  assert.doesNotMatch(createEntry, /const placeMeta[^=]*= place \|\| parent/, "a region created without a place kind must still get its sheet");
 
-  // A parent that was picked still has to reach the sheet.
+  // What the pickers do supply still has to reach the sheet.
   assert.match(createEntry, /parent: systemParent\?\.success \? systemParent\.data : null/, "a filed system keeps its parent");
   assert.match(createEntry, /parent: raceParent\?\.success \? raceParent\.data : null/, "a filed creature keeps its race");
+  assert.match(createEntry, /type: place\?\.type \?\? null/, "a placed region keeps the kind of place it is");
+  assert.match(createEntry, /settlementTier: place\?\.settlementTier \?\? null/, "a settlement keeps its tier");
 });
