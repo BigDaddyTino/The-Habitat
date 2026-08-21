@@ -33,7 +33,6 @@ const gatedActions = [
   "updateArc",
   "createNode",
   "updateNode",
-  "moveNode",
   "deleteNode",
   "createEdge",
   "updateEdge",

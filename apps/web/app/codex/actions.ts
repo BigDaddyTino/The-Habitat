@@ -550,42 +550,6 @@ export async function updateNode(formData: FormData) {
   refreshCodex(arcSlug);
 }
 
-const moveNodeSchema = z.object({
-  nodeId: z.string().uuid(),
-  canvasX: z.coerce.number().int().min(-100000).max(100000),
-  canvasY: z.coerce.number().int().min(-100000).max(100000),
-});
-
-/**
- * Position is layout, not content, so a drag deliberately does not touch
- * `version` — moving a card must never invalidate the edit somebody else has
- * open in the inspector.
- */
-export async function moveNode(input: { nodeId: string; canvasX: number; canvasY: number }) {
-  const user = await requireRole(storyReadRole);
-  const parsed = moveNodeSchema.safeParse(input);
-  if (!parsed.success) throw refusal("That position is off the board.");
-
-  await db.$transaction(async (tx) => {
-    const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { id: true, arcId: true, title: true, canvasX: true, canvasY: true } });
-    if (!node) throw refusal("That node no longer exists.");
-    if (node.canvasX === parsed.data.canvasX && node.canvasY === parsed.data.canvasY) return;
-    await assertArcUnlocked(tx, node.arcId);
-
-    await tx.storyNode.update({ where: { id: node.id }, data: { canvasX: parsed.data.canvasX, canvasY: parsed.data.canvasY } });
-    await recordRevision(tx, {
-      entityType: "NODE",
-      entityId: node.id,
-      arcId: node.arcId,
-      action: "MOVED",
-      actorUserId: user.id,
-      summary: `Moved "${node.title}"`,
-      before: { canvasX: node.canvasX, canvasY: node.canvasY },
-      after: { canvasX: parsed.data.canvasX, canvasY: parsed.data.canvasY },
-    });
-  });
-}
-
 export async function deleteNode(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const nodeId = z.string().uuid().safeParse(formData.get("nodeId"));
