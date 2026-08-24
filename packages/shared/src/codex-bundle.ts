@@ -5,7 +5,7 @@
  * resource library (including non-canon work and its artwork).
  */
 
-export const codexBundleContractVersion = 3 as const;
+export const codexBundleContractVersion = 4 as const;
 
 export type CodexJsonValue =
   | null
@@ -38,6 +38,7 @@ export type CodexBundleCounts = {
   revisions: number;
   maps: number;
   placements: number;
+  nodePlacements: number;
   assets: number;
 };
 
@@ -214,6 +215,22 @@ export type CodexSnapshotMapPlacement = {
   updatedAt: string;
 };
 
+export type CodexSnapshotMapNodePlacement = {
+  id: string;
+  mapSlug: string;
+  arcSlug: string;
+  nodeKey: string;
+  geometryKind: string;
+  geometry: CodexJsonValue;
+  label: readonly [number, number] | null;
+  minZoom: number;
+  maxZoom: number | null;
+  priority: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type MartinoCodexSnapshot = {
   contract: "martino-codex-snapshot";
   contractVersion: typeof codexBundleContractVersion;
@@ -235,6 +252,7 @@ export type MartinoCodexSnapshot = {
   revisions: CodexSnapshotRevision[];
   maps: CodexSnapshotMap[];
   placements: CodexSnapshotMapPlacement[];
+  nodePlacements: CodexSnapshotMapNodePlacement[];
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -133,6 +133,7 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
       revisions: snapshot.revisions.length,
       maps: snapshot.maps.length,
       placements: snapshot.placements.length,
+      nodePlacements: snapshot.nodePlacements.length,
       assets: assets.length,
     },
     content: {

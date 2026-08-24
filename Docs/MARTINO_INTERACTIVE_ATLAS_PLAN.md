@@ -2,9 +2,9 @@
 
 ## Implementation status — 2026-08-24
 
-The approved V2 geography is locked and the first production vertical slice is implemented. The live Codex now owns one authenticated world scene, ten new macro-region dossiers, and 24 audited placements. `/codex/map` renders the versioned world master with Codex-derived biome, settlement, POI, faction, system, and quest overlays; the Great Hall links to it without loading the renderer; and Bundle v3 carries scenes, normalized geometry, placements, and map art to the trusted game-computer handoff.
+The approved V2 geography is locked and the atlas now owns three authenticated scenes: the macro world, a dedicated Starting Island tactical map, and a dedicated Port Arcadia city map. The live Codex carries 36 calibrated place placements plus 10 independently positioned quest-node placements. `/codex/map` renders the versioned masters with Codex-derived region, district, settlement, POI, faction, system, and quest overlays; world markers drill into their child scenes instead of enlarging the macro image beyond its useful resolution; and Bundle v4 carries all three scenes, both placement kinds, and all three active map masters to the trusted game-computer handoff.
 
-Authenticated desktop/mobile Chrome QA is complete, including search, filters, selection, pan/zoom, Codex navigation, Great Hall entry, overflow, and console health. Still ahead: an 8K-class deep-zoom art master and tile pyramid, separate region/city/town scene art, the writer-facing Unplaced tray and geometry editor, route/political overlays, and an adapter-owned calibration from atlas locations to Unreal level coordinates.
+The database migrations, strict typechecks, lint, 335 web tests, 3 sync tests, production build, isolated Bundle v4 publish/verification, and authenticated desktop/mobile Chrome calibration QA are complete. Browser QA also corrected the world overview's full-extent framing and moved the Starting Island macro marker onto the actual island immediately southwest of Port Arcadia. Still ahead: an 8K-class tile pyramid when art tooling supports a materially larger native master, additional region/city/town scenes, the writer-facing Unplaced tray and geometry editor, route/political overlays, and an adapter-owned calibration from atlas locations to Unreal level coordinates.
 
 ## Outcome
 
@@ -30,7 +30,7 @@ The atlas is a view over Codex truth. It is not a second lore database, a simula
 2. **Use OpenLayers with a pixel-coordinate projection.** It supports a fictional image coordinate system, deep-zoom image tiles, vector features, selection, and touch interaction. It does not require fake latitude and longitude.
 3. **Keep map art and map information separate.** Terrain, coastlines, relief, water, and permanent environmental texture belong in the raster master. Labels, borders, highlights, POIs, quests, faction control, routes, and selection states are data-driven overlays.
 4. **Keep lore in existing Codex records.** A map placement links to a `StoryEntry`; it does not copy the entry title, summary, biome, faction control, population, status, Veil Anchor tier, Soul Forge state, or dossier prose.
-5. **Derive quest locations from existing quest relationships.** A quest pickup comes from `StoryArc.regionEntryId`. Quest steps come from REGION entries linked to `StoryNode` records through `StoryEntryLink`. An exact new objective location must first become a real Codex place.
+5. **Derive broad quest locations and explicitly place exact quest beats.** A quest pickup still comes from `StoryArc.regionEntryId`, and place-linked steps still come through `StoryEntryLink`. When two steps in one city occupy different ground, `StoryMapNodePlacement` assigns geometry directly to the existing `StoryNode`; it does not invent duplicate REGION entries or copy quest prose into map data.
 6. **Store placement separately from `StoryEntry.meta`.** Geometry has different validation, revision, query, and editing needs from lore sheets. Adding large polygons to required-but-nullable region JSON would make ordinary region edits fragile and would duplicate map concerns in every entry.
 7. **Use normalized fictional coordinates.** Store positions in a fixed `0..100000` coordinate space per scene, independent of the current art resolution. Replacing an 8K master with a 12K master will not move every POI.
 8. **Do not invent locations.** New Codex places without geometry appear in an authenticated "Unplaced" tray. They do not receive guessed coordinates and do not silently disappear.
@@ -134,6 +134,15 @@ The tile path is derived from validated `slug` and `artVersion`; a request never
 
 One placement represents one Codex place in one map scene. A multipolygon covers islands or separated pieces without duplicating the entry. The same place may have placements in a world overview and a detailed parent map when both scales need it.
 
+### `StoryMapNodePlacement`
+
+- `id`, `mapId`, `nodeId`
+- the same validated point, polygon, or multipolygon geometry contract as place placements
+- optional label anchor and minimum/maximum visible zoom
+- display priority, optimistic version, creator/editor, and timestamps
+
+This record positions a real Story Codex node without manufacturing a duplicate REGION entry just to draw a quest marker. The stable arc/node identity remains authoritative, while the placement supplies only scene-specific cartography. A deliberately broad search polygon is valid when canon identifies a district or city search area but has not established one exact point; the renderer must not present such an area as a precise confirmed location.
+
 ### Route geometry
 
 Connections continue to live in REGION meta. Initially the renderer draws a connection between the linked placements. A small optional route-geometry record can later provide an authored curve for a road or sea lane without copying the relationship itself. Removing the Codex connection removes the route.
@@ -168,7 +177,7 @@ Create a pure `getStoryMapProjection(mapSlug, viewer)` service that returns only
 
 - scene metadata and tile identity;
 - placements with resolved Codex presentation data;
-- derived quest appearances;
+- derived quest appearances plus independently positioned quest-node features;
 - derived connections and system markers;
 - child-map links;
 - real counts and an update cursor;

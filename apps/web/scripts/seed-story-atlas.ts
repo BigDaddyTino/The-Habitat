@@ -88,41 +88,118 @@ const macroRegions = [
 ] as const;
 
 type Point = readonly [number, number];
-const point = (x: number, y: number) => ({ type: "POINT", coordinates: [x, y] as Point } as const);
-const polygon = (points: readonly Point[]) => ({ type: "POLYGON", coordinates: [[...points, points[0]]] } as const);
+const imageWidth = 1536;
+const imageHeight = 1024;
+const coordinateWidth = 100000;
+const coordinateHeight = 66667;
+const px = (x: number, y: number): Point => [Math.round(x / imageWidth * coordinateWidth), Math.round(y / imageHeight * coordinateHeight)];
+const point = (x: number, y: number) => ({ type: "POINT", coordinates: px(x, y) } as const);
+const polygon = (points: readonly Point[]) => {
+  const normalized = points.map(([x, y]) => px(x, y));
+  return { type: "POLYGON", coordinates: [[...normalized, normalized[0]]] } as const;
+};
+
 type PlacementSeed = {
   slug: string;
   geometry: ReturnType<typeof point> | ReturnType<typeof polygon>;
   label?: Point;
   priority: number;
   minZoom?: number;
+  maxZoom?: number;
 };
 
-const placements: readonly PlacementSeed[] = [
-  { slug: "high-cliffs", geometry: polygon([[25000, 1500], [67000, 1000], [71000, 13000], [61500, 19000], [35000, 18500], [22000, 10000]]), label: [49000, 5400], priority: 100 },
-  { slug: "grand-lake", geometry: polygon([[38500, 5000], [58500, 4200], [64000, 9000], [58000, 12500], [40000, 12000], [35000, 8300]]), label: [49500, 8000], priority: 110 },
-  { slug: "the-floating-city", geometry: point(50000, 8500), label: [50000, 8500], priority: 180, minZoom: 0.5 },
-  { slug: "grand-rift", geometry: polygon([[0, 2500], [27000, 3000], [35500, 17000], [32000, 34500], [8000, 39000], [0, 30000]]), label: [14500, 12500], priority: 100 },
-  { slug: "the-red-forest", geometry: polygon([[12000, 18000], [36000, 16000], [43000, 28500], [33000, 38500], [11000, 33000], [5000, 24500]]), label: [23500, 24500], priority: 115 },
-  { slug: "death-canyon", geometry: polygon([[0, 18500], [17500, 14500], [31000, 22500], [30000, 35000], [9000, 39000], [0, 31000]]), label: [13500, 29000], priority: 125 },
-  { slug: "the-desert", geometry: polygon([[0, 32500], [23000, 31000], [37000, 41500], [33000, 53500], [0, 54500]]), label: [17000, 44000], priority: 100 },
-  { slug: "riverlands", geometry: polygon([[35000, 13500], [43000, 9000], [47500, 21000], [65000, 16000], [57500, 28500], [78000, 35000], [56500, 38500], [49000, 52000], [40500, 39000], [27000, 43500], [34000, 31500], [20500, 24500], [39500, 26500]]), label: [47000, 28500], priority: 105 },
-  { slug: "magic-torn-wasteland", geometry: polygon([[65000, 0], [100000, 0], [100000, 24000], [80500, 28000], [62000, 16000]]), label: [82000, 12500], priority: 100 },
-  { slug: "unknown-southeast", geometry: polygon([[72000, 24500], [100000, 23000], [100000, 52000], [78000, 50500], [65000, 37500]]), label: [84000, 37500], priority: 90 },
-  { slug: "the-peninsula", geometry: polygon([[37000, 34000], [65000, 32500], [66500, 43000], [60000, 52000], [57500, 63500], [47000, 65000], [40500, 55500], [33000, 47000]]), label: [50500, 47500], priority: 105 },
-  { slug: "port-arcadia", geometry: point(52500, 59600), label: [52500, 59600], priority: 220, minZoom: 0 },
-  { slug: "the-starting-island", geometry: point(33500, 60100), label: [33500, 60100], priority: 215, minZoom: 0 },
-  { slug: "the-ocean", geometry: point(78500, 58000), label: [78500, 58000], priority: 70, minZoom: 0 },
-  { slug: "stormglass-landing", geometry: point(32100, 60800), priority: 160, minZoom: 2.8 },
-  { slug: "shattermarket", geometry: point(32900, 60200), priority: 165, minZoom: 3.2 },
-  { slug: "forward-camp-kestrel", geometry: point(33700, 59800), priority: 175, minZoom: 3.2 },
-  { slug: "glasswater-village", geometry: point(32800, 59100), priority: 160, minZoom: 3.2 },
-  { slug: "blackreef-harbour", geometry: point(33500, 58700), priority: 155, minZoom: 3.2 },
-  { slug: "northwatch-relay", geometry: point(34200, 59000), priority: 150, minZoom: 3.5 },
-  { slug: "fort-tempest", geometry: point(34800, 59400), priority: 170, minZoom: 3.2 },
-  { slug: "stormglass-quarry", geometry: point(34600, 60100), priority: 160, minZoom: 3.2 },
-  { slug: "riftwood-interior", geometry: point(34000, 60300), priority: 160, minZoom: 3.5 },
-  { slug: "pearl-beachhead", geometry: point(34600, 61000), priority: 170, minZoom: 3.2 },
+type NodePlacementSeed = Omit<PlacementSeed, "slug"> & { arc: string; node: string };
+
+type MapSeed = {
+  slug: string;
+  title: string;
+  artVersion: string;
+  owner?: string;
+  parent?: string;
+  maxZoom: number;
+  placements: readonly PlacementSeed[];
+  nodePlacements?: readonly NodePlacementSeed[];
+};
+
+const maps: readonly MapSeed[] = [
+  {
+    slug: "martino-world",
+    title: "Martino World Atlas",
+    artVersion: "v1",
+    maxZoom: 3.1,
+    placements: [
+      { slug: "high-cliffs", geometry: polygon([[390, 0], [930, 0], [955, 155], [820, 235], [505, 215], [355, 110]]), label: px(675, 45), priority: 100 },
+      { slug: "grand-lake", geometry: polygon([[535, 65], [825, 55], [875, 135], [805, 205], [585, 205], [515, 130]]), label: px(690, 115), priority: 120 },
+      { slug: "the-floating-city", geometry: point(690, 105), label: px(690, 105), priority: 220 },
+      { slug: "grand-rift", geometry: polygon([[0, 0], [420, 0], [475, 150], [465, 365], [300, 455], [70, 390], [0, 275]]), label: px(220, 100), priority: 95 },
+      { slug: "death-canyon", geometry: polygon([[285, 75], [410, 75], [470, 205], [465, 445], [385, 505], [300, 385]]), label: px(370, 270), priority: 135 },
+      { slug: "the-red-forest", geometry: polygon([[245, 215], [485, 190], [605, 350], [570, 585], [360, 535], [275, 400]]), label: px(430, 385), priority: 125 },
+      { slug: "the-desert", geometry: polygon([[0, 210], [285, 175], [330, 385], [600, 560], [520, 685], [0, 675]]), label: px(190, 500), priority: 90 },
+      { slug: "riverlands", geometry: polygon([[455, 145], [565, 125], [650, 220], [825, 190], [970, 255], [990, 485], [875, 570], [785, 660], [650, 595], [535, 555], [465, 430]]), label: px(700, 385), priority: 105 },
+      { slug: "magic-torn-wasteland", geometry: polygon([[900, 0], [1536, 0], [1536, 285], [1220, 345], [970, 275], [875, 145]]), label: px(1175, 135), priority: 100 },
+      { slug: "unknown-southeast", geometry: polygon([[985, 250], [1536, 250], [1536, 725], [1190, 725], [955, 555], [875, 430]]), label: px(1260, 470), priority: 85 },
+      { slug: "the-peninsula", geometry: polygon([[520, 450], [965, 435], [1000, 610], [930, 760], [905, 1024], [660, 1024], [585, 760], [485, 590]]), label: px(730, 625), priority: 110 },
+      { slug: "port-arcadia", geometry: point(780, 920), label: px(780, 920), priority: 260 },
+      { slug: "the-starting-island", geometry: point(575, 900), label: px(575, 900), priority: 255 },
+      { slug: "the-ocean", geometry: point(1225, 880), label: px(1225, 880), priority: 60 },
+    ],
+  },
+  {
+    slug: "martino-starting-island",
+    title: "Starting Island Tactical Atlas",
+    artVersion: "v1",
+    owner: "the-starting-island",
+    parent: "martino-world",
+    maxZoom: 3.7,
+    placements: [
+      { slug: "glasswater-village", geometry: polygon([[70, 185], [260, 180], [330, 300], [250, 400], [75, 365]]), label: px(175, 290), priority: 180 },
+      { slug: "blackreef-harbour", geometry: polygon([[285, 75], [590, 70], [630, 230], [515, 285], [330, 250]]), label: px(445, 175), priority: 190 },
+      { slug: "northwatch-relay", geometry: point(760, 82), label: px(760, 82), priority: 210 },
+      { slug: "fort-tempest", geometry: polygon([[1260, 30], [1490, 35], [1510, 205], [1320, 220], [1235, 135]]), label: px(1380, 115), priority: 220 },
+      { slug: "forward-camp-kestrel", geometry: polygon([[300, 285], [620, 285], [680, 455], [540, 520], [300, 470]]), label: px(480, 390), priority: 230 },
+      { slug: "shattermarket", geometry: polygon([[255, 470], [565, 470], [610, 675], [430, 735], [230, 650]]), label: px(410, 585), priority: 205 },
+      { slug: "stormglass-landing", geometry: polygon([[70, 675], [380, 670], [435, 855], [285, 955], [70, 895]]), label: px(240, 815), priority: 225 },
+      { slug: "riftwood-interior", geometry: polygon([[695, 135], [1120, 125], [1240, 330], [1130, 565], [820, 560], [700, 405]]), label: px(960, 335), priority: 215 },
+      { slug: "stormglass-quarry", geometry: polygon([[650, 520], [1040, 500], [1110, 760], [965, 890], [690, 830]]), label: px(850, 695), priority: 220 },
+      { slug: "pearl-beachhead", geometry: polygon([[1110, 535], [1505, 510], [1525, 865], [1260, 920], [1075, 790]]), label: px(1300, 700), priority: 225 },
+    ],
+    nodePlacements: [
+      { arc: "the-island-is-already-lost", node: "the-operations-table", geometry: point(470, 395), priority: 310, minZoom: 2.7 },
+      { arc: "the-last-days-of-kestrel", node: "dig-in", geometry: point(520, 360), priority: 305, minZoom: 2.8 },
+      { arc: "the-last-days-of-kestrel", node: "the-dead-do-not-wait", geometry: point(940, 350), priority: 305, minZoom: 2.8 },
+      { arc: "the-last-days-of-kestrel", node: "every-fucking-meter", geometry: point(455, 420), priority: 305, minZoom: 3.1 },
+      { arc: "the-evacuation", node: "the-manifest", geometry: point(560, 405), priority: 305, minZoom: 2.8 },
+      { arc: "the-evacuation", node: "who-we-carry", geometry: point(520, 260), priority: 300, minZoom: 3.0 },
+      { arc: "the-evacuation", node: "the-harbour-run", geometry: point(430, 165), priority: 315, minZoom: 2.8 },
+    ],
+  },
+  {
+    slug: "martino-port-arcadia",
+    title: "Port Arcadia City Atlas",
+    artVersion: "v2",
+    owner: "port-arcadia",
+    parent: "martino-world",
+    maxZoom: 3.7,
+    placements: [
+      { slug: "exclusion-area", geometry: polygon([[585, 35], [975, 35], [1015, 180], [550, 180]]), label: px(790, 95), priority: 180 },
+      { slug: "upper-westside", geometry: polygon([[120, 95], [600, 85], [650, 360], [360, 440], [120, 330]]), label: px(360, 230), priority: 170 },
+      { slug: "lower-westside", geometry: polygon([[120, 325], [430, 330], [580, 565], [260, 665], [110, 530]]), label: px(310, 475), priority: 165 },
+      { slug: "the-northside", geometry: polygon([[560, 145], [1080, 135], [1125, 390], [965, 465], [565, 400]]), label: px(820, 275), priority: 170 },
+      { slug: "the-southside", geometry: polygon([[350, 350], [1160, 345], [1195, 690], [960, 750], [405, 700], [250, 555]]), label: px(755, 510), priority: 175 },
+      { slug: "waterfront-district", geometry: polygon([[385, 560], [1165, 555], [1260, 900], [980, 985], [470, 945], [260, 760]]), label: px(790, 760), priority: 185 },
+      { slug: "east-side", geometry: polygon([[1080, 155], [1465, 120], [1535, 560], [1320, 800], [1160, 620]]), label: px(1305, 390), priority: 170 },
+      { slug: "chancellory-of-arcadia", geometry: point(335, 185), label: px(335, 185), priority: 245, minZoom: 2.9 },
+      { slug: "arcadian-soverign-guard", geometry: point(235, 275), label: px(235, 275), priority: 245, minZoom: 3.0 },
+      { slug: "arcadian-special-intelligence-service", geometry: point(445, 315), label: px(445, 315), priority: 250, minZoom: 3.1 },
+      { slug: "embassy-row", geometry: point(515, 295), label: px(515, 295), priority: 250, minZoom: 3.1 },
+      { slug: "census-office", geometry: point(790, 655), label: px(790, 655), priority: 250, minZoom: 2.9 },
+    ],
+    nodePlacements: [
+      { arc: "binding-in-arcadia", node: "storm-beach", geometry: polygon([[20, 320], [150, 300], [235, 540], [165, 650], [25, 610]]), label: px(110, 470), priority: 320, minZoom: 2.5 },
+      { arc: "binding-in-arcadia", node: "military-docks", geometry: point(805, 785), label: px(805, 785), priority: 325, minZoom: 2.5 },
+      { arc: "binding-in-arcadia", node: "find-the-soul-forge", geometry: polygon([[190, 140], [1190, 135], [1280, 770], [1040, 900], [350, 820], [130, 520]]), label: px(790, 470), priority: 150, minZoom: 2.4, maxZoom: 2.95 },
+    ],
+  },
 ] as const;
 
 async function main() {
@@ -143,24 +220,132 @@ async function main() {
     });
   }
 
-  if (!apply) { console.log(`  would create/retain atlas scene and ${placements.length} placements`); return; }
-  const map = await db.storyMap.upsert({
-    where: { slug: "martino-world" },
-    update: {},
-    create: { slug: "martino-world", title: "Martino World Atlas", artVersion: "v1", imageWidth: 1536, imageHeight: 1024, coordinateWidth: 100000, coordinateHeight: 66667, initialCenterX: 50000, initialCenterY: 33333, initialZoom: 0, minZoom: 0, maxZoom: 8, createdByUserId: author.id },
-  });
-  const mapRevision = await db.storyRevision.findFirst({ where: { entityType: "MAP", entityId: map.id, action: "CREATED" }, select: { id: true } });
-  if (!mapRevision) await db.storyRevision.create({ data: { entityType: "MAP", entityId: map.id, action: "CREATED", actorUserId: author.id, summary: "Locked the approved V2 geography as the Martino world atlas", after: { slug: map.slug, artVersion: map.artVersion, coordinateWidth: map.coordinateWidth, coordinateHeight: map.coordinateHeight } } });
+  if (!apply) {
+    console.log(`  would calibrate ${maps.length} scenes, ${maps.reduce((count, map) => count + map.placements.length, 0)} place overlays, and ${maps.reduce((count, map) => count + (map.nodePlacements?.length ?? 0), 0)} quest overlays`);
+    return;
+  }
 
-  for (const seed of placements) {
-    const entry = await db.storyEntry.findUnique({ where: { slug: seed.slug }, select: { id: true, title: true } });
-    if (!entry) { console.log(`  unplaced missing ${seed.slug}`); continue; }
-    const existing = await db.storyMapPlacement.findUnique({ where: { mapId_entryId: { mapId: map.id, entryId: entry.id } }, select: { id: true } });
-    if (existing) { console.log(`  keep placement  ${seed.slug}`); continue; }
-    await db.$transaction(async (tx) => {
-      const placement = await tx.storyMapPlacement.create({ data: { mapId: map.id, entryId: entry.id, geometryKind: seed.geometry.type, geometry: seed.geometry as unknown as Prisma.InputJsonValue, ...(seed.label ? { labelX: seed.label[0], labelY: seed.label[1] } : {}), minZoom: seed.minZoom ?? 0, priority: seed.priority, createdByUserId: author.id } });
-      await tx.storyRevision.create({ data: { entityType: "PLACEMENT", entityId: placement.id, action: "CREATED", actorUserId: author.id, summary: `Placed "${entry.title}" on the Martino world atlas`, after: { map: map.slug, entry: seed.slug, geometry: seed.geometry as unknown as Prisma.InputJsonValue } } });
+  for (const seed of maps) {
+    const owner = seed.owner ? await db.storyEntry.findUnique({ where: { slug: seed.owner }, select: { id: true } }) : null;
+    if (seed.owner && !owner) throw new Error(`Missing owner entry ${seed.owner} for ${seed.slug}`);
+    const parent = seed.parent ? await db.storyMap.findUnique({ where: { slug: seed.parent }, select: { id: true } }) : null;
+    if (seed.parent && !parent) throw new Error(`Missing parent map ${seed.parent} for ${seed.slug}`);
+    const existingMap = await db.storyMap.findUnique({ where: { slug: seed.slug }, select: { id: true } });
+    const mapData = {
+      title: seed.title,
+      parentMapId: parent?.id ?? null,
+      ownerEntryId: owner?.id ?? null,
+      artVersion: seed.artVersion,
+      imageWidth,
+      imageHeight,
+      coordinateWidth,
+      coordinateHeight,
+      initialCenterX: 50000,
+      initialCenterY: 33333,
+      initialZoom: 0,
+      minZoom: 0,
+      maxZoom: seed.maxZoom,
+      version: seed.slug === "martino-world" ? 2 : 1,
+      updatedByUserId: author.id,
+    };
+    const map = await db.storyMap.upsert({
+      where: { slug: seed.slug },
+      update: mapData,
+      create: { slug: seed.slug, ...mapData, createdByUserId: author.id },
     });
+    await db.storyRevision.create({
+      data: {
+        entityType: "MAP",
+        entityId: map.id,
+        action: existingMap ? "UPDATED" : "CREATED",
+        actorUserId: author.id,
+        summary: `${existingMap ? "Calibrated" : "Created"} authoritative atlas scene "${seed.title}"`,
+        after: { slug: seed.slug, artVersion: seed.artVersion, parent: seed.parent ?? null, owner: seed.owner ?? null, maxZoom: seed.maxZoom },
+      },
+    });
+
+    const retainedPlacementIds: string[] = [];
+    for (const placementSeed of seed.placements) {
+      const entry = await db.storyEntry.findUnique({ where: { slug: placementSeed.slug }, select: { id: true, title: true } });
+      if (!entry) throw new Error(`Missing atlas entry ${placementSeed.slug} for ${seed.slug}`);
+      const existing = await db.storyMapPlacement.findUnique({ where: { mapId_entryId: { mapId: map.id, entryId: entry.id } }, select: { id: true } });
+      const placementData = {
+        geometryKind: placementSeed.geometry.type,
+        geometry: placementSeed.geometry as unknown as Prisma.InputJsonValue,
+        labelX: placementSeed.label?.[0] ?? null,
+        labelY: placementSeed.label?.[1] ?? null,
+        minZoom: placementSeed.minZoom ?? 0,
+        maxZoom: placementSeed.maxZoom ?? null,
+        priority: placementSeed.priority,
+        version: existing ? 2 : 1,
+        updatedByUserId: author.id,
+      };
+      const placement = await db.storyMapPlacement.upsert({
+        where: { mapId_entryId: { mapId: map.id, entryId: entry.id } },
+        update: placementData,
+        create: { mapId: map.id, entryId: entry.id, ...placementData, createdByUserId: author.id },
+      });
+      retainedPlacementIds.push(placement.id);
+      await db.storyRevision.create({
+        data: {
+          entityType: "PLACEMENT",
+          entityId: placement.id,
+          action: existing ? "MOVED" : "CREATED",
+          actorUserId: author.id,
+          summary: `${existing ? "Calibrated" : "Placed"} "${entry.title}" on ${seed.title}`,
+          after: { map: seed.slug, entry: placementSeed.slug, geometry: placementSeed.geometry as unknown as Prisma.InputJsonValue },
+        },
+      });
+    }
+    const stalePlacements = await db.storyMapPlacement.findMany({ where: { mapId: map.id, id: { notIn: retainedPlacementIds } }, select: { id: true, entry: { select: { slug: true, title: true } } } });
+    if (stalePlacements.length) {
+      await db.$transaction([
+        ...stalePlacements.map((placement) => db.storyRevision.create({ data: { entityType: "PLACEMENT", entityId: placement.id, action: "DELETED", actorUserId: author.id, summary: `Removed obsolete overlay "${placement.entry.title}" from ${seed.title}`, before: { map: seed.slug, entry: placement.entry.slug } } })),
+        db.storyMapPlacement.deleteMany({ where: { id: { in: stalePlacements.map((placement) => placement.id) } } }),
+      ]);
+    }
+
+    const retainedNodePlacementIds: string[] = [];
+    for (const placementSeed of seed.nodePlacements ?? []) {
+      const node = await db.storyNode.findFirst({ where: { key: placementSeed.node, arc: { slug: placementSeed.arc } }, select: { id: true, title: true } });
+      if (!node) throw new Error(`Missing quest node ${placementSeed.arc}/${placementSeed.node}`);
+      const existing = await db.storyMapNodePlacement.findUnique({ where: { mapId_nodeId: { mapId: map.id, nodeId: node.id } }, select: { id: true } });
+      const placementData = {
+        geometryKind: placementSeed.geometry.type,
+        geometry: placementSeed.geometry as unknown as Prisma.InputJsonValue,
+        labelX: placementSeed.label?.[0] ?? null,
+        labelY: placementSeed.label?.[1] ?? null,
+        minZoom: placementSeed.minZoom ?? 0,
+        maxZoom: placementSeed.maxZoom ?? null,
+        priority: placementSeed.priority,
+        version: existing ? 2 : 1,
+        updatedByUserId: author.id,
+      };
+      const placement = await db.storyMapNodePlacement.upsert({
+        where: { mapId_nodeId: { mapId: map.id, nodeId: node.id } },
+        update: placementData,
+        create: { mapId: map.id, nodeId: node.id, ...placementData, createdByUserId: author.id },
+      });
+      retainedNodePlacementIds.push(placement.id);
+      await db.storyRevision.create({
+        data: {
+          entityType: "PLACEMENT",
+          entityId: placement.id,
+          action: existing ? "MOVED" : "CREATED",
+          actorUserId: author.id,
+          summary: `${existing ? "Calibrated" : "Placed"} quest marker "${node.title}" on ${seed.title}`,
+          after: { map: seed.slug, arc: placementSeed.arc, node: placementSeed.node, geometry: placementSeed.geometry as unknown as Prisma.InputJsonValue },
+        },
+      });
+    }
+    const staleNodePlacements = await db.storyMapNodePlacement.findMany({ where: { mapId: map.id, id: { notIn: retainedNodePlacementIds } }, select: { id: true, node: { select: { key: true, title: true, arc: { select: { slug: true } } } } } });
+    if (staleNodePlacements.length) {
+      await db.$transaction([
+        ...staleNodePlacements.map((placement) => db.storyRevision.create({ data: { entityType: "PLACEMENT", entityId: placement.id, action: "DELETED", actorUserId: author.id, summary: `Removed obsolete quest overlay "${placement.node.title}" from ${seed.title}`, before: { map: seed.slug, arc: placement.node.arc.slug, node: placement.node.key } } })),
+        db.storyMapNodePlacement.deleteMany({ where: { id: { in: staleNodePlacements.map((placement) => placement.id) } } }),
+      ]);
+    }
+    console.log(`  calibrated ${seed.slug}: ${seed.placements.length} places, ${seed.nodePlacements?.length ?? 0} quests`);
   }
 }
 

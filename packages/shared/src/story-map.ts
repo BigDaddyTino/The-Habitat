@@ -24,20 +24,28 @@ export type StoryAtlasQuest = {
   nodeKey: string | null;
 };
 
+export type StoryAtlasMapLink = {
+  slug: string;
+  title: string;
+};
+
 export type StoryAtlasFeature = {
   placementId: string;
-  entryId: string;
+  source: "ENTRY" | "NODE";
+  entryId: string | null;
+  nodeId: string | null;
   slug: string;
   title: string;
   summary: string | null;
   body: string | null;
   status: string;
-  layer: Exclude<StoryAtlasLayer, "QUEST">;
+  layer: StoryAtlasLayer;
   geometry: StoryMapGeometry;
   label: StoryMapPoint | null;
   minZoom: number;
   maxZoom: number | null;
   priority: number;
+  childMap: StoryAtlasMapLink | null;
   place: {
     type: string | null;
     settlementTier: string | null;
@@ -69,6 +77,7 @@ export type StoryAtlasProjection = {
     initialZoom: number;
     minZoom: number;
     maxZoom: number;
+    parentMap: StoryAtlasMapLink | null;
   };
   features: readonly StoryAtlasFeature[];
   counts: {

@@ -52,7 +52,7 @@ test("mirror verifies and atomically materializes a complete release", async () 
     generatedAt: "2026-08-20T00:00:00.000Z",
     revisionCursor: null,
     sourceContentSha256: "a".repeat(64),
-    counts: { arcs: 0, nodes: 0, edges: 0, entries: 0, links: 0, comments: 0, revisions: 0, maps: 0, placements: 0, assets: 1 },
+    counts: { arcs: 0, nodes: 0, edges: 0, entries: 0, links: 0, comments: 0, revisions: 0, maps: 0, placements: 0, nodePlacements: 0, assets: 1 },
     content: contentDescriptor,
     compatibility: compatibilityDescriptor,
     assets: [

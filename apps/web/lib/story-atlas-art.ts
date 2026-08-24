@@ -1,7 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 
-const atlasFiles = new Map([["martino-world:v1", "martino-world-map-v1.png"]]);
+const atlasFiles = new Map([
+  ["martino-world:v1", "martino-world-map-v1.png"],
+  ["martino-starting-island:v1", "martino-starting-island-map-v1.png"],
+  ["martino-port-arcadia:v2", "martino-port-arcadia-map-v2.png"],
+]);
 
 export function resolveStoryAtlasArt(slug: string, versionFile: string) {
   const match = /^(v[0-9]+)\.png$/.exec(versionFile);

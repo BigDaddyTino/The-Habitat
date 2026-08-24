@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@habitat/db", "@habitat/shared"],
+  // Browser-driven local QA may reach the dev server through an explicit LAN
+  // address. Keep that origin opt-in so production and normal local dev do not
+  // broaden their accepted development origins.
+  allowedDevOrigins: process.env.HABITAT_ALLOWED_DEV_ORIGIN
+    ? [process.env.HABITAT_ALLOWED_DEV_ORIGIN]
+    : undefined,
   // The OpenTelemetry Node SDK patches modules at require time, which only works
   // when it is loaded from node_modules rather than bundled into the server
   // output. Next's own instrumentation guidance requires the same.

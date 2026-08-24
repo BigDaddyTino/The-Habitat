@@ -106,6 +106,10 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
     orderBy: [{ mapId: "asc" }, { priority: "desc" }, { entryId: "asc" }],
     include: { map: { select: { slug: true } }, entry: { select: { slug: true } } },
   });
+  const nodePlacements = await database.storyMapNodePlacement.findMany({
+    orderBy: [{ mapId: "asc" }, { priority: "desc" }, { nodeId: "asc" }],
+    include: { map: { select: { slug: true } }, node: { select: { key: true, arc: { select: { slug: true } } } } },
+  });
   const cursorAfter = await database.storyRevision.findFirst({
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: { id: true },
@@ -265,6 +269,21 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
           createdAt: placement.createdAt.toISOString(),
           updatedAt: placement.updatedAt.toISOString(),
         })),
+        nodePlacements: nodePlacements.map((placement) => ({
+          id: placement.id,
+          mapSlug: placement.map.slug,
+          arcSlug: placement.node.arc.slug,
+          nodeKey: placement.node.key,
+          geometryKind: placement.geometryKind,
+          geometry: sanitizeCodexJson(placement.geometry),
+          label: placement.labelX === null || placement.labelY === null ? null : [placement.labelX, placement.labelY] as const,
+          minZoom: placement.minZoom,
+          maxZoom: placement.maxZoom,
+          priority: placement.priority,
+          version: placement.version,
+          createdAt: placement.createdAt.toISOString(),
+          updatedAt: placement.updatedAt.toISOString(),
+        })),
   };
 }
 
@@ -288,6 +307,7 @@ export async function codexDatabaseFingerprint() {
   });
   const maps = await database.storyMap.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const placements = await database.storyMapPlacement.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
+  const nodePlacements = await database.storyMapNodePlacement.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   return JSON.stringify({
     revision: newestRevision?.id ?? null,
     arcs: [arcs._count._all, arcs._max.updatedAt?.toISOString() ?? null],
@@ -298,5 +318,6 @@ export async function codexDatabaseFingerprint() {
     comments: [comments._count._all, comments._max.createdAt?.toISOString() ?? null, comments._max.resolvedAt?.toISOString() ?? null],
     maps: [maps._count._all, maps._max.updatedAt?.toISOString() ?? null],
     placements: [placements._count._all, placements._max.updatedAt?.toISOString() ?? null],
+    nodePlacements: [nodePlacements._count._all, nodePlacements._max.updatedAt?.toISOString() ?? null],
   });
 }
