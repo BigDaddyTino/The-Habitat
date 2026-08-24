@@ -98,6 +98,14 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     include: { actor: { select: writerSelect } },
   });
+  const maps = await database.storyMap.findMany({
+    orderBy: [{ parentMapId: "asc" }, { slug: "asc" }],
+    include: { parent: { select: { slug: true } }, owner: { select: { slug: true } } },
+  });
+  const placements = await database.storyMapPlacement.findMany({
+    orderBy: [{ mapId: "asc" }, { priority: "desc" }, { entryId: "asc" }],
+    include: { map: { select: { slug: true } }, entry: { select: { slug: true } } },
+  });
   const cursorAfter = await database.storyRevision.findFirst({
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     select: { id: true },
@@ -223,6 +231,40 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
           after: sanitizeCodexJson(revision.after),
           createdAt: revision.createdAt.toISOString(),
         })),
+        maps: maps.map((map) => ({
+          id: map.id,
+          slug: map.slug,
+          title: map.title,
+          parentMapSlug: map.parent?.slug ?? null,
+          ownerEntrySlug: map.owner?.slug ?? null,
+          artVersion: map.artVersion,
+          artLogicalPath: `/images/maps/${map.slug}-map-${map.artVersion}.png`,
+          imageWidth: map.imageWidth,
+          imageHeight: map.imageHeight,
+          coordinateWidth: map.coordinateWidth,
+          coordinateHeight: map.coordinateHeight,
+          initialCenter: [map.initialCenterX, map.initialCenterY] as const,
+          initialZoom: map.initialZoom,
+          minZoom: map.minZoom,
+          maxZoom: map.maxZoom,
+          version: map.version,
+          createdAt: map.createdAt.toISOString(),
+          updatedAt: map.updatedAt.toISOString(),
+        })),
+        placements: placements.map((placement) => ({
+          id: placement.id,
+          mapSlug: placement.map.slug,
+          entrySlug: placement.entry.slug,
+          geometryKind: placement.geometryKind,
+          geometry: sanitizeCodexJson(placement.geometry),
+          label: placement.labelX === null || placement.labelY === null ? null : [placement.labelX, placement.labelY] as const,
+          minZoom: placement.minZoom,
+          maxZoom: placement.maxZoom,
+          priority: placement.priority,
+          version: placement.version,
+          createdAt: placement.createdAt.toISOString(),
+          updatedAt: placement.updatedAt.toISOString(),
+        })),
   };
 }
 
@@ -244,6 +286,8 @@ export async function codexDatabaseFingerprint() {
     _count: { _all: true },
     _max: { createdAt: true, resolvedAt: true },
   });
+  const maps = await database.storyMap.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
+  const placements = await database.storyMapPlacement.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   return JSON.stringify({
     revision: newestRevision?.id ?? null,
     arcs: [arcs._count._all, arcs._max.updatedAt?.toISOString() ?? null],
@@ -252,5 +296,7 @@ export async function codexDatabaseFingerprint() {
     entries: [entries._count._all, entries._max.updatedAt?.toISOString() ?? null],
     links: [links._count._all, links._max.createdAt?.toISOString() ?? null],
     comments: [comments._count._all, comments._max.createdAt?.toISOString() ?? null, comments._max.resolvedAt?.toISOString() ?? null],
+    maps: [maps._count._all, maps._max.updatedAt?.toISOString() ?? null],
+    placements: [placements._count._all, placements._max.updatedAt?.toISOString() ?? null],
   });
 }

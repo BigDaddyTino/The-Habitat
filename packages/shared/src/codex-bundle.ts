@@ -5,7 +5,7 @@
  * resource library (including non-canon work and its artwork).
  */
 
-export const codexBundleContractVersion = 2 as const;
+export const codexBundleContractVersion = 3 as const;
 
 export type CodexJsonValue =
   | null
@@ -36,6 +36,8 @@ export type CodexBundleCounts = {
   links: number;
   comments: number;
   revisions: number;
+  maps: number;
+  placements: number;
   assets: number;
 };
 
@@ -176,6 +178,42 @@ export type CodexSnapshotRevision = {
   createdAt: string;
 };
 
+export type CodexSnapshotMap = {
+  id: string;
+  slug: string;
+  title: string;
+  parentMapSlug: string | null;
+  ownerEntrySlug: string | null;
+  artVersion: string;
+  artLogicalPath: string;
+  imageWidth: number;
+  imageHeight: number;
+  coordinateWidth: number;
+  coordinateHeight: number;
+  initialCenter: readonly [number, number];
+  initialZoom: number;
+  minZoom: number;
+  maxZoom: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CodexSnapshotMapPlacement = {
+  id: string;
+  mapSlug: string;
+  entrySlug: string;
+  geometryKind: string;
+  geometry: CodexJsonValue;
+  label: readonly [number, number] | null;
+  minZoom: number;
+  maxZoom: number | null;
+  priority: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type MartinoCodexSnapshot = {
   contract: "martino-codex-snapshot";
   contractVersion: typeof codexBundleContractVersion;
@@ -195,6 +233,8 @@ export type MartinoCodexSnapshot = {
   links: CodexSnapshotLink[];
   comments: CodexSnapshotComment[];
   revisions: CodexSnapshotRevision[];
+  maps: CodexSnapshotMap[];
+  placements: CodexSnapshotMapPlacement[];
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -104,6 +104,7 @@ function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex/threads");
   revalidatePath("/codex/promises");
   revalidatePath("/codex/timeline");
+  revalidatePath("/codex/map");
   for (const collection of Object.keys(storyCollections)) revalidatePath(`/codex/library/${collection}`);
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, Circle, Flame, ShieldCheck, UsersRound } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Circle, Flame, MapPinned, ShieldCheck, UsersRound } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { ChronicleFeed } from "@/components/chronicle-feed";
 import { WorldCard } from "@/components/world-card";
@@ -11,6 +12,8 @@ import { getGreatHallAtmosphere } from "@/lib/hall-atmosphere";
 import { ClubGameCard } from "@/components/club-game-card";
 import { getClubGames } from "@/lib/club-games";
 import { getLiveStreamSummary } from "@/lib/stream-showcase";
+import { hasRole } from "@/lib/authorization";
+import { storyReadRole } from "@/lib/story-codex";
 
 export default async function GreatHallPage() {
   const worlds = await getWorlds();
@@ -23,6 +26,7 @@ export default async function GreatHallPage() {
   const atmosphere = getGreatHallAtmosphere();
   const clubGames = getClubGames();
   const liveStreams = await getLiveStreamSummary();
+  const canOpenCodex = await hasRole(storyReadRole);
   return (
     <div className="great-hall">
       <section className={`hall-hero sky-${atmosphere.sky}`}>
@@ -67,6 +71,14 @@ export default async function GreatHallPage() {
         </div>
         <div className="club-room-grid">{clubGames.map((game) => <ClubGameCard game={game} key={game.slug} />)}</div>
       </section>
+
+      {canOpenCodex ? <section className="content-shell hall-atlas-section">
+        <Link className="hall-atlas-card" href="/codex/map">
+          <Image unoptimized fill sizes="(max-width: 1200px) 100vw, 1200px" src="/codex-map/martino-world/v1.png" alt="The locked Martino V2 world atlas showing its macro regions, ocean, peninsula, and cities" />
+          <span className="hall-atlas-shade" aria-hidden="true" />
+          <span className="hall-atlas-copy"><span className="eyebrow">Martino Codex area</span><strong><MapPinned aria-hidden="true" size={22}/> Enter the World Atlas</strong><small>Explore biomes, cities, POIs, factions, and quest locations on the living Codex map.</small><span className="hall-atlas-action">Open interactive map <ArrowRight aria-hidden="true" size={15}/></span></span>
+        </Link>
+      </section> : null}
 
       <section className="content-shell lower-grid">
         <div className="chronicle-panel">

@@ -19,3 +19,4 @@ export * from "./story";
 export * from "./story-assistant";
 export * from "./gemini";
 export * from "./codex-bundle";
+export * from "./story-map";

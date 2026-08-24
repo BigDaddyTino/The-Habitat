@@ -55,6 +55,7 @@ async function walk(directory: string): Promise<string[]> {
 
 export async function discoverCodexAssets(repositoryRoot: string): Promise<SourceAsset[]> {
   const imagesRoot = path.join(repositoryRoot, "apps", "web", "public", "images");
+  const privateMapsRoot = path.join(repositoryRoot, "apps", "web", "private", "codex-art", "maps");
   const candidates: string[] = [];
   for (const directory of codexArtDirectories) {
     candidates.push(...(await walk(path.join(imagesRoot, directory))));
@@ -63,6 +64,7 @@ export async function discoverCodexAssets(repositoryRoot: string): Promise<Sourc
   for (const entry of rootFiles) {
     if (entry.isFile() && codexRootImages.has(entry.name)) candidates.push(path.join(imagesRoot, entry.name));
   }
+  candidates.push(...(await walk(privateMapsRoot)));
 
   const assets = await Promise.all(
     candidates
@@ -72,7 +74,9 @@ export async function discoverCodexAssets(repositoryRoot: string): Promise<Sourc
         const info = await stat(sourcePath);
         return {
           sourcePath,
-          logicalPath: `/images/${path.relative(imagesRoot, sourcePath).split(path.sep).join("/")}`,
+          logicalPath: sourcePath.startsWith(privateMapsRoot)
+            ? `/images/maps/${path.relative(privateMapsRoot, sourcePath).split(path.sep).join("/")}`
+            : `/images/${path.relative(imagesRoot, sourcePath).split(path.sep).join("/")}`,
           bytes: info.size,
           modifiedMs: info.mtimeMs,
         };

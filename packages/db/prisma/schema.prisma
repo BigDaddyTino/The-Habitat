@@ -429,76 +429,89 @@ enum StoryRevisionAction {
   UNLINKED
 }
 
+/// Geometry is deliberately small and engine-neutral. The authored atlas uses
+/// normalized 2D coordinates; Unreal world transforms remain a separate,
+/// game-owned concern.
+enum StoryMapGeometryKind {
+  POINT
+  POLYGON
+  MULTIPOLYGON
+}
+
 model User {
-  id                     String                    @id @default(uuid()) @db.Uuid
-  name                   String?
-  username               String?                   @unique
-  displayName            String?
-  email                  String?                   @unique
-  emailVerified          DateTime?
-  role                   Role                      @default(VIEWER)
-  image                  String?
-  bio                    String?                   @db.VarChar(500)
-  avatarBorder           String?                   @db.VarChar(64)
-  profileLayout          String?                   @db.VarChar(64)
-  isActive               Boolean                   @default(false)
-  createdAt              DateTime                  @default(now())
-  updatedAt              DateTime                  @updatedAt
-  accounts               Account[]
-  sessions               Session[]
-  playerIdentities       PlayerIdentity[]
-  auditLogs              AuditLog[]
-  chronicleReactions     ChronicleReaction[]
-  identityClaims         PlayerIdentityClaim[]     @relation("IdentityClaimant")
-  resolvedIdentityClaims PlayerIdentityClaim[]     @relation("IdentityClaimResolver")
-  identitiesGranted      IdentityOwnershipTransaction[] @relation("IdentityOwnershipTo")
-  identitiesRevoked      IdentityOwnershipTransaction[] @relation("IdentityOwnershipFrom")
-  ownershipDecisions     IdentityOwnershipTransaction[] @relation("IdentityOwnershipActor")
-  titles                 UserTitle[]               @relation("TitleOwner")
-  awardedTitles          UserTitle[]               @relation("TitleAwarder")
-  achievements           PlayerAchievement[]
-  recordHolders          RecordHolder[]            @relation("RecordHolderUser")
-  recordHistory          RecordHistory[]           @relation("RecordHistoryUser")
-  wakeRequests           WakeRequest[]             @relation("WakeRequestRequester")
-  resolvedWakeRequests   WakeRequest[]             @relation("WakeRequestResolver")
-  wakeVotes              WakeVote[]
-  pollsCreated           ServerPoll[]              @relation("PollCreator")
-  pollVotes              ServerPollVote[]
-  serverCommands         ServerCommand[]
-  socialAccounts         UserSocialAccount[]
-  unlockedRewards        UserAchievementReward[]
-  steamLinkNonces        SteamLinkNonce[]
-  twitchLinkNonces       TwitchLinkNonce[]
-  twitchChannel          TwitchChannel?
-  discordStreamSignal    DiscordStreamSignal?
-  xpEntries              UserXpEntry[]
-  weeklyQuestProgress    UserWeeklyQuestProgress[]
-  seasonMemberships      SeasonMembership[]
-  seasonXpEntries        SeasonXpEntry[]
-  seasonQuestProgress    UserSeasonQuestProgress[]
-  seasonTrophies         UserSeasonTrophy[]
-  identityReconciliations IdentityRewardReconciliation[]
-  clubGameProfiles        ClubGameProfile[]
-  gameActivities          GameActivity[]
-  invitationsSent         Invitation[]                @relation("InvitationSender")
-  memberPresence          MemberPresence?
-  memberReferralsSent     MemberReferral[]           @relation("MemberReferralInviter")
-  memberReferralReceived  MemberReferral?             @relation("MemberReferralInvitee")
-  storyArcs               StoryArc[]                  @relation("StoryArcCreator")
-  storyArcLocks           StoryArc[]                  @relation("StoryArcLock")
-  storyNodesCreated       StoryNode[]                 @relation("StoryNodeCreator")
-  storyNodesUpdated       StoryNode[]                 @relation("StoryNodeEditor")
-  storyNodeLocks          StoryNode[]                 @relation("StoryNodeLock")
-  storyEdges              StoryEdge[]                 @relation("StoryEdgeCreator")
-  storyEntriesCreated     StoryEntry[]                @relation("StoryEntryCreator")
-  storyEntriesUpdated     StoryEntry[]                @relation("StoryEntryEditor")
-  storyEntryLocks         StoryEntry[]                @relation("StoryEntryLock")
-  storyRevisions          StoryRevision[]             @relation("StoryRevisionActor")
-  storyComments           StoryComment[]              @relation("StoryCommentAuthor")
-  storyCommentsResolved   StoryComment[]              @relation("StoryCommentResolver")
-  storyPresence           StoryPresence?
-  storyExportTokens       StoryExportToken[]          @relation("StoryExportTokenCreator")
-  storyAssistantMessages  StoryAssistantMessage[]     @relation("StoryAssistantAsker")
+  id                        String                         @id @default(uuid()) @db.Uuid
+  name                      String?
+  username                  String?                        @unique
+  displayName               String?
+  email                     String?                        @unique
+  emailVerified             DateTime?
+  role                      Role                           @default(VIEWER)
+  image                     String?
+  bio                       String?                        @db.VarChar(500)
+  avatarBorder              String?                        @db.VarChar(64)
+  profileLayout             String?                        @db.VarChar(64)
+  isActive                  Boolean                        @default(false)
+  createdAt                 DateTime                       @default(now())
+  updatedAt                 DateTime                       @updatedAt
+  accounts                  Account[]
+  sessions                  Session[]
+  playerIdentities          PlayerIdentity[]
+  auditLogs                 AuditLog[]
+  chronicleReactions        ChronicleReaction[]
+  identityClaims            PlayerIdentityClaim[]          @relation("IdentityClaimant")
+  resolvedIdentityClaims    PlayerIdentityClaim[]          @relation("IdentityClaimResolver")
+  identitiesGranted         IdentityOwnershipTransaction[] @relation("IdentityOwnershipTo")
+  identitiesRevoked         IdentityOwnershipTransaction[] @relation("IdentityOwnershipFrom")
+  ownershipDecisions        IdentityOwnershipTransaction[] @relation("IdentityOwnershipActor")
+  titles                    UserTitle[]                    @relation("TitleOwner")
+  awardedTitles             UserTitle[]                    @relation("TitleAwarder")
+  achievements              PlayerAchievement[]
+  recordHolders             RecordHolder[]                 @relation("RecordHolderUser")
+  recordHistory             RecordHistory[]                @relation("RecordHistoryUser")
+  wakeRequests              WakeRequest[]                  @relation("WakeRequestRequester")
+  resolvedWakeRequests      WakeRequest[]                  @relation("WakeRequestResolver")
+  wakeVotes                 WakeVote[]
+  pollsCreated              ServerPoll[]                   @relation("PollCreator")
+  pollVotes                 ServerPollVote[]
+  serverCommands            ServerCommand[]
+  socialAccounts            UserSocialAccount[]
+  unlockedRewards           UserAchievementReward[]
+  steamLinkNonces           SteamLinkNonce[]
+  twitchLinkNonces          TwitchLinkNonce[]
+  twitchChannel             TwitchChannel?
+  discordStreamSignal       DiscordStreamSignal?
+  xpEntries                 UserXpEntry[]
+  weeklyQuestProgress       UserWeeklyQuestProgress[]
+  seasonMemberships         SeasonMembership[]
+  seasonXpEntries           SeasonXpEntry[]
+  seasonQuestProgress       UserSeasonQuestProgress[]
+  seasonTrophies            UserSeasonTrophy[]
+  identityReconciliations   IdentityRewardReconciliation[]
+  clubGameProfiles          ClubGameProfile[]
+  gameActivities            GameActivity[]
+  invitationsSent           Invitation[]                   @relation("InvitationSender")
+  memberPresence            MemberPresence?
+  memberReferralsSent       MemberReferral[]               @relation("MemberReferralInviter")
+  memberReferralReceived    MemberReferral?                @relation("MemberReferralInvitee")
+  storyArcs                 StoryArc[]                     @relation("StoryArcCreator")
+  storyArcLocks             StoryArc[]                     @relation("StoryArcLock")
+  storyNodesCreated         StoryNode[]                    @relation("StoryNodeCreator")
+  storyNodesUpdated         StoryNode[]                    @relation("StoryNodeEditor")
+  storyNodeLocks            StoryNode[]                    @relation("StoryNodeLock")
+  storyEdges                StoryEdge[]                    @relation("StoryEdgeCreator")
+  storyEntriesCreated       StoryEntry[]                   @relation("StoryEntryCreator")
+  storyEntriesUpdated       StoryEntry[]                   @relation("StoryEntryEditor")
+  storyEntryLocks           StoryEntry[]                   @relation("StoryEntryLock")
+  storyRevisions            StoryRevision[]                @relation("StoryRevisionActor")
+  storyComments             StoryComment[]                 @relation("StoryCommentAuthor")
+  storyCommentsResolved     StoryComment[]                 @relation("StoryCommentResolver")
+  storyPresence             StoryPresence?
+  storyExportTokens         StoryExportToken[]             @relation("StoryExportTokenCreator")
+  storyAssistantMessages    StoryAssistantMessage[]        @relation("StoryAssistantAsker")
+  storyMapsCreated          StoryMap[]                     @relation("StoryMapCreator")
+  storyMapsUpdated          StoryMap[]                     @relation("StoryMapEditor")
+  storyMapPlacementsCreated StoryMapPlacement[]            @relation("StoryMapPlacementCreator")
+  storyMapPlacementsUpdated StoryMapPlacement[]            @relation("StoryMapPlacementEditor")
 }
 
 model Account {
@@ -536,15 +549,15 @@ model VerificationToken {
 }
 
 model Invitation {
-  id              String    @id @default(uuid()) @db.Uuid
-  email           String    @unique
-  role            Role      @default(USER)
+  id              String          @id @default(uuid()) @db.Uuid
+  email           String          @unique
+  role            Role            @default(USER)
   expiresAt       DateTime
   acceptedAt      DateTime?
   revokedAt       DateTime?
-  createdAt       DateTime  @default(now())
-  invitedByUserId String?   @db.Uuid
-  invitedBy       User?     @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime        @default(now())
+  invitedByUserId String?         @db.Uuid
+  invitedBy       User?           @relation("InvitationSender", fields: [invitedByUserId], references: [id], onDelete: SetNull)
   memberReferral  MemberReferral?
 
   @@index([invitedByUserId, createdAt])
@@ -552,16 +565,16 @@ model Invitation {
 }
 
 model MemberReferral {
-  id             String      @id @default(uuid()) @db.Uuid
-  inviterUserId  String      @db.Uuid
-  invitedUserId  String      @unique @db.Uuid
-  invitationId   String?     @unique @db.Uuid
-  method         String      @db.VarChar(16)
-  codeWeek       String?     @db.VarChar(10)
-  createdAt      DateTime    @default(now())
-  inviter        User        @relation("MemberReferralInviter", fields: [inviterUserId], references: [id], onDelete: Restrict)
-  invitedUser    User        @relation("MemberReferralInvitee", fields: [invitedUserId], references: [id], onDelete: Cascade)
-  invitation     Invitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
+  id            String      @id @default(uuid()) @db.Uuid
+  inviterUserId String      @db.Uuid
+  invitedUserId String      @unique @db.Uuid
+  invitationId  String?     @unique @db.Uuid
+  method        String      @db.VarChar(16)
+  codeWeek      String?     @db.VarChar(10)
+  createdAt     DateTime    @default(now())
+  inviter       User        @relation("MemberReferralInviter", fields: [inviterUserId], references: [id], onDelete: Restrict)
+  invitedUser   User        @relation("MemberReferralInvitee", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  invitation    Invitation? @relation(fields: [invitationId], references: [id], onDelete: SetNull)
 
   @@index([inviterUserId, createdAt])
   @@index([method, createdAt])
@@ -664,19 +677,19 @@ model ServerMetricSample {
 }
 
 model PlayerIdentity {
-  id                String                 @id @default(uuid()) @db.Uuid
-  userId            String?                @db.Uuid
-  serverId          String?                @db.Uuid
+  id                String                         @id @default(uuid()) @db.Uuid
+  userId            String?                        @db.Uuid
+  serverId          String?                        @db.Uuid
   gameType          GameType
   displayName       String
   providerKey       String
   externalProvider  SocialPlatform?
-  externalAccountId String?                @db.VarChar(80)
+  externalAccountId String?                        @db.VarChar(80)
   verifiedAt        DateTime?
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
-  user              User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
-  server            GameServer?            @relation(fields: [serverId], references: [id], onDelete: SetNull)
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
+  user              User?                          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  server            GameServer?                    @relation(fields: [serverId], references: [id], onDelete: SetNull)
   events            ServerEvent[]
   claims            PlayerIdentityClaim[]
   recordHolders     RecordHolder[]
@@ -690,17 +703,17 @@ model PlayerIdentity {
 }
 
 model PlayerIdentityClaim {
-  id               String              @id @default(uuid()) @db.Uuid
-  playerIdentityId String              @db.Uuid
-  userId           String              @db.Uuid
-  status           IdentityClaimStatus @default(PENDING)
-  requestedAt      DateTime            @default(now())
+  id               String                         @id @default(uuid()) @db.Uuid
+  playerIdentityId String                         @db.Uuid
+  userId           String                         @db.Uuid
+  status           IdentityClaimStatus            @default(PENDING)
+  requestedAt      DateTime                       @default(now())
   resolvedAt       DateTime?
-  resolvedByUserId String?             @db.Uuid
+  resolvedByUserId String?                        @db.Uuid
   resolutionNote   String?
-  playerIdentity   PlayerIdentity      @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
-  user             User                @relation("IdentityClaimant", fields: [userId], references: [id], onDelete: Cascade)
-  resolvedBy       User?               @relation("IdentityClaimResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
+  playerIdentity   PlayerIdentity                 @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
+  user             User                           @relation("IdentityClaimant", fields: [userId], references: [id], onDelete: Cascade)
+  resolvedBy       User?                          @relation("IdentityClaimResolver", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
   ownershipLedger  IdentityOwnershipTransaction[]
 
   @@unique([playerIdentityId, userId])
@@ -709,15 +722,15 @@ model PlayerIdentityClaim {
 }
 
 model IdentityRewardReconciliation {
-  id               String          @id @default(uuid()) @db.Uuid
-  playerIdentityId String          @unique @db.Uuid
-  userId           String          @db.Uuid
-  queuedAt         DateTime        @default(now())
+  id               String         @id @default(uuid()) @db.Uuid
+  playerIdentityId String         @unique @db.Uuid
+  userId           String         @db.Uuid
+  queuedAt         DateTime       @default(now())
   completedAt      DateTime?
-  attempts         Int             @default(0)
-  lastError        String?         @db.VarChar(180)
-  playerIdentity   PlayerIdentity  @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempts         Int            @default(0)
+  lastError        String?        @db.VarChar(180)
+  playerIdentity   PlayerIdentity @relation(fields: [playerIdentityId], references: [id], onDelete: Cascade)
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([completedAt, queuedAt])
   @@index([userId, completedAt])
@@ -876,37 +889,37 @@ model UserWeeklyQuestProgress {
 /// Migration 20260814230000 enforces a positive community goal and an exact
 /// three-calendar-month window.
 model Season {
-  id                String                    @id @default(uuid()) @db.Uuid
-  slug              String                    @unique @db.VarChar(80)
-  ordinal           Int                       @unique
-  name              String                    @db.VarChar(100)
-  description       String                    @db.VarChar(400)
-  theme             String                    @db.VarChar(80)
-  startsAt          DateTime
-  endsAt            DateTime
-  status            SeasonStatus              @default(UPCOMING)
-  communityXpGoal   Int
+  id                  String                  @id @default(uuid()) @db.Uuid
+  slug                String                  @unique @db.VarChar(80)
+  ordinal             Int                     @unique
+  name                String                  @db.VarChar(100)
+  description         String                  @db.VarChar(400)
+  theme               String                  @db.VarChar(80)
+  startsAt            DateTime
+  endsAt              DateTime
+  status              SeasonStatus            @default(UPCOMING)
+  communityXpGoal     Int
   /// Season XP a member must personally bank inside the window to receive that
   /// season's commemorative trophies at closure. Zero means every enrolled
   /// member qualifies. Enrollment alone never earns the shelf.
   trophyXpRequirement Int                     @default(1500)
-  isEnabled         Boolean                   @default(true)
-  completedAt       DateTime?
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @updatedAt
-  memberships       SeasonMembership[]
-  xpEntries         SeasonXpEntry[]
-  quests            SeasonQuestDefinition[]
-  expeditions       SeasonExpedition[]
-  trophies          SeasonTrophy[]
-  chronicle         SeasonChronicle?
+  isEnabled           Boolean                 @default(true)
+  completedAt         DateTime?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  memberships         SeasonMembership[]
+  xpEntries           SeasonXpEntry[]
+  quests              SeasonQuestDefinition[]
+  expeditions         SeasonExpedition[]
+  trophies            SeasonTrophy[]
+  chronicle           SeasonChronicle?
 
   @@index([isEnabled, status, startsAt])
   @@index([endsAt])
 }
 
 model SeasonMembership {
-  id        String   @id @default(uuid()) @db.Uuid
+  id       String   @id @default(uuid()) @db.Uuid
   seasonId String   @db.Uuid
   userId   String   @db.Uuid
   joinedAt DateTime @default(now())
@@ -918,19 +931,19 @@ model SeasonMembership {
 }
 
 model SeasonQuestDefinition {
-  id               String                      @id @default(uuid()) @db.Uuid
-  seasonId         String                      @db.Uuid
-  slug             String                      @db.VarChar(80)
-  name             String                      @db.VarChar(100)
-  description      String                      @db.VarChar(240)
+  id               String                    @id @default(uuid()) @db.Uuid
+  seasonId         String                    @db.Uuid
+  slug             String                    @db.VarChar(80)
+  name             String                    @db.VarChar(100)
+  description      String                    @db.VarChar(240)
   scope            SeasonQuestScope
   gameType         GameType?
   ruleType         SeasonRuleType
   threshold        Int
   xpReward         Int
-  sortOrder        Int                         @default(0)
-  enabled          Boolean                     @default(true)
-  season           Season                      @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  sortOrder        Int                       @default(0)
+  enabled          Boolean                   @default(true)
+  season           Season                    @relation(fields: [seasonId], references: [id], onDelete: Cascade)
   personalProgress UserSeasonQuestProgress[]
   teamProgress     SeasonTeamQuestProgress?
 
@@ -1127,7 +1140,7 @@ model PlayerAchievement {
   dedupeKey               String                  @unique
   user                    User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   achievement             AchievementDefinition   @relation(fields: [achievementDefinitionId], references: [id], onDelete: Cascade)
-  sourceActivity          GameActivity?            @relation(fields: [sourceActivityId], references: [id], onDelete: Cascade)
+  sourceActivity          GameActivity?           @relation(fields: [sourceActivityId], references: [id], onDelete: Cascade)
   unlockedRewards         UserAchievementReward[]
 
   @@index([userId, awardedAt])
@@ -1157,36 +1170,36 @@ model UserSocialAccount {
 }
 
 model SteamProfile {
-  id                         String             @id @default(uuid()) @db.Uuid
-  socialAccountId            String             @unique @db.Uuid
+  id                         String                 @id @default(uuid()) @db.Uuid
+  socialAccountId            String                 @unique @db.Uuid
   enrichmentEnabledAt        DateTime
-  displayPublic              Boolean            @default(false)
-  personaName                String?            @db.VarChar(80)
-  profileUrl                 String?            @db.VarChar(300)
-  avatarUrl                  String?            @db.VarChar(500)
-  avatarMediumUrl            String?            @db.VarChar(500)
-  avatarFullUrl              String?            @db.VarChar(500)
+  displayPublic              Boolean                @default(false)
+  personaName                String?                @db.VarChar(80)
+  profileUrl                 String?                @db.VarChar(300)
+  avatarUrl                  String?                @db.VarChar(500)
+  avatarMediumUrl            String?                @db.VarChar(500)
+  avatarFullUrl              String?                @db.VarChar(500)
   communityVisibilityState   Int?
   profileState               Int?
   steamCreatedAt             DateTime?
   lastLogoffAt               DateTime?
   currentGameAppId           Int?
-  currentGameName            String?            @db.VarChar(160)
-  profileStatus              ProviderSyncStatus @default(PENDING)
+  currentGameName            String?                @db.VarChar(160)
+  profileStatus              ProviderSyncStatus     @default(PENDING)
   profileLastAttemptedAt     DateTime?
   profileLastSuccessfulAt    DateTime?
   profileNextAttemptAt       DateTime?
-  profileConsecutiveFailures Int                @default(0)
-  profileSyncError           String?            @db.VarChar(180)
-  libraryStatus              ProviderSyncStatus @default(PENDING)
+  profileConsecutiveFailures Int                    @default(0)
+  profileSyncError           String?                @db.VarChar(180)
+  libraryStatus              ProviderSyncStatus     @default(PENDING)
   libraryLastAttemptedAt     DateTime?
   libraryLastSuccessfulAt    DateTime?
   libraryNextAttemptAt       DateTime?
-  libraryConsecutiveFailures Int                @default(0)
-  librarySyncError           String?            @db.VarChar(180)
-  createdAt                  DateTime           @default(now())
-  updatedAt                  DateTime           @updatedAt
-  socialAccount              UserSocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  libraryConsecutiveFailures Int                    @default(0)
+  librarySyncError           String?                @db.VarChar(180)
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+  socialAccount              UserSocialAccount      @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
   libraryGames               SteamLibraryGame[]
   achievementSyncs           SteamAchievementSync[]
   userAchievements           SteamUserAchievement[]
@@ -1196,18 +1209,18 @@ model SteamProfile {
 }
 
 model SteamApp {
-  appId          Int                @id
-  name           String             @db.VarChar(200)
-  iconHash       String?            @db.VarChar(100)
-  metadataSeenAt DateTime           @default(now())
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  libraryGames   SteamLibraryGame[]
-  achievementSchemaStatus           SteamAchievementSyncStatus @default(PENDING)
+  appId                             Int                          @id
+  name                              String                       @db.VarChar(200)
+  iconHash                          String?                      @db.VarChar(100)
+  metadataSeenAt                    DateTime                     @default(now())
+  createdAt                         DateTime                     @default(now())
+  updatedAt                         DateTime                     @updatedAt
+  libraryGames                      SteamLibraryGame[]
+  achievementSchemaStatus           SteamAchievementSyncStatus   @default(PENDING)
   achievementSchemaLastAttemptedAt  DateTime?
   achievementSchemaLastSuccessfulAt DateTime?
   achievementSchemaNextAttemptAt    DateTime?
-  achievementSchemaSyncError        String?                    @db.VarChar(180)
+  achievementSchemaSyncError        String?                      @db.VarChar(180)
   achievementDefinitions            SteamAchievementDefinition[]
   achievementSyncs                  SteamAchievementSync[]
 }
@@ -1233,20 +1246,20 @@ model SteamLibraryGame {
 }
 
 model SteamAchievementDefinition {
-  id             String                 @id @default(uuid()) @db.Uuid
-  steamAppId     Int
-  apiName        String                 @db.VarChar(200)
-  displayName    String                 @db.VarChar(200)
-  description    String?                @db.VarChar(500)
-  hidden         Boolean                @default(false)
-  iconUrl        String?                @db.VarChar(500)
-  iconGrayUrl    String?                @db.VarChar(500)
-  globalPercent  Float?
-  lastSeenAt     DateTime
-  isCurrent      Boolean                @default(true)
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
-  app            SteamApp               @relation(fields: [steamAppId], references: [appId], onDelete: Cascade)
+  id               String                 @id @default(uuid()) @db.Uuid
+  steamAppId       Int
+  apiName          String                 @db.VarChar(200)
+  displayName      String                 @db.VarChar(200)
+  description      String?                @db.VarChar(500)
+  hidden           Boolean                @default(false)
+  iconUrl          String?                @db.VarChar(500)
+  iconGrayUrl      String?                @db.VarChar(500)
+  globalPercent    Float?
+  lastSeenAt       DateTime
+  isCurrent        Boolean                @default(true)
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  app              SteamApp               @relation(fields: [steamAppId], references: [appId], onDelete: Cascade)
   userAchievements SteamUserAchievement[]
 
   @@unique([steamAppId, apiName])
@@ -1304,56 +1317,56 @@ model ProviderRequestUsage {
 }
 
 model ClubGameProfile {
-  id             String                @id @default(uuid()) @db.Uuid
-  userId         String                @db.Uuid
-  gameType       ClubGameType
-  providerUid    String                @db.VarChar(32)
-  displayName    String                @db.VarChar(80)
-  platform       String                @default("PC") @db.VarChar(24)
-  displayPublic  Boolean               @default(false)
+  id                       String                     @id @default(uuid()) @db.Uuid
+  userId                   String                     @db.Uuid
+  gameType                 ClubGameType
+  providerUid              String                     @db.VarChar(32)
+  displayName              String                     @db.VarChar(80)
+  platform                 String                     @default("PC") @db.VarChar(24)
+  displayPublic            Boolean                    @default(false)
   /// Occupying a squad seat is a separate, explicit choice from sharing stats.
   /// NULL means the member holds no seat; a seat is never assigned automatically.
-  rosterSeatClaimedAt DateTime?
-  connectedAt    DateTime              @default(now())
-  lastSyncedAt   DateTime?
-  lastAttemptedAt DateTime?
-  nextAttemptAt  DateTime?
-  consecutiveFailures Int               @default(0)
-  syncStatus     ClubProfileSyncStatus @default(READY)
-  syncError      String?               @db.VarChar(180)
-  playerLevel    Int?
-  rankName       String?               @db.VarChar(40)
-  peakRankName   String?               @db.VarChar(40)
-  rankScore      Int?
+  rosterSeatClaimedAt      DateTime?
+  connectedAt              DateTime                   @default(now())
+  lastSyncedAt             DateTime?
+  lastAttemptedAt          DateTime?
+  nextAttemptAt            DateTime?
+  consecutiveFailures      Int                        @default(0)
+  syncStatus               ClubProfileSyncStatus      @default(READY)
+  syncError                String?                    @db.VarChar(180)
+  playerLevel              Int?
+  rankName                 String?                    @db.VarChar(40)
+  peakRankName             String?                    @db.VarChar(40)
+  rankScore                Int?
   /// Best rating the provider has ever reported, across all seasons.
-  peakRankScore  Int?
+  peakRankScore            Int?
   /// Competitive wins summed from per-season records. These survive even when a
   /// provider holds no career overview, so they are stored separately from
   /// totalWins rather than being merged into it.
-  rankedWins     Int?
-  rankedSeasons  Int?
-  totalMatches   Int?
-  totalWins      Int?
-  overallKd      Float?
-  overallKda     Float?
-  topHeroes      Json?
-  providerUpdatedAt DateTime?
-  matchStatus              ProviderSyncStatus @default(PENDING)
+  rankedWins               Int?
+  rankedSeasons            Int?
+  totalMatches             Int?
+  totalWins                Int?
+  overallKd                Float?
+  overallKda               Float?
+  topHeroes                Json?
+  providerUpdatedAt        DateTime?
+  matchStatus              ProviderSyncStatus         @default(PENDING)
   matchLastAttemptedAt     DateTime?
   matchLastSuccessfulAt    DateTime?
   matchNextAttemptAt       DateTime?
-  matchConsecutiveFailures Int                @default(0)
-  matchSyncError           String?            @db.VarChar(180)
+  matchConsecutiveFailures Int                        @default(0)
+  matchSyncError           String?                    @db.VarChar(180)
   matchCursorOccurredAt    DateTime?
-  matchCursorProviderId    String?            @db.VarChar(80)
-  matchHistoryGapDetected  Boolean            @default(false)
+  matchCursorProviderId    String?                    @db.VarChar(80)
+  matchHistoryGapDetected  Boolean                    @default(false)
   steamLastPlayingAt       DateTime?
   steamPresenceCheckedAt   DateTime?
-  createdAt      DateTime              @default(now())
-  updatedAt      DateTime              @updatedAt
-  user           User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  snapshots      ClubGameStatSnapshot[]
-  matchParticipants ClubGameMatchParticipant[]
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  user                     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots                ClubGameStatSnapshot[]
+  matchParticipants        ClubGameMatchParticipant[]
 
   @@unique([userId, gameType])
   @@unique([gameType, providerUid])
@@ -1383,19 +1396,19 @@ model ClubGameStatSnapshot {
 }
 
 model ClubGameMatch {
-  id                String                       @id @default(uuid()) @db.Uuid
+  id                String                     @id @default(uuid()) @db.Uuid
   gameType          ClubGameType
-  providerMatchId   String                       @db.VarChar(80)
+  providerMatchId   String                     @db.VarChar(80)
   occurredAt        DateTime
   durationSeconds   Int?
-  modeId            String?                      @db.VarChar(40)
-  modeName          String?                      @db.VarChar(80)
-  mapId             String?                      @db.VarChar(40)
-  mapName           String?                      @db.VarChar(120)
-  seasonKey         String?                      @db.VarChar(40)
-  source            String                       @db.VarChar(40)
+  modeId            String?                    @db.VarChar(40)
+  modeName          String?                    @db.VarChar(80)
+  mapId             String?                    @db.VarChar(40)
+  mapName           String?                    @db.VarChar(120)
+  seasonKey         String?                    @db.VarChar(40)
+  source            String                     @db.VarChar(40)
   providerUpdatedAt DateTime?
-  ingestedAt        DateTime                     @default(now())
+  ingestedAt        DateTime                   @default(now())
   metadata          Json?
   participants      ClubGameMatchParticipant[]
 
@@ -1404,46 +1417,46 @@ model ClubGameMatch {
 }
 
 model ClubGameMatchParticipant {
-  id                 String                         @id @default(uuid()) @db.Uuid
-  matchId            String                         @db.Uuid
-  clubGameProfileId  String                         @db.Uuid
-  providerPlayerUid  String                         @db.VarChar(32)
-  result             ClubMatchResult                @default(UNKNOWN)
-  kills              Int?
-  deaths             Int?
-  assists            Int?
-  damage             Int?
-  healing            Int?
-  damageTaken        Int?
-  score              Float?
-  scoreChange        Int?
-  mvp                Boolean                        @default(false)
-  svp                Boolean                        @default(false)
-  disconnected       Boolean?
-  metadata           Json?
-  match              ClubGameMatch                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  clubGameProfile    ClubGameProfile                @relation(fields: [clubGameProfileId], references: [id], onDelete: Cascade)
-  heroPerformances   ClubGameMatchHeroPerformance[]
-  gameActivities     GameActivity[]
+  id                String                         @id @default(uuid()) @db.Uuid
+  matchId           String                         @db.Uuid
+  clubGameProfileId String                         @db.Uuid
+  providerPlayerUid String                         @db.VarChar(32)
+  result            ClubMatchResult                @default(UNKNOWN)
+  kills             Int?
+  deaths            Int?
+  assists           Int?
+  damage            Int?
+  healing           Int?
+  damageTaken       Int?
+  score             Float?
+  scoreChange       Int?
+  mvp               Boolean                        @default(false)
+  svp               Boolean                        @default(false)
+  disconnected      Boolean?
+  metadata          Json?
+  match             ClubGameMatch                  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  clubGameProfile   ClubGameProfile                @relation(fields: [clubGameProfileId], references: [id], onDelete: Cascade)
+  heroPerformances  ClubGameMatchHeroPerformance[]
+  gameActivities    GameActivity[]
 
   @@unique([matchId, clubGameProfileId])
   @@index([clubGameProfileId, matchId])
 }
 
 model ClubGameMatchHeroPerformance {
-  id                 String                   @id @default(uuid()) @db.Uuid
-  participantId      String                   @db.Uuid
-  providerHeroId     String                   @db.VarChar(40)
-  heroName           String                   @db.VarChar(100)
-  playtimeSeconds    Int?
-  kills              Int?
-  deaths             Int?
-  assists            Int?
-  damage             Int?
-  healing            Int?
-  damageTaken        Int?
-  metadata           Json?
-  participant        ClubGameMatchParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  id              String                   @id @default(uuid()) @db.Uuid
+  participantId   String                   @db.Uuid
+  providerHeroId  String                   @db.VarChar(40)
+  heroName        String                   @db.VarChar(100)
+  playtimeSeconds Int?
+  kills           Int?
+  deaths          Int?
+  assists         Int?
+  damage          Int?
+  healing         Int?
+  damageTaken     Int?
+  metadata        Json?
+  participant     ClubGameMatchParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
 
   @@unique([participantId, providerHeroId])
   @@index([providerHeroId])
@@ -1458,41 +1471,41 @@ model ClubGameMatchHeroPerformance {
 /// currentViewerCount, and liveSince NULL whenever isLive is false, so an
 /// offline channel can never display a stale audience count.
 model TwitchChannel {
-  id                   String             @id @default(uuid()) @db.Uuid
-  socialAccountId      String             @unique @db.Uuid
-  userId               String             @unique @db.Uuid
-  twitchUserId         String             @unique @db.VarChar(40)
-  login                String             @db.VarChar(40)
-  displayName          String             @db.VarChar(80)
-  profileImageUrl      String?            @db.VarChar(500)
-  offlineImageUrl      String?            @db.VarChar(500)
-  broadcasterType      String?            @db.VarChar(20)
-  channelDescription   String?            @db.VarChar(500)
+  id                    String             @id @default(uuid()) @db.Uuid
+  socialAccountId       String             @unique @db.Uuid
+  userId                String             @unique @db.Uuid
+  twitchUserId          String             @unique @db.VarChar(40)
+  login                 String             @db.VarChar(40)
+  displayName           String             @db.VarChar(80)
+  profileImageUrl       String?            @db.VarChar(500)
+  offlineImageUrl       String?            @db.VarChar(500)
+  broadcasterType       String?            @db.VarChar(20)
+  channelDescription    String?            @db.VarChar(500)
   /// Appearing in the public showcase is an explicit, revocable choice that is
   /// kept separate from verifying the account.
-  showcaseEnabled      Boolean            @default(false)
-  connectedAt          DateTime           @default(now())
-  isLive               Boolean            @default(false)
-  liveSince            DateTime?
-  currentStreamId      String?            @db.VarChar(40)
-  currentTitle         String?            @db.VarChar(200)
-  currentGameName      String?            @db.VarChar(120)
-  currentViewerCount   Int?
+  showcaseEnabled       Boolean            @default(false)
+  connectedAt           DateTime           @default(now())
+  isLive                Boolean            @default(false)
+  liveSince             DateTime?
+  currentStreamId       String?            @db.VarChar(40)
+  currentTitle          String?            @db.VarChar(200)
+  currentGameName       String?            @db.VarChar(120)
+  currentViewerCount    Int?
   /// Twitch serves a templated thumbnail URL containing {width}/{height}.
-  thumbnailUrlTemplate String?            @db.VarChar(500)
-  lastLiveAt           DateTime?
-  followerCount        Int?
-  syncStatus           ProviderSyncStatus @default(PENDING)
-  syncError            String?            @db.VarChar(180)
-  lastSyncedAt         DateTime?
-  lastAttemptedAt      DateTime?
+  thumbnailUrlTemplate  String?            @db.VarChar(500)
+  lastLiveAt            DateTime?
+  followerCount         Int?
+  syncStatus            ProviderSyncStatus @default(PENDING)
+  syncError             String?            @db.VarChar(180)
+  lastSyncedAt          DateTime?
+  lastAttemptedAt       DateTime?
   metadataNextAttemptAt DateTime?
-  consecutiveFailures  Int                @default(0)
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
-  socialAccount        UserSocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sessions             StreamSession[]
+  consecutiveFailures   Int                @default(0)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  socialAccount         UserSocialAccount  @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions              StreamSession[]
 
   @@index([showcaseEnabled, isLive])
   @@index([isLive, currentViewerCount])
@@ -1576,25 +1589,25 @@ model SteamLinkNonce {
 }
 
 model RecordDefinition {
-  id            String          @id @default(uuid()) @db.Uuid
-  slug          String          @unique
-  title         String
-  description   String
-  hall          RecordHall
-  gameType      GameType?
-  gameKey       String?         @db.VarChar(40)
-  category      String
-  valueLabel    String
-  ruleType      RecordRuleType
-  ruleConfig    Json
-  comparison    RecordComparison @default(MAX)
-  minimumSampleSize Int          @default(1)
-  seasonScope   String?          @db.VarChar(40)
-  enabled       Boolean         @default(true)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  currentHolder RecordHolder?
-  history       RecordHistory[]
+  id                String           @id @default(uuid()) @db.Uuid
+  slug              String           @unique
+  title             String
+  description       String
+  hall              RecordHall
+  gameType          GameType?
+  gameKey           String?          @db.VarChar(40)
+  category          String
+  valueLabel        String
+  ruleType          RecordRuleType
+  ruleConfig        Json
+  comparison        RecordComparison @default(MAX)
+  minimumSampleSize Int              @default(1)
+  seasonScope       String?          @db.VarChar(40)
+  enabled           Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  currentHolder     RecordHolder?
+  history           RecordHistory[]
 
   @@index([hall, enabled])
 }
@@ -1676,30 +1689,30 @@ model ServerEvent {
 }
 
 model GameActivity {
-  id                           String                          @id @default(uuid()) @db.Uuid
-  userId                       String                          @db.Uuid
-  gameKey                      String                          @db.VarChar(40)
-  activityType                 String                          @db.VarChar(60)
+  id                           String                    @id @default(uuid()) @db.Uuid
+  userId                       String                    @db.Uuid
+  gameKey                      String                    @db.VarChar(40)
+  activityType                 String                    @db.VarChar(60)
   occurredAt                   DateTime
-  source                       String                          @db.VarChar(40)
-  sourceConfidence             Int                             @default(100)
+  source                       String                    @db.VarChar(40)
+  sourceConfidence             Int                       @default(100)
   valueNumber                  Float?
-  valueText                    String?                         @db.VarChar(200)
+  valueText                    String?                   @db.VarChar(200)
   metadata                     Json?
-  sourceServerEventId          String?                         @db.Uuid
-  sourceClubMatchParticipantId String?                         @db.Uuid
-  providerEventId              String?                         @db.VarChar(120)
-  dedupeKey                    String                          @unique @db.VarChar(220)
+  sourceServerEventId          String?                   @db.Uuid
+  sourceClubMatchParticipantId String?                   @db.Uuid
+  providerEventId              String?                   @db.VarChar(120)
+  dedupeKey                    String                    @unique @db.VarChar(220)
   chroniclePromotedAt          DateTime?
-  chronicleHeadline            String?                         @db.VarChar(180)
-  chronicleSummary             String?                         @db.VarChar(500)
-  createdAt                    DateTime                        @default(now())
-  user                         User                            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sourceServerEvent            ServerEvent?                    @relation(fields: [sourceServerEventId], references: [id], onDelete: Cascade)
-  sourceClubMatchParticipant   ClubGameMatchParticipant?       @relation(fields: [sourceClubMatchParticipantId], references: [id], onDelete: Cascade)
+  chronicleHeadline            String?                   @db.VarChar(180)
+  chronicleSummary             String?                   @db.VarChar(500)
+  createdAt                    DateTime                  @default(now())
+  user                         User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceServerEvent            ServerEvent?              @relation(fields: [sourceServerEventId], references: [id], onDelete: Cascade)
+  sourceClubMatchParticipant   ClubGameMatchParticipant? @relation(fields: [sourceClubMatchParticipantId], references: [id], onDelete: Cascade)
   playerAchievements           PlayerAchievement[]
-  recordHolders                RecordHolder[]                   @relation("RecordHolderActivity")
-  recordHistory               RecordHistory[]                  @relation("RecordHistoryActivity")
+  recordHolders                RecordHolder[]            @relation("RecordHolderActivity")
+  recordHistory                RecordHistory[]           @relation("RecordHistoryActivity")
   discordNotifications         DiscordNotification[]
 
   @@index([userId, activityType, occurredAt])
@@ -1843,25 +1856,25 @@ model ServerCommandAudit {
 }
 
 model DiscordNotification {
-  id            String                  @id @default(uuid()) @db.Uuid
-  configId      String                  @db.Uuid
-  serverEventId String?                 @db.Uuid
-  gameActivityId String?                @db.Uuid
-  kind          DiscordNotificationKind
+  id             String                  @id @default(uuid()) @db.Uuid
+  configId       String                  @db.Uuid
+  serverEventId  String?                 @db.Uuid
+  gameActivityId String?                 @db.Uuid
+  kind           DiscordNotificationKind
   /// Explicit delivery target captured when the notification was queued. Null
   /// means the guild's announcement channel. Operational alerts always carry
   /// their own operations channel so a later configuration change can never
   /// redirect infrastructure detail into a community channel.
-  channelId     String?                 @db.VarChar(40)
-  content       String
-  dedupeKey     String                  @unique
-  queuedAt      DateTime                @default(now())
-  sentAt        DateTime?
-  attempts      Int                     @default(0)
-  lastError     String?
-  config        DiscordGuildConfig      @relation(fields: [configId], references: [id], onDelete: Cascade)
-  serverEvent   ServerEvent?            @relation(fields: [serverEventId], references: [id], onDelete: SetNull)
-  gameActivity  GameActivity?           @relation(fields: [gameActivityId], references: [id], onDelete: Cascade)
+  channelId      String?                 @db.VarChar(40)
+  content        String
+  dedupeKey      String                  @unique
+  queuedAt       DateTime                @default(now())
+  sentAt         DateTime?
+  attempts       Int                     @default(0)
+  lastError      String?
+  config         DiscordGuildConfig      @relation(fields: [configId], references: [id], onDelete: Cascade)
+  serverEvent    ServerEvent?            @relation(fields: [serverEventId], references: [id], onDelete: SetNull)
+  gameActivity   GameActivity?           @relation(fields: [gameActivityId], references: [id], onDelete: Cascade)
 
   @@index([configId, sentAt, queuedAt])
   @@index([gameActivityId])
@@ -1946,10 +1959,10 @@ model ServiceHeartbeat {
 /// CHECK "PulseSignal_ok_has_last_ok_at" — a signal reporting OK must carry the
 /// timestamp of that OK observation, so a green tile can never be undated.
 model PulseSignal {
-  key            String       @id @db.VarChar(60)
+  key            String        @id @db.VarChar(60)
   category       PulseCategory
   status         PulseStatus
-  summary        String       @db.VarChar(240)
+  summary        String        @db.VarChar(240)
   detail         Json?
   observedAt     DateTime
   /// When the current status was first observed. Reset only on a real change,
@@ -1959,7 +1972,7 @@ model PulseSignal {
   lastOkAt       DateTime?
   notifiedStatus PulseStatus?
   notifiedAt     DateTime?
-  updatedAt      DateTime     @updatedAt
+  updatedAt      DateTime      @updatedAt
 
   @@index([status, observedAt])
 }
@@ -1972,20 +1985,20 @@ model PulseSignal {
 /// CHECK "CollectorSourceState_counts_nonnegative" and
 /// CHECK "CollectorSourceState_unavailable_yields_nothing".
 model CollectorSourceState {
-  serverId        String     @db.Uuid
-  sourceKind      String     @db.VarChar(60)
-  label           String     @db.VarChar(120)
-  available       Boolean    @default(false)
-  truncated       Boolean    @default(false)
-  lastScanAt      DateTime
+  serverId         String     @db.Uuid
+  sourceKind       String     @db.VarChar(60)
+  label            String     @db.VarChar(120)
+  available        Boolean    @default(false)
+  truncated        Boolean    @default(false)
+  lastScanAt       DateTime
   /// Newest scan that both read the source and parsed at least one record.
-  lastYieldAt     DateTime?
+  lastYieldAt      DateTime?
   /// `occurredAt` of the newest record the source has ever yielded.
-  lastRecordAt    DateTime?
-  recordsLastScan Int        @default(0)
-  importedLastScan Int       @default(0)
-  lastError       String?    @db.VarChar(240)
-  server          GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
+  lastRecordAt     DateTime?
+  recordsLastScan  Int        @default(0)
+  importedLastScan Int        @default(0)
+  lastError        String?    @db.VarChar(240)
+  server           GameServer @relation(fields: [serverId], references: [id], onDelete: Cascade)
 
   @@id([serverId, sourceKind])
   @@index([lastScanAt])
@@ -1995,12 +2008,12 @@ model CollectorSourceState {
 /// import cycle silently; recording them lets one poisoned record be skipped
 /// and still be visible, replayable, and countable on the Pulse view.
 model EvaluationFailure {
-  id         String   @id @default(uuid()) @db.Uuid
-  kind       String   @db.VarChar(40)
-  scope      String   @db.VarChar(120)
-  reference  String?  @db.VarChar(200)
-  message    String   @db.VarChar(300)
-  occurredAt DateTime @default(now())
+  id         String    @id @default(uuid()) @db.Uuid
+  kind       String    @db.VarChar(40)
+  scope      String    @db.VarChar(120)
+  reference  String?   @db.VarChar(200)
+  message    String    @db.VarChar(300)
+  occurredAt DateTime  @default(now())
   resolvedAt DateTime?
 
   @@index([occurredAt])
@@ -2011,31 +2024,31 @@ model EvaluationFailure {
 /// is drawn for. Side quests get their own arc so a contributor can build one
 /// out without touching the spine of the story.
 model StoryArc {
-  id              String      @id @default(uuid()) @db.Uuid
-  slug            String      @unique @db.VarChar(64)
-  title           String      @db.VarChar(120)
-  summary         String?     @db.VarChar(500)
+  id                String                  @id @default(uuid()) @db.Uuid
+  slug              String                  @unique @db.VarChar(64)
+  title             String                  @db.VarChar(120)
+  summary           String?                 @db.VarChar(500)
   /// How the party finds this quest — notice board, dying stranger, a rumor
   /// in a tavern. Free-text roleplay intent; the region below is the
   /// structural half.
-  hook            String?     @db.VarChar(500)
+  hook              String?                 @db.VarChar(500)
   /// Where the quest is picked up, as a REGION bible entry so the pickup
   /// place always resolves to a real asset on the game side.
-  regionEntryId   String?     @db.Uuid
-  isMainline      Boolean     @default(false)
+  regionEntryId     String?                 @db.Uuid
+  isMainline        Boolean                 @default(false)
   /// The filing category, kept in lockstep with `isMainline` by a CHECK
   /// constraint — see the enum for why both columns exist.
-  category        StoryArcCategory @default(SIDE_QUEST)
+  category          StoryArcCategory        @default(SIDE_QUEST)
   /// Whose story this is when the category is COMPANION_QUEST — a CHARACTER
   /// bible entry, so the companion always resolves to a real dossier. Mirrors
   /// `regionEntryId` exactly.
-  companionEntryId String?    @db.Uuid
+  companionEntryId  String?                 @db.Uuid
   /// Whose banner this quest flies when the category is FACTION_QUEST — a
   /// FACTION bible entry, so the faction always resolves to a real dossier.
   /// Mirrors `companionEntryId` exactly.
-  factionEntryId  String?     @db.Uuid
-  status          StoryStatus @default(PROPOSED)
-  position        Int         @default(0)
+  factionEntryId    String?                 @db.Uuid
+  status            StoryStatus             @default(PROPOSED)
+  position          Int                     @default(0)
   /// The writers' room is open by default: nothing is frozen until somebody
   /// freezes it. A locked arc is settled story — no card, branch, or arc
   /// setting on it can be changed by anyone, including the admin who locked
@@ -2045,20 +2058,20 @@ model StoryArc {
   /// That one is transient, self-expiring, and only says "someone is typing
   /// here"; this one is a deliberate, permanent-until-lifted freeze, so it
   /// has no expiry and is never claimed automatically.
-  lockedAt        DateTime?
-  lockedByUserId  String?     @db.Uuid
-  createdByUserId String      @db.Uuid
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  creator         User        @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  lockedBy        User?       @relation("StoryArcLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
-  region          StoryEntry? @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
-  companion       StoryEntry? @relation("StoryArcCompanion", fields: [companionEntryId], references: [id], onDelete: SetNull)
-  faction         StoryEntry? @relation("StoryArcFaction", fields: [factionEntryId], references: [id], onDelete: SetNull)
-  nodes           StoryNode[]
-  edges           StoryEdge[]
-  continuedFrom   StoryNode[] @relation("StoryContinuation")
-  presence        StoryPresence[]
+  lockedAt          DateTime?
+  lockedByUserId    String?                 @db.Uuid
+  createdByUserId   String                  @db.Uuid
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  creator           User                    @relation("StoryArcCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  lockedBy          User?                   @relation("StoryArcLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  region            StoryEntry?             @relation("StoryArcRegion", fields: [regionEntryId], references: [id], onDelete: SetNull)
+  companion         StoryEntry?             @relation("StoryArcCompanion", fields: [companionEntryId], references: [id], onDelete: SetNull)
+  faction           StoryEntry?             @relation("StoryArcFaction", fields: [factionEntryId], references: [id], onDelete: SetNull)
+  nodes             StoryNode[]
+  edges             StoryEdge[]
+  continuedFrom     StoryNode[]             @relation("StoryContinuation")
+  presence          StoryPresence[]
   assistantMessages StoryAssistantMessage[]
 
   @@index([status, isMainline, position])
@@ -2079,56 +2092,56 @@ model StoryArc {
 /// The migration additionally CHECKs that canvas coordinates stay within
 /// +/-100000 and that a CANON node carries a non-empty title.
 model StoryNode {
-  id              String           @id @default(uuid()) @db.Uuid
-  arcId           String           @db.Uuid
-  kind            StoryNodeKind    @default(SCENE)
-  key             String           @db.VarChar(80)
-  title           String           @db.VarChar(160)
-  summary         String?          @db.VarChar(500)
-  body            String?          @db.Text
-  status          StoryStatus      @default(PROPOSED)
+  id                String                  @id @default(uuid()) @db.Uuid
+  arcId             String                  @db.Uuid
+  kind              StoryNodeKind           @default(SCENE)
+  key               String                  @db.VarChar(80)
+  title             String                  @db.VarChar(160)
+  summary           String?                 @db.VarChar(500)
+  body              String?                 @db.Text
+  status            StoryStatus             @default(PROPOSED)
   /// Who speaks this node, when it is one voice. A reference to a CHARACTER
   /// bible entry rather than free text, so a speaker can never be a typo and
   /// always resolves to an asset the importer knows. Null is unattributed
   /// narration — the correct value for most SCENE and BEAT nodes, whose bodies
   /// carry multi-speaker attribution inline.
-  speakerEntryId  String?          @db.Uuid
+  speakerEntryId    String?                 @db.Uuid
   /// Only meaningful on ENDING nodes; the migration CHECKs that pairing.
-  endingKind      StoryEndingKind?
+  endingKind        StoryEndingKind?
   /// What finishes this step, as writer intent in free text — only meaningful
   /// on QUEST_STEP nodes (CHECKed). An Unreal author transcribes it into a
   /// real task; it is documentation for a human, never parsed by a machine.
-  completion      String?          @db.VarChar(500)
+  completion        String?                 @db.VarChar(500)
   /// What the story does here — give item, set flag, shift reputation — as
   /// free-text lines. Interpreted by the game, never by the codex.
-  effects         String[]         @default([])
+  effects           String[]                @default([])
   /// What finishing this pays, one reward per line. Kept apart from effects
   /// so payment reads at a glance; notable rewards should also exist as ITEM
   /// entries referenced on the node.
-  rewards         String[]         @default([])
+  rewards           String[]                @default([])
   /// Where an ENDING flows next (CHECKed to endings) — the structural link
   /// that chains multi-part quests and joins the prologue to its branches.
-  continuesInArcId String?         @db.Uuid
-  canvasX         Int              @default(0)
-  canvasY         Int              @default(0)
-  version         Int              @default(1)
-  createdByUserId String           @db.Uuid
-  updatedByUserId String?          @db.Uuid
-  lockedByUserId  String?          @db.Uuid
-  lockExpiresAt   DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  arc             StoryArc         @relation(fields: [arcId], references: [id], onDelete: Cascade)
-  creator         User             @relation("StoryNodeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  editor          User?            @relation("StoryNodeEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-  lockedBy        User?            @relation("StoryNodeLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
-  speaker         StoryEntry?      @relation("StoryNodeSpeaker", fields: [speakerEntryId], references: [id], onDelete: SetNull)
-  continuesIn     StoryArc?        @relation("StoryContinuation", fields: [continuesInArcId], references: [id], onDelete: SetNull)
-  outgoingEdges   StoryEdge[]      @relation("StoryEdgeFrom")
-  incomingEdges   StoryEdge[]      @relation("StoryEdgeTo")
-  entryLinks      StoryEntryLink[]
-  comments        StoryComment[]
-  presence        StoryPresence[]
+  continuesInArcId  String?                 @db.Uuid
+  canvasX           Int                     @default(0)
+  canvasY           Int                     @default(0)
+  version           Int                     @default(1)
+  createdByUserId   String                  @db.Uuid
+  updatedByUserId   String?                 @db.Uuid
+  lockedByUserId    String?                 @db.Uuid
+  lockExpiresAt     DateTime?
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  arc               StoryArc                @relation(fields: [arcId], references: [id], onDelete: Cascade)
+  creator           User                    @relation("StoryNodeCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor            User?                   @relation("StoryNodeEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  lockedBy          User?                   @relation("StoryNodeLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  speaker           StoryEntry?             @relation("StoryNodeSpeaker", fields: [speakerEntryId], references: [id], onDelete: SetNull)
+  continuesIn       StoryArc?               @relation("StoryContinuation", fields: [continuesInArcId], references: [id], onDelete: SetNull)
+  outgoingEdges     StoryEdge[]             @relation("StoryEdgeFrom")
+  incomingEdges     StoryEdge[]             @relation("StoryEdgeTo")
+  entryLinks        StoryEntryLink[]
+  comments          StoryComment[]
+  presence          StoryPresence[]
   assistantMessages StoryAssistantMessage[]
 
   @@unique([arcId, key])
@@ -2178,36 +2191,100 @@ model StoryEdge {
 /// A lore bible entry: the theme, regions, creatures, characters, factions,
 /// items, and rules a writer has to know before adding to the story.
 model StoryEntry {
-  id              String           @id @default(uuid()) @db.Uuid
+  id              String              @id @default(uuid()) @db.Uuid
   kind            StoryEntryKind
-  slug            String           @unique @db.VarChar(64)
-  title           String           @db.VarChar(120)
-  summary         String?          @db.VarChar(500)
-  body            String?          @db.Text
+  slug            String              @unique @db.VarChar(64)
+  title           String              @db.VarChar(120)
+  summary         String?             @db.VarChar(500)
+  body            String?             @db.Text
   /// The typed module object from Codex_Module_Schema.md — shape depends on
   /// kind, every field nullable, null meaning "not yet decided". Prose stays
   /// primary; meta is the queryable index over it.
   meta            Json?
-  status          StoryStatus      @default(PROPOSED)
-  version         Int              @default(1)
-  createdByUserId String           @db.Uuid
-  updatedByUserId String?          @db.Uuid
-  lockedByUserId  String?          @db.Uuid
+  status          StoryStatus         @default(PROPOSED)
+  version         Int                 @default(1)
+  createdByUserId String              @db.Uuid
+  updatedByUserId String?             @db.Uuid
+  lockedByUserId  String?             @db.Uuid
   lockExpiresAt   DateTime?
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  creator         User             @relation("StoryEntryCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  editor          User?            @relation("StoryEntryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-  lockedBy        User?            @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  creator         User                @relation("StoryEntryCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor          User?               @relation("StoryEntryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  lockedBy        User?               @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
   nodeLinks       StoryEntryLink[]
   comments        StoryComment[]
-  speakerOf       StoryNode[]      @relation("StoryNodeSpeaker")
-  regionOf        StoryArc[]       @relation("StoryArcRegion")
-  companionOf     StoryArc[]       @relation("StoryArcCompanion")
-  factionOf       StoryArc[]       @relation("StoryArcFaction")
+  speakerOf       StoryNode[]         @relation("StoryNodeSpeaker")
+  regionOf        StoryArc[]          @relation("StoryArcRegion")
+  companionOf     StoryArc[]          @relation("StoryArcCompanion")
+  factionOf       StoryArc[]          @relation("StoryArcFaction")
+  ownedMap        StoryMap?           @relation("StoryMapOwner")
+  mapPlacements   StoryMapPlacement[]
 
   @@index([kind, status, title])
   @@index([status, updatedAt])
+}
+
+/// One zoomable illustrated atlas scene. A world map can own child region or
+/// settlement maps without coupling their art pixels to Unreal coordinates.
+model StoryMap {
+  id               String              @id @default(uuid()) @db.Uuid
+  slug             String              @unique @db.VarChar(64)
+  title            String              @db.VarChar(120)
+  parentMapId      String?             @db.Uuid
+  ownerEntryId     String?             @unique @db.Uuid
+  artVersion       String              @db.VarChar(40)
+  imageWidth       Int
+  imageHeight      Int
+  coordinateWidth  Int                 @default(100000)
+  coordinateHeight Int
+  initialCenterX   Int
+  initialCenterY   Int
+  initialZoom      Float               @default(0)
+  minZoom          Float               @default(0)
+  maxZoom          Float               @default(8)
+  version          Int                 @default(1)
+  createdByUserId  String              @db.Uuid
+  updatedByUserId  String?             @db.Uuid
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  parent           StoryMap?           @relation("StoryMapHierarchy", fields: [parentMapId], references: [id], onDelete: SetNull)
+  children         StoryMap[]          @relation("StoryMapHierarchy")
+  owner            StoryEntry?         @relation("StoryMapOwner", fields: [ownerEntryId], references: [id], onDelete: SetNull)
+  placements       StoryMapPlacement[]
+  creator          User                @relation("StoryMapCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor           User?               @relation("StoryMapEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([parentMapId, title])
+  @@index([ownerEntryId])
+}
+
+/// A Codex entry's authored position on one atlas scene. Lore remains on the
+/// entry; this record only owns cartographic presentation and zoom behavior.
+model StoryMapPlacement {
+  id              String               @id @default(uuid()) @db.Uuid
+  mapId           String               @db.Uuid
+  entryId         String               @db.Uuid
+  geometryKind    StoryMapGeometryKind
+  geometry        Json
+  labelX          Int?
+  labelY          Int?
+  minZoom         Float                @default(0)
+  maxZoom         Float?
+  priority        Int                  @default(0)
+  version         Int                  @default(1)
+  createdByUserId String               @db.Uuid
+  updatedByUserId String?              @db.Uuid
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  map             StoryMap             @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  entry           StoryEntry           @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  creator         User                 @relation("StoryMapPlacementCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor          User?                @relation("StoryMapPlacementEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([mapId, entryId])
+  @@index([mapId, priority])
+  @@index([entryId])
 }
 
 /// Declares that a node features a bible entry, so a scene lists its cast and
