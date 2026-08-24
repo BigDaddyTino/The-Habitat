@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Cog, GitBranch, History, Map, Shield, Sparkles, UsersRound } from "lucide-react";
+import { ArrowRight, BookOpen, Cog, GitBranch, History, Map, MapPinned, Shield, Sparkles, UsersRound } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
 import { getStoryActivity, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -100,11 +100,12 @@ export default async function CodexPage() {
       <section className="codex-world-libraries">
         <div className="section-heading"><div><p className="eyebrow">Build the world</p><h2>Choose what you want to shape</h2></div><p>No JSON. Open a visual library, create an entry, and fill out its connected sheet.</p></div>
         <div>
-          <Link href="/codex/library/characters"><UsersRound aria-hidden="true" /><span><small>{characters.length} characters</small><strong>Characters</strong><p>Voice, relationships, factions, quests, and game models.</p></span><ArrowRight aria-hidden="true" /></Link>
-          <Link href="/codex/library/factions"><Shield aria-hidden="true" /><span><small>{factions.length} factions</small><strong>Factions</strong><p>Leadership, territory, goals, allies, enemies, and influence.</p></span><ArrowRight aria-hidden="true" /></Link>
-          <Link href="/codex/library/regions"><Map aria-hidden="true" /><span><small>{regions.length} regions</small><strong>Regions</strong><p>World hierarchy, control, travel connections, and game tags.</p></span><ArrowRight aria-hidden="true" /></Link>
-          <Link href="/codex/library/systems"><Cog aria-hidden="true" /><span><small>{systems.length} systems</small><strong>Game systems</strong><p>The mechanics the game will ship, and when the story hands each one to the player.</p></span><ArrowRight aria-hidden="true" /></Link>
-          <Link href="/codex/stories"><GitBranch aria-hidden="true" /><span><small>{arcs.length} stories</small><strong>Stories &amp; quests</strong><p>The campaign, side quests, contracts, companion roads, and everything that comes through.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-characters" href="/codex/library/characters"><UsersRound aria-hidden="true" /><span><small>{characters.length} characters</small><strong>Characters</strong><p>Voice, relationships, factions, quests, and game models.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-factions" href="/codex/library/factions"><Shield aria-hidden="true" /><span><small>{factions.length} factions</small><strong>Factions</strong><p>Leadership, territory, goals, allies, enemies, and influence.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-regions" href="/codex/library/regions"><Map aria-hidden="true" /><span><small>{regions.length} regions</small><strong>Regions</strong><p>World hierarchy, control, travel connections, and game tags.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-atlas" href="/codex/map"><MapPinned aria-hidden="true" /><span><small>Living world map</small><strong>World Atlas</strong><p>Explore biomes, cities, POIs, factions, and quest locations on the interactive Codex map.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-systems" href="/codex/library/systems"><Cog aria-hidden="true" /><span><small>{systems.length} systems</small><strong>Game systems</strong><p>The mechanics the game will ship, and when the story hands each one to the player.</p></span><ArrowRight aria-hidden="true" /></Link>
+          <Link className="library-card-stories" href="/codex/stories"><GitBranch aria-hidden="true" /><span><small>{arcs.length} stories</small><strong>Stories &amp; quests</strong><p>The campaign, side quests, contracts, companion roads, and everything that comes through.</p></span><ArrowRight aria-hidden="true" /></Link>
         </div>
       </section>
 
