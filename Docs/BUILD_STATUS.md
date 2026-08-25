@@ -629,3 +629,13 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Added read-only production baseline and route verification commands plus an explicit release-file inventory; disposable acceptance screenshots remain preserved outside the executable release commit
 - [x] Added separate production staging controls: ADMIN-requested internal V2 can be proven while V1 remains default, production V2 default requires its own flag, and explicit `?atlas=v1` remains the immediate rollback
 - [x] Kept Atlas author mode independently guarded to development and prohibited destructive seed reconciliation from the production deployment path
+
+## 2026-08-25 - Atlas 2.0 production cutover
+
+- [x] Created release commit `39a854f073e01301e11d5de5bcceb4af1b44d921`, pushed it to `origin/main`, and deployed validated production build `FBr23Z0qzwskOVtI3bdRL`
+- [x] Completed and restore-list-verified a fresh production backup before database mutation; the PostgreSQL dump contains 696 catalog entries and repository/configuration backups are retained on the established backup volume
+- [x] Applied only additive migration `20260824230000_add_atlas_topology_connections`, transactionally activated 19 nodes, 26 boundaries, 11 rings, 43 references, 25 provenance-complete connections, and exactly nine approved paths
+- [x] Re-verified unchanged V1 fingerprint, 25/25 legacy connection parity, zero topology gaps/overlaps/crossings, valid Death Canyon containment, frozen raster hash, and zero potential parity regressions
+- [x] Passed staged authenticated desktop and 390 x 844 mobile QA with V1 kept default first, then enabled V2 as the production default; search, hierarchy, child scenes, routes, browser history, breadcrumbs, and responsive layout all passed
+- [x] Kept explicit `?atlas=v1` rollback working, kept production Atlas authoring disabled, confirmed both Habitat services healthy, and observed no introduced client, HTTP 5xx, or database errors
+- [x] Recorded the non-secret cutover evidence in `Docs/atlas-v2-production-cutover-2026-08-25.json`; disposable acceptance screenshots remain preserved as untracked local evidence

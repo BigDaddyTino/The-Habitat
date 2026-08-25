@@ -1,0 +1,91 @@
+{
+  "contract": "martino-atlas-v2-production-cutover",
+  "contractVersion": 1,
+  "decision": "ATLAS_V2_LIVE",
+  "release": {
+    "date": "2026-08-25",
+    "timezone": "America/New_York",
+    "ownerApproval": "OWNER_APPROVED_ATLAS_V2_GO_LIVE_2026_08_25",
+    "branch": "main",
+    "releaseCommit": "39a854f073e01301e11d5de5bcceb4af1b44d921",
+    "buildId": "FBr23Z0qzwskOVtI3bdRL",
+    "remote": "origin/main"
+  },
+  "backup": {
+    "startedAtUtc": "2026-08-25T10:57:17.3790815Z",
+    "completedAtUtc": "2026-08-25T10:57:34.6318618Z",
+    "databaseDump": "N:\\The Habitat\\backups\\database\\habitat-20260825-065717.dump",
+    "databaseDumpBytes": 18431567,
+    "configurationArchive": "N:\\The Habitat\\backups\\config\\config-20260825-065717.zip",
+    "repositoryBundle": "N:\\The Habitat\\backups\\repository\\habitat-20260825-065717.bundle",
+    "databaseVerification": "PG_RESTORE_LIST_OK",
+    "restoreListEntries": 696
+  },
+  "database": {
+    "target": "loopback production database habitat",
+    "migration": "20260824230000_add_atlas_topology_connections",
+    "migrationStatus": "APPLIED_SCHEMA_UP_TO_DATE",
+    "activationStatus": "ACTIVATED",
+    "legacyFingerprintBefore": "1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef",
+    "legacyFingerprintAfter": "1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef",
+    "v2LogicalFingerprint": "ff1f315a0cf071fbd7df3e022d507ca494a881710715c59b0f31ffd1e77a7e48"
+  },
+  "activationCounts": {
+    "topologyNodes": 19,
+    "boundaries": 26,
+    "areaRings": 11,
+    "ringReferences": 43,
+    "worldConnections": 25,
+    "connectionPaths": 9
+  },
+  "integrity": {
+    "legacyConnectionsPreserved": "25/25",
+    "potentialParityRegressions": 0,
+    "partitionAreaDelta": 0,
+    "gaps": 0,
+    "overlaps": 0,
+    "crossings": 0,
+    "orphanNodes": 0,
+    "unusedBoundaries": 0,
+    "duplicateBorders": 0,
+    "sharedDirectionFailures": 0,
+    "deathCanyonValidInsideGrandRift": true,
+    "deathCanyonOverlapsRedForest": false
+  },
+  "approvedPaths": [
+    "Blackreef Harbour -> Forward Camp Kestrel [ROAD]",
+    "Blackreef Harbour -> Glasswater Village [ROAD]",
+    "Shattermarket -> Forward Camp Kestrel [ROAD]",
+    "Pearl Beachhead -> Stormglass Quarry [ROAD]",
+    "Stormglass Landing -> Shattermarket [ROAD]",
+    "Grand Lake -> Riverlands [RIVER_TRAVEL]",
+    "Riverlands -> Peninsula [RIVER_TRAVEL]",
+    "Blackreef Harbour -> Port Arcadia [SEA_ROUTE]",
+    "Floating City -> Grand Lake [AIR_ROUTE]"
+  ],
+  "runtime": {
+    "productionDefaultAtlas": "V2",
+    "v1Rollback": "AVAILABLE_VIA_ATLAS_V1_QUERY",
+    "productionAuthorMode": "DISABLED",
+    "habitatWeb": "RUNNING_AUTOMATIC",
+    "habitatWorker": "RUNNING_AUTOMATIC",
+    "authenticatedDesktopSmoke": "PASS",
+    "authenticatedMobile390x844Smoke": "PASS",
+    "v1RollbackSmoke": "PASS",
+    "introducedClientErrors": 0,
+    "introducedHttp5xxErrors": 0,
+    "introducedDatabaseErrors": 0
+  },
+  "raster": {
+    "path": "apps/web/private/codex-art/maps/candidates/martino-world-map-v2-clean-production-candidate.png",
+    "sha256": "427bf4967afa8a96afa2175d5aed261225cf7fbeed17944be527f4616b5713b6",
+    "authenticatedProtectedRoute": "PASS",
+    "rawCandidatePublicAccess": "UNAVAILABLE"
+  },
+  "notes": [
+    "The deployed runtime build is based on the release commit above; the later evidence commit is documentation-only.",
+    "Atlas authoring remains restricted to the loopback development database.",
+    "The known pg client query concurrency deprecation warning remains non-blocking and predates this cutover.",
+    "Fourteen legacy route candidates remain review-required and two non-route transitions remain intentionally deferred."
+  ]
+}
