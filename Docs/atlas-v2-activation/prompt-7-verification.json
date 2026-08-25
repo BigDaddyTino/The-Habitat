@@ -1,0 +1,105 @@
+{
+  "contract": "martino-atlas-v2-prompt-7-verification",
+  "contractVersion": 1,
+  "activeDatabase": {
+    "database": "habitat",
+    "host": "localhost",
+    "classification": "DEPLOYED_PRODUCTION_DATABASE",
+    "migration": "20260824230000_add_atlas_topology_connections",
+    "migrationStatus": "PENDING",
+    "migrationApplied": false,
+    "v2Activated": false,
+    "reason": "Repository deployment documentation and the running automatic HabitatWeb/HabitatWorker services identify the configured database as production. Prompt 7 permits activation only after an active development identity is established."
+  },
+  "backup": {
+    "completed": true,
+    "stamp": "20260824-182505",
+    "root": "N:/The Habitat/backups",
+    "databaseBytesReported": "17.0 MB",
+    "repositoryBundleBytesReported": "336.0 MB",
+    "configFiles": 4,
+    "avatars": 5,
+    "expiredBackupsRemovedByRetentionPolicy": 3,
+    "uncommittedPathsNotIncludedInRepositoryBundle": 31
+  },
+  "frozenArtifacts": {
+    "raster": "427bf4967afa8a96afa2175d5aed261225cf7fbeed17944be527f4616b5713b6",
+    "topologyManifest": "6af3fa434526ef853d4ebd3f00599ffa56cb3ad961339afcde94fdd0fe38a647",
+    "derivedGeometry": "bad2aaf43dd08587729ef429f5ba66f37606c8f0a0d54dd04244c61104b8270b"
+  },
+  "isolatedActivationProof": {
+    "freshClones": 2,
+    "rollbackProbe": "PASSED",
+    "repeatActivation": "ALREADY_ACTIVATED",
+    "conflictingStableIdProbe": "REFUSED_DERIVED_GEOMETRY_MISMATCH",
+    "guardedCleanup": "PASSED",
+    "clonesRemoved": true,
+    "counts": {
+      "topologyNodes": 19,
+      "boundaries": 26,
+      "areaRings": 11,
+      "ringBoundaryReferences": 43,
+      "worldConnections": 25,
+      "connectionPaths": 0
+    },
+    "legacyFingerprint": "1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef",
+    "logicalFingerprint": "401275849b972e4a6945914fd24ad8b62d3529a59b9342da7802319949802176",
+    "topology": {
+      "areaDelta": 0,
+      "gaps": 0,
+      "overlaps": 0,
+      "crossings": 0,
+      "orphanNodes": 0,
+      "unusedBoundaries": 0,
+      "duplicateBorders": 0,
+      "sharedDirectionFailures": 0
+    },
+    "deathCanyon": {
+      "parent": "grand-rift",
+      "ringPoints": 23,
+      "everyVertexInsideGrandRift": true,
+      "crossesGrandRift": false,
+      "overlapsRedForest": false,
+      "valid": true
+    },
+    "connectionProvenance": {
+      "legacyRows": 25,
+      "v2Candidates": 25,
+      "exactProvenance": 25,
+      "resolvedEndpoints": 25,
+      "dropped": 0,
+      "fingerprintMismatches": 0,
+      "alteredWording": 0,
+      "unexpectedDuplicates": 0,
+      "valid": true
+    },
+    "parity": {
+      "v1PlacePlacements": 14,
+      "v1QuestPlacements": 0,
+      "childScenes": 2,
+      "v2Regions": 10,
+      "v2Points": 4,
+      "potentialRegressions": 0
+    }
+  },
+  "pointReview": [
+    { "slug": "the-ocean", "coordinate": [79753, 57292], "correctionApplied": false },
+    { "slug": "port-arcadia", "coordinate": [50781, 59896], "correctionApplied": false },
+    { "slug": "the-floating-city", "coordinate": [44922, 6836], "correctionApplied": false },
+    { "slug": "the-starting-island", "canonicalTitle": "Igit Island", "coordinate": [37435, 58594], "correctionApplied": false }
+  ],
+  "manualQa": {
+    "database": "disposable activated clone",
+    "authenticatedAdmin": true,
+    "desktop": "PASSED",
+    "mobile390x844": "PASSED",
+    "restingArtwork": "PASSED",
+    "hover": "PASSED",
+    "clickToFit": "PASSED",
+    "persistentSelection": "PASSED",
+    "deathCanyonNestedSelection": "PASSED",
+    "grandLakeSelection": "PASSED",
+    "igitIslandChildScene": "PASSED",
+    "note": "The V2 child-scene heading now derives Igit Island from the canonical owning StoryEntry; V1 data remains unchanged."
+  }
+}

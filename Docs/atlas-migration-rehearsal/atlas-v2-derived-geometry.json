@@ -1,0 +1,1299 @@
+{
+  "contract": "martino-atlas-v2-derived-area-geometry",
+  "contractVersion": 1,
+  "dimensions": {
+    "height": 66667,
+    "width": 100000
+  },
+  "editableSource": false,
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              24089,
+              3581
+            ],
+            [
+              30599,
+              1628
+            ],
+            [
+              39063,
+              1302
+            ],
+            [
+              48177,
+              1302
+            ],
+            [
+              55990,
+              1628
+            ],
+            [
+              62500,
+              2279
+            ],
+            [
+              61849,
+              5208
+            ],
+            [
+              60547,
+              8464
+            ],
+            [
+              59570,
+              11719
+            ],
+            [
+              58594,
+              14974
+            ],
+            [
+              55339,
+              16927
+            ],
+            [
+              50781,
+              18555
+            ],
+            [
+              44922,
+              18229
+            ],
+            [
+              39063,
+              16927
+            ],
+            [
+              34180,
+              13021
+            ],
+            [
+              33203,
+              10742
+            ],
+            [
+              31250,
+              8464
+            ],
+            [
+              28646,
+              6185
+            ],
+            [
+              26042,
+              4557
+            ],
+            [
+              24089,
+              3581
+            ]
+          ],
+          [
+            [
+              38411,
+              5859
+            ],
+            [
+              37760,
+              8789
+            ],
+            [
+              38086,
+              12044
+            ],
+            [
+              39714,
+              14323
+            ],
+            [
+              42318,
+              14974
+            ],
+            [
+              47526,
+              15300
+            ],
+            [
+              53385,
+              14974
+            ],
+            [
+              57943,
+              13997
+            ],
+            [
+              59570,
+              10417
+            ],
+            [
+              58594,
+              6836
+            ],
+            [
+              56315,
+              4883
+            ],
+            [
+              53385,
+              3581
+            ],
+            [
+              48177,
+              2604
+            ],
+            [
+              42969,
+              3581
+            ],
+            [
+              38411,
+              5859
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "c42b622e-ee8d-5951-a28c-53caacea7941",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "f229d056-9117-5534-a410-73c3c373d001",
+          "d3642590-c035-5d9a-b529-8835dd94be71",
+          "09016654-7333-550e-9696-1bf0bc88d3c0",
+          "a3a3ad70-e027-5728-b596-6d0b8420538e",
+          "2568eaf1-99dd-5932-b97c-0991e3327f04",
+          "90d1759f-f684-5163-9ed8-5e318a7f055e",
+          "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+          "5b26609b-2d2b-5547-915e-c19d8576ae61"
+        ],
+        "entrySlug": "high-cliffs",
+        "labelAnchor": [
+          45673,
+          8703
+        ],
+        "neighbors": [
+          "grand-lake",
+          "grand-rift",
+          "magic-torn-wasteland",
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "High Cliffs"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              38411,
+              5859
+            ],
+            [
+              42969,
+              3581
+            ],
+            [
+              48177,
+              2604
+            ],
+            [
+              53385,
+              3581
+            ],
+            [
+              56315,
+              4883
+            ],
+            [
+              58594,
+              6836
+            ],
+            [
+              59570,
+              10417
+            ],
+            [
+              57943,
+              13997
+            ],
+            [
+              53385,
+              14974
+            ],
+            [
+              47526,
+              15300
+            ],
+            [
+              42318,
+              14974
+            ],
+            [
+              39714,
+              14323
+            ],
+            [
+              38086,
+              12044
+            ],
+            [
+              37760,
+              8789
+            ],
+            [
+              38411,
+              5859
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "054e8428-861d-5b75-a0aa-86bf0f9961fa",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "5b26609b-2d2b-5547-915e-c19d8576ae61",
+          "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+          "90d1759f-f684-5163-9ed8-5e318a7f055e",
+          "2568eaf1-99dd-5932-b97c-0991e3327f04"
+        ],
+        "entrySlug": "grand-lake",
+        "labelAnchor": [
+          48417,
+          9319
+        ],
+        "neighbors": [
+          "high-cliffs"
+        ],
+        "parentEntrySlug": null,
+        "role": "MAJOR_WATER",
+        "title": "Grand Lake"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              62500,
+              2279
+            ],
+            [
+              70313,
+              1302
+            ],
+            [
+              78776,
+              1953
+            ],
+            [
+              87240,
+              4232
+            ],
+            [
+              94401,
+              7487
+            ],
+            [
+              98633,
+              11068
+            ],
+            [
+              98958,
+              14323
+            ],
+            [
+              96029,
+              16276
+            ],
+            [
+              91146,
+              16276
+            ],
+            [
+              85938,
+              16927
+            ],
+            [
+              80078,
+              18555
+            ],
+            [
+              74870,
+              20508
+            ],
+            [
+              69661,
+              21484
+            ],
+            [
+              64453,
+              19531
+            ],
+            [
+              61198,
+              16927
+            ],
+            [
+              58594,
+              14974
+            ],
+            [
+              59570,
+              11719
+            ],
+            [
+              60547,
+              8464
+            ],
+            [
+              61849,
+              5208
+            ],
+            [
+              62500,
+              2279
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "3472373e-5ae8-51af-a3d7-c685ed5a3a5e",
+          "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+          "d3642590-c035-5d9a-b529-8835dd94be71"
+        ],
+        "entrySlug": "magic-torn-wasteland",
+        "labelAnchor": [
+          76830,
+          11011
+        ],
+        "neighbors": [
+          "high-cliffs",
+          "riverlands",
+          "unknown-southeast"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "Magic-Torn Wasteland"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              96029,
+              16276
+            ],
+            [
+              99284,
+              20833
+            ],
+            [
+              97982,
+              26693
+            ],
+            [
+              94401,
+              32552
+            ],
+            [
+              89193,
+              36133
+            ],
+            [
+              83333,
+              41016
+            ],
+            [
+              75521,
+              45573
+            ],
+            [
+              70313,
+              43294
+            ],
+            [
+              67057,
+              41016
+            ],
+            [
+              65755,
+              39063
+            ],
+            [
+              65755,
+              36459
+            ],
+            [
+              66406,
+              32552
+            ],
+            [
+              67057,
+              27995
+            ],
+            [
+              68359,
+              24740
+            ],
+            [
+              69661,
+              21484
+            ],
+            [
+              74870,
+              20508
+            ],
+            [
+              80078,
+              18555
+            ],
+            [
+              85938,
+              16927
+            ],
+            [
+              91146,
+              16276
+            ],
+            [
+              96029,
+              16276
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "ce312c5f-63be-51e8-8e4c-a5a91090fb20",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff",
+          "1c994691-a4ec-568e-a0fb-dc944d06b09e"
+        ],
+        "entrySlug": "unknown-southeast",
+        "labelAnchor": [
+          81413,
+          29576
+        ],
+        "neighbors": [
+          "magic-torn-wasteland",
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "Unknown Southeast"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              65755,
+              39063
+            ],
+            [
+              67708,
+              42318
+            ],
+            [
+              65755,
+              46875
+            ],
+            [
+              63802,
+              52084
+            ],
+            [
+              62500,
+              57292
+            ],
+            [
+              59896,
+              61198
+            ],
+            [
+              55339,
+              63802
+            ],
+            [
+              50781,
+              63151
+            ],
+            [
+              46875,
+              60547
+            ],
+            [
+              44271,
+              56641
+            ],
+            [
+              42318,
+              51433
+            ],
+            [
+              40365,
+              45573
+            ],
+            [
+              38086,
+              42318
+            ],
+            [
+              36133,
+              39714
+            ],
+            [
+              42318,
+              37110
+            ],
+            [
+              49479,
+              37761
+            ],
+            [
+              57292,
+              37110
+            ],
+            [
+              62500,
+              38412
+            ],
+            [
+              65755,
+              39063
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "317e932c-d122-5189-9620-a560d6eefc50",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8"
+        ],
+        "entrySlug": "the-peninsula",
+        "labelAnchor": [
+          52912,
+          48511
+        ],
+        "neighbors": [
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "The Peninsula"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              34180,
+              13021
+            ],
+            [
+              39063,
+              16927
+            ],
+            [
+              44922,
+              18229
+            ],
+            [
+              50781,
+              18555
+            ],
+            [
+              55339,
+              16927
+            ],
+            [
+              58594,
+              14974
+            ],
+            [
+              61198,
+              16927
+            ],
+            [
+              64453,
+              19531
+            ],
+            [
+              69661,
+              21484
+            ],
+            [
+              68359,
+              24740
+            ],
+            [
+              67057,
+              27995
+            ],
+            [
+              66406,
+              32552
+            ],
+            [
+              65755,
+              36459
+            ],
+            [
+              65755,
+              39063
+            ],
+            [
+              62500,
+              38412
+            ],
+            [
+              57292,
+              37110
+            ],
+            [
+              49479,
+              37761
+            ],
+            [
+              42318,
+              37110
+            ],
+            [
+              36133,
+              39714
+            ],
+            [
+              35156,
+              39063
+            ],
+            [
+              33854,
+              38086
+            ],
+            [
+              37109,
+              35156
+            ],
+            [
+              40365,
+              31901
+            ],
+            [
+              42969,
+              27995
+            ],
+            [
+              41016,
+              25391
+            ],
+            [
+              42969,
+              21484
+            ],
+            [
+              39063,
+              19531
+            ],
+            [
+              34505,
+              19857
+            ],
+            [
+              34831,
+              17578
+            ],
+            [
+              34505,
+              15300
+            ],
+            [
+              34180,
+              13021
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "09016654-7333-550e-9696-1bf0bc88d3c0",
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "d738f62c-0853-59e0-ad68-29ad57badb6a",
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097"
+        ],
+        "entrySlug": "riverlands",
+        "labelAnchor": [
+          52851,
+          27544
+        ],
+        "neighbors": [
+          "grand-rift",
+          "high-cliffs",
+          "magic-torn-wasteland",
+          "the-desert",
+          "the-peninsula",
+          "the-red-forest",
+          "unknown-southeast"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "Riverlands"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              24089,
+              3581
+            ],
+            [
+              22786,
+              7161
+            ],
+            [
+              21484,
+              11719
+            ],
+            [
+              20182,
+              16276
+            ],
+            [
+              19206,
+              20833
+            ],
+            [
+              20508,
+              24740
+            ],
+            [
+              22786,
+              27995
+            ],
+            [
+              25391,
+              30599
+            ],
+            [
+              27344,
+              32227
+            ],
+            [
+              28646,
+              33854
+            ],
+            [
+              31250,
+              36459
+            ],
+            [
+              33854,
+              38086
+            ],
+            [
+              35156,
+              39063
+            ],
+            [
+              36133,
+              39714
+            ],
+            [
+              33854,
+              40690
+            ],
+            [
+              29297,
+              41667
+            ],
+            [
+              22786,
+              41016
+            ],
+            [
+              16927,
+              39714
+            ],
+            [
+              11068,
+              37761
+            ],
+            [
+              5859,
+              33854
+            ],
+            [
+              2930,
+              27344
+            ],
+            [
+              2279,
+              19531
+            ],
+            [
+              3906,
+              13021
+            ],
+            [
+              6510,
+              7813
+            ],
+            [
+              9766,
+              4557
+            ],
+            [
+              14323,
+              2279
+            ],
+            [
+              19531,
+              1953
+            ],
+            [
+              24089,
+              3581
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "642aa106-4e42-5928-92fa-5e51832f2141",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "90633689-6c61-55bd-ba7f-3faba438b714"
+        ],
+        "entrySlug": "the-desert",
+        "labelAnchor": [
+          15224,
+          23146
+        ],
+        "neighbors": [
+          "grand-rift",
+          "riverlands",
+          "the-red-forest"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "The Desert"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              24089,
+              3581
+            ],
+            [
+              26042,
+              4557
+            ],
+            [
+              28646,
+              6185
+            ],
+            [
+              31250,
+              8464
+            ],
+            [
+              33203,
+              10742
+            ],
+            [
+              34180,
+              13021
+            ],
+            [
+              34505,
+              15300
+            ],
+            [
+              34831,
+              17578
+            ],
+            [
+              34505,
+              19857
+            ],
+            [
+              33203,
+              22136
+            ],
+            [
+              32552,
+              24740
+            ],
+            [
+              31250,
+              27344
+            ],
+            [
+              29297,
+              29948
+            ],
+            [
+              27344,
+              32227
+            ],
+            [
+              25391,
+              30599
+            ],
+            [
+              22786,
+              27995
+            ],
+            [
+              20508,
+              24740
+            ],
+            [
+              19206,
+              20833
+            ],
+            [
+              20182,
+              16276
+            ],
+            [
+              21484,
+              11719
+            ],
+            [
+              22786,
+              7161
+            ],
+            [
+              24089,
+              3581
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "65213e53-a6a8-50f3-8273-6f1638aaa23b",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "a3a3ad70-e027-5728-b596-6d0b8420538e",
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+          "3de4a22b-297f-532b-83a2-67947305694c",
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5"
+        ],
+        "entrySlug": "grand-rift",
+        "labelAnchor": [
+          26974,
+          17909
+        ],
+        "neighbors": [
+          "high-cliffs",
+          "riverlands",
+          "the-desert",
+          "the-red-forest"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "Grand Rift"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              34505,
+              19857
+            ],
+            [
+              39063,
+              19531
+            ],
+            [
+              42969,
+              21484
+            ],
+            [
+              41016,
+              25391
+            ],
+            [
+              42969,
+              27995
+            ],
+            [
+              40365,
+              31901
+            ],
+            [
+              37109,
+              35156
+            ],
+            [
+              33854,
+              38086
+            ],
+            [
+              31250,
+              36459
+            ],
+            [
+              28646,
+              33854
+            ],
+            [
+              27344,
+              32227
+            ],
+            [
+              29297,
+              29948
+            ],
+            [
+              31250,
+              27344
+            ],
+            [
+              32552,
+              24740
+            ],
+            [
+              33203,
+              22136
+            ],
+            [
+              34505,
+              19857
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "a895ea74-eb01-5b3e-952b-2175876afd44",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "d738f62c-0853-59e0-ad68-29ad57badb6a",
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "3de4a22b-297f-532b-83a2-67947305694c"
+        ],
+        "entrySlug": "the-red-forest",
+        "labelAnchor": [
+          35768,
+          28447
+        ],
+        "neighbors": [
+          "grand-rift",
+          "riverlands",
+          "the-desert"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "title": "The Red Forest"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              26367,
+              7813
+            ],
+            [
+              27669,
+              7813
+            ],
+            [
+              28971,
+              8789
+            ],
+            [
+              29818,
+              10417
+            ],
+            [
+              30078,
+              12370
+            ],
+            [
+              30924,
+              14323
+            ],
+            [
+              31250,
+              16276
+            ],
+            [
+              31250,
+              18229
+            ],
+            [
+              31576,
+              20508
+            ],
+            [
+              31120,
+              22787
+            ],
+            [
+              30469,
+              25391
+            ],
+            [
+              29297,
+              27995
+            ],
+            [
+              27344,
+              29623
+            ],
+            [
+              26042,
+              28516
+            ],
+            [
+              25000,
+              26693
+            ],
+            [
+              24219,
+              24414
+            ],
+            [
+              23763,
+              21810
+            ],
+            [
+              23828,
+              19531
+            ],
+            [
+              23698,
+              17253
+            ],
+            [
+              24089,
+              14649
+            ],
+            [
+              24414,
+              12044
+            ],
+            [
+              25065,
+              9440
+            ],
+            [
+              26367,
+              7813
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "403004eb-779b-5382-bebd-7787f3058388",
+      "properties": {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "boundaryIds": [
+          "a6eb0bea-995f-5159-9bda-4e1c2990e84d",
+          "bab67400-a081-5508-b513-69810366a748",
+          "2ce74dc3-122f-568d-90ba-a5cbe6733de1",
+          "ecb4ca16-2351-5314-874d-4c50df205574"
+        ],
+        "entrySlug": "death-canyon",
+        "labelAnchor": [
+          27473,
+          18595
+        ],
+        "neighbors": [
+          "grand-rift"
+        ],
+        "parentEntrySlug": "grand-rift",
+        "role": "NESTED_GEOGRAPHY",
+        "title": "Death Canyon"
+      },
+      "type": "Feature"
+    }
+  ],
+  "mapSlug": "martino-world",
+  "sourceContract": "martino-atlas-v2-canonical-world-topology",
+  "sourceVersion": 1,
+  "validation": {
+    "deathCanyon": {
+      "crossesGrandRift": false,
+      "everyVertexInsideGrandRift": true,
+      "overlapsRedForest": false,
+      "parent": "grand-rift",
+      "ringPoints": 23,
+      "valid": true
+    },
+    "hardGates": {
+      "allAreasApproved": true,
+      "allTopLevelShells": true,
+      "deathCanyonContained": true,
+      "deathCanyonShell": true,
+      "grandLakeShell": true,
+      "highCliffsShell": true,
+      "multiRegionJunctionsExact": true,
+      "noDuplicateEditableBorders": true,
+      "noInvalidRings": true,
+      "noOrphans": true,
+      "noOwnerReviewEdges": true,
+      "noUnintendedCrossings": true,
+      "noUnusedBoundaries": true,
+      "partitionExact": true,
+      "sharedBoundariesReused": true
+    },
+    "partition": {
+      "areaDelta": 0,
+      "assignedArea": 3949593743,
+      "gaps": 0,
+      "outerArea": 3949593743,
+      "overlaps": 0
+    },
+    "topologyLocked": true
+  }
+}

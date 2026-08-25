@@ -438,82 +438,138 @@ enum StoryMapGeometryKind {
   MULTIPOLYGON
 }
 
+enum StoryMapBoundaryKind {
+  INTERNAL_BORDER
+  COAST
+  WATER_BOUNDARY
+  OPEN_BOUNDARY
+}
+
+enum StoryMapAreaRingRole {
+  SHELL
+  HOLE
+}
+
+enum StoryWorldConnectionType {
+  ROAD
+  TRAIL
+  RIVER_TRAVEL
+  SEA_ROUTE
+  AIR_ROUTE
+  OTHER
+  UNKNOWN
+}
+
+enum StoryWorldConnectionDirectionality {
+  UNSPECIFIED
+  FROM_TO
+  TO_FROM
+  BIDIRECTIONAL
+}
+
+enum StoryWorldConnectionStatus {
+  UNSPECIFIED
+  OPEN
+  CLOSED
+  DESTROYED
+}
+
+enum StoryWorldConnectionVisibility {
+  DEFAULT
+  HIDDEN
+}
+
+enum StoryMapConnectionPathGeometryKind {
+  LINESTRING
+  MULTILINESTRING
+}
+
 model User {
-  id                            String                         @id @default(uuid()) @db.Uuid
-  name                          String?
-  username                      String?                        @unique
-  displayName                   String?
-  email                         String?                        @unique
-  emailVerified                 DateTime?
-  role                          Role                           @default(VIEWER)
-  image                         String?
-  bio                           String?                        @db.VarChar(500)
-  avatarBorder                  String?                        @db.VarChar(64)
-  profileLayout                 String?                        @db.VarChar(64)
-  isActive                      Boolean                        @default(false)
-  createdAt                     DateTime                       @default(now())
-  updatedAt                     DateTime                       @updatedAt
-  accounts                      Account[]
-  sessions                      Session[]
-  playerIdentities              PlayerIdentity[]
-  auditLogs                     AuditLog[]
-  chronicleReactions            ChronicleReaction[]
-  identityClaims                PlayerIdentityClaim[]          @relation("IdentityClaimant")
-  resolvedIdentityClaims        PlayerIdentityClaim[]          @relation("IdentityClaimResolver")
-  identitiesGranted             IdentityOwnershipTransaction[] @relation("IdentityOwnershipTo")
-  identitiesRevoked             IdentityOwnershipTransaction[] @relation("IdentityOwnershipFrom")
-  ownershipDecisions            IdentityOwnershipTransaction[] @relation("IdentityOwnershipActor")
-  titles                        UserTitle[]                    @relation("TitleOwner")
-  awardedTitles                 UserTitle[]                    @relation("TitleAwarder")
-  achievements                  PlayerAchievement[]
-  recordHolders                 RecordHolder[]                 @relation("RecordHolderUser")
-  recordHistory                 RecordHistory[]                @relation("RecordHistoryUser")
-  wakeRequests                  WakeRequest[]                  @relation("WakeRequestRequester")
-  resolvedWakeRequests          WakeRequest[]                  @relation("WakeRequestResolver")
-  wakeVotes                     WakeVote[]
-  pollsCreated                  ServerPoll[]                   @relation("PollCreator")
-  pollVotes                     ServerPollVote[]
-  serverCommands                ServerCommand[]
-  socialAccounts                UserSocialAccount[]
-  unlockedRewards               UserAchievementReward[]
-  steamLinkNonces               SteamLinkNonce[]
-  twitchLinkNonces              TwitchLinkNonce[]
-  twitchChannel                 TwitchChannel?
-  discordStreamSignal           DiscordStreamSignal?
-  xpEntries                     UserXpEntry[]
-  weeklyQuestProgress           UserWeeklyQuestProgress[]
-  seasonMemberships             SeasonMembership[]
-  seasonXpEntries               SeasonXpEntry[]
-  seasonQuestProgress           UserSeasonQuestProgress[]
-  seasonTrophies                UserSeasonTrophy[]
-  identityReconciliations       IdentityRewardReconciliation[]
-  clubGameProfiles              ClubGameProfile[]
-  gameActivities                GameActivity[]
-  invitationsSent               Invitation[]                   @relation("InvitationSender")
-  memberPresence                MemberPresence?
-  memberReferralsSent           MemberReferral[]               @relation("MemberReferralInviter")
-  memberReferralReceived        MemberReferral?                @relation("MemberReferralInvitee")
-  storyArcs                     StoryArc[]                     @relation("StoryArcCreator")
-  storyArcLocks                 StoryArc[]                     @relation("StoryArcLock")
-  storyNodesCreated             StoryNode[]                    @relation("StoryNodeCreator")
-  storyNodesUpdated             StoryNode[]                    @relation("StoryNodeEditor")
-  storyNodeLocks                StoryNode[]                    @relation("StoryNodeLock")
-  storyEdges                    StoryEdge[]                    @relation("StoryEdgeCreator")
-  storyEntriesCreated           StoryEntry[]                   @relation("StoryEntryCreator")
-  storyEntriesUpdated           StoryEntry[]                   @relation("StoryEntryEditor")
-  storyEntryLocks               StoryEntry[]                   @relation("StoryEntryLock")
-  storyRevisions                StoryRevision[]                @relation("StoryRevisionActor")
-  storyComments                 StoryComment[]                 @relation("StoryCommentAuthor")
-  storyCommentsResolved         StoryComment[]                 @relation("StoryCommentResolver")
-  storyPresence                 StoryPresence?
-  storyExportTokens             StoryExportToken[]             @relation("StoryExportTokenCreator")
-  storyAssistantMessages        StoryAssistantMessage[]        @relation("StoryAssistantAsker")
-  storyMapsCreated              StoryMap[]                     @relation("StoryMapCreator")
-  storyMapsUpdated              StoryMap[]                     @relation("StoryMapEditor")
-  storyMapPlacementsCreated     StoryMapPlacement[]            @relation("StoryMapPlacementCreator")
-  storyMapPlacementsUpdated     StoryMapPlacement[]            @relation("StoryMapPlacementEditor")
-  storyMapNodePlacementsCreated StoryMapNodePlacement[]        @relation("StoryMapNodePlacementCreator")
-  storyMapNodePlacementsUpdated StoryMapNodePlacement[]        @relation("StoryMapNodePlacementEditor")
+  id                             String                         @id @default(uuid()) @db.Uuid
+  name                           String?
+  username                       String?                        @unique
+  displayName                    String?
+  email                          String?                        @unique
+  emailVerified                  DateTime?
+  role                           Role                           @default(VIEWER)
+  image                          String?
+  bio                            String?                        @db.VarChar(500)
+  avatarBorder                   String?                        @db.VarChar(64)
+  profileLayout                  String?                        @db.VarChar(64)
+  isActive                       Boolean                        @default(false)
+  createdAt                      DateTime                       @default(now())
+  updatedAt                      DateTime                       @updatedAt
+  accounts                       Account[]
+  sessions                       Session[]
+  playerIdentities               PlayerIdentity[]
+  auditLogs                      AuditLog[]
+  chronicleReactions             ChronicleReaction[]
+  identityClaims                 PlayerIdentityClaim[]          @relation("IdentityClaimant")
+  resolvedIdentityClaims         PlayerIdentityClaim[]          @relation("IdentityClaimResolver")
+  identitiesGranted              IdentityOwnershipTransaction[] @relation("IdentityOwnershipTo")
+  identitiesRevoked              IdentityOwnershipTransaction[] @relation("IdentityOwnershipFrom")
+  ownershipDecisions             IdentityOwnershipTransaction[] @relation("IdentityOwnershipActor")
+  titles                         UserTitle[]                    @relation("TitleOwner")
+  awardedTitles                  UserTitle[]                    @relation("TitleAwarder")
+  achievements                   PlayerAchievement[]
+  recordHolders                  RecordHolder[]                 @relation("RecordHolderUser")
+  recordHistory                  RecordHistory[]                @relation("RecordHistoryUser")
+  wakeRequests                   WakeRequest[]                  @relation("WakeRequestRequester")
+  resolvedWakeRequests           WakeRequest[]                  @relation("WakeRequestResolver")
+  wakeVotes                      WakeVote[]
+  pollsCreated                   ServerPoll[]                   @relation("PollCreator")
+  pollVotes                      ServerPollVote[]
+  serverCommands                 ServerCommand[]
+  socialAccounts                 UserSocialAccount[]
+  unlockedRewards                UserAchievementReward[]
+  steamLinkNonces                SteamLinkNonce[]
+  twitchLinkNonces               TwitchLinkNonce[]
+  twitchChannel                  TwitchChannel?
+  discordStreamSignal            DiscordStreamSignal?
+  xpEntries                      UserXpEntry[]
+  weeklyQuestProgress            UserWeeklyQuestProgress[]
+  seasonMemberships              SeasonMembership[]
+  seasonXpEntries                SeasonXpEntry[]
+  seasonQuestProgress            UserSeasonQuestProgress[]
+  seasonTrophies                 UserSeasonTrophy[]
+  identityReconciliations        IdentityRewardReconciliation[]
+  clubGameProfiles               ClubGameProfile[]
+  gameActivities                 GameActivity[]
+  invitationsSent                Invitation[]                   @relation("InvitationSender")
+  memberPresence                 MemberPresence?
+  memberReferralsSent            MemberReferral[]               @relation("MemberReferralInviter")
+  memberReferralReceived         MemberReferral?                @relation("MemberReferralInvitee")
+  storyArcs                      StoryArc[]                     @relation("StoryArcCreator")
+  storyArcLocks                  StoryArc[]                     @relation("StoryArcLock")
+  storyNodesCreated              StoryNode[]                    @relation("StoryNodeCreator")
+  storyNodesUpdated              StoryNode[]                    @relation("StoryNodeEditor")
+  storyNodeLocks                 StoryNode[]                    @relation("StoryNodeLock")
+  storyEdges                     StoryEdge[]                    @relation("StoryEdgeCreator")
+  storyEntriesCreated            StoryEntry[]                   @relation("StoryEntryCreator")
+  storyEntriesUpdated            StoryEntry[]                   @relation("StoryEntryEditor")
+  storyEntryLocks                StoryEntry[]                   @relation("StoryEntryLock")
+  storyRevisions                 StoryRevision[]                @relation("StoryRevisionActor")
+  storyComments                  StoryComment[]                 @relation("StoryCommentAuthor")
+  storyCommentsResolved          StoryComment[]                 @relation("StoryCommentResolver")
+  storyPresence                  StoryPresence?
+  storyExportTokens              StoryExportToken[]             @relation("StoryExportTokenCreator")
+  storyAssistantMessages         StoryAssistantMessage[]        @relation("StoryAssistantAsker")
+  storyMapsCreated               StoryMap[]                     @relation("StoryMapCreator")
+  storyMapsUpdated               StoryMap[]                     @relation("StoryMapEditor")
+  storyMapPlacementsCreated      StoryMapPlacement[]            @relation("StoryMapPlacementCreator")
+  storyMapPlacementsUpdated      StoryMapPlacement[]            @relation("StoryMapPlacementEditor")
+  storyMapNodePlacementsCreated  StoryMapNodePlacement[]        @relation("StoryMapNodePlacementCreator")
+  storyMapNodePlacementsUpdated  StoryMapNodePlacement[]        @relation("StoryMapNodePlacementEditor")
+  storyMapTopologyNodesCreated   StoryMapTopologyNode[]         @relation("StoryMapTopologyNodeCreator")
+  storyMapTopologyNodesUpdated   StoryMapTopologyNode[]         @relation("StoryMapTopologyNodeEditor")
+  storyMapBoundariesCreated      StoryMapBoundary[]             @relation("StoryMapBoundaryCreator")
+  storyMapBoundariesUpdated      StoryMapBoundary[]             @relation("StoryMapBoundaryEditor")
+  storyMapAreaRingsCreated       StoryMapAreaRing[]             @relation("StoryMapAreaRingCreator")
+  storyMapAreaRingsUpdated       StoryMapAreaRing[]             @relation("StoryMapAreaRingEditor")
+  storyWorldConnectionsCreated   StoryWorldConnection[]         @relation("StoryWorldConnectionCreator")
+  storyWorldConnectionsUpdated   StoryWorldConnection[]         @relation("StoryWorldConnectionEditor")
+  storyMapConnectionPathsCreated StoryMapConnectionPath[]       @relation("StoryMapConnectionPathCreator")
+  storyMapConnectionPathsUpdated StoryMapConnectionPath[]       @relation("StoryMapConnectionPathEditor")
 }
 
 model Account {
@@ -2194,35 +2250,37 @@ model StoryEdge {
 /// A lore bible entry: the theme, regions, creatures, characters, factions,
 /// items, and rules a writer has to know before adding to the story.
 model StoryEntry {
-  id              String              @id @default(uuid()) @db.Uuid
-  kind            StoryEntryKind
-  slug            String              @unique @db.VarChar(64)
-  title           String              @db.VarChar(120)
-  summary         String?             @db.VarChar(500)
-  body            String?             @db.Text
+  id                   String                 @id @default(uuid()) @db.Uuid
+  kind                 StoryEntryKind
+  slug                 String                 @unique @db.VarChar(64)
+  title                String                 @db.VarChar(120)
+  summary              String?                @db.VarChar(500)
+  body                 String?                @db.Text
   /// The typed module object from Codex_Module_Schema.md — shape depends on
   /// kind, every field nullable, null meaning "not yet decided". Prose stays
   /// primary; meta is the queryable index over it.
-  meta            Json?
-  status          StoryStatus         @default(PROPOSED)
-  version         Int                 @default(1)
-  createdByUserId String              @db.Uuid
-  updatedByUserId String?             @db.Uuid
-  lockedByUserId  String?             @db.Uuid
-  lockExpiresAt   DateTime?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  creator         User                @relation("StoryEntryCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
-  editor          User?               @relation("StoryEntryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
-  lockedBy        User?               @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
-  nodeLinks       StoryEntryLink[]
-  comments        StoryComment[]
-  speakerOf       StoryNode[]         @relation("StoryNodeSpeaker")
-  regionOf        StoryArc[]          @relation("StoryArcRegion")
-  companionOf     StoryArc[]          @relation("StoryArcCompanion")
-  factionOf       StoryArc[]          @relation("StoryArcFaction")
-  ownedMap        StoryMap?           @relation("StoryMapOwner")
-  mapPlacements   StoryMapPlacement[]
+  meta                 Json?
+  status               StoryStatus            @default(PROPOSED)
+  version              Int                    @default(1)
+  createdByUserId      String                 @db.Uuid
+  updatedByUserId      String?                @db.Uuid
+  lockedByUserId       String?                @db.Uuid
+  lockExpiresAt        DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  creator              User                   @relation("StoryEntryCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor               User?                  @relation("StoryEntryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  lockedBy             User?                  @relation("StoryEntryLock", fields: [lockedByUserId], references: [id], onDelete: SetNull)
+  nodeLinks            StoryEntryLink[]
+  comments             StoryComment[]
+  speakerOf            StoryNode[]            @relation("StoryNodeSpeaker")
+  regionOf             StoryArc[]             @relation("StoryArcRegion")
+  companionOf          StoryArc[]             @relation("StoryArcCompanion")
+  factionOf            StoryArc[]             @relation("StoryArcFaction")
+  ownedMap             StoryMap?              @relation("StoryMapOwner")
+  mapPlacements        StoryMapPlacement[]
+  worldConnectionsFrom StoryWorldConnection[] @relation("StoryWorldConnectionFrom")
+  worldConnectionsTo   StoryWorldConnection[] @relation("StoryWorldConnectionTo")
 
   @@index([kind, status, title])
   @@index([status, updatedAt])
@@ -2231,33 +2289,36 @@ model StoryEntry {
 /// One zoomable illustrated atlas scene. A world map can own child region or
 /// settlement maps without coupling their art pixels to Unreal coordinates.
 model StoryMap {
-  id               String                  @id @default(uuid()) @db.Uuid
-  slug             String                  @unique @db.VarChar(64)
-  title            String                  @db.VarChar(120)
-  parentMapId      String?                 @db.Uuid
-  ownerEntryId     String?                 @unique @db.Uuid
-  artVersion       String                  @db.VarChar(40)
+  id               String                   @id @default(uuid()) @db.Uuid
+  slug             String                   @unique @db.VarChar(64)
+  title            String                   @db.VarChar(120)
+  parentMapId      String?                  @db.Uuid
+  ownerEntryId     String?                  @unique @db.Uuid
+  artVersion       String                   @db.VarChar(40)
   imageWidth       Int
   imageHeight      Int
-  coordinateWidth  Int                     @default(100000)
+  coordinateWidth  Int                      @default(100000)
   coordinateHeight Int
   initialCenterX   Int
   initialCenterY   Int
-  initialZoom      Float                   @default(0)
-  minZoom          Float                   @default(0)
-  maxZoom          Float                   @default(8)
-  version          Int                     @default(1)
-  createdByUserId  String                  @db.Uuid
-  updatedByUserId  String?                 @db.Uuid
-  createdAt        DateTime                @default(now())
-  updatedAt        DateTime                @updatedAt
-  parent           StoryMap?               @relation("StoryMapHierarchy", fields: [parentMapId], references: [id], onDelete: SetNull)
-  children         StoryMap[]              @relation("StoryMapHierarchy")
-  owner            StoryEntry?             @relation("StoryMapOwner", fields: [ownerEntryId], references: [id], onDelete: SetNull)
+  initialZoom      Float                    @default(0)
+  minZoom          Float                    @default(0)
+  maxZoom          Float                    @default(8)
+  version          Int                      @default(1)
+  createdByUserId  String                   @db.Uuid
+  updatedByUserId  String?                  @db.Uuid
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  parent           StoryMap?                @relation("StoryMapHierarchy", fields: [parentMapId], references: [id], onDelete: SetNull)
+  children         StoryMap[]               @relation("StoryMapHierarchy")
+  owner            StoryEntry?              @relation("StoryMapOwner", fields: [ownerEntryId], references: [id], onDelete: SetNull)
   placements       StoryMapPlacement[]
   nodePlacements   StoryMapNodePlacement[]
-  creator          User                    @relation("StoryMapCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
-  editor           User?                   @relation("StoryMapEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  topologyNodes    StoryMapTopologyNode[]
+  boundaries       StoryMapBoundary[]
+  connectionPaths  StoryMapConnectionPath[]
+  creator          User                     @relation("StoryMapCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor           User?                    @relation("StoryMapEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
 
   @@index([parentMapId, title])
   @@index([ownerEntryId])
@@ -2314,10 +2375,152 @@ model StoryMapPlacement {
   entry           StoryEntry           @relation(fields: [entryId], references: [id], onDelete: Cascade)
   creator         User                 @relation("StoryMapPlacementCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
   editor          User?                @relation("StoryMapPlacementEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  areaRings       StoryMapAreaRing[]
 
   @@unique([mapId, entryId])
   @@index([mapId, priority])
   @@index([entryId])
+}
+
+/// One canonical shared-topology vertex in a map's fixed-point extent. Exact
+/// coordinate uniqueness makes a junction one node rather than several
+/// coincident nodes; independent analytical overlays do not use this table.
+model StoryMapTopologyNode {
+  id              String             @id @default(uuid()) @db.Uuid
+  mapId           String             @db.Uuid
+  x               Int
+  y               Int
+  version         Int                @default(1)
+  createdByUserId String             @db.Uuid
+  updatedByUserId String?            @db.Uuid
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  map             StoryMap           @relation(fields: [mapId], references: [id], onDelete: Restrict)
+  boundariesFrom  StoryMapBoundary[] @relation("StoryMapBoundaryStart")
+  boundariesTo    StoryMapBoundary[] @relation("StoryMapBoundaryEnd")
+  creator         User               @relation("StoryMapTopologyNodeCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor          User?              @relation("StoryMapTopologyNodeEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([mapId, x, y])
+  @@index([mapId])
+}
+
+/// A shared base-geography edge. Endpoints live on topology nodes; this JSON
+/// stores only the bounded ordered interior fixed-point vertices.
+model StoryMapBoundary {
+  id               String                     @id @default(uuid()) @db.Uuid
+  mapId            String                     @db.Uuid
+  startNodeId      String                     @db.Uuid
+  endNodeId        String                     @db.Uuid
+  kind             StoryMapBoundaryKind
+  interiorVertices Json
+  version          Int                        @default(1)
+  createdByUserId  String                     @db.Uuid
+  updatedByUserId  String?                    @db.Uuid
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+  map              StoryMap                   @relation(fields: [mapId], references: [id], onDelete: Restrict)
+  startNode        StoryMapTopologyNode       @relation("StoryMapBoundaryStart", fields: [startNodeId], references: [id], onDelete: Restrict)
+  endNode          StoryMapTopologyNode       @relation("StoryMapBoundaryEnd", fields: [endNodeId], references: [id], onDelete: Restrict)
+  ringReferences   StoryMapAreaRingBoundary[]
+  creator          User                       @relation("StoryMapBoundaryCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor           User?                      @relation("StoryMapBoundaryEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([mapId])
+  @@index([startNodeId])
+  @@index([endNodeId])
+}
+
+/// One shell or hole in a topology-backed placement component. `ringIndex=0`
+/// is the component shell; positive indexes are independently ordered holes.
+model StoryMapAreaRing {
+  id              String                     @id @default(uuid()) @db.Uuid
+  placementId     String                     @db.Uuid
+  componentIndex  Int
+  ringIndex       Int
+  role            StoryMapAreaRingRole
+  version         Int                        @default(1)
+  createdByUserId String                     @db.Uuid
+  updatedByUserId String?                    @db.Uuid
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  placement       StoryMapPlacement          @relation(fields: [placementId], references: [id], onDelete: Restrict)
+  boundaries      StoryMapAreaRingBoundary[]
+  creator         User                       @relation("StoryMapAreaRingCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor          User?                      @relation("StoryMapAreaRingEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([placementId, componentIndex, ringIndex])
+  @@index([placementId])
+}
+
+/// Ordered consumption of one shared boundary by one area ring. The compound
+/// primary key prevents duplicate boundary use while `sequence` fixes order.
+model StoryMapAreaRingBoundary {
+  ringId     String           @db.Uuid
+  boundaryId String           @db.Uuid
+  sequence   Int
+  reversed   Boolean          @default(false)
+  ring       StoryMapAreaRing @relation(fields: [ringId], references: [id], onDelete: Restrict)
+  boundary   StoryMapBoundary @relation(fields: [boundaryId], references: [id], onDelete: Restrict)
+
+  @@id([ringId, boundaryId])
+  @@unique([ringId, sequence])
+  @@index([boundaryId])
+}
+
+/// A stable first-class route or world relationship between canonical Codex
+/// entries. Multiple rows between the same endpoints are intentionally valid.
+model StoryWorldConnection {
+  id              String                             @id @default(uuid()) @db.Uuid
+  fromEntryId     String                             @db.Uuid
+  toEntryId       String                             @db.Uuid
+  type            StoryWorldConnectionType
+  directionality  StoryWorldConnectionDirectionality @default(UNSPECIFIED)
+  status          StoryWorldConnectionStatus         @default(UNSPECIFIED)
+  visibility      StoryWorldConnectionVisibility     @default(DEFAULT)
+  originalWording String?                            @db.VarChar(2000)
+  editorialNotes  String?                            @db.VarChar(2000)
+  metadata        Json
+  version         Int                                @default(1)
+  createdByUserId String                             @db.Uuid
+  updatedByUserId String?                            @db.Uuid
+  createdAt       DateTime                           @default(now())
+  updatedAt       DateTime                           @updatedAt
+  fromEntry       StoryEntry                         @relation("StoryWorldConnectionFrom", fields: [fromEntryId], references: [id], onDelete: Restrict)
+  toEntry         StoryEntry                         @relation("StoryWorldConnectionTo", fields: [toEntryId], references: [id], onDelete: Restrict)
+  paths           StoryMapConnectionPath[]
+  creator         User                               @relation("StoryWorldConnectionCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor          User?                              @relation("StoryWorldConnectionEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([fromEntryId])
+  @@index([toEntryId])
+  @@index([type])
+}
+
+/// One connection's cartographic representation in one scene. Disconnected
+/// route pieces use MULTILINESTRING rather than competing per-scene rows.
+model StoryMapConnectionPath {
+  id              String                             @id @default(uuid()) @db.Uuid
+  connectionId    String                             @db.Uuid
+  mapId           String                             @db.Uuid
+  geometryKind    StoryMapConnectionPathGeometryKind
+  geometry        Json
+  minZoom         Float                              @default(0)
+  maxZoom         Float?
+  priority        Int                                @default(0)
+  version         Int                                @default(1)
+  createdByUserId String                             @db.Uuid
+  updatedByUserId String?                            @db.Uuid
+  createdAt       DateTime                           @default(now())
+  updatedAt       DateTime                           @updatedAt
+  connection      StoryWorldConnection               @relation(fields: [connectionId], references: [id], onDelete: Restrict)
+  map             StoryMap                           @relation(fields: [mapId], references: [id], onDelete: Restrict)
+  creator         User                               @relation("StoryMapConnectionPathCreator", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  editor          User?                              @relation("StoryMapConnectionPathEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([connectionId, mapId])
+  @@index([mapId])
+  @@index([connectionId])
 }
 
 /// Declares that a node features a bible entry, so a scene lists its cast and

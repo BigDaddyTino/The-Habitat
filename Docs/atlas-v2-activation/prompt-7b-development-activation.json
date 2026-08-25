@@ -1,0 +1,23 @@
+{
+  "schema": "martino-atlas-v2-prompt-7b-development-activation",
+  "version": 1,
+  "date": "2026-08-24",
+  "production": {
+    "database": "localhost:5432/habitat",
+    "migration": "20260824230000_add_atlas_topology_connections",
+    "migrationState": "pending",
+    "writes": 0
+  },
+  "development": {
+    "database": "localhost:5432/habitat_atlas_dev",
+    "backup": "N:\\The Habitat\\backups\\database\\habitat-20260824-192228.dump",
+    "backupBytes": 17882164,
+    "migrationState": "applied",
+    "v2Active": true,
+    "counts": { "nodes": 19, "boundaries": 26, "rings": 11, "references": 43, "connections": 25, "paths": 0 },
+    "legacyFingerprint": "1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef",
+    "logicalFingerprint": "401275849b972e4a6945914fd24ad8b62d3529a59b9342da7802319949802176",
+    "activation": "activated, verified, parity-checked, idempotent, cleaned up, and reactivated",
+    "seed": "refused before reconciliation without an override"
+  }
+}

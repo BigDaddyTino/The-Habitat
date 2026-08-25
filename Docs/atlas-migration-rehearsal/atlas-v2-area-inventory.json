@@ -1,0 +1,330 @@
+{
+  "contract": "martino-atlas-v2-migration-rehearsal",
+  "contractVersion": 1,
+  "records": [
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "arcadian-soverign-guard",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:arcadian-soverign-guard",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "arcadian-special-intelligence-service",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:arcadian-special-intelligence-service",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "census-office",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:census-office",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "chancellory-of-arcadia",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:chancellory-of-arcadia",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "east-side",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:east-side",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "embassy-row",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:embassy-row",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "exclusion-area",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:exclusion-area",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "lower-westside",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:lower-westside",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "the-northside",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:the-northside",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "the-southside",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:the-southside",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "upper-westside",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:upper-westside",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "PORT_ARCADIA_RECALIBRATION",
+      "entrySlug": "waterfront-district",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-port-arcadia",
+      "placementKey": "martino-port-arcadia:waterfront-district",
+      "rationale": "Area tracing is blocked by the decoded/declared artwork aspect-ratio mismatch.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "blackreef-harbour",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:blackreef-harbour",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "fort-tempest",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:fort-tempest",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "forward-camp-kestrel",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:forward-camp-kestrel",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "glasswater-village",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:glasswater-village",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "northwatch-relay",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:northwatch-relay",
+      "rationale": "Existing point placement is not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "pearl-beachhead",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:pearl-beachhead",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "OWNER_REVIEW_REQUIRED",
+      "entrySlug": "riftwood-interior",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:riftwood-interior",
+      "rationale": "The breach-scarred interior is visible, but lore describes a forest armies route around rather than a settled legal boundary.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "shattermarket",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:shattermarket",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "stormglass-landing",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:stormglass-landing",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "stormglass-quarry",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-starting-island",
+      "placementKey": "martino-starting-island:stormglass-quarry",
+      "rationale": "This settlement, fort, landing, or site is cartographically a marker; its V1 polygon is not canonical base geography.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "death-canyon",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:death-canyon",
+      "rationale": "Prompt 6 locks a validated 23-point nested shell wholly inside Grand Rift and disjoint from Red Forest.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "grand-lake",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:grand-lake",
+      "rationale": "The frozen V2 shoreline is a closed water shell shared in reverse by the High Cliffs hole.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "grand-rift",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:grand-rift",
+      "rationale": "Prompt 6 locks one top-level outer rift shell independently of the nested Death Canyon boundary.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "high-cliffs",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:high-cliffs",
+      "rationale": "Prompt 6 approves a deterministic alpine shell using the frozen V2 coastline, shared Grand Lake shoreline, cliff lip, and exact Grand Rift/Riverlands/Magic-Torn junctions.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "magic-torn-wasteland",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:magic-torn-wasteland",
+      "rationale": "The canonical shell follows the northeastern coast and defensible anomaly transitions to High Cliffs, Riverlands, and Unknown Southeast.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "port-arcadia",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:port-arcadia",
+      "rationale": "Canonical city marker with its own child scene.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "riverlands",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:riverlands",
+      "rationale": "The central shell is assembled entirely from shared neighboring boundaries and exact multi-region junctions.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "the-desert",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-desert",
+      "rationale": "The canonical shell follows the western coast, rift wall, crimson transition, and a short Riverlands cartographic edge without creating a river-corridor hole.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "the-floating-city",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-floating-city",
+      "rationale": "Canonical settlement marker, not base partition geography.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "the-ocean",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-ocean",
+      "rationale": "Water context marker; no fictional ocean partition is required.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "the-peninsula",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-peninsula",
+      "rationale": "The canonical shell preserves the established coastline and uses one exact Riverlands boundary across the northern neck.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "the-red-forest",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-red-forest",
+      "rationale": "The owner-approved Red Forest is one contiguous top-level shell adjacent to Grand Rift, Riverlands, and Desert.",
+      "v1GeometryKind": "POLYGON"
+    },
+    {
+      "disposition": "POINT_ONLY",
+      "entrySlug": "the-starting-island",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:the-starting-island",
+      "rationale": "Canonical island destination marker with its own child scene.",
+      "v1GeometryKind": "POINT"
+    },
+    {
+      "disposition": "TRACED",
+      "entrySlug": "unknown-southeast",
+      "entryStatus": "CANON",
+      "mapSlug": "martino-world",
+      "placementKey": "martino-world:unknown-southeast",
+      "rationale": "Only the geographic selection footprint is locked; the cloud-veiled territory receives no invented biome, faction, or settlement lore.",
+      "v1GeometryKind": "POLYGON"
+    }
+  ]
+}

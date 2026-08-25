@@ -1,0 +1,1539 @@
+{
+  "contract": "martino-atlas-v1-geometry-migration-manifest",
+  "contractVersion": 1,
+  "records": [
+    {
+      "childSceneSlug": null,
+      "entrySlug": "arcadian-soverign-guard",
+      "entryStatus": "CANON",
+      "fingerprint": "f3fc33e5d8a1f3f5b397dd83b654e511218542d20569eaed99d27e909bf5760e",
+      "geometry": {
+        "coordinates": [
+          15299,
+          17904
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        15299,
+        17904
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 3,
+      "placementKey": "martino-port-arcadia:arcadian-soverign-guard",
+      "priority": 245
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "arcadian-special-intelligence-service",
+      "entryStatus": "CANON",
+      "fingerprint": "2beb20c726cf31167ab3a33aeca6341d967d792587602d9151a877fec6663362",
+      "geometry": {
+        "coordinates": [
+          28971,
+          20508
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        28971,
+        20508
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 3.1,
+      "placementKey": "martino-port-arcadia:arcadian-special-intelligence-service",
+      "priority": 250
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "census-office",
+      "entryStatus": "CANON",
+      "fingerprint": "78d0ab157f033a6435790fd3172914594ba4372ab4eafa331560f5be8a74ddd1",
+      "geometry": {
+        "coordinates": [
+          51432,
+          42643
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        51432,
+        42643
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 2.9,
+      "placementKey": "martino-port-arcadia:census-office",
+      "priority": 250
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "chancellory-of-arcadia",
+      "entryStatus": "CANON",
+      "fingerprint": "0523433b9f1ae3a9b37ee1d54a7851ad6e0916c966fdbc337877b83799a4d552",
+      "geometry": {
+        "coordinates": [
+          21810,
+          12044
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        21810,
+        12044
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 2.9,
+      "placementKey": "martino-port-arcadia:chancellory-of-arcadia",
+      "priority": 245
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "east-side",
+      "entryStatus": "CANON",
+      "fingerprint": "bc4d470e35893065cafe43df10fc1190d40161b539373cf9ac62dba4fb5c193d",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              70313,
+              10091
+            ],
+            [
+              95378,
+              7813
+            ],
+            [
+              99935,
+              36459
+            ],
+            [
+              85938,
+              52084
+            ],
+            [
+              75521,
+              40365
+            ],
+            [
+              70313,
+              10091
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        84961,
+        25391
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:east-side",
+      "priority": 170
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "embassy-row",
+      "entryStatus": "CANON",
+      "fingerprint": "1094dabfa79aa39f5e7dcc928fbdc00c16c5503c0f0b03e9b54ab6a521f67e90",
+      "geometry": {
+        "coordinates": [
+          33529,
+          19206
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        33529,
+        19206
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 3.1,
+      "placementKey": "martino-port-arcadia:embassy-row",
+      "priority": 250
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "exclusion-area",
+      "entryStatus": "CANON",
+      "fingerprint": "b74e4afd29e441607b5e8d26f6eb2463b833b83fc9fbf5c36c63efd89c5e7cd2",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              38086,
+              2279
+            ],
+            [
+              63477,
+              2279
+            ],
+            [
+              66081,
+              11719
+            ],
+            [
+              35807,
+              11719
+            ],
+            [
+              38086,
+              2279
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        51432,
+        6185
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:exclusion-area",
+      "priority": 180
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "lower-westside",
+      "entryStatus": "CANON",
+      "fingerprint": "1293bbcfb589d02860070692b9d8f1f5b79446a08dc00f07cb59ab8013f0e520",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              7813,
+              21159
+            ],
+            [
+              27995,
+              21484
+            ],
+            [
+              37760,
+              36784
+            ],
+            [
+              16927,
+              43294
+            ],
+            [
+              7161,
+              34505
+            ],
+            [
+              7813,
+              21159
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        20182,
+        30925
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:lower-westside",
+      "priority": 165
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-northside",
+      "entryStatus": "CANON",
+      "fingerprint": "f6cde515e24d6993242088ee2ebe6d201755402d7b8238dfc9ba1dfbbbe90230",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              36458,
+              9440
+            ],
+            [
+              70313,
+              8789
+            ],
+            [
+              73242,
+              25391
+            ],
+            [
+              62826,
+              30274
+            ],
+            [
+              36784,
+              26042
+            ],
+            [
+              36458,
+              9440
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        53385,
+        17904
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:the-northside",
+      "priority": 170
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-southside",
+      "entryStatus": "CANON",
+      "fingerprint": "24153cb1b9d545830768575be30b1686b4bbc1775cac9b1894db2d5a43b90b6e",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              22786,
+              22787
+            ],
+            [
+              75521,
+              22461
+            ],
+            [
+              77799,
+              44922
+            ],
+            [
+              62500,
+              48828
+            ],
+            [
+              26367,
+              45573
+            ],
+            [
+              16276,
+              36133
+            ],
+            [
+              22786,
+              22787
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        49154,
+        33203
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:the-southside",
+      "priority": 175
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "upper-westside",
+      "entryStatus": "CANON",
+      "fingerprint": "0e4b4aadb2127ac666baafd80722d55da44603c8dc9e5a3d821d1a5a9695fc6a",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              7813,
+              6185
+            ],
+            [
+              39063,
+              5534
+            ],
+            [
+              42318,
+              23438
+            ],
+            [
+              23438,
+              28646
+            ],
+            [
+              7813,
+              21484
+            ],
+            [
+              7813,
+              6185
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        23438,
+        14974
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:upper-westside",
+      "priority": 170
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "waterfront-district",
+      "entryStatus": "CANON",
+      "fingerprint": "a71e40cc2a3ddee229b54ed7af0119d51cd41dbf3fe0b337a2561fe486195c77",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              25065,
+              36459
+            ],
+            [
+              75846,
+              36133
+            ],
+            [
+              82031,
+              58594
+            ],
+            [
+              63802,
+              64128
+            ],
+            [
+              30599,
+              61524
+            ],
+            [
+              16927,
+              49479
+            ],
+            [
+              25065,
+              36459
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        51432,
+        49479
+      ],
+      "mapSlug": "martino-port-arcadia",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-port-arcadia:waterfront-district",
+      "priority": 185
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "blackreef-harbour",
+      "entryStatus": "CANON",
+      "fingerprint": "c95792a29862df02cb54118905568b659a83b7f175e1d746361c6dd4c013be81",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              18555,
+              4883
+            ],
+            [
+              38411,
+              4557
+            ],
+            [
+              41016,
+              14974
+            ],
+            [
+              33529,
+              18555
+            ],
+            [
+              21484,
+              16276
+            ],
+            [
+              18555,
+              4883
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        28971,
+        11393
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:blackreef-harbour",
+      "priority": 190
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "fort-tempest",
+      "entryStatus": "CANON",
+      "fingerprint": "a2da6b77f565eedcfa97ba00c84fbbce4afac67583612452d1af3946b2ac2813",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              82031,
+              1953
+            ],
+            [
+              97005,
+              2279
+            ],
+            [
+              98307,
+              13346
+            ],
+            [
+              85938,
+              14323
+            ],
+            [
+              80404,
+              8789
+            ],
+            [
+              82031,
+              1953
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        89844,
+        7487
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:fort-tempest",
+      "priority": 220
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "forward-camp-kestrel",
+      "entryStatus": "CANON",
+      "fingerprint": "f713e120297fa7e5bde8337be5ac4e071a3c08f41af8ca4e3329969de5314bfe",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              19531,
+              18555
+            ],
+            [
+              40365,
+              18555
+            ],
+            [
+              44271,
+              29623
+            ],
+            [
+              35156,
+              33854
+            ],
+            [
+              19531,
+              30599
+            ],
+            [
+              19531,
+              18555
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        31250,
+        25391
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:forward-camp-kestrel",
+      "priority": 230
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "glasswater-village",
+      "entryStatus": "CANON",
+      "fingerprint": "e6b8441047f94615fae7be6f47114b789d83ed5bc0fd4a9db50994ee9082b1bf",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              4557,
+              12044
+            ],
+            [
+              16927,
+              11719
+            ],
+            [
+              21484,
+              19531
+            ],
+            [
+              16276,
+              26042
+            ],
+            [
+              4883,
+              23763
+            ],
+            [
+              4557,
+              12044
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        11393,
+        18880
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:glasswater-village",
+      "priority": 180
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "northwatch-relay",
+      "entryStatus": "CANON",
+      "fingerprint": "906525db821584bfe1420b3293dc12ab02c40a167cd6e8f517366413870dba65",
+      "geometry": {
+        "coordinates": [
+          49479,
+          5339
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        49479,
+        5339
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:northwatch-relay",
+      "priority": 210
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "pearl-beachhead",
+      "entryStatus": "CANON",
+      "fingerprint": "3617babae264a391d445f3a2d894dd151a62dced1c73a71102e6e8a6e7ce8f5b",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              72266,
+              34831
+            ],
+            [
+              97982,
+              33203
+            ],
+            [
+              99284,
+              56315
+            ],
+            [
+              82031,
+              59896
+            ],
+            [
+              69987,
+              51433
+            ],
+            [
+              72266,
+              34831
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        84635,
+        45573
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:pearl-beachhead",
+      "priority": 225
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "riftwood-interior",
+      "entryStatus": "CANON",
+      "fingerprint": "6eb31de029331057e77c5759445fc20304e380840c81913c1dfa02e4911b570d",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              45247,
+              8789
+            ],
+            [
+              72917,
+              8138
+            ],
+            [
+              80729,
+              21484
+            ],
+            [
+              73568,
+              36784
+            ],
+            [
+              53385,
+              36459
+            ],
+            [
+              45573,
+              26367
+            ],
+            [
+              45247,
+              8789
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        62500,
+        21810
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:riftwood-interior",
+      "priority": 215
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "shattermarket",
+      "entryStatus": "CANON",
+      "fingerprint": "ae90d022bce2e84c5960196c1f1651fbc87a88bd5f3f15ac81f0d8fba512729a",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              16602,
+              30599
+            ],
+            [
+              36784,
+              30599
+            ],
+            [
+              39714,
+              43946
+            ],
+            [
+              27995,
+              47852
+            ],
+            [
+              14974,
+              42318
+            ],
+            [
+              16602,
+              30599
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        26693,
+        38086
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:shattermarket",
+      "priority": 205
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "stormglass-landing",
+      "entryStatus": "CANON",
+      "fingerprint": "a706db3e18d7fc092b6896620c9c6ad430e1c2f2098502aba031c79079c1ad91",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              4557,
+              43946
+            ],
+            [
+              24740,
+              43620
+            ],
+            [
+              28320,
+              55664
+            ],
+            [
+              18555,
+              62175
+            ],
+            [
+              4557,
+              58269
+            ],
+            [
+              4557,
+              43946
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        15625,
+        53060
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:stormglass-landing",
+      "priority": 225
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "stormglass-quarry",
+      "entryStatus": "CANON",
+      "fingerprint": "853c76b61363fde87463aece0f5e5f9a44fddf7ea1309ad69badbef848f24cb5",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              42318,
+              33854
+            ],
+            [
+              67708,
+              32552
+            ],
+            [
+              72266,
+              49479
+            ],
+            [
+              62826,
+              57943
+            ],
+            [
+              44922,
+              54037
+            ],
+            [
+              42318,
+              33854
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        55339,
+        45248
+      ],
+      "mapSlug": "martino-starting-island",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-starting-island:stormglass-quarry",
+      "priority": 220
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "death-canyon",
+      "entryStatus": "CANON",
+      "fingerprint": "fb3d0b50d994a4d7bb8a4a1fcd64351482e086ceb77088e0eaff0763cb33865d",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              18555,
+              4883
+            ],
+            [
+              26693,
+              4883
+            ],
+            [
+              30599,
+              13346
+            ],
+            [
+              30273,
+              28971
+            ],
+            [
+              25065,
+              32878
+            ],
+            [
+              19531,
+              25065
+            ],
+            [
+              18555,
+              4883
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        24089,
+        17578
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:death-canyon",
+      "priority": 135
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "grand-lake",
+      "entryStatus": "CANON",
+      "fingerprint": "b8b9fb448198c9411f3625efc54d9507892b5b039d1812f6d493f2e43428801f",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              34831,
+              4232
+            ],
+            [
+              53711,
+              3581
+            ],
+            [
+              56966,
+              8789
+            ],
+            [
+              52409,
+              13346
+            ],
+            [
+              38086,
+              13346
+            ],
+            [
+              33529,
+              8464
+            ],
+            [
+              34831,
+              4232
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        44922,
+        7487
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:grand-lake",
+      "priority": 120
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "grand-rift",
+      "entryStatus": "CANON",
+      "fingerprint": "5d00f5ced2cde3d02c5ca05810ffcf049db6b6c0ad730afa5fcd50112522bea7",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              27344,
+              0
+            ],
+            [
+              30924,
+              9766
+            ],
+            [
+              30273,
+              23763
+            ],
+            [
+              19531,
+              29623
+            ],
+            [
+              4557,
+              25391
+            ],
+            [
+              0,
+              17904
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        14323,
+        6510
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:grand-rift",
+      "priority": 95
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "high-cliffs",
+      "entryStatus": "CANON",
+      "fingerprint": "50627977a1775b39ddef82230c38f55bef72c06c7361c8bec98ac3c2d4979abb",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              25391,
+              0
+            ],
+            [
+              60547,
+              0
+            ],
+            [
+              62174,
+              10091
+            ],
+            [
+              53385,
+              15300
+            ],
+            [
+              32878,
+              13997
+            ],
+            [
+              23112,
+              7161
+            ],
+            [
+              25391,
+              0
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        43945,
+        2930
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:high-cliffs",
+      "priority": 100
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "magic-torn-wasteland",
+      "entryStatus": "CANON",
+      "fingerprint": "0147ad51c24759e241e1c875bb16307b86f6b8212d88bdbcd84f0c93e18e24e1",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              58594,
+              0
+            ],
+            [
+              100000,
+              0
+            ],
+            [
+              100000,
+              18555
+            ],
+            [
+              79427,
+              22461
+            ],
+            [
+              63151,
+              17904
+            ],
+            [
+              56966,
+              9440
+            ],
+            [
+              58594,
+              0
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        76497,
+        8789
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:magic-torn-wasteland",
+      "priority": 100
+    },
+    {
+      "childSceneSlug": "martino-port-arcadia",
+      "entrySlug": "port-arcadia",
+      "entryStatus": "CANON",
+      "fingerprint": "d2eae216d938eaed423cedf3df1f58c5693eb2004069f96b9ed72577cef40604",
+      "geometry": {
+        "coordinates": [
+          50781,
+          59896
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        50781,
+        59896
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:port-arcadia",
+      "priority": 260
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "riverlands",
+      "entryStatus": "CANON",
+      "fingerprint": "f036695bed168d020cef56b7c1dbffeb229265ac1f1c0bd7e23cab86cbf80c2e",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              29622,
+              9440
+            ],
+            [
+              36784,
+              8138
+            ],
+            [
+              42318,
+              14323
+            ],
+            [
+              53711,
+              12370
+            ],
+            [
+              63151,
+              16602
+            ],
+            [
+              64453,
+              31576
+            ],
+            [
+              56966,
+              37110
+            ],
+            [
+              51107,
+              42969
+            ],
+            [
+              42318,
+              38737
+            ],
+            [
+              34831,
+              36133
+            ],
+            [
+              30273,
+              27995
+            ],
+            [
+              29622,
+              9440
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        45573,
+        25065
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:riverlands",
+      "priority": 105
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-desert",
+      "entryStatus": "CANON",
+      "fingerprint": "9602bd10c0c17b00a0c1c0b1aacdf55a5ac3ab034eada6dae85a76c771832749",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              13672
+            ],
+            [
+              18555,
+              11393
+            ],
+            [
+              21484,
+              25065
+            ],
+            [
+              39063,
+              36459
+            ],
+            [
+              33854,
+              44597
+            ],
+            [
+              0,
+              43946
+            ],
+            [
+              0,
+              13672
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        12370,
+        32552
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-desert",
+      "priority": 90
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-floating-city",
+      "entryStatus": "CANON",
+      "fingerprint": "7e7931143eb0f7c3d2282f912ca88a05c8b382af35f896673582df4339c65b12",
+      "geometry": {
+        "coordinates": [
+          44922,
+          6836
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        44922,
+        6836
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-floating-city",
+      "priority": 220
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-ocean",
+      "entryStatus": "CANON",
+      "fingerprint": "35f5ad30095a6638117e0a18b2c621195ddcee99384725564aeea1d38023569a",
+      "geometry": {
+        "coordinates": [
+          79753,
+          57292
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        79753,
+        57292
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-ocean",
+      "priority": 60
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-peninsula",
+      "entryStatus": "CANON",
+      "fingerprint": "53bfbcc026420188915f776452656cddab1f010290634310b6c35e9852f27cd6",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              33854,
+              29297
+            ],
+            [
+              62826,
+              28320
+            ],
+            [
+              65104,
+              39714
+            ],
+            [
+              60547,
+              49479
+            ],
+            [
+              58919,
+              66667
+            ],
+            [
+              42969,
+              66667
+            ],
+            [
+              38086,
+              49479
+            ],
+            [
+              31576,
+              38412
+            ],
+            [
+              33854,
+              29297
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        47526,
+        40690
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-peninsula",
+      "priority": 110
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "the-red-forest",
+      "entryStatus": "CANON",
+      "fingerprint": "3605d83774b64b28bf817a8e4186588c8d0204ccfb06e1b8aaec5acc587f0b7c",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              15951,
+              13997
+            ],
+            [
+              31576,
+              12370
+            ],
+            [
+              39388,
+              22787
+            ],
+            [
+              37109,
+              38086
+            ],
+            [
+              23438,
+              34831
+            ],
+            [
+              17904,
+              26042
+            ],
+            [
+              15951,
+              13997
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        27995,
+        25065
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-red-forest",
+      "priority": 125
+    },
+    {
+      "childSceneSlug": "martino-starting-island",
+      "entrySlug": "the-starting-island",
+      "entryStatus": "CANON",
+      "fingerprint": "0444bec1fd7f4da07393554934111f22ad59016ae0d82177ef3e480bf7299937",
+      "geometry": {
+        "coordinates": [
+          37435,
+          58594
+        ],
+        "type": "POINT"
+      },
+      "geometryKind": "POINT",
+      "label": [
+        37435,
+        58594
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:the-starting-island",
+      "priority": 255
+    },
+    {
+      "childSceneSlug": null,
+      "entrySlug": "unknown-southeast",
+      "entryStatus": "CANON",
+      "fingerprint": "24c54462520707f40b31eb25135beed802baa3cdf2074de2ac984ffaada21087",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              64128,
+              16276
+            ],
+            [
+              100000,
+              16276
+            ],
+            [
+              100000,
+              47201
+            ],
+            [
+              77474,
+              47201
+            ],
+            [
+              62174,
+              36133
+            ],
+            [
+              56966,
+              27995
+            ],
+            [
+              64128,
+              16276
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "geometryKind": "POLYGON",
+      "label": [
+        82031,
+        30599
+      ],
+      "mapSlug": "martino-world",
+      "maxZoom": null,
+      "minZoom": 0,
+      "placementKey": "martino-world:unknown-southeast",
+      "priority": 85
+    }
+  ],
+  "source": "StoryMapPlacement"
+}

@@ -1,0 +1,2142 @@
+{
+  "connections": {
+    "alteredWording": [],
+    "autoClassified": 23,
+    "dropped": 0,
+    "duplicates": [],
+    "exactProvenance": 25,
+    "fingerprintMismatches": [],
+    "legacyRows": 25,
+    "missing": [],
+    "resolvedEndpoints": 25,
+    "typeReviewRequired": 2,
+    "unexpectedDuplicates": 0,
+    "v2Candidates": 25,
+    "valid": true
+  },
+  "contract": "martino-atlas-v2-migration-rehearsal",
+  "contractVersion": 1,
+  "geometryComparisons": [
+    {
+      "centroidDelta": [
+        2796,
+        799
+      ],
+      "entrySlug": "death-canyon",
+      "excluded": [
+        "Grand Rift outer shelves",
+        "Red Forest canopy"
+      ],
+      "included": [
+        "toxic green fissure",
+        "broken inner canyon shelves"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 replaces the broad V1 approximation with a validated 23-point nested shell wholly inside Grand Rift.",
+      "v1": {
+        "approximateArea": 267556281,
+        "bounds": {
+          "maxX": 30599,
+          "maxY": 32878,
+          "minX": 18555,
+          "minY": 4883
+        },
+        "centroid": [
+          24677,
+          17796
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "fb3d0b50d994a4d7bb8a4a1fcd64351482e086ceb77088e0eaff0763cb33865d",
+      "v2": {
+        "approximateArea": 127788899,
+        "bounds": {
+          "maxX": 31576,
+          "maxY": 29623,
+          "minX": 23698,
+          "minY": 7813
+        },
+        "centroid": [
+          27473,
+          18595
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        3258,
+        877
+      ],
+      "entrySlug": "grand-lake",
+      "excluded": [
+        "surrounding alpine rock"
+      ],
+      "included": [
+        "elevated blue lake",
+        "Floating City marker vicinity"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 follows the visible shoreline and shares it exactly with the High Cliffs hole; it does not reuse V1 vertices.",
+      "v1": {
+        "approximateArea": 189131450,
+        "bounds": {
+          "maxX": 56966,
+          "maxY": 13346,
+          "minX": 33529,
+          "minY": 3581
+        },
+        "centroid": [
+          45159,
+          8442
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "b8b9fb448198c9411f3625efc54d9507892b5b039d1812f6d493f2e43428801f",
+      "v2": {
+        "approximateArea": 223743900,
+        "bounds": {
+          "maxX": 59570,
+          "maxY": 15300,
+          "minX": 37760,
+          "minY": 2604
+        },
+        "centroid": [
+          48417,
+          9319
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        11576,
+        4457
+      ],
+      "entrySlug": "grand-rift",
+      "excluded": [
+        "adjacent Red Forest",
+        "nested Death Canyon as a peer partition"
+      ],
+      "included": [
+        "complete outer rupture",
+        "rift walls and exposed shelves"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 locks one closed top-level outer shell while retaining Death Canyon as contained child geography.",
+      "v1": {
+        "approximateArea": 790706231,
+        "bounds": {
+          "maxX": 30924,
+          "maxY": 29623,
+          "minX": 0,
+          "minY": 0
+        },
+        "centroid": [
+          15398,
+          13452
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "5d00f5ced2cde3d02c5ca05810ffcf049db6b6c0ad730afa5fcd50112522bea7",
+      "v2": {
+        "approximateArea": 289711928,
+        "bounds": {
+          "maxX": 34831,
+          "maxY": 32227,
+          "minX": 19206,
+          "minY": 3581
+        },
+        "centroid": [
+          26974,
+          17909
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        2256,
+        1812
+      ],
+      "entrySlug": "high-cliffs",
+      "excluded": [
+        "Grand Lake water surface, represented as a shared-boundary hole"
+      ],
+      "included": [
+        "northern alpine crown",
+        "visible waterfall cliff"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 follows the frozen artwork's alpine mass and models Grand Lake as a true hole/shared neighbor instead of reproducing overlapping V1 lake and cliff polygons.",
+      "v1": {
+        "approximateArea": 498923065,
+        "bounds": {
+          "maxX": 62174,
+          "maxY": 15300,
+          "minX": 23112,
+          "minY": 0
+        },
+        "centroid": [
+          43417,
+          6891
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "50627977a1775b39ddef82230c38f55bef72c06c7361c8bec98ac3c2d4979abb",
+      "v2": {
+        "approximateArea": 233111709,
+        "bounds": {
+          "maxX": 62500,
+          "maxY": 18555,
+          "minX": 24089,
+          "minY": 1302
+        },
+        "centroid": [
+          45673,
+          8703
+        ],
+        "holes": 1
+      }
+    },
+    {
+      "centroidDelta": [
+        -2823,
+        1050
+      ],
+      "entrySlug": "magic-torn-wasteland",
+      "excluded": [
+        "High Cliffs",
+        "cloud-veiled Unknown Southeast"
+      ],
+      "included": [
+        "northeastern anomaly terrain",
+        "shielded-city region"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 follows the frozen coastline and defensible reality-fracture transitions through exact shared boundaries.",
+      "v1": {
+        "approximateArea": 827278614,
+        "bounds": {
+          "maxX": 100000,
+          "maxY": 22461,
+          "minX": 56966,
+          "minY": 0
+        },
+        "centroid": [
+          79653,
+          9961
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "0147ad51c24759e241e1c875bb16307b86f6b8212d88bdbcd84f0c93e18e24e1",
+      "v2": {
+        "approximateArea": 559963593,
+        "bounds": {
+          "maxX": 98958,
+          "maxY": 21484,
+          "minX": 58594,
+          "minY": 1302
+        },
+        "centroid": [
+          76830,
+          11011
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        6482,
+        2478
+      ],
+      "entrySlug": "riverlands",
+      "excluded": [
+        "river corridors as independent regions"
+      ],
+      "included": [
+        "central lowlands",
+        "connected watershed"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 closes the central partition entirely from reused neighbor edges while allowing painted rivers to cross cartographic transitions.",
+      "v1": {
+        "approximateArea": 844118341,
+        "bounds": {
+          "maxX": 64453,
+          "maxY": 42969,
+          "minX": 29622,
+          "minY": 8138
+        },
+        "centroid": [
+          46369,
+          25066
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "f036695bed168d020cef56b7c1dbffeb229265ac1f1c0bd7e23cab86cbf80c2e",
+      "v2": {
+        "approximateArea": 565595232,
+        "bounds": {
+          "maxX": 69661,
+          "maxY": 39714,
+          "minX": 33854,
+          "minY": 13021
+        },
+        "centroid": [
+          52851,
+          27544
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        193,
+        -7523
+      ],
+      "entrySlug": "the-desert",
+      "excluded": [
+        "river corridor as a hole"
+      ],
+      "included": [
+        "western arid landmass",
+        "oasis corridor context"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 follows the coast, rift wall, forest transition, and shared Riverlands edge without duplicating neighboring borders.",
+      "v1": {
+        "approximateArea": 883179237,
+        "bounds": {
+          "maxX": 39063,
+          "maxY": 44597,
+          "minX": 0,
+          "minY": 11393
+        },
+        "centroid": [
+          15031,
+          30669
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "9602bd10c0c17b00a0c1c0b1aacdf55a5ac3ab034eada6dae85a76c771832749",
+      "v2": {
+        "approximateArea": 698248525,
+        "bounds": {
+          "maxX": 36133,
+          "maxY": 41667,
+          "minX": 2279,
+          "minY": 1953
+        },
+        "centroid": [
+          15224,
+          23146
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        3697,
+        3152
+      ],
+      "entrySlug": "the-peninsula",
+      "excluded": [
+        "child-scene district topology"
+      ],
+      "included": [
+        "long south-central landform",
+        "Port Arcadia world anchor"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 preserves the coastline and closes the landform with one exact shared Riverlands neck boundary.",
+      "v1": {
+        "approximateArea": 941512270,
+        "bounds": {
+          "maxX": 65104,
+          "maxY": 66667,
+          "minX": 31576,
+          "minY": 28320
+        },
+        "centroid": [
+          49215,
+          45359
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "53bfbcc026420188915f776452656cddab1f010290634310b6c35e9852f27cd6",
+      "v2": {
+        "approximateArea": 557668410,
+        "bounds": {
+          "maxX": 67708,
+          "maxY": 63802,
+          "minX": 36133,
+          "minY": 37110
+        },
+        "centroid": [
+          52912,
+          48511
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        7600,
+        4021
+      ],
+      "entrySlug": "the-red-forest",
+      "excluded": [
+        "disconnected visual feathering",
+        "Grand Rift and Death Canyon overlap"
+      ],
+      "included": [
+        "one contiguous crimson selection footprint"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 implements the owner decision that Red Forest is one top-level neighbor of Grand Rift, Riverlands, and Desert.",
+      "v1": {
+        "approximateArea": 432007182,
+        "bounds": {
+          "maxX": 39388,
+          "maxY": 38086,
+          "minX": 15951,
+          "minY": 12370
+        },
+        "centroid": [
+          28168,
+          24426
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "3605d83774b64b28bf817a8e4186588c8d0204ccfb06e1b8aaec5acc587f0b7c",
+      "v2": {
+        "approximateArea": 168591261,
+        "bounds": {
+          "maxX": 42969,
+          "maxY": 38086,
+          "minX": 27344,
+          "minY": 19531
+        },
+        "centroid": [
+          35768,
+          28447
+        ],
+        "holes": 0
+      }
+    },
+    {
+      "centroidDelta": [
+        32,
+        -1167
+      ],
+      "entrySlug": "unknown-southeast",
+      "excluded": [
+        "new biome, faction, city, or narrative lore"
+      ],
+      "included": [
+        "current cloud-veiled geographic footprint"
+      ],
+      "mapSlug": "martino-world",
+      "reason": "V2 defines selection geometry only and shares exact borders with Magic-Torn Wasteland and Riverlands.",
+      "v1": {
+        "approximateArea": 1125357015,
+        "bounds": {
+          "maxX": 100000,
+          "maxY": 47201,
+          "minX": 56966,
+          "minY": 16276
+        },
+        "centroid": [
+          81381,
+          30743
+        ],
+        "holes": 0
+      },
+      "v1Fingerprint": "24c54462520707f40b31eb25135beed802baa3cdf2074de2ac984ffaada21087",
+      "v2": {
+        "approximateArea": 652959188,
+        "bounds": {
+          "maxX": 99284,
+          "maxY": 45573,
+          "minX": 65755,
+          "minY": 16276
+        },
+        "centroid": [
+          81413,
+          29576
+        ],
+        "holes": 0
+      }
+    }
+  ],
+  "policies": {
+    "activeDatabaseWrites": 0,
+    "connectionPathsCreated": 0,
+    "portArcadiaTopologyCreated": 0,
+    "reciprocalRowsMerged": 0,
+    "rendererSwitch": false,
+    "v1GeometryIsCanonicalTraceInput": false
+  },
+  "topology": {
+    "accidentalDuplicateNodes": [],
+    "areaRings": 11,
+    "boundaries": 26,
+    "boundaryOwnerMismatches": [],
+    "coastBoundaries": 5,
+    "components": 10,
+    "deathCanyon": {
+      "crossesGrandRift": false,
+      "everyVertexInsideGrandRift": true,
+      "overlapsRedForest": false,
+      "parent": "grand-rift",
+      "ringPoints": 23,
+      "valid": true
+    },
+    "derivedAreas": [
+      {
+        "areaId": "c42b622e-ee8d-5951-a28c-53caacea7941",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                24089,
+                3581
+              ],
+              [
+                30599,
+                1628
+              ],
+              [
+                39063,
+                1302
+              ],
+              [
+                48177,
+                1302
+              ],
+              [
+                55990,
+                1628
+              ],
+              [
+                62500,
+                2279
+              ],
+              [
+                61849,
+                5208
+              ],
+              [
+                60547,
+                8464
+              ],
+              [
+                59570,
+                11719
+              ],
+              [
+                58594,
+                14974
+              ],
+              [
+                55339,
+                16927
+              ],
+              [
+                50781,
+                18555
+              ],
+              [
+                44922,
+                18229
+              ],
+              [
+                39063,
+                16927
+              ],
+              [
+                34180,
+                13021
+              ],
+              [
+                33203,
+                10742
+              ],
+              [
+                31250,
+                8464
+              ],
+              [
+                28646,
+                6185
+              ],
+              [
+                26042,
+                4557
+              ],
+              [
+                24089,
+                3581
+              ]
+            ],
+            [
+              [
+                38411,
+                5859
+              ],
+              [
+                37760,
+                8789
+              ],
+              [
+                38086,
+                12044
+              ],
+              [
+                39714,
+                14323
+              ],
+              [
+                42318,
+                14974
+              ],
+              [
+                47526,
+                15300
+              ],
+              [
+                53385,
+                14974
+              ],
+              [
+                57943,
+                13997
+              ],
+              [
+                59570,
+                10417
+              ],
+              [
+                58594,
+                6836
+              ],
+              [
+                56315,
+                4883
+              ],
+              [
+                53385,
+                3581
+              ],
+              [
+                48177,
+                2604
+              ],
+              [
+                42969,
+                3581
+              ],
+              [
+                38411,
+                5859
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "054e8428-861d-5b75-a0aa-86bf0f9961fa",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                38411,
+                5859
+              ],
+              [
+                42969,
+                3581
+              ],
+              [
+                48177,
+                2604
+              ],
+              [
+                53385,
+                3581
+              ],
+              [
+                56315,
+                4883
+              ],
+              [
+                58594,
+                6836
+              ],
+              [
+                59570,
+                10417
+              ],
+              [
+                57943,
+                13997
+              ],
+              [
+                53385,
+                14974
+              ],
+              [
+                47526,
+                15300
+              ],
+              [
+                42318,
+                14974
+              ],
+              [
+                39714,
+                14323
+              ],
+              [
+                38086,
+                12044
+              ],
+              [
+                37760,
+                8789
+              ],
+              [
+                38411,
+                5859
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                62500,
+                2279
+              ],
+              [
+                70313,
+                1302
+              ],
+              [
+                78776,
+                1953
+              ],
+              [
+                87240,
+                4232
+              ],
+              [
+                94401,
+                7487
+              ],
+              [
+                98633,
+                11068
+              ],
+              [
+                98958,
+                14323
+              ],
+              [
+                96029,
+                16276
+              ],
+              [
+                91146,
+                16276
+              ],
+              [
+                85938,
+                16927
+              ],
+              [
+                80078,
+                18555
+              ],
+              [
+                74870,
+                20508
+              ],
+              [
+                69661,
+                21484
+              ],
+              [
+                64453,
+                19531
+              ],
+              [
+                61198,
+                16927
+              ],
+              [
+                58594,
+                14974
+              ],
+              [
+                59570,
+                11719
+              ],
+              [
+                60547,
+                8464
+              ],
+              [
+                61849,
+                5208
+              ],
+              [
+                62500,
+                2279
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                96029,
+                16276
+              ],
+              [
+                99284,
+                20833
+              ],
+              [
+                97982,
+                26693
+              ],
+              [
+                94401,
+                32552
+              ],
+              [
+                89193,
+                36133
+              ],
+              [
+                83333,
+                41016
+              ],
+              [
+                75521,
+                45573
+              ],
+              [
+                70313,
+                43294
+              ],
+              [
+                67057,
+                41016
+              ],
+              [
+                65755,
+                39063
+              ],
+              [
+                65755,
+                36459
+              ],
+              [
+                66406,
+                32552
+              ],
+              [
+                67057,
+                27995
+              ],
+              [
+                68359,
+                24740
+              ],
+              [
+                69661,
+                21484
+              ],
+              [
+                74870,
+                20508
+              ],
+              [
+                80078,
+                18555
+              ],
+              [
+                85938,
+                16927
+              ],
+              [
+                91146,
+                16276
+              ],
+              [
+                96029,
+                16276
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "317e932c-d122-5189-9620-a560d6eefc50",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                65755,
+                39063
+              ],
+              [
+                67708,
+                42318
+              ],
+              [
+                65755,
+                46875
+              ],
+              [
+                63802,
+                52084
+              ],
+              [
+                62500,
+                57292
+              ],
+              [
+                59896,
+                61198
+              ],
+              [
+                55339,
+                63802
+              ],
+              [
+                50781,
+                63151
+              ],
+              [
+                46875,
+                60547
+              ],
+              [
+                44271,
+                56641
+              ],
+              [
+                42318,
+                51433
+              ],
+              [
+                40365,
+                45573
+              ],
+              [
+                38086,
+                42318
+              ],
+              [
+                36133,
+                39714
+              ],
+              [
+                42318,
+                37110
+              ],
+              [
+                49479,
+                37761
+              ],
+              [
+                57292,
+                37110
+              ],
+              [
+                62500,
+                38412
+              ],
+              [
+                65755,
+                39063
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                34180,
+                13021
+              ],
+              [
+                39063,
+                16927
+              ],
+              [
+                44922,
+                18229
+              ],
+              [
+                50781,
+                18555
+              ],
+              [
+                55339,
+                16927
+              ],
+              [
+                58594,
+                14974
+              ],
+              [
+                61198,
+                16927
+              ],
+              [
+                64453,
+                19531
+              ],
+              [
+                69661,
+                21484
+              ],
+              [
+                68359,
+                24740
+              ],
+              [
+                67057,
+                27995
+              ],
+              [
+                66406,
+                32552
+              ],
+              [
+                65755,
+                36459
+              ],
+              [
+                65755,
+                39063
+              ],
+              [
+                62500,
+                38412
+              ],
+              [
+                57292,
+                37110
+              ],
+              [
+                49479,
+                37761
+              ],
+              [
+                42318,
+                37110
+              ],
+              [
+                36133,
+                39714
+              ],
+              [
+                35156,
+                39063
+              ],
+              [
+                33854,
+                38086
+              ],
+              [
+                37109,
+                35156
+              ],
+              [
+                40365,
+                31901
+              ],
+              [
+                42969,
+                27995
+              ],
+              [
+                41016,
+                25391
+              ],
+              [
+                42969,
+                21484
+              ],
+              [
+                39063,
+                19531
+              ],
+              [
+                34505,
+                19857
+              ],
+              [
+                34831,
+                17578
+              ],
+              [
+                34505,
+                15300
+              ],
+              [
+                34180,
+                13021
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "642aa106-4e42-5928-92fa-5e51832f2141",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                24089,
+                3581
+              ],
+              [
+                22786,
+                7161
+              ],
+              [
+                21484,
+                11719
+              ],
+              [
+                20182,
+                16276
+              ],
+              [
+                19206,
+                20833
+              ],
+              [
+                20508,
+                24740
+              ],
+              [
+                22786,
+                27995
+              ],
+              [
+                25391,
+                30599
+              ],
+              [
+                27344,
+                32227
+              ],
+              [
+                28646,
+                33854
+              ],
+              [
+                31250,
+                36459
+              ],
+              [
+                33854,
+                38086
+              ],
+              [
+                35156,
+                39063
+              ],
+              [
+                36133,
+                39714
+              ],
+              [
+                33854,
+                40690
+              ],
+              [
+                29297,
+                41667
+              ],
+              [
+                22786,
+                41016
+              ],
+              [
+                16927,
+                39714
+              ],
+              [
+                11068,
+                37761
+              ],
+              [
+                5859,
+                33854
+              ],
+              [
+                2930,
+                27344
+              ],
+              [
+                2279,
+                19531
+              ],
+              [
+                3906,
+                13021
+              ],
+              [
+                6510,
+                7813
+              ],
+              [
+                9766,
+                4557
+              ],
+              [
+                14323,
+                2279
+              ],
+              [
+                19531,
+                1953
+              ],
+              [
+                24089,
+                3581
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "65213e53-a6a8-50f3-8273-6f1638aaa23b",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                24089,
+                3581
+              ],
+              [
+                26042,
+                4557
+              ],
+              [
+                28646,
+                6185
+              ],
+              [
+                31250,
+                8464
+              ],
+              [
+                33203,
+                10742
+              ],
+              [
+                34180,
+                13021
+              ],
+              [
+                34505,
+                15300
+              ],
+              [
+                34831,
+                17578
+              ],
+              [
+                34505,
+                19857
+              ],
+              [
+                33203,
+                22136
+              ],
+              [
+                32552,
+                24740
+              ],
+              [
+                31250,
+                27344
+              ],
+              [
+                29297,
+                29948
+              ],
+              [
+                27344,
+                32227
+              ],
+              [
+                25391,
+                30599
+              ],
+              [
+                22786,
+                27995
+              ],
+              [
+                20508,
+                24740
+              ],
+              [
+                19206,
+                20833
+              ],
+              [
+                20182,
+                16276
+              ],
+              [
+                21484,
+                11719
+              ],
+              [
+                22786,
+                7161
+              ],
+              [
+                24089,
+                3581
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "a895ea74-eb01-5b3e-952b-2175876afd44",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                34505,
+                19857
+              ],
+              [
+                39063,
+                19531
+              ],
+              [
+                42969,
+                21484
+              ],
+              [
+                41016,
+                25391
+              ],
+              [
+                42969,
+                27995
+              ],
+              [
+                40365,
+                31901
+              ],
+              [
+                37109,
+                35156
+              ],
+              [
+                33854,
+                38086
+              ],
+              [
+                31250,
+                36459
+              ],
+              [
+                28646,
+                33854
+              ],
+              [
+                27344,
+                32227
+              ],
+              [
+                29297,
+                29948
+              ],
+              [
+                31250,
+                27344
+              ],
+              [
+                32552,
+                24740
+              ],
+              [
+                33203,
+                22136
+              ],
+              [
+                34505,
+                19857
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      },
+      {
+        "areaId": "403004eb-779b-5382-bebd-7787f3058388",
+        "geometry": {
+          "coordinates": [
+            [
+              [
+                26367,
+                7813
+              ],
+              [
+                27669,
+                7813
+              ],
+              [
+                28971,
+                8789
+              ],
+              [
+                29818,
+                10417
+              ],
+              [
+                30078,
+                12370
+              ],
+              [
+                30924,
+                14323
+              ],
+              [
+                31250,
+                16276
+              ],
+              [
+                31250,
+                18229
+              ],
+              [
+                31576,
+                20508
+              ],
+              [
+                31120,
+                22787
+              ],
+              [
+                30469,
+                25391
+              ],
+              [
+                29297,
+                27995
+              ],
+              [
+                27344,
+                29623
+              ],
+              [
+                26042,
+                28516
+              ],
+              [
+                25000,
+                26693
+              ],
+              [
+                24219,
+                24414
+              ],
+              [
+                23763,
+                21810
+              ],
+              [
+                23828,
+                19531
+              ],
+              [
+                23698,
+                17253
+              ],
+              [
+                24089,
+                14649
+              ],
+              [
+                24414,
+                12044
+              ],
+              [
+                25065,
+                9440
+              ],
+              [
+                26367,
+                7813
+              ]
+            ]
+          ],
+          "type": "POLYGON"
+        }
+      }
+    ],
+    "duplicateEditableBorders": [],
+    "hardGates": {
+      "allAreasApproved": true,
+      "allTopLevelShells": true,
+      "deathCanyonContained": true,
+      "deathCanyonShell": true,
+      "grandLakeShell": true,
+      "highCliffsShell": true,
+      "multiRegionJunctionsExact": true,
+      "noDuplicateEditableBorders": true,
+      "noInvalidRings": true,
+      "noOrphans": true,
+      "noOwnerReviewEdges": true,
+      "noUnintendedCrossings": true,
+      "noUnusedBoundaries": true,
+      "partitionExact": true,
+      "sharedBoundariesReused": true
+    },
+    "holes": 1,
+    "internalBoundariesConsumedByTwoAreas": 13,
+    "junctions": [
+      {
+        "boundaryIds": [
+          "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+          "90633689-6c61-55bd-ba7f-3faba438b714",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8"
+        ],
+        "boundaryLocators": [
+          "border.desert-riverlands",
+          "border.riverlands-peninsula",
+          "coast.desert",
+          "coast.peninsula"
+        ],
+        "coordinate": [
+          36133,
+          39714
+        ],
+        "locator": "coast.peninsula-desert-riverlands",
+        "nodeId": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+        "regions": [
+          "riverlands",
+          "the-desert",
+          "the-peninsula"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "ce312c5f-63be-51e8-8e4c-a5a91090fb20",
+          "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8"
+        ],
+        "boundaryLocators": [
+          "border.riverlands-peninsula",
+          "border.riverlands-unknown",
+          "coast.peninsula",
+          "coast.unknown-southeast"
+        ],
+        "coordinate": [
+          65755,
+          39063
+        ],
+        "locator": "coast.unknown-peninsula-riverlands",
+        "nodeId": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+        "regions": [
+          "riverlands",
+          "the-peninsula",
+          "unknown-southeast"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "3de4a22b-297f-532b-83a2-67947305694c"
+        ],
+        "boundaryLocators": [
+          "border.desert-grand-rift",
+          "border.desert-red-forest",
+          "border.grand-rift-red-forest"
+        ],
+        "coordinate": [
+          27344,
+          32227
+        ],
+        "locator": "junction.desert-grand-rift-red-forest",
+        "nodeId": "83bf1edd-cb68-5cb7-b324-5c09cee97807",
+        "regions": [
+          "grand-rift",
+          "the-desert",
+          "the-red-forest"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "f229d056-9117-5534-a410-73c3c373d001",
+          "90633689-6c61-55bd-ba7f-3faba438b714",
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+          "a3a3ad70-e027-5728-b596-6d0b8420538e"
+        ],
+        "boundaryLocators": [
+          "border.desert-grand-rift",
+          "border.grand-rift-high-cliffs",
+          "coast.desert",
+          "coast.high-cliffs"
+        ],
+        "coordinate": [
+          24089,
+          3581
+        ],
+        "locator": "junction.desert-high-cliffs-grand-rift",
+        "nodeId": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+        "regions": [
+          "grand-rift",
+          "high-cliffs",
+          "the-desert"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "d738f62c-0853-59e0-ad68-29ad57badb6a"
+        ],
+        "boundaryLocators": [
+          "border.desert-red-forest",
+          "border.desert-riverlands",
+          "border.red-forest-riverlands"
+        ],
+        "coordinate": [
+          33854,
+          38086
+        ],
+        "locator": "junction.desert-red-forest-riverlands",
+        "nodeId": "e5428d3b-f728-5b26-9973-a2b8dbff838d",
+        "regions": [
+          "riverlands",
+          "the-desert",
+          "the-red-forest"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+          "3de4a22b-297f-532b-83a2-67947305694c",
+          "d738f62c-0853-59e0-ad68-29ad57badb6a"
+        ],
+        "boundaryLocators": [
+          "border.grand-rift-red-forest",
+          "border.grand-rift-riverlands",
+          "border.red-forest-riverlands"
+        ],
+        "coordinate": [
+          34505,
+          19857
+        ],
+        "locator": "junction.grand-rift-red-forest-riverlands",
+        "nodeId": "10d420ac-7089-560b-9630-d782790b3f47",
+        "regions": [
+          "grand-rift",
+          "riverlands",
+          "the-red-forest"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "a3a3ad70-e027-5728-b596-6d0b8420538e",
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+          "09016654-7333-550e-9696-1bf0bc88d3c0"
+        ],
+        "boundaryLocators": [
+          "border.grand-rift-high-cliffs",
+          "border.grand-rift-riverlands",
+          "border.high-cliffs-riverlands"
+        ],
+        "coordinate": [
+          34180,
+          13021
+        ],
+        "locator": "junction.high-cliffs-grand-rift-riverlands",
+        "nodeId": "10c5344c-ea54-5be8-9473-5f376d0b1c2d",
+        "regions": [
+          "grand-rift",
+          "high-cliffs",
+          "riverlands"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "09016654-7333-550e-9696-1bf0bc88d3c0",
+          "d3642590-c035-5d9a-b529-8835dd94be71",
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b"
+        ],
+        "boundaryLocators": [
+          "border.high-cliffs-magic-torn",
+          "border.high-cliffs-riverlands",
+          "border.magic-torn-riverlands"
+        ],
+        "coordinate": [
+          58594,
+          14974
+        ],
+        "locator": "junction.high-cliffs-riverlands-magic-torn",
+        "nodeId": "fd374283-b4a9-51f6-93e9-976bc1a2bb6c",
+        "regions": [
+          "high-cliffs",
+          "magic-torn-wasteland",
+          "riverlands"
+        ]
+      },
+      {
+        "boundaryIds": [
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+          "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff"
+        ],
+        "boundaryLocators": [
+          "border.magic-torn-riverlands",
+          "border.magic-torn-unknown",
+          "border.riverlands-unknown"
+        ],
+        "coordinate": [
+          69661,
+          21484
+        ],
+        "locator": "junction.riverlands-magic-torn-unknown",
+        "nodeId": "7857ffd5-3b0a-5465-8083-8f83c7ea0399",
+        "regions": [
+          "magic-torn-wasteland",
+          "riverlands",
+          "unknown-southeast"
+        ]
+      }
+    ],
+    "majorWaterAreas": 1,
+    "mapSlug": "martino-world",
+    "nestedBoundaries": 4,
+    "nestedRegions": 1,
+    "oneSidedTopLevelInternalBoundaries": [],
+    "orderedBoundaryReferences": 43,
+    "orphanNodes": [],
+    "ownerReviewBoundaries": [],
+    "partition": {
+      "areaDelta": 0,
+      "assignedArea": 3949593743,
+      "gaps": 0,
+      "outerArea": 3949593743,
+      "overlaps": 0
+    },
+    "regionResults": [
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "403004eb-779b-5382-bebd-7787f3058388",
+        "boundaryIds": [
+          "a6eb0bea-995f-5159-9bda-4e1c2990e84d",
+          "bab67400-a081-5508-b513-69810366a748",
+          "2ce74dc3-122f-568d-90ba-a5cbe6733de1",
+          "ecb4ca16-2351-5314-874d-4c50df205574"
+        ],
+        "boundaryLocators": [
+          "death-canyon.edge.northeast",
+          "death-canyon.edge.southeast",
+          "death-canyon.edge.southwest",
+          "death-canyon.edge.northwest"
+        ],
+        "confidence": [
+          "HIGH"
+        ],
+        "entrySlug": "death-canyon",
+        "holes": 0,
+        "neighbors": [
+          "grand-rift"
+        ],
+        "parentEntrySlug": "grand-rift",
+        "role": "NESTED_GEOGRAPHY",
+        "semanticMix": [
+          "CANONICAL_FEATURE"
+        ],
+        "sharedBoundaryCount": 0,
+        "shellCount": 1,
+        "title": "Death Canyon"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "054e8428-861d-5b75-a0aa-86bf0f9961fa",
+        "boundaryIds": [
+          "5b26609b-2d2b-5547-915e-c19d8576ae61",
+          "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+          "90d1759f-f684-5163-9ed8-5e318a7f055e",
+          "2568eaf1-99dd-5932-b97c-0991e3327f04"
+        ],
+        "boundaryLocators": [
+          "grand-lake.shore.north",
+          "grand-lake.shore.east",
+          "grand-lake.shore.south",
+          "grand-lake.shore.west"
+        ],
+        "confidence": [
+          "HIGH"
+        ],
+        "entrySlug": "grand-lake",
+        "holes": 0,
+        "neighbors": [
+          "high-cliffs"
+        ],
+        "parentEntrySlug": null,
+        "role": "MAJOR_WATER",
+        "semanticMix": [
+          "WATER_BOUNDARY"
+        ],
+        "sharedBoundaryCount": 4,
+        "shellCount": 1,
+        "title": "Grand Lake"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "65213e53-a6a8-50f3-8273-6f1638aaa23b",
+        "boundaryIds": [
+          "a3a3ad70-e027-5728-b596-6d0b8420538e",
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+          "3de4a22b-297f-532b-83a2-67947305694c",
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5"
+        ],
+        "boundaryLocators": [
+          "border.grand-rift-high-cliffs",
+          "border.grand-rift-riverlands",
+          "border.grand-rift-red-forest",
+          "border.desert-grand-rift"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "grand-rift",
+        "holes": 0,
+        "neighbors": [
+          "high-cliffs",
+          "riverlands",
+          "the-desert",
+          "the-red-forest"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE"
+        ],
+        "sharedBoundaryCount": 4,
+        "shellCount": 1,
+        "title": "Grand Rift"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "c42b622e-ee8d-5951-a28c-53caacea7941",
+        "boundaryIds": [
+          "f229d056-9117-5534-a410-73c3c373d001",
+          "d3642590-c035-5d9a-b529-8835dd94be71",
+          "09016654-7333-550e-9696-1bf0bc88d3c0",
+          "a3a3ad70-e027-5728-b596-6d0b8420538e",
+          "2568eaf1-99dd-5932-b97c-0991e3327f04",
+          "90d1759f-f684-5163-9ed8-5e318a7f055e",
+          "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+          "5b26609b-2d2b-5547-915e-c19d8576ae61"
+        ],
+        "boundaryLocators": [
+          "coast.high-cliffs",
+          "border.high-cliffs-magic-torn",
+          "border.high-cliffs-riverlands",
+          "border.grand-rift-high-cliffs",
+          "grand-lake.shore.west",
+          "grand-lake.shore.south",
+          "grand-lake.shore.east",
+          "grand-lake.shore.north"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "high-cliffs",
+        "holes": 1,
+        "neighbors": [
+          "grand-lake",
+          "grand-rift",
+          "magic-torn-wasteland",
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "CARTOGRAPHIC_TRANSITION",
+          "COASTLINE",
+          "WATER_BOUNDARY"
+        ],
+        "sharedBoundaryCount": 7,
+        "shellCount": 1,
+        "title": "High Cliffs"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d",
+        "boundaryIds": [
+          "3472373e-5ae8-51af-a3d7-c685ed5a3a5e",
+          "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+          "d3642590-c035-5d9a-b529-8835dd94be71"
+        ],
+        "boundaryLocators": [
+          "coast.magic-torn",
+          "border.magic-torn-unknown",
+          "border.magic-torn-riverlands",
+          "border.high-cliffs-magic-torn"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "magic-torn-wasteland",
+        "holes": 0,
+        "neighbors": [
+          "high-cliffs",
+          "riverlands",
+          "unknown-southeast"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "CARTOGRAPHIC_TRANSITION",
+          "COASTLINE"
+        ],
+        "sharedBoundaryCount": 3,
+        "shellCount": 1,
+        "title": "Magic-Torn Wasteland"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690",
+        "boundaryIds": [
+          "09016654-7333-550e-9696-1bf0bc88d3c0",
+          "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "d738f62c-0853-59e0-ad68-29ad57badb6a",
+          "997dcc3c-4d11-5b5c-aad3-bb263f41e097"
+        ],
+        "boundaryLocators": [
+          "border.high-cliffs-riverlands",
+          "border.magic-torn-riverlands",
+          "border.riverlands-unknown",
+          "border.riverlands-peninsula",
+          "border.desert-riverlands",
+          "border.red-forest-riverlands",
+          "border.grand-rift-riverlands"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "riverlands",
+        "holes": 0,
+        "neighbors": [
+          "grand-rift",
+          "high-cliffs",
+          "magic-torn-wasteland",
+          "the-desert",
+          "the-peninsula",
+          "the-red-forest",
+          "unknown-southeast"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "CARTOGRAPHIC_TRANSITION"
+        ],
+        "sharedBoundaryCount": 7,
+        "shellCount": 1,
+        "title": "Riverlands"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "642aa106-4e42-5928-92fa-5e51832f2141",
+        "boundaryIds": [
+          "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+          "90633689-6c61-55bd-ba7f-3faba438b714"
+        ],
+        "boundaryLocators": [
+          "border.desert-grand-rift",
+          "border.desert-red-forest",
+          "border.desert-riverlands",
+          "coast.desert"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "the-desert",
+        "holes": 0,
+        "neighbors": [
+          "grand-rift",
+          "riverlands",
+          "the-red-forest"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "CARTOGRAPHIC_TRANSITION",
+          "COASTLINE"
+        ],
+        "sharedBoundaryCount": 3,
+        "shellCount": 1,
+        "title": "The Desert"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "317e932c-d122-5189-9620-a560d6eefc50",
+        "boundaryIds": [
+          "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+          "d2735a4a-6b27-5837-a484-ad3f3b9712a8"
+        ],
+        "boundaryLocators": [
+          "coast.peninsula",
+          "border.riverlands-peninsula"
+        ],
+        "confidence": [
+          "HIGH"
+        ],
+        "entrySlug": "the-peninsula",
+        "holes": 0,
+        "neighbors": [
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "COASTLINE"
+        ],
+        "sharedBoundaryCount": 1,
+        "shellCount": 1,
+        "title": "The Peninsula"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "a895ea74-eb01-5b3e-952b-2175876afd44",
+        "boundaryIds": [
+          "d738f62c-0853-59e0-ad68-29ad57badb6a",
+          "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+          "3de4a22b-297f-532b-83a2-67947305694c"
+        ],
+        "boundaryLocators": [
+          "border.red-forest-riverlands",
+          "border.desert-red-forest",
+          "border.grand-rift-red-forest"
+        ],
+        "confidence": [
+          "MEDIUM"
+        ],
+        "entrySlug": "the-red-forest",
+        "holes": 0,
+        "neighbors": [
+          "grand-rift",
+          "riverlands",
+          "the-desert"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CANONICAL_FEATURE",
+          "CARTOGRAPHIC_TRANSITION"
+        ],
+        "sharedBoundaryCount": 3,
+        "shellCount": 1,
+        "title": "The Red Forest"
+      },
+      {
+        "approval": "APPROVED_FOR_MIGRATION",
+        "areaId": "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b",
+        "boundaryIds": [
+          "ce312c5f-63be-51e8-8e4c-a5a91090fb20",
+          "707952fe-da65-52f1-bf25-60e7e48d56ff",
+          "1c994691-a4ec-568e-a0fb-dc944d06b09e"
+        ],
+        "boundaryLocators": [
+          "coast.unknown-southeast",
+          "border.riverlands-unknown",
+          "border.magic-torn-unknown"
+        ],
+        "confidence": [
+          "HIGH",
+          "MEDIUM"
+        ],
+        "entrySlug": "unknown-southeast",
+        "holes": 0,
+        "neighbors": [
+          "magic-torn-wasteland",
+          "riverlands"
+        ],
+        "parentEntrySlug": null,
+        "role": "TOP_LEVEL_LAND",
+        "semanticMix": [
+          "CARTOGRAPHIC_TRANSITION",
+          "COASTLINE"
+        ],
+        "sharedBoundaryCount": 2,
+        "shellCount": 1,
+        "title": "Unknown Southeast"
+      }
+    ],
+    "sharedBoundaries": 17,
+    "sharedDirectionFailures": [],
+    "sharedWaterBoundariesConsumedByTwoAreas": 4,
+    "shells": 10,
+    "topLevelRegions": 8,
+    "topologyLocked": true,
+    "topologyNodes": 19,
+    "tracedAreas": 10,
+    "unintendedCrossings": [],
+    "unusedBoundaries": [],
+    "validationFailures": []
+  }
+}

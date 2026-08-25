@@ -1,5 +1,7 @@
 # Martino Interactive Atlas Plan
 
+> **Atlas 2.0 authority:** [ATLAS_2_CONTRACT.md](./ATLAS_2_CONTRACT.md) governs the fixed-point coordinate, geometry, topology, connection, audit, and migration-manifest contracts. This plan remains historical and product context where the documents overlap.
+
 ## Implementation status — 2026-08-24
 
 The approved V2 geography is locked and the atlas now owns three authenticated scenes: the macro world, a dedicated Starting Island tactical map, and a dedicated Port Arcadia city map. The live Codex carries 36 calibrated place placements plus 10 independently positioned quest-node placements. `/codex/map` renders the versioned masters with Codex-derived region, district, settlement, POI, faction, system, and quest overlays; world markers drill into their child scenes instead of enlarging the macro image beyond its useful resolution; and Bundle v4 carries all three scenes, both placement kinds, and all three active map masters to the trusted game-computer handoff.

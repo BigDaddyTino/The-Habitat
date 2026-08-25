@@ -8,7 +8,19 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "tsx --test lib/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "atlas:audit": "tsx scripts/audit-story-atlas.ts",
+    "atlas:manifests": "tsx scripts/generate-atlas-migration-manifests.ts",
+    "atlas:persistence:verify": "tsx scripts/verify-atlas-persistence.ts",
+    "atlas:migrate:plan": "tsx scripts/plan-atlas-v2-migration.ts",
+    "atlas:migrate:artifacts": "tsx scripts/plan-atlas-v2-migration.ts --write",
+    "atlas:migrate:rehearse": "tsx scripts/rehearse-atlas-v2-migration.ts",
+    "atlas:migrate:verify": "tsx scripts/verify-atlas-v2-rehearsal.ts",
+    "atlas:v2:activate": "tsx scripts/activate-atlas-v2.ts",
+    "atlas:v2:verify": "tsx scripts/verify-atlas-v2-activation.ts",
+    "atlas:v2:parity": "tsx scripts/report-atlas-v2-parity.ts",
+    "atlas:dev:verify": "tsx scripts/verify-atlas-development.ts",
+    "atlas:dev": "tsx scripts/start-atlas-development.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",

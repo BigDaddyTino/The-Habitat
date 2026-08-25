@@ -1,0 +1,1433 @@
+{
+  "candidates": [
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says road.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The coast road that brings the people.",
+      "fromEntryId": "blackreef-harbour",
+      "id": "1efd57e1-85f7-5109-9de9-a50be0042bf9",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says road.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "ca44fa9158e3b72d1c4621d8a6f192966817c554817cbf9c621e9f9bc2748c6d",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "road",
+            "notes": "The coast road that brings the people.",
+            "to": "glasswater-village"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "blackreef-harbour",
+          "stableLocator": "blackreef-harbour.meta.connections[0]",
+          "targetAuthored": "glasswater-village"
+        }
+      },
+      "originalRow": {
+        "by": "road",
+        "notes": "The coast road that brings the people.",
+        "to": "glasswater-village"
+      },
+      "originalWording": "road",
+      "provenanceKey": "blackreef-harbour.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "ca44fa9158e3b72d1c4621d8a6f192966817c554817cbf9c621e9f9bc2748c6d",
+      "sourceSlug": "blackreef-harbour",
+      "status": "UNSPECIFIED",
+      "targetSlug": "glasswater-village",
+      "toEntryId": "glasswater-village",
+      "type": "ROAD",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says road.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The evacuation road that brings everyone else.",
+      "fromEntryId": "blackreef-harbour",
+      "id": "00b6d3b9-2174-5551-abfc-d7ad11ecec7b",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says road.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "5b4e1e66904be62397b3826e8220850663062b1ff7697ec17f5c60ac513b1043",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "road",
+            "notes": "The evacuation road that brings everyone else.",
+            "to": "forward-camp-kestrel"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 1,
+          "sourceSlug": "blackreef-harbour",
+          "stableLocator": "blackreef-harbour.meta.connections[1]",
+          "targetAuthored": "forward-camp-kestrel"
+        }
+      },
+      "originalRow": {
+        "by": "road",
+        "notes": "The evacuation road that brings everyone else.",
+        "to": "forward-camp-kestrel"
+      },
+      "originalWording": "road",
+      "provenanceKey": "blackreef-harbour.meta.connections[1]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 1,
+      "sourceFingerprint": "5b4e1e66904be62397b3826e8220850663062b1ff7697ec17f5c60ac513b1043",
+      "sourceSlug": "blackreef-harbour",
+      "status": "UNSPECIFIED",
+      "targetSlug": "forward-camp-kestrel",
+      "toEntryId": "forward-camp-kestrel",
+      "type": "ROAD",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says sea.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The Flee branch's crossing — the fleet puts in at the military port.",
+      "fromEntryId": "blackreef-harbour",
+      "id": "c99fe64f-9b0f-513a-9a74-a62d2c794312",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says sea.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "65ed965806adc37a86d1902822d81b4f986241479bd55600129bfee12bc86c18",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "sea",
+            "notes": "The Flee branch's crossing — the fleet puts in at the military port.",
+            "to": "port-arcadia"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 2,
+          "sourceSlug": "blackreef-harbour",
+          "stableLocator": "blackreef-harbour.meta.connections[2]",
+          "targetAuthored": "port-arcadia"
+        }
+      },
+      "originalRow": {
+        "by": "sea",
+        "notes": "The Flee branch's crossing — the fleet puts in at the military port.",
+        "to": "port-arcadia"
+      },
+      "originalWording": "sea",
+      "provenanceKey": "blackreef-harbour.meta.connections[2]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 2,
+      "sourceFingerprint": "65ed965806adc37a86d1902822d81b4f986241479bd55600129bfee12bc86c18",
+      "sourceSlug": "blackreef-harbour",
+      "status": "UNSPECIFIED",
+      "targetSlug": "port-arcadia",
+      "toEntryId": "port-arcadia",
+      "type": "SEA_ROUTE",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "LOW",
+      "classificationRationale": "The authored route wording \"broken canyon shelves\" has no safe controlled transport mapping; preserve it as OTHER pending owner review.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": null,
+      "fromEntryId": "death-canyon",
+      "id": "588fad7f-6483-5e1f-bf9d-ecfe257e3aa0",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "LOW",
+            "rationale": "The authored route wording \"broken canyon shelves\" has no safe controlled transport mapping; preserve it as OTHER pending owner review.",
+            "reviewStatus": "REVIEW_REQUIRED",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "1594591c8ed4a2f59f3b9977fdac7bca405f4e4efffcb9ac4a6f6939cfd45f60",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "broken canyon shelves",
+            "notes": null,
+            "to": "the-red-forest"
+          },
+          "reciprocalCandidates": [
+            "the-red-forest.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "death-canyon",
+          "stableLocator": "death-canyon.meta.connections[0]",
+          "targetAuthored": "the-red-forest"
+        }
+      },
+      "originalRow": {
+        "by": "broken canyon shelves",
+        "notes": null,
+        "to": "the-red-forest"
+      },
+      "originalWording": "broken canyon shelves",
+      "provenanceKey": "death-canyon.meta.connections[0]",
+      "reciprocalCandidates": [
+        "the-red-forest.meta.connections[0]"
+      ],
+      "reviewStatus": "REVIEW_REQUIRED",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "1594591c8ed4a2f59f3b9977fdac7bca405f4e4efffcb9ac4a6f6939cfd45f60",
+      "sourceSlug": "death-canyon",
+      "status": "UNSPECIFIED",
+      "targetSlug": "the-red-forest",
+      "toEntryId": "the-red-forest",
+      "type": "OTHER",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "Source of the central rivers.",
+      "fromEntryId": "grand-lake",
+      "id": "10dc5f6a-8436-5a6f-99d9-036a084a124a",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "73ee68682e2886baba9f7f7d4556387f3cc6f4117f06cfb3fdf04e16f7326077",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "great waterfalls",
+            "notes": "Source of the central rivers.",
+            "to": "riverlands"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "grand-lake",
+          "stableLocator": "grand-lake.meta.connections[0]",
+          "targetAuthored": "riverlands"
+        }
+      },
+      "originalRow": {
+        "by": "great waterfalls",
+        "notes": "Source of the central rivers.",
+        "to": "riverlands"
+      },
+      "originalWording": "great waterfalls",
+      "provenanceKey": "grand-lake.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "73ee68682e2886baba9f7f7d4556387f3cc6f4117f06cfb3fdf04e16f7326077",
+      "sourceSlug": "grand-lake",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riverlands",
+      "toEntryId": "riverlands",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A buildable river arm reaches into the broken country.",
+      "fromEntryId": "grand-rift",
+      "id": "0f084914-2680-5722-96b1-1508598fc06c",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "433a49aa09275fe48bd7bcb67910e34eb804c6ec65ed2681319d73808c5e625c",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "rift river corridor",
+            "notes": "A buildable river arm reaches into the broken country.",
+            "to": "riverlands"
+          },
+          "reciprocalCandidates": [
+            "riverlands.meta.connections[1]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "grand-rift",
+          "stableLocator": "grand-rift.meta.connections[0]",
+          "targetAuthored": "riverlands"
+        }
+      },
+      "originalRow": {
+        "by": "rift river corridor",
+        "notes": "A buildable river arm reaches into the broken country.",
+        "to": "riverlands"
+      },
+      "originalWording": "rift river corridor",
+      "provenanceKey": "grand-rift.meta.connections[0]",
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[1]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "433a49aa09275fe48bd7bcb67910e34eb804c6ec65ed2681319d73808c5e625c",
+      "sourceSlug": "grand-rift",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riverlands",
+      "toEntryId": "riverlands",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The Grand Lake feeds the central watershed.",
+      "fromEntryId": "high-cliffs",
+      "id": "d658e97c-94ed-587e-a574-f1da0ca082dd",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "aa5366bebbe55342504d65f6f1052a4f442ebfbfbd918af79e7c0b7f2525f3c9",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "waterfalls and river valleys",
+            "notes": "The Grand Lake feeds the central watershed.",
+            "to": "riverlands"
+          },
+          "reciprocalCandidates": [
+            "riverlands.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "high-cliffs",
+          "stableLocator": "high-cliffs.meta.connections[0]",
+          "targetAuthored": "riverlands"
+        }
+      },
+      "originalRow": {
+        "by": "waterfalls and river valleys",
+        "notes": "The Grand Lake feeds the central watershed.",
+        "to": "riverlands"
+      },
+      "originalWording": "waterfalls and river valleys",
+      "provenanceKey": "high-cliffs.meta.connections[0]",
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[0]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "aa5366bebbe55342504d65f6f1052a4f442ebfbfbd918af79e7c0b7f2525f3c9",
+      "sourceSlug": "high-cliffs",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riverlands",
+      "toEntryId": "riverlands",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch provides one buildable approach into the end-game zone.",
+      "fromEntryId": "magic-torn-wasteland",
+      "id": "1c578432-8f52-53e5-a9dd-cad912d02a19",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "1eb68e2ee09d21c7f7775c8f2a73cca5047a0e78a81375fce4f715ae42476b02",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "stabilized river corridor",
+            "notes": "A Riverlands branch provides one buildable approach into the end-game zone.",
+            "to": "riverlands"
+          },
+          "reciprocalCandidates": [
+            "riverlands.meta.connections[3]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "magic-torn-wasteland",
+          "stableLocator": "magic-torn-wasteland.meta.connections[0]",
+          "targetAuthored": "riverlands"
+        }
+      },
+      "originalRow": {
+        "by": "stabilized river corridor",
+        "notes": "A Riverlands branch provides one buildable approach into the end-game zone.",
+        "to": "riverlands"
+      },
+      "originalWording": "stabilized river corridor",
+      "provenanceKey": "magic-torn-wasteland.meta.connections[0]",
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[3]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "1eb68e2ee09d21c7f7775c8f2a73cca5047a0e78a81375fce4f715ae42476b02",
+      "sourceSlug": "magic-torn-wasteland",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riverlands",
+      "toEntryId": "riverlands",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says road.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The supply artery — the prize and the invader's logistics share one road.",
+      "fromEntryId": "pearl-beachhead",
+      "id": "f6cee09d-5791-58ae-a762-40c07c4940a9",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says road.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "f7404ec21dce16df669c9c65e69267bcbd15573838fe25e07923fe3bdecc287b",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "road",
+            "notes": "The supply artery — the prize and the invader's logistics share one road.",
+            "to": "stormglass-quarry"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "pearl-beachhead",
+          "stableLocator": "pearl-beachhead.meta.connections[0]",
+          "targetAuthored": "stormglass-quarry"
+        }
+      },
+      "originalRow": {
+        "by": "road",
+        "notes": "The supply artery — the prize and the invader's logistics share one road.",
+        "to": "stormglass-quarry"
+      },
+      "originalWording": "road",
+      "provenanceKey": "pearl-beachhead.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "f7404ec21dce16df669c9c65e69267bcbd15573838fe25e07923fe3bdecc287b",
+      "sourceSlug": "pearl-beachhead",
+      "status": "UNSPECIFIED",
+      "targetSlug": "stormglass-quarry",
+      "toEntryId": "stormglass-quarry",
+      "type": "ROAD",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says trail.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The infiltration trail, for players who prefer questions asked afterward.",
+      "fromEntryId": "pearl-beachhead",
+      "id": "19a5e6fe-1ffc-547b-be63-041052ecab31",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says trail.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "c1ffa59c91538d984981b84238cc114c03b36ce2ca57ecd962b81466e5add768",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "trail",
+            "notes": "The infiltration trail, for players who prefer questions asked afterward.",
+            "to": "riftwood-interior"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 1,
+          "sourceSlug": "pearl-beachhead",
+          "stableLocator": "pearl-beachhead.meta.connections[1]",
+          "targetAuthored": "riftwood-interior"
+        }
+      },
+      "originalRow": {
+        "by": "trail",
+        "notes": "The infiltration trail, for players who prefer questions asked afterward.",
+        "to": "riftwood-interior"
+      },
+      "originalWording": "trail",
+      "provenanceKey": "pearl-beachhead.meta.connections[1]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 1,
+      "sourceFingerprint": "c1ffa59c91538d984981b84238cc114c03b36ce2ca57ecd962b81466e5add768",
+      "sourceSlug": "pearl-beachhead",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riftwood-interior",
+      "toEntryId": "riftwood-interior",
+      "type": "TRAIL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says trail.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": null,
+      "fromEntryId": "riftwood-interior",
+      "id": "a7f6808c-44fa-5dbc-a9b6-9514376cf0a5",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says trail.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "d06b68c1219e3e49983e23c377cb753b7d10c1dd6d3b20281f6a7b032dce44c9",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "trail",
+            "notes": null,
+            "to": "forward-camp-kestrel"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "riftwood-interior",
+          "stableLocator": "riftwood-interior.meta.connections[0]",
+          "targetAuthored": "forward-camp-kestrel"
+        }
+      },
+      "originalRow": {
+        "by": "trail",
+        "notes": null,
+        "to": "forward-camp-kestrel"
+      },
+      "originalWording": "trail",
+      "provenanceKey": "riftwood-interior.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "d06b68c1219e3e49983e23c377cb753b7d10c1dd6d3b20281f6a7b032dce44c9",
+      "sourceSlug": "riftwood-interior",
+      "status": "UNSPECIFIED",
+      "targetSlug": "forward-camp-kestrel",
+      "toEntryId": "forward-camp-kestrel",
+      "type": "TRAIL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says trail.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The quarry ravine trail.",
+      "fromEntryId": "riftwood-interior",
+      "id": "7d69609f-ae5c-5eb1-921c-c37087427551",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says trail.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "1fc5fc2bfe6491ffac41866eac765ef0c3ac81c454bbe298db3a013d720f5247",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "trail",
+            "notes": "The quarry ravine trail.",
+            "to": "stormglass-quarry"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 1,
+          "sourceSlug": "riftwood-interior",
+          "stableLocator": "riftwood-interior.meta.connections[1]",
+          "targetAuthored": "stormglass-quarry"
+        }
+      },
+      "originalRow": {
+        "by": "trail",
+        "notes": "The quarry ravine trail.",
+        "to": "stormglass-quarry"
+      },
+      "originalWording": "trail",
+      "provenanceKey": "riftwood-interior.meta.connections[1]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 1,
+      "sourceFingerprint": "1fc5fc2bfe6491ffac41866eac765ef0c3ac81c454bbe298db3a013d720f5247",
+      "sourceSlug": "riftwood-interior",
+      "status": "UNSPECIFIED",
+      "targetSlug": "stormglass-quarry",
+      "toEntryId": "stormglass-quarry",
+      "type": "TRAIL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says trail.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": null,
+      "fromEntryId": "riftwood-interior",
+      "id": "1d71e3fb-7e60-513a-a497-259a35ee1470",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says trail.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "4372513765a6b3bd8f2bd19204234c57049b84d277ffa407acde44cc53aa47c7",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "trail",
+            "notes": null,
+            "to": "northwatch-relay"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 2,
+          "sourceSlug": "riftwood-interior",
+          "stableLocator": "riftwood-interior.meta.connections[2]",
+          "targetAuthored": "northwatch-relay"
+        }
+      },
+      "originalRow": {
+        "by": "trail",
+        "notes": null,
+        "to": "northwatch-relay"
+      },
+      "originalWording": "trail",
+      "provenanceKey": "riftwood-interior.meta.connections[2]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 2,
+      "sourceFingerprint": "4372513765a6b3bd8f2bd19204234c57049b84d277ffa407acde44cc53aa47c7",
+      "sourceSlug": "riftwood-interior",
+      "status": "UNSPECIFIED",
+      "targetSlug": "northwatch-relay",
+      "toEntryId": "northwatch-relay",
+      "type": "TRAIL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+      "fromEntryId": "riverlands",
+      "id": "626564ea-c3dd-5895-92ca-f34180ac59d9",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "9c10986ac77e76e0a4ee7c28703bb5517f0e3c220d08704d5f8a5e96e67579ed",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "river corridor",
+            "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+            "to": "high-cliffs"
+          },
+          "reciprocalCandidates": [
+            "high-cliffs.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "riverlands",
+          "stableLocator": "riverlands.meta.connections[0]",
+          "targetAuthored": "high-cliffs"
+        }
+      },
+      "originalRow": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "high-cliffs"
+      },
+      "originalWording": "river corridor",
+      "provenanceKey": "riverlands.meta.connections[0]",
+      "reciprocalCandidates": [
+        "high-cliffs.meta.connections[0]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "9c10986ac77e76e0a4ee7c28703bb5517f0e3c220d08704d5f8a5e96e67579ed",
+      "sourceSlug": "riverlands",
+      "status": "UNSPECIFIED",
+      "targetSlug": "high-cliffs",
+      "toEntryId": "high-cliffs",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+      "fromEntryId": "riverlands",
+      "id": "37a85cd7-9af7-545c-9132-7c9cb673cee1",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "b4631d2c6d76a1b6ec3ead1c530e4f42628e3c4f547f55f5213b932e5795d31d",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "river corridor",
+            "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+            "to": "grand-rift"
+          },
+          "reciprocalCandidates": [
+            "grand-rift.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 1,
+          "sourceSlug": "riverlands",
+          "stableLocator": "riverlands.meta.connections[1]",
+          "targetAuthored": "grand-rift"
+        }
+      },
+      "originalRow": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "grand-rift"
+      },
+      "originalWording": "river corridor",
+      "provenanceKey": "riverlands.meta.connections[1]",
+      "reciprocalCandidates": [
+        "grand-rift.meta.connections[0]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 1,
+      "sourceFingerprint": "b4631d2c6d76a1b6ec3ead1c530e4f42628e3c4f547f55f5213b932e5795d31d",
+      "sourceSlug": "riverlands",
+      "status": "UNSPECIFIED",
+      "targetSlug": "grand-rift",
+      "toEntryId": "grand-rift",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+      "fromEntryId": "riverlands",
+      "id": "654ceb46-f1e4-55bc-97de-244eba76593f",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "a2785b3f5c1e213c1fda6eb64922f3221d0572392085cd17df651bc16356fffd",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "river corridor",
+            "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+            "to": "the-desert"
+          },
+          "reciprocalCandidates": [
+            "the-desert.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 2,
+          "sourceSlug": "riverlands",
+          "stableLocator": "riverlands.meta.connections[2]",
+          "targetAuthored": "the-desert"
+        }
+      },
+      "originalRow": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "the-desert"
+      },
+      "originalWording": "river corridor",
+      "provenanceKey": "riverlands.meta.connections[2]",
+      "reciprocalCandidates": [
+        "the-desert.meta.connections[0]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 2,
+      "sourceFingerprint": "a2785b3f5c1e213c1fda6eb64922f3221d0572392085cd17df651bc16356fffd",
+      "sourceSlug": "riverlands",
+      "status": "UNSPECIFIED",
+      "targetSlug": "the-desert",
+      "toEntryId": "the-desert",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+      "fromEntryId": "riverlands",
+      "id": "f7b73888-120f-5992-b4d5-aed0eb20633d",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "24f65662862610492bcb06850238e3c4f8be28991ef45b255bea959402599350",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "river corridor",
+            "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+            "to": "magic-torn-wasteland"
+          },
+          "reciprocalCandidates": [
+            "magic-torn-wasteland.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 3,
+          "sourceSlug": "riverlands",
+          "stableLocator": "riverlands.meta.connections[3]",
+          "targetAuthored": "magic-torn-wasteland"
+        }
+      },
+      "originalRow": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "magic-torn-wasteland"
+      },
+      "originalWording": "river corridor",
+      "provenanceKey": "riverlands.meta.connections[3]",
+      "reciprocalCandidates": [
+        "magic-torn-wasteland.meta.connections[0]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 3,
+      "sourceFingerprint": "24f65662862610492bcb06850238e3c4f8be28991ef45b255bea959402599350",
+      "sourceSlug": "riverlands",
+      "status": "UNSPECIFIED",
+      "targetSlug": "magic-torn-wasteland",
+      "toEntryId": "magic-torn-wasteland",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+      "fromEntryId": "riverlands",
+      "id": "1ba2b991-96e0-5c5d-938c-52252dc66da4",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "572f464874ea81b6ffd2932d0d0fb24eff702cb7d25076b067355291e19ae5ab",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "river corridor",
+            "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+            "to": "the-peninsula"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 4,
+          "sourceSlug": "riverlands",
+          "stableLocator": "riverlands.meta.connections[4]",
+          "targetAuthored": "the-peninsula"
+        }
+      },
+      "originalRow": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "the-peninsula"
+      },
+      "originalWording": "river corridor",
+      "provenanceKey": "riverlands.meta.connections[4]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 4,
+      "sourceFingerprint": "572f464874ea81b6ffd2932d0d0fb24eff702cb7d25076b067355291e19ae5ab",
+      "sourceSlug": "riverlands",
+      "status": "UNSPECIFIED",
+      "targetSlug": "the-peninsula",
+      "toEntryId": "the-peninsula",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says road.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "Shattermarket sits between the Landing and Kestrel.",
+      "fromEntryId": "shattermarket",
+      "id": "aaea4832-7ff7-5467-a01d-d4c982ad4f8c",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says road.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "6d22b0e7c4d3650bfa7350d49c278eb6206c42ad24b55223f5c75799b6279fe5",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "road",
+            "notes": "Shattermarket sits between the Landing and Kestrel.",
+            "to": "forward-camp-kestrel"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "shattermarket",
+          "stableLocator": "shattermarket.meta.connections[0]",
+          "targetAuthored": "forward-camp-kestrel"
+        }
+      },
+      "originalRow": {
+        "by": "road",
+        "notes": "Shattermarket sits between the Landing and Kestrel.",
+        "to": "forward-camp-kestrel"
+      },
+      "originalWording": "road",
+      "provenanceKey": "shattermarket.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "6d22b0e7c4d3650bfa7350d49c278eb6206c42ad24b55223f5c75799b6279fe5",
+      "sourceSlug": "shattermarket",
+      "status": "UNSPECIFIED",
+      "targetSlug": "forward-camp-kestrel",
+      "toEntryId": "forward-camp-kestrel",
+      "type": "ROAD",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says road.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": null,
+      "fromEntryId": "stormglass-landing",
+      "id": "f7b34446-f3d4-5bce-8837-a926aee524e5",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says road.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "20dc8356a48e9f6389ad008a9b885164f144412cc6eca205140dd6948ddef18c",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "road",
+            "notes": null,
+            "to": "shattermarket"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "stormglass-landing",
+          "stableLocator": "stormglass-landing.meta.connections[0]",
+          "targetAuthored": "shattermarket"
+        }
+      },
+      "originalRow": {
+        "by": "road",
+        "notes": null,
+        "to": "shattermarket"
+      },
+      "originalWording": "road",
+      "provenanceKey": "stormglass-landing.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "20dc8356a48e9f6389ad008a9b885164f144412cc6eca205140dd6948ddef18c",
+      "sourceSlug": "stormglass-landing",
+      "status": "UNSPECIFIED",
+      "targetSlug": "shattermarket",
+      "toEntryId": "shattermarket",
+      "type": "ROAD",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "Fertile, buildable ground follows the water into the desert.",
+      "fromEntryId": "the-desert",
+      "id": "7c37da64-a1ac-540d-9c98-c63ccd6c4f24",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes a river, waterfall, or water corridor used for travel.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "838675071e9377da6a5e2b5de6ea51321f0bf9f561aaa220ccd534c1010378e4",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "oasis river corridor",
+            "notes": "Fertile, buildable ground follows the water into the desert.",
+            "to": "riverlands"
+          },
+          "reciprocalCandidates": [
+            "riverlands.meta.connections[2]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "the-desert",
+          "stableLocator": "the-desert.meta.connections[0]",
+          "targetAuthored": "riverlands"
+        }
+      },
+      "originalRow": {
+        "by": "oasis river corridor",
+        "notes": "Fertile, buildable ground follows the water into the desert.",
+        "to": "riverlands"
+      },
+      "originalWording": "oasis river corridor",
+      "provenanceKey": "the-desert.meta.connections[0]",
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[2]"
+      ],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "838675071e9377da6a5e2b5de6ea51321f0bf9f561aaa220ccd534c1010378e4",
+      "sourceSlug": "the-desert",
+      "status": "UNSPECIFIED",
+      "targetSlug": "riverlands",
+      "toEntryId": "riverlands",
+      "type": "RIVER_TRAVEL",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly describes aerial transit or a skybridge.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": null,
+      "fromEntryId": "the-floating-city",
+      "id": "cec44011-2c5c-5bf9-911e-8f46208b5411",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly describes aerial transit or a skybridge.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "d3142a3ee838d404df7d2560b060b72a48d34321c1f4caaca12715c9dec171e0",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "skybridge and aerial transit",
+            "notes": null,
+            "to": "grand-lake"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "the-floating-city",
+          "stableLocator": "the-floating-city.meta.connections[0]",
+          "targetAuthored": "grand-lake"
+        }
+      },
+      "originalRow": {
+        "by": "skybridge and aerial transit",
+        "notes": null,
+        "to": "grand-lake"
+      },
+      "originalWording": "skybridge and aerial transit",
+      "provenanceKey": "the-floating-city.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "d3142a3ee838d404df7d2560b060b72a48d34321c1f4caaca12715c9dec171e0",
+      "sourceSlug": "the-floating-city",
+      "status": "UNSPECIFIED",
+      "targetSlug": "grand-lake",
+      "toEntryId": "grand-lake",
+      "type": "AIR_ROUTE",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says sea.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "Every route on or off the island crosses this water.",
+      "fromEntryId": "the-ocean",
+      "id": "a65a1afa-7edb-510b-b821-19a31d736108",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says sea.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "c2d2896c2866baf3ef9a52183b8570b360ad1c95cc861bec95a59ebd367d71eb",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "sea",
+            "notes": "Every route on or off the island crosses this water.",
+            "to": "the-starting-island"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "the-ocean",
+          "stableLocator": "the-ocean.meta.connections[0]",
+          "targetAuthored": "the-starting-island"
+        }
+      },
+      "originalRow": {
+        "by": "sea",
+        "notes": "Every route on or off the island crosses this water.",
+        "to": "the-starting-island"
+      },
+      "originalWording": "sea",
+      "provenanceKey": "the-ocean.meta.connections[0]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "c2d2896c2866baf3ef9a52183b8570b360ad1c95cc861bec95a59ebd367d71eb",
+      "sourceSlug": "the-ocean",
+      "status": "UNSPECIFIED",
+      "targetSlug": "the-starting-island",
+      "toEntryId": "the-starting-island",
+      "type": "SEA_ROUTE",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "HIGH",
+      "classificationRationale": "The authored route explicitly says sea.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "Both prologue endings land on the peninsula's coast.",
+      "fromEntryId": "the-ocean",
+      "id": "26c24454-430b-5d03-9df9-faedb0d813e9",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "HIGH",
+            "rationale": "The authored route explicitly says sea.",
+            "reviewStatus": "AUTO_SAFE",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "0bb1bc8ebbb6a85c3c5fdb9b337f97ba2520f7857b244c1bc5ec8fa46b0c308e",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "sea",
+            "notes": "Both prologue endings land on the peninsula's coast.",
+            "to": "the-peninsula"
+          },
+          "reciprocalCandidates": [],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 1,
+          "sourceSlug": "the-ocean",
+          "stableLocator": "the-ocean.meta.connections[1]",
+          "targetAuthored": "the-peninsula"
+        }
+      },
+      "originalRow": {
+        "by": "sea",
+        "notes": "Both prologue endings land on the peninsula's coast.",
+        "to": "the-peninsula"
+      },
+      "originalWording": "sea",
+      "provenanceKey": "the-ocean.meta.connections[1]",
+      "reciprocalCandidates": [],
+      "reviewStatus": "AUTO_SAFE",
+      "sourceArrayIndex": 1,
+      "sourceFingerprint": "0bb1bc8ebbb6a85c3c5fdb9b337f97ba2520f7857b244c1bc5ec8fa46b0c308e",
+      "sourceSlug": "the-ocean",
+      "status": "UNSPECIFIED",
+      "targetSlug": "the-peninsula",
+      "toEntryId": "the-peninsula",
+      "type": "SEA_ROUTE",
+      "version": 1,
+      "visibility": "DEFAULT"
+    },
+    {
+      "classificationConfidence": "LOW",
+      "classificationRationale": "The authored route wording \"fractured forest shelves\" has no safe controlled transport mapping; preserve it as OTHER pending owner review.",
+      "directionality": "UNSPECIFIED",
+      "editorialNotes": "The red canopy dies back gradually inside the canyon.",
+      "fromEntryId": "the-red-forest",
+      "id": "8846fd28-b1f0-5039-ad5f-0f8595bd9a56",
+      "metadata": {
+        "migration": {
+          "classification": {
+            "confidence": "LOW",
+            "rationale": "The authored route wording \"fractured forest shelves\" has no safe controlled transport mapping; preserve it as OTHER pending owner review.",
+            "reviewStatus": "REVIEW_REQUIRED",
+            "source": "PROMPT_2_DETERMINISTIC_CLASSIFIER"
+          },
+          "fingerprint": "8c21ee4686d5a1c3dac17d82345fc20205c7d320f22bd62b98be5e748561307a",
+          "manifestContract": "martino-atlas-v1-connection-migration-manifest",
+          "manifestContractVersion": 1,
+          "rawAuthoredRow": {
+            "by": "fractured forest shelves",
+            "notes": "The red canopy dies back gradually inside the canyon.",
+            "to": "death-canyon"
+          },
+          "reciprocalCandidates": [
+            "death-canyon.meta.connections[0]"
+          ],
+          "rehearsalContract": "martino-atlas-v2-migration-rehearsal",
+          "rehearsalVersion": 1,
+          "sourceArrayIndex": 0,
+          "sourceSlug": "the-red-forest",
+          "stableLocator": "the-red-forest.meta.connections[0]",
+          "targetAuthored": "death-canyon"
+        }
+      },
+      "originalRow": {
+        "by": "fractured forest shelves",
+        "notes": "The red canopy dies back gradually inside the canyon.",
+        "to": "death-canyon"
+      },
+      "originalWording": "fractured forest shelves",
+      "provenanceKey": "the-red-forest.meta.connections[0]",
+      "reciprocalCandidates": [
+        "death-canyon.meta.connections[0]"
+      ],
+      "reviewStatus": "REVIEW_REQUIRED",
+      "sourceArrayIndex": 0,
+      "sourceFingerprint": "8c21ee4686d5a1c3dac17d82345fc20205c7d320f22bd62b98be5e748561307a",
+      "sourceSlug": "the-red-forest",
+      "status": "UNSPECIFIED",
+      "targetSlug": "death-canyon",
+      "toEntryId": "death-canyon",
+      "type": "OTHER",
+      "version": 1,
+      "visibility": "DEFAULT"
+    }
+  ],
+  "contract": "martino-atlas-v2-migration-rehearsal",
+  "contractVersion": 1,
+  "parity": {
+    "alteredWording": [],
+    "autoClassified": 23,
+    "dropped": 0,
+    "duplicates": [],
+    "exactProvenance": 25,
+    "fingerprintMismatches": [],
+    "legacyRows": 25,
+    "missing": [],
+    "resolvedEndpoints": 25,
+    "typeReviewRequired": 2,
+    "unexpectedDuplicates": 0,
+    "v2Candidates": 25,
+    "valid": true
+  },
+  "reciprocalGroups": [
+    {
+      "candidateInterpretation": "UNRESOLVED",
+      "connectionA": {
+        "fingerprint": "1594591c8ed4a2f59f3b9977fdac7bca405f4e4efffcb9ac4a6f6939cfd45f60",
+        "locator": "death-canyon.meta.connections[0]",
+        "source": "death-canyon",
+        "target": "the-red-forest",
+        "wording": "broken canyon shelves"
+      },
+      "connectionB": {
+        "fingerprint": "8c21ee4686d5a1c3dac17d82345fc20205c7d320f22bd62b98be5e748561307a",
+        "locator": "the-red-forest.meta.connections[0]",
+        "source": "the-red-forest",
+        "target": "death-canyon",
+        "wording": "fractured forest shelves"
+      },
+      "groupKey": "death-canyon.meta.connections[0]|the-red-forest.meta.connections[0]",
+      "recommendation": "Keep both directional candidates distinct until an owner confirms merge, directionality, or distinct-route intent."
+    },
+    {
+      "candidateInterpretation": "LIKELY_ONE_BIDIRECTIONAL_ROUTE",
+      "connectionA": {
+        "fingerprint": "433a49aa09275fe48bd7bcb67910e34eb804c6ec65ed2681319d73808c5e625c",
+        "locator": "grand-rift.meta.connections[0]",
+        "source": "grand-rift",
+        "target": "riverlands",
+        "wording": "rift river corridor"
+      },
+      "connectionB": {
+        "fingerprint": "b4631d2c6d76a1b6ec3ead1c530e4f42628e3c4f547f55f5213b932e5795d31d",
+        "locator": "riverlands.meta.connections[1]",
+        "source": "riverlands",
+        "target": "grand-rift",
+        "wording": "river corridor"
+      },
+      "groupKey": "grand-rift.meta.connections[0]|riverlands.meta.connections[1]",
+      "recommendation": "Keep both directional candidates distinct until an owner confirms merge, directionality, or distinct-route intent."
+    },
+    {
+      "candidateInterpretation": "LIKELY_ONE_BIDIRECTIONAL_ROUTE",
+      "connectionA": {
+        "fingerprint": "aa5366bebbe55342504d65f6f1052a4f442ebfbfbd918af79e7c0b7f2525f3c9",
+        "locator": "high-cliffs.meta.connections[0]",
+        "source": "high-cliffs",
+        "target": "riverlands",
+        "wording": "waterfalls and river valleys"
+      },
+      "connectionB": {
+        "fingerprint": "9c10986ac77e76e0a4ee7c28703bb5517f0e3c220d08704d5f8a5e96e67579ed",
+        "locator": "riverlands.meta.connections[0]",
+        "source": "riverlands",
+        "target": "high-cliffs",
+        "wording": "river corridor"
+      },
+      "groupKey": "high-cliffs.meta.connections[0]|riverlands.meta.connections[0]",
+      "recommendation": "Keep both directional candidates distinct until an owner confirms merge, directionality, or distinct-route intent."
+    },
+    {
+      "candidateInterpretation": "LIKELY_ONE_BIDIRECTIONAL_ROUTE",
+      "connectionA": {
+        "fingerprint": "1eb68e2ee09d21c7f7775c8f2a73cca5047a0e78a81375fce4f715ae42476b02",
+        "locator": "magic-torn-wasteland.meta.connections[0]",
+        "source": "magic-torn-wasteland",
+        "target": "riverlands",
+        "wording": "stabilized river corridor"
+      },
+      "connectionB": {
+        "fingerprint": "24f65662862610492bcb06850238e3c4f8be28991ef45b255bea959402599350",
+        "locator": "riverlands.meta.connections[3]",
+        "source": "riverlands",
+        "target": "magic-torn-wasteland",
+        "wording": "river corridor"
+      },
+      "groupKey": "magic-torn-wasteland.meta.connections[0]|riverlands.meta.connections[3]",
+      "recommendation": "Keep both directional candidates distinct until an owner confirms merge, directionality, or distinct-route intent."
+    },
+    {
+      "candidateInterpretation": "LIKELY_ONE_BIDIRECTIONAL_ROUTE",
+      "connectionA": {
+        "fingerprint": "a2785b3f5c1e213c1fda6eb64922f3221d0572392085cd17df651bc16356fffd",
+        "locator": "riverlands.meta.connections[2]",
+        "source": "riverlands",
+        "target": "the-desert",
+        "wording": "river corridor"
+      },
+      "connectionB": {
+        "fingerprint": "838675071e9377da6a5e2b5de6ea51321f0bf9f561aaa220ccd534c1010378e4",
+        "locator": "the-desert.meta.connections[0]",
+        "source": "the-desert",
+        "target": "riverlands",
+        "wording": "oasis river corridor"
+      },
+      "groupKey": "riverlands.meta.connections[2]|the-desert.meta.connections[0]",
+      "recommendation": "Keep both directional candidates distinct until an owner confirms merge, directionality, or distinct-route intent."
+    }
+  ]
+}

@@ -203,6 +203,13 @@ const maps: readonly MapSeed[] = [
 ] as const;
 
 async function main() {
+  if (apply && !process.argv.includes("--allow-activated-v2")) {
+    const schema = await db.$queryRaw<Array<{ present: boolean }>>`SELECT to_regclass('public."StoryMapTopologyNode"') IS NOT NULL AS present`;
+    if (schema[0]?.present) {
+      const [nodes, boundaries, rings, connections] = await Promise.all([db.storyMapTopologyNode.count(), db.storyMapBoundary.count(), db.storyMapAreaRing.count(), db.storyWorldConnection.count()]);
+      if (nodes + boundaries + rings + connections > 0) throw new Error("Refusing destructive Atlas seed reconciliation while activated V2 data exists. Use the dedicated Atlas activation/cleanup workflow; --allow-activated-v2 is an explicit emergency override.");
+    }
+  }
   const author =
     (await db.user.findFirst({ where: { OR: [{ displayName: "Tino" }, { name: "Tino" }], isActive: true }, select: { id: true, username: true } })) ??
     (await db.user.findFirstOrThrow({ where: { role: "ADMIN", isActive: true }, select: { id: true, username: true } }));

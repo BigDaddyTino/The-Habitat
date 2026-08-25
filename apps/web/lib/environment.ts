@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { resolveAtlasDevelopmentDatabaseUrl } from "./atlas-development-database";
 
 function findEnvFile() {
   let directory = process.cwd();
@@ -15,3 +16,5 @@ function findEnvFile() {
 
 const envFile = findEnvFile();
 if (envFile) dotenv.config({ path: envFile, quiet: true });
+const atlasDevelopmentUrl = resolveAtlasDevelopmentDatabaseUrl(process.env);
+if (atlasDevelopmentUrl) process.env.DATABASE_URL = atlasDevelopmentUrl;

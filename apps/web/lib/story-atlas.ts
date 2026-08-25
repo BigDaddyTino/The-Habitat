@@ -1,5 +1,6 @@
 import "server-only";
 import { getPrismaClient } from "@habitat/db/client";
+import type { AtlasPersistenceClient } from "./atlas-persistence-service";
 import { parseStoryMapGeometry, type StoryAtlasFeature, type StoryAtlasProjection, type StoryAtlasQuest } from "@habitat/shared";
 
 const db = getPrismaClient();
@@ -11,8 +12,9 @@ function record(value: unknown): Record<string, unknown> | null {
 
 function text(value: unknown) { return typeof value === "string" ? value : null; }
 
-export async function getStoryAtlasProjection(slug: string): Promise<StoryAtlasProjection | null> {
-  const scene = await db.storyMap.findUnique({
+export function createStoryAtlasProjectionService(client: AtlasPersistenceClient) {
+ return async function getStoryAtlasProjectionForClient(slug: string): Promise<StoryAtlasProjection | null> {
+  const scene = await client.storyMap.findUnique({
     where: { slug },
     include: {
       parent: { select: { slug: true, title: true } },
@@ -27,11 +29,11 @@ export async function getStoryAtlasProjection(slug: string): Promise<StoryAtlasP
   if (!scene) return null;
 
   const entryIds = scene.placements.map((placement) => placement.entryId);
-  const directArcs = await db.storyArc.findMany({
+  const directArcs = await client.storyArc.findMany({
     where: { regionEntryId: { in: entryIds }, status: { in: [...visibleStatuses] } },
     select: { slug: true, title: true, category: true, status: true, regionEntryId: true },
   });
-  const linkedNodes = await db.storyEntryLink.findMany({
+  const linkedNodes = await client.storyEntryLink.findMany({
     where: { entryId: { in: entryIds }, node: { status: { in: [...visibleStatuses] }, arc: { status: { in: [...visibleStatuses] } } } },
     select: { entryId: true, node: { select: { key: true, arc: { select: { slug: true, title: true, category: true, status: true } } } } },
   });
@@ -40,7 +42,7 @@ export async function getStoryAtlasProjection(slug: string): Promise<StoryAtlasP
     const controls = record(placement.entry.meta)?.control;
     if (Array.isArray(controls)) for (const control of controls) { const slug = text(record(control)?.faction); if (slug) factionSlugs.add(slug); }
   }
-  const factions = factionSlugs.size ? await db.storyEntry.findMany({ where: { slug: { in: [...factionSlugs] }, kind: "FACTION" }, select: { slug: true, title: true } }) : [];
+  const factions = factionSlugs.size ? await client.storyEntry.findMany({ where: { slug: { in: [...factionSlugs] }, kind: "FACTION" }, select: { slug: true, title: true } }) : [];
   const factionTitle = new Map(factions.map((faction) => [faction.slug, faction.title]));
   const childMapByOwner = new Map(scene.children.flatMap((child) => child.ownerEntryId ? [[child.ownerEntryId, { slug: child.slug, title: child.title }]] : []));
 
@@ -111,7 +113,7 @@ export async function getStoryAtlasProjection(slug: string): Promise<StoryAtlasP
       quests: [{ slug: placement.node.arc.slug, title: placement.node.arc.title, category: placement.node.arc.category, status: placement.node.arc.status, nodeKey: placement.node.key }],
     });
   }
-  const revision = await db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } });
+  const revision = await client.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true } });
   const uniqueQuests = new Set(features.flatMap((feature) => feature.quests.map((quest) => quest.slug)));
   return {
     contract: "martino-story-atlas",
@@ -121,4 +123,7 @@ export async function getStoryAtlasProjection(slug: string): Promise<StoryAtlasP
     features,
     counts: { placed: features.length, regions: features.filter((feature) => feature.layer === "REGION").length, settlements: features.filter((feature) => feature.layer === "SETTLEMENT").length, pois: features.filter((feature) => feature.layer === "POI").length, quests: uniqueQuests.size },
   };
+ };
 }
+
+export const getStoryAtlasProjection = createStoryAtlasProjectionService(db);

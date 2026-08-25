@@ -1,0 +1,506 @@
+{
+  "contract": "martino-atlas-v1-connection-migration-manifest",
+  "contractVersion": 1,
+  "records": [
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "ROAD",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "ca44fa9158e3b72d1c4621d8a6f192966817c554817cbf9c621e9f9bc2748c6d",
+      "original": {
+        "by": "road",
+        "notes": "The coast road that brings the people.",
+        "to": "glasswater-village"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "glasswater-village",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "blackreef-harbour",
+      "stableLocator": "blackreef-harbour.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "ROAD",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "5b4e1e66904be62397b3826e8220850663062b1ff7697ec17f5c60ac513b1043",
+      "original": {
+        "by": "road",
+        "notes": "The evacuation road that brings everyone else.",
+        "to": "forward-camp-kestrel"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "forward-camp-kestrel",
+      "sourceArrayIndex": 1,
+      "sourceSlug": "blackreef-harbour",
+      "stableLocator": "blackreef-harbour.meta.connections[1]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "SEA_ROUTE",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "65ed965806adc37a86d1902822d81b4f986241479bd55600129bfee12bc86c18",
+      "original": {
+        "by": "sea",
+        "notes": "The Flee branch's crossing — the fleet puts in at the military port.",
+        "to": "port-arcadia"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "port-arcadia",
+      "sourceArrayIndex": 2,
+      "sourceSlug": "blackreef-harbour",
+      "stableLocator": "blackreef-harbour.meta.connections[2]"
+    },
+    {
+      "ambiguityNotes": [
+        "Authored wording is preserved but does not safely map to a controlled transport type."
+      ],
+      "ambiguous": true,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "OTHER",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "1594591c8ed4a2f59f3b9977fdac7bca405f4e4efffcb9ac4a6f6939cfd45f60",
+      "original": {
+        "by": "broken canyon shelves",
+        "notes": null,
+        "to": "the-red-forest"
+      },
+      "reciprocalCandidates": [
+        "the-red-forest.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "the-red-forest",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "death-canyon",
+      "stableLocator": "death-canyon.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "73ee68682e2886baba9f7f7d4556387f3cc6f4117f06cfb3fdf04e16f7326077",
+      "original": {
+        "by": "great waterfalls",
+        "notes": "Source of the central rivers.",
+        "to": "riverlands"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "riverlands",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "grand-lake",
+      "stableLocator": "grand-lake.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "433a49aa09275fe48bd7bcb67910e34eb804c6ec65ed2681319d73808c5e625c",
+      "original": {
+        "by": "rift river corridor",
+        "notes": "A buildable river arm reaches into the broken country.",
+        "to": "riverlands"
+      },
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[1]"
+      ],
+      "resolvedTargetSlug": "riverlands",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "grand-rift",
+      "stableLocator": "grand-rift.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "aa5366bebbe55342504d65f6f1052a4f442ebfbfbd918af79e7c0b7f2525f3c9",
+      "original": {
+        "by": "waterfalls and river valleys",
+        "notes": "The Grand Lake feeds the central watershed.",
+        "to": "riverlands"
+      },
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "riverlands",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "high-cliffs",
+      "stableLocator": "high-cliffs.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "1eb68e2ee09d21c7f7775c8f2a73cca5047a0e78a81375fce4f715ae42476b02",
+      "original": {
+        "by": "stabilized river corridor",
+        "notes": "A Riverlands branch provides one buildable approach into the end-game zone.",
+        "to": "riverlands"
+      },
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[3]"
+      ],
+      "resolvedTargetSlug": "riverlands",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "magic-torn-wasteland",
+      "stableLocator": "magic-torn-wasteland.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "ROAD",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "f7404ec21dce16df669c9c65e69267bcbd15573838fe25e07923fe3bdecc287b",
+      "original": {
+        "by": "road",
+        "notes": "The supply artery — the prize and the invader's logistics share one road.",
+        "to": "stormglass-quarry"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "stormglass-quarry",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "pearl-beachhead",
+      "stableLocator": "pearl-beachhead.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "TRAIL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "c1ffa59c91538d984981b84238cc114c03b36ce2ca57ecd962b81466e5add768",
+      "original": {
+        "by": "trail",
+        "notes": "The infiltration trail, for players who prefer questions asked afterward.",
+        "to": "riftwood-interior"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "riftwood-interior",
+      "sourceArrayIndex": 1,
+      "sourceSlug": "pearl-beachhead",
+      "stableLocator": "pearl-beachhead.meta.connections[1]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "TRAIL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "d06b68c1219e3e49983e23c377cb753b7d10c1dd6d3b20281f6a7b032dce44c9",
+      "original": {
+        "by": "trail",
+        "notes": null,
+        "to": "forward-camp-kestrel"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "forward-camp-kestrel",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "riftwood-interior",
+      "stableLocator": "riftwood-interior.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "TRAIL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "1fc5fc2bfe6491ffac41866eac765ef0c3ac81c454bbe298db3a013d720f5247",
+      "original": {
+        "by": "trail",
+        "notes": "The quarry ravine trail.",
+        "to": "stormglass-quarry"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "stormglass-quarry",
+      "sourceArrayIndex": 1,
+      "sourceSlug": "riftwood-interior",
+      "stableLocator": "riftwood-interior.meta.connections[1]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "TRAIL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "4372513765a6b3bd8f2bd19204234c57049b84d277ffa407acde44cc53aa47c7",
+      "original": {
+        "by": "trail",
+        "notes": null,
+        "to": "northwatch-relay"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "northwatch-relay",
+      "sourceArrayIndex": 2,
+      "sourceSlug": "riftwood-interior",
+      "stableLocator": "riftwood-interior.meta.connections[2]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "9c10986ac77e76e0a4ee7c28703bb5517f0e3c220d08704d5f8a5e96e67579ed",
+      "original": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "high-cliffs"
+      },
+      "reciprocalCandidates": [
+        "high-cliffs.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "high-cliffs",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "riverlands",
+      "stableLocator": "riverlands.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "b4631d2c6d76a1b6ec3ead1c530e4f42628e3c4f547f55f5213b932e5795d31d",
+      "original": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "grand-rift"
+      },
+      "reciprocalCandidates": [
+        "grand-rift.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "grand-rift",
+      "sourceArrayIndex": 1,
+      "sourceSlug": "riverlands",
+      "stableLocator": "riverlands.meta.connections[1]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "a2785b3f5c1e213c1fda6eb64922f3221d0572392085cd17df651bc16356fffd",
+      "original": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "the-desert"
+      },
+      "reciprocalCandidates": [
+        "the-desert.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "the-desert",
+      "sourceArrayIndex": 2,
+      "sourceSlug": "riverlands",
+      "stableLocator": "riverlands.meta.connections[2]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "24f65662862610492bcb06850238e3c4f8be28991ef45b255bea959402599350",
+      "original": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "magic-torn-wasteland"
+      },
+      "reciprocalCandidates": [
+        "magic-torn-wasteland.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "magic-torn-wasteland",
+      "sourceArrayIndex": 3,
+      "sourceSlug": "riverlands",
+      "stableLocator": "riverlands.meta.connections[3]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "572f464874ea81b6ffd2932d0d0fb24eff702cb7d25076b067355291e19ae5ab",
+      "original": {
+        "by": "river corridor",
+        "notes": "A Riverlands branch carries buildable ground into the neighboring biome.",
+        "to": "the-peninsula"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "the-peninsula",
+      "sourceArrayIndex": 4,
+      "sourceSlug": "riverlands",
+      "stableLocator": "riverlands.meta.connections[4]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "ROAD",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "6d22b0e7c4d3650bfa7350d49c278eb6206c42ad24b55223f5c75799b6279fe5",
+      "original": {
+        "by": "road",
+        "notes": "Shattermarket sits between the Landing and Kestrel.",
+        "to": "forward-camp-kestrel"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "forward-camp-kestrel",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "shattermarket",
+      "stableLocator": "shattermarket.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "ROAD",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "20dc8356a48e9f6389ad008a9b885164f144412cc6eca205140dd6948ddef18c",
+      "original": {
+        "by": "road",
+        "notes": null,
+        "to": "shattermarket"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "shattermarket",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "stormglass-landing",
+      "stableLocator": "stormglass-landing.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "RIVER_TRAVEL",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "838675071e9377da6a5e2b5de6ea51321f0bf9f561aaa220ccd534c1010378e4",
+      "original": {
+        "by": "oasis river corridor",
+        "notes": "Fertile, buildable ground follows the water into the desert.",
+        "to": "riverlands"
+      },
+      "reciprocalCandidates": [
+        "riverlands.meta.connections[2]"
+      ],
+      "resolvedTargetSlug": "riverlands",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "the-desert",
+      "stableLocator": "the-desert.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "AIR_ROUTE",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "d3142a3ee838d404df7d2560b060b72a48d34321c1f4caaca12715c9dec171e0",
+      "original": {
+        "by": "skybridge and aerial transit",
+        "notes": null,
+        "to": "grand-lake"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "grand-lake",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "the-floating-city",
+      "stableLocator": "the-floating-city.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "SEA_ROUTE",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "c2d2896c2866baf3ef9a52183b8570b360ad1c95cc861bec95a59ebd367d71eb",
+      "original": {
+        "by": "sea",
+        "notes": "Every route on or off the island crosses this water.",
+        "to": "the-starting-island"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "the-starting-island",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "the-ocean",
+      "stableLocator": "the-ocean.meta.connections[0]"
+    },
+    {
+      "ambiguityNotes": [],
+      "ambiguous": false,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "SEA_ROUTE",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "0bb1bc8ebbb6a85c3c5fdb9b337f97ba2520f7857b244c1bc5ec8fa46b0c308e",
+      "original": {
+        "by": "sea",
+        "notes": "Both prologue endings land on the peninsula's coast.",
+        "to": "the-peninsula"
+      },
+      "reciprocalCandidates": [],
+      "resolvedTargetSlug": "the-peninsula",
+      "sourceArrayIndex": 1,
+      "sourceSlug": "the-ocean",
+      "stableLocator": "the-ocean.meta.connections[1]"
+    },
+    {
+      "ambiguityNotes": [
+        "Authored wording is preserved but does not safely map to a controlled transport type."
+      ],
+      "ambiguous": true,
+      "candidateDirectionality": "UNSPECIFIED",
+      "candidateType": "OTHER",
+      "endpointMethod": "SLUG",
+      "endpointStatus": "RESOLVED",
+      "fingerprint": "8c21ee4686d5a1c3dac17d82345fc20205c7d320f22bd62b98be5e748561307a",
+      "original": {
+        "by": "fractured forest shelves",
+        "notes": "The red canopy dies back gradually inside the canyon.",
+        "to": "death-canyon"
+      },
+      "reciprocalCandidates": [
+        "death-canyon.meta.connections[0]"
+      ],
+      "resolvedTargetSlug": "death-canyon",
+      "sourceArrayIndex": 0,
+      "sourceSlug": "the-red-forest",
+      "stableLocator": "the-red-forest.meta.connections[0]"
+    }
+  ],
+  "source": "StoryEntry(kind=REGION).meta.connections"
+}

@@ -5,6 +5,7 @@ import { resolveStoryAtlasArt } from "./story-atlas-art";
 
 test("every authoritative atlas scene resolves its allow-listed master", () => {
   assert.equal(basename(resolveStoryAtlasArt("martino-world", "v1.png") ?? ""), "martino-world-map-v1.png");
+  assert.equal(basename(resolveStoryAtlasArt("martino-world", "v2.png") ?? ""), "martino-world-map-v2-clean-production-candidate.png");
   assert.equal(basename(resolveStoryAtlasArt("martino-starting-island", "v1.png") ?? ""), "martino-starting-island-map-v1.png");
   assert.equal(basename(resolveStoryAtlasArt("martino-port-arcadia", "v2.png") ?? ""), "martino-port-arcadia-map-v2.png");
 });

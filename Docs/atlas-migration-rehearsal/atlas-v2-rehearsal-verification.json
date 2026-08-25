@@ -1,0 +1,43 @@
+{
+  "activeDatabase": {
+    "migrationApplications": 0,
+    "seedRuns": 0,
+    "writes": 0
+  },
+  "contract": "martino-atlas-v2-topology-lock-rehearsal-verification",
+  "contractVersion": 1,
+  "runs": [
+    {
+      "counts": {
+        "areaRings": 11,
+        "boundaries": 26,
+        "connectionPaths": 0,
+        "ringBoundaryReferences": 43,
+        "topologyNodes": 19,
+        "worldConnections": 25
+      },
+      "deathCanyonValid": true,
+      "logicalFingerprint": "60368a93b625328cbc0beb638eb7b657431d3d64a4d711bab81f217d2810b517",
+      "rollbackProof": "PASSED",
+      "run": 1,
+      "sourceWrites": 0,
+      "topologyLocked": true
+    },
+    {
+      "counts": {
+        "areaRings": 11,
+        "boundaries": 26,
+        "connectionPaths": 0,
+        "ringBoundaryReferences": 43,
+        "topologyNodes": 19,
+        "worldConnections": 25
+      },
+      "deathCanyonValid": true,
+      "logicalFingerprint": "60368a93b625328cbc0beb638eb7b657431d3d64a4d711bab81f217d2810b517",
+      "rollbackProof": "PASSED",
+      "run": 2,
+      "sourceWrites": 0,
+      "topologyLocked": true
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-20
+Last updated: 2026-08-24
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -536,3 +536,71 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Corrected an OpenLayers extent constraint discovered during visual QA: `showFullExtent` plus a measured initial resolution now displays every scene from edge to edge before the player zooms, instead of cropping the north and south to satisfy the wider desktop viewport
 - [x] Final regression is green: strict shared/database/web/sync typechecks, web lint, 335/335 web tests, 3/3 sync tests, all 58 database migrations applied, and a production Next.js build; focused atlas-art tests cover every allow-listed scene plus unknown-version and path-traversal rejection
 - [x] Added the World Atlas as a first-class door in the Codex landing page's “Choose what you want to shape” grid, with dedicated original cinematic command-table art, direct access to the interactive map, and a balanced responsive six-card layout; authenticated production QA passed at desktop and 390 × 844 mobile, including exact link navigation, no horizontal overflow, and a clean page console. The image is promotional atmosphere only and is never presented as authoritative geography or live game data
+
+## 2026-08-24 - Atlas 2.0 integrity and contract foundation
+
+- [x] Added browser-safe fixed-point coordinate, bounded geometry, spatial-layer, shared-boundary topology, validation-severity, and first-class world-connection contracts to `packages/shared`; the production OpenLayers renderer and all persistence remain unchanged
+- [x] Added a repeatable read-only Atlas integrity audit with human, deterministic JSON, and strict-warning modes; it decodes and hashes protected artwork, inventories maps, places, quest geometry, semantic metadata, legacy connections, and exact V1 polygon relationships without importing or invoking the destructive seed
+- [x] Verified the live review baseline from source data: 3 scenes, 37 place entries, 36 place placements, 10 quest placements, 1 unplaced entry (`the-docks`), 25 resolved legacy connection rows, 26 independent polygons, and zero exact shared vertices or boundary segments; Port Arcadia remains unchanged and is correctly reported as 1599 x 984 artwork against 1536 x 1024 declarations requiring recalibration
+- [x] Generated deterministic, review-only V1 geometry and connection manifests under `Docs/atlas-migration-manifests`; a second generation was byte-identical, preserving every original geometry/connection payload and stable source fingerprint without creating a runtime source of truth
+- [x] Made `Docs/ATLAS_2_CONTRACT.md` authoritative for Atlas 2.0 contracts, migration tooling, severity semantics, known seed risk, absent discovery ownership, and deferred runtime work; persistence, renderer changes, Bundle V4 changes, and editing remain later phases
+
+## 2026-08-24 - Atlas 2.0 additive persistence foundation
+
+- [x] Added a strictly additive Prisma migration for empty shared-topology nodes, boundaries, placement-owned area rings and ordered shared-boundary references, stable world connections, and scene-specific line/multiline paths; all structural deletes are restrictive and no V1 row is read or transformed by the SQL
+- [x] Added an internal server-only persistence service with fixed-point/map validation, bounded geometry and metadata validation, complete topology assembly checks, region-only connection endpoint policy, optimistic expected-version writes, serializable topology transactions, explicit safe deletes, and the existing `StoryRevision` stream for every entity class
+- [x] Proved the complete 59-migration chain against the disposable local `habitat_atlas_p3_verify_20260824` database, confirmed all six new tables began empty, exercised shared/reversed boundaries, rollback, concurrency, multiple routes and scene paths, then removed the isolated database; the active `habitat` database was not migrated or written
+- [x] Preserved `StoryMapPlacement.geometry`, `REGION.meta.connections`, renderer/API/URL/SSE behavior, Port Arcadia calibration, artwork, seed, and Bundle V4; generic analytical-layer persistence and all V1-to-V2 data migration remain deferred
+
+## 2026-08-24 - Atlas 2.0 controlled migration rehearsal
+
+- [x] Added deterministic read-only planning plus guarded rehearsal/verification tooling: all 25 legacy connection rows become distinct first-class candidates with exact manifest locator, fingerprint, original wording/full row, resolved endpoint, classifier rationale, and review state; the 2 ambiguous rows remain `OTHER`/review-required and all 5 reciprocal groups remain unmerged
+- [x] Added a deliberately partial manual artwork trace: Grand Lake and the High Cliffs reuse four exact shoreline boundaries in opposite directions, yielding 8 nodes, 8 boundaries, 2 areas, 3 rings, and 12 references; three uncertain outer High Cliffs transitions stay owner-review-required, Starting Island topology is deferred rather than invented, and Port Arcadia remains blocked on recalibration
+- [x] Added one deterministic owner-review packet, area inventory, parity report, trace manifest, connection-candidate manifest, and a development-only static V1/V2 comparison page under `Docs/atlas-migration-rehearsal`; these artifacts reference protected artwork unchanged and have no API or live-data access
+- [x] Proved rollback, active-database refusal, idempotency, and fresh-run determinism against two disposable local rehearsal databases; both produced logical fingerprint `658d5b685de23ffea8b2d7775215a71e246d2e831291a29213a4b4b41141b682` and were removed, while active `habitat` retained the Prompt 3 migration as pending with zero source writes
+- [x] Preserved V1 placement/quest geometry, `REGION.meta.connections`, artwork and allow-list, Port Arcadia declarations, renderer/API/routes/URLs/SSE, seed, player discovery behavior, Bundle V4, lore, statuses, and slugs; no connection paths, adjacency records, live V2 rows, dual-write, or renderer switch were introduced
+
+## 2026-08-24 - Martino World Atlas Master V2 art candidate
+
+- [x] Generated separate 1536 × 1024 clean and labeled world-map candidates from the approved V1 composition, with clearer shared-boundary-ready segmentation, preserved macro geography, Port Arcadia, the Floating City, and owner-confirmed Igit Island placement
+- [x] Saved both candidates outside the active art allow-list and documented their hashes, regions, anchors, soft-boundary decisions, preservation/refinement classification, generation constraints, and owner-review gates under `Docs/atlas-master-v2-candidate`
+- [ ] Candidate art remains review-only: V1 artwork, renderer/API/routes, placements, topology, world connections, Codex entries, Bundle V4, and runtime art selection are unchanged pending explicit owner approval
+
+## 2026-08-24 - Martino World Atlas Master V2 production refinement candidate
+
+- [x] Generated one clean, unlabeled 1536 × 1024 production-refinement candidate from the V2 clean composition, preserving the established continent, regions, Grand Lake/Floating City, Port Arcadia, Igit Island, far southwestern city-island, and southeastern volcanic archipelago
+- [x] Added a visible Peninsula-neck closure, retained the `100000 × 66667` 3:2 coordinate contract, and kept labels, POI glyphs, runtime wiring, allow-list entries, placements, topology, connections, Codex records, and Bundle V4 unchanged
+- [ ] The production candidate remains review-only: Death Canyon still lacks an unequivocal independently closed nested perimeter, the new Peninsula-neck/boundary stroke remains heavier than the requested premium hairline, coast/internal line separation needs final art polish, and a genuine 8K-class master is still unavailable from the current built-in generation path
+
+## 2026-08-24 - Martino Atlas topology-lock surgical pass
+
+- [x] Completed the requested maximum of two disciplined raster-edit attempts without overwriting or activating the controlling production candidate
+- [x] Preserved the lower-drift attempt as `martino-world-map-v2-topology-lock-review-candidate.png`; it consolidates Red Forest into one top-level footprint and provides a visible nested Death Canyon loop while keeping established anchors, including Igit Island, in place
+- [x] Recorded the owner hierarchy decision: Grand Rift and Red Forest are neighboring top-level geographic regions, while Death Canyon is nested inside Grand Rift
+- [x] Added a deterministic, contract-valid `100000 × 66667` Death Canyon polygon plus transparent SVG overlay for dynamic Atlas rendering; neither artifact is runtime-active or persisted
+- [ ] Topology promotion remains blocked: generated boundary styling is still brighter than the target hairline, Grand Rift/Riverlands junctions require manual approval, and both generative attempts changed unrelated pixels outside the requested edit zone
+
+## 2026-08-24 - Atlas 2.0 canonical vector topology lock
+
+- [x] Froze `martino-world-map-v2-clean-production-candidate.png` byte-for-byte at SHA-256 `427bf4967afa8a96afa2175d5aed261225cf7fbeed17944be527f4616b5713b6`; the later topology-lock raster remains review-only and neither raster was edited or activated
+- [x] Replaced the partial rehearsal trace with deterministic `100000 x 66667` shared topology for eight interlocking top-level land regions, Grand Lake, and nested Death Canyon: 19 exact nodes, 26 boundaries, 11 rings, and 43 ordered references, with all nine multi-region junctions resolving to single node IDs
+- [x] Locked Red Forest as one contiguous top-level neighbor and Death Canyon as a 23-point child of Grand Rift; machine checks report exact land-partition area, zero unintended crossings, zero orphan nodes, zero unused boundaries, no duplicate editable borders, and valid containment with no Red Forest overlap
+- [x] Added deterministic topology-manifest, derived-geometry, transparent-SVG, and interactive HTML review artifacts with raster/V1/V2/node/ID/semantic/nested/label toggles plus hover and URL-hash-persisted selection; public `/codex/map` remains unchanged
+- [x] Rehearsed from clean state in two fresh guarded databases, including rollback proof, and obtained identical logical fingerprint `60368a93b625328cbc0beb638eb7b657431d3d64a4d711bab81f217d2810b517`; each run persisted 19 nodes, 26 boundaries, 11 rings, 43 ordered references, 25 unchanged connection candidates, and zero paths before both databases were removed
+- [x] Kept active database writes, active migration applications, and seed runs at zero; Igit Island and Port Arcadia remain world anchors/independent child scenes, and V1 renderer/API/routes/URLs/SSE/artwork/Bundle V4 remain active and untouched
+
+## 2026-08-24 - Atlas 2.0 controlled activation foundation
+
+- [x] Added guarded explicit V2 activation, read-only verification, deterministic V1/V2 parity reporting, exact artifact-hash gates, production/development database identity checks, serializable all-or-nothing writes, stable audited IDs, exact-content idempotency, conflicting-row refusal, intentional rollback proof, and a provenance-verified V2-only cleanup path
+- [x] Proved the pending additive migration and canonical activation twice on fresh disposable production-backup clones: 19 nodes, 26 boundaries, 11 rings, 43 references, 25 connections, zero paths, complete 25/25 legacy provenance, zero topology defects, valid Grand Rift/Death Canyon containment, and identical logical fingerprint `401275849b972e4a6945914fd24ad8b62d3529a59b9342da7802319949802176`; both clones were removed
+- [x] Added a separate server-selected V2 projection and OpenLayers renderer behind `HABITAT_ATLAS_V2_INTERNAL_ENABLED=true`, authenticated `ADMIN`, and explicit `?atlas=v2`; V1 remains the default and its component, projection, routes, geometry, connections, lore, slugs, child scenes, and Bundle V4 remain intact
+- [x] Added invisible region hit geometry, lightweight native hover/selection styling, click/tap-to-fit, hash-persisted selection, dynamic Codex region labels with stored-anchor support and decluttering, zoom-thresholded canonical points/quests, Grand Rift to Death Canyon nested discovery, Grand Lake selection, search, child-scene drill-down, and in-place SSE source refresh
+- [x] Authenticated isolated QA passed on desktop and 390 x 844 mobile for clean rest state, hover, persistent selection, click-to-fit, nested Death Canyon, Grand Lake, Floating City, Igit Island, and child-map navigation; V2 now derives `Igit Island Tactical Atlas` from the owning canonical entry while preserving the stale V1 map title as compatibility data
+- [x] A repository backup completed before any activation rehearsal. The active `habitat` database was verified as the deployed production database, so migration `20260824230000_add_atlas_topology_connections` remains pending and V2 data activation was correctly blocked there; production services continued running and received no Atlas schema/data writes
+- [x] Prisma format/validate/generate, database/shared/web/codex-sync strict typechecks, 375/375 web tests, 3/3 Bundle V4 sync tests, web lint, production build, live read-only Atlas audit, isolated activation verification/parity, frozen hashes, and guarded cleanup all pass; detailed evidence is in `Docs/atlas-v2-activation/prompt-7-verification.json`
+
+## 2026-08-24 - Atlas 2.0 persistent development activation
+
+- [x] Took a fresh verified production backup, restored it into the retained loopback-only `habitat_atlas_dev` database, and added an ignored no-secret `.env.local` development opt-in that derives this database from the existing local base URL; deployed `habitat` and its services received no migration or data writes
+- [x] Applied only the additive Atlas migration to the development target, activated and independently verified 19 nodes, 26 boundaries, 11 rings, 43 references, and 25 provenance-complete world connections; V1's 25 legacy rows retained fingerprint `1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef` and V2 logical fingerprint is `401275849b972e4a6945914fd24ad8b62d3529a59b9342da7802319949802176`
+- [x] Proved exact-content idempotency, seed refusal before reconciliation, guarded V2-only cleanup, and reactivation on the retained development database; added a read-only `atlas:dev:verify` command and local-target resolver tests to prevent accidental production targeting

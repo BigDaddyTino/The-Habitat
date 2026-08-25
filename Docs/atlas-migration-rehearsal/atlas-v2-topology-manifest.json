@@ -1,0 +1,2003 @@
+{
+  "contract": "martino-atlas-v2-canonical-world-topology",
+  "contractVersion": 1,
+  "coordinateSource": "MANUAL_FROZEN_ARTWORK_TRACE",
+  "deathCanyonCandidateReview": {
+    "atlasGeometryValidationFindings": 0,
+    "decision": "REFINED_NOT_USED_AS_TRACE_SOURCE",
+    "declaredReferenceArtwork": "martino-world-map-v2-topology-lock-review-candidate.png",
+    "distinctVerticesInsideFinalGrandRift": "22/22",
+    "grandRiftBoundaryCrossings": 0,
+    "path": "Docs/atlas-master-v2-candidate/death-canyon-dynamic-boundary-v1.json",
+    "rationale": "The Prompt 5 candidate is structurally valid and contained, but it declares the prohibited topology-lock review raster as its visual source. Prompt 6 therefore preserves it as evidence and authors the canonical 23-point shell independently against the frozen clean raster.",
+    "redForestBoundaryCrossings": 0,
+    "ringPoints": 23,
+    "sha256": "be6fa25410d3d10e5e13d5fc3afe680b8ed1bec571c54e6a46a8d94dcbd64ceb"
+  },
+  "frozenArtwork": {
+    "height": 1024,
+    "path": "apps/web/private/codex-art/maps/candidates/martino-world-map-v2-clean-production-candidate.png",
+    "sha256": "427bf4967afa8a96afa2175d5aed261225cf7fbeed17944be527f4616b5713b6",
+    "width": 1536
+  },
+  "maps": [
+    {
+      "areaEntrySlugs": {
+        "054e8428-861d-5b75-a0aa-86bf0f9961fa": "grand-lake",
+        "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690": "riverlands",
+        "317e932c-d122-5189-9620-a560d6eefc50": "the-peninsula",
+        "403004eb-779b-5382-bebd-7787f3058388": "death-canyon",
+        "642aa106-4e42-5928-92fa-5e51832f2141": "the-desert",
+        "65213e53-a6a8-50f3-8273-6f1638aaa23b": "grand-rift",
+        "a895ea74-eb01-5b3e-952b-2175876afd44": "the-red-forest",
+        "c42b622e-ee8d-5951-a28c-53caacea7941": "high-cliffs",
+        "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d": "magic-torn-wasteland",
+        "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b": "unknown-southeast"
+      },
+      "areaMetadata": {
+        "054e8428-861d-5b75-a0aa-86bf0f9961fa": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "grand-lake",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "MAJOR_WATER",
+          "title": "Grand Lake"
+        },
+        "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "riverlands",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "Riverlands"
+        },
+        "317e932c-d122-5189-9620-a560d6eefc50": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "the-peninsula",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "The Peninsula"
+        },
+        "403004eb-779b-5382-bebd-7787f3058388": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "death-canyon",
+          "hierarchyLevel": "REGION",
+          "parentEntrySlug": "grand-rift",
+          "role": "NESTED_GEOGRAPHY",
+          "title": "Death Canyon"
+        },
+        "642aa106-4e42-5928-92fa-5e51832f2141": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "the-desert",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "The Desert"
+        },
+        "65213e53-a6a8-50f3-8273-6f1638aaa23b": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "grand-rift",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "Grand Rift"
+        },
+        "a895ea74-eb01-5b3e-952b-2175876afd44": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "the-red-forest",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "The Red Forest"
+        },
+        "c42b622e-ee8d-5951-a28c-53caacea7941": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "high-cliffs",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "High Cliffs"
+        },
+        "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "magic-torn-wasteland",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "Magic-Torn Wasteland"
+        },
+        "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b": {
+          "approval": "APPROVED_FOR_MIGRATION",
+          "entrySlug": "unknown-southeast",
+          "hierarchyLevel": "WORLD",
+          "parentEntrySlug": null,
+          "role": "TOP_LEVEL_LAND",
+          "title": "Unknown Southeast"
+        }
+      },
+      "artworkIdentity": "martino-world:v2-clean-production-candidate",
+      "boundaryLocators": {
+        "09016654-7333-550e-9696-1bf0bc88d3c0": "border.high-cliffs-riverlands",
+        "1bd89396-9541-51d1-9589-d18fe96a6fa5": "border.desert-grand-rift",
+        "1c994691-a4ec-568e-a0fb-dc944d06b09e": "border.magic-torn-unknown",
+        "2568eaf1-99dd-5932-b97c-0991e3327f04": "grand-lake.shore.west",
+        "2ce74dc3-122f-568d-90ba-a5cbe6733de1": "death-canyon.edge.southwest",
+        "3472373e-5ae8-51af-a3d7-c685ed5a3a5e": "coast.magic-torn",
+        "3de4a22b-297f-532b-83a2-67947305694c": "border.grand-rift-red-forest",
+        "5b26609b-2d2b-5547-915e-c19d8576ae61": "grand-lake.shore.north",
+        "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6": "coast.peninsula",
+        "652bbaf7-aa35-58f1-8739-f6ff09e24c2d": "border.desert-riverlands",
+        "707952fe-da65-52f1-bf25-60e7e48d56ff": "border.riverlands-unknown",
+        "90633689-6c61-55bd-ba7f-3faba438b714": "coast.desert",
+        "90d1759f-f684-5163-9ed8-5e318a7f055e": "grand-lake.shore.south",
+        "997dcc3c-4d11-5b5c-aad3-bb263f41e097": "border.grand-rift-riverlands",
+        "a3a3ad70-e027-5728-b596-6d0b8420538e": "border.grand-rift-high-cliffs",
+        "a6eb0bea-995f-5159-9bda-4e1c2990e84d": "death-canyon.edge.northeast",
+        "b5e5aa3f-6310-5408-a901-1f9e99b1920d": "grand-lake.shore.east",
+        "bab67400-a081-5508-b513-69810366a748": "death-canyon.edge.southeast",
+        "ce312c5f-63be-51e8-8e4c-a5a91090fb20": "coast.unknown-southeast",
+        "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d": "border.desert-red-forest",
+        "d2735a4a-6b27-5837-a484-ad3f3b9712a8": "border.riverlands-peninsula",
+        "d3642590-c035-5d9a-b529-8835dd94be71": "border.high-cliffs-magic-torn",
+        "d738f62c-0853-59e0-ad68-29ad57badb6a": "border.red-forest-riverlands",
+        "d85d66a0-b848-53cc-8cc8-7a7989bffd4b": "border.magic-torn-riverlands",
+        "ecb4ca16-2351-5314-874d-4c50df205574": "death-canyon.edge.northwest",
+        "f229d056-9117-5534-a410-73c3c373d001": "coast.high-cliffs"
+      },
+      "boundaryMetadata": {
+        "09016654-7333-550e-9696-1bf0bc88d3c0": {
+          "confidence": "MEDIUM",
+          "evidence": "The line follows the cliff lip and watershed while allowing visible river valleys to cross the ecological transition.",
+          "locator": "border.high-cliffs-riverlands",
+          "owners": [
+            "high-cliffs",
+            "riverlands"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "1bd89396-9541-51d1-9589-d18fe96a6fa5": {
+          "confidence": "HIGH",
+          "evidence": "The western rift wall and exposed geology provide a defensible shared edge.",
+          "locator": "border.desert-grand-rift",
+          "owners": [
+            "the-desert",
+            "grand-rift"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "1c994691-a4ec-568e-a0fb-dc944d06b09e": {
+          "confidence": "MEDIUM",
+          "evidence": "The vector follows the defensible midpoint between active purple fractures and the charcoal cloud-veiled territory.",
+          "locator": "border.magic-torn-unknown",
+          "owners": [
+            "magic-torn-wasteland",
+            "unknown-southeast"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "2568eaf1-99dd-5932-b97c-0991e3327f04": {
+          "confidence": "HIGH",
+          "evidence": "The western shore is a clear enclosed basin edge.",
+          "locator": "grand-lake.shore.west",
+          "owners": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "semantic": "WATER_BOUNDARY"
+        },
+        "2ce74dc3-122f-568d-90ba-a5cbe6733de1": {
+          "confidence": "HIGH",
+          "evidence": "The nested edge follows the southern and western exposed canyon shelves.",
+          "locator": "death-canyon.edge.southwest",
+          "owners": [
+            "death-canyon"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "3472373e-5ae8-51af-a3d7-c685ed5a3a5e": {
+          "confidence": "HIGH",
+          "evidence": "The northeastern coast is visually explicit and independent of the magical transition.",
+          "locator": "coast.magic-torn",
+          "owners": [
+            "magic-torn-wasteland"
+          ],
+          "semantic": "COASTLINE"
+        },
+        "3de4a22b-297f-532b-83a2-67947305694c": {
+          "confidence": "MEDIUM",
+          "evidence": "The shared edge follows the fractured shelf between rift geology and the contiguous crimson canopy; visual feathering does not change ownership.",
+          "locator": "border.grand-rift-red-forest",
+          "owners": [
+            "grand-rift",
+            "the-red-forest"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "5b26609b-2d2b-5547-915e-c19d8576ae61": {
+          "confidence": "HIGH",
+          "evidence": "The northern lake shoreline is visually explicit beneath the Floating City.",
+          "locator": "grand-lake.shore.north",
+          "owners": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "semantic": "WATER_BOUNDARY"
+        },
+        "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6": {
+          "confidence": "HIGH",
+          "evidence": "The long Peninsula and Port Arcadia tip are among the strongest frozen-raster anchors.",
+          "locator": "coast.peninsula",
+          "owners": [
+            "the-peninsula"
+          ],
+          "semantic": "COASTLINE"
+        },
+        "652bbaf7-aa35-58f1-8739-f6ff09e24c2d": {
+          "confidence": "MEDIUM",
+          "evidence": "A short cartographic transition completes the western lowland partition without turning the river corridor into a hole.",
+          "locator": "border.desert-riverlands",
+          "owners": [
+            "the-desert",
+            "riverlands"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "707952fe-da65-52f1-bf25-60e7e48d56ff": {
+          "confidence": "MEDIUM",
+          "evidence": "The line follows the western edge of the clouded charcoal terrain without inventing its lore.",
+          "locator": "border.riverlands-unknown",
+          "owners": [
+            "riverlands",
+            "unknown-southeast"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "90633689-6c61-55bd-ba7f-3faba438b714": {
+          "confidence": "HIGH",
+          "evidence": "The western and southwestern coastline is explicit around the arid landmass.",
+          "locator": "coast.desert",
+          "owners": [
+            "the-desert"
+          ],
+          "semantic": "COASTLINE"
+        },
+        "90d1759f-f684-5163-9ed8-5e318a7f055e": {
+          "confidence": "HIGH",
+          "evidence": "The southern shoreline follows the elevated basin above the great waterfall.",
+          "locator": "grand-lake.shore.south",
+          "owners": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "semantic": "WATER_BOUNDARY"
+        },
+        "997dcc3c-4d11-5b5c-aad3-bb263f41e097": {
+          "confidence": "HIGH",
+          "evidence": "The upper eastern rift wall creates a short, visually defensible boundary with the central lowlands.",
+          "locator": "border.grand-rift-riverlands",
+          "owners": [
+            "grand-rift",
+            "riverlands"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "a3a3ad70-e027-5728-b596-6d0b8420538e": {
+          "confidence": "HIGH",
+          "evidence": "The fractured rift rim meets the alpine crown along a visible ridge and shelf break.",
+          "locator": "border.grand-rift-high-cliffs",
+          "owners": [
+            "grand-rift",
+            "high-cliffs"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "a6eb0bea-995f-5159-9bda-4e1c2990e84d": {
+          "confidence": "HIGH",
+          "evidence": "The nested edge follows the toxic fissure's northeastern broken shelf.",
+          "locator": "death-canyon.edge.northeast",
+          "owners": [
+            "death-canyon"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "b5e5aa3f-6310-5408-a901-1f9e99b1920d": {
+          "confidence": "HIGH",
+          "evidence": "The eastern shore is a stable water/rock edge.",
+          "locator": "grand-lake.shore.east",
+          "owners": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "semantic": "WATER_BOUNDARY"
+        },
+        "bab67400-a081-5508-b513-69810366a748": {
+          "confidence": "HIGH",
+          "evidence": "The nested edge follows the eastern canyon wall without touching the Grand Rift shell.",
+          "locator": "death-canyon.edge.southeast",
+          "owners": [
+            "death-canyon"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "ce312c5f-63be-51e8-8e4c-a5a91090fb20": {
+          "confidence": "HIGH",
+          "evidence": "The cloud-veiled southeastern landmass has an unambiguous coastline without requiring new lore.",
+          "locator": "coast.unknown-southeast",
+          "owners": [
+            "unknown-southeast"
+          ],
+          "semantic": "COASTLINE"
+        },
+        "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d": {
+          "confidence": "MEDIUM",
+          "evidence": "The edge follows the logical center of the arid-to-crimson vegetation transition.",
+          "locator": "border.desert-red-forest",
+          "owners": [
+            "the-desert",
+            "the-red-forest"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "d2735a4a-6b27-5837-a484-ad3f3b9712a8": {
+          "confidence": "HIGH",
+          "evidence": "The established northern neck closure separates the Peninsula from the central lowlands at one exact edge.",
+          "locator": "border.riverlands-peninsula",
+          "owners": [
+            "riverlands",
+            "the-peninsula"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "d3642590-c035-5d9a-b529-8835dd94be71": {
+          "confidence": "HIGH",
+          "evidence": "The alpine rock gives way to the first continuous reality fractures along a strong visible transition.",
+          "locator": "border.high-cliffs-magic-torn",
+          "owners": [
+            "high-cliffs",
+            "magic-torn-wasteland"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "d738f62c-0853-59e0-ad68-29ad57badb6a": {
+          "confidence": "MEDIUM",
+          "evidence": "The exact selection edge follows the center of forest thinning while keeping the Red Forest one contiguous region.",
+          "locator": "border.red-forest-riverlands",
+          "owners": [
+            "the-red-forest",
+            "riverlands"
+          ],
+          "semantic": "CARTOGRAPHIC_TRANSITION"
+        },
+        "d85d66a0-b848-53cc-8cc8-7a7989bffd4b": {
+          "confidence": "HIGH",
+          "evidence": "The anomaly front provides a clear western edge to the magical terrain.",
+          "locator": "border.magic-torn-riverlands",
+          "owners": [
+            "magic-torn-wasteland",
+            "riverlands"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "ecb4ca16-2351-5314-874d-4c50df205574": {
+          "confidence": "HIGH",
+          "evidence": "The nested edge closes along the western shelf while remaining inside Grand Rift.",
+          "locator": "death-canyon.edge.northwest",
+          "owners": [
+            "death-canyon"
+          ],
+          "semantic": "CANONICAL_FEATURE"
+        },
+        "f229d056-9117-5534-a410-73c3c373d001": {
+          "confidence": "HIGH",
+          "evidence": "The northern alpine shoreline is a stable geographic feature on the frozen raster.",
+          "locator": "coast.high-cliffs",
+          "owners": [
+            "high-cliffs"
+          ],
+          "semantic": "COASTLINE"
+        }
+      },
+      "dataset": {
+        "areas": [
+          {
+            "id": "c42b622e-ee8d-5951-a28c-53caacea7941",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "f229d056-9117-5534-a410-73c3c373d001",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "d3642590-c035-5d9a-b529-8835dd94be71",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "09016654-7333-550e-9696-1bf0bc88d3c0",
+                    "reversed": true,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "a3a3ad70-e027-5728-b596-6d0b8420538e",
+                    "reversed": true,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "a6618c21-f0de-54d1-9270-313679a6c917",
+                "role": "SHELL"
+              },
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "2568eaf1-99dd-5932-b97c-0991e3327f04",
+                    "reversed": true,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "90d1759f-f684-5163-9ed8-5e318a7f055e",
+                    "reversed": true,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+                    "reversed": true,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "5b26609b-2d2b-5547-915e-c19d8576ae61",
+                    "reversed": true,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "8a57a007-1d4f-522a-9a3b-6194d1be1431",
+                "role": "HOLE"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "054e8428-861d-5b75-a0aa-86bf0f9961fa",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "5b26609b-2d2b-5547-915e-c19d8576ae61",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "90d1759f-f684-5163-9ed8-5e318a7f055e",
+                    "reversed": false,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "2568eaf1-99dd-5932-b97c-0991e3327f04",
+                    "reversed": false,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "75f890ac-77aa-5974-9073-7cdf0a1fb38c",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "d3ce2e82-8ee4-58b4-a5fe-ab4f850d778d",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "3472373e-5ae8-51af-a3d7-c685ed5a3a5e",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+                    "reversed": true,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+                    "reversed": true,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "d3642590-c035-5d9a-b529-8835dd94be71",
+                    "reversed": true,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "60a57647-7a33-506d-a620-facf3ff7a33d",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "dfcfcf11-c39e-596c-89cc-bf56fc5bb70b",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "ce312c5f-63be-51e8-8e4c-a5a91090fb20",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "707952fe-da65-52f1-bf25-60e7e48d56ff",
+                    "reversed": true,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+                    "reversed": false,
+                    "sequence": 2
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "1d5af8b4-778e-587d-bc45-afced94b9ae9",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "317e932c-d122-5189-9620-a560d6eefc50",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "d2735a4a-6b27-5837-a484-ad3f3b9712a8",
+                    "reversed": false,
+                    "sequence": 1
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "a73dac4f-6cad-5b82-bc37-b658b429e0a5",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "2ebeaeaf-7712-5312-8b7f-46ce9f0ad690",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "09016654-7333-550e-9696-1bf0bc88d3c0",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "707952fe-da65-52f1-bf25-60e7e48d56ff",
+                    "reversed": false,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "d2735a4a-6b27-5837-a484-ad3f3b9712a8",
+                    "reversed": true,
+                    "sequence": 3
+                  },
+                  {
+                    "boundaryId": "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+                    "reversed": true,
+                    "sequence": 4
+                  },
+                  {
+                    "boundaryId": "d738f62c-0853-59e0-ad68-29ad57badb6a",
+                    "reversed": true,
+                    "sequence": 5
+                  },
+                  {
+                    "boundaryId": "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+                    "reversed": true,
+                    "sequence": 6
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "38979acc-5d62-50fd-9154-b3c37e54d90b",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "642aa106-4e42-5928-92fa-5e51832f2141",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+                    "reversed": false,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "90633689-6c61-55bd-ba7f-3faba438b714",
+                    "reversed": true,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "7b517eea-d1e7-540b-b56a-248db4de1886",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "65213e53-a6a8-50f3-8273-6f1638aaa23b",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "a3a3ad70-e027-5728-b596-6d0b8420538e",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "3de4a22b-297f-532b-83a2-67947305694c",
+                    "reversed": false,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+                    "reversed": true,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "fda2e758-3f36-55b7-8632-f57533809741",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "a895ea74-eb01-5b3e-952b-2175876afd44",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "d738f62c-0853-59e0-ad68-29ad57badb6a",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+                    "reversed": true,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "3de4a22b-297f-532b-83a2-67947305694c",
+                    "reversed": true,
+                    "sequence": 2
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "43f63919-8fa7-5086-a3a5-c0b2bc0beaf8",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          },
+          {
+            "id": "403004eb-779b-5382-bebd-7787f3058388",
+            "layerKind": "BASE_GEOGRAPHY",
+            "mapSlug": "martino-world",
+            "rings": [
+              {
+                "boundaries": [
+                  {
+                    "boundaryId": "a6eb0bea-995f-5159-9bda-4e1c2990e84d",
+                    "reversed": false,
+                    "sequence": 0
+                  },
+                  {
+                    "boundaryId": "bab67400-a081-5508-b513-69810366a748",
+                    "reversed": false,
+                    "sequence": 1
+                  },
+                  {
+                    "boundaryId": "2ce74dc3-122f-568d-90ba-a5cbe6733de1",
+                    "reversed": false,
+                    "sequence": 2
+                  },
+                  {
+                    "boundaryId": "ecb4ca16-2351-5314-874d-4c50df205574",
+                    "reversed": false,
+                    "sequence": 3
+                  }
+                ],
+                "componentIndex": 0,
+                "id": "02c7a427-d0ba-5920-b79b-69fac6bbaca9",
+                "role": "SHELL"
+              }
+            ],
+            "version": 1
+          }
+        ],
+        "boundaries": [
+          {
+            "endNodeId": "49059837-1564-51ea-b70c-9842090b4886",
+            "id": "f229d056-9117-5534-a410-73c3c373d001",
+            "interiorVertices": [
+              [
+                30599,
+                1628
+              ],
+              [
+                39063,
+                1302
+              ],
+              [
+                48177,
+                1302
+              ],
+              [
+                55990,
+                1628
+              ]
+            ],
+            "kind": "COAST",
+            "mapSlug": "martino-world",
+            "startNodeId": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+            "version": 1
+          },
+          {
+            "endNodeId": "ab483a8a-3295-551d-9b49-3dee521ad81e",
+            "id": "3472373e-5ae8-51af-a3d7-c685ed5a3a5e",
+            "interiorVertices": [
+              [
+                70313,
+                1302
+              ],
+              [
+                78776,
+                1953
+              ],
+              [
+                87240,
+                4232
+              ],
+              [
+                94401,
+                7487
+              ],
+              [
+                98633,
+                11068
+              ],
+              [
+                98958,
+                14323
+              ]
+            ],
+            "kind": "COAST",
+            "mapSlug": "martino-world",
+            "startNodeId": "49059837-1564-51ea-b70c-9842090b4886",
+            "version": 1
+          },
+          {
+            "endNodeId": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+            "id": "ce312c5f-63be-51e8-8e4c-a5a91090fb20",
+            "interiorVertices": [
+              [
+                99284,
+                20833
+              ],
+              [
+                97982,
+                26693
+              ],
+              [
+                94401,
+                32552
+              ],
+              [
+                89193,
+                36133
+              ],
+              [
+                83333,
+                41016
+              ],
+              [
+                75521,
+                45573
+              ],
+              [
+                70313,
+                43294
+              ],
+              [
+                67057,
+                41016
+              ]
+            ],
+            "kind": "COAST",
+            "mapSlug": "martino-world",
+            "startNodeId": "ab483a8a-3295-551d-9b49-3dee521ad81e",
+            "version": 1
+          },
+          {
+            "endNodeId": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+            "id": "5b7c0612-b5d0-5c2a-bb08-70b9fb60e2c6",
+            "interiorVertices": [
+              [
+                67708,
+                42318
+              ],
+              [
+                65755,
+                46875
+              ],
+              [
+                63802,
+                52084
+              ],
+              [
+                62500,
+                57292
+              ],
+              [
+                59896,
+                61198
+              ],
+              [
+                55339,
+                63802
+              ],
+              [
+                50781,
+                63151
+              ],
+              [
+                46875,
+                60547
+              ],
+              [
+                44271,
+                56641
+              ],
+              [
+                42318,
+                51433
+              ],
+              [
+                40365,
+                45573
+              ],
+              [
+                38086,
+                42318
+              ]
+            ],
+            "kind": "COAST",
+            "mapSlug": "martino-world",
+            "startNodeId": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+            "version": 1
+          },
+          {
+            "endNodeId": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+            "id": "90633689-6c61-55bd-ba7f-3faba438b714",
+            "interiorVertices": [
+              [
+                19531,
+                1953
+              ],
+              [
+                14323,
+                2279
+              ],
+              [
+                9766,
+                4557
+              ],
+              [
+                6510,
+                7813
+              ],
+              [
+                3906,
+                13021
+              ],
+              [
+                2279,
+                19531
+              ],
+              [
+                2930,
+                27344
+              ],
+              [
+                5859,
+                33854
+              ],
+              [
+                11068,
+                37761
+              ],
+              [
+                16927,
+                39714
+              ],
+              [
+                22786,
+                41016
+              ],
+              [
+                29297,
+                41667
+              ],
+              [
+                33854,
+                40690
+              ]
+            ],
+            "kind": "COAST",
+            "mapSlug": "martino-world",
+            "startNodeId": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+            "version": 1
+          },
+          {
+            "endNodeId": "83bf1edd-cb68-5cb7-b324-5c09cee97807",
+            "id": "1bd89396-9541-51d1-9589-d18fe96a6fa5",
+            "interiorVertices": [
+              [
+                22786,
+                7161
+              ],
+              [
+                21484,
+                11719
+              ],
+              [
+                20182,
+                16276
+              ],
+              [
+                19206,
+                20833
+              ],
+              [
+                20508,
+                24740
+              ],
+              [
+                22786,
+                27995
+              ],
+              [
+                25391,
+                30599
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+            "version": 1
+          },
+          {
+            "endNodeId": "e5428d3b-f728-5b26-9973-a2b8dbff838d",
+            "id": "cef245fa-c5ec-5d09-9d79-e2e5e9c5674d",
+            "interiorVertices": [
+              [
+                28646,
+                33854
+              ],
+              [
+                31250,
+                36459
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "83bf1edd-cb68-5cb7-b324-5c09cee97807",
+            "version": 1
+          },
+          {
+            "endNodeId": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+            "id": "652bbaf7-aa35-58f1-8739-f6ff09e24c2d",
+            "interiorVertices": [
+              [
+                35156,
+                39063
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "e5428d3b-f728-5b26-9973-a2b8dbff838d",
+            "version": 1
+          },
+          {
+            "endNodeId": "10c5344c-ea54-5be8-9473-5f376d0b1c2d",
+            "id": "a3a3ad70-e027-5728-b596-6d0b8420538e",
+            "interiorVertices": [
+              [
+                26042,
+                4557
+              ],
+              [
+                28646,
+                6185
+              ],
+              [
+                31250,
+                8464
+              ],
+              [
+                33203,
+                10742
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+            "version": 1
+          },
+          {
+            "endNodeId": "10d420ac-7089-560b-9630-d782790b3f47",
+            "id": "997dcc3c-4d11-5b5c-aad3-bb263f41e097",
+            "interiorVertices": [
+              [
+                34505,
+                15300
+              ],
+              [
+                34831,
+                17578
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "10c5344c-ea54-5be8-9473-5f376d0b1c2d",
+            "version": 1
+          },
+          {
+            "endNodeId": "83bf1edd-cb68-5cb7-b324-5c09cee97807",
+            "id": "3de4a22b-297f-532b-83a2-67947305694c",
+            "interiorVertices": [
+              [
+                33203,
+                22136
+              ],
+              [
+                32552,
+                24740
+              ],
+              [
+                31250,
+                27344
+              ],
+              [
+                29297,
+                29948
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "10d420ac-7089-560b-9630-d782790b3f47",
+            "version": 1
+          },
+          {
+            "endNodeId": "fd374283-b4a9-51f6-93e9-976bc1a2bb6c",
+            "id": "09016654-7333-550e-9696-1bf0bc88d3c0",
+            "interiorVertices": [
+              [
+                39063,
+                16927
+              ],
+              [
+                44922,
+                18229
+              ],
+              [
+                50781,
+                18555
+              ],
+              [
+                55339,
+                16927
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "10c5344c-ea54-5be8-9473-5f376d0b1c2d",
+            "version": 1
+          },
+          {
+            "endNodeId": "fd374283-b4a9-51f6-93e9-976bc1a2bb6c",
+            "id": "d3642590-c035-5d9a-b529-8835dd94be71",
+            "interiorVertices": [
+              [
+                61849,
+                5208
+              ],
+              [
+                60547,
+                8464
+              ],
+              [
+                59570,
+                11719
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "49059837-1564-51ea-b70c-9842090b4886",
+            "version": 1
+          },
+          {
+            "endNodeId": "7857ffd5-3b0a-5465-8083-8f83c7ea0399",
+            "id": "d85d66a0-b848-53cc-8cc8-7a7989bffd4b",
+            "interiorVertices": [
+              [
+                61198,
+                16927
+              ],
+              [
+                64453,
+                19531
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "fd374283-b4a9-51f6-93e9-976bc1a2bb6c",
+            "version": 1
+          },
+          {
+            "endNodeId": "ab483a8a-3295-551d-9b49-3dee521ad81e",
+            "id": "1c994691-a4ec-568e-a0fb-dc944d06b09e",
+            "interiorVertices": [
+              [
+                74870,
+                20508
+              ],
+              [
+                80078,
+                18555
+              ],
+              [
+                85938,
+                16927
+              ],
+              [
+                91146,
+                16276
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "7857ffd5-3b0a-5465-8083-8f83c7ea0399",
+            "version": 1
+          },
+          {
+            "endNodeId": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+            "id": "707952fe-da65-52f1-bf25-60e7e48d56ff",
+            "interiorVertices": [
+              [
+                68359,
+                24740
+              ],
+              [
+                67057,
+                27995
+              ],
+              [
+                66406,
+                32552
+              ],
+              [
+                65755,
+                36459
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "7857ffd5-3b0a-5465-8083-8f83c7ea0399",
+            "version": 1
+          },
+          {
+            "endNodeId": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+            "id": "d2735a4a-6b27-5837-a484-ad3f3b9712a8",
+            "interiorVertices": [
+              [
+                42318,
+                37110
+              ],
+              [
+                49479,
+                37761
+              ],
+              [
+                57292,
+                37110
+              ],
+              [
+                62500,
+                38412
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+            "version": 1
+          },
+          {
+            "endNodeId": "e5428d3b-f728-5b26-9973-a2b8dbff838d",
+            "id": "d738f62c-0853-59e0-ad68-29ad57badb6a",
+            "interiorVertices": [
+              [
+                39063,
+                19531
+              ],
+              [
+                42969,
+                21484
+              ],
+              [
+                41016,
+                25391
+              ],
+              [
+                42969,
+                27995
+              ],
+              [
+                40365,
+                31901
+              ],
+              [
+                37109,
+                35156
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "10d420ac-7089-560b-9630-d782790b3f47",
+            "version": 1
+          },
+          {
+            "endNodeId": "6fb6bf92-26ad-5988-acc9-cee3a8c4a6b5",
+            "id": "5b26609b-2d2b-5547-915e-c19d8576ae61",
+            "interiorVertices": [
+              [
+                42969,
+                3581
+              ],
+              [
+                48177,
+                2604
+              ],
+              [
+                53385,
+                3581
+              ]
+            ],
+            "kind": "WATER_BOUNDARY",
+            "mapSlug": "martino-world",
+            "startNodeId": "fc899f63-9449-5d58-8db1-4ab9ee2fa686",
+            "version": 1
+          },
+          {
+            "endNodeId": "3100ddeb-a34a-5cf6-a3f3-736c9c4e09c0",
+            "id": "b5e5aa3f-6310-5408-a901-1f9e99b1920d",
+            "interiorVertices": [
+              [
+                58594,
+                6836
+              ],
+              [
+                59570,
+                10417
+              ]
+            ],
+            "kind": "WATER_BOUNDARY",
+            "mapSlug": "martino-world",
+            "startNodeId": "6fb6bf92-26ad-5988-acc9-cee3a8c4a6b5",
+            "version": 1
+          },
+          {
+            "endNodeId": "8dcd6ede-c69c-53e2-a98e-c707df5211fb",
+            "id": "90d1759f-f684-5163-9ed8-5e318a7f055e",
+            "interiorVertices": [
+              [
+                53385,
+                14974
+              ],
+              [
+                47526,
+                15300
+              ],
+              [
+                42318,
+                14974
+              ]
+            ],
+            "kind": "WATER_BOUNDARY",
+            "mapSlug": "martino-world",
+            "startNodeId": "3100ddeb-a34a-5cf6-a3f3-736c9c4e09c0",
+            "version": 1
+          },
+          {
+            "endNodeId": "fc899f63-9449-5d58-8db1-4ab9ee2fa686",
+            "id": "2568eaf1-99dd-5932-b97c-0991e3327f04",
+            "interiorVertices": [
+              [
+                38086,
+                12044
+              ],
+              [
+                37760,
+                8789
+              ]
+            ],
+            "kind": "WATER_BOUNDARY",
+            "mapSlug": "martino-world",
+            "startNodeId": "8dcd6ede-c69c-53e2-a98e-c707df5211fb",
+            "version": 1
+          },
+          {
+            "endNodeId": "799ee9ec-d928-573f-8bbf-ecbc216c31cd",
+            "id": "a6eb0bea-995f-5159-9bda-4e1c2990e84d",
+            "interiorVertices": [
+              [
+                27669,
+                7813
+              ],
+              [
+                28971,
+                8789
+              ],
+              [
+                29818,
+                10417
+              ],
+              [
+                30078,
+                12370
+              ],
+              [
+                30924,
+                14323
+              ],
+              [
+                31250,
+                16276
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "d9036e78-7a3a-51b2-ab24-b7aa6f2445a6",
+            "version": 1
+          },
+          {
+            "endNodeId": "572fff23-ce9c-5e36-a1ba-d82e3f8dda84",
+            "id": "bab67400-a081-5508-b513-69810366a748",
+            "interiorVertices": [
+              [
+                31576,
+                20508
+              ],
+              [
+                31120,
+                22787
+              ],
+              [
+                30469,
+                25391
+              ],
+              [
+                29297,
+                27995
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "799ee9ec-d928-573f-8bbf-ecbc216c31cd",
+            "version": 1
+          },
+          {
+            "endNodeId": "7fd7fa56-f8a5-5900-8506-c37c192a4b8c",
+            "id": "2ce74dc3-122f-568d-90ba-a5cbe6733de1",
+            "interiorVertices": [
+              [
+                26042,
+                28516
+              ],
+              [
+                25000,
+                26693
+              ],
+              [
+                24219,
+                24414
+              ],
+              [
+                23763,
+                21810
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "572fff23-ce9c-5e36-a1ba-d82e3f8dda84",
+            "version": 1
+          },
+          {
+            "endNodeId": "d9036e78-7a3a-51b2-ab24-b7aa6f2445a6",
+            "id": "ecb4ca16-2351-5314-874d-4c50df205574",
+            "interiorVertices": [
+              [
+                23698,
+                17253
+              ],
+              [
+                24089,
+                14649
+              ],
+              [
+                24414,
+                12044
+              ],
+              [
+                25065,
+                9440
+              ]
+            ],
+            "kind": "INTERNAL_BORDER",
+            "mapSlug": "martino-world",
+            "startNodeId": "7fd7fa56-f8a5-5900-8506-c37c192a4b8c",
+            "version": 1
+          }
+        ],
+        "nodes": [
+          {
+            "id": "caf6c0b3-4282-5b64-82b2-0a194e212b59",
+            "mapSlug": "martino-world",
+            "position": [
+              24089,
+              3581
+            ],
+            "version": 1
+          },
+          {
+            "id": "10c5344c-ea54-5be8-9473-5f376d0b1c2d",
+            "mapSlug": "martino-world",
+            "position": [
+              34180,
+              13021
+            ],
+            "version": 1
+          },
+          {
+            "id": "83bf1edd-cb68-5cb7-b324-5c09cee97807",
+            "mapSlug": "martino-world",
+            "position": [
+              27344,
+              32227
+            ],
+            "version": 1
+          },
+          {
+            "id": "10d420ac-7089-560b-9630-d782790b3f47",
+            "mapSlug": "martino-world",
+            "position": [
+              34505,
+              19857
+            ],
+            "version": 1
+          },
+          {
+            "id": "e5428d3b-f728-5b26-9973-a2b8dbff838d",
+            "mapSlug": "martino-world",
+            "position": [
+              33854,
+              38086
+            ],
+            "version": 1
+          },
+          {
+            "id": "fd374283-b4a9-51f6-93e9-976bc1a2bb6c",
+            "mapSlug": "martino-world",
+            "position": [
+              58594,
+              14974
+            ],
+            "version": 1
+          },
+          {
+            "id": "7857ffd5-3b0a-5465-8083-8f83c7ea0399",
+            "mapSlug": "martino-world",
+            "position": [
+              69661,
+              21484
+            ],
+            "version": 1
+          },
+          {
+            "id": "49059837-1564-51ea-b70c-9842090b4886",
+            "mapSlug": "martino-world",
+            "position": [
+              62500,
+              2279
+            ],
+            "version": 1
+          },
+          {
+            "id": "ab483a8a-3295-551d-9b49-3dee521ad81e",
+            "mapSlug": "martino-world",
+            "position": [
+              96029,
+              16276
+            ],
+            "version": 1
+          },
+          {
+            "id": "3197b90c-4a69-500d-9dd2-b9118dd72a0b",
+            "mapSlug": "martino-world",
+            "position": [
+              65755,
+              39063
+            ],
+            "version": 1
+          },
+          {
+            "id": "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547",
+            "mapSlug": "martino-world",
+            "position": [
+              36133,
+              39714
+            ],
+            "version": 1
+          },
+          {
+            "id": "fc899f63-9449-5d58-8db1-4ab9ee2fa686",
+            "mapSlug": "martino-world",
+            "position": [
+              38411,
+              5859
+            ],
+            "version": 1
+          },
+          {
+            "id": "6fb6bf92-26ad-5988-acc9-cee3a8c4a6b5",
+            "mapSlug": "martino-world",
+            "position": [
+              56315,
+              4883
+            ],
+            "version": 1
+          },
+          {
+            "id": "3100ddeb-a34a-5cf6-a3f3-736c9c4e09c0",
+            "mapSlug": "martino-world",
+            "position": [
+              57943,
+              13997
+            ],
+            "version": 1
+          },
+          {
+            "id": "8dcd6ede-c69c-53e2-a98e-c707df5211fb",
+            "mapSlug": "martino-world",
+            "position": [
+              39714,
+              14323
+            ],
+            "version": 1
+          },
+          {
+            "id": "d9036e78-7a3a-51b2-ab24-b7aa6f2445a6",
+            "mapSlug": "martino-world",
+            "position": [
+              26367,
+              7813
+            ],
+            "version": 1
+          },
+          {
+            "id": "799ee9ec-d928-573f-8bbf-ecbc216c31cd",
+            "mapSlug": "martino-world",
+            "position": [
+              31250,
+              18229
+            ],
+            "version": 1
+          },
+          {
+            "id": "572fff23-ce9c-5e36-a1ba-d82e3f8dda84",
+            "mapSlug": "martino-world",
+            "position": [
+              27344,
+              29623
+            ],
+            "version": 1
+          },
+          {
+            "id": "7fd7fa56-f8a5-5900-8506-c37c192a4b8c",
+            "mapSlug": "martino-world",
+            "position": [
+              23828,
+              19531
+            ],
+            "version": 1
+          }
+        ]
+      },
+      "dimensions": {
+        "height": 66667,
+        "width": 100000
+      },
+      "mapSlug": "martino-world",
+      "nodeLocators": {
+        "10c5344c-ea54-5be8-9473-5f376d0b1c2d": "junction.high-cliffs-grand-rift-riverlands",
+        "10d420ac-7089-560b-9630-d782790b3f47": "junction.grand-rift-red-forest-riverlands",
+        "3100ddeb-a34a-5cf6-a3f3-736c9c4e09c0": "grand-lake.southeast",
+        "3197b90c-4a69-500d-9dd2-b9118dd72a0b": "coast.unknown-peninsula-riverlands",
+        "49059837-1564-51ea-b70c-9842090b4886": "coast.high-cliffs-magic-torn",
+        "572fff23-ce9c-5e36-a1ba-d82e3f8dda84": "death-canyon.south",
+        "69bc1a4f-3bb8-59cb-8b77-d8dba75b8547": "coast.peninsula-desert-riverlands",
+        "6fb6bf92-26ad-5988-acc9-cee3a8c4a6b5": "grand-lake.northeast",
+        "7857ffd5-3b0a-5465-8083-8f83c7ea0399": "junction.riverlands-magic-torn-unknown",
+        "799ee9ec-d928-573f-8bbf-ecbc216c31cd": "death-canyon.east",
+        "7fd7fa56-f8a5-5900-8506-c37c192a4b8c": "death-canyon.west",
+        "83bf1edd-cb68-5cb7-b324-5c09cee97807": "junction.desert-grand-rift-red-forest",
+        "8dcd6ede-c69c-53e2-a98e-c707df5211fb": "grand-lake.southwest",
+        "ab483a8a-3295-551d-9b49-3dee521ad81e": "coast.magic-torn-unknown",
+        "caf6c0b3-4282-5b64-82b2-0a194e212b59": "junction.desert-high-cliffs-grand-rift",
+        "d9036e78-7a3a-51b2-ab24-b7aa6f2445a6": "death-canyon.north",
+        "e5428d3b-f728-5b26-9973-a2b8dbff838d": "junction.desert-red-forest-riverlands",
+        "fc899f63-9449-5d58-8db1-4ab9ee2fa686": "grand-lake.northwest",
+        "fd374283-b4a9-51f6-93e9-976bc1a2bb6c": "junction.high-cliffs-riverlands-magic-torn"
+      },
+      "reviews": [
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "high-cliffs"
+          ],
+          "evidence": "The northern alpine shoreline is a stable geographic feature on the frozen raster.",
+          "locator": "coast.high-cliffs",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "magic-torn-wasteland"
+          ],
+          "evidence": "The northeastern coast is visually explicit and independent of the magical transition.",
+          "locator": "coast.magic-torn",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "unknown-southeast"
+          ],
+          "evidence": "The cloud-veiled southeastern landmass has an unambiguous coastline without requiring new lore.",
+          "locator": "coast.unknown-southeast",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "the-peninsula"
+          ],
+          "evidence": "The long Peninsula and Port Arcadia tip are among the strongest frozen-raster anchors.",
+          "locator": "coast.peninsula",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "the-desert"
+          ],
+          "evidence": "The western and southwestern coastline is explicit around the arid landmass.",
+          "locator": "coast.desert",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "the-desert",
+            "grand-rift"
+          ],
+          "evidence": "The western rift wall and exposed geology provide a defensible shared edge.",
+          "locator": "border.desert-grand-rift",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "the-desert",
+            "the-red-forest"
+          ],
+          "evidence": "The edge follows the logical center of the arid-to-crimson vegetation transition.",
+          "locator": "border.desert-red-forest",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "the-desert",
+            "riverlands"
+          ],
+          "evidence": "A short cartographic transition completes the western lowland partition without turning the river corridor into a hole.",
+          "locator": "border.desert-riverlands",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-rift",
+            "high-cliffs"
+          ],
+          "evidence": "The fractured rift rim meets the alpine crown along a visible ridge and shelf break.",
+          "locator": "border.grand-rift-high-cliffs",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-rift",
+            "riverlands"
+          ],
+          "evidence": "The upper eastern rift wall creates a short, visually defensible boundary with the central lowlands.",
+          "locator": "border.grand-rift-riverlands",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "grand-rift",
+            "the-red-forest"
+          ],
+          "evidence": "The shared edge follows the fractured shelf between rift geology and the contiguous crimson canopy; visual feathering does not change ownership.",
+          "locator": "border.grand-rift-red-forest",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "high-cliffs",
+            "riverlands"
+          ],
+          "evidence": "The line follows the cliff lip and watershed while allowing visible river valleys to cross the ecological transition.",
+          "locator": "border.high-cliffs-riverlands",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "high-cliffs",
+            "magic-torn-wasteland"
+          ],
+          "evidence": "The alpine rock gives way to the first continuous reality fractures along a strong visible transition.",
+          "locator": "border.high-cliffs-magic-torn",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "magic-torn-wasteland",
+            "riverlands"
+          ],
+          "evidence": "The anomaly front provides a clear western edge to the magical terrain.",
+          "locator": "border.magic-torn-riverlands",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "magic-torn-wasteland",
+            "unknown-southeast"
+          ],
+          "evidence": "The vector follows the defensible midpoint between active purple fractures and the charcoal cloud-veiled territory.",
+          "locator": "border.magic-torn-unknown",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "riverlands",
+            "unknown-southeast"
+          ],
+          "evidence": "The line follows the western edge of the clouded charcoal terrain without inventing its lore.",
+          "locator": "border.riverlands-unknown",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "riverlands",
+            "the-peninsula"
+          ],
+          "evidence": "The established northern neck closure separates the Peninsula from the central lowlands at one exact edge.",
+          "locator": "border.riverlands-peninsula",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "MEDIUM",
+          "entrySlugs": [
+            "the-red-forest",
+            "riverlands"
+          ],
+          "evidence": "The exact selection edge follows the center of forest thinning while keeping the Red Forest one contiguous region.",
+          "locator": "border.red-forest-riverlands",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "evidence": "The northern lake shoreline is visually explicit beneath the Floating City.",
+          "locator": "grand-lake.shore.north",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "evidence": "The eastern shore is a stable water/rock edge.",
+          "locator": "grand-lake.shore.east",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "evidence": "The southern shoreline follows the elevated basin above the great waterfall.",
+          "locator": "grand-lake.shore.south",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "grand-lake",
+            "high-cliffs"
+          ],
+          "evidence": "The western shore is a clear enclosed basin edge.",
+          "locator": "grand-lake.shore.west",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "death-canyon"
+          ],
+          "evidence": "The nested edge follows the toxic fissure's northeastern broken shelf.",
+          "locator": "death-canyon.edge.northeast",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "death-canyon"
+          ],
+          "evidence": "The nested edge follows the eastern canyon wall without touching the Grand Rift shell.",
+          "locator": "death-canyon.edge.southeast",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "death-canyon"
+          ],
+          "evidence": "The nested edge follows the southern and western exposed canyon shelves.",
+          "locator": "death-canyon.edge.southwest",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        },
+        {
+          "confidence": "HIGH",
+          "entrySlugs": [
+            "death-canyon"
+          ],
+          "evidence": "The nested edge closes along the western shelf while remaining inside Grand Rift.",
+          "locator": "death-canyon.edge.northwest",
+          "mapSlug": "martino-world",
+          "ownerDecision": null
+        }
+      ]
+    }
+  ],
+  "portArcadia": {
+    "declaredContract": "1536x1024",
+    "decodedArtwork": "1599x984",
+    "mapSlug": "martino-port-arcadia",
+    "status": "RECALIBRATION_REQUIRED"
+  },
+  "startingIsland": {
+    "mapSlug": "martino-starting-island",
+    "reason": "Prompt 6 locks only the world master. Igit Island remains a world anchor and independent child scene.",
+    "status": "DEFERRED_CHILD_SCENE"
+  },
+  "traceVersion": 2
+}
