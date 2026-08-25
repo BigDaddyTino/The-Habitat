@@ -604,3 +604,28 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Took a fresh verified production backup, restored it into the retained loopback-only `habitat_atlas_dev` database, and added an ignored no-secret `.env.local` development opt-in that derives this database from the existing local base URL; deployed `habitat` and its services received no migration or data writes
 - [x] Applied only the additive Atlas migration to the development target, activated and independently verified 19 nodes, 26 boundaries, 11 rings, 43 references, and 25 provenance-complete world connections; V1's 25 legacy rows retained fingerprint `1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef` and V2 logical fingerprint is `401275849b972e4a6945914fd24ad8b62d3529a59b9342da7802319949802176`
 - [x] Proved exact-content idempotency, seed refusal before reconciliation, guarded V2-only cleanup, and reactivation on the retained development database; added a read-only `atlas:dev:verify` command and local-target resolver tests to prevent accidental production targeting
+
+## 2026-08-24 - Atlas 2.0 internal authoring environment
+
+- [x] Added a development-only, server-guarded ADMIN Atlas workbench with explicit SELECT/REGIONS/POIS/LABELS/CONNECTIONS modes, local unsaved previews, discard/exit warnings, stale-version messaging, and compact revision history; authoring is refused anywhere except loopback `habitat_atlas_dev`
+- [x] Added direct shared-node and boundary-interior editing against canonical topology, complete-map validation, transactional expected-version saves, shared-region warnings, and an atomic boundary split that creates one node/two edges and rewrites every consuming area-ring reference; unsafe boundary merge is explicitly deferred
+- [x] Added canonical Codex placement authoring with a live-derived Unplaced Locations tray, draggable point and independent label-anchor previews, zoom/priority properties, and placement-only removal that cannot delete lore
+- [x] Added semantic connection create/update/strong-confirm delete, authored/missing filtering, click-and-vertex LineString path editing, validated LineString/MultiLineString persistence, scene-path removal without semantic deletion, and a restrained player route layer hidden by default and absent when there are no paths
+- [x] Reused the Atlas persistence transactions, optimistic versions, and existing StoryRevision stream; V1 compatibility, activated-V2 seed refusal, Bundle V4, public routes, production defaults, and the frozen world raster remain unchanged
+
+## 2026-08-24 - Atlas 2.0 internal acceptance and canonical route baseline
+
+- [x] Made `/codex/map` resolve to V2 only for authenticated development administrators with the existing internal flag; explicit `?atlas=v1` remains a working comparison/rollback path and production/non-admin defaults remain V1
+- [x] Added scene-aware direct links and browser history for world selection, nested Death Canyon, Igit Island, and Port Arcadia; Back/Forward and World breadcrumbs restore the expected scene and selection
+- [x] Reviewed all 25 semantic connections in one deterministic backlog, persisted nine high-confidence paths (five Igit roads, two world river corridors, one world sea route, one air route), left fourteen for review, and deferred two non-route transitions
+- [x] Kept authored routes hidden by default, added a restrained in-place route toggle, and reveal only selected-context routes when the global route layer is off
+- [x] Completed authenticated desktop and 390 x 844 owner-style browser QA across V2/V1 comparison, all top-level regions, Grand Rift/Death Canyon hierarchy, both child scenes, search, route filtering, mobile overflow, all editor modes, and reversible node/POI/label saves; a real Next.js server-action export defect found by the browser pass was fixed and regression-covered
+- [x] Preserved the frozen raster, V1 renderer and legacy geometry, Codex lore, URLs, Bundle V4, production configuration, and production database; all Prompt 10 authoring was confined to loopback `habitat_atlas_dev`
+
+## 2026-08-25 - Atlas 2.0 production release controls
+
+- [x] Added an owner-authorized production mode to the existing transactionally guarded activation workflow, requiring exact production identity, release HEAD/build ID, fresh verified backup, frozen raster/artifact hashes, applied migration, and the pre-cutover V1 fingerprint
+- [x] Froze the accepted activation payload at 19 nodes, 26 boundaries, 11 rings, 43 references, 25 semantic connections, and exactly nine approved persisted paths with normal audit revisions
+- [x] Added read-only production baseline and route verification commands plus an explicit release-file inventory; disposable acceptance screenshots remain preserved outside the executable release commit
+- [x] Added separate production staging controls: ADMIN-requested internal V2 can be proven while V1 remains default, production V2 default requires its own flag, and explicit `?atlas=v1` remains the immediate rollback
+- [x] Kept Atlas author mode independently guarded to development and prohibited destructive seed reconciliation from the production deployment path

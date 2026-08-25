@@ -87,5 +87,20 @@ test("server persistence is internal, transactional, version-guarded, and reuses
   assert.match(service, /updateMany\(\{ where: \{ id: [^}]+version: input\.expectedVersion/);
   assert.match(service, /STALE_VERSION/);
   assert.match(service, /tx\.storyRevision\.create/);
+  assert.match(service, /case "RIVER_TRAVEL": return "river route"/);
+  assert.match(service, /case "SEA_ROUTE": return "sea route"/);
+  assert.doesNotMatch(service, /replaceAll\("_", " "\).*route/);
   assert.doesNotMatch(service, /REGION\.meta\.connections|story-atlas\.tsx|getStoryAtlasProjection/);
+});
+
+test("boundary split is one serializable topology operation that rewrites shared ring references", async () => {
+  const service = await readFile(path.join(process.cwd(), "lib", "atlas-persistence-service.ts"), "utf8");
+  const split = service.slice(service.indexOf("splitBoundaryAtInteriorVertex"), service.indexOf("deleteBoundary", service.indexOf("splitBoundaryAtInteriorVertex")));
+  assert.match(split, /assertMapTopologyValid/);
+  assert.match(split, /storyMapTopologyNode\.create/);
+  assert.match(split, /storyMapBoundary\.createMany/);
+  assert.match(split, /storyMapAreaRingBoundary\.deleteMany/);
+  assert.match(split, /storyMapAreaRingBoundary\.createMany/);
+  assert.match(split, /storyMapBoundary\.delete/);
+  assert.doesNotMatch(split, /client\.storyMap/, "split must stay inside the serializable transaction client");
 });

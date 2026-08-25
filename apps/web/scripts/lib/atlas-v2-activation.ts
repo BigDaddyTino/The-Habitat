@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 import { createPrismaClient, type Prisma } from "@habitat/db/client";
-import { validateAtlasTopology, type AtlasTopologyDataset } from "@habitat/shared";
+import { validateAtlasMapConnectionPath, validateAtlasTopology, type AtlasTopologyDataset } from "@habitat/shared";
 import { analyzeAtlasCanonicalTopology, buildAtlasCanonicalDerivedGeometry, type AtlasCanonicalTopologyTrace } from "./atlas-canonical-topology";
 import { atlasSha256, stableAtlasJson } from "./atlas-integrity";
 import { verifyAtlasConnectionParity, type AtlasConnectionCandidate, type AtlasV1ConnectionManifest } from "./atlas-migration-rehearsal";
+import type { AtlasCanonicalRouteBacklogItem } from "./atlas-canonical-routes";
 
 type Database = ReturnType<typeof createPrismaClient>;
 type Transaction = Prisma.TransactionClient;
@@ -13,6 +14,7 @@ export const atlasV2ArtifactHashes = {
   topologyManifest: "6af3fa434526ef853d4ebd3f00599ffa56cb3ad961339afcde94fdd0fe38a647",
   derivedGeometry: "bad2aaf43dd08587729ef429f5ba66f37606c8f0a0d54dd04244c61104b8270b",
   connectionCandidates: "333f72dbb1b03155abf7b0c6fbf3688feea1e3fb50e123e476938604e20396e7",
+  canonicalRoutes: "058c293a4c43e2b04fc079f1fd99835c6cb258c8bc007f8730464c13cc4b1bda",
 } as const;
 
 export function verifyAtlasV2ArtifactHash(label: keyof typeof atlasV2ArtifactHashes, bytes: string | Buffer) {
@@ -28,6 +30,7 @@ function databaseIdentity(value: string) {
 }
 
 export const atlasPersistentDevelopmentDatabase = "habitat_atlas_dev" as const;
+export const atlasV2ProductionOwnerAuthorization = "OWNER_APPROVED_ATLAS_V2_GO_LIVE_2026_08_25" as const;
 
 export function assertAtlasPersistentDevelopmentTarget(targetUrl: string, environment: Readonly<Record<string, string | undefined>> = process.env) {
   const target = databaseIdentity(targetUrl);
@@ -51,7 +54,11 @@ export function assertAtlasV2ActivationTarget(sourceUrl: string, targetUrl: stri
   if (stableAtlasJson(source, false) !== stableAtlasJson(target, false) || target.database !== "habitat") throw new Error("Active activation requires the explicit canonical habitat database URL; use a guarded p7 database for rehearsal.");
   const publicOrigin = environment.AUTH_URL ?? environment.HABITAT_PUBLIC_ORIGIN ?? "";
   const productionOrigin = publicOrigin ? !["localhost", "127.0.0.1", "::1"].includes(new URL(publicOrigin).hostname.toLowerCase()) : false;
-  if (productionOrigin) throw new Error("The configured Atlas database belongs to the deployed production service. Prompt 7 active activation is development-only.");
+  if (productionOrigin) {
+    if (environment.ATLAS_V2_ACTIVATION_ENVIRONMENT !== "production" || environment.ATLAS_V2_ACTIVATION_CONFIRM_DATABASE !== "habitat") throw new Error("Production Atlas activation requires the explicit production environment and canonical database confirmation.");
+    if (environment.ATLAS_V2_PRODUCTION_OWNER_AUTHORIZATION !== atlasV2ProductionOwnerAuthorization) throw new Error("Production Atlas activation requires the exact owner-authorization token.");
+    return { mode: "PRODUCTION" as const, source, target };
+  }
   if (environment.ATLAS_V2_ACTIVATION_ENVIRONMENT !== "development" || environment.ATLAS_V2_ACTIVATION_CONFIRM_DATABASE !== "habitat") throw new Error("Active development activation requires ATLAS_V2_ACTIVATION_ENVIRONMENT=development and ATLAS_V2_ACTIVATION_CONFIRM_DATABASE=habitat.");
   return { mode: "ACTIVE_DEVELOPMENT" as const, source, target };
 }
@@ -101,10 +108,11 @@ async function verifyConnectionSource(client: Transaction | Database, manifest: 
   }
 }
 
-async function verifyPersistedState(client: Transaction | Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace) {
-  const expectedCounts = { topologyNodes: 19, boundaries: 26, areaRings: 11, ringBoundaryReferences: 43, worldConnections: candidates.length, connectionPaths: 0 };
+async function verifyPersistedState(client: Transaction | Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[] = []) {
+  const expectedCounts = { topologyNodes: 19, boundaries: 26, areaRings: 11, ringBoundaryReferences: 43, worldConnections: candidates.length };
   const counts = await atlasCounts(client);
-  if (stableAtlasJson(counts, false) !== stableAtlasJson(expectedCounts, false)) throw new Error(`Atlas V2 counts conflict: ${stableAtlasJson({ counts, expectedCounts }, false)}`);
+  const coreCounts = { topologyNodes: counts.topologyNodes, boundaries: counts.boundaries, areaRings: counts.areaRings, ringBoundaryReferences: counts.ringBoundaryReferences, worldConnections: counts.worldConnections };
+  if (stableAtlasJson(coreCounts, false) !== stableAtlasJson(expectedCounts, false)) throw new Error(`Atlas V2 counts conflict: ${stableAtlasJson({ counts: coreCounts, expectedCounts }, false)}`);
   await verifyConnectionSource(client, manifest);
   const connections = await client.storyWorldConnection.findMany({ orderBy: { id: "asc" }, include: { fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } });
   const reconstructed = connections.map((row) => {
@@ -114,6 +122,16 @@ async function verifyPersistedState(client: Transaction | Database, manifest: At
   });
   const parity = verifyAtlasConnectionParity(manifest, reconstructed);
   if (!parity.valid) throw new Error(`Activated connection provenance failed: ${stableAtlasJson(parity, false)}`);
+  const persistedPaths = await client.storyMapConnectionPath.findMany({ include: { map: { select: { slug: true, coordinateWidth: true, coordinateHeight: true } } } });
+  if (persistedPaths.length !== routes.length) throw new Error(`Atlas V2 connection-path count conflict: expected ${routes.length}, received ${persistedPaths.length}.`);
+  for (const path of persistedPaths) {
+    const validation = validateAtlasMapConnectionPath({ id: path.id, connectionId: path.connectionId, mapSlug: path.map.slug, geometry: path.geometry as never, minZoom: path.minZoom, maxZoom: path.maxZoom, priority: path.priority, version: path.version }, { width: path.map.coordinateWidth as 100_000, height: path.map.coordinateHeight });
+    if (!validation.valid) throw new Error(`Activated connection path ${path.id} failed validation: ${stableAtlasJson(validation.findings, false)}`);
+    const route = routes.find((candidate) => candidate.connectionId === path.connectionId && candidate.recommendedScene === path.map.slug);
+    if (!route || route.status !== "AUTHOR_NOW" || route.confidence !== "HIGH_CONFIDENCE" || !route.geometry) throw new Error(`Activated connection path ${path.id} is not in the approved route release.`);
+    if (stableAtlasJson(path.geometry, false) !== stableAtlasJson(route.geometry, false)) throw new Error(`Activated connection path ${path.id} differs from approved route geometry.`);
+  }
+  for (const route of routes) if (!persistedPaths.some((path) => path.connectionId === route.connectionId && path.map.slug === route.recommendedScene)) throw new Error(`Approved Atlas route ${route.connectionId} is missing from ${route.recommendedScene}.`);
   const traceMap = trace.maps[0];
   const map = await client.storyMap.findUnique({ where: { slug: traceMap.mapSlug }, select: { id: true, coordinateWidth: true, coordinateHeight: true } });
   if (!map) throw new Error(`Missing Atlas map ${traceMap.mapSlug}.`);
@@ -137,7 +155,15 @@ async function verifyPersistedState(client: Transaction | Database, manifest: At
   return { counts, parity, topology: { topologyLocked: true, partition: analysis.partition, deathCanyon: analysis.deathCanyon, orphanNodes: analysis.orphanNodes, unusedBoundaries: analysis.unusedBoundaries, crossings: analysis.unintendedCrossings, duplicateBorders: analysis.duplicateEditableBorders, sharedDirectionFailures: analysis.sharedDirectionFailures } };
 }
 
-async function writeActivation(tx: Transaction, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, actorUserId: string, injectFailure: boolean) {
+function routeRevisionLabel(type: string) {
+  if (type === "RIVER_TRAVEL") return "river route";
+  if (type === "SEA_ROUTE") return "sea route";
+  if (type === "AIR_ROUTE") return "air route";
+  if (type === "TRAIL") return "trail route";
+  return type === "ROAD" ? "road route" : "route";
+}
+
+async function writeActivation(tx: Transaction, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[], actorUserId: string, injectFailure: boolean) {
   const slugs = [...new Set(candidates.flatMap((candidate) => [candidate.sourceSlug, candidate.targetSlug]))];
   const entries = await tx.storyEntry.findMany({ where: { slug: { in: slugs } }, select: { id: true, slug: true } });
   const entryId = new Map(entries.map((entry) => [entry.slug, entry.id]));
@@ -169,46 +195,65 @@ async function writeActivation(tx: Transaction, candidates: readonly AtlasConnec
     }
     await tx.storyRevision.create({ data: { id: stableRevisionId("AREA_RING", area.id), entityType: "AREA_RING", entityId: targetPlacementId, action: "CREATED", actorUserId, summary: `Activated Atlas V2 topology for ${slug}`, after: { activation: "ATLAS_V2", traceContract: trace.contract, traceVersion: trace.traceVersion, entrySlug: slug, metadata: traceMap.areaMetadata[area.id] } as Prisma.InputJsonValue } });
   }
+  const routeMaps = await tx.storyMap.findMany({ where: { slug: { in: [...new Set(routes.map((route) => route.recommendedScene))] } }, select: { id: true, slug: true, coordinateWidth: true, coordinateHeight: true } });
+  const routeMapBySlug = new Map(routeMaps.map((routeMap) => [routeMap.slug, routeMap]));
+  for (const route of routes) {
+    if (route.status !== "AUTHOR_NOW" || route.confidence !== "HIGH_CONFIDENCE" || !route.geometry) throw new Error(`Route ${route.connectionId} is not approved for production activation.`);
+    const candidate = candidates.find((connection) => connection.id === route.connectionId);
+    const routeMap = routeMapBySlug.get(route.recommendedScene);
+    if (!candidate || candidate.sourceSlug !== route.source || candidate.targetSlug !== route.destination || candidate.type !== route.type) throw new Error(`Approved route ${route.connectionId} no longer matches its semantic connection.`);
+    if (!routeMap) throw new Error(`Approved route ${route.connectionId} references missing scene ${route.recommendedScene}.`);
+    const pathId = stableRevisionId("CONN_PATH", `${route.connectionId}:${route.recommendedScene}`);
+    const pathContract = { id: pathId, connectionId: route.connectionId, mapSlug: route.recommendedScene, geometry: route.geometry, minZoom: 0, maxZoom: null, priority: 10, version: 1 };
+    const validation = validateAtlasMapConnectionPath(pathContract, { width: routeMap.coordinateWidth as 100_000, height: routeMap.coordinateHeight });
+    if (!validation.valid) throw new Error(`Approved route ${route.connectionId} failed production validation: ${stableAtlasJson(validation.findings, false)}`);
+    await tx.storyMapConnectionPath.create({ data: { id: pathId, connectionId: route.connectionId, mapId: routeMap.id, geometryKind: route.geometry.type, geometry: route.geometry as unknown as Prisma.InputJsonValue, minZoom: 0, maxZoom: null, priority: 10, version: 1, createdByUserId: actorUserId } });
+    await tx.storyRevision.create({ data: { id: stableRevisionId("CONN_PATH_REVISION", pathId), entityType: "CONN_PATH", entityId: pathId, action: "CREATED", actorUserId, summary: `Added ${routeRevisionLabel(route.type)}: ${route.source} → ${route.destination} on ${route.recommendedScene}`, after: { activation: "ATLAS_V2", connectionId: route.connectionId, mapSlug: route.recommendedScene, geometry: route.geometry } as Prisma.InputJsonValue } });
+  }
 }
 
-export async function verifyAtlasV2Activation(database: Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace) {
+export async function verifyAtlasV2Activation(database: Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[] = []) {
   await assertAtlasV2SchemaPresent(database);
   const legacy = await captureAtlasV1LegacySnapshot(database);
-  const verified = await verifyPersistedState(database, manifest, candidates, trace);
+  const verified = await verifyPersistedState(database, manifest, candidates, trace, routes);
   const report = { contract: "martino-atlas-v2-active-verification", contractVersion: 1, legacyFingerprint: legacy.fingerprint, ...verified };
   return { ...report, logicalFingerprint: atlasSha256(stableAtlasJson(report, false)) };
 }
 
-export async function activateAtlasV2(database: Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, options: { injectFailureAfterConnections?: boolean } = {}) {
+export async function activateAtlasV2(database: Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[] = [], options: { injectFailureAfterConnections?: boolean; expectedLegacyFingerprint?: string } = {}) {
   await assertAtlasV2SchemaPresent(database);
   const before = await captureAtlasV1LegacySnapshot(database);
+  if (options.expectedLegacyFingerprint && before.fingerprint !== options.expectedLegacyFingerprint) throw new Error(`V1 Atlas fingerprint mismatch before activation: expected ${options.expectedLegacyFingerprint}, received ${before.fingerprint}.`);
   const counts = await atlasCounts(database);
   if (Object.values(counts).some((count) => count !== 0)) {
-    const verified = await verifyAtlasV2Activation(database, manifest, candidates, trace);
+    const verified = await verifyAtlasV2Activation(database, manifest, candidates, trace, routes);
     return { status: "ALREADY_ACTIVATED" as const, ...verified };
   }
   const result = await database.$transaction(async (tx) => {
     const actor = await tx.user.findFirst({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });
     if (!actor) throw new Error("Atlas V2 activation requires an active administrator for audit authorship.");
     await verifyConnectionSource(tx, manifest);
-    await writeActivation(tx, candidates, trace, actor.id, options.injectFailureAfterConnections === true);
+    await writeActivation(tx, candidates, trace, routes, actor.id, options.injectFailureAfterConnections === true);
     const after = await captureAtlasV1LegacySnapshot(tx);
     if (after.fingerprint !== before.fingerprint) throw new Error("V1 Atlas compatibility data changed inside activation transaction.");
-    const verified = await verifyPersistedState(tx, manifest, candidates, trace);
+    const verified = await verifyPersistedState(tx, manifest, candidates, trace, routes);
     return { actorUserId: actor.id, verified };
   }, { isolationLevel: "Serializable", timeout: 30_000 });
-  const report = await verifyAtlasV2Activation(database, manifest, candidates, trace);
+  const report = await verifyAtlasV2Activation(database, manifest, candidates, trace, routes);
   return { status: "ACTIVATED" as const, actorUserId: result.actorUserId, ...report };
 }
 
-export async function cleanupAtlasV2Activation(database: Database, confirm: string) {
+export async function cleanupAtlasV2Activation(database: Database, confirm: string, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[] = []) {
   if (confirm !== "DELETE_CANONICAL_ATLAS_V2") throw new Error("Atlas V2 cleanup requires the exact destructive confirmation token.");
   await assertAtlasV2SchemaPresent(database);
+  await verifyAtlasV2Activation(database, manifest, candidates, trace, routes);
   return database.$transaction(async (tx) => {
-    if (await tx.storyMapConnectionPath.count()) throw new Error("Cleanup refuses activated connection paths.");
     const ids = await Promise.all([
-      tx.storyMapTopologyNode.findMany({ select: { id: true } }), tx.storyMapBoundary.findMany({ select: { id: true } }), tx.storyMapAreaRing.findMany({ select: { id: true, placementId: true } }), tx.storyWorldConnection.findMany({ select: { id: true } }),
+      tx.storyMapTopologyNode.findMany({ select: { id: true } }), tx.storyMapBoundary.findMany({ select: { id: true } }), tx.storyMapAreaRing.findMany({ select: { id: true, placementId: true } }), tx.storyWorldConnection.findMany({ select: { id: true } }), tx.storyMapConnectionPath.findMany({ select: { id: true } }),
     ]);
+    const pathIds = ids[4].map((row) => row.id);
+    if (pathIds.length) await tx.storyRevision.deleteMany({ where: { entityType: "CONN_PATH", entityId: { in: pathIds } } });
+    await tx.storyMapConnectionPath.deleteMany();
     await tx.storyMapAreaRingBoundary.deleteMany();
     await tx.storyMapAreaRing.deleteMany();
     await tx.storyMapBoundary.deleteMany();

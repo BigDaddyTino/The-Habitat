@@ -30,7 +30,7 @@ export class AtlasPersistenceError extends Error {
   }
 }
 
-type RevisionEntityType = "TOPO_NODE" | "BOUNDARY" | "AREA_RING" | "WORLD_CONN" | "CONN_PATH";
+type RevisionEntityType = "PLACEMENT" | "TOPO_NODE" | "BOUNDARY" | "AREA_RING" | "WORLD_CONN" | "CONN_PATH";
 type RevisionAction = "CREATED" | "UPDATED" | "DELETED";
 
 type MapExtent = { id: string; slug: string; coordinateWidth: number; coordinateHeight: number };
@@ -46,6 +46,7 @@ export type CreateBoundaryInput = {
   actorUserId: string;
 };
 export type UpdateBoundaryInput = CreateBoundaryInput & { id: string; expectedVersion: number };
+export type SplitBoundaryInput = { readonly id: string; readonly expectedVersion: number; readonly interiorVertexIndex: number; readonly actorUserId: string };
 
 export type PersistedAreaRingInput = {
   readonly id?: string;
@@ -66,6 +67,8 @@ export type CreateWorldConnectionInput = Omit<AtlasWorldConnection, "id" | "vers
 export type UpdateWorldConnectionInput = CreateWorldConnectionInput & { readonly id: string; readonly expectedVersion: number };
 export type CreateConnectionPathInput = Omit<AtlasMapConnectionPath, "id" | "version" | "mapSlug"> & { readonly mapId: string; readonly actorUserId: string };
 export type UpdateConnectionPathInput = CreateConnectionPathInput & { readonly id: string; readonly expectedVersion: number };
+export type CreatePointPlacementInput = { readonly mapId: string; readonly entryId: string; readonly x: number; readonly y: number; readonly labelX: number | null; readonly labelY: number | null; readonly minZoom: number; readonly maxZoom: number | null; readonly priority: number; readonly actorUserId: string };
+export type UpdatePointPlacementInput = CreatePointPlacementInput & { readonly id: string; readonly expectedVersion: number };
 
 function topologyWrite<T>(client: AtlasPersistenceClient, operation: (tx: Transaction) => Promise<T>) {
   return client.$transaction(operation, { isolationLevel: "Serializable" });
@@ -73,6 +76,18 @@ function topologyWrite<T>(client: AtlasPersistenceClient, operation: (tx: Transa
 
 function fail(code: AtlasPersistenceErrorCode, message: string): never {
   throw new AtlasPersistenceError(code, message);
+}
+
+function routeRevisionLabel(type: AtlasWorldConnection["type"]) {
+  switch (type) {
+    case "ROAD": return "road route";
+    case "TRAIL": return "trail route";
+    case "RIVER_TRAVEL": return "river route";
+    case "SEA_ROUTE": return "sea route";
+    case "AIR_ROUTE": return "air route";
+    case "OTHER":
+    case "UNKNOWN": return "route";
+  }
 }
 
 function dimensions(map: MapExtent): AtlasCoordinateDimensions {
@@ -230,6 +245,18 @@ function connectionContract(input: CreateWorldConnectionInput | UpdateWorldConne
   };
 }
 
+function validatePointPlacement(input: CreatePointPlacementInput, map: MapExtent) {
+  const point = validateAtlasPoint([input.x, input.y], dimensions(map));
+  if (!point.ok) fail("VALIDATION", `Invalid placement coordinate: ${point.issue}.`);
+  if ((input.labelX === null) !== (input.labelY === null)) fail("VALIDATION", "A label anchor requires both X and Y coordinates.");
+  if (input.labelX !== null && input.labelY !== null) {
+    const label = validateAtlasPoint([input.labelX, input.labelY], dimensions(map));
+    if (!label.ok) fail("VALIDATION", `Invalid label coordinate: ${label.issue}.`);
+  }
+  if (!Number.isFinite(input.minZoom) || input.minZoom < 0 || (input.maxZoom !== null && (!Number.isFinite(input.maxZoom) || input.maxZoom < input.minZoom))) fail("VALIDATION", "Placement zoom bounds are invalid.");
+  if (!Number.isSafeInteger(input.priority)) fail("VALIDATION", "Placement priority must be a safe integer.");
+}
+
 export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
   return {
     getTopologyForMap(mapId: string) {
@@ -314,6 +341,46 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
       });
     },
 
+    splitBoundaryAtInteriorVertex(input: SplitBoundaryInput) {
+      return topologyWrite(client, async (tx) => {
+        const current = await tx.storyMapBoundary.findUnique({ where: { id: input.id }, include: { map: { select: { id: true, slug: true, coordinateWidth: true, coordinateHeight: true } } } });
+        if (!current) fail("NOT_FOUND", "Boundary no longer exists.");
+        if (current.version !== input.expectedVersion) fail("STALE_VERSION", "Somebody edited this boundary first.");
+        const interior = current.interiorVertices as unknown as readonly (readonly [number, number])[];
+        if (!Number.isSafeInteger(input.interiorVertexIndex) || input.interiorVertexIndex < 0 || input.interiorVertexIndex >= interior.length) fail("VALIDATION", "Choose an existing interior vertex at which to split this boundary.");
+        const splitPoint = interior[input.interiorVertexIndex]!;
+        const point = validateAtlasPoint(splitPoint, dimensions(current.map));
+        if (!point.ok) fail("VALIDATION", `Invalid split coordinate: ${point.issue}.`);
+        const nodeId = randomUUID();
+        const firstId = randomUUID();
+        const secondId = randomUUID();
+        const firstInterior = interior.slice(0, input.interiorVertexIndex);
+        const secondInterior = interior.slice(input.interiorVertexIndex + 1);
+        const first: AtlasBoundary = { id: firstId, mapSlug: current.map.slug, startNodeId: current.startNodeId, endNodeId: nodeId, kind: current.kind, interiorVertices: firstInterior as unknown as readonly AtlasPoint[], version: 1 };
+        const second: AtlasBoundary = { id: secondId, mapSlug: current.map.slug, startNodeId: nodeId, endNodeId: current.endNodeId, kind: current.kind, interiorVertices: secondInterior as unknown as readonly AtlasPoint[], version: 1 };
+        await assertMapTopologyValid(tx, current.mapId, (dataset) => ({
+          nodes: [...dataset.nodes, { id: nodeId, mapSlug: current.map.slug, position: point.value, version: 1 }],
+          boundaries: dataset.boundaries.flatMap((boundary) => boundary.id === current.id ? [first, second] : [boundary]),
+          areas: dataset.areas.map((area) => ({ ...area, rings: area.rings.map((ring) => ({ ...ring, boundaries: ring.boundaries.flatMap((reference) => reference.boundaryId !== current.id ? [reference] : reference.reversed ? [{ boundaryId: secondId, sequence: 0, reversed: true }, { boundaryId: firstId, sequence: 0, reversed: true }] : [{ boundaryId: firstId, sequence: 0, reversed: false }, { boundaryId: secondId, sequence: 0, reversed: false }]).map((reference, sequence) => ({ ...reference, sequence })) })) })),
+        }));
+        const affectedRings = await tx.storyMapAreaRing.findMany({ where: { boundaries: { some: { boundaryId: current.id } } }, include: { boundaries: { orderBy: { sequence: "asc" } } } });
+        await tx.storyMapTopologyNode.create({ data: { id: nodeId, mapId: current.mapId, x: point.value[0], y: point.value[1], createdByUserId: input.actorUserId } });
+        await tx.storyMapBoundary.createMany({ data: [{ id: firstId, mapId: current.mapId, startNodeId: current.startNodeId, endNodeId: nodeId, kind: current.kind, interiorVertices: inputJson(firstInterior), createdByUserId: input.actorUserId }, { id: secondId, mapId: current.mapId, startNodeId: nodeId, endNodeId: current.endNodeId, kind: current.kind, interiorVertices: inputJson(secondInterior), createdByUserId: input.actorUserId }] });
+        if (affectedRings.length) {
+          await tx.storyMapAreaRingBoundary.deleteMany({ where: { ringId: { in: affectedRings.map((ring) => ring.id) } } });
+          for (const ring of affectedRings) {
+            const references = ring.boundaries.flatMap((reference) => reference.boundaryId !== current.id ? [{ boundaryId: reference.boundaryId, reversed: reference.reversed }] : reference.reversed ? [{ boundaryId: secondId, reversed: true }, { boundaryId: firstId, reversed: true }] : [{ boundaryId: firstId, reversed: false }, { boundaryId: secondId, reversed: false }]);
+            await tx.storyMapAreaRingBoundary.createMany({ data: references.map((reference, sequence) => ({ ringId: ring.id, boundaryId: reference.boundaryId, sequence, reversed: reference.reversed })) });
+            await tx.storyMapAreaRing.update({ where: { id: ring.id }, data: { version: { increment: 1 }, updatedByUserId: input.actorUserId } });
+          }
+        }
+        await tx.storyMapBoundary.delete({ where: { id: current.id } });
+        await recordRevision(tx, { entityType: "TOPO_NODE", entityId: nodeId, action: "CREATED", actorUserId: input.actorUserId, summary: `Created topology node while splitting a boundary on ${current.map.slug}`, after: { x: point.value[0], y: point.value[1], version: 1 } });
+        await recordRevision(tx, { entityType: "BOUNDARY", entityId: current.id, action: "DELETED", actorUserId: input.actorUserId, summary: `Split shared Atlas boundary on ${current.map.slug}`, before: current, after: { replacementBoundaryIds: [firstId, secondId], nodeId } });
+        return { nodeId, boundaryIds: [firstId, secondId] as const, affectedRingIds: affectedRings.map((ring) => ring.id) };
+      });
+    },
+
     deleteBoundary(id: string, expectedVersion: number, actorUserId: string) {
       return topologyWrite(client, async (tx) => {
         const current = await tx.storyMapBoundary.findUnique({ where: { id }, include: { map: { select: { slug: true } }, _count: { select: { ringReferences: true } } } });
@@ -327,6 +394,47 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
 
     getAssembledTopologyForPlacement(placementId: string) {
       return client.$transaction((tx) => getAssembledTopologyForPlacement(tx, placementId));
+    },
+
+    createPointPlacement(input: CreatePointPlacementInput) {
+      return client.$transaction(async (tx) => {
+        const map = await requireMap(tx, input.mapId);
+        validatePointPlacement(input, map);
+        const entry = await tx.storyEntry.findUnique({ where: { id: input.entryId }, select: { id: true, slug: true, title: true, kind: true } });
+        if (!entry) fail("NOT_FOUND", "Codex location no longer exists.");
+        if (entry.kind !== "REGION") fail("VALIDATION", "Atlas place authoring requires a canonical REGION entry.");
+        const existing = await tx.storyMapPlacement.findUnique({ where: { mapId_entryId: { mapId: input.mapId, entryId: input.entryId } }, select: { id: true } });
+        if (existing) fail("CONFLICT", "This Codex location is already placed on the scene.");
+        const placement = await tx.storyMapPlacement.create({ data: { mapId: input.mapId, entryId: input.entryId, geometryKind: "POINT", geometry: inputJson({ type: "POINT", coordinates: [input.x, input.y] }), labelX: input.labelX, labelY: input.labelY, minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, createdByUserId: input.actorUserId } });
+        await recordRevision(tx, { entityType: "PLACEMENT", entityId: placement.id, action: "CREATED", actorUserId: input.actorUserId, summary: `Placed ${entry.title} on ${map.slug}`, after: { entryId: entry.id, position: [input.x, input.y], label: input.labelX === null ? null : [input.labelX, input.labelY], minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, version: 1 } });
+        return placement;
+      });
+    },
+
+    updatePointPlacement(input: UpdatePointPlacementInput) {
+      return client.$transaction(async (tx) => {
+        const map = await requireMap(tx, input.mapId);
+        validatePointPlacement(input, map);
+        const current = await tx.storyMapPlacement.findUnique({ where: { id: input.id }, include: { entry: { select: { title: true } }, _count: { select: { areaRings: true } } } });
+        if (!current) fail("NOT_FOUND", "Atlas placement no longer exists.");
+        if (current.mapId !== input.mapId || current.entryId !== input.entryId) fail("VALIDATION", "Placements cannot move between maps or Codex entities.");
+        if (current.geometryKind !== "POINT" || current._count.areaRings > 0) fail("VALIDATION", "Point authoring cannot overwrite region topology.");
+        const updated = await tx.storyMapPlacement.updateMany({ where: { id: input.id, version: input.expectedVersion }, data: { geometry: inputJson({ type: "POINT", coordinates: [input.x, input.y] }), labelX: input.labelX, labelY: input.labelY, minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, updatedByUserId: input.actorUserId, version: { increment: 1 } } });
+        if (updated.count !== 1) fail("STALE_VERSION", "Somebody edited this placement first.");
+        await recordRevision(tx, { entityType: "PLACEMENT", entityId: input.id, action: "UPDATED", actorUserId: input.actorUserId, summary: `Updated ${current.entry.title} placement on ${map.slug}`, before: { geometry: current.geometry, labelX: current.labelX, labelY: current.labelY, minZoom: current.minZoom, maxZoom: current.maxZoom, priority: current.priority, version: current.version }, after: { position: [input.x, input.y], label: input.labelX === null ? null : [input.labelX, input.labelY], minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, version: input.expectedVersion + 1 } });
+        return tx.storyMapPlacement.findUniqueOrThrow({ where: { id: input.id } });
+      });
+    },
+
+    deletePointPlacement(id: string, expectedVersion: number, actorUserId: string) {
+      return client.$transaction(async (tx) => {
+        const current = await tx.storyMapPlacement.findUnique({ where: { id }, include: { entry: { select: { title: true } }, map: { select: { slug: true } }, _count: { select: { areaRings: true } } } });
+        if (!current) fail("NOT_FOUND", "Atlas placement no longer exists.");
+        if (current.geometryKind !== "POINT" || current._count.areaRings > 0) fail("IN_USE", "Region topology cannot be removed through Unplace POI.");
+        const deleted = await tx.storyMapPlacement.deleteMany({ where: { id, version: expectedVersion } });
+        if (deleted.count !== 1) fail("STALE_VERSION", "Somebody edited this placement first.");
+        await recordRevision(tx, { entityType: "PLACEMENT", entityId: id, action: "DELETED", actorUserId, summary: `Unplaced ${current.entry.title} from ${current.map.slug}`, before: current });
+      });
     },
 
     replacePlacementTopology(input: ReplacePlacementTopologyInput) {
@@ -428,21 +536,21 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
     createConnectionPath(input: CreateConnectionPathInput) {
       const id = randomUUID();
       return client.$transaction(async (tx) => {
-        const connection = await tx.storyWorldConnection.findUnique({ where: { id: input.connectionId }, select: { id: true } });
+        const connection = await tx.storyWorldConnection.findUnique({ where: { id: input.connectionId }, select: { id: true, type: true, fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } });
         const map = await requireMap(tx, input.mapId);
         if (!connection) fail("NOT_FOUND", "World connection no longer exists.");
         const contract: AtlasMapConnectionPath = { id, connectionId: input.connectionId, mapSlug: map.slug, geometry: input.geometry, minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, version: 1 };
         const validated = validateAtlasMapConnectionPath(contract, dimensions(map));
         if (!validated.valid) fail("VALIDATION", findingMessage("Invalid connection path", validated.findings));
         const path = await tx.storyMapConnectionPath.create({ data: { id, connectionId: input.connectionId, mapId: input.mapId, geometryKind: input.geometry.type, geometry: inputJson(input.geometry), minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, createdByUserId: input.actorUserId } });
-        await recordRevision(tx, { entityType: "CONN_PATH", entityId: path.id, action: "CREATED", actorUserId: input.actorUserId, summary: `Created world-connection path on ${map.slug}`, after: contract });
+        await recordRevision(tx, { entityType: "CONN_PATH", entityId: path.id, action: "CREATED", actorUserId: input.actorUserId, summary: `Added ${routeRevisionLabel(connection.type)}: ${connection.fromEntry.slug} → ${connection.toEntry.slug} on ${map.slug}`, after: contract });
         return path;
       });
     },
 
     updateConnectionPath(input: UpdateConnectionPathInput) {
       return client.$transaction(async (tx) => {
-        const current = await tx.storyMapConnectionPath.findUnique({ where: { id: input.id } });
+        const current = await tx.storyMapConnectionPath.findUnique({ where: { id: input.id }, include: { connection: { select: { type: true, fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } } } });
         if (!current) fail("NOT_FOUND", "Connection path no longer exists.");
         if (current.connectionId !== input.connectionId || current.mapId !== input.mapId) fail("VALIDATION", "Connection paths cannot move between connections or maps.");
         const map = await requireMap(tx, input.mapId);
@@ -451,18 +559,18 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
         if (!validated.valid) fail("VALIDATION", findingMessage("Invalid connection path", validated.findings));
         const updated = await tx.storyMapConnectionPath.updateMany({ where: { id: input.id, version: input.expectedVersion }, data: { geometryKind: input.geometry.type, geometry: inputJson(input.geometry), minZoom: input.minZoom, maxZoom: input.maxZoom, priority: input.priority, updatedByUserId: input.actorUserId, version: { increment: 1 } } });
         if (updated.count !== 1) fail("STALE_VERSION", "Somebody edited this connection path first.");
-        await recordRevision(tx, { entityType: "CONN_PATH", entityId: input.id, action: "UPDATED", actorUserId: input.actorUserId, summary: `Updated world-connection path on ${map.slug}`, before: current, after: contract });
+        await recordRevision(tx, { entityType: "CONN_PATH", entityId: input.id, action: "UPDATED", actorUserId: input.actorUserId, summary: `Updated ${routeRevisionLabel(current.connection.type)}: ${current.connection.fromEntry.slug} → ${current.connection.toEntry.slug} on ${map.slug}`, before: current, after: contract });
         return tx.storyMapConnectionPath.findUniqueOrThrow({ where: { id: input.id } });
       });
     },
 
     deleteConnectionPath(id: string, expectedVersion: number, actorUserId: string) {
       return client.$transaction(async (tx) => {
-        const current = await tx.storyMapConnectionPath.findUnique({ where: { id }, include: { map: { select: { slug: true } } } });
+        const current = await tx.storyMapConnectionPath.findUnique({ where: { id }, include: { map: { select: { slug: true } }, connection: { select: { type: true, fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } } } });
         if (!current) fail("NOT_FOUND", "Connection path no longer exists.");
         const deleted = await tx.storyMapConnectionPath.deleteMany({ where: { id, version: expectedVersion } });
         if (deleted.count !== 1) fail("STALE_VERSION", "Somebody edited this connection path first.");
-        await recordRevision(tx, { entityType: "CONN_PATH", entityId: id, action: "DELETED", actorUserId, summary: `Deleted world-connection path on ${current.map.slug}`, before: current });
+        await recordRevision(tx, { entityType: "CONN_PATH", entityId: id, action: "DELETED", actorUserId, summary: `Removed ${routeRevisionLabel(current.connection.type)}: ${current.connection.fromEntry.slug} → ${current.connection.toEntry.slug} from ${current.map.slug}`, before: current });
       });
     },
   };

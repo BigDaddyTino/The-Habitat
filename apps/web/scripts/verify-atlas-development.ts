@@ -25,7 +25,7 @@ async function main() {
       captureAtlasV1LegacySnapshot(database),
     ]);
     const legacyRows = legacyConnections.reduce((total, entry) => total + (Array.isArray((entry.meta as { connections?: unknown } | null)?.connections) ? (entry.meta as { connections: unknown[] }).connections.length : 0), 0);
-    process.stdout.write(stableAtlasJson({ contract: "martino-atlas-development-environment", contractVersion: 1, environment: process.env.HABITAT_ENVIRONMENT, database: target, atlasSchema: "APPLIED", atlasV2: { topologyNodes: nodes, boundaries, areaRings: rings, ringBoundaryReferences: references, worldConnections: connections, connectionPaths: paths, activated: nodes === 19 && boundaries === 26 && rings === 11 && references === 43 && connections === 25 && paths === 0 }, legacyV1: { connectionRows: legacyRows, fingerprint: legacySnapshot.fingerprint, present: legacyRows === 25 }, featureFlag: process.env.HABITAT_ATLAS_V2_INTERNAL_ENABLED?.trim().toLowerCase() === "true" }));
+    process.stdout.write(stableAtlasJson({ contract: "martino-atlas-development-environment", contractVersion: 1, environment: process.env.HABITAT_ENVIRONMENT, database: target, atlasSchema: "APPLIED", atlasV2: { topologyNodes: nodes, boundaries, areaRings: rings, ringBoundaryReferences: references, worldConnections: connections, connectionPaths: paths, activated: nodes === 19 && boundaries === 26 && rings === 11 && references === 43 && connections === 25 }, legacyV1: { connectionRows: legacyRows, fingerprint: legacySnapshot.fingerprint, present: legacyRows === 25 }, featureFlag: process.env.HABITAT_ATLAS_V2_INTERNAL_ENABLED?.trim().toLowerCase() === "true" }));
   } finally {
     await database.$disconnect();
   }

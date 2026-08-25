@@ -18,9 +18,13 @@
     "atlas:migrate:verify": "tsx scripts/verify-atlas-v2-rehearsal.ts",
     "atlas:v2:activate": "tsx scripts/activate-atlas-v2.ts",
     "atlas:v2:verify": "tsx scripts/verify-atlas-v2-activation.ts",
+    "atlas:production:baseline": "tsx scripts/capture-atlas-production-baseline.ts",
     "atlas:v2:parity": "tsx scripts/report-atlas-v2-parity.ts",
     "atlas:dev:verify": "tsx scripts/verify-atlas-development.ts",
-    "atlas:dev": "tsx scripts/start-atlas-development.ts"
+    "atlas:dev": "tsx scripts/start-atlas-development.ts",
+    "atlas:authoring:verify": "tsx scripts/verify-atlas-authoring.ts",
+    "atlas:routes:author": "tsx scripts/author-canonical-atlas-routes.ts",
+    "atlas:routes:verify": "tsx scripts/verify-canonical-atlas-routes.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",

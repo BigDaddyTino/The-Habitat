@@ -1,5 +1,6 @@
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { AdminSuiteNav } from "@/components/admin-suite-nav";
+import { atlasAuthoringEnvironmentAvailable } from "@/lib/atlas-authoring-environment";
 import { requireRole } from "@/lib/authorization";
 import "./admin-suite.css";
 
@@ -12,7 +13,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
         <div className="admin-actor"><LockKeyhole aria-hidden="true" size={14} /><span>Authorized as</span><strong>{actor.name ?? actor.email ?? "Administrator"}</strong></div>
       </div>
     </section>
-    <AdminSuiteNav />
+    <AdminSuiteNav atlasAuthoringAvailable={atlasAuthoringEnvironmentAvailable()} />
     {children}
   </div>;
 }

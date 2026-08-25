@@ -13,12 +13,15 @@ export { AtlasPersistenceError } from "./atlas-persistence-service";
 export type {
   CreateBoundaryInput,
   CreateConnectionPathInput,
+  CreatePointPlacementInput,
   CreateTopologyNodeInput,
   CreateWorldConnectionInput,
   PersistedAreaRingInput,
   ReplacePlacementTopologyInput,
+  SplitBoundaryInput,
   UpdateBoundaryInput,
   UpdateConnectionPathInput,
+  UpdatePointPlacementInput,
   UpdateTopologyNodeInput,
   UpdateWorldConnectionInput,
 } from "./atlas-persistence-service";

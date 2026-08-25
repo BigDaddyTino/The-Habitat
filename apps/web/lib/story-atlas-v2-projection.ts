@@ -4,6 +4,7 @@ import {
   type AtlasNumericPoint,
   type AtlasTopologyDataset,
   type AtlasV2ConnectionProjection,
+  type AtlasV2ConnectionPathProjection,
   type AtlasV2Projection,
   type AtlasV2RegionProjection,
   type StoryAtlasProjection,
@@ -17,7 +18,7 @@ function centroid(ring: readonly AtlasNumericPoint[]): StoryMapPoint { let twice
 function defaultLabel(area: AtlasDerivedTopologyArea): StoryMapPoint { return centroid(area.geometry.type === "POLYGON" ? area.geometry.coordinates[0]! : area.geometry.coordinates[0]![0]!); }
 function canonicalSceneTitle(legacyTitle: string, ownerTitle?: string) { if (!ownerTitle) return legacyTitle; const suffix = legacyTitle.match(/\s+(?:city|tactical)\s+atlas$/i)?.[0] ?? ""; return `${ownerTitle}${suffix}`; }
 
-export function buildStoryAtlasV2Projection(input: { v1: StoryAtlasProjection; topology: AtlasTopologyDataset; connections: readonly AtlasV2ConnectionProjection[]; revisionCursor: string | null; sceneOwnerTitle?: string }): AtlasV2Projection {
+export function buildStoryAtlasV2Projection(input: { v1: StoryAtlasProjection; topology: AtlasTopologyDataset; connections: readonly AtlasV2ConnectionProjection[]; connectionPaths?: readonly AtlasV2ConnectionPathProjection[]; revisionCursor: string | null; sceneOwnerTitle?: string }): AtlasV2Projection {
   const validation = validateAtlasTopology(input.topology, { width: input.v1.scene.coordinateWidth as 100_000, height: input.v1.scene.coordinateHeight });
   if (!validation.valid || !validation.value) throw new Error(`Persisted Atlas V2 topology is invalid: ${validation.findings.map((finding) => finding.code).join(", ")}`);
   const canonical = analyzeAtlasCanonicalTopology(buildAtlasCanonicalTopologyTrace());
@@ -35,5 +36,5 @@ export function buildStoryAtlasV2Projection(input: { v1: StoryAtlasProjection; t
   const regionSlugs = new Set(regions.map((region) => region.slug));
   const points = input.v1.features.filter((feature) => feature.source === "ENTRY" && !regionSlugs.has(feature.slug));
   const questNodes = input.v1.features.filter((feature) => feature.source === "NODE");
-  return { contract: "martino-story-atlas-v2", contractVersion: 1, projectionVersion: "V2", revisionCursor: input.revisionCursor, scene: { ...input.v1.scene, title: canonicalSceneTitle(input.v1.scene.title, input.sceneOwnerTitle), ...(input.v1.scene.slug === "martino-world" ? { artVersion: "v2", imageUrl: "/codex-map/martino-world/v2.png" } : {}) }, regions, points, questNodes, connections: input.connections, hierarchy: regions.map((region) => ({ slug: region.slug, parentSlug: region.parentSlug, childSlugs: region.childSlugs })), counts: { regions: regions.length, topLevelRegions: regions.filter((region) => region.role === "TOP_LEVEL_LAND").length, nestedRegions: regions.filter((region) => region.role === "NESTED_GEOGRAPHY").length, points: points.length, questNodes: questNodes.length, connections: input.connections.length, connectionPaths: input.connections.filter((connection) => connection.hasPath).length } };
+  return { contract: "martino-story-atlas-v2", contractVersion: 1, projectionVersion: "V2", revisionCursor: input.revisionCursor, scene: { ...input.v1.scene, title: canonicalSceneTitle(input.v1.scene.title, input.sceneOwnerTitle), ...(input.v1.scene.slug === "martino-world" ? { artVersion: "v2", imageUrl: "/codex-map/martino-world/v2.png" } : {}) }, regions, points, questNodes, connections: input.connections, connectionPaths: input.connectionPaths ?? [], hierarchy: regions.map((region) => ({ slug: region.slug, parentSlug: region.parentSlug, childSlugs: region.childSlugs })), counts: { regions: regions.length, topLevelRegions: regions.filter((region) => region.role === "TOP_LEVEL_LAND").length, nestedRegions: regions.filter((region) => region.role === "NESTED_GEOGRAPHY").length, points: points.length, questNodes: questNodes.length, connections: input.connections.length, connectionPaths: input.connectionPaths?.length ?? 0 } };
 }

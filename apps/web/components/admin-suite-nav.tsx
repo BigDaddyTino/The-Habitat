@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, Award, CalendarRange, ClipboardCheck, Flame, LayoutDashboard, Map, MessageCircle, NotebookPen, RadioTower, Users } from "lucide-react";
+import { Activity, Award, CalendarRange, ClipboardCheck, Flame, LayoutDashboard, Map, MapPinned, MessageCircle, NotebookPen, RadioTower, Users } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const groups = [
@@ -21,12 +21,13 @@ const groups = [
     { href: "/admin/seasons", label: "Seasons", icon: CalendarRange },
     { href: "/admin/discord", label: "Discord", icon: MessageCircle },
     { href: "/admin/story", label: "Story export", icon: NotebookPen },
+    { href: "/admin/story/atlas", label: "Atlas editor", icon: MapPinned },
   ] },
 ];
 
-export function AdminSuiteNav() {
+export function AdminSuiteNav({ atlasAuthoringAvailable = false }: { atlasAuthoringAvailable?: boolean }) {
   const pathname = usePathname();
-  return <nav className="admin-suite-nav" aria-label="Admin Suite navigation"><div className="content-shell">{groups.map((group) => <div className="admin-nav-group" key={group.label}><span>{group.label}</span><div>{group.items.map(({ href, label, icon: Icon }) => {
+  return <nav className="admin-suite-nav" aria-label="Admin Suite navigation"><div className="content-shell">{groups.map((group) => <div className="admin-nav-group" key={group.label}><span>{group.label}</span><div>{group.items.filter((item) => item.href !== "/admin/story/atlas" || atlasAuthoringAvailable).map(({ href, label, icon: Icon }) => {
     const active = pathname === href || (href !== "/admin" && pathname.startsWith(`${href}/`));
     return <Link aria-current={active ? "page" : undefined} className={active ? "active" : ""} href={href} key={href}><Icon aria-hidden="true" size={15} />{label}</Link>;
   })}</div></div>)}</div></nav>;

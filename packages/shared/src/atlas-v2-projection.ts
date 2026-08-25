@@ -1,4 +1,4 @@
-import type { AtlasMultiPolygonGeometry, AtlasPolygonGeometry } from "./atlas-geometry";
+import type { AtlasLineGeometry, AtlasMultiLineGeometry, AtlasMultiPolygonGeometry, AtlasPolygonGeometry } from "./atlas-geometry";
 import type { StoryAtlasFeature, StoryAtlasMapLink, StoryMapPoint } from "./story-map";
 
 export const atlasProjectionVersions = ["V1", "V2"] as const;
@@ -40,6 +40,19 @@ export type AtlasV2ConnectionProjection = {
   hasPath: boolean;
 };
 
+export type AtlasV2ConnectionPathProjection = {
+  id: string;
+  connectionId: string;
+  fromSlug: string;
+  toSlug: string;
+  type: string;
+  geometry: AtlasLineGeometry | AtlasMultiLineGeometry;
+  minZoom: number;
+  maxZoom: number | null;
+  priority: number;
+  version: number;
+};
+
 export type AtlasV2Projection = {
   contract: "martino-story-atlas-v2";
   contractVersion: 1;
@@ -65,6 +78,7 @@ export type AtlasV2Projection = {
   points: readonly StoryAtlasFeature[];
   questNodes: readonly StoryAtlasFeature[];
   connections: readonly AtlasV2ConnectionProjection[];
+  connectionPaths: readonly AtlasV2ConnectionPathProjection[];
   hierarchy: readonly { slug: string; parentSlug: string | null; childSlugs: readonly string[] }[];
   counts: {
     regions: number;
