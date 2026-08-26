@@ -1,4 +1,5 @@
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import dotenv from "dotenv";
 import React from "react";
@@ -31,6 +32,7 @@ Object.assign(globalThis, { React });
 
 const webRoot = process.cwd();
 const outputDirectory = path.join(webRoot, "private", "codex-art", "bloomfall-systems", "review");
+const evidenceDirectory = path.join(webRoot, "private", "codex-art", "bloomfall-systems", "evidence");
 
 function compiledStylesheet() {
   const chunks = path.join(webRoot, ".next", "static", "chunks");
@@ -45,7 +47,7 @@ function compiledStylesheet() {
 const resolve = (slug: string) => ({ title: slug.replaceAll("-", " "), href: `#${slug}` });
 
 function harness() {
-  const { file, css } = compiledStylesheet();
+  const { css } = compiledStylesheet();
   const sections = ["bloomfall-reach", ...bloomfallIntegrationRecords.map((record) => record.slug)].map((slug) => {
     const record = bloomfallIntegrationRecords.find((entry) => entry.slug === slug);
     const prose = record ? renderToStaticMarkup(<StoryProse body={record.body} resolve={resolve} />) : "";
@@ -153,9 +155,72 @@ function mobileFrame() {
 </body></html>`;
 }
 
+const chromeCandidates = [
+  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+  "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+  "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
+];
+
+function findBrowser() {
+  return chromeCandidates.find((candidate) => existsSync(candidate)) ?? null;
+}
+
+function fileUrl(target: string) {
+  return `file:///${target.replaceAll("\\", "/").replaceAll(" ", "%20")}`;
+}
+
+/** Drives the harness in headless Chromium and returns what it measured. */
+function measure(browser: string, url: string, width: number, height: number, extra: string[] = []) {
+  const dom = execFileSync(browser, [
+    "--headless=new", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+    `--window-size=${width},${height}`, "--virtual-time-budget=12000", "--dump-dom", ...extra, url,
+  ], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+  const report = /QA_REPORT (\{[^<]*\})/.exec(dom);
+  if (!report) throw new Error(`The harness did not report a measurement for ${url}.`);
+  return JSON.parse(report[1]!) as Record<string, unknown>;
+}
+
+function capture(browser: string, url: string, width: number, height: number, target: string, extra: string[] = []) {
+  execFileSync(browser, [
+    "--headless=new", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+    `--window-size=${width},${height}`, "--virtual-time-budget=12000", `--screenshot=${target}`, ...extra, url,
+  ], { stdio: "ignore" });
+}
+
 mkdirSync(outputDirectory, { recursive: true });
 const file = path.join(outputDirectory, "index.html");
 const mobile = path.join(outputDirectory, "mobile-390x844.html");
 writeFileSync(file, harness(), "utf8");
 writeFileSync(mobile, mobileFrame(), "utf8");
 process.stdout.write(`${file}\n${mobile}\n`);
+
+if (process.argv.includes("--capture")) {
+  const browser = findBrowser();
+  if (!browser) throw new Error(`No headless Chromium found. Looked in: ${chromeCandidates.join(", ")}`);
+  mkdirSync(evidenceDirectory, { recursive: true });
+  const desktop = measure(browser, fileUrl(file), 1500, 900);
+  const phone = measure(browser, fileUrl(mobile), 900, 1000, ["--allow-file-access-from-files"]);
+  capture(browser, `${fileUrl(file)}?only=bloomfall-reach`, 1500, 900, path.join(evidenceDirectory, "desktop-1500x900-network.png"));
+  capture(browser, `${fileUrl(file)}?only=bloomfall-travel`, 1500, 3000, path.join(evidenceDirectory, "desktop-1500x900-travel.png"));
+  capture(browser, fileUrl(mobile), 440, 900, path.join(evidenceDirectory, "mobile-390x844.png"), ["--allow-file-access-from-files"]);
+  const evidence = {
+    contract: "martino-bloomfall-systems-qa",
+    contractVersion: 1,
+    browser: path.basename(browser),
+    stylesheet: compiledStylesheet().file,
+    desktop,
+    mobile: phone,
+    status: desktop.horizontalOverflow === 0 && phone.horizontalOverflow === 0
+      && desktop.elementsOverflowingViewport === 0 && phone.elementsOverflowingViewport === 0
+      && desktop.linksUnder24px === 0 && phone.linksUnder24px === 0
+      && desktop.imagesMissingAlt === 0 && phone.imagesMissingAlt === 0
+      && phone.documentClientWidth === 390 && phone.documentScrollWidth === 390
+      && desktop.scrollContainers === desktop.scrollContainersContained
+      && phone.scrollContainers === phone.scrollContainersContained
+      ? "PASS" : "FAIL",
+  };
+  writeFileSync(path.join(evidenceDirectory, "qa-measurements.json"), `${JSON.stringify(evidence, null, 2)}\n`, "utf8");
+  process.stdout.write(`${JSON.stringify(evidence, null, 2)}\n`);
+  if (evidence.status !== "PASS") process.exitCode = 1;
+}

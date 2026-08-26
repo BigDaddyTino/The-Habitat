@@ -253,7 +253,35 @@ async function main() {
   const missingTerms = canonicalTerms.filter((term) => !terminologyBodies.includes(term));
   check(missingTerms.length === 0, `Canonical Bloomfall terms absent from the integration prose: ${missingTerms.join(", ")}`);
 
-  // 14. Geographic hierarchy stays top-level.
+  // 14. The terms a reader would actually type reach the right dossier. This
+  // repeats the Codex library's own query shape rather than approximating it.
+  const searchTerms: Array<{ term: string; mustReach: string }> = [
+    { term: "Adaptive Mutation", mustReach: "adaptive-mutation" },
+    { term: "Blackbloom", mustReach: "blackbloom-exposure" },
+    { term: "Bloomstorm", mustReach: "bloomstorms" },
+    { term: "Essence Saturation", mustReach: "essence-saturation" },
+    { term: "Aberrant", mustReach: "aberrant-escalation" },
+    { term: "Bellwether", mustReach: "the-bellwether" },
+    { term: "Latchhound", mustReach: "latchhound" },
+    { term: "Southreach", mustReach: "southreach-complex" },
+    { term: "Heartfen", mustReach: "heartfen" },
+    { term: "Conditional route", mustReach: "bloomfall-travel" },
+  ];
+  const searchResults = await Promise.all(searchTerms.map(async ({ term, mustReach }) => {
+    const hits = await db.storyEntry.findMany({
+      where: { OR: [
+        { title: { contains: term, mode: "insensitive" } },
+        { summary: { contains: term, mode: "insensitive" } },
+        { body: { contains: term, mode: "insensitive" } },
+      ] },
+      select: { slug: true },
+    });
+    const slugs = hits.map((hit) => hit.slug);
+    check(slugs.includes(mustReach), `A Codex search for "${term}" does not reach ${mustReach}.`);
+    return { term, results: slugs.length, reaches: mustReach, found: slugs.includes(mustReach) };
+  }));
+
+  // 15. Geographic hierarchy stays top-level.
   const region = allEntries.find((entry) => entry.id === bloomfallRegionId);
   const regionMeta = region?.meta as { parent?: unknown } | null;
   check(region?.slug === "bloomfall-reach" && regionMeta?.parent === null, "Bloomfall Reach is no longer a top-level region.");
@@ -281,6 +309,7 @@ async function main() {
       adaptiveBoundAssets: adaptiveBound.length,
     },
     routeClasses: classCounts,
+    search: searchResults,
     integrity: {
       brokenReferences,
       duplicateSystemEntries: stormLike.length + travelLike.length,
