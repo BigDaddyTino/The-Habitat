@@ -43,6 +43,10 @@ export function assertBloomfallProductionActivationTarget(sourceUrl: string, tar
   return { mode: "PRODUCTION" as const, source, target };
 }
 
+/** Which release a set of evidence variables belongs to. Each promotion reads
+ *  its own names so a stale token cannot authorise a later cutover. */
+export type BloomfallReleasePrefix = "BLOOMFALL_V3" | "BLOOMFALL_CODEX" | "BLOOMFALL_ATLAS";
+
 export type BloomfallReleaseEvidence = {
   actualHead: string;
   actualBuildId: string;
@@ -58,7 +62,7 @@ export type BloomfallReleaseEvidence = {
  * actually readable. The prefix selects which release is being gated, so a
  * stale token from an earlier cutover cannot authorise a later one.
  */
-export function assertBloomfallReleaseEvidence(evidence: BloomfallReleaseEvidence, environment: Readonly<Record<string, string | undefined>> = process.env, now = Date.now(), prefix: "BLOOMFALL_V3" | "BLOOMFALL_CODEX" = "BLOOMFALL_V3") {
+export function assertBloomfallReleaseEvidence(evidence: BloomfallReleaseEvidence, environment: Readonly<Record<string, string | undefined>> = process.env, now = Date.now(), prefix: BloomfallReleasePrefix = "BLOOMFALL_V3") {
   const expectedHead = environment[`${prefix}_RELEASE_HEAD`]?.trim().toLowerCase();
   if (!expectedHead || !/^[a-f0-9]{40}$/.test(expectedHead) || expectedHead !== evidence.actualHead.toLowerCase()) throw new Error(`Bloomfall release HEAD mismatch: expected ${expectedHead ?? "missing"}, actual ${evidence.actualHead}.`);
   const expectedBuildId = environment[`${prefix}_EXPECTED_BUILD_ID`]?.trim();
@@ -71,7 +75,7 @@ export function assertBloomfallReleaseEvidence(evidence: BloomfallReleaseEvidenc
   return { releaseHead: evidence.actualHead.toLowerCase(), buildId: evidence.actualBuildId, backupPath: path.resolve(evidence.backupPath), backupBytes: evidence.backupBytes };
 }
 
-export async function loadBloomfallReleaseEvidence(environment: Readonly<Record<string, string | undefined>>, actualHead: string, actualBuildId: string, prefix: "BLOOMFALL_V3" | "BLOOMFALL_CODEX" = "BLOOMFALL_V3") {
+export async function loadBloomfallReleaseEvidence(environment: Readonly<Record<string, string | undefined>>, actualHead: string, actualBuildId: string, prefix: BloomfallReleasePrefix = "BLOOMFALL_V3") {
   const backupPath = environment[`${prefix}_PRODUCTION_BACKUP_PATH`]?.trim() ?? "";
   const backup = backupPath ? await stat(backupPath) : null;
   return assertBloomfallReleaseEvidence({ actualHead, actualBuildId, backupPath, backupBytes: backup?.size ?? 0, backupMtimeMs: backup?.mtimeMs ?? 0 }, environment, Date.now(), prefix);

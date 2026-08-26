@@ -51,3 +51,6 @@ Docs/BLOOMFALL_REACH_VISUAL_PROMPTS.md
 Docs/BLOOMFALL_REACH_VISUAL_REPORT.md
 Docs/BLOOMFALL_REACH_VISUAL_V2_PROMPTS.md
 Docs/BLOOMFALL_REACH_VISUAL_V2_REPORT.md
+
+# Throwaway inspection scripts used during a release; never part of one.
+apps/web/scripts/tmp/
