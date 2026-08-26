@@ -30,6 +30,12 @@ pnpm --filter @habitat/web bloomfall:v3:activate -- --apply
 
 Exactly one action is required. Dry-run performs zero writes.
 
+Capture the exact target fingerprint with the separately guarded read-only inspector:
+
+```text
+pnpm --filter @habitat/web bloomfall:v3:baseline
+```
+
 ## Required gates
 
 The entrypoint never infers its write target from the application URL. It requires:
