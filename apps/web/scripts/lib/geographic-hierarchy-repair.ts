@@ -7,12 +7,12 @@ export const geographicHierarchyRepairContract = "MARTINO_GLOBAL_REGION_HIERARCH
 
 export const geographicHierarchyRepairManifest = [
   { id: "a64869df-c623-49ec-9236-dd306a3fd5c7", slug: "bloomfall-reach", title: "Bloomfall Reach", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
-  { id: "e97f3dfa-23cb-43df-9d71-b186f08b45e3", slug: "the-desert", title: "The Desert", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
-  { id: "09ee1dc8-8f3e-462a-9741-ccb6aeecf0ac", slug: "grand-rift", title: "The Grand Rift", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
-  { id: "ec50dc96-805d-480c-a177-ee6cd6bd7fa3", slug: "high-cliffs", title: "The High Cliffs", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
-  { id: "087f6d60-db59-482e-a892-04334444bd02", slug: "magic-torn-wasteland", title: "The Magic-Torn Wasteland", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
-  { id: "8908a33a-0cd4-4a56-8610-5521cafade8c", slug: "the-red-forest", title: "The Red Forest", beforeParent: "grand-rift", beforeType: "zone", finalParent: null, finalType: "region" },
-  { id: "ef4b0861-94e3-4cc1-bcfd-42bd1ce318a5", slug: "riverlands", title: "The Riverlands", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
+  { id: "e97f3dfa-23cb-43df-9d71-b186f08b45e3", slug: "the-desert", title: "Desert", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
+  { id: "09ee1dc8-8f3e-462a-9741-ccb6aeecf0ac", slug: "grand-rift", title: "Grand Rift", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
+  { id: "ec50dc96-805d-480c-a177-ee6cd6bd7fa3", slug: "high-cliffs", title: "High Cliffs", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
+  { id: "087f6d60-db59-482e-a892-04334444bd02", slug: "magic-torn-wasteland", title: "Magic-Torn Wasteland", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
+  { id: "8908a33a-0cd4-4a56-8610-5521cafade8c", slug: "the-red-forest", title: "Red Forest", beforeParent: "grand-rift", beforeType: "zone", finalParent: null, finalType: "region" },
+  { id: "ef4b0861-94e3-4cc1-bcfd-42bd1ce318a5", slug: "riverlands", title: "Riverlands", beforeParent: "the-peninsula", beforeType: "region", finalParent: null, finalType: "region" },
 ] as const;
 
 export const verifiedGeographicParentContracts = {

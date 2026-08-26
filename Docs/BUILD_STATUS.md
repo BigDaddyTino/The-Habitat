@@ -748,3 +748,12 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Published exactly 15 owner-locked V3 selections with V1/V2 at zero, verified production art resolution and SHA-256 byte-for-byte, and inspected the served world and local rasters directly
 - [x] Re-ran the activator for a zero-mutation `ALREADY_APPLIED`, observed zero new client/5xx/database/asset errors, and left all four rollback levels available and unused
 - [ ] Authenticated desktop and mobile interaction QA (selection, search, breadcrumbs, POI/route controls) remains an owner-side confirmation step; every such surface is sign-in gated
+
+## 2026-08-26 - Canonical title article normalization
+
+- [x] Deep-dive audited every "The" across 238 production entries, 810 wiki links, and ~55 slug-referencing code files; froze slugs as immutable identifiers and scoped the fix to display titles only
+- [x] Normalized 50 titles (37 article drift, 11 geographic labels, 2 casing/spelling) through a frozen manifest and a guarded, serializable, revision-audited, idempotent tool with dev and production modes
+- [x] Kept authored articles (creatures, events, rules, systems, missions, six the- factions) and recorded the retained set in code so the decision is auditable
+- [x] Aligned the hierarchy-repair manifest, atlas seeds, shared Bloomfall canon, and test fixtures in lockstep; left frozen atlas migration artifacts untouched
+- [x] Applied to development and production behind fresh verified backups; both report ALREADY_APPLIED / 0 mutations on rerun, hierarchy audits show zero defects, and the Bloomfall V3 activation fingerprint is byte-identical before and after
+- [ ] HabitatWeb restart onto build Cb-qCH9ihKFBPUCvZWldT pending

@@ -9,13 +9,13 @@ test("Bloomfall Reach owns the approved vocabulary", () => {
     commonName: "The Living Ruin",
     historicalName: "Southreach Energy Reserve",
     historicalShorthand: "Southreach",
-    facility: { formalName: "Southreach Strategic Essence Reserve, Refinery, and Gridworks", commonName: "The Southreach Complex" },
+    facility: { formalName: "Southreach Strategic Essence Reserve, Refinery, and Gridworks", commonName: "Southreach Complex" },
     catastrophe: "The Bloomfall",
     catastropheAge: "roughly two decades before the present day",
     corruption: "The Blackbloom",
     officialCause: "A cascading industrial control and containment failure during strategic load balancing drove multiple Essence storage banks into uncontrolled resonance. Isolation systems failed faster than the facility could segment the reserve, causing a catastrophic regional release.",
     deepMysteryTruth: "DEFERRED",
-    subregions: { north: "The Shattercore", central: "The Mutation Belt", south: "The Living Marsh" },
+    subregions: { north: "Shattercore", central: "Mutation Belt", south: "Living Marsh" },
     formerDevelopmentPlaceholder: { title: "Unknown Southeast", slug: "unknown-southeast", inWorldCanon: false },
   });
 });

@@ -49,7 +49,7 @@ function fixtureSource(geometry: unknown = polygon): AtlasAuditSource {
     }],
     entries: [
       { id: "entry-id", kind: "REGION", slug: "placed", title: "Placed", summary: null, body: null, status: "CANON", meta: { type: "region", parent: null, biome: "test biome", control: [], connections: [] } },
-      { id: "docks-id", kind: "REGION", slug: "the-docks", title: "The Docks", summary: null, body: null, status: "CANON", meta: { type: "site", parent: null, biome: null, control: [], connections: [] } },
+      { id: "docks-id", kind: "REGION", slug: "the-docks", title: "Docks", summary: null, body: null, status: "CANON", meta: { type: "site", parent: null, biome: null, control: [], connections: [] } },
     ],
   };
 }

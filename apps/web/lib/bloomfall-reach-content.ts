@@ -90,7 +90,7 @@ const characterMeta = (input: {
 
 export const bloomfallSubregions: readonly BloomfallEntrySeed[] = [
   {
-    kind: "REGION", slug: "the-shattercore", title: "The Shattercore",
+    kind: "REGION", slug: "the-shattercore", title: "Shattercore",
     summary: "Bloomfall Reach's northern industrial ruin, centered on the broken Southreach Complex and its cycling reactor sectors.",
     body: `The Shattercore is the northern wound of [[bloomfall-reach]], where the Southreach Strategic Essence Reserve, Refinery, and Gridworks failed during [[the-bloomfall]]. Its fractured containment rings, storage banks, freight lines, and cooling works form a vertical industrial ruin around [[southreach-complex]]. [[crown-break]] still vents Blackbloom-charged weather over the district, while [[reserve-vault-twelve]], [[ashline-exchange]], and [[redline-shelter-six]] preserve incompatible pieces of the official record.
 
@@ -100,7 +100,7 @@ The Shattercore is neither dead nor stable. [[reactor-cycles]] can make a quiet 
     ], [{ faction: "national-defense-directorate", kind: "holds" }, { faction: "aegis-extraction-consortium", kind: "influences" }, { faction: "meridian-arcane-institute", kind: "influences" }]),
   },
   {
-    kind: "REGION", slug: "the-mutation-belt", title: "The Mutation Belt",
+    kind: "REGION", slug: "the-mutation-belt", title: "Mutation Belt",
     summary: "A broad middle country where mature Blackbloom ecology has remade farms, substations, forests, and migration routes.",
     body: `The Mutation Belt is the central breadth of [[bloomfall-reach]], beyond the Shattercore's immediate wreckage but still inside the mature Blackbloom ecology. It is a mosaic of altered woodland, failed agriculture, mobile root masses, conductive growth, and old utility corridors. [[glassroot-observatory]] studies the changes; [[cairnwood-camp]] equips expeditions; [[walking-orchard]], [[splicefield-substation]], and [[long-graze]] demonstrate that adaptation is neither random decoration nor a single new taxonomy.
 
@@ -111,7 +111,7 @@ Travel depends on recent field knowledge. Trails close, feeding ranges shift, an
     ], [{ faction: "wardens-monster-hunter-guild", kind: "influences" }, { faction: "meridian-arcane-institute", kind: "influences" }]),
   },
   {
-    kind: "REGION", slug: "the-living-marsh", title: "The Living Marsh",
+    kind: "REGION", slug: "the-living-marsh", title: "Living Marsh",
     summary: "The ancient southern wetlands that halted the Blackbloom's oceanward advance through confirmed coordinated ecological behavior.",
     body: `The Living Marsh is the southern wetland of [[bloomfall-reach]] and the reason the catastrophe did not continue into [[the-ocean]]. When the Blackbloom front reached these old wetlands, filtration roots, sink organisms, microbial cultures, and altered predators redistributed contamination until the oceanward advance stopped. Researchers now confirm coordinated behavior: channels close before surges, root systems sacrifice contaminated ground, and resources move toward stressed filtration zones. Consciousness remains unproven; there is no confirmed hive mind, telepathy, central organism, or marsh god.
 
@@ -125,7 +125,7 @@ Travel depends on recent field knowledge. Trails close, feeding ranges shift, an
 
 export const bloomfallPois: readonly BloomfallEntrySeed[] = [
   {
-    kind: "REGION", slug: "southreach-complex", title: "The Southreach Complex",
+    kind: "REGION", slug: "southreach-complex", title: "Southreach Complex",
     summary: "The broken strategic Essence reserve, refinery, and gridworks at the center of the Bloomfall.",
     body: `The formal record names this state asset the **Southreach Strategic Essence Reserve, Refinery, and Gridworks**. The Southreach Complex combined strategic [[essence]] storage, refining, heavy plant, freight, cooling, grid dispatch, research, and emergency systems. Aegis operated intake, refining, storage, heavy works, and logistics; NDD secured the site and classified inventory; Meridian certified containment, assayed Essence, and supplied research oversight; civilian grid administrators balanced public loads.
 

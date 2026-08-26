@@ -67,7 +67,7 @@ test("the release-order hierarchy stage can precede Bloomfall child creation wit
 
 test("the live dossier projection groups descendants beneath direct children", () => {
   const projection = buildContainedPlaceProjection("the-peninsula", [
-    { slug: "the-peninsula", title: "The Peninsula", summary: null, meta: { type: "region", parent: null } },
+    { slug: "the-peninsula", title: "Peninsula", summary: null, meta: { type: "region", parent: null } },
     { slug: "port-arcadia", title: "Port Arcadia", summary: null, meta: { type: "settlement", parent: "the-peninsula" } },
     { slug: "waterfront", title: "Waterfront", summary: null, meta: { type: "zone", parent: "port-arcadia" } },
     { slug: "bloomfall-reach", title: "Bloomfall Reach", summary: null, meta: { type: "region", parent: null } },

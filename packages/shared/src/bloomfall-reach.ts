@@ -7,7 +7,7 @@ export const bloomfallReachCanon = {
   historicalShorthand: "Southreach",
   facility: {
     formalName: "Southreach Strategic Essence Reserve, Refinery, and Gridworks",
-    commonName: "The Southreach Complex",
+    commonName: "Southreach Complex",
   },
   catastrophe: "The Bloomfall",
   catastropheAge: "roughly two decades before the present day",
@@ -15,9 +15,9 @@ export const bloomfallReachCanon = {
   officialCause: "A cascading industrial control and containment failure during strategic load balancing drove multiple Essence storage banks into uncontrolled resonance. Isolation systems failed faster than the facility could segment the reserve, causing a catastrophic regional release.",
   deepMysteryTruth: "DEFERRED",
   subregions: {
-    north: "The Shattercore",
-    central: "The Mutation Belt",
-    south: "The Living Marsh",
+    north: "Shattercore",
+    central: "Mutation Belt",
+    south: "Living Marsh",
   },
   formerDevelopmentPlaceholder: {
     title: "Unknown Southeast",
@@ -39,8 +39,8 @@ export const bloomfallReachLocalAtlas = {
   sceneSlug: "martino-bloomfall-reach",
   artVersion: "v1",
   subregions: [
-    { slug: "the-shattercore", title: "The Shattercore", parentSlug: null, neighbors: ["the-mutation-belt"] },
-    { slug: "the-mutation-belt", title: "The Mutation Belt", parentSlug: null, neighbors: ["the-shattercore", "the-living-marsh"] },
-    { slug: "the-living-marsh", title: "The Living Marsh", parentSlug: null, neighbors: ["the-mutation-belt"] },
+    { slug: "the-shattercore", title: "Shattercore", parentSlug: null, neighbors: ["the-mutation-belt"] },
+    { slug: "the-mutation-belt", title: "Mutation Belt", parentSlug: null, neighbors: ["the-shattercore", "the-living-marsh"] },
+    { slug: "the-living-marsh", title: "Living Marsh", parentSlug: null, neighbors: ["the-mutation-belt"] },
   ],
 } as const;
