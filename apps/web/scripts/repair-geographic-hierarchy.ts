@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import dotenv from "dotenv";
 import { createPrismaClient, type Prisma } from "@habitat/db/client";
 import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
@@ -19,7 +20,9 @@ const confirmation = "--confirm=GLOBAL_REGION_HIERARCHY_DEVELOPMENT_REPAIR";
 
 function inputJson(value: Prisma.InputJsonValue) { return value; }
 
-async function geographicEntries(client: Prisma.TransactionClient | ReturnType<typeof createPrismaClient>) {
+type Database = ReturnType<typeof createPrismaClient>;
+
+async function geographicEntries(client: Prisma.TransactionClient | Database) {
   const rows = await client.storyEntry.findMany({
     where: { kind: "REGION", status: { in: ["DRAFT", "PROPOSED", "CANON"] } },
     orderBy: { slug: "asc" },
@@ -32,32 +35,22 @@ async function geographicEntries(client: Prisma.TransactionClient | ReturnType<t
   }));
 }
 
-async function main() {
-  const root = path.resolve(process.cwd(), "..", "..");
-  dotenv.config({ path: path.join(root, ".env"), quiet: true });
-  dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
-  const url = resolveAtlasDevelopmentDatabaseUrl(process.env);
-  if (!url) throw new Error("Geographic hierarchy repair target URL is unavailable.");
-  assertAtlasPersistentDevelopmentTarget(url);
-  const identity = new URL(url);
-  const database = identity.pathname.slice(1);
-  const db = createPrismaClient(url);
-  try {
+export async function applyGeographicHierarchyRepair(db: Database, options: { dryRun?: boolean } = {}) {
     await assertAtlasV2SchemaPresent(db);
+    const identity = await db.$queryRaw<Array<{ database: string }>>`SELECT current_database() AS database`;
+    const database = identity[0]?.database;
+    if (!database) throw new Error("Geographic hierarchy repair could not verify its database identity.");
     const current = await geographicEntries(db);
     const assessment = assessGeographicHierarchyRepair(current);
     const proposedDiff = geographicHierarchyRepairManifest.map((entry) => ({ id: entry.id, slug: entry.slug, before: { parent: entry.beforeParent, type: entry.beforeType }, after: { parent: entry.finalParent, type: entry.finalType } }));
     if (assessment.overall === "DRIFT") throw new Error(`Hierarchy repair source drifted from its exact all-before/all-after contract: ${stableAtlasJson(assessment, false)}`);
     if (assessment.overall === "ALREADY_APPLIED") {
       const audit = assertRepairedHierarchy(current as GeographicEntry[]);
-      process.stdout.write(stableAtlasJson({ contract: geographicHierarchyRepairContract, status: "ALREADY_APPLIED", database, mutations: 0, revisions: 0, invalidParents: audit.invalidParentCount, peninsulaVisible: audit.peninsulaVisible.map((entry) => entry.slug) }));
-      return;
+      return { contract: geographicHierarchyRepairContract, status: "ALREADY_APPLIED" as const, database, mutations: 0, revisions: 0, invalidParents: audit.invalidParentCount, peninsulaVisible: audit.peninsulaVisible.map((entry) => entry.slug) };
     }
-    if (!process.argv.includes("--apply")) {
-      process.stdout.write(stableAtlasJson({ contract: geographicHierarchyRepairContract, status: "PREVIEW", database, mutations: proposedDiff.length, proposedDiff, apply: `pnpm --filter @habitat/web geography:repair -- --apply ${confirmation}` }));
-      return;
+    if (options.dryRun) {
+      return { contract: geographicHierarchyRepairContract, status: "PREVIEW" as const, database, mutations: proposedDiff.length, proposedDiff };
     }
-    if (!process.argv.includes(confirmation)) throw new Error(`Development repair requires ${confirmation}.`);
 
     const result = await db.$transaction(async (tx) => {
       const beforeAtlas = await captureAtlasPreservationSnapshot(tx);
@@ -105,10 +98,25 @@ async function main() {
       atlasPreserved: stableAtlasJson(result.beforeAtlas, false) === stableAtlasJson(result.afterAtlas, false),
       atlasSnapshot: result.afterAtlas,
     };
-    process.stdout.write(stableAtlasJson({ ...receipt, logicalSha256: atlasSha256(stableAtlasJson(receipt, false)) }));
+    return { ...receipt, logicalSha256: atlasSha256(stableAtlasJson(receipt, false)) };
+}
+
+async function main() {
+  const root = path.resolve(process.cwd(), "..", "..");
+  dotenv.config({ path: path.join(root, ".env"), quiet: true });
+  dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
+  const url = resolveAtlasDevelopmentDatabaseUrl(process.env);
+  if (!url) throw new Error("Geographic hierarchy repair target URL is unavailable.");
+  const target = assertAtlasPersistentDevelopmentTarget(url);
+  const db = createPrismaClient(url);
+  try {
+    const apply = process.argv.includes("--apply");
+    if (apply && !process.argv.includes(confirmation)) throw new Error(`Development repair requires ${confirmation}.`);
+    const result = await applyGeographicHierarchyRepair(db, { dryRun: !apply });
+    process.stdout.write(stableAtlasJson({ ...result, database: target.database, ...(apply ? {} : { apply: `pnpm --filter @habitat/web geography:repair -- --apply ${confirmation}` }) }));
   } finally {
     await db.$disconnect();
   }
 }
 
-void main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) void main();

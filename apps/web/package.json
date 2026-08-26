@@ -32,6 +32,7 @@
     "bloomfall:atlas:activate": "tsx scripts/activate-bloomfall-local-atlas.ts",
     "bloomfall:atlas:verify": "tsx scripts/activate-bloomfall-local-atlas.ts --verify",
     "bloomfall:v3:verify": "tsx scripts/verify-bloomfall-v3-art.ts",
+    "bloomfall:v3:activate": "tsx scripts/activate-bloomfall-v3.ts",
     "geography:audit": "tsx scripts/audit-geographic-hierarchy.ts",
     "geography:audit:production": "tsx scripts/audit-geographic-hierarchy.ts --production",
     "geography:dossier:audit": "tsx scripts/audit-peninsula-dossier.ts",

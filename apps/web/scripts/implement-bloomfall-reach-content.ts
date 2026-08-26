@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import dotenv from "dotenv";
 import { createPrismaClient, type Prisma } from "@habitat/db/client";
@@ -16,24 +17,23 @@ import {
 import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2SchemaPresent } from "./lib/atlas-v2-activation";
 import { stableAtlasJson } from "./lib/atlas-integrity";
 
-const root = path.resolve(process.cwd(), "..", "..");
-dotenv.config({ path: path.join(root, ".env"), quiet: true });
-dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
-
 const confirmation = "--confirm=BLOOMFALL_CANONICAL_CONTENT_DEVELOPMENT_ONLY";
-const developmentUrl = resolveAtlasDevelopmentDatabaseUrl(process.env);
-if (!developmentUrl) throw new Error("Bloomfall content implementation requires HABITAT_ENVIRONMENT=development.");
-process.env.DATABASE_URL = developmentUrl;
-const target = assertAtlasPersistentDevelopmentTarget(developmentUrl);
-assertAtlasAuthoringEnvironment(process.env);
-const db = createPrismaClient(developmentUrl);
+type Database = ReturnType<typeof createPrismaClient>;
 type Transaction = Prisma.TransactionClient;
 
 function inputJson(value: unknown) { return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue; }
 function jsonEqual(left: unknown, right: unknown) { return stableAtlasJson(left, false) === stableAtlasJson(right, false); }
 function withoutPlaceConnections(value: unknown) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
-  return { ...(value as Record<string, unknown>), connections: [] };
+  const rest = { ...(value as Record<string, unknown>) };
+  delete rest.visualArt;
+  return { ...rest, connections: [] };
+}
+function withoutVisualArt(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  const rest = { ...(value as Record<string, unknown>) };
+  delete rest.visualArt;
+  return rest;
 }
 function stableUuid(key: string) {
   const source = createHash("sha256").update(`martino:bloomfall-reach:prompt-3:${key}`).digest("hex").slice(0, 32).split("");
@@ -153,11 +153,12 @@ async function createArc(tx: Transaction, actorUserId: string, arcSeed: (typeof 
   return true;
 }
 
-async function main() {
+export async function applyBloomfallCanonicalContent(db: Database, options: { dryRun?: boolean } = {}) {
   validateManifest();
   await assertAtlasV2SchemaPresent(db);
   const identity = await db.$queryRaw<Array<{ database: string }>>`SELECT current_database() AS database`;
-  if (identity[0]?.database !== "habitat_atlas_dev" || target.database !== "habitat_atlas_dev") throw new Error("Bloomfall implementation independently verified the wrong database identity.");
+  const database = identity[0]?.database;
+  if (!database) throw new Error("Bloomfall implementation could not verify its database identity.");
   const [region, existingNew, mainlineBefore, geometryBefore, routePathsBefore] = await Promise.all([
     db.storyEntry.findUnique({ where: { id: bloomfallRegionId } }),
     db.storyEntry.findMany({ where: { slug: { in: bloomfallNewEntries.map((entry) => entry.slug) } }, select: { slug: true } }),
@@ -166,16 +167,15 @@ async function main() {
     db.storyMapConnectionPath.count(),
   ]);
   if (!region || region.slug !== "bloomfall-reach" || region.title !== "Bloomfall Reach" || region.kind !== "REGION" || region.status !== "CANON") throw new Error("Canonical Bloomfall Reach source identity is missing or drifted.");
-  const preview = { status: "PREVIEW", database: target, region: { id: region.id, version: region.version }, manifest: { newEntries: bloomfallNewEntries.length, arcs: bloomfallArcs.length, semanticConnections: routes.length, scene: bloomfallScene.slug }, existingManifestEntries: existingNew.length, apply: `pnpm --filter @habitat/web bloomfall:implement --apply ${confirmation}` };
-  if (!process.argv.includes("--apply")) { process.stdout.write(stableAtlasJson(preview)); return; }
-  if (!process.argv.includes(confirmation)) throw new Error(`Development implementation requires ${confirmation}.`);
+  const preview = { status: "PREVIEW" as const, database, mutations: 0, region: { id: region.id, version: region.version }, manifest: { newEntries: bloomfallNewEntries.length, arcs: bloomfallArcs.length, semanticConnections: routes.length, scene: bloomfallScene.slug }, existingManifestEntries: existingNew.length };
+  if (options.dryRun) return preview;
 
   let mutations = 0;
   const result = await db.$transaction(async (tx) => {
     const actor = await tx.user.findFirst({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });
     if (!actor) throw new Error("Bloomfall implementation requires an active administrator for audit authorship.");
     const currentRegion = await tx.storyEntry.findUniqueOrThrow({ where: { id: bloomfallRegionId } });
-    const regionExact = currentRegion.summary === bloomfallMainRegion.summary && currentRegion.body === bloomfallMainRegion.body && jsonEqual(currentRegion.meta, bloomfallMainRegion.meta);
+    const regionExact = currentRegion.summary === bloomfallMainRegion.summary && currentRegion.body === bloomfallMainRegion.body && jsonEqual(withoutVisualArt(currentRegion.meta), bloomfallMainRegion.meta);
     if (!regionExact) {
       const initialState = currentRegion.version === 3;
       const connectionNormalization = currentRegion.version === 4 && currentRegion.summary === bloomfallMainRegion.summary && currentRegion.body === bloomfallMainRegion.body && jsonEqual(withoutPlaceConnections(currentRegion.meta), bloomfallMainRegion.meta);
@@ -190,7 +190,7 @@ async function main() {
       if (existing) {
         const coreExact = existing.kind === seed.kind && existing.title === seed.title && existing.summary === seed.summary && existing.body === seed.body && existing.status === "CANON";
         if (!coreExact) throw new Error(`Existing entry ${seed.slug} conflicts with the approved Bloomfall manifest.`);
-        if (!jsonEqual(existing.meta, seed.meta)) {
+        if (!jsonEqual(withoutVisualArt(existing.meta), seed.meta)) {
           const placeConnectionNormalization = seed.kind === "REGION" && jsonEqual(withoutPlaceConnections(existing.meta), seed.meta);
           if (!placeConnectionNormalization) throw new Error(`Existing entry ${seed.slug} metadata conflicts with the approved Bloomfall manifest.`);
           const updated = await tx.storyEntry.update({ where: { id: existing.id }, data: { meta: inputJson(seed.meta), version: { increment: 1 }, updatedByUserId: actor.id } });
@@ -251,7 +251,27 @@ async function main() {
   if (!jsonEqual(mainlineBefore, mainlineAfter)) throw new Error("A mainline arc changed during Bloomfall implementation.");
   if (!jsonEqual(geometryBefore, geometryAfter)) throw new Error("Existing Atlas geometry changed during Bloomfall implementation.");
   if (routePathsBefore !== routePathsAfter || bloomfallPaths !== 0) throw new Error("Route path geometry changed during Bloomfall implementation.");
-  process.stdout.write(stableAtlasJson({ status: mutations ? "BLOOMFALL_CANONICAL_CONTENT_APPLIED" : "ALREADY_APPLIED", database: target, actorUserId: result.actorUserId, mutations, mainlineArcsModified: 0, atlasGeometryChanged: false, bloomfallRoutePaths: bloomfallPaths, productionWrites: 0 }));
+  return { status: mutations ? "BLOOMFALL_CANONICAL_CONTENT_APPLIED" as const : "ALREADY_APPLIED" as const, database, actorUserId: result.actorUserId, mutations, mainlineArcsModified: 0, atlasGeometryChanged: false, bloomfallRoutePaths: bloomfallPaths };
 }
 
-void main().finally(() => db.$disconnect());
+async function main() {
+  const root = path.resolve(process.cwd(), "..", "..");
+  dotenv.config({ path: path.join(root, ".env"), quiet: true });
+  dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
+  const developmentUrl = resolveAtlasDevelopmentDatabaseUrl(process.env);
+  if (!developmentUrl) throw new Error("Bloomfall content implementation requires HABITAT_ENVIRONMENT=development.");
+  process.env.DATABASE_URL = developmentUrl;
+  const target = assertAtlasPersistentDevelopmentTarget(developmentUrl);
+  assertAtlasAuthoringEnvironment(process.env);
+  const db = createPrismaClient(developmentUrl);
+  try {
+    const apply = process.argv.includes("--apply");
+    if (apply && !process.argv.includes(confirmation)) throw new Error(`Development implementation requires ${confirmation}.`);
+    const result = await applyBloomfallCanonicalContent(db, { dryRun: !apply });
+    process.stdout.write(stableAtlasJson({ ...result, database: target, ...(apply ? { productionWrites: 0 } : { apply: `pnpm --filter @habitat/web bloomfall:implement --apply ${confirmation}` }) }));
+  } finally {
+    await db.$disconnect();
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) void main();

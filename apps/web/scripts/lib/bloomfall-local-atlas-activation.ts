@@ -19,7 +19,7 @@ async function scopedCounts(client: Client) {
   return { placements, nodes, boundaries, rings, references, paths };
 }
 
-export async function verifyBloomfallLocalAtlas(database: Database) {
+export async function verifyBloomfallLocalAtlas(database: Database, options: { expectedArtVersion?: string } = {}) {
   await assertAtlasV2SchemaPresent(database);
   const map = await database.storyMap.findUnique({
     where: { slug: manifest.scene.slug },
@@ -31,7 +31,8 @@ export async function verifyBloomfallLocalAtlas(database: Database) {
     },
   });
   if (!map) throw new Error("Bloomfall local scene is missing.");
-  if (map.parent?.slug !== manifest.scene.parentSlug || map.owner?.slug !== manifest.scene.ownerEntrySlug || map.artVersion !== manifest.scene.artVersion) throw new Error("Bloomfall local scene identity or activation metadata differs from the manifest.");
+  const expectedArtVersion = options.expectedArtVersion ?? manifest.scene.artVersion;
+  if (map.parent?.slug !== manifest.scene.parentSlug || map.owner?.slug !== manifest.scene.ownerEntrySlug || map.artVersion !== expectedArtVersion) throw new Error("Bloomfall local scene identity or activation metadata differs from the manifest.");
   const counts = await scopedCounts(database);
   const expectedCounts = { placements: 18, nodes: 8, boundaries: 10, rings: 3, references: 12, paths: 2 };
   if (stableAtlasJson(counts, false) !== stableAtlasJson(expectedCounts, false)) throw new Error(`Bloomfall Atlas counts differ: ${stableAtlasJson({ counts, expectedCounts }, false)}`);
@@ -96,6 +97,7 @@ export async function activateBloomfallLocalAtlas(database: Database) {
   const map = await database.storyMap.findUnique({ where: { slug: manifest.scene.slug }, include: { parent: { select: { slug: true } }, owner: { select: { slug: true } } } });
   if (!map || map.id !== "1d8fe347-8ce8-5bc1-ae5c-6ee5dedab54f" || map.parent?.slug !== manifest.scene.parentSlug || map.owner?.slug !== manifest.scene.ownerEntrySlug) throw new Error("Bloomfall local scene identity/ownership guard failed.");
   const counts = await scopedCounts(database);
+  if (map.artVersion === "v3") return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database, { expectedArtVersion: "v3" })) };
   if (map.artVersion === manifest.scene.artVersion) return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database)) };
   if (map.artVersion !== "foundation" || !counts || Object.values(counts).some((count) => count !== 0)) throw new Error("Bloomfall local scene is neither the clean foundation nor the exact activated state; activation refused.");
   const actor = await database.user.findFirst({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });

@@ -715,3 +715,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Verified 15 approved V3/reset candidates, four retained revise iterations, 55 evidence files, honest native resolutions, recorded SHA-256 values, inactive runtime copies, and a minimum internal QA score of 8.8
 - [x] Preserved zero StoryEntry, database, topology, POI-coordinate, route, campaign, application-logic, production-write, migration, configuration, Atlas, Codex, and production-art-activation changes; Prompt 6 remains unrun
 - [ ] Owner review of the V3 hard reset remains pending; V1/V2/V3 candidates remain preserved and inactive, and production release stays paused
+
+## 2026-08-25 - Bloomfall V3 repository and release engineering
+
+- [x] Selectively checkpointed the validated Bloomfall rename/content, geographic hierarchy, local Atlas, tests, manifests, and authoritative docs without staging rejected visual candidates or the local review/evidence tree
+- [x] Copied only the 15 owner-approved V3 rasters into stable private production destinations, registered two Atlas V3 keys and 13 canonical Codex bindings, and added byte-level SHA-256/dimension regression checks with V1/V2 selection fixed at zero
+- [x] Preserved separate development and production publication behavior: development can review V3, while production requires exact database-backed art markers and two explicit StoryMap V3 selections
+- [x] Refactored the proven development mutations into shared deterministic apply functions while retaining every `habitat_atlas_dev` wrapper guard
+- [x] Added a separate production/rehearsal entrypoint with explicit target, environment, database, owner-token, HEAD, build-ID, fresh verified backup, baseline fingerprint, exact-count, hierarchy, and V3 hash gates plus zero-write dry-run support
+- [x] Added negative tests for development/wrong targets, missing authorization, wrong HEAD/build/backup, placeholder and hierarchy drift, mismatched hashes, V1/V2 selection, and partial/conflicting activation
+- [ ] Disposable full-sequence dry-run, apply, second-run no-op, logical fingerprint comparison, browser QA, final test matrix, and push remain pending before Prompt 6A can be closed
+- [ ] Production cutover remains reserved for Prompt 6B; no production database, configuration, Codex, Atlas, or art publication change is authorized here
