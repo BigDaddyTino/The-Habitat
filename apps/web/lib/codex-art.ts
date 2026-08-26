@@ -17,7 +17,7 @@ import path from "node:path";
  * Server-only (node:fs). Never import from a "use client" module.
  */
 
-export const codexArtKinds = { systems: "systems", timeline: "timeline" } as const;
+export const codexArtKinds = { systems: "systems", timeline: "timeline", "bloomfall-v3": "bloomfall-v3" } as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
 export const codexArtContentTypes = {
@@ -30,6 +30,7 @@ export const codexArtContentTypes = {
 const artExtensions = ["png", "jpg", "jpeg", "webp"] as const;
 
 function directoryFor(kind: CodexArtKind) {
+  if (kind === "bloomfall-v3") return path.join(process.cwd(), "private", "codex-art", "bloomfall-v3");
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
 }
 

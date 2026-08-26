@@ -4,9 +4,11 @@ import path from "node:path";
 const atlasFiles = new Map<string, { filename: string; developmentOnly?: boolean }>([
   ["martino-world:v1", { filename: "martino-world-map-v1.png" }],
   ["martino-world:v2", { filename: "candidates/martino-world-map-v2-clean-production-candidate.png" }],
+  ["martino-world:v3", { filename: "martino-world-map-v3.png" }],
   ["martino-starting-island:v1", { filename: "martino-starting-island-map-v1.png" }],
   ["martino-port-arcadia:v2", { filename: "martino-port-arcadia-map-v2.png" }],
   ["martino-bloomfall-reach:v1", { filename: "candidates/martino-bloomfall-reach-map-v1.png", developmentOnly: true }],
+  ["martino-bloomfall-reach:v3", { filename: "martino-bloomfall-reach-map-v3.png" }],
 ]);
 
 /**

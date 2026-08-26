@@ -15,6 +15,7 @@ import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
 import { plainStoryProse } from "@/lib/story-prose";
 import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
+import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
@@ -401,6 +402,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           const characterKeyart = entry.kind === "CHARACTER" ? getCharacterKeyart(entry.slug) : null;
           const creatureKeyart = entry.kind === "CREATURE" ? getCreatureKeyart(entry.slug) : null;
           const systemArt = entry.kind === "SYSTEM" ? getSystemArt(entry.slug) : null;
+          const bloomfallV3Art = getBloomfallV3CodexArt(entry.slug, entry.meta);
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
           const characterFactionBrands = entry.kind === "CHARACTER"
@@ -447,7 +449,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-card-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-card-keyart" src={systemArt} /> : entry.kind === "SYSTEM" ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{systemArtSlot(entry.slug)}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              </> : bloomfallV3Art ? <img alt={`${entry.title} Bloomfall V3 key art`} className="entity-card-keyart" src={bloomfallV3Art} /> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-card-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-card-keyart" src={systemArt} /> : entry.kind === "SYSTEM" ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{systemArtSlot(entry.slug)}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}
