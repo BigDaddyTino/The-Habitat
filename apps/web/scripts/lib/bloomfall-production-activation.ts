@@ -108,13 +108,22 @@ export async function captureBloomfallActivationSnapshot(database: Database) {
 const beforeCounts = { storyEntries: 175, storyMaps: 3, placements: 36, nodePlacements: 10, topologyNodes: 19, boundaries: 26, rings: 11, references: 43, worldConnections: 25, connectionPaths: 9, arcs: 7 };
 const afterCounts = { storyEntries: 238, storyMaps: 4, placements: 54, nodePlacements: 10, topologyNodes: 27, boundaries: 36, rings: 14, references: 55, worldConnections: 27, connectionPaths: 11, arcs: 13 };
 /**
- * The Codex systems integration adds the two dossiers Bloomfall had no page
- * for — Bloomstorms and Bloomfall Travel Conditions — and nothing else that
- * this snapshot counts. It is a later state of the same applied world, so the
- * V3 classifier must recognise it rather than read it as drift.
+ * Bloomfall has been released in stages, and each stage leaves the same world
+ * in a later valid state. The classifier recognises every one of them so a
+ * completed release does not read as drift the next time a tool looks.
+ *
+ *   V3 cutover              the counts above
+ *   Codex systems           + the two dossiers Bloomfall had no page for
+ *   Conditional alignments  + the two conditional base alignments and their
+ *                             semantic connections
  */
 const codexIntegrationCounts = { ...afterCounts, storyEntries: afterCounts.storyEntries + 2 };
-const appliedCountSets = [afterCounts, codexIntegrationCounts];
+const conditionalAtlasCounts = {
+  ...codexIntegrationCounts,
+  worldConnections: codexIntegrationCounts.worldConnections + 2,
+  connectionPaths: codexIntegrationCounts.connectionPaths + 2,
+};
+const appliedCountSets = [afterCounts, codexIntegrationCounts, conditionalAtlasCounts];
 
 function hierarchyExpected(snapshot: BloomfallActivationSnapshot, phase: "before" | "after") {
   return geographicHierarchyRepairManifest.every((expected) => {
