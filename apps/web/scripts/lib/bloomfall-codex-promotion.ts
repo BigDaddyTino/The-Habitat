@@ -3,8 +3,8 @@ import type { Prisma } from "@habitat/db/client";
 import { metaSchemasByKind } from "../../lib/story-meta-schemas";
 import {
   bloomfallAllCrossLinkBlocks,
-  bloomfallIntegrationBaselineBody,
   bloomfallIntegrationExpectedBody,
+  bloomfallIntegrationPriorBodies,
   bloomfallIntegrationRecords,
 } from "../../lib/bloomfall-codex-integration";
 import { bloomfallNewEntries } from "../../lib/bloomfall-reach-content";
@@ -68,7 +68,7 @@ export function validateBloomfallCodexManifest() {
   for (const block of bloomfallAllCrossLinkBlocks) {
     if (seen.has(block.slug)) throw new Error(`Duplicate cross-link block for ${block.slug}.`);
     seen.add(block.slug);
-    if (bloomfallIntegrationBaselineBody(block.slug) === null) throw new Error(`No approved baseline body is known for ${block.slug}.`);
+    if (bloomfallIntegrationPriorBodies(block.slug).length === 0) throw new Error(`No approved prior body is known for ${block.slug}.`);
   }
 }
 
@@ -106,7 +106,7 @@ export async function planBloomfallCodexIntegration(db: Client): Promise<Bloomfa
     if (!current) throw new Error(`Cross-link target ${block.slug} is missing.`);
     if (current.kind !== block.kind) throw new Error(`${block.slug} is stored as ${current.kind}, not ${block.kind}.`);
     if (current.body === bloomfallIntegrationExpectedBody(block.slug)) { plan.unchanged.push(block.slug); continue; }
-    if (current.body !== bloomfallIntegrationBaselineBody(block.slug)) throw new Error(`${block.slug} has edits outside its approved baseline; refusing to append.`);
+    if (!bloomfallIntegrationPriorBodies(block.slug).includes(current.body ?? "")) throw new Error(`${block.slug} has edits outside its approved prior states; refusing to append.`);
     plan.link.push(block.slug);
   }
 
@@ -144,8 +144,7 @@ export async function applyBloomfallCodexIntegration(tx: Transaction, actorUserI
       continue;
     }
     if (current.title === record.title && current.summary === record.summary && current.body === record.body && jsonEqual(withoutVisualArt(current.meta), record.meta)) continue;
-    const seed = packageBySlug.get(record.slug);
-    if (!seed || current.body !== seed.body) throw new Error(`${record.slug} changed after the plan was taken; transaction stopped.`);
+    if (!bloomfallIntegrationPriorBodies(record.slug).includes(current.body ?? "")) throw new Error(`${record.slug} changed after the plan was taken; transaction stopped.`);
     const before = { title: current.title, summary: current.summary, body: current.body, meta: current.meta, version: current.version };
     const updated = await tx.storyEntry.update({ where: { id: current.id }, data: {
       title: record.title, summary: record.summary, body: record.body,
@@ -165,7 +164,7 @@ export async function applyBloomfallCodexIntegration(tx: Transaction, actorUserI
     const current = await tx.storyEntry.findUniqueOrThrow({ where: { slug: block.slug } });
     const expected = bloomfallIntegrationExpectedBody(block.slug);
     if (current.body === expected) continue;
-    if (current.body !== bloomfallIntegrationBaselineBody(block.slug)) throw new Error(`${block.slug} changed after the plan was taken; transaction stopped.`);
+    if (!bloomfallIntegrationPriorBodies(block.slug).includes(current.body ?? "")) throw new Error(`${block.slug} changed after the plan was taken; transaction stopped.`);
     const before = { body: current.body, version: current.version };
     const updated = await tx.storyEntry.update({ where: { id: current.id }, data: { body: expected, version: { increment: 1 }, updatedByUserId: actorUserId } });
     await tx.storyRevision.create({ data: {

@@ -211,8 +211,11 @@ function RouteClasses() {
     <h3 className="bloomfall-group-heading">The twelve classified routes <span>{bloomfallRouteRecords.length}</span></h3>
     <div className="bloomfall-index-scroll">
       <table className="bloomfall-index">
-        <caption>Every Bloomfall route candidate, in the classes the route review settled on. Four are drawn on the Atlas; eight deliberately are not.</caption>
-        <thead><tr><th scope="col">Class</th><th scope="col">Route</th><th scope="col">Between</th><th scope="col">Condition owner</th><th scope="col">On the Atlas</th></tr></thead>
+        {/* "Base topology" rather than "on the Atlas": four alignments are
+            stable enough to persist, and eight deliberately are not. Which of
+            those four the Atlas currently draws is a separate release. */}
+        <caption>Every Bloomfall route candidate, in the classes the route review settled on. Four are stable enough to hold a persisted alignment; eight deliberately are not.</caption>
+        <thead><tr><th scope="col">Class</th><th scope="col">Route</th><th scope="col">Between</th><th scope="col">Condition owner</th><th scope="col">Base topology</th></tr></thead>
         <tbody>
           {routeClassOrder.map((classKey) => {
             const rows = bloomfallRouteRecords.filter((route) => route.classKey === classKey);
@@ -221,7 +224,7 @@ function RouteClasses() {
               <td><strong>{route.name}</strong><span className="bloomfall-index-note">{route.note}</span></td>
               <td>{route.endpoints}</td>
               <td>{route.conditionOwner}</td>
-              <td>{route.persisted ? "Drawn" : "Not drawn"}</td>
+              <td>{route.persisted ? "Persisted alignment" : "Not persisted"}</td>
             </tr>);
           })}
         </tbody>

@@ -904,6 +904,23 @@ export function bloomfallIntegrationBaselineBody(slug: string): string | null {
   return packageBodyBySlug.get(slug) ?? null;
 }
 
+/**
+ * Every approved state a record may be found in before this phase lands.
+ *
+ * A Codex that has already received the creature enhancement holds the
+ * rendered Prompt B dossier; one that has not — production, until this
+ * release — still holds the original Prompt 3 body. Both are reviewed states,
+ * and both promote to the same target, so a release accepts either and
+ * refuses anything else.
+ */
+export function bloomfallIntegrationPriorBodies(slug: string): string[] {
+  const bodies = [
+    slug === bloomfallReachSlug ? bloomfallMainRegion.body : packageBodyBySlug.get(slug) ?? null,
+    bloomfallIntegrationBaselineBody(slug),
+  ].filter((body): body is string => body !== null);
+  return [...new Set(bodies)];
+}
+
 /** What the record must hold once this phase has been applied. */
 export function bloomfallIntegrationExpectedBody(slug: string): string | null {
   const record = bloomfallIntegrationBySlug.get(slug);
