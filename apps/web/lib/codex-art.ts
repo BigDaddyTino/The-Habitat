@@ -17,7 +17,13 @@ import path from "node:path";
  * Server-only (node:fs). Never import from a "use client" module.
  */
 
-export const codexArtKinds = { systems: "systems", timeline: "timeline", "bloomfall-v3": "bloomfall-v3" } as const;
+export const codexArtKinds = {
+  systems: "systems",
+  timeline: "timeline",
+  "bloomfall-v3": "bloomfall-v3",
+  "bloomfall-adaptive-p0": "bloomfall-adaptive-p0",
+  "bloomfall-adaptive-p0-source": "bloomfall-adaptive-p0-source",
+} as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
 export const codexArtContentTypes = {
@@ -31,7 +37,13 @@ const artExtensions = ["png", "jpg", "jpeg", "webp"] as const;
 
 function directoryFor(kind: CodexArtKind) {
   if (kind === "bloomfall-v3") return path.join(process.cwd(), "private", "codex-art", "bloomfall-v3");
+  if (kind === "bloomfall-adaptive-p0") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "candidates");
+  if (kind === "bloomfall-adaptive-p0-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "sources");
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
+}
+
+function isDevelopmentReviewKind(kind: string) {
+  return kind === "bloomfall-adaptive-p0" || kind === "bloomfall-adaptive-p0-source";
 }
 
 /** The URL for an entry's art, or null when nobody has dropped one in yet. */
@@ -56,8 +68,9 @@ export function codexArtSlot(kind: CodexArtKind, slug: string) {
  * is no way to express a traversal — and the resolved path is re-checked to be
  * inside its directory regardless.
  */
-export function resolveCodexArtFile(kind: string, file: string): string | null {
+export function resolveCodexArtFile(kind: string, file: string, environment: Readonly<Record<string, string | undefined>> = process.env): string | null {
   if (!(kind in codexArtKinds)) return null;
+  if (isDevelopmentReviewKind(kind) && environment.HABITAT_ENVIRONMENT !== "development") return null;
   const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)\.(png|jpg|jpeg|webp)$/.exec(file);
   if (!match) return null;
   const directory = directoryFor(kind as CodexArtKind);

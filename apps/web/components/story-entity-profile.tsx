@@ -33,6 +33,7 @@ import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
 import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
+import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
 /** One mission in a companion's chain, in order, statused. */
@@ -276,6 +277,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           <Fact label="Story stage" value={stageLabel(meta.stage)} />
         </> : null}
       </dl> : null}
+
+      <BloomfallAdaptiveMutationPanel entrySlug={entry.slug} />
 
       <div className="entity-profile-layout">
         <article className="entity-profile-narrative">

@@ -778,3 +778,13 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Planned 27 new images across P0/P1/P2/P3 with exact continuity requirements and reuse of the approved Bellwether and Switchmother V3 heroes; generated and activated no images
 - [x] Documented current Codex UI/schema limits, future shared-type and migration needs, the complete 23-part Prompt B report, owner decisions, and a gated P0-only Prompt C recommendation in `Docs/BLOOMFALL_CREATURE_MUTATION_CLASSIFICATION.md`
 - [x] Independent audit passes with zero broken references, zero schema/runtime changes, and zero production writes
+
+## 2026-08-26 - Bloomfall Adaptive Mutation P0 visual proof
+
+- [x] Generated the exact twelve Prompt B P0 finals: five Blackbloom Hart images, five Latchhound images, and two Last Shift continuity images; retained four revision attempts and generated no P1/P2/P3 or bonus-creature art
+- [x] Locked a 20-record typed visual manifest covering twelve approved candidates, four revisions, and four unchanged V3 context/comparison references with dimensions, SHA-256, iteration, binding, continuity, alt text, and eight-category QA scores
+- [x] Passed anatomy and state continuity for Hart and Latchhound; preserved the Last Shift's three worker identities, PPE, tools, bay, functional industrial logic, and unresolved consciousness across before/current evidence
+- [x] Added a protected DEVELOPMENT-only owner gallery and dossier panels for Hart, Latchhound, Last Shift, and the explicit NONE example Glasswing Kite; production resolvers and presentation remain closed
+- [x] Captured three desktop contact sheets and a 390 × 844 mobile evidence frame with zero document overflow, loaded native images, and contained horizontal state navigation
+- [x] Passed the 20-file P0 audit, 425 web tests, strict typecheck, creature/regional audits, lint, production build, read-only 13-record production fingerprint comparison, and final diff checks
+- [ ] Owner approval of the twelve candidates remains the only P0 gate; Prompt C2 is not authorized or started
