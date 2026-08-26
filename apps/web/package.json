@@ -27,6 +27,8 @@
     "atlas:routes:verify": "tsx scripts/verify-canonical-atlas-routes.ts",
     "bloomfall:implement": "tsx scripts/implement-bloomfall-reach-content.ts",
     "bloomfall:audit": "tsx scripts/audit-bloomfall-reach-content.ts",
+    "bloomfall:creatures:apply": "tsx scripts/apply-bloomfall-creature-enhancements.ts",
+    "bloomfall:creatures:audit": "tsx scripts/audit-bloomfall-creature-enhancements.ts",
     "bloomfall:atlas:manifest": "tsx scripts/plan-bloomfall-local-atlas.ts --write",
     "bloomfall:atlas:rehearse": "tsx scripts/rehearse-bloomfall-local-atlas.ts",
     "bloomfall:atlas:activate": "tsx scripts/activate-bloomfall-local-atlas.ts",

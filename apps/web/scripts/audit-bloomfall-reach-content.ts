@@ -4,6 +4,7 @@ import { createPrismaClient } from "@habitat/db/client";
 import { storyProseLinks } from "../lib/story-prose";
 import { storyAtlasArtRegistered } from "../lib/story-atlas-art";
 import { metaSchemasByKind } from "../lib/story-meta-schemas";
+import { bloomfallCreatureEnhancementBySlug, renderBloomfallCreatureEnhancement } from "../lib/bloomfall-creature-enhancements";
 import {
   bloomfallAberrants,
   bloomfallArcs,
@@ -68,7 +69,9 @@ async function main() {
     const stored = storedBySlug.get(seed.slug);
     check(Boolean(stored), `Missing canonical entry ${seed.slug}.`);
     if (!stored) continue;
-    check(stored.kind === seed.kind && stored.title === seed.title && stored.summary === seed.summary && stored.body === seed.body && stored.status === "CANON" && jsonEqual(stored.meta, seed.meta), `Canonical entry ${seed.slug} differs from its source manifest.`);
+    const enhancement = bloomfallCreatureEnhancementBySlug.get(seed.slug);
+    const expectedBody = enhancement ? renderBloomfallCreatureEnhancement(enhancement) : seed.body;
+    check(stored.kind === seed.kind && stored.title === seed.title && stored.summary === seed.summary && stored.body === expectedBody && stored.status === "CANON" && jsonEqual(stored.meta, seed.meta), `Canonical entry ${seed.slug} differs from its latest approved source manifest.`);
     const schema = metaSchemasByKind[seed.kind];
     if (schema) check(schema.safeParse(stored.meta).success, `${seed.slug} fails its typed metadata schema.`);
   }

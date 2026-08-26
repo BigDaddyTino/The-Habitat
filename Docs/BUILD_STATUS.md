@@ -757,3 +757,24 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Aligned the hierarchy-repair manifest, atlas seeds, shared Bloomfall canon, and test fixtures in lockstep; left frozen atlas migration artifacts untouched
 - [x] Applied to development and production behind fresh verified backups; both report ALREADY_APPLIED / 0 mutations on rerun, hierarchy audits show zero defects, and the Bloomfall V3 activation fingerprint is byte-identical before and after
 - [ ] HabitatWeb restart onto build Cb-qCH9ihKFBPUCvZWldT pending
+
+## 2026-08-26 - Bloomfall regional simulation system canon
+
+- [x] Re-read the live production Codex read-only across all 28 requested records, including the existing Systems hierarchy, global Environment/Weather/Magic/Harvest/Damage dependencies, three Bloomfall subregions, Southreach, the Bloomfall, and four named Aberrants; all requested records were present and production writes were zero
+- [x] Locked the Bloomfall-only causal network as Reactor -> Essence -> Environment -> Life -> Player Interference -> Consequences, with Living Marsh absorption as the stabilizing feedback and no unexplained random source terms
+- [x] Defined an event-driven 18-24-cell ownership model, internal 0-100 saturation with four readable bands, explicit legal sources/sinks, subregion tendencies, the seven-state Reactor Cycle machine, and five-stage Bloomstorm progression
+- [x] Defined two-axis Adaptive Mutation eligibility/designation, optional functional states, bounded environmental/combat inputs, propagation and persistence rules, promoted-survivor caps, named Aberrant mobility/intel/life-state architecture, and per-tier Codex image requirements without assigning current species
+- [x] Defined harvesting consequence classes, local pressure/sink recovery, ten cross-system gameplay scenarios, MVP/Phase 2/Aspirational boundaries, world-authoritative save/network state, optional Atlas overlays, and Permanent/Conditional/Dynamic/Deferred route classes
+- [x] Specified the six Systems-area page plan, typed future content metadata, exact Prompt B/Prompt C responsibilities, future Unreal integration needs, six AAA system visual briefs, and same-species mutation progression standards in `Docs/BLOOMFALL_REGIONAL_SIMULATION_ARCHITECTURE.md`
+- [x] Kept production data, migrations, configuration, Codex records, Atlas state, runtime code, creature assignments, and image generation unchanged
+
+## 2026-08-26 - Bloomfall creature Codex and Adaptive Mutation classification
+
+- [x] Audited the twelve live Bloomfall creature records plus Maintenance Unit M-17, their Beasts/Human/Monstrosities taxonomy parents, six ordinary Human characters, and seven living ecological Region/Item surfaces without misfiling ecosystems or resources as creatures
+- [x] Classified all thirteen target records: four `NONE`, one `MINOR_ADAPTIVE`, two `FUNCTIONAL_ADAPTIVE`, two `ADVANCED_ADAPTIVE`, and four `EXCEPTIONAL_ABERRANT`; kept Blackbloom exposure, Adaptive Mutation, Aberrant designation, Monstrosity provenance, and Seven-Phase Corruption distinct
+- [x] Authored finite species state paths for Hart, Rootback, Mirejaw, Sump Eel, and Latchhound; bounded combat families; reactor/environment transfer rules; Bloomstorm behavior; saturation tolerance; ecology; harvesting consequence; visual continuity; and promotion eligibility limited to Hart, Mirejaw, and Latchhound
+- [x] Preserved Bellwether, Switchmother, Old Drowner, and Last Shift as unique named histories rather than generic ladders; preserved Mender as corrupted maintenance integration and Bloommarked Remnant as a case-specific Human classification
+- [x] Added a typed development source manifest, deterministic prose renderer, strict tests, guarded preview/apply command, serializable revision audit trail, and independent exact-content audit; enhanced thirteen records in loopback `habitat_atlas_dev` and corrected one canon-name typo through the same audited path
+- [x] Planned 27 new images across P0/P1/P2/P3 with exact continuity requirements and reuse of the approved Bellwether and Switchmother V3 heroes; generated and activated no images
+- [x] Documented current Codex UI/schema limits, future shared-type and migration needs, the complete 23-part Prompt B report, owner decisions, and a gated P0-only Prompt C recommendation in `Docs/BLOOMFALL_CREATURE_MUTATION_CLASSIFICATION.md`
+- [x] Independent audit passes with zero broken references, zero schema/runtime changes, and zero production writes

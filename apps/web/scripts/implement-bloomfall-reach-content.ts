@@ -7,6 +7,7 @@ import { validateAtlasWorldConnection } from "@habitat/shared";
 import { assertAtlasAuthoringEnvironment } from "../lib/atlas-authoring-environment";
 import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
 import { metaSchemasByKind } from "../lib/story-meta-schemas";
+import { bloomfallCreatureEnhancementBySlug, renderBloomfallCreatureEnhancement } from "../lib/bloomfall-creature-enhancements";
 import {
   bloomfallArcs,
   bloomfallMainRegion,
@@ -188,7 +189,9 @@ export async function applyBloomfallCanonicalContent(db: Database, options: { dr
     for (const seed of bloomfallNewEntries) {
       const existing = await tx.storyEntry.findUnique({ where: { slug: seed.slug } });
       if (existing) {
-        const coreExact = existing.kind === seed.kind && existing.title === seed.title && existing.summary === seed.summary && existing.body === seed.body && existing.status === "CANON";
+        const enhancement = bloomfallCreatureEnhancementBySlug.get(seed.slug);
+        const approvedBody = enhancement ? renderBloomfallCreatureEnhancement(enhancement) : seed.body;
+        const coreExact = existing.kind === seed.kind && existing.title === seed.title && existing.summary === seed.summary && (existing.body === seed.body || existing.body === approvedBody) && existing.status === "CANON";
         if (!coreExact) throw new Error(`Existing entry ${seed.slug} conflicts with the approved Bloomfall manifest.`);
         if (!jsonEqual(withoutVisualArt(existing.meta), seed.meta)) {
           const placeConnectionNormalization = seed.kind === "REGION" && jsonEqual(withoutPlaceConnections(existing.meta), seed.meta);
