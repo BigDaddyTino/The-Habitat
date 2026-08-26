@@ -48,6 +48,7 @@
     "bloomfall:integration:apply": "tsx scripts/apply-bloomfall-codex-integration.ts",
     "bloomfall:integration:audit": "tsx scripts/audit-bloomfall-codex-integration.ts",
     "bloomfall:integration:production-audit": "tsx scripts/audit-bloomfall-codex-integration-production.ts",
+    "bloomfall:integration:audit:production": "tsx scripts/audit-bloomfall-codex-integration.ts --production",
     "bloomfall:systems:qa": "tsx scripts/qa-bloomfall-systems.tsx --capture",
     "bloomfall:promote:dry-run": "tsx scripts/promote-bloomfall-codex-integration.ts --dry-run",
     "bloomfall:promote": "tsx scripts/promote-bloomfall-codex-integration.ts --apply",

@@ -36,18 +36,30 @@ const root = path.resolve(process.cwd(), "..", "..");
 dotenv.config({ path: path.join(root, ".env"), quiet: true });
 dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
 
-const developmentUrl = (() => {
+/**
+ * The audit reads, never writes, so it runs against either Codex. Development
+ * is the default; `--production` points the same assertions at the canonical
+ * database so a release can prove what it actually delivered.
+ */
+const auditProduction = process.argv.includes("--production");
+
+const auditUrl = (() => {
   const source = process.env.DATABASE_URL;
-  if (process.env.HABITAT_ENVIRONMENT !== "development") throw new Error("The Bloomfall Codex integration audit requires HABITAT_ENVIRONMENT=development.");
   if (!source) throw new Error("The Bloomfall Codex integration audit requires a base DATABASE_URL.");
   const url = new URL(source);
   if (!["localhost", "127.0.0.1", "::1"].includes(url.hostname.toLowerCase())) throw new Error("The Bloomfall Codex integration audit requires a loopback PostgreSQL base URL.");
+  if (auditProduction) {
+    url.pathname = "/habitat";
+    return url.toString();
+  }
+  if (process.env.HABITAT_ENVIRONMENT !== "development") throw new Error("The Bloomfall Codex integration audit requires HABITAT_ENVIRONMENT=development, or an explicit --production run.");
   url.pathname = "/habitat_atlas_dev";
   return url.toString();
 })();
 
-const target = assertAtlasPersistentDevelopmentTarget(developmentUrl);
-const db = createPrismaClient(developmentUrl);
+const target = auditProduction ? { database: "habitat", hostname: new URL(auditUrl).hostname, port: new URL(auditUrl).port || "5432" } : assertAtlasPersistentDevelopmentTarget(auditUrl);
+const db = createPrismaClient(auditUrl);
+const expectedDatabase = auditProduction ? "habitat" : "habitat_atlas_dev";
 
 const routeManifestPath = path.join(root, "Docs", "bloomfall-routes", "bloomfall-route-status-manifest.json");
 
@@ -70,7 +82,7 @@ function withoutVisualArt(value: unknown) {
 async function main() {
   await assertAtlasV2SchemaPresent(db);
   const identity = await db.$queryRaw<Array<{ database: string; schema: string }>>`SELECT current_database() AS database, current_schema() AS schema`;
-  if (identity[0]?.database !== "habitat_atlas_dev") throw new Error("The Bloomfall Codex integration audit independently verified the wrong database.");
+  if (identity[0]?.database !== expectedDatabase) throw new Error(`The Bloomfall Codex integration audit independently verified the wrong database: expected ${expectedDatabase}, found ${identity[0]?.database}.`);
 
   const failures: string[] = [];
   const check = (condition: unknown, message: string) => { if (!condition) failures.push(message); };
@@ -307,6 +319,8 @@ async function main() {
   const report = {
     contract: `${bloomfallCodexIntegrationContract}-audit`,
     contractVersion: bloomfallCodexIntegrationVersion,
+    environment: auditProduction ? "PRODUCTION" : "DEVELOPMENT",
+    writes: 0,
     status: failures.length ? "FAIL" : "PASS",
     database: { ...target, schema: identity[0]?.schema },
     systemPages: bloomfallIntegrationRecords.map((record) => ({ slug: record.slug, authoring: record.authoring, title: record.title })),
