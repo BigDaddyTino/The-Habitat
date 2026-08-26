@@ -75,3 +75,11 @@ The development commands remain locked to `habitat_atlas_dev`. Their semantic ap
 Each semantic stage runs in its existing serializable, audited, idempotent transaction. Publication is a separate serializable transaction because it is the explicit application/DB visibility boundary. The sequence is staged rather than one cross-feature transaction; Prompt 6B must take and verify the fresh production backup immediately before the first write. Every stage has a deterministic already-applied path, and a partial state fails the outer baseline classifier instead of continuing silently.
 
 No migration is part of this release package. No service restart, deployment, production configuration change, production write, or production publication occurred while preparing this contract.
+
+## Rehearsal evidence
+
+The full guarded sequence was exercised against two independently created disposable clones of the exact canonical production baseline. The dry-run produced zero writes. Both clean applies converged to logical fingerprint `c3fd0ff0a3ae73fc7b18198c717b48e579b1d764f7ae821b01fccc49741c7a40`, 238 StoryEntries, four maps, 54 placements, 27/36/14/55 topology, 27 semantic connections, 11 paths, 13 arcs, and 1227 revisions. A second invocation on the first clone returned `ALREADY_APPLIED`, made zero mutations, and left both fingerprint and revision count unchanged.
+
+All 15 registered rasters decoded at their exact native dimensions in browser QA at desktop and mobile viewports. The two disposable databases were dropped after verification. The machine-readable record is `Docs/bloomfall-v3-release-engineering-verification.json`.
+
+This rehearsal is engineering evidence only. It does not satisfy Prompt 6B's fresh production backup, deployed build, exact final release HEAD, immediate baseline, or owner-token requirements.

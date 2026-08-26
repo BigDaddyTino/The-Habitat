@@ -714,7 +714,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Built 15 V2-versus-V3/reset comparisons, 37 native-pixel crops, world/local alignment overlays, contact sheet, manifest, canon-direction document, final prompt record, owner report, and responsive private review gallery
 - [x] Verified 15 approved V3/reset candidates, four retained revise iterations, 55 evidence files, honest native resolutions, recorded SHA-256 values, inactive runtime copies, and a minimum internal QA score of 8.8
 - [x] Preserved zero StoryEntry, database, topology, POI-coordinate, route, campaign, application-logic, production-write, migration, configuration, Atlas, Codex, and production-art-activation changes; Prompt 6 remains unrun
-- [ ] Owner review of the V3 hard reset remains pending; V1/V2/V3 candidates remain preserved and inactive, and production release stays paused
+- [x] Owner approved the 15 V3 hard-reset candidates for release engineering; V1/V2 history remains preserved, and production release stays paused behind the Prompt 6B activation gates
 
 ## 2026-08-25 - Bloomfall V3 repository and release engineering
 
@@ -724,5 +724,7 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Refactored the proven development mutations into shared deterministic apply functions while retaining every `habitat_atlas_dev` wrapper guard
 - [x] Added a separate production/rehearsal entrypoint with explicit target, environment, database, owner-token, HEAD, build-ID, fresh verified backup, baseline fingerprint, exact-count, hierarchy, and V3 hash gates plus zero-write dry-run support
 - [x] Added negative tests for development/wrong targets, missing authorization, wrong HEAD/build/backup, placeholder and hierarchy drift, mismatched hashes, V1/V2 selection, and partial/conflicting activation
-- [ ] Disposable full-sequence dry-run, apply, second-run no-op, logical fingerprint comparison, browser QA, final test matrix, and push remain pending before Prompt 6A can be closed
+- [x] Exercised zero-write dry-run, clean apply, and zero-mutation second invocation on a disposable production clone; repeated the clean apply on a second independent clone and obtained the same exact logical fingerprint and counts
+- [x] Browser-rendered all 15 registered V3 assets at desktop and mobile viewports with exact native dimensions and zero broken images; authenticated application routes remain covered by protected-route and resolver tests without weakening sign-in
+- [x] Passed 415 web tests, three Codex Sync tests, strict web/shared/database/Codex Sync typechecks, Prisma validation, web lint, all Bloomfall/geography/Atlas/V2/parity/Bundle V4 verifiers, production read-only hierarchy comparison, and final diff checks; normal-workflow push is the remaining closeout action
 - [ ] Production cutover remains reserved for Prompt 6B; no production database, configuration, Codex, Atlas, or art publication change is authorized here

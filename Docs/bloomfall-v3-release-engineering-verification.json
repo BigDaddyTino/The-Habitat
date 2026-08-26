@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-08-25",
+  "releaseHead": "f750bca0ec5acc50bd8cf6ef3747d79abbfade19",
+  "buildId": "nFaja59YKyleuISuI7iW-",
+  "production": {
+    "writes": 0,
+    "migrations": 0,
+    "configurationChanges": 0,
+    "codexChanges": 0,
+    "atlasChanges": 0,
+    "artActivation": 0
+  },
+  "initialBaseline": {
+    "fingerprint": "98fc74662dc0c490ee23637d737ab99a25bf79c28ddebb946448d9d8d81ebe27",
+    "storyEntries": 175,
+    "storyMaps": 3,
+    "storyMapPlacements": 36,
+    "storyMapNodePlacements": 10,
+    "topology": {
+      "nodes": 19,
+      "boundaries": 26,
+      "rings": 11,
+      "regionRefs": 43
+    },
+    "semanticConnections": 25,
+    "paths": 9,
+    "arcs": 7,
+    "revisions": 1018,
+    "worldArtVersion": "v1"
+  },
+  "rehearsal": {
+    "dryRunWrites": 0,
+    "firstApplyMutations": 114,
+    "secondApplyMutations": 0,
+    "secondApplyStatus": "ALREADY_APPLIED",
+    "freshCloneCount": 2,
+    "deterministicFinalFingerprint": "c3fd0ff0a3ae73fc7b18198c717b48e579b1d764f7ae821b01fccc49741c7a40",
+    "publicationFingerprintPrefix": "e8baa547",
+    "final": {
+      "storyEntries": 238,
+      "storyMaps": 4,
+      "storyMapPlacements": 54,
+      "storyMapNodePlacements": 10,
+      "topology": {
+        "nodes": 27,
+        "boundaries": 36,
+        "rings": 14,
+        "regionRefs": 55
+      },
+      "semanticConnections": 27,
+      "paths": 11,
+      "arcs": 13,
+      "revisions": 1227,
+      "worldArtVersion": "v3",
+      "bloomfallArtVersion": "v3",
+      "v3AtlasSelections": 2,
+      "v3CodexBindings": 13
+    }
+  },
+  "visualVerification": {
+    "registeredAssets": 15,
+    "v1Selections": 0,
+    "v2Selections": 0,
+    "v3Selections": 15,
+    "desktopBrowserRenders": 15,
+    "mobileBrowserRenders": 15,
+    "brokenImages": 0
+  },
+  "qa": {
+    "webTests": {
+      "passed": 415,
+      "failed": 0
+    },
+    "codexSyncTests": {
+      "passed": 3,
+      "failed": 0
+    },
+    "webTypecheck": "PASS",
+    "sharedTypecheck": "PASS",
+    "databaseTypecheck": "PASS",
+    "codexSyncTypecheck": "PASS",
+    "prismaValidate": "PASS",
+    "webLint": "PASS",
+    "bloomfallContentAudit": "PASS",
+    "bloomfallAtlasVerification": "PASS",
+    "globalHierarchyAudit": "PASS",
+    "peninsulaDossierAudit": "PASS",
+    "atlasDevelopmentVerification": "PASS",
+    "atlasAuthoringVerification": "PASS",
+    "atlasRouteVerification": "PASS",
+    "atlasV2Verification": "PASS",
+    "atlasV2ParityPotentialRegressions": 0,
+    "bundleV4Verification": "PASS",
+    "productionReadOnlyHierarchyAudit": "PASS_EXPECTED_SIX_PRE_RELEASE_DEFECTS"
+  },
+  "negativeGateTests": 12,
+  "disposableDatabasesRemoved": [
+    "habitat_bloomfall_v3_rehearsal_a",
+    "habitat_bloomfall_v3_rehearsal_b"
+  ],
+  "productionReleaseRun": false
+}
