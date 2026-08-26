@@ -13,8 +13,10 @@ Scope: controlled production promotion of the reviewed Bloomfall Codex systems i
 | Branch | `main` |
 | Starting HEAD | `89e174d863606dea43fb29a80c95ce34117f5085` |
 | Release commit | `d6aa1b8167deea4d10dece48576b20bd5881678b` |
-| Production build ID | `BilUK581FklIESWFe5Km3` |
-| Deployed service | `HabitatWeb`, restarted 15:43:55 |
+| Evidence commit | `dd34d5e2c17e7a857c2d26779407d309aeb5f3ad` |
+| Deployed commit | `dd34d5e2c17e7a857c2d26779407d309aeb5f3ad` |
+| Production build ID | `EH8Tl6bbZerzovEITU37F` (the promotion itself ran against `BilUK581FklIESWFe5Km3`, built from the release commit) |
+| Deployed service | `HabitatWeb`, restarted after each build |
 | Worktree at release | clean; the promotion refuses a dirty tree |
 
 ## 2. Backup
@@ -165,7 +167,7 @@ The pre-existing `ChunkLoadError` entries in the error log predate the release: 
 
 ## 12. Idempotency
 
-A second promotion run reports `ALREADY_APPLIED` with `mutations = 0` and no duplicate systems, relationships, image bindings, POI links, resource links, or route records.
+A second promotion run against the deployed commit reports `ALREADY_APPLIED`, `mutations = 0`, and all 50 records unchanged — zero creates, zero upgrades, zero appends. No duplicate systems, relationships, image bindings, POI links, resource links, or route records.
 
 ## 13. Rollback
 
