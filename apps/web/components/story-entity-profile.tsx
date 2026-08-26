@@ -29,6 +29,7 @@ import { timelineEraLabel } from "@/lib/story-timeline";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
+import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
 import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
@@ -37,7 +38,7 @@ type Connection = { slug: string; title: string; kind: StoryEntryKind; relation:
 /** One mission in a companion's chain, in order, statused. */
 type ChainMission = { slug: string; title: string; summary: string | null; order: number | null; missionStatus: string | null; stage: string | null };
 /** A place directly inside this one, with whatever sits inside it in turn. */
-type ContainedPlace = { slug: string; title: string; summary: string | null; label: string; inside?: Array<{ slug: string; title: string; label: string }> };
+type ContainedPlace = { slug: string; title: string; summary: string | null; meta: Record<string, unknown> | null; label: string; inside?: Array<{ slug: string; title: string; label: string }> };
 type Appearance = { id: string; title: string; via: "referenced" | "speaks"; arc: { slug: string; title: string } };
 
 const record = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
@@ -354,14 +355,12 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {isRegion ? <div className="entity-contained-places">
             <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>
             {containedPlaces.length ? <ul>{containedPlaces.map((place) => {
-              const placeBrand = getRegionBranding(place.slug);
+              const placeArt = getPlaceKeyart(place.slug, place.meta);
               return <li key={place.slug}>
-                {/* The row is a two-column grid with a fixed art column. Without
-                    a fallback, an unbranded place let its copy fall into that
-                    column and the title ellipsed away to nothing — which is
-                    what "the children have no titles" looked like. Every place
-                    a writer adds is unbranded, so this hit new work only. */}
-                {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={18} /></span>}
+                {/* Registered place art fills the fixed image column. The pin
+                    remains only for a genuinely unillustrated new place so its
+                    copy cannot collapse into the art column. */}
+                {placeArt ? <img alt="" src={placeArt} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={18} /></span>}
                 <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {place.summary ? <p><StoryProseLine resolve={resolveProse} text={place.summary} /></p> : null}
                 {/* The third rung, shown in place: a POI's own destinations

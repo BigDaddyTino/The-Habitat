@@ -9,6 +9,7 @@ import { getCharacterKeyart } from "@/lib/character-keyart";
 import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
+import { getPlaceKeyart } from "@/lib/place-art";
 import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
@@ -315,10 +316,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                 </Link>
                 {places.length
                   ? <ul>{places.map(({ place, inside }) => {
-                      const placeBrand = getRegionBranding(place.slug);
+                      const placeArt = getPlaceKeyart(place.slug, place.meta);
                       return <li key={place.id}>
                         <Link href={`/codex/bible/${place.slug}`}>
-                          {placeBrand ? <img alt="" src={placeBrand.keyart} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
+                          {placeArt ? <img alt="" src={placeArt} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
                           <span><strong>{place.title}</strong><i>{placeKindLabel(asRecord(place.meta))}</i></span>
                           <ArrowRight aria-hidden="true" size={11} />
                         </Link>

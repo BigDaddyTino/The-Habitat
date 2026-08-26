@@ -173,6 +173,7 @@ export function buildContainedPlaceProjection(parentSlug: string, regions: reado
       slug: place.slug,
       title: place.title,
       summary: place.summary,
+      meta: place.meta,
       label: placeKindLabel(place.meta ?? {}),
       order: order(place.meta),
       inside: regions

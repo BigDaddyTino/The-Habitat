@@ -729,6 +729,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Passed 415 web tests, three Codex Sync tests, strict web/shared/database/Codex Sync typechecks, Prisma validation, web lint, all Bloomfall/geography/Atlas/V2/parity/Bundle V4 verifiers, production read-only hierarchy comparison, final diff checks, and the normal-workflow push
 - [ ] Production cutover remains reserved for Prompt 6B; no production database, configuration, Codex, Atlas, or art publication change is authorized here
 
+## 2026-08-26 - Codex place-thumbnail artwork repair
+
+- [x] Replaced the Regions directory and contained-place card dependency on full region branding with one place-art resolver that checks the approved Bloomfall V3 binding first, then existing public region artwork
+- [x] Preserved child-place metadata through the shared dossier projection so production V3 publication markers remain enforced rather than bypassed
+- [x] Registered existing artwork for Death Canyon, Grand Lake, Floating City, and The Docks independently of whether each place has a settled accent/brand package
+- [x] Confirmed the six observed production placeholders now resolve to real registered images in development, verified every file at desktop and mobile viewport sizes, and passed 418 web tests, strict typecheck, lint, and diff checks
+- [x] Production writes, configuration changes, Atlas changes, Codex changes, art activation, deployment, and restart remain zero
+
 ## 2026-08-26 - Bloomfall V3 production cutover
 
 - [x] Verified the rehearsed release source rather than trusting it: HEAD, origin/main, clean worktree, and a release build proven to postdate the last source commit

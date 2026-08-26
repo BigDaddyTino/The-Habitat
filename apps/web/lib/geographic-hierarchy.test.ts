@@ -74,5 +74,6 @@ test("the live dossier projection groups descendants beneath direct children", (
   ]);
   assert.equal(projection.length, 1);
   assert.equal(projection[0]?.slug, "port-arcadia");
+  assert.deepEqual(projection[0]?.meta, { type: "settlement", parent: "the-peninsula" });
   assert.deepEqual(projection[0]?.inside.map((candidate) => candidate.slug), ["waterfront"]);
 });

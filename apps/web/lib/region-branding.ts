@@ -3,6 +3,13 @@ export type RegionBranding = {
   keyart: string;
 };
 
+const standaloneRegionKeyart = {
+  "death-canyon": "/images/regions/keyart/death-canyon.png",
+  "grand-lake": "/images/regions/keyart/grand-lake.png",
+  "the-docks": "/images/regions/keyart/the-docks.png",
+  "the-floating-city": "/images/regions/keyart/the-floating-city.jpg",
+} as const satisfies Record<string, string>;
+
 const regionAccents = {
   // The Docks stays unbranded until its title-only, parentless dossier says
   // which docks these are and what distinguishes them from the waterfront.
@@ -40,8 +47,16 @@ export function getRegionBranding(slug: string): RegionBranding | null {
 
   return {
     accent,
-    keyart: `/images/regions/keyart/${slug}.jpg`,
+    keyart: getRegionKeyart(slug)!,
   };
+}
+
+/** Artwork and full branding are separate concerns. A place can already have
+ * approved key art without yet having a settled accent/identity package. */
+export function getRegionKeyart(slug: string): string | null {
+  const standalone = standaloneRegionKeyart[slug as keyof typeof standaloneRegionKeyart];
+  if (standalone) return standalone;
+  return slug in regionAccents ? `/images/regions/keyart/${slug}.jpg` : null;
 }
 
 export const brandedRegionCount = Object.keys(regionAccents).length;
