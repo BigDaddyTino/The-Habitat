@@ -35,7 +35,7 @@ async function geographicEntries(client: Prisma.TransactionClient | Database) {
   }));
 }
 
-export async function applyGeographicHierarchyRepair(db: Database, options: { dryRun?: boolean } = {}) {
+export async function applyGeographicHierarchyRepair(db: Database, options: { dryRun?: boolean; requireBloomfallSubregions?: boolean } = {}) {
     await assertAtlasV2SchemaPresent(db);
     const identity = await db.$queryRaw<Array<{ database: string }>>`SELECT current_database() AS database`;
     const database = identity[0]?.database;
@@ -45,7 +45,7 @@ export async function applyGeographicHierarchyRepair(db: Database, options: { dr
     const proposedDiff = geographicHierarchyRepairManifest.map((entry) => ({ id: entry.id, slug: entry.slug, before: { parent: entry.beforeParent, type: entry.beforeType }, after: { parent: entry.finalParent, type: entry.finalType } }));
     if (assessment.overall === "DRIFT") throw new Error(`Hierarchy repair source drifted from its exact all-before/all-after contract: ${stableAtlasJson(assessment, false)}`);
     if (assessment.overall === "ALREADY_APPLIED") {
-      const audit = assertRepairedHierarchy(current as GeographicEntry[]);
+      const audit = assertRepairedHierarchy(current as GeographicEntry[], options);
       return { contract: geographicHierarchyRepairContract, status: "ALREADY_APPLIED" as const, database, mutations: 0, revisions: 0, invalidParents: audit.invalidParentCount, peninsulaVisible: audit.peninsulaVisible.map((entry) => entry.slug) };
     }
     if (options.dryRun) {
@@ -79,7 +79,7 @@ export async function applyGeographicHierarchyRepair(db: Database, options: { dr
       const afterRows = await geographicEntries(tx);
       const afterAssessment = assessGeographicHierarchyRepair(afterRows);
       if (afterAssessment.overall !== "ALREADY_APPLIED") throw new Error(`Hierarchy did not reach its exact final contract: ${stableAtlasJson(afterAssessment, false)}`);
-      const audit = assertRepairedHierarchy(afterRows as GeographicEntry[]);
+      const audit = assertRepairedHierarchy(afterRows as GeographicEntry[], options);
       const afterAtlas = await captureAtlasPreservationSnapshot(tx);
       if (stableAtlasJson(afterAtlas, false) !== stableAtlasJson(beforeAtlas, false)) throw new Error("Atlas maps, placements, topology, connections, paths, or geometry changed during the semantic hierarchy repair.");
       return { actorUserId: actor.id, changed, audit, beforeAtlas, afterAtlas };

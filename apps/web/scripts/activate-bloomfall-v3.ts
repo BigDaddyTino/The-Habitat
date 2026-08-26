@@ -71,15 +71,16 @@ async function main() {
     }
 
     const rename = await applyBloomfallRename(database);
-    const hierarchy = await applyGeographicHierarchyRepair(database);
+    const hierarchy = await applyGeographicHierarchyRepair(database, { requireBloomfallSubregions: false });
     const content = await applyBloomfallCanonicalContent(database);
+    const hierarchyVerification = await applyGeographicHierarchyRepair(database);
     const localAtlas = await activateBloomfallLocalAtlas(database);
     const publication = await publishBloomfallV3(database);
     const after = await captureBloomfallActivationSnapshot(database);
     if (classifyBloomfallActivationSnapshot(after) !== "ALREADY_APPLIED") throw new Error("Bloomfall V3 activation did not reach the exact final release state.");
     const [localVerification, publicationVerification] = await Promise.all([verifyBloomfallLocalAtlas(database, { expectedArtVersion: "v3" }), verifyBloomfallV3Publication(database)]);
     const mutations = rename.mutations + hierarchy.mutations + content.mutations + (localAtlas.status === "APPLIED" ? 1 : 0) + publication.mutations;
-    process.stdout.write(stableAtlasJson({ action: "ACTIVATE", status: "ACTIVATED", mutations, identity, release, art: art.result, stages: { rename, hierarchy, content: { ...content, phases: ["canonical-content", "stories", "semantic-connections"] }, localAtlas, publication }, after, verification: { localAtlas: localVerification, publication: publicationVerification } }));
+    process.stdout.write(stableAtlasJson({ action: "ACTIVATE", status: "ACTIVATED", mutations, identity, release, art: art.result, stages: { rename, hierarchy, content: { ...content, phases: ["canonical-content", "stories", "semantic-connections"] }, localAtlas, publication }, after, verification: { hierarchy: hierarchyVerification, localAtlas: localVerification, publication: publicationVerification } }));
   } finally {
     await database.$disconnect();
   }

@@ -3,7 +3,7 @@ import test from "node:test";
 import { bloomfallMainRegion, bloomfallSubregions } from "./bloomfall-reach-content";
 import { buildContainedPlaceProjection } from "./story-library";
 import { auditGeographicHierarchy, type GeographicEntry } from "../scripts/lib/geographic-hierarchy";
-import { assessGeographicHierarchyRepair, geographicHierarchyRepairManifest, stableGeographicHierarchyRevisionId, verifiedGeographicParentContracts } from "../scripts/lib/geographic-hierarchy-repair";
+import { assertRepairedHierarchy, assessGeographicHierarchyRepair, geographicHierarchyRepairManifest, stableGeographicHierarchyRevisionId, verifiedGeographicParentContracts } from "../scripts/lib/geographic-hierarchy-repair";
 
 const entry = (slug: string, parent: string | null, type = "region"): GeographicEntry => ({
   id: geographicHierarchyRepairManifest.find((candidate) => candidate.slug === slug)?.id ?? `00000000-0000-5000-8000-${slug.padEnd(12, "0").slice(0, 12)}`,
@@ -54,6 +54,14 @@ test("repair assessment is strict, all-or-none, and idempotent", () => {
   assert.equal(assessGeographicHierarchyRepair(before).overall, "READY");
   assert.equal(assessGeographicHierarchyRepair(after).overall, "ALREADY_APPLIED");
   assert.equal(assessGeographicHierarchyRepair([after[0]!, ...before.slice(1)]).overall, "DRIFT");
+});
+
+test("the release-order hierarchy stage can precede Bloomfall child creation without weakening final verification", () => {
+  const preContent = Object.entries(verifiedGeographicParentContracts)
+    .filter(([slug]) => !["the-shattercore", "the-mutation-belt", "the-living-marsh"].includes(slug))
+    .map(([slug, parent]) => entry(slug, parent));
+  assert.doesNotThrow(() => assertRepairedHierarchy(preContent, { requireBloomfallSubregions: false }));
+  assert.throws(() => assertRepairedHierarchy(preContent), /the-shattercore/);
 });
 
 test("the live dossier projection groups descendants beneath direct children", () => {

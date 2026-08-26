@@ -109,12 +109,15 @@ export async function captureAtlasPreservationSnapshot(client: Database) {
   };
 }
 
-export function assertRepairedHierarchy(entries: readonly GeographicEntry[]) {
+export function assertRepairedHierarchy(entries: readonly GeographicEntry[], options: { requireBloomfallSubregions?: boolean } = {}) {
   const audit = auditGeographicHierarchy(entries);
   if (audit.missingParents.length || audit.selfParents.length || audit.cycles.length || audit.topLevelNestedUnderTopLevel.length || audit.suspicious.length) {
     throw new Error(`Repaired hierarchy failed integrity checks: ${stableAtlasJson({ missingParents: audit.missingParents, selfParents: audit.selfParents, cycles: audit.cycles, topLevelNestedUnderTopLevel: audit.topLevelNestedUnderTopLevel, suspicious: audit.suspicious }, false)}`);
   }
-  for (const [slug, expectedParent] of Object.entries(verifiedGeographicParentContracts)) {
+  const contracts = options.requireBloomfallSubregions === false
+    ? Object.entries(verifiedGeographicParentContracts).filter(([slug]) => !["the-shattercore", "the-mutation-belt", "the-living-marsh"].includes(slug))
+    : Object.entries(verifiedGeographicParentContracts);
+  for (const [slug, expectedParent] of contracts) {
     const entry = audit.matrix.find((candidate) => candidate.slug === slug);
     if (!entry || entry.parent !== expectedParent) throw new Error(`Verified geographic parent contract failed for ${slug}: expected ${expectedParent}, received ${entry?.parent}.`);
   }
