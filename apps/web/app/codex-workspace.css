@@ -249,3 +249,74 @@
 .adaptive-revision-drawer summary{min-height:36px;cursor:pointer;color:#cbb47c;font:700 9px/36px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
 @media(max-width:1100px){.adaptive-state-track,.adaptive-review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.adaptive-review-grid.is-reference{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.adaptive-mutation-panel{margin-inline:-4px;padding:17px}.adaptive-mutation-heading{align-items:start;flex-direction:column}.adaptive-state-track,.adaptive-state-track.is-continuity{display:flex;overflow-x:auto;grid-template-columns:none;gap:10px;margin-right:-17px;padding-right:17px;scroll-padding-left:0;scroll-snap-type:x mandatory}.adaptive-state-card{min-width:min(78vw,310px);scroll-snap-align:start}.adaptive-support-art .adaptive-state-card{display:block}.adaptive-review-totals{grid-template-columns:repeat(2,minmax(0,1fr))}.adaptive-review-grid,.adaptive-review-grid.entity-the-last-shift,.adaptive-review-grid.is-reference,.adaptive-review-grid.is-revision{display:flex;overflow-x:auto;grid-template-columns:none;margin-right:-16px;padding-right:16px;scroll-snap-type:x mandatory}.adaptive-review-card{min-width:min(78vw,310px);scroll-snap-align:start}.adaptive-full-link{min-height:44px}}
+
+/* Prompt E: the Bloomfall systems presentation. Text-first cards, one shared
+   card shape across every system, and every table and diagram scrolling
+   inside its own box so the page never scrolls sideways. */
+.bloomfall-system-panel{margin:22px 0 30px;border:1px solid #465044;border-top:2px solid #6f8b6a;padding:22px;background:radial-gradient(circle at 8% 0,#2a4a3f33,transparent 34%),linear-gradient(150deg,#141a15,#0d120e);box-shadow:0 20px 50px #0005}
+.bloomfall-panel-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:10px}
+.bloomfall-panel-heading h2{margin:4px 0 0;color:#f0e2bd;font:600 clamp(24px,2.8vw,34px)/1.05 var(--font-serif)}
+.bloomfall-status-chip{flex:none;border:1px solid #6d7f68;padding:7px 10px;color:#cfe0c6;background:#18211a;font:700 9px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.bloomfall-panel-intro{max-width:860px;margin:0;color:#a9b2a8;font-size:11px;line-height:1.65}
+.bloomfall-group-heading{display:flex;align-items:center;gap:9px;margin:22px 0 10px;color:#d8c79c;font:600 14px var(--font-serif)}
+.bloomfall-group-heading span{border:1px solid #4a5548;padding:3px 6px;color:#93a08f;font:700 8px var(--font-mono);letter-spacing:.05em}
+.bloomfall-card-grid{display:grid;gap:10px;margin-top:16px;align-items:start}
+.bloomfall-card-grid.is-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.bloomfall-card-grid.is-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.bloomfall-card{display:grid;gap:7px;border:1px solid #394238;border-left:2px solid #7d9476;padding:13px;background:#111612}
+.bloomfall-card .eyebrow{color:#8a9686;font:700 8px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.bloomfall-card h4{margin:0;color:#e8d7b0;font:600 17px/1.1 var(--font-serif)}
+.bloomfall-card-lead{margin:0;color:#bcc7b9;font-size:10px;line-height:1.55}
+.bloomfall-card dl{display:grid;gap:6px;margin:2px 0 0}
+.bloomfall-card dt{color:#c9b47e;font:700 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+.bloomfall-card dd{margin:2px 0 0;color:#98a399;font-size:9px;line-height:1.55}
+.bloomfall-card dd a{display:inline-flex;min-height:26px;align-items:center;gap:4px;color:#d3b87c;text-decoration:none}
+.bloomfall-card dd a:hover,.bloomfall-card dd a:focus-visible{text-decoration:underline}
+.bloomfall-index-scroll{overflow-x:auto;margin-top:6px;border:1px solid #394238;background:#111612}
+.bloomfall-index{width:100%;min-width:640px;border-collapse:collapse}
+.bloomfall-index caption{padding:11px 13px;color:#8a9686;font:9px/1.5 var(--font-sans);text-align:left}
+.bloomfall-index th,.bloomfall-index td{padding:9px 13px;border-top:1px solid #2c332b;text-align:left;vertical-align:top}
+.bloomfall-index thead th{color:#c9b47e;font:700 8px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.bloomfall-index tbody th{color:#dbc999;font:600 12px var(--font-serif);white-space:nowrap;border-right:1px solid #2c332b}
+.bloomfall-index td{color:#98a399;font-size:10px;line-height:1.5}
+.bloomfall-index td strong{display:block;color:#d9c99f;font:600 12px var(--font-serif)}
+.bloomfall-index-note{display:block;margin-top:3px;color:#7f8b81;font-size:9px;line-height:1.5}
+.bloomfall-index td a{display:inline-flex;align-items:center;gap:5px;min-height:24px;color:#d3b87c;font-weight:600;text-decoration:none}
+.bloomfall-index td a:hover,.bloomfall-index td a:focus-visible{text-decoration:underline}
+.bloomfall-index tr.is-exceptional td{background:#15130e}
+.bloomfall-panel-note{margin:15px 0 0;color:#778278;font:8px/1.6 var(--font-mono);letter-spacing:.04em;text-transform:uppercase}
+.bloomfall-panel-note strong{color:#c9b47e}
+.bloomfall-hero-figure{margin:16px 0 0;border:1px solid #394238;background:#0a0f0b}
+.bloomfall-hero-figure img{display:block;width:100%;height:auto}
+.bloomfall-hero-figure figcaption{padding:10px 13px;color:#8a9686;font:9px/1.55 var(--font-sans)}
+.bloomfall-diagram{margin:20px 0 0}
+.bloomfall-diagram-canvas{overflow-x:auto;padding:4px 0}
+.bloomfall-diagram svg{display:block;width:100%;min-width:760px;height:auto;overflow:visible}
+.bloomfall-diagram figcaption{margin-top:9px;color:#8a9686;font:9px/1.55 var(--font-sans)}
+.bloomfall-diagram-edges path{fill:none;stroke:#6f8b6a;stroke-width:1.2}
+.bloomfall-diagram-edges g{color:#6f8b6a}
+.bloomfall-diagram-edges text{fill:#9aa896;font:8px var(--font-mono);letter-spacing:.03em;paint-order:stroke;stroke:#0d120e;stroke-width:3;stroke-linejoin:round}
+.bloomfall-diagram-nodes rect{stroke:#4d5a4a;stroke-width:1;fill:#141a15}
+.bloomfall-diagram-nodes rect.tone-source{fill:#221a12;stroke:#7d6238}
+.bloomfall-diagram-nodes rect.tone-pressure{fill:#151d1a;stroke:#5f8073}
+.bloomfall-diagram-nodes rect.tone-life{fill:#171e14;stroke:#6f8b56}
+.bloomfall-diagram-nodes rect.tone-player{fill:#1d1a15;stroke:#8b744d}
+.bloomfall-diagram-nodes rect.tone-sink{fill:#131b1d;stroke:#54737f}
+.bloomfall-diagram-nodes text{fill:#e2d3ab;font:600 11px var(--font-serif);text-anchor:middle}
+.bloomfall-diagram-key{display:grid;gap:4px;margin:12px 0 0;padding:0 0 0 18px;color:#7f8b81;font-size:9px;line-height:1.55}
+.bloomfall-diagram-key strong{color:#b3bfaf;font-weight:600}
+.bloomfall-system-index{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:20px}
+.bloomfall-system-index a{display:grid;gap:5px;min-height:44px;border:1px solid #394238;border-left:2px solid #7d9476;padding:12px;background:#111612;text-decoration:none}
+.bloomfall-system-index a:hover,.bloomfall-system-index a:focus-visible{border-left-color:#d3b87c;background:#141b15}
+.bloomfall-system-index strong{display:flex;align-items:center;gap:6px;color:#e8d7b0;font:600 14px/1.15 var(--font-serif)}
+.bloomfall-system-index span{color:#8f9b8e;font-size:9px;line-height:1.5}
+.bloomfall-system-panel.is-region{border-top-color:#8b744d}
+@media(max-width:1150px){.bloomfall-card-grid.is-4,.bloomfall-card-grid.is-5{grid-template-columns:repeat(2,minmax(0,1fr))}.bloomfall-system-index{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.bloomfall-system-panel{margin-inline:-4px;padding:17px}.bloomfall-panel-heading{align-items:start;flex-direction:column}.bloomfall-card-grid.is-4,.bloomfall-card-grid.is-5,.bloomfall-system-index{grid-template-columns:minmax(0,1fr)}.bloomfall-index-scroll,.bloomfall-diagram-canvas{margin-right:-17px}.bloomfall-index td a,.bloomfall-card dd a{min-height:44px}}
+/* Generated dossiers write their sections as markdown headings. They render as
+   real headings now, sized to sit under the dossier title without competing
+   with the panel cards beneath them. */
+.entity-profile-narrative h2.prose-heading{margin:26px 0 0;padding-top:19px;border-top:1px solid #363c35;color:#e8d7b0;font:600 20px/1.15 var(--font-serif)}
+.entity-profile-narrative h3.prose-heading{margin:19px 0 0;color:#d3bf90;font:600 14px/1.2 var(--font-serif)}
+.entity-profile-narrative h2.prose-heading+p,.entity-profile-narrative h3.prose-heading+p{margin-top:9px}
+.entity-profile-narrative>p:not(.eyebrow)+h2.prose-heading{margin-top:24px}

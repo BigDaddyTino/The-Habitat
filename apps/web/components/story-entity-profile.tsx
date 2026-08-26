@@ -34,6 +34,7 @@ import { modelPreview } from "@/lib/story-library";
 import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
+import { BloomfallSystemPanel } from "@/components/bloomfall-system-panel";
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
 /** One mission in a companion's chain, in order, statused. */
@@ -255,7 +256,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
         </div>
       </header>
 
-      {(isCharacter || isFaction || isRegion || isThread || isMission || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
+      {(isCharacter || isFaction || isRegion || isSystem || isThread || isMission || entry.kind === "CREATURE" || entry.kind === "ITEM" || entry.kind === "EVENT") ? <dl className="entity-fact-ribbon">
         {isCharacter ? <><Fact label="Full name" value={meta.fullName} /><Fact label="Species" value={meta.species} /><Fact label="Pronouns" value={meta.pronouns} /><Fact label="Magic" value={magic.origin} />{corruption ? <Fact label="Corruption" value={storyCorruptionPhaseLabel(magic.corruptionPhase)} /> : null}<Fact label="Known status" value={status.known} /></> : null}
         {isFaction ? <><Fact label="Power" value={meta.scope} /><Fact label="Seat" value={meta.seat} /><Fact label="Game tag" value={meta.gameTag} /><Fact label="Leaders" value={words(meta.leaders).length ? `${words(meta.leaders).length} named` : null} /></> : null}
         {isRegion ? <><Fact label="Place type" value={meta.type} /><Fact label="Biome" value={meta.biome} /><Fact label="Population" value={meta.population} /><Fact label="World state" value={meta.status} />{label(meta.veilAnchorTier) ? <Fact label="Veil Anchor" value={`Tier ${String(meta.veilAnchorTier)}`} /> : null}{label(meta.soulForge) ? <Fact label="Soul Forge" value={String(meta.soulForge)} /> : null}<Fact label="Game tag" value={meta.gameTag} /></> : null}
@@ -279,6 +280,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
       </dl> : null}
 
       <BloomfallAdaptiveMutationPanel entrySlug={entry.slug} />
+      <BloomfallSystemPanel entrySlug={entry.slug} />
 
       <div className="entity-profile-layout">
         <article className="entity-profile-narrative">

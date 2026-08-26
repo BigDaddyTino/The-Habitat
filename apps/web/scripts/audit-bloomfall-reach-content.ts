@@ -5,6 +5,7 @@ import { storyProseLinks } from "../lib/story-prose";
 import { storyAtlasArtRegistered } from "../lib/story-atlas-art";
 import { metaSchemasByKind } from "../lib/story-meta-schemas";
 import { bloomfallCreatureEnhancementBySlug, renderBloomfallCreatureEnhancement } from "../lib/bloomfall-creature-enhancements";
+import { bloomfallIntegrationBySlug, bloomfallIntegrationExpectedBody } from "../lib/bloomfall-codex-integration";
 import {
   bloomfallAberrants,
   bloomfallArcs,
@@ -62,7 +63,8 @@ async function main() {
   ]);
 
   check(region?.slug === "bloomfall-reach" && region.title === "Bloomfall Reach" && region.kind === "REGION" && region.status === "CANON", "Main Bloomfall Reach identity is missing or wrong.");
-  check(region?.summary === bloomfallMainRegion.summary && region.body === bloomfallMainRegion.body && jsonEqual(region.meta, bloomfallMainRegion.meta), "Main Bloomfall Reach dossier drifted from the approved manifest.");
+  const expectedRegionBody = bloomfallIntegrationExpectedBody("bloomfall-reach") ?? bloomfallMainRegion.body;
+  check(region?.summary === bloomfallMainRegion.summary && region.body === expectedRegionBody && jsonEqual(region.meta, bloomfallMainRegion.meta), "Main Bloomfall Reach dossier drifted from the approved manifest.");
   check(entries.length === bloomfallNewEntries.length, `Expected ${bloomfallNewEntries.length} new canonical entries, found ${entries.length}.`);
   const storedBySlug = new Map(entries.map((entry) => [entry.slug, entry]));
   for (const seed of bloomfallNewEntries) {
@@ -70,8 +72,15 @@ async function main() {
     check(Boolean(stored), `Missing canonical entry ${seed.slug}.`);
     if (!stored) continue;
     const enhancement = bloomfallCreatureEnhancementBySlug.get(seed.slug);
-    const expectedBody = enhancement ? renderBloomfallCreatureEnhancement(enhancement) : seed.body;
-    check(stored.kind === seed.kind && stored.title === seed.title && stored.summary === seed.summary && stored.body === expectedBody && stored.status === "CANON" && jsonEqual(stored.meta, seed.meta), `Canonical entry ${seed.slug} differs from its latest approved source manifest.`);
+    const integration = bloomfallIntegrationBySlug.get(seed.slug);
+    // Prompt E rewrote some records and appended cross-link blocks to others.
+    // Where it did, its output is the approved source; everywhere else the
+    // Prompt 3 seed and the Prompt B rendering still are.
+    const expectedBody = bloomfallIntegrationExpectedBody(seed.slug) ?? (enhancement ? renderBloomfallCreatureEnhancement(enhancement) : seed.body);
+    const expectedTitle = integration?.title ?? seed.title;
+    const expectedSummary = integration?.summary ?? seed.summary;
+    const expectedMeta = integration?.meta ?? seed.meta;
+    check(stored.kind === seed.kind && stored.title === expectedTitle && stored.summary === expectedSummary && stored.body === expectedBody && stored.status === "CANON" && jsonEqual(stored.meta, expectedMeta), `Canonical entry ${seed.slug} differs from its latest approved source manifest.`);
     const schema = metaSchemasByKind[seed.kind];
     if (schema) check(schema.safeParse(stored.meta).success, `${seed.slug} fails its typed metadata schema.`);
   }

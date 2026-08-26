@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { parseStoryProse, splitStoryParagraphs, storyProseLinkLabel, unwrittenLinkLabel, type ProseToken } from "@/lib/story-prose";
+import { parseStoryProse, storyProseBlocks, storyProseLinkLabel, unwrittenLinkLabel, type ProseToken } from "@/lib/story-prose";
 
 /**
  * Renders codex prose: bold, italic, and `[[slug]]` cross-references as real
@@ -37,13 +37,15 @@ export function StoryProseLine({ text, resolve }: { text: string; resolve: Prose
   return <Tokens resolve={resolve} tokens={parseStoryProse(text)} />;
 }
 
-/** A whole body, split into paragraphs. */
+/** A whole body: its sections as real headings, everything else as paragraphs. */
 export function StoryProse({ body, resolve }: { body: string; resolve: ProseResolver }) {
   return (
     <>
-      {splitStoryParagraphs(body).map((paragraph, index) => (
-        <p key={index}><Tokens resolve={resolve} tokens={parseStoryProse(paragraph)} /></p>
-      ))}
+      {storyProseBlocks(body).map((block, index) => {
+        if (block.kind === "paragraph") return <p key={index}><Tokens resolve={resolve} tokens={parseStoryProse(block.text)} /></p>;
+        const Heading = block.level === 2 ? "h2" : "h3";
+        return <Heading className="prose-heading" key={index}><Tokens resolve={resolve} tokens={parseStoryProse(block.text)} /></Heading>;
+      })}
     </>
   );
 }

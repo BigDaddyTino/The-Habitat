@@ -7,6 +7,7 @@ import {
   renderBloomfallCreatureEnhancement,
 } from "../lib/bloomfall-creature-enhancements";
 import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
+import { bloomfallIntegrationExpectedBody } from "../lib/bloomfall-codex-integration";
 import { metaSchemasByKind } from "../lib/story-meta-schemas";
 import { storyProseLinks } from "../lib/story-prose";
 import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2SchemaPresent } from "./lib/atlas-v2-activation";
@@ -40,7 +41,10 @@ async function main() {
     check(Boolean(current), `Missing ${enhancement.slug}.`);
     if (!current) continue;
     check(current.kind === enhancement.kind && current.status === "CANON", `${enhancement.slug} kind or canon status drifted.`);
-    check(current.body === renderBloomfallCreatureEnhancement(enhancement), `${enhancement.slug} prose differs from the Prompt B source manifest.`);
+    // Prompt E appends a Related-in-the-Codex block to the Prompt B prose.
+    // The rendering itself must still be exact; only the block may follow it.
+    const expectedProse = bloomfallIntegrationExpectedBody(enhancement.slug) ?? renderBloomfallCreatureEnhancement(enhancement);
+    check(current.body === expectedProse, `${enhancement.slug} prose differs from the Prompt B source manifest.`);
     if (enhancement.kind === "CREATURE") {
       const meta = current.meta as { parent?: unknown; category?: unknown } | null;
       check(meta?.parent === enhancement.taxonomyParent, `${enhancement.slug} parent taxonomy drifted.`);

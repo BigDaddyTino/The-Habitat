@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { parseStoryProse, plainStoryProse, splitStoryParagraphs, storyProseLinkLabel, storyProseLinks, unwrittenLinkLabel, type ProseToken } from "./story-prose";
+import { parseStoryProse, plainStoryProse, splitStoryParagraphs, storyProseBlocks, storyProseLinkLabel, storyProseLinks, unwrittenLinkLabel, type ProseToken } from "./story-prose";
 
 /** Flattens tokens to a readable shape so assertions stay legible. */
 const shape = (tokens: ProseToken[]): unknown =>
@@ -87,4 +87,19 @@ test("plain rendering strips markup without ever leaving a raw marker", () => {
     assert.doesNotMatch(plain, /\[\[|\]\]/, `${sample} left brackets behind`);
     assert.doesNotMatch(plain, /\*/, `${sample} left asterisks behind`);
   }
+});
+
+test("a generated dossier's sections become headings instead of literal hashes", () => {
+  assert.deepEqual(storyProseBlocks("Opening line.\n\n## Ecology\n\nBody.\n\n### A state\n\nDetail."), [
+    { kind: "paragraph", text: "Opening line." },
+    { kind: "heading", level: 2, text: "Ecology" },
+    { kind: "paragraph", text: "Body." },
+    { kind: "heading", level: 3, text: "A state" },
+    { kind: "paragraph", text: "Detail." },
+  ]);
+  // A heading carries the same markup as a paragraph does.
+  assert.deepEqual(storyProseBlocks("## Related to [[the-soul-forge]]"), [{ kind: "heading", level: 2, text: "Related to [[the-soul-forge]]" }]);
+  // One hash is not a heading, and neither is a hash inside a sentence.
+  assert.deepEqual(storyProseBlocks("# Not a heading"), [{ kind: "paragraph", text: "# Not a heading" }]);
+  assert.deepEqual(storyProseBlocks("Bay ## 4 is sealed."), [{ kind: "paragraph", text: "Bay ## 4 is sealed." }]);
 });

@@ -9,6 +9,7 @@ import {
   renderBloomfallCreatureEnhancement,
 } from "../lib/bloomfall-creature-enhancements";
 import { bloomfallAberrants, bloomfallCharacters, bloomfallCreatures } from "../lib/bloomfall-reach-content";
+import { bloomfallIntegrationExpectedBody } from "../lib/bloomfall-codex-integration";
 import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2SchemaPresent } from "./lib/atlas-v2-activation";
 import { stableAtlasJson } from "./lib/atlas-integrity";
 
@@ -65,8 +66,10 @@ async function main() {
           throw new Error(`${enhancement.slug} taxonomy drifted or conflates Blackbloom with Abomination.`);
         }
       }
-      const expected = renderBloomfallCreatureEnhancement(enhancement);
-      if (current.body !== seed.body && current.body !== expected && !isApprovedPriorPromptBBody(enhancement.slug, current.body, expected)) throw new Error(`${enhancement.slug} body has edits outside the approved Prompt 3 or Prompt B states.`);
+      // Prompt E appended a cross-link block on top of the Prompt B prose, so
+      // that composed body is an approved state this tool must leave alone.
+      const expected = bloomfallIntegrationExpectedBody(enhancement.slug) ?? renderBloomfallCreatureEnhancement(enhancement);
+      if (current.body !== seed.body && current.body !== expected && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} body has edits outside the approved Prompt 3, Prompt B, or Prompt E states.`);
       if (current.body !== expected) pending += 1;
     }
 
@@ -93,9 +96,9 @@ async function main() {
       for (const enhancement of bloomfallCreatureEnhancements) {
         const seed = baselines.get(enhancement.slug)!;
         const current = await tx.storyEntry.findUniqueOrThrow({ where: { slug: enhancement.slug } });
-        const expected = renderBloomfallCreatureEnhancement(enhancement);
+        const expected = bloomfallIntegrationExpectedBody(enhancement.slug) ?? renderBloomfallCreatureEnhancement(enhancement);
         if (current.body === expected) continue;
-        if (current.body !== seed.body && !isApprovedPriorPromptBBody(enhancement.slug, current.body, expected)) throw new Error(`${enhancement.slug} changed after preview; transaction stopped.`);
+        if (current.body !== seed.body && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} changed after preview; transaction stopped.`);
         const before = { body: current.body, version: current.version };
         const updated = await tx.storyEntry.update({
           where: { id: current.id },

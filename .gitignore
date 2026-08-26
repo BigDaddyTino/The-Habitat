@@ -24,6 +24,9 @@ codex-sync-logs/
 HabitatWeb.exe
 HabitatWeb.xml
 web-logs/
+# Generated from the compiled stylesheet by qa-bloomfall-systems; rebuild it
+# with pnpm --filter @habitat/web bloomfall:systems:qa rather than committing it.
+apps/web/private/codex-art/bloomfall-systems/review/
 apps/web/public/member-avatars/*
 !apps/web/public/member-avatars/.gitkeep
 *.log

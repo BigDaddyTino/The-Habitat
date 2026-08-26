@@ -65,6 +65,31 @@ export function splitStoryParagraphs(body: string): string[] {
   return body.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter(Boolean);
 }
 
+export type ProseBlock =
+  | { kind: "heading"; level: 2 | 3; text: string }
+  | { kind: "paragraph"; text: string };
+
+const HEADING = /^(#{2,3})\s+(.+)$/;
+
+/**
+ * A body as its blocks rather than a flat list of paragraphs.
+ *
+ * Generated dossiers — the Bloomfall ecology sheets, the system pages — have
+ * always written their sections as `## Ecology`. Rendered as paragraphs those
+ * hashes showed up as literal punctuation, which is the same failure the link
+ * markup was written to fix: the structure the writer expressed was the one
+ * thing the reader could not see. Only two levels are recognised, because a
+ * dossier already owns its `h1` and nothing in canon nests deeper.
+ */
+export function storyProseBlocks(body: string): ProseBlock[] {
+  return splitStoryParagraphs(body).map((paragraph) => {
+    const heading = HEADING.exec(paragraph);
+    return heading
+      ? { kind: "heading" as const, level: heading[1]!.length as 2 | 3, text: heading[2]!.trim() }
+      : { kind: "paragraph" as const, text: paragraph };
+  });
+}
+
 /** Every entry or arc a body links to, for prefetching titles in one query. */
 export function storyProseLinks(body: string): string[] {
   return [...new Set([...body.matchAll(/\[\[([a-z0-9]+(?:-[a-z0-9]+)*)\]\]/g)].map((match) => match[1]))];
