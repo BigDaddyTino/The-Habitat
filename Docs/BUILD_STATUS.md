@@ -787,4 +787,15 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Added a protected DEVELOPMENT-only owner gallery and dossier panels for Hart, Latchhound, Last Shift, and the explicit NONE example Glasswing Kite; production resolvers and presentation remain closed
 - [x] Captured three desktop contact sheets and a 390 × 844 mobile evidence frame with zero document overflow, loaded native images, and contained horizontal state navigation
 - [x] Passed the 20-file P0 audit, 425 web tests, strict typecheck, creature/regional audits, lint, production build, read-only 13-record production fingerprint comparison, and final diff checks
-- [ ] Owner approval of the twelve candidates remains the only P0 gate; Prompt C2 is not authorized or started
+- [ ] Owner approval of the twelve P0 candidates remains pending; Prompt C2 proceeded as an isolated development-only package without reopening them
+
+## 2026-08-26 - Bloomfall Adaptive Mutation P1/P2 visual package
+
+- [x] Reconciled Prompt B's 27-image plan to twelve unchanged P0 finals, fourteen required P1/P2 finals, and one optional P3 Bloommarked Remnant image that remains explicitly deferred
+- [x] Generated fourteen selected P1/P2 visuals across Rootback Grazer, Mirejaw, Sump Eel, Glasswing Kite, Spore Lantern Colony, Switchmother, Old Drowner, and Mender; rejected one first-pass humanoid Mender and selected a nonhumanoid industrial crawler revision
+- [x] Preserved fixed-form `NONE` treatment for Glasswing, Lantern Colony, Mender, and Bloommarked Remnant; preserved Switchmother, Old Drowner, Bellwether, and Last Shift as exceptional history/continuity cases rather than generic mutation ladders
+- [x] Added a 17-record typed manifest covering fourteen selected candidates, two locked V3 hero reuses, and one P0 Hart lineage reuse with exact dimensions, SHA-256, generation iteration, development binding, mature-tone note, and eight-category QA scores; recorded the rejected attempt as a count without staging rejected art
+- [x] Extended the existing DEVELOPMENT-only dossier panel and protected owner-review flow without runtime mutation logic, production art activation, production UI activation, Codex data writes, Atlas changes, or migrations
+- [x] Captured Rootback, Mirejaw, Sump Eel, Old Drowner, and Switchmother contact sheets plus a 390 × 844 mobile evidence frame; browser QA found zero broken images and zero document overflow
+- [x] P1/P2 audit passes at 14/14 selected with critical minimums at or above 9.4, P0 remains 12/12, promotion eligibility remains Hart/Mirejaw/Latchhound only, and the combined required generated package is 26 visuals
+- [ ] Owner approval of the fourteen P1/P2 candidates remains the only visual gate; optional P3 art and Prompt D route authoring remain unstarted

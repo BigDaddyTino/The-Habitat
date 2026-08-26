@@ -31,6 +31,10 @@ export default async function CodexReviewPage() {
         <p>Nothing below is in the game yet. Approving a node also makes its arc canon so the export can carry it; rejecting keeps it on the board, marked, so the writer can see what happened to it.</p>
       </div>
 
+      {process.env.HABITAT_ENVIRONMENT === "development" ? <div className="codex-review-list">
+        <article><div><p className="eyebrow">Development art gate</p><h2><Link href="/codex/bloomfall-adaptive-p1p2">Bloomfall Adaptive Mutation P1/P2</Link></h2><p>Fourteen selected creature visuals, exceptional continuity, fixed-form treatment, and native-resolution review links.</p></div></article>
+      </div> : null}
+
       {queue.total === 0 ? (
         <div className="empty-data"><Inbox aria-hidden="true" size={24} /><div><h2>The queue is empty.</h2><p>Everything written so far has been reviewed.</p></div></div>
       ) : (

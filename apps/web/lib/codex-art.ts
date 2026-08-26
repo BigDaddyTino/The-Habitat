@@ -23,6 +23,8 @@ export const codexArtKinds = {
   "bloomfall-v3": "bloomfall-v3",
   "bloomfall-adaptive-p0": "bloomfall-adaptive-p0",
   "bloomfall-adaptive-p0-source": "bloomfall-adaptive-p0-source",
+  "bloomfall-adaptive-p1p2": "bloomfall-adaptive-p1p2",
+  "bloomfall-adaptive-p1p2-source": "bloomfall-adaptive-p1p2-source",
 } as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
@@ -39,11 +41,13 @@ function directoryFor(kind: CodexArtKind) {
   if (kind === "bloomfall-v3") return path.join(process.cwd(), "private", "codex-art", "bloomfall-v3");
   if (kind === "bloomfall-adaptive-p0") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "candidates");
   if (kind === "bloomfall-adaptive-p0-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "sources");
+  if (kind === "bloomfall-adaptive-p1p2") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "candidates");
+  if (kind === "bloomfall-adaptive-p1p2-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "sources");
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
 }
 
 function isDevelopmentReviewKind(kind: string) {
-  return kind === "bloomfall-adaptive-p0" || kind === "bloomfall-adaptive-p0-source";
+  return kind === "bloomfall-adaptive-p0" || kind === "bloomfall-adaptive-p0-source" || kind === "bloomfall-adaptive-p1p2" || kind === "bloomfall-adaptive-p1p2-source";
 }
 
 /** The URL for an entry's art, or null when nobody has dropped one in yet. */
