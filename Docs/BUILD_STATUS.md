@@ -728,3 +728,15 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Browser-rendered all 15 registered V3 assets at desktop and mobile viewports with exact native dimensions and zero broken images; authenticated application routes remain covered by protected-route and resolver tests without weakening sign-in
 - [x] Passed 415 web tests, three Codex Sync tests, strict web/shared/database/Codex Sync typechecks, Prisma validation, web lint, all Bloomfall/geography/Atlas/V2/parity/Bundle V4 verifiers, production read-only hierarchy comparison, final diff checks, and the normal-workflow push
 - [ ] Production cutover remains reserved for Prompt 6B; no production database, configuration, Codex, Atlas, or art publication change is authorized here
+
+## 2026-08-26 - Bloomfall V3 production cutover
+
+- [x] Verified the rehearsed release source rather than trusting it: HEAD, origin/main, clean worktree, and a release build proven to postdate the last source commit
+- [x] Found HabitatWeb serving a build whose chunks had been overwritten underneath it, deployed the release build first per the build-identity and publication-boundary contract, and cleared a pre-existing `/chronicle` 500 in the process
+- [x] Took and independently restore-list verified a dedicated fresh production dump rather than reusing the nightly or rehearsal dumps
+- [x] Captured the read-only production baseline at fingerprint `98fc7466...ebe27`, matching rehearsal exactly, then passed a zero-write dry run
+- [x] Activated in the locked order and converged on fingerprint `c3fd0ff0...c7a40` with 114 mutations, 1227 revisions, 238 entries, four maps, and 27/36/14/55 topology - byte-identical to two independent rehearsal clones
+- [x] Confirmed world topology unchanged at 19/26/11 per map, zero hierarchy defects, a 13-entry Peninsula with no world-region leakage, and zero mainline campaign modifications
+- [x] Published exactly 15 owner-locked V3 selections with V1/V2 at zero, verified production art resolution and SHA-256 byte-for-byte, and inspected the served world and local rasters directly
+- [x] Re-ran the activator for a zero-mutation `ALREADY_APPLIED`, observed zero new client/5xx/database/asset errors, and left all four rollback levels available and unused
+- [ ] Authenticated desktop and mobile interaction QA (selection, search, breadcrumbs, POI/route controls) remains an owner-side confirmation step; every such surface is sign-in gated

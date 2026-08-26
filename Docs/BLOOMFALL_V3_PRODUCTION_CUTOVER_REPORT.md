@@ -1,313 +1,449 @@
-# Bloomfall Reach + Geographic Hierarchy + V3 Visual Lock — Production Cutover Report
+# Bloomfall V3 production cutover report
 
-Date: 2026-08-25
-Prompt: FINAL PROMPT 6 (controlled production release)
+Date: 2026-08-26
+Prompt: 6B — Bloomfall Reach + geographic hierarchy + owner-locked V3 controlled production cutover
 
-## FINAL DECISION
+Supersedes the Prompt 6 `BLOOMFALL_V3_RELEASE_BLOCKED` report, which is preserved in git history
+at `0cc4ddf`. That report's two blocking causes — no production activation path, and V3 art
+registered nowhere — were both resolved by the release engineering phase before this cutover ran.
+
+## Final decision
 
 ```text
-BLOOMFALL_V3_RELEASE_BLOCKED
+BLOOMFALL_HIERARCHY_AND_V3_LIVE
 ```
 
-Failed gate: **Section 16 / Stage 1 step 1 — Production Hierarchy Repair**, and by the same
-root cause Sections 17, 18 and 24. Independently, Sections 22 and 39 fail on a second cause.
-
-No production write was attempted. No production backup was required or taken, because
-Section 14 scopes the backup to "immediately before the first production write" and no such
-write was reached. Production is byte-for-byte unchanged.
+Rollback used: **NO**. Production database, application build, and V3 publication all reached
+their exact locked target state on the first attempt.
 
 ## 1. Release identity
 
 ```text
-branch            main
-starting HEAD     d292b9455106914f13c33b4f513f8ebbd57b458a
-origin/main       d292b9455106914f13c33b4f513f8ebbd57b458a
-divergence        ahead 0 / behind 0
-release commit    NOT CREATED (release blocked before deployment)
-evidence commit   NOT CREATED
-deployed commit   unchanged
-production build  unchanged
+branch                main
+starting HEAD         0cc4ddfb844ef20c6c22144d9dd90d805539dc66
+deployed commit       0cc4ddfb844ef20c6c22144d9dd90d805539dc66
+production build ID   A-OBDskg7tzOM0cTu5qRn
+origin/main (pre)     0cc4ddfb844ef20c6c22144d9dd90d805539dc66
+divergence (pre)      ahead 0 / behind 0
+worktree at cutover   0 modified, 0 staged, 0 untracked
 ```
 
-Worktree preserved intact: 26 tracked modifications, 263 untracked files. Nothing reset,
-cleaned, stashed or discarded.
+The prompt's expected HEAD, origin, and clean-worktree state were verified rather than assumed
+and matched exactly. The release build was confirmed to postdate the last source-bearing commit
+(`f750bca`, 21:10:05) with no `.ts`/`.tsx` file modified after the build at 21:30:52, so
+`A-OBDskg7tzOM0cTu5qRn` is a faithful build of HEAD.
 
-## 2. Blocking cause A — no production activation path exists
+## 2. Deployment ordering correction
 
-Every Stage 1 mutation tool is hard-locked to the development database. Each resolves its
-target through `resolveAtlasDevelopmentDatabaseUrl`, which returns `null` unless
-`HABITAT_ENVIRONMENT=development` and then *rewrites the URL path* to `/habitat_atlas_dev`.
+Preflight found that HabitatWeb had been running since **08:10:34** while the release build was
+written at **21:30:52** the previous evening. The live process was therefore serving a build whose
+Turbopack chunks had been overwritten underneath it. Production was already degraded independently
+of this release:
 
-| Section | Required production mutation | Tool | Production path |
+```text
+/chronicle            HTTP 500
+error log             ChunkLoadError: Cannot find module
+                      .next/server/chunks/ssr/node_modules__pnpm_0qgnmgg._.js
+```
+
+Per section 14 the activation gate must reflect the actually deployed build, and per section 35
+application deploy must pass before player visibility. HabitatWeb was therefore restarted **before**
+any database write, which is also consistent with the publication boundary: code deployment and file
+presence alone do not publish the package.
+
+```text
+new PID               24216
+started               2026-08-26 05:53:33
+serving BUILD_ID      A-OBDskg7tzOM0cTu5qRn
+```
+
+Post-deploy the pre-existing failure cleared:
+
+```text
+/chronicle            HTTP 500 -> HTTP 200
+```
+
+HabitatWorker was left running and untouched; the release does not require it.
+
+## 3. Production backup
+
+A dedicated fresh pre-release dump was taken immediately before the first write using the exact
+convention in `scripts/backup-habitat.ps1` (`pg_dump --format custom --compress 6`). The 04:00
+nightly dump was deliberately **not** reused; it would have aged out of the two-hour freshness gate
+mid-cutover.
+
+```text
+path         N:\The Habitat\backups\database\habitat-pre-bloomfall-v3-20260826-055515.dump
+size         19,566,193 bytes
+timestamp    2026-08-26 05:55:17
+SHA-256      199aa31c99e1bd7c8ade500c4efa82c14acc40b6a38156358f86fa3e768bea72
+```
+
+Independent restore-list verification was run against the **host artifact** (copied back into the
+container so the exact gated file was the one checked):
+
+```text
+pg_restore --list exit code   0
+archive dbname                habitat
+TOC entries                   746
+TABLE DATA entries            96
+StoryEntry / StoryMap present YES
+```
+
+The backup is retained and was not deleted during the release. It is the Level 4 rollback artifact.
+
+## 4. Baseline
+
+Captured read-only from the exact production target with the separately guarded inspector
+immediately before invocation.
+
+```text
+state                 BEFORE
+database              localhost:5432/habitat
+baseline fingerprint  98fc74662dc0c490ee23637d737ab99a25bf79c28ddebb946448d9d8d81ebe27
+```
+
+This is an exact match to the rehearsal baseline fingerprint. Pre-release counts matched the locked
+expectation precisely:
+
+```text
+StoryEntries 175   StoryMaps 3   placements 36   nodePlacements 10
+topology 19 nodes / 26 boundaries / 11 rings / 43 references
+worldConnections 25   connectionPaths 9   arcs 7   world Atlas art v1
+placeholder  a64869df-c623-49ec-9236-dd306a3fd5c7  Unknown Southeast / unknown-southeast  CANON v1
+```
+
+All six geographic hierarchy defects were present exactly as expected.
+
+## 5. Dry run
+
+```text
+result   READY
+writes   0
+mode     PRODUCTION
+source   localhost:5432/habitat   target   localhost:5432/habitat
+release  head 0cc4ddfb…dc66  build A-OBDskg7tzOM0cTu5qRn  backup 19,566,193 bytes
+```
+
+## 6. Activation
+
+```text
+action     ACTIVATE
+status     ACTIVATED
+mutations  114        (rehearsal expectation: 114)
+```
+
+Stage breakdown, in the locked dependency order:
+
+| Order | Stage | Status | Mutations |
+| ---: | --- | --- | ---: |
+| 1 | rename | RENAMED | 1 |
+| 2 | hierarchy repair | REPAIRED | 7 |
+| 3 | canonical content / stories / semantic connections | BLOOMFALL_CANONICAL_CONTENT_APPLIED | 90 |
+| 4 | local Atlas | APPLIED | 1 |
+| 5 | V3 publication | ACTIVATED | 15 |
+
+## 7. Final production fingerprint
+
+```text
+final fingerprint     c3fd0ff0a3ae73fc7b18198c717b48e579b1d764f7ae821b01fccc49741c7a40
+rehearsal fingerprint c3fd0ff0a3ae73fc7b18198c717b48e579b1d764f7ae821b01fccc49741c7a40
+match                 EXACT
+revisions             1227   (rehearsal: 1227)
+```
+
+Real production converged byte-for-byte on the same logical state as two independent rehearsal
+clones.
+
+## 8. Final production counts
+
+```text
+StoryEntries     238    StoryMaps        4
+placements        54    nodePlacements  10
+topologyNodes     27    boundaries      36
+rings             14    references      55
+worldConnections  27    connectionPaths 11
+arcs              13
+```
+
+Every value matches the rehearsal target exactly.
+
+## 9. World topology remains locked
+
+Counted per map, not as post-release totals:
+
+```text
+martino-world             19 nodes / 26 boundaries / 11 rings     UNCHANGED
+martino-bloomfall-reach    8 nodes / 10 boundaries /  3 rings     additive
+```
+
+The larger 27/36/14/55 totals are world plus the additive Bloomfall local topology. No world region
+was retraced.
+
+## 10. Hierarchy repair
+
+Production hierarchy audit after activation:
+
+```text
+database          habitat
+entries audited   55
+invalid parents    0
+cycles             0
+missing parents    0
+suspicious         0
+```
+
+Final top-level regions:
+
+| Region | Parent | Type |
+| --- | --- | --- |
+| Bloomfall Reach | null | region |
+| The Desert | null | region |
+| The Grand Rift | null | region |
+| The High Cliffs | null | region |
+| The Magic-Torn Wasteland | null | region |
+| The Peninsula | null | region |
+| The Red Forest | null | region |
+| The Riverlands | null | region |
+
+Legitimate nesting preserved:
+
+```text
+Death Canyon   -> grand-rift        Grand Lake      -> high-cliffs
+Floating City  -> high-cliffs       Port Arcadia    -> the-peninsula
+Shattercore    -> bloomfall-reach   Mutation Belt   -> bloomfall-reach
+Living Marsh   -> bloomfall-reach   Long Graze      -> the-mutation-belt
+Igit Island (the-starting-island)   -> null  (starter progression untouched)
+```
+
+## 11. Peninsula dossier
+
+Exactly 13 legitimate descendants, all beneath Port Arcadia:
+
+```text
+Port Arcadia
+├── Arcadian Soverign Guard
+├── Arcadian Special Intelligence Service
+├── Census Office
+├── Chancellory of Arcadia
+├── Embassy Row
+├── Exclusion Area
+├── Lower Westside
+├── The East side
+├── The Northside
+├── The southside
+├── Upper Westside
+└── Waterfront district
+```
+
+```text
+unrelated world regions inside Peninsula = 0
+```
+
+Titles are reproduced exactly as they exist in the canonical database. Pre-existing spelling in
+unrelated content was deliberately not corrected in this release.
+
+## 12. Bloomfall canonical rename
+
+```text
+Unknown Southeast retired   YES
+Bloomfall Reach canonical   YES
+slug bloomfall-reach        YES
+same StoryEntry ID          YES   a64869df-c623-49ec-9236-dd306a3fd5c7
+top-level parent            YES   parent = null, type = region
+status / version            CANON / v5
+subregion children          the-living-marsh, the-mutation-belt, the-shattercore
+```
+
+The 21 remaining `Unknown Southeast` occurrences are all classified
+`HISTORICAL_DEVELOPMENT_EVIDENCE` in `StoryRevision` rows — the preserved audit lineage, which is
+correct for an in-place rename.
+
+## 13. Stories and campaign protection
+
+```text
+total arcs after activation   13    (7 before + 6 regional Bloomfall arcs)
+mainline arcs                  5    unchanged
+mainline arcs modified         0
+mainline Bloomfall links       0
+```
+
+All six Bloomfall arcs are non-mainline (`SIDE_QUEST`, `CONTRACT`, `WORLD_EVENT`, `FACTION_QUEST`).
+
+```text
+campaign act decided          NO       mandatory progression   NO
+Tino requirement               0       Amanda requirement       0
+antagonist link          unresolved    true cause         unresolved
+```
+
+## 14. World connections
+
+```text
+total semantic connections    27   (25 + 2 additive)
+bloomfall-reach <-> riverlands    ROAD        BIDIRECTIONAL   ACTIVE
+bloomfall-reach <-> the-ocean     SEA_ROUTE   BIDIRECTIONAL   ACTIVE
+magic-torn semantic route         NONE
+```
+
+## 15. Bloomfall local Atlas
+
+```text
+scene slug     martino-bloomfall-reach
+scene ID       1d8fe347-8ce8-5bc1-ae5c-6ee5dedab54f
+parent         martino-world
+owner          bloomfall-reach
+art version    v3
+topology       8 nodes / 10 boundaries / 3 rings / 12 references
+placements     18   (3 subregion polygons + 15 POIs)
+paths           2   (Riverlands road corridor, Ocean marsh approach)
+verification   PASS
+```
+
+No REVIEW_REQUIRED or DEFER route candidate was activated. No POI coordinate was moved.
+
+## 16. V3 visual lock — production selections
+
+```text
+V1 selected for Bloomfall release = 0
+V2 selected for Bloomfall release = 0
+V3 selected for release           = 15   (2 Atlas + 13 Codex)
+```
+
+Verified by resolving the art exactly as production does (`HABITAT_ENVIRONMENT=production`):
+
+| Binding | Served file | SHA-256 | Dimensions |
 | --- | --- | --- | --- |
-| 16 | Hierarchy repair | `repair-geographic-hierarchy.ts` | none |
-| 17 | Bloomfall canonical rename | `rename-bloomfall-reach.ts` | none |
-| 18 | Bloomfall canon content activation | `implement-bloomfall-reach-content.ts` | none |
-| 24 | Bloomfall local Atlas promotion | `activate-bloomfall-local-atlas.ts` | none |
-
-Reinforcing guards:
-
-- `rename-bloomfall-reach.ts` and `implement-bloomfall-reach-content.ts` additionally
-  re-assert `database === "habitat_atlas_dev"` *inside* the transaction.
-- `repair-geographic-hierarchy.ts` calls `assertAtlasPersistentDevelopmentTarget(url)`.
-- The confirmation token is literally `GLOBAL_REGION_HIERARCHY_DEVELOPMENT_REPAIR`.
-
-There is no environment variable, CLI flag, or branch in any of the four that can target
-`habitat`. Compare `activate-atlas-v2.ts`, which *does* implement the repository production
-cutover convention (`ATLAS_V2_ACTIVATION_DATABASE_URL`, owner-authorization token, backup /
-release-HEAD / build-ID preconditions). The Bloomfall and hierarchy tools were never given
-the equivalent.
-
-Reaching production would require either modifying those development-only guards or writing
-a new tool that bypasses them. Section 51 states **"Do not weaken safety guards."** Both
-options violate it, so the release stops here rather than forcing the write.
-
-## 3. Blocking cause B — V3 art is not registered in any environment
-
-`apps/web/lib/story-atlas-art.ts` holds a hardcoded registry:
+| `martino-world:v3` | `private/codex-art/maps/martino-world-map-v3.png` | `9670a94dc80a69272648bd7cdb51795e933dc099b03d95bf05c47047ea85b62a` | 1536x1024 |
+| `martino-bloomfall-reach:v3` | `private/codex-art/maps/martino-bloomfall-reach-map-v3.png` | `3a9f5517e972217a5513428544567267d29ea219ea11dcf69dd12f0aa67e6569` | 1536x1024 |
 
 ```text
-martino-world:v1            martino-world-map-v1.png
-martino-world:v2            candidates/martino-world-map-v2-clean-production-candidate.png
-martino-starting-island:v1  martino-starting-island-map-v1.png
-martino-port-arcadia:v2     martino-port-arcadia-map-v2.png
-martino-bloomfall-reach:v1  candidates/martino-bloomfall-reach-map-v1.png  (developmentOnly)
+martino-bloomfall-reach:v1  -> NOT SERVED IN PRODUCTION (developmentOnly, superseded)
+martino-world:v1            -> still registered, available for V1 renderer rollback
 ```
 
-- There is **no `:v3` key** for any scene.
-- The resolver serves only from `private/codex-art/maps/`; all 15 V3 files live under
-  `private/codex-art/bloomfall/v3-reset/`, outside the served tree.
-- `martino-bloomfall-reach:v1` is flagged `developmentOnly: true`, so the local scene is
-  deliberately non-production today.
-- Both databases still report `martino-world` art=`v1` and `martino-bloomfall-reach` art=`v1`.
-
-Section 39 (V3 Codex imagery) has no binding surface either: Codex heroes in
-`apps/web/lib/story-library.ts` are static `/images/...` paths, and none of the 13 cinematic
-V3 assets are wired to canonical entries.
-
-The V3 manifest agrees it was never released:
+Codex publication markers:
 
 ```text
-decision    BLOOMFALL_VISUAL_RESET_READY_FOR_OWNER_REVIEW
-publication candidateOnly=true  active=false  playerVisible=false
-            productionReleasePaused=true  prompt6Run=false
+expected markers  13
+active markers    13
+missing            0
+wrong version      0
 ```
 
-Promoting V3 is therefore a code change (register `:v3` keys, relocate assets into the served
-tree, drop `developmentOnly`, bind Codex imagery), not a release-time activation.
+Spot-checked production Codex files (hero, Shattercore, Bellwether, Switchmother) all returned
+`SHA_OK` at 1672x941. The `bloomfall-v3` directory holds exactly 13 files.
 
-## 4. V3 visual lock inventory — VERIFIED AND FROZEN
+## 17. World Atlas V3 visual verification
 
-Manifest: `apps/web/private/codex-art/bloomfall/v3-reset/bloomfall-visual-v3-reset-manifest.json`
-All 15 assets: file present, dimensions match, SHA-256 matches. **15/15 verified, 0 failed.**
+The exact served production file was inspected, not merely hashed. All owner-approved corrections
+are present:
 
-| # | Purpose | Filename | Dimensions | SHA-256 |
-| ---: | --- | --- | --- | --- |
-| 1 | Corrected world Atlas | martino-world-map-v3-reset-candidate.png | 1536x1024 | `9670a94dc80a69272648bd7cdb51795e933dc099b03d95bf05c47047ea85b62a` |
-| 2 | Bloomfall Reach hero | bloomfall-hero-v3-reset.png | 1672x941 | `8750634e8c515ae2dc71bb87d3ff372e2dfc2247f844b41fa9de5c06497a8eae` |
-| 3 | Shattercore | shattercore-v3-reset.png | 1672x941 | `6a63118ea898f69d2ed8043d67a2564b801773a0677a4163b0fc99a1e87d4b72` |
-| 4 | Southreach exterior | southreach-exterior-v3-reset.png | 1672x941 | `37919540f6d74d50de9476bc86dc6b20888051aa43173142aa92ca03569de422` |
-| 5 | Southreach interior | southreach-interior-v3-reset.png | 1672x941 | `2627d93017f2c27571f5b1393ddb25a0e1f12f8b954165679309d6411d325f71` |
-| 6 | Mutation Belt | mutation-belt-v3-reset.png | 1672x941 | `f30f9f049f13e48ea7b312ada29a271e5f100db5eb1fb46dd5c36ccff59523a1` |
-| 7 | Living Marsh day | living-marsh-day-v3-reset.png | 1672x941 | `96d664e7ae59ef6964a409afb871e7b9e9d0bbc5fe41c9d2ec2dcd7b95f2565a` |
-| 8 | Living Marsh night | living-marsh-night-v3-reset.png | 1672x941 | `b8e7ede36195162c812e3bc0f6322ca0b17b73a1368e724c5d8655841621b4b1` |
-| 9 | Bellwether | bellwether-v3-reset.png | 1672x941 | `d68bc35a655fbcc2f9e66092b403710cf822838ee50e01b5c482ef70b6e11784` |
-| 10 | Switchmother | switchmother-v3-reset.png | 1672x941 | `53fc717810276550b2e43459134b7a104879ba019f85865357242bad22806ae1` |
-| 11 | Marsh coordination | marsh-coordination-v3-reset.png | 1672x941 | `6f86fa6c4c5031561de792a74db06636e3a2f63b9c51adc778ca4efa4e56b81d` |
-| 12 | Flora/resources | flora-resources-v3-reset.png | 1672x941 | `8d162eb2eb4350e3a32065b0607bea90c88258e5d0cd9e7e40420eb701b73133` |
-| 13 | Bloomstorm | bloomstorm-v3-reset.png | 1672x941 | `aa710396e9d7764977b00c03894ee10eb170fb967de7aa68d402981375014f6a` |
-| 14 | Expedition/survivor team | expedition-v3-reset.png | 1672x941 | `6a8834258638b53dab8c3b6e7dc7226810762a9fb04a702e01ae72286ec7067c` |
-| 15 | Bloomfall local Atlas | local-atlas-v3-reset.png | 1536x1024 | `3a9f5517e972217a5513428544567267d29ea219ea11dcf69dd12f0aa67e6569` |
-
-```text
-V1 selected for release = 0
-V2 selected for release = 0
-V3 selected for release = 0   (activation blocked; 15 verified and frozen, none promoted)
-```
-
-No art was regenerated, restyled, upscaled, recoloured or blended. V1 and V2 preserved as
-superseded development evidence.
-
-## 5. V3 world Atlas lock — visually confirmed
-
-Manual inspection of `martino-world-map-v3-reset-candidate.png` confirms every owner-approved
-correction:
-
-- Floating City restored — airborne over the lake, visible underside and water shadow.
-- Missing island groups restored — several distinct offshore archipelagos.
-- Volcanic islands strongly represented — smoking cones, active lava, black basalt.
-- Tropical islands strongly represented — canopy, beaches, turquoise reef shallows.
-- Desert city restored — dense settlement in the western desert corridor.
+- Floating City restored — airborne over the lake with a real underside and water shadow.
+- Additional island groups restored — several distinct offshore archipelagos.
+- Volcanic islands clearly represented — smoking cones, active lava flow, black basalt.
+- Tropical islands clearly represented — palm canopy, beaches, turquoise reef shallows.
+- Desert city restored — dense settlement with defensive works in the desert corridor.
 - Magic-Torn settlement restored — fortified city beneath a visible defensive field.
-- Death Canyon — lethal purple/green gas pooled inside the nested canyon depth.
-- Port Arcadia — enlarged, clearly crescent, with harbour, docks and breakwaters.
-- Bloomfall Reach — represented in the south-east.
-- No boundary-filament contamination; no baked Atlas UI or boundary lines.
+- Death Canyon — lethal purple/green gas pooled inside the canyon depth.
+- Port Arcadia — enlarged and clearly crescent, with harbour, docks and breakwaters.
+- Bloomfall Reach — correctly represented in the south-east.
+- No filament contamination; no baked region-boundary artefacts; no baked Atlas UI.
 
-The V3 local Atlas confirms three legible bands (Shattercore industrial wound / Mutation Belt
-countryside / Living Marsh coastal flooding) with the Drowned Intake on the sea terminus and
-no baked labels.
+The local Atlas shows the three canonical bands — Shattercore industrial wound, Mutation Belt
+countryside, Living Marsh coastal flooding — with the Drowned Intake on the sea terminus and no
+baked labels.
 
-## 6. Stage 0 — production baseline (captured, unchanged)
+## 18. Idempotency
 
-```text
-database                  localhost:5432/habitat
-StoryEntry rows           175
-StoryMap rows             3
-world topology            19 nodes / 26 boundaries / 11 rings
-placements                36        nodePlacements    10
-worldConnections          25        connectionPaths    9
-arcs                       7
-martino-world art          v1
-martino-port-arcadia art   v2
-martino-starting-island    v1
-HabitatWeb                 Running      HabitatWorker  Running
-public site /              HTTP 200
-```
-
-Production hierarchy defects present (**invalidParents = 6**):
+The activator was re-invoked against production with the post-release baseline fingerprint:
 
 ```text
-the-desert            parent=the-peninsula   (should be null)
-grand-rift            parent=the-peninsula   (should be null)
-high-cliffs           parent=the-peninsula   (should be null)
-magic-torn-wasteland  parent=the-peninsula   (should be null)
-riverlands            parent=the-peninsula   (should be null)
-the-red-forest        parent=grand-rift  type=zone  (should be null / region)
-unknown-southeast     parent=the-peninsula   (not yet renamed)
+status              ALREADY_APPLIED
+mutations           0
+revisions added     0   (1227 before and after)
+fingerprint         c3fd0ff0…c7a40   unchanged
+local Atlas         PASS
+publication counts  atlas 2 / codex 13 / total 15
 ```
 
-Legitimate nesting already correct in production and to be preserved:
-`death-canyon → grand-rift`, `grand-lake → high-cliffs`, `the-floating-city → high-cliffs`,
-`port-arcadia → the-peninsula`.
-
-Repair-manifest StoryEntry IDs were checked against production and **match exactly**, so the
-manifest is production-compatible once a production-capable tool exists. Note the manifest
-expects slug `bloomfall-reach` with `beforeParent=the-peninsula`, so the rename (Section 17)
-must run **before** the hierarchy repair (Section 16).
-
-## 7. Development release candidate — ALL GATES PASS
+## 19. Monitoring
 
 ```text
-database                    habitat_atlas_dev
-StoryEntry rows             238
-StoryMap rows               4
-world topology              19 nodes / 26 boundaries / 11 rings / 43 refs   (unchanged)
-bloomfall local topology     8 nodes / 10 boundaries /  3 rings / 12 refs
+new client errors    0
+new HTTP 5xx         0
+new DB errors        0
+asset failures       0
+error log growth     0 lines since the post-deploy baseline (16111)
 ```
 
-Bloomfall content audit — `status: PASS`:
+The `/chronicle` 500 present before the cutover was resolved by the deploy. Protected art routes
+correctly return HTTP 404 to unauthenticated callers, which is the intended private-art behaviour
+rather than a delivery fault.
+
+Route status after activation:
 
 ```text
-main region 1            subregions 3           POIs 15
-systems 9                characters/entities 7  creatures 8
-aberrants 4              resources 8            events 11
-regional arcs 6          semantic connections 2 route paths 2
-local scene 1            local placements 18
-brokenReferences 0       orphanMajorEntries 0
-mainlineArcsLinked 0     mainlineNodeLinks 0    nobodyCameOutcomes 6
-productionWrites 0
+/                            200
+/codex/bible/bloomfall-reach 307  (authentication redirect, not an error)
+/codex/map?atlas=v1          307  (authentication redirect, route intact)
 ```
 
-Geographic hierarchy audit — 55 entries, `invalidParents 0`, `cycles 0`, `missingParents 0`,
-`suspiciousContainment 0`. All eight required top-level regions present.
-
-Peninsula dossier audit — `status: PASS`. `peninsulaRows = [port-arcadia]` only; 13 legitimate
-Peninsula entries; no unrelated world region appears.
-
-Local Atlas verification — `verificationStatus: PASS`; nodes 8, boundaries 10, rings 3,
-references 12, paths 2, placements 18; approved routes `riverlands-road` and `ocean-sea-route`;
-route candidates correctly left DEFER (5) and REVIEW_REQUIRED (2).
-
-World connections — `bloomfall-reach ↔ riverlands ROAD BIDIRECTIONAL` and
-`bloomfall-reach ↔ the-ocean SEA_ROUTE BIDIRECTIONAL`. No Magic-Torn semantic route.
-
-Idempotency — `geography:repair` preview reports `mutations 0`, `invalidParents 0`
-(ALREADY_APPLIED) on development.
-
-## 8. Test suite — ALL PASS
+## 20. Production authoring
 
 ```text
-@habitat/web test             403 pass / 0 fail
-@habitat/web typecheck        clean
-@habitat/web lint             clean
-@habitat/shared typecheck     clean
-@habitat/db typecheck         clean
-@habitat/db prisma validate   schema valid
-@habitat/codex-sync typecheck clean
-@habitat/codex-sync test        3 pass / 0 fail
-bloomfall:audit               PASS
-codex-sync bloomfall:verify   PASS
-geography:audit               0 defects
-geography:dossier:audit       PASS
-bloomfall:atlas:verify        PASS
-atlas:dev:verify              world topology unchanged
-atlas:routes:verify           27 connections / 11 approved
-git diff --check              clean
+production Atlas authoring = DISABLED
 ```
 
-No safety guard was weakened, disabled or bypassed.
+`HABITAT_ATLAS_AUTHORING_ENABLED` is absent from `.env`, and the authoring guard independently
+refuses `HABITAT_ENVIRONMENT=production` and any URL resolving to the `habitat` database. Topology,
+POI, label, and route authoring remain unavailable in production.
 
-## 9. Section 9 worktree classification
-
-```text
-RELEASE_REQUIRED            source under apps/web, apps/codex-sync, packages/shared
-                            (~0.3 MB, ~26 files) plus the 15 V3 production rasters
-                            (~40 MB) once relocated into private/codex-art/maps/
-RELEASE_EVIDENCE            Docs/BLOOMFALL_*.md, Docs/bloomfall-local-atlas/,
-                            Docs/geographic-hierarchy/, the V3 manifest
-SUPERSEDED_VISUAL_HISTORY   private/codex-art/bloomfall/v2       167 MB / 81 files
-                            private/codex-art/bloomfall/candidates 113 MB / 36 files
-                            (preserve on disk; do NOT commit)
-TEMPORARY/DO_NOT_COMMIT     v3-reset evidence: comparisons, native close-ups, overlays,
-                            contact sheets, sources, runtime copies (~145 MB)
-UNRELATED                   none identified
-```
-
-Repository convention (7 tracked files under `private/codex-art/`) commits only
-production-required rasters. The 472 MB of untracked art is **not** gitignored, so a naive
-`git add -A` would commit all of it. Selective staging is required.
-
-## 10. Campaign protection — INTACT
-
-```text
-mainline arcs modified        0
-mainline Bloomfall links      0
-Tino required                 NO
-Amanda required               NO
-campaign unlock               UNDECIDED
-campaign act                  UNDECIDED
-major antagonist connection   UNDECIDED
-ending relevance              UNDECIDED
-true Bloomfall culprit        UNRESOLVED
-```
-
-## 11. Production authoring — DISABLED (verified)
-
-`HABITAT_ATLAS_AUTHORING_ENABLED` is absent from `.env` (production) and present only in
-`.env.local` (development). `assertAtlasAuthoringEnvironment` additionally rejects
-`HABITAT_ENVIRONMENT=production` and any URL resolving to the `habitat` database.
-
-## 12. Rollback
+## 21. Rollback
 
 ```text
 rollback used = NO
 ```
 
-No rollback was needed — no production mutation, deployment or art activation occurred.
-All four rollback levels remain available and unused. `/codex/map?atlas=v1` legacy renderer
-compatibility is present and untouched.
+All layers remain available:
 
-## 13. Work required to unblock
+| Level | Action | Status |
+| --- | --- | --- |
+| 1 | Disable Bloomfall publication markers / StoryMap V3 selections | available |
+| 2 | Return Atlas/Codex visual selection to prior production state | available |
+| 3 | Restore previous production build and restart HabitatWeb | available |
+| 4 | Restore `habitat-pre-bloomfall-v3-20260826-055515.dump` | available, verified |
 
-1. **Production activation tooling.** Give the four Bloomfall/hierarchy tools the production
-   convention already proven by `activate-atlas-v2.ts`: explicit
-   `*_ACTIVATION_DATABASE_URL`, owner-authorization token, fresh-backup / release-HEAD /
-   build-ID preconditions, serializable transaction, optimistic version claims, atlas
-   preservation snapshot, and an `ALREADY_APPLIED` idempotent path. This is new reviewed
-   engineering, not a release action.
-2. **V3 art registration.** Add `martino-world:v3` and `martino-bloomfall-reach:v3` to the
-   art registry, relocate the two Atlas rasters into `private/codex-art/maps/`, drop
-   `developmentOnly` from the Bloomfall scene, and bind the 13 cinematic V3 assets to their
-   canonical Codex entries.
-3. **Re-run this prompt** once both land, starting from a fresh preflight.
+The corrected hierarchy should be retained under Levels 1–3; only a full Level 4 restore would
+reintroduce the known-bad hierarchy.
+
+## 22. Verification limitation — authenticated UI QA outstanding
+
+Every Codex and Atlas surface is authentication-gated and returns HTTP 307 to this unauthenticated
+loopback session. Server-side verification was therefore performed exhaustively — database state,
+production art resolution, byte-level SHA verification, route health, and error monitoring — and the
+served V3 rasters were inspected directly as image files.
+
+The following require an authenticated browser session and have **not** been executed here:
+
+- desktop interaction QA (region selection, search, breadcrumbs, browser history);
+- Bloomfall local scene drill-down, POI hover/selection, route controls;
+- cross-scene Atlas search for the three subregions and 15 POIs;
+- mobile 390x844 layout, overflow, and tap-target QA.
+
+The engineering phase browser-rendered all 15 registered V3 assets at desktop and mobile viewports
+with exact native dimensions and zero broken images, so asset delivery is covered. The interaction
+pass above remains an owner-side confirmation step.
+
+## 23. Source suite
+
+The release source suite was green before deployment: 415 web tests, 3 Codex Sync tests, strict
+web/shared/database/Codex Sync typechecks, Prisma validation, and web lint. Expensive source tests
+were not re-run after production mutation; production-safe audits were run instead and are reported
+above.
+
+One tool was deliberately not forced: `atlas:v2:verify` resolves to the development database under
+the normal environment loader, and its production mode carries separate Atlas V2 activation
+authorization semantics. Section 6 forbids bypassing a gate, so it was left alone. The ground it
+covers was verified directly instead — per-map world topology unchanged at 19/26/11, hierarchy audit
+clean including Death Canyon containment, and the activator's own hierarchy, local Atlas, and
+publication verification all passing.
