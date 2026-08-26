@@ -46,8 +46,14 @@ function directoryFor(kind: CodexArtKind) {
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
 }
 
+/**
+ * The generation history — every iteration, including the ones review sent
+ * back — is local evidence and never leaves development. The candidate
+ * directories beside it hold only the owner-approved finals, so those are
+ * ordinary served art once a release promotes them.
+ */
 function isDevelopmentReviewKind(kind: string) {
-  return kind === "bloomfall-adaptive-p0" || kind === "bloomfall-adaptive-p0-source" || kind === "bloomfall-adaptive-p1p2" || kind === "bloomfall-adaptive-p1p2-source";
+  return kind === "bloomfall-adaptive-p0-source" || kind === "bloomfall-adaptive-p1p2-source";
 }
 
 /** The URL for an entry's art, or null when nobody has dropped one in yet. */

@@ -29,17 +29,9 @@ import { bloomfallV3Assets, bloomfallV3Package } from "@/lib/bloomfall-v3-art";
  * tier, class, and route tables a reader wants side by side, plus the causal
  * diagram and the Adaptive Mutation creature index. It renders from the same
  * reviewed manifest the prose is generated from, so the two can never disagree.
- *
- * Development only, on purpose. The Prompt E package is a review candidate;
- * production keeps exactly what the owner has already approved until a
- * promotion phase says otherwise.
  */
 
 const stormHero = bloomfallV3Assets.find((asset) => asset.id === "bloomstorm");
-
-function isDevelopment(environment: Readonly<Record<string, string | undefined>>) {
-  return environment.HABITAT_ENVIRONMENT === "development";
-}
 
 function Cards({ children, columns }: { children: React.ReactNode; columns: 4 | 5 }) {
   return <div className={`bloomfall-card-grid is-${columns}`}>{children}</div>;
@@ -350,9 +342,7 @@ const panelIcons = {
   STORM_STAGES: Activity, HARVEST_CLASSES: Sprout, ABERRANT_PROFILES: ShieldAlert, ROUTE_CLASSES: Route,
 } as const;
 
-export function BloomfallSystemPanel({ entrySlug, environment = process.env }: { entrySlug: string; environment?: Readonly<Record<string, string | undefined>> }) {
-  if (!isDevelopment(environment)) return null;
-
+export function BloomfallSystemPanel({ entrySlug }: { entrySlug: string }) {
   if (entrySlug === "bloomfall-reach") {
     return <section aria-labelledby="bloomfall-network-title" className="bloomfall-system-panel is-region">
       <div className="bloomfall-panel-heading">

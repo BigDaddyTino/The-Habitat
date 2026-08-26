@@ -51,23 +51,30 @@ export type BloomfallReleaseEvidence = {
   backupMtimeMs: number;
 };
 
-export function assertBloomfallReleaseEvidence(evidence: BloomfallReleaseEvidence, environment: Readonly<Record<string, string | undefined>> = process.env, now = Date.now()) {
-  const expectedHead = environment.BLOOMFALL_V3_RELEASE_HEAD?.trim().toLowerCase();
+/**
+ * Every Bloomfall production release proves the same four things before it is
+ * allowed to write: the exact source commit, the exact build it produced, a
+ * fresh custom-format backup at a named absolute path, and that the backup was
+ * actually readable. The prefix selects which release is being gated, so a
+ * stale token from an earlier cutover cannot authorise a later one.
+ */
+export function assertBloomfallReleaseEvidence(evidence: BloomfallReleaseEvidence, environment: Readonly<Record<string, string | undefined>> = process.env, now = Date.now(), prefix: "BLOOMFALL_V3" | "BLOOMFALL_CODEX" = "BLOOMFALL_V3") {
+  const expectedHead = environment[`${prefix}_RELEASE_HEAD`]?.trim().toLowerCase();
   if (!expectedHead || !/^[a-f0-9]{40}$/.test(expectedHead) || expectedHead !== evidence.actualHead.toLowerCase()) throw new Error(`Bloomfall release HEAD mismatch: expected ${expectedHead ?? "missing"}, actual ${evidence.actualHead}.`);
-  const expectedBuildId = environment.BLOOMFALL_V3_EXPECTED_BUILD_ID?.trim();
+  const expectedBuildId = environment[`${prefix}_EXPECTED_BUILD_ID`]?.trim();
   if (!expectedBuildId || expectedBuildId !== evidence.actualBuildId) throw new Error(`Bloomfall production build identity mismatch: expected ${expectedBuildId ?? "missing"}, actual ${evidence.actualBuildId}.`);
-  const expectedBackupPath = environment.BLOOMFALL_V3_PRODUCTION_BACKUP_PATH?.trim();
+  const expectedBackupPath = environment[`${prefix}_PRODUCTION_BACKUP_PATH`]?.trim();
   if (!expectedBackupPath || !path.isAbsolute(expectedBackupPath) || path.extname(expectedBackupPath).toLowerCase() !== ".dump" || path.resolve(expectedBackupPath) !== path.resolve(evidence.backupPath)) throw new Error("Bloomfall activation requires the exact absolute custom-format backup dump path.");
   if (evidence.backupBytes <= 0) throw new Error("Bloomfall activation backup evidence is empty.");
   if (now - evidence.backupMtimeMs > 2 * 60 * 60 * 1000 || evidence.backupMtimeMs > now + 60_000) throw new Error("Bloomfall activation backup evidence is not fresh.");
-  if (environment.BLOOMFALL_V3_BACKUP_VERIFICATION !== "PG_RESTORE_LIST_OK") throw new Error("Bloomfall activation requires successful pg_restore list verification.");
+  if (environment[`${prefix}_BACKUP_VERIFICATION`] !== "PG_RESTORE_LIST_OK") throw new Error("Bloomfall activation requires successful pg_restore list verification.");
   return { releaseHead: evidence.actualHead.toLowerCase(), buildId: evidence.actualBuildId, backupPath: path.resolve(evidence.backupPath), backupBytes: evidence.backupBytes };
 }
 
-export async function loadBloomfallReleaseEvidence(environment: Readonly<Record<string, string | undefined>>, actualHead: string, actualBuildId: string) {
-  const backupPath = environment.BLOOMFALL_V3_PRODUCTION_BACKUP_PATH?.trim() ?? "";
+export async function loadBloomfallReleaseEvidence(environment: Readonly<Record<string, string | undefined>>, actualHead: string, actualBuildId: string, prefix: "BLOOMFALL_V3" | "BLOOMFALL_CODEX" = "BLOOMFALL_V3") {
+  const backupPath = environment[`${prefix}_PRODUCTION_BACKUP_PATH`]?.trim() ?? "";
   const backup = backupPath ? await stat(backupPath) : null;
-  return assertBloomfallReleaseEvidence({ actualHead, actualBuildId, backupPath, backupBytes: backup?.size ?? 0, backupMtimeMs: backup?.mtimeMs ?? 0 }, environment);
+  return assertBloomfallReleaseEvidence({ actualHead, actualBuildId, backupPath, backupBytes: backup?.size ?? 0, backupMtimeMs: backup?.mtimeMs ?? 0 }, environment, Date.now(), prefix);
 }
 
 export function assertBloomfallV3ArtLock(input: { selected: { v1: number; v2: number; v3: number }; assets: Array<{ id: string; sha256: string }> }) {
@@ -96,6 +103,14 @@ export async function captureBloomfallActivationSnapshot(database: Database) {
 
 const beforeCounts = { storyEntries: 175, storyMaps: 3, placements: 36, nodePlacements: 10, topologyNodes: 19, boundaries: 26, rings: 11, references: 43, worldConnections: 25, connectionPaths: 9, arcs: 7 };
 const afterCounts = { storyEntries: 238, storyMaps: 4, placements: 54, nodePlacements: 10, topologyNodes: 27, boundaries: 36, rings: 14, references: 55, worldConnections: 27, connectionPaths: 11, arcs: 13 };
+/**
+ * The Codex systems integration adds the two dossiers Bloomfall had no page
+ * for — Bloomstorms and Bloomfall Travel Conditions — and nothing else that
+ * this snapshot counts. It is a later state of the same applied world, so the
+ * V3 classifier must recognise it rather than read it as drift.
+ */
+const codexIntegrationCounts = { ...afterCounts, storyEntries: afterCounts.storyEntries + 2 };
+const appliedCountSets = [afterCounts, codexIntegrationCounts];
 
 function hierarchyExpected(snapshot: BloomfallActivationSnapshot, phase: "before" | "after") {
   return geographicHierarchyRepairManifest.every((expected) => {
@@ -108,7 +123,7 @@ function hierarchyExpected(snapshot: BloomfallActivationSnapshot, phase: "before
 export function classifyBloomfallActivationSnapshot(snapshot: BloomfallActivationSnapshot) {
   const before = snapshot.placeholder?.id === "a64869df-c623-49ec-9236-dd306a3fd5c7" && snapshot.placeholder.slug === "unknown-southeast" && snapshot.placeholder.title === "Unknown Southeast" && snapshot.placeholder.kind === "REGION" && snapshot.placeholder.status === "CANON" && stableAtlasJson(snapshot.counts, false) === stableAtlasJson(beforeCounts, false) && hierarchyExpected(snapshot, "before") && snapshot.maps.length === 1 && snapshot.maps[0]?.slug === "martino-world" && snapshot.maps[0].artVersion === "v1";
   if (before) return "BEFORE" as const;
-  const after = snapshot.placeholder?.id === "a64869df-c623-49ec-9236-dd306a3fd5c7" && snapshot.placeholder.slug === "bloomfall-reach" && snapshot.placeholder.title === "Bloomfall Reach" && stableAtlasJson(snapshot.counts, false) === stableAtlasJson(afterCounts, false) && hierarchyExpected(snapshot, "after") && snapshot.maps.length === 2 && snapshot.maps.every((map) => map.artVersion === "v3");
+  const after = snapshot.placeholder?.id === "a64869df-c623-49ec-9236-dd306a3fd5c7" && snapshot.placeholder.slug === "bloomfall-reach" && snapshot.placeholder.title === "Bloomfall Reach" && appliedCountSets.some((counts) => stableAtlasJson(snapshot.counts, false) === stableAtlasJson(counts, false)) && hierarchyExpected(snapshot, "after") && snapshot.maps.length === 2 && snapshot.maps.every((map) => map.artVersion === "v3");
   if (after) return "ALREADY_APPLIED" as const;
   throw new Error(`Bloomfall production baseline differs from both locked before and final states: ${stableAtlasJson(snapshot, false)}`);
 }

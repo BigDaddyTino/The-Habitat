@@ -51,7 +51,7 @@ function harness() {
   const sections = ["bloomfall-reach", ...bloomfallIntegrationRecords.map((record) => record.slug)].map((slug) => {
     const record = bloomfallIntegrationRecords.find((entry) => entry.slug === slug);
     const prose = record ? renderToStaticMarkup(<StoryProse body={record.body} resolve={resolve} />) : "";
-    const panel = renderToStaticMarkup(<BloomfallSystemPanel entrySlug={slug} environment={{ HABITAT_ENVIRONMENT: "development" }} />);
+    const panel = renderToStaticMarkup(<BloomfallSystemPanel entrySlug={slug} />);
     return `<section id="${slug}" class="qa-section">
       <h1>${record?.title ?? "Bloomfall Reach"}</h1>
       ${record ? `<div class="entity-profile-layout"><article class="entity-profile-narrative">${prose}</article><aside class="entity-connections"><section><p class="eyebrow">World connections</p></section></aside></div>` : ""}

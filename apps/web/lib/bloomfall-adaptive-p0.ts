@@ -116,8 +116,7 @@ const selectedByEntity = new Map(
   ["blackbloom-hart", "latchhound", "the-last-shift"].map((slug) => [slug, bloomfallAdaptiveP0SelectedAssets.filter((asset) => asset.entitySlug === slug)]),
 );
 
-export function getBloomfallAdaptiveP0Presentation(entrySlug: string, environment: Readonly<Record<string, string | undefined>> = process.env) {
-  if (environment.HABITAT_ENVIRONMENT !== "development") return null;
+export function getBloomfallAdaptiveP0Presentation(entrySlug: string) {
   const enhancement = bloomfallCreatureEnhancements.find((entry) => entry.slug === entrySlug);
   if (!enhancement) return null;
   if (entrySlug === "glasswing-kite") return { kind: "NONE" as const, enhancement, assets: [] as readonly BloomfallAdaptiveP0Asset[] };

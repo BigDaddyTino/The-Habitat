@@ -34,17 +34,31 @@ test("all selected candidates clear the 9/10 gate and carry review metadata", ()
   }
 });
 
-test("development presentation covers two ladders, one exceptional case, and one explicit NONE case", () => {
-  assert.equal(getBloomfallAdaptiveP0Presentation("blackbloom-hart", { HABITAT_ENVIRONMENT: "development" })?.kind, "ADAPTIVE");
-  assert.equal(getBloomfallAdaptiveP0Presentation("latchhound", { HABITAT_ENVIRONMENT: "development" })?.kind, "ADAPTIVE");
-  assert.equal(getBloomfallAdaptiveP0Presentation("the-last-shift", { HABITAT_ENVIRONMENT: "development" })?.kind, "EXCEPTIONAL");
-  assert.equal(getBloomfallAdaptiveP0Presentation("glasswing-kite", { HABITAT_ENVIRONMENT: "development" })?.kind, "NONE");
-  assert.equal(getBloomfallAdaptiveP0Presentation("blackbloom-hart", { HABITAT_ENVIRONMENT: "production" }), null);
+test("the presentation covers two ladders, one exceptional case, and one explicit NONE case", () => {
+  assert.equal(getBloomfallAdaptiveP0Presentation("blackbloom-hart")?.kind, "ADAPTIVE");
+  assert.equal(getBloomfallAdaptiveP0Presentation("latchhound")?.kind, "ADAPTIVE");
+  assert.equal(getBloomfallAdaptiveP0Presentation("the-last-shift")?.kind, "EXCEPTIONAL");
+  assert.equal(getBloomfallAdaptiveP0Presentation("glasswing-kite")?.kind, "NONE");
+  assert.equal(getBloomfallAdaptiveP0Presentation("not-a-bloomfall-creature"), null);
 });
 
-test("P0 art resolver is development-only while locked V3 behavior is unchanged", () => {
-  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p0", "blackbloom-hart-gradient-sensing.png", { HABITAT_ENVIRONMENT: "development" }));
-  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p0", "blackbloom-hart-gradient-sensing.png", { HABITAT_ENVIRONMENT: "production" }), null);
-  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p0-source", "../candidates/blackbloom-hart-gradient-sensing.png", { HABITAT_ENVIRONMENT: "development" }), null);
-  assert.ok(resolveCodexArtFile("bloomfall-v3", "the-bellwether.png", { HABITAT_ENVIRONMENT: "production" }));
+test("the approved finals are served everywhere; the generation history never is", () => {
+  const development = { HABITAT_ENVIRONMENT: "development" };
+  const production = { HABITAT_ENVIRONMENT: "production" };
+  const final = "blackbloom-hart-gradient-sensing.png";
+  const revisedOut = "blackbloom-hart-grounded-crown-iteration-1-revise.png";
+
+  // The candidates directory holds only owner-approved finals, so promotion
+  // serves it like any other art package.
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p0", final, development));
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p0", final, production));
+
+  // The sources beside it hold every iteration review sent back. That is local
+  // evidence, and no release opens it.
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p0-source", revisedOut, development));
+  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p0-source", revisedOut, production), null);
+
+  // Traversal stays impossible in either environment.
+  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p0-source", "../candidates/blackbloom-hart-gradient-sensing.png", development), null);
+  assert.ok(resolveCodexArtFile("bloomfall-v3", "the-bellwether.png", production));
 });

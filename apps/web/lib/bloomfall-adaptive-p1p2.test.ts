@@ -46,12 +46,19 @@ test("classification, NONE, exceptional, and promotion boundaries stay locked", 
   assert.equal(bloomfallAdaptiveP1P2Assets.map((asset) => String(asset.entitySlug)).includes("bloommarked-remnant"), false);
 });
 
-test("development presentation is explicit and production resolves nothing", () => {
-  for (const slug of ["rootback-grazer", "mirejaw", "sump-eel"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug, { HABITAT_ENVIRONMENT: "development" })?.kind, "ADAPTIVE");
-  for (const slug of ["glasswing-kite", "spore-lantern-colony", "maintenance-unit-m-17", "bloommarked-remnant"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug, { HABITAT_ENVIRONMENT: "development" })?.kind, "NONE");
-  for (const slug of ["the-bellwether", "switchmother", "old-drowner"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug, { HABITAT_ENVIRONMENT: "development" })?.kind, "EXCEPTIONAL");
-  assert.equal(getBloomfallAdaptiveP1P2Presentation("mirejaw", { HABITAT_ENVIRONMENT: "production" }), null);
-  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p1p2", "mirejaw-flow-reader.png", { HABITAT_ENVIRONMENT: "development" }));
-  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p1p2", "mirejaw-flow-reader.png", { HABITAT_ENVIRONMENT: "production" }), null);
-  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p1p2-source", "../candidates/mirejaw-flow-reader.png", { HABITAT_ENVIRONMENT: "development" }), null);
+test("every classified entity presents explicitly, in whichever environment asks", () => {
+  for (const slug of ["rootback-grazer", "mirejaw", "sump-eel"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug)?.kind, "ADAPTIVE");
+  for (const slug of ["glasswing-kite", "spore-lantern-colony", "maintenance-unit-m-17", "bloommarked-remnant"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug)?.kind, "NONE");
+  for (const slug of ["the-bellwether", "switchmother", "old-drowner"]) assert.equal(getBloomfallAdaptiveP1P2Presentation(slug)?.kind, "EXCEPTIONAL");
+  assert.equal(getBloomfallAdaptiveP1P2Presentation("not-a-bloomfall-creature"), null);
+});
+
+test("the approved P1/P2 finals are served everywhere; the generation history never is", () => {
+  const development = { HABITAT_ENVIRONMENT: "development" };
+  const production = { HABITAT_ENVIRONMENT: "production" };
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p1p2", "mirejaw-flow-reader.png", development));
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p1p2", "mirejaw-flow-reader.png", production));
+  assert.ok(resolveCodexArtFile("bloomfall-adaptive-p1p2-source", "mender-current-integrated-chassis-hero-iteration-2.png", development));
+  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p1p2-source", "mender-current-integrated-chassis-hero-iteration-2.png", production), null);
+  assert.equal(resolveCodexArtFile("bloomfall-adaptive-p1p2-source", "../candidates/mirejaw-flow-reader.png", development), null);
 });

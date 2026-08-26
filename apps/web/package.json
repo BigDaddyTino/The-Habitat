@@ -49,6 +49,8 @@
     "bloomfall:integration:audit": "tsx scripts/audit-bloomfall-codex-integration.ts",
     "bloomfall:integration:production-audit": "tsx scripts/audit-bloomfall-codex-integration-production.ts",
     "bloomfall:systems:qa": "tsx scripts/qa-bloomfall-systems.tsx --capture",
+    "bloomfall:promote:dry-run": "tsx scripts/promote-bloomfall-codex-integration.ts --dry-run",
+    "bloomfall:promote": "tsx scripts/promote-bloomfall-codex-integration.ts --apply",
     "bloomfall:adaptive:p1p2:review": "tsx scripts/serve-bloomfall-adaptive-p1p2-review.ts",
     "geography:audit": "tsx scripts/audit-geographic-hierarchy.ts",
     "geography:audit:production": "tsx scripts/audit-geographic-hierarchy.ts --production",

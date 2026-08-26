@@ -37,7 +37,8 @@ export type BloomfallAdaptiveP1P2Asset = {
 const score = (aaa: number, anatomy: number, materials: number, continuity: number, mutationLogic: number, artifact: number, canon: number, visualStorytelling: number): BloomfallAdaptiveP1P2Scores =>
   ({ aaa, anatomy, materials, continuity, mutationLogic, artifact, canon, visualStorytelling });
 
-/** Authoritative Prompt C2 manifest. All bindings resolve only in development. */
+/** Authoritative Prompt C2 manifest: the fourteen approved P1/P2 finals plus
+ *  their locked V3 and P0 reuse. */
 export const bloomfallAdaptiveP1P2Assets: readonly BloomfallAdaptiveP1P2Asset[] = [
   { id: "rootback-carried-mat", entitySlug: "rootback-grazer", entity: "Rootback Grazer", state: "Carried-Mat Grazer", purpose: "STATE_REFERENCE", filename: "rootback-grazer-carried-mat.png", width: 1122, height: 1402, sha256: "caff09e0e87a59be21ab7769f07925504b24581a25f8ed88a18a24bb2f419c38", generationIteration: 1, status: "APPROVED_CANDIDATE", reusedAsset: null, codexDevelopmentBinding: "rootback-grazer:known-states:0", physicalChanges: "Massive four-limbed grazer carrying an established living soil-and-root mat.", functionalChanges: "Moves seed, soil organisms, and modest filtration capacity through damaged ground.", continuityMarkers: ["broad herbivore skull", "left ear notch", "pale shoulder slash", "four load-bearing limbs", "continuous carried mat"], matureTone: "Rugged ecological unease, not predatory horror.", alt: "Carried-Mat Rootback Grazer crossing wet Mutation Belt ground.", scores: score(9.5, 9.7, 9.6, 9.7, 9.6, 9.7, 9.8, 9.5) },
   { id: "rootback-root-clamped", entitySlug: "rootback-grazer", entity: "Rootback Grazer", state: "Root-Clamped", purpose: "STATE_REFERENCE", filename: "rootback-grazer-root-clamped.png", width: 1122, height: 1402, sha256: "f53e55d332f2c19aeddfd2fc51773af3665d31d800cc5095ce9eba199fec21a3", generationIteration: 1, status: "APPROVED_CANDIDATE", reusedAsset: null, codexDevelopmentBinding: "rootback-grazer:known-states:1", physicalChanges: "The same root mat contracts around the flanks under a sealing resin film.", functionalChanges: "Lowers its center of mass and anchors contaminated surface flow.", continuityMarkers: ["same skull", "same ear notch", "same shoulder slash", "four limbs", "same mat footprint"], matureTone: "Functional tissue constriction without random gore.", alt: "Root-Clamped Rootback Grazer braced by contracted roots and resin.", scores: score(9.6, 9.7, 9.7, 9.8, 9.7, 9.7, 9.8, 9.6) },
@@ -71,8 +72,7 @@ const selectedByEntity = new Map<string, readonly BloomfallAdaptiveP1P2Asset[]>(
   [...new Set(bloomfallAdaptiveP1P2Assets.map((asset) => asset.entitySlug))].map((slug) => [slug, bloomfallAdaptiveP1P2Assets.filter((asset) => asset.entitySlug === slug && asset.status !== "REJECTED")]),
 );
 
-export function getBloomfallAdaptiveP1P2Presentation(entrySlug: string, environment: Readonly<Record<string, string | undefined>> = process.env) {
-  if (environment.HABITAT_ENVIRONMENT !== "development") return null;
+export function getBloomfallAdaptiveP1P2Presentation(entrySlug: string) {
   const enhancement = bloomfallCreatureEnhancements.find((entry) => entry.slug === entrySlug);
   if (!enhancement) return null;
   if (entrySlug === "bloommarked-remnant") return { kind: "NONE" as const, enhancement, assets: [] as readonly BloomfallAdaptiveP1P2Asset[] };
