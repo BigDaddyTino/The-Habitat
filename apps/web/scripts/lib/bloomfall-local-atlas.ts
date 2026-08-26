@@ -119,6 +119,8 @@ export const bloomfallLocalRoutes = [
 ] as const;
 
 export const bloomfallLocalRouteBacklog = {
+  status: "SUPERSEDED_BY_PROMPT_D_ROUTE_STATUS_MANIFEST",
+  authoritativeManifest: "Docs/bloomfall-routes/bloomfall-route-status-manifest.json",
   AUTHOR_NOW: bloomfallLocalRoutes.map((route) => route.key),
   REVIEW_REQUIRED: ["Cairnwood–Glassroot expedition trail", "Southreach Complex service/rail alignment"],
   DEFER: ["Walking Orchard/Reedless moving route", "Long Graze herd corridor", "Heartfen route", "Magic-Torn Wasteland route", "full-world continuation geometry"],
@@ -146,7 +148,7 @@ export function buildBloomfallLocalAtlasManifest() {
     contract: "martino-bloomfall-local-atlas", contractVersion: 1, scene: { slug: mapSlug, ownerEntrySlug: "bloomfall-reach", parentSlug: "martino-world", artVersion: "v1", imageWidth: 1536, imageHeight: 1024, coordinateWidth: 100000, coordinateHeight: 66667, initialCenter: [50000,33333], initialZoom: 0, minZoom: 0, maxZoom: 5 },
     art: bloomfallLocalAtlasArt, topology: bloomfallLocalTopology, placements: [...regionPlacements, ...bloomfallLocalPoiPlacements], routes: bloomfallLocalRoutes, routeBacklog: bloomfallLocalRouteBacklog,
     analysis: { topologyValid: true, subregions: 3, pois: 15, nodes: 8, boundaries: 10, rings: 3, boundaryReferences: 12, sharedInternalBoundaries: 2, holes: 0, partitionArea: regionArea, expectedExtentArea: 100000 * 66667, gaps: 0, overlaps: 0 },
-    overlayArchitecture: { namedCreatureTerritories: "future non-base analytical overlay keyed to Codex entry and scene", spawnPoints: "not authored", baseTopologyMutationRequired: false },
+    overlayArchitecture: { namedCreatureTerritories: "future non-base analytical overlay keyed to Codex entry and scene", spawnPoints: "not authored", baseTopologyMutationRequired: false, routeStatusManifest: "Docs/bloomfall-routes/bloomfall-route-status-manifest.json" },
   } as const;
   return { ...payload, logicalSha256: atlasSha256(stableAtlasJson(payload, false)) };
 }

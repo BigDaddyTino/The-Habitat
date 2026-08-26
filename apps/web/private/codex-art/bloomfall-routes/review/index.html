@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bloomfall system-aware route review</title>
+  <style>
+    :root { color-scheme: dark; --ink:#eee8d6; --panel:#121715; --current:#f1e4bf; --new:#67d9e8; --conditional:#f2ad49; --dynamic:#82c77c; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#090c0b; color:var(--ink); font:14px/1.45 ui-sans-serif,system-ui,sans-serif; }
+    header { padding:20px clamp(16px,4vw,48px) 14px; border-bottom:1px solid #343b36; background:linear-gradient(180deg,#171d1a,#0d110f); }
+    h1 { margin:0 0 6px; font:600 clamp(22px,3vw,36px)/1.05 Georgia,serif; letter-spacing:.02em; }
+    header p { margin:0; max-width:90ch; color:#bfc6bd; }
+    main { width:min(1600px,100%); margin:auto; padding:18px; }
+    .legend { display:flex; flex-wrap:wrap; gap:10px 18px; margin-bottom:14px; padding:12px 14px; background:var(--panel); border:1px solid #303a34; border-radius:8px; }
+    .legend span { display:flex; align-items:center; gap:8px; font-size:12px; letter-spacing:.08em; }
+    .swatch { width:34px; height:0; border-top:4px solid; }
+    .current .swatch { border-color:var(--current); }
+    .new .swatch { border-color:var(--new); }
+    .conditional .swatch { border-color:var(--conditional); border-top-style:dashed; }
+    .dynamic .swatch { border-color:var(--dynamic); border-top-width:10px; border-top-style:dotted; opacity:.8; }
+    figure { margin:0; position:relative; overflow:hidden; border:1px solid #465047; border-radius:8px; background:#111; box-shadow:0 18px 60px #000b; }
+    figure > img { display:block; width:100%; height:auto; filter:saturate(.84) brightness(.72); }
+    svg { position:absolute; inset:0; width:100%; height:100%; }
+    .route { fill:none; vector-effect:non-scaling-stroke; stroke-linecap:round; stroke-linejoin:round; }
+    .route.current { stroke:var(--current); stroke-width:5; filter:drop-shadow(0 1px 2px #000); }
+    .route.author-now { stroke:var(--new); stroke-width:6; filter:drop-shadow(0 1px 2px #000); }
+    .route.condition { stroke:var(--conditional); stroke-width:2.5; stroke-dasharray:10 8; }
+    .route.dynamic { stroke:var(--dynamic); stroke-width:18; stroke-dasharray:2 16; opacity:.62; }
+    .poi { fill:#f4efe0; stroke:#141815; stroke-width:1.5; vector-effect:non-scaling-stroke; }
+    .label { font:700 1180px/1 ui-sans-serif,system-ui,sans-serif; fill:#fff7df; paint-order:stroke; stroke:#111; stroke-width:300px; stroke-linejoin:round; letter-spacing:30px; }
+    figcaption { padding:12px 14px; color:#bfc6bd; background:#101512; }
+    .notes { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    article { background:var(--panel); border:1px solid #303a34; border-radius:8px; padding:13px; }
+    h2 { margin:0 0 5px; font-size:14px; letter-spacing:.06em; }
+    article p { margin:0; color:#bfc6bd; }
+    @media (max-width:720px) { main{padding:10px}.notes{grid-template-columns:1fr}.label{font-size:1550px}.legend{gap:8px 12px}.legend span{font-size:10px} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Bloomfall Reach · route review</h1>
+    <p>Development-only overlay on the locked V3 local Atlas. Lines show authoring evidence, not live travel state; broad dotted marks are corridor envelopes and are never persistent paths.</p>
+  </header>
+  <main>
+    <div class="legend" aria-label="Route review legend">
+      <span class="current"><i class="swatch"></i>CURRENT PERSISTED</span>
+      <span class="new"><i class="swatch"></i>NEW AUTHOR_NOW</span>
+      <span class="conditional"><i class="swatch"></i>CONDITIONAL BASE</span>
+      <span class="dynamic"><i class="swatch"></i>DYNAMIC CORRIDOR</span>
+    </div>
+    <figure>
+      <img src="/maps/martino-bloomfall-reach-map-v3.png" alt="Owner-approved Bloomfall Reach V3 local Atlas">
+      <svg viewBox="0 0 100000 66667" role="img" aria-label="Bloomfall route classifications over the local Atlas">
+        <g data-layer="dynamic-corridor-review-only">
+          <path class="route dynamic" data-route="walking-orchard-reedless-moving-corridor" d="M35807 27669 C39000 31500 45000 37500 53711 42318"/>
+          <path class="route dynamic" data-route="long-graze-herd-corridor" d="M17904 34180 C28000 39000 40000 35500 48828 30925 C56000 28500 61000 33000 66000 36000"/>
+          <path class="route dynamic" data-route="heartfen-openings" d="M53711 42318 C59000 45000 65500 47000 61849 51432"/>
+          <path class="route dynamic" data-route="living-marsh-secondary-waterways" d="M35807 47201 C47000 43000 61000 47000 84635 47201 M53711 42318 C61000 50000 70000 55000 66081 61849"/>
+        </g>
+        <g data-layer="current-persisted">
+          <path class="route current" data-route="riverlands-ashline-corridor" d="M0 21000 L10000 21000 L22786 21159 L32000 19000 L40000 15500 L48828 8138 M32000 19000 L43000 20500 L55339 19500"/>
+          <path class="route current" data-route="drowned-intake-ocean-approach" d="M66081 66667 L66081 61849 L62000 57000 L55000 52000 L47000 49000 L35807 47201"/>
+        </g>
+        <g data-layer="new-author-now">
+          <path class="route author-now" data-route="cairnwood-glassroot-expedition-trail" d="M17904 34180 L23500 33750 L29200 32750 L35000 31500 L41000 29900 L47000 28600 L53500 27800 L60000 28200 L65104 29297"/>
+          <path class="route author-now" data-route="southreach-service-rail-alignment" d="M32552 3255 L38000 4100 L43000 5400 L47000 7000 L48828 8138 L55500 7300 L62000 6000 L69000 4300 L74870 3255"/>
+        </g>
+        <g data-layer="conditional-base-status">
+          <path class="route condition" data-route="drowned-intake-ocean-approach-condition" d="M66081 66667 L66081 61849 L62000 57000 L55000 52000 L47000 49000 L35807 47201"/>
+          <path class="route condition" data-route="cairnwood-glassroot-expedition-trail-condition" d="M17904 34180 L23500 33750 L29200 32750 L35000 31500 L41000 29900 L47000 28600 L53500 27800 L60000 28200 L65104 29297"/>
+          <path class="route condition" data-route="southreach-service-rail-alignment-condition" d="M32552 3255 L38000 4100 L43000 5400 L47000 7000 L48828 8138 L55500 7300 L62000 6000 L69000 4300 L74870 3255"/>
+        </g>
+        <g aria-hidden="true">
+          <circle class="poi" cx="17904" cy="34180" r="390"/><circle class="poi" cx="65104" cy="29297" r="390"/>
+          <circle class="poi" cx="32552" cy="3255" r="390"/><circle class="poi" cx="48828" cy="8138" r="390"/><circle class="poi" cx="74870" cy="3255" r="390"/>
+          <text class="label" x="15000" y="37500">CAIRNWOOD</text><text class="label" x="62000" y="32500">GLASSROOT</text>
+          <text class="label" x="29500" y="6400">VAULT 12</text><text class="label" x="45500" y="11500">SOUTHREACH</text><text class="label" x="71000" y="6500">CROWN BREAK</text>
+        </g>
+      </svg>
+      <figcaption>Ivory paths are the two untouched Prompt 5 baselines. Cyan paths are the two stable alignments approved for development authoring. Amber dashes identify stable paths whose usability will be conditional. Green dotted envelopes communicate moving ecology only.</figcaption>
+    </figure>
+    <section class="notes">
+      <article><h2>Stable geometry, mutable state</h2><p>Ocean, Cairnwood–Glassroot, and Southreach keep one base alignment. Future OPEN / DANGEROUS / CLOSED records alter presentation and traversal without redrawing the path.</p></article>
+      <article><h2>No static marsh fiction</h2><p>Walking Orchard, Reedless Mile, Long Graze, Heartfen, and secondary channels remain runtime-owned corridors. Their envelopes are review annotations, not authored routes.</p></article>
+    </section>
+  </main>
+</body>
+</html>

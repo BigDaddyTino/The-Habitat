@@ -798,4 +798,16 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Extended the existing DEVELOPMENT-only dossier panel and protected owner-review flow without runtime mutation logic, production art activation, production UI activation, Codex data writes, Atlas changes, or migrations
 - [x] Captured Rootback, Mirejaw, Sump Eel, Old Drowner, and Switchmother contact sheets plus a 390 × 844 mobile evidence frame; browser QA found zero broken images and zero document overflow
 - [x] P1/P2 audit passes at 14/14 selected with critical minimums at or above 9.4, P0 remains 12/12, promotion eligibility remains Hart/Mirejaw/Latchhound only, and the combined required generated package is 26 visuals
-- [ ] Owner approval of the fourteen P1/P2 candidates remains the only visual gate; optional P3 art and Prompt D route authoring remain unstarted
+- [ ] Owner approval of the fourteen P1/P2 candidates remains the visual gate; optional P3 art remains deferred
+
+## 2026-08-26 - Bloomfall system-aware route authoring
+
+- [x] Re-read the regional simulation architecture, creature classification, current development Codex package, local/world route manifests, two persisted paths, and locked V3 world/local Atlas art before making route decisions
+- [x] Classified twelve candidates as one Permanent, three Conditional, five Dynamic, and three Deferred; kept Magic-Torn adjacency route-less and both world-scene continuations deferred for lack of exact V3 line evidence
+- [x] Preserved the Riverlands/Ashline and Drowned Intake/Ocean geometries exactly; authored one nine-vertex Cairnwood/Glassroot trail and one nine-vertex Reserve Vault Twelve/Southreach/Crown Break service bed in guarded `habitat_atlas_dev`
+- [x] Avoided duplicating the existing Ashline-Southreach and Redline segments, used `OTHER` for mixed service/rail infrastructure, and increased local stable paths from two to four with deterministic IDs, bounded metadata, optimistic version checks, serializable writes, and StoryRevision history
+- [x] Kept Walking Orchard/Reedless, Long Graze, Heartfen, and secondary marsh channels runtime-owned and unpersisted; defined OPEN/DANGEROUS/CLOSED authority separately from KNOWN_OPEN/KNOWN_CLOSED/HAZARDOUS/UNVERIFIED/LOST player knowledge without implementing runtime state
+- [x] Added the authoritative route-status manifest, bounded five-system travel matrix, shared travel vocabulary, independent development audit, deterministic author/plan tooling, and a development-only review overlay
+- [x] Browser-reviewed the V3 overlay at 1440 x 1000 and 390 x 844 with all imagery/routes present and zero horizontal overflow; full tests, audits, typecheck, lint, build, production fingerprint comparison, and final diff checks are recorded in `Docs/BLOOMFALL_SYSTEM_AWARE_ROUTES_REPORT.md`
+- [x] Production writes, migrations, Atlas changes, and Codex changes remain zero; runtime route state, timers, simulation, Aberrant blocking, and replication remain unimplemented
+- [ ] Owner review of the two new stable base alignments and the full route classification package remains pending

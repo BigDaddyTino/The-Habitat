@@ -1,0 +1,342 @@
+{
+  "contract": "martino-bloomfall-route-status",
+  "contractVersion": 1,
+  "counts": {
+    "candidates": 12,
+    "CONDITIONAL": 3,
+    "DEFERRED": 3,
+    "DYNAMIC": 5,
+    "newPersisted": 2,
+    "PERMANENT": 1,
+    "persistedAfter": 4,
+    "persistedBefore": 2
+  },
+  "definitions": {
+    "CONDITIONAL": "Stable base alignment whose OPEN, DANGEROUS, or CLOSED usability changes through bounded world-state records.",
+    "DEFERRED": "No path is authored because canon, art, endpoint meaning, or later world/runtime ownership is insufficient.",
+    "DYNAMIC": "Traversal geometry is selected, moved, or removed by an owning ecology/system and is never stored as base topology.",
+    "PERMANENT": "Stable infrastructure or geography whose identity persists even while hazardous or locally blocked."
+  },
+  "logicalSha256": "d121d82a754773570adcfb4c8986b0c5c3d7b906b3229da84cdbf26b284a5b5f",
+  "playerKnowledge": {
+    "rule": "Knowledge is player/party information with freshness; it never replaces authoritative OPEN/DANGEROUS/CLOSED route state.",
+    "values": [
+      "KNOWN_OPEN",
+      "KNOWN_CLOSED",
+      "HAZARDOUS",
+      "UNVERIFIED",
+      "LOST"
+    ]
+  },
+  "policy": "World connection is semantic; connection path is stable scene geometry; current gameplay usability belongs to a future authoritative route-state service.",
+  "productionSafety": {
+    "atlasChanges": 0,
+    "codexChanges": 0,
+    "migrations": 0,
+    "writes": 0
+  },
+  "routes": [
+    {
+      "authoringDecision": "PRESERVE",
+      "classification": "PERMANENT",
+      "conditionOwner": "BLOOMFALL_ROUTE_CONDITION_SERVICE",
+      "defaultAvailability": "OPEN",
+      "defaultKnowledge": "KNOWN_OPEN",
+      "destination": "riverlands",
+      "key": "riverlands-ashline-corridor",
+      "name": "Riverlands / Ashline historical corridor",
+      "notes": "Prompt D preserves the approved local geometry. Permanent means the road identity survives; system-owned condition records may still make a segment dangerous or closed.",
+      "pathSha256": "e44319339df39f39295e618ccd9ec801160e44a131cb67a6dff3d17e062de2f7",
+      "persisted": true,
+      "source": "bloomfall-reach",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "REACTOR_CYCLES",
+        "BLOOMSTORMS",
+        "ABERRANTS"
+      ],
+      "type": "ROAD",
+      "via": [
+        "ashline-exchange",
+        "southreach-complex",
+        "redline-shelter-six"
+      ]
+    },
+    {
+      "authoringDecision": "PRESERVE",
+      "classification": "CONDITIONAL",
+      "conditionOwner": "LIVING_MARSH_HYDROLOGY",
+      "defaultAvailability": "DANGEROUS",
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "the-ocean",
+      "key": "drowned-intake-ocean-approach",
+      "name": "Drowned Intake / Ocean shallow-draft approach",
+      "notes": "Prompt D preserves the approved base alignment. Hydrology, Bloomstorms, intake state, and Old Drowner change usability through route-state records, never alternate static paths.",
+      "pathSha256": "013098b8a69cf266114519c62b8bf20e9007cfdc95c681a8e4a1271410d948e4",
+      "persisted": true,
+      "source": "bloomfall-reach",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "REACTOR_CYCLES",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE",
+        "ABERRANTS"
+      ],
+      "type": "SEA_ROUTE",
+      "via": [
+        "drowned-intake",
+        "blackweir"
+      ]
+    },
+    {
+      "authoringDecision": "AUTHOR_NOW",
+      "classification": "CONDITIONAL",
+      "conditionOwner": "MUTATION_BELT_ROUTE_STATE",
+      "defaultAvailability": "OPEN",
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "glassroot-observatory",
+      "key": "cairnwood-glassroot-expedition-trail",
+      "name": "Cairnwood Camp / Glassroot Observatory expedition trail",
+      "notes": "V3 review supports one stable surveyed alignment. Migration, saturation, Bloomstorms, and field disturbance alter cost or close it through future condition records.",
+      "pathSha256": "60c80be021bc043582c87b65c6f208c4394d6e9e7fadf7b4a2a7288ed1d756a1",
+      "persisted": true,
+      "source": "cairnwood-camp",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE",
+        "ABERRANTS"
+      ],
+      "type": "TRAIL",
+      "via": []
+    },
+    {
+      "authoringDecision": "AUTHOR_NOW",
+      "classification": "CONDITIONAL",
+      "conditionOwner": "SOUTHREACH_REACTOR_CONTROLLER",
+      "defaultAvailability": "DANGEROUS",
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "crown-break",
+      "key": "southreach-service-rail-alignment",
+      "name": "Southreach reserve/service rail alignment",
+      "notes": "OTHER is the closest existing taxonomy for mixed rail, service bed, and plant access. Ashline-Southreach and the Redline spur remain represented by the preserved Riverlands corridor, avoiding duplicate geometry.",
+      "pathSha256": "260ef0c3edb6ea0ee2ed3f80aa0312b8f4eba85b89ebc55e66ebd2e91d7cc809",
+      "persisted": true,
+      "source": "reserve-vault-twelve",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "REACTOR_CYCLES",
+        "BLOOMSTORMS",
+        "ABERRANTS"
+      ],
+      "type": "OTHER",
+      "via": [
+        "southreach-complex"
+      ]
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DYNAMIC",
+      "conditionOwner": "LIVING_MARSH_DYNAMIC_CORRIDOR_RESOLVER",
+      "defaultAvailability": null,
+      "defaultKnowledge": "LOST",
+      "destination": "reedless-mile",
+      "key": "walking-orchard-reedless-moving-corridor",
+      "name": "Walking Orchard / Reedless moving corridor",
+      "notes": "The Orchard moves and the Reedless opening can vanish. Runtime may select from authored corridor envelopes; no canonical line exists.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "walking-orchard",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE"
+      ],
+      "type": "TRAIL",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DYNAMIC",
+      "conditionOwner": "LIVING_MARSH_DYNAMIC_CORRIDOR_RESOLVER",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "reedless-mile",
+      "key": "reedless-mile-openings",
+      "name": "Reedless Mile temporary openings",
+      "notes": "Bare substrate creates schedule-bound openings, not a stable trail.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "the-mutation-belt",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE"
+      ],
+      "type": "TRAIL",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DYNAMIC",
+      "conditionOwner": "MUTATION_BELT_HERD_SCHEDULER",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "long-graze",
+      "key": "long-graze-herd-corridor",
+      "name": "Long Graze herd corridor",
+      "notes": "Herd and predator movement creates a temporary travel corridor, never a guaranteed player road.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "cairnwood-camp",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE",
+        "ABERRANTS"
+      ],
+      "type": "TRAIL",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DYNAMIC",
+      "conditionOwner": "LIVING_MARSH_DYNAMIC_CORRIDOR_RESOLVER",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "heartfen",
+      "key": "heartfen-openings",
+      "name": "Heartfen access openings",
+      "notes": "Access is a changing ecological opening or route-less exploration. Heartfen receives no convenient permanent road.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "the-living-marsh",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE"
+      ],
+      "type": "RIVER_TRAVEL",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DYNAMIC",
+      "conditionOwner": "LIVING_MARSH_DYNAMIC_CORRIDOR_RESOLVER",
+      "defaultAvailability": null,
+      "defaultKnowledge": "LOST",
+      "destination": "lantern-pools",
+      "key": "living-marsh-secondary-waterways",
+      "name": "Living Marsh secondary waterways",
+      "notes": "Secondary channels close, redirect, or cease to be navigable. Only the Drowned Intake approach has a stable base alignment.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "blackweir",
+      "systemDependencies": [
+        "ESSENCE_SATURATION",
+        "BLOOMSTORMS",
+        "HARVESTING_PRESSURE",
+        "ABERRANTS"
+      ],
+      "type": "RIVER_TRAVEL",
+      "via": [
+        "reedless-mile",
+        "heartfen"
+      ]
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DEFERRED",
+      "conditionOwner": "NONE_UNTIL_WORLD_GEOMETRY_REVIEW",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "riverlands",
+      "key": "riverlands-world-continuation",
+      "name": "Riverlands world-scene continuation",
+      "notes": "The V3 world Atlas establishes adjacency and landmass context but does not show a defensible exact road line. The semantic connection and local Ashline path remain sufficient.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "bloomfall-reach",
+      "systemDependencies": [],
+      "type": "ROAD",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DEFERRED",
+      "conditionOwner": "NONE_UNTIL_WORLD_GEOMETRY_REVIEW",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "the-ocean",
+      "key": "ocean-world-continuation",
+      "name": "Ocean world-scene continuation",
+      "notes": "The V3 world coast does not provide exact shallow-draft continuation geometry. Preserve the semantic connection and local Drowned Intake alignment only.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "bloomfall-reach",
+      "systemDependencies": [],
+      "type": "SEA_ROUTE",
+      "via": []
+    },
+    {
+      "authoringDecision": "DO_NOT_PERSIST",
+      "classification": "DEFERRED",
+      "conditionOwner": "NONE",
+      "defaultAvailability": null,
+      "defaultKnowledge": "UNVERIFIED",
+      "destination": "magic-torn-wasteland",
+      "key": "magic-torn-adjacency",
+      "name": "Magic-Torn Wasteland adjacency",
+      "notes": "Geographic adjacency only. Current Codex contains no semantic travel route, trail, road, or hidden passage.",
+      "pathSha256": null,
+      "persisted": false,
+      "source": "bloomfall-reach",
+      "systemDependencies": [],
+      "type": "UNKNOWN",
+      "via": []
+    }
+  ],
+  "scene": "martino-bloomfall-reach",
+  "travelMatrix": [
+    {
+      "aberrants": "Occupation changes risk and intel, never topology.",
+      "bloomstorms": "Usually usable with exposure/visibility risk; severe footprints can close a segment.",
+      "essenceSaturation": "May raise cost and warnings; does not erase the road.",
+      "harvestingPressure": "No default effect; only an authored structural consequence may alter a local spur.",
+      "reactorCycles": "Southreach/Ashline segments can become dangerous or closed; bed persists.",
+      "routeKey": "riverlands-ashline-corridor"
+    },
+    {
+      "aberrants": "Old Drowner can make the channel unsafe or impassable without deleting its alignment.",
+      "bloomstorms": "Onset/Peak can close shallow water; Decay/Aftermath may create a valuable window.",
+      "essenceSaturation": "Contaminated flow raises exposure and spell/equipment risk.",
+      "harvestingPressure": "Sink loss can raise water/load and close the approach.",
+      "reactorCycles": "Venting, Purge, Overflow, or Breach can send load through the intake.",
+      "routeKey": "drowned-intake-ocean-approach"
+    },
+    {
+      "aberrants": "Bellwether/herd displacement changes safety and confidence, not the surveyed alignment.",
+      "bloomstorms": "Warning supports evacuation; Peak may close exposed sections; Aftermath may reward travel.",
+      "essenceSaturation": "Active/Surge bands raise warnings, creature density, and traversal cost.",
+      "harvestingPressure": "Local root/ground damage can make the surveyed bed dangerous or temporarily closed.",
+      "reactorCycles": "Only indirect transferred pressure affects it; a reactor label cannot close it remotely.",
+      "routeKey": "cairnwood-glassroot-expedition-trail"
+    },
+    {
+      "aberrants": "Last Shift procedures can open one access while sealing another; route identity persists.",
+      "bloomstorms": "Exposed conductors and visibility make Onset/Peak hazardous or closed.",
+      "essenceSaturation": "Charge and contamination make fixed segments dangerous.",
+      "harvestingPressure": "No generic effect; only removal of functional infrastructure can alter access.",
+      "reactorCycles": "Dormant may permit manual access; Restart/Purge may open systems; Venting/Overflow/Breach can close segments.",
+      "routeKey": "southreach-service-rail-alignment"
+    },
+    {
+      "aberrants": "Bellwether and Old Drowner influence corridor selection through ecology/hydrology.",
+      "bloomstorms": "Storm and aftermath can move, expose, or erase current geometry.",
+      "essenceSaturation": "Pressure gradients help select or remove a temporary corridor.",
+      "harvestingPressure": "Sink/root/herd disruption can move the corridor instead of toggling a fixed line.",
+      "reactorCycles": "Only transferred air/water/grid effects participate.",
+      "routeKey": "dynamic-corridors"
+    }
+  ]
+}

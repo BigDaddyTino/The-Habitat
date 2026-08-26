@@ -16,7 +16,7 @@ async function main() {
  assertAtlasPersistentDevelopmentTarget(url);
  await verifyBloomfallLocalAtlasArtFiles();
  const db = createPrismaClient(url);
- try { const result = process.argv.includes("--verify") ? await verifyBloomfallLocalAtlas(db) : await activateBloomfallLocalAtlas(db); process.stdout.write(stableAtlasJson(result)); }
+ try { const result = process.argv.includes("--verify") ? await verifyBloomfallLocalAtlas(db, { allowSystemAwareRoutes: true }) : await activateBloomfallLocalAtlas(db); process.stdout.write(stableAtlasJson(result)); }
  finally { await db.$disconnect(); }
 }
 void main();

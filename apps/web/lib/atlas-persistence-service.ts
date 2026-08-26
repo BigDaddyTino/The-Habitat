@@ -63,9 +63,9 @@ export type ReplacePlacementTopologyInput = {
   readonly actorUserId: string;
 };
 
-export type CreateWorldConnectionInput = Omit<AtlasWorldConnection, "id" | "version"> & { readonly actorUserId: string };
+export type CreateWorldConnectionInput = Omit<AtlasWorldConnection, "id" | "version"> & { readonly id?: string; readonly actorUserId: string };
 export type UpdateWorldConnectionInput = CreateWorldConnectionInput & { readonly id: string; readonly expectedVersion: number };
-export type CreateConnectionPathInput = Omit<AtlasMapConnectionPath, "id" | "version" | "mapSlug"> & { readonly mapId: string; readonly actorUserId: string };
+export type CreateConnectionPathInput = Omit<AtlasMapConnectionPath, "id" | "version" | "mapSlug"> & { readonly id?: string; readonly mapId: string; readonly actorUserId: string };
 export type UpdateConnectionPathInput = CreateConnectionPathInput & { readonly id: string; readonly expectedVersion: number };
 export type CreatePointPlacementInput = { readonly mapId: string; readonly entryId: string; readonly x: number; readonly y: number; readonly labelX: number | null; readonly labelY: number | null; readonly minZoom: number; readonly maxZoom: number | null; readonly priority: number; readonly actorUserId: string };
 export type UpdatePointPlacementInput = CreatePointPlacementInput & { readonly id: string; readonly expectedVersion: number };
@@ -495,7 +495,7 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
     },
 
     createWorldConnection(input: CreateWorldConnectionInput) {
-      const id = randomUUID();
+      const id = input.id ?? randomUUID();
       const contract = connectionContract(input, id, 1);
       const validated = validateAtlasWorldConnection(contract);
       if (!validated.valid) fail("VALIDATION", findingMessage("Invalid world connection", validated.findings));
@@ -534,7 +534,7 @@ export function createAtlasPersistenceService(client: AtlasPersistenceClient) {
     },
 
     createConnectionPath(input: CreateConnectionPathInput) {
-      const id = randomUUID();
+      const id = input.id ?? randomUUID();
       return client.$transaction(async (tx) => {
         const connection = await tx.storyWorldConnection.findUnique({ where: { id: input.connectionId }, select: { id: true, type: true, fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } });
         const map = await requireMap(tx, input.mapId);

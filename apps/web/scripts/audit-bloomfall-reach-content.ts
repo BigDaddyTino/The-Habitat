@@ -124,7 +124,7 @@ async function main() {
   if (scene) {
     check(scene.id === bloomfallScene.id && scene.parent?.slug === "martino-world" && scene.ownerEntryId === bloomfallRegionId && scene.artVersion === "v1", "Bloomfall local scene identity, parent, owner, or activation state drifted.");
     check(scene.imageWidth === 1536 && scene.imageHeight === 1024 && scene.coordinateWidth === 100000 && scene.coordinateHeight === 66667, "Bloomfall local scene dimensions drifted from the 3:2 contract.");
-    check(scene.placements.length === 18 && scene.nodePlacements.length === 0 && scene.topologyNodes.length === 8 && scene.boundaries.length === 10 && scene.connectionPaths.length === 2, "Bloomfall local scene Atlas record counts drifted.");
+    check(scene.placements.length === 18 && scene.nodePlacements.length === 0 && scene.topologyNodes.length === 8 && scene.boundaries.length === 10 && scene.connectionPaths.length === 4, "Bloomfall local scene Atlas record counts drifted.");
     check(storyAtlasArtRegistered(scene.slug, scene.artVersion), "Approved Bloomfall local scene art is not registered.");
   }
 

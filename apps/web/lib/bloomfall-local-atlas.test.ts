@@ -17,5 +17,6 @@ test("Bloomfall route release authors only the two existing high-confidence conn
   assert.deepEqual(manifest.routes.map((route) => [route.endpointSlug, route.type, route.status]), [["riverlands", "ROAD", "AUTHOR_NOW"], ["the-ocean", "SEA_ROUTE", "AUTHOR_NOW"]]);
   assert.equal(manifest.routeBacklog.REVIEW_REQUIRED.length, 2);
   assert.equal(manifest.routeBacklog.DEFER.includes("Magic-Torn Wasteland route"), true);
+  assert.equal(manifest.routeBacklog.status, "SUPERSEDED_BY_PROMPT_D_ROUTE_STATUS_MANIFEST");
   assert.equal(manifest.overlayArchitecture.spawnPoints, "not authored");
 });

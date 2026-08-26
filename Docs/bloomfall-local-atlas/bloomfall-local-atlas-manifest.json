@@ -22,10 +22,11 @@
   },
   "contract": "martino-bloomfall-local-atlas",
   "contractVersion": 1,
-  "logicalSha256": "e24a964bc0f4d2368a145383d5f5a78c84fb8a9c5bd7fd61819747d5dd328c6b",
+  "logicalSha256": "eb2f503926172556772178afac28ec7cf68249915b37c99393886261d3ce1580",
   "overlayArchitecture": {
     "baseTopologyMutationRequired": false,
     "namedCreatureTerritories": "future non-base analytical overlay keyed to Codex entry and scene",
+    "routeStatusManifest": "Docs/bloomfall-routes/bloomfall-route-status-manifest.json",
     "spawnPoints": "not authored"
   },
   "placements": [
@@ -539,6 +540,7 @@
       "riverlands-road",
       "ocean-sea-route"
     ],
+    "authoritativeManifest": "Docs/bloomfall-routes/bloomfall-route-status-manifest.json",
     "DEFER": [
       "Walking Orchard/Reedless moving route",
       "Long Graze herd corridor",
@@ -549,7 +551,8 @@
     "REVIEW_REQUIRED": [
       "Cairnwood–Glassroot expedition trail",
       "Southreach Complex service/rail alignment"
-    ]
+    ],
+    "status": "SUPERSEDED_BY_PROMPT_D_ROUTE_STATUS_MANIFEST"
   },
   "routes": [
     {

@@ -3,6 +3,7 @@ import { validateAtlasMapConnectionPath, validateAtlasTopology, type AtlasTopolo
 import { buildBloomfallLocalAtlasManifest, bloomfallAtlasId } from "./bloomfall-local-atlas";
 import { assertAtlasV2SchemaPresent } from "./atlas-v2-activation";
 import { stableAtlasJson } from "./atlas-integrity";
+import { bloomfallPersistedRoutes } from "./bloomfall-routes";
 
 type Database = ReturnType<typeof createPrismaClient>;
 type Client = Database | Prisma.TransactionClient;
@@ -19,7 +20,7 @@ async function scopedCounts(client: Client) {
   return { placements, nodes, boundaries, rings, references, paths };
 }
 
-export async function verifyBloomfallLocalAtlas(database: Database, options: { expectedArtVersion?: string } = {}) {
+export async function verifyBloomfallLocalAtlas(database: Database, options: { expectedArtVersion?: string; allowSystemAwareRoutes?: boolean } = {}) {
   await assertAtlasV2SchemaPresent(database);
   const map = await database.storyMap.findUnique({
     where: { slug: manifest.scene.slug },
@@ -34,7 +35,7 @@ export async function verifyBloomfallLocalAtlas(database: Database, options: { e
   const expectedArtVersion = options.expectedArtVersion ?? manifest.scene.artVersion;
   if (map.parent?.slug !== manifest.scene.parentSlug || map.owner?.slug !== manifest.scene.ownerEntrySlug || map.artVersion !== expectedArtVersion) throw new Error("Bloomfall local scene identity or activation metadata differs from the manifest.");
   const counts = await scopedCounts(database);
-  const expectedCounts = { placements: 18, nodes: 8, boundaries: 10, rings: 3, references: 12, paths: 2 };
+  const expectedCounts = { placements: 18, nodes: 8, boundaries: 10, rings: 3, references: 12, paths: options.allowSystemAwareRoutes ? bloomfallPersistedRoutes.length : 2 };
   if (stableAtlasJson(counts, false) !== stableAtlasJson(expectedCounts, false)) throw new Error(`Bloomfall Atlas counts differ: ${stableAtlasJson({ counts, expectedCounts }, false)}`);
   const entrySlugByPlacement = new Map(map.placements.map((placement) => [placement.id, placement.entry.slug]));
   const topology: AtlasTopologyDataset = {
@@ -49,13 +50,20 @@ export async function verifyBloomfallLocalAtlas(database: Database, options: { e
     if (!actual || actual.id !== expected.id || actual.geometryKind !== expected.geometry.type || stableAtlasJson(actual.geometry, false) !== stableAtlasJson(expected.geometry, false) || actual.labelX !== expected.label[0] || actual.labelY !== expected.label[1] || actual.minZoom !== expected.minZoom || actual.maxZoom !== expected.maxZoom || actual.priority !== expected.priority) throw new Error(`Persisted placement differs for ${expected.entrySlug}.`);
   }
   for (const path of map.connectionPaths) {
+    if (options.allowSystemAwareRoutes) {
+      const expected = bloomfallPersistedRoutes.find((route) => route.pathId === path.id && route.connectionId === path.connectionId);
+      if (!expected || path.connection.fromEntry.slug !== expected.source || path.connection.toEntry.slug !== expected.destination || path.connection.type !== expected.type || stableAtlasJson(path.geometry, false) !== stableAtlasJson(expected.geometry, false) || path.minZoom !== expected.minZoom || path.maxZoom !== expected.maxZoom || path.priority !== expected.priority) throw new Error(`Persisted Bloomfall system-aware route ${path.id} differs from the manifest.`);
+      const checked = validateAtlasMapConnectionPath({ id: path.id, connectionId: path.connectionId, mapSlug: map.slug, geometry: path.geometry as never, minZoom: path.minZoom, maxZoom: path.maxZoom, priority: path.priority, version: path.version }, { width: 100000, height: 66667 });
+      if (!checked.valid) throw new Error(`Persisted Bloomfall system-aware route ${path.id} is invalid.`);
+      continue;
+    }
     const endpointSlugs = new Set([path.connection.fromEntry.slug, path.connection.toEntry.slug]);
     const expected = manifest.routes.find((route) => endpointSlugs.has("bloomfall-reach") && endpointSlugs.has(route.endpointSlug) && path.connection.type === route.type);
     if (!expected || stableAtlasJson(path.geometry, false) !== stableAtlasJson(expected.geometry, false) || path.minZoom !== expected.minZoom || path.priority !== expected.priority) throw new Error(`Persisted Bloomfall route ${path.id} differs from the manifest.`);
     const checked = validateAtlasMapConnectionPath({ id: path.id, connectionId: path.connectionId, mapSlug: map.slug, geometry: path.geometry as never, minZoom: path.minZoom, maxZoom: path.maxZoom, priority: path.priority, version: path.version }, { width: 100000, height: 66667 });
     if (!checked.valid) throw new Error(`Persisted Bloomfall route ${path.id} is invalid.`);
   }
-  return { contract: "martino-bloomfall-local-atlas-verification", contractVersion: 1, verificationStatus: "PASS" as const, manifestSha256: manifest.logicalSha256, counts, regions: validation.value.map((area) => entrySlugByPlacement.get(area.areaId)).sort(), routeBacklog: manifest.routeBacklog, productionWrites: 0 };
+  return { contract: "martino-bloomfall-local-atlas-verification", contractVersion: 1, verificationStatus: "PASS" as const, manifestSha256: manifest.logicalSha256, counts, regions: validation.value.map((area) => entrySlugByPlacement.get(area.areaId)).sort(), routePhase: options.allowSystemAwareRoutes ? "PROMPT_D_SYSTEM_AWARE" : "PROMPT_5_BASELINE", routeBacklog: manifest.routeBacklog, productionWrites: 0 };
 }
 
 async function writeActivation(tx: Prisma.TransactionClient, actorUserId: string) {
@@ -97,8 +105,8 @@ export async function activateBloomfallLocalAtlas(database: Database) {
   const map = await database.storyMap.findUnique({ where: { slug: manifest.scene.slug }, include: { parent: { select: { slug: true } }, owner: { select: { slug: true } } } });
   if (!map || map.id !== "1d8fe347-8ce8-5bc1-ae5c-6ee5dedab54f" || map.parent?.slug !== manifest.scene.parentSlug || map.owner?.slug !== manifest.scene.ownerEntrySlug) throw new Error("Bloomfall local scene identity/ownership guard failed.");
   const counts = await scopedCounts(database);
-  if (map.artVersion === "v3") return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database, { expectedArtVersion: "v3" })) };
-  if (map.artVersion === manifest.scene.artVersion) return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database)) };
+  if (map.artVersion === "v3") return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database, { expectedArtVersion: "v3", allowSystemAwareRoutes: counts?.paths === bloomfallPersistedRoutes.length })) };
+  if (map.artVersion === manifest.scene.artVersion) return { status: "ALREADY_APPLIED" as const, ...(await verifyBloomfallLocalAtlas(database, { allowSystemAwareRoutes: counts?.paths === bloomfallPersistedRoutes.length })) };
   if (map.artVersion !== "foundation" || !counts || Object.values(counts).some((count) => count !== 0)) throw new Error("Bloomfall local scene is neither the clean foundation nor the exact activated state; activation refused.");
   const actor = await database.user.findFirst({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });
   if (!actor) throw new Error("Bloomfall local Atlas activation requires an active administrator for audit authorship.");

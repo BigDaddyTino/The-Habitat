@@ -7,6 +7,7 @@ import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-dat
 import { stableAtlasJson } from "./lib/atlas-integrity";
 import { loadAtlasCanonicalRouteBacklog } from "./lib/atlas-canonical-routes";
 import { bloomfallLocalRouteBacklog, bloomfallLocalRoutes } from "./lib/bloomfall-local-atlas";
+import { bloomfallPersistedRoutes, bloomfallRouteCandidates } from "./lib/bloomfall-routes";
 
 const root = path.resolve(process.cwd(), "..", "..");
 dotenv.config({ path: path.join(root, ".env"), quiet: true });
@@ -33,8 +34,9 @@ const db = createPrismaClient(target.url);
 async function main() {
   const backlog = await loadAtlasCanonicalRouteBacklog(root);
   const approved = backlog.routes.filter((route) => route.status === "AUTHOR_NOW");
+  const expectedBloomfallRoutes = target.mode === "DEVELOPMENT" ? bloomfallPersistedRoutes : bloomfallPersistedRoutes.filter((route) => route.authoringDecision === "PRESERVE");
   const paths = await db.storyMapConnectionPath.findMany({ include: { map: true, connection: { include: { fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } } }, orderBy: { connectionId: "asc" } });
-  if (paths.length !== approved.length + bloomfallLocalRoutes.length) throw new Error(`Expected ${approved.length} world paths and ${bloomfallLocalRoutes.length} Bloomfall paths, received ${paths.length}.`);
+  if (paths.length !== approved.length + expectedBloomfallRoutes.length) throw new Error(`Expected ${approved.length} world paths and ${expectedBloomfallRoutes.length} Bloomfall paths, received ${paths.length}.`);
   for (const route of approved) {
     const persisted = paths.find((candidate) => candidate.connectionId === route.connectionId && candidate.map.slug === route.recommendedScene);
     if (!persisted) throw new Error(`Missing approved path ${route.connectionId}.`);
@@ -52,15 +54,23 @@ async function main() {
     const validation = validateAtlasMapConnectionPath({ id: persisted.id, connectionId: persisted.connectionId, mapSlug: persisted.map.slug, geometry: persisted.geometry as never, minZoom: persisted.minZoom, maxZoom: persisted.maxZoom, priority: persisted.priority, version: persisted.version }, { width: persisted.map.coordinateWidth as 100_000, height: persisted.map.coordinateHeight });
     if (!validation.valid) throw new Error(`Approved Bloomfall path ${route.key} failed geometry validation.`);
   }
+  for (const route of expectedBloomfallRoutes.filter((candidate) => candidate.authoringDecision === "AUTHOR_NOW")) {
+    const persisted = paths.find((candidate) => candidate.id === route.pathId && candidate.connectionId === route.connectionId && candidate.map.slug === "martino-bloomfall-reach");
+    if (!persisted) throw new Error(`Missing Prompt D Bloomfall path ${route.key}.`);
+    if (persisted.connection.fromEntry.slug !== route.source || persisted.connection.toEntry.slug !== route.destination || persisted.connection.type !== route.type) throw new Error(`Prompt D Bloomfall path ${route.key} semantic data drifted.`);
+    if (stableAtlasJson(persisted.geometry, false) !== stableAtlasJson(route.geometry, false) || persisted.minZoom !== route.minZoom || persisted.maxZoom !== route.maxZoom || persisted.priority !== route.priority) throw new Error(`Prompt D Bloomfall path ${route.key} geometry or presentation drifted.`);
+    const validation = validateAtlasMapConnectionPath({ id: persisted.id, connectionId: persisted.connectionId, mapSlug: persisted.map.slug, geometry: persisted.geometry as never, minZoom: persisted.minZoom, maxZoom: persisted.maxZoom, priority: persisted.priority, version: persisted.version }, { width: persisted.map.coordinateWidth as 100_000, height: persisted.map.coordinateHeight });
+    if (!validation.valid) throw new Error(`Prompt D Bloomfall path ${route.key} failed geometry validation.`);
+  }
   const scenes = [...new Set([...approved.map((route) => route.recommendedScene), "martino-bloomfall-reach"] )];
   const scenePaths = await Promise.all(scenes.map(async (slug) => ({ slug, paths: await db.storyMapConnectionPath.count({ where: { map: { slug } } }) })));
   for (const scene of scenePaths) {
-    const expected = approved.filter((route) => route.recommendedScene === scene.slug).length + (scene.slug === "martino-bloomfall-reach" ? bloomfallLocalRoutes.length : 0);
+    const expected = approved.filter((route) => route.recommendedScene === scene.slug).length + (scene.slug === "martino-bloomfall-reach" ? expectedBloomfallRoutes.length : 0);
     if (scene.paths !== expected) throw new Error(`V2 scene source ${scene.slug} does not contain its ${expected} approved paths.`);
   }
   const connections = await db.storyWorldConnection.findMany({ select: { type: true, paths: { select: { id: true } } } });
   const byType = Object.fromEntries([...new Set(connections.map((connection) => connection.type))].sort().map((type) => { const rows = connections.filter((connection) => connection.type === type); return [type, { connections: rows.length, pathsAuthored: rows.filter((connection) => connection.paths.length > 0).length, missingPaths: rows.filter((connection) => connection.paths.length === 0).length }]; }));
-  process.stdout.write(stableAtlasJson({ contract: "martino-atlas-canonical-route-verification", contractVersion: 2, database: target.database, mode: target.mode, status: "PASS", connections: connections.length, pathsAuthored: paths.length, pathsMissing: connections.length - paths.length, approved: paths.length, reviewRequired: backlog.counts.reviewRequired + bloomfallLocalRouteBacklog.REVIEW_REQUIRED.length, deferred: backlog.counts.defer + bloomfallLocalRouteBacklog.DEFER.length, byType, scenes: Object.fromEntries(scenePaths.map(({ slug, paths: count }) => [slug, count])) }));
+  process.stdout.write(stableAtlasJson({ contract: "martino-atlas-canonical-route-verification", contractVersion: 2, database: target.database, mode: target.mode, status: "PASS", connections: connections.length, pathsAuthored: paths.length, pathsMissing: connections.length - paths.length, approved: paths.length, reviewRequired: backlog.counts.reviewRequired + (target.mode === "PRODUCTION" ? bloomfallLocalRouteBacklog.REVIEW_REQUIRED.length : 0), deferred: backlog.counts.defer + (target.mode === "PRODUCTION" ? bloomfallLocalRouteBacklog.DEFER.length : bloomfallRouteCandidates.filter((route) => route.classification === "DEFERRED").length), dynamic: target.mode === "DEVELOPMENT" ? bloomfallRouteCandidates.filter((route) => route.classification === "DYNAMIC").length : 0, byType, scenes: Object.fromEntries(scenePaths.map(({ slug, paths: count }) => [slug, count])) }));
 }
 
 void main().finally(() => db.$disconnect());
