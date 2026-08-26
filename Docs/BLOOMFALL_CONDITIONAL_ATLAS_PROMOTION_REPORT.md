@@ -14,6 +14,9 @@ Scope: promote the two conditional base alignments Prompt D authored in developm
 | Starting HEAD | `8e8a7ffed21f7456042fdf2be981700f99b07da6` |
 | Release commit | `fcf12c41fd2b0b372304d93149b21be0356abdfe` |
 | Build used for the promotion | `IW5raOZXYMFu-CuwMcqKE` |
+| Evidence commit | `76f03e69a0b0fc13807b9b288cc2252e6b1dfe3b` |
+| Deployed commit | `76f03e69a0b0fc13807b9b288cc2252e6b1dfe3b` |
+| Deployed build ID | `pdJ-BFChiwRVKqF7lOK1c` |
 | Worktree at release | clean; the promoter refuses a dirty tree |
 
 ## 2. Backup
@@ -185,6 +188,10 @@ Not used. Available, narrowest first:
 3. Roll the application build back.
 4. Restore the verified backup named above.
 
-## 16. Final decision
+## 16. Idempotency
+
+A second promotion run against the deployed commit and build reports `ALREADY_APPLIED` with `mutations = 0` and both routes planned as no-ops. No duplicate connections, paths, or revisions.
+
+## 17. Final decision
 
 `BLOOMFALL_CONDITIONAL_ATLAS_ALIGNMENTS_LIVE`
