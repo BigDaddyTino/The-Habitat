@@ -1,0 +1,94 @@
+{
+  "contract": "martino-global-geographic-hierarchy-prompt-5b-verification",
+  "contractVersion": 1,
+  "status": "PASS",
+  "head": "d292b9455106914f13c33b4f513f8ebbd57b458a",
+  "branch": "main",
+  "rootCause": "BAD_CANONICAL_PARENT_DATA",
+  "development": {
+    "database": "habitat_atlas_dev",
+    "entriesAudited": 55,
+    "topLevelWorldRegions": 8,
+    "nestedRegions": 8,
+    "citiesAndSettlements": 4,
+    "sitesFacilitiesAndLandmarks": 25,
+    "invalidParentsBefore": 7,
+    "invalidParentsAfter": 0,
+    "missingParentsAfter": 0,
+    "cyclesAfter": 0,
+    "suspiciousRelationshipsAfter": 0
+  },
+  "repair": {
+    "contract": "MARTINO_GLOBAL_REGION_HIERARCHY_V1",
+    "script": "apps/web/scripts/repair-geographic-hierarchy.ts",
+    "changedRecords": 7,
+    "revisions": 7,
+    "slugs": [
+      "bloomfall-reach",
+      "the-desert",
+      "grand-rift",
+      "high-cliffs",
+      "magic-torn-wasteland",
+      "the-red-forest",
+      "riverlands"
+    ],
+    "secondRun": {
+      "status": "ALREADY_APPLIED",
+      "mutations": 0,
+      "revisions": 0
+    }
+  },
+  "dossiers": {
+    "audit": "apps/web/scripts/audit-peninsula-dossier.ts",
+    "peninsulaDirectRows": ["port-arcadia"],
+    "peninsulaVisibleEntries": 13,
+    "bloomfallDirectRows": ["the-living-marsh", "the-mutation-belt", "the-shattercore"],
+    "bloomfallVisibleEntries": 18,
+    "topLevelParentTrails": 0,
+    "duplicateChildren": 0,
+    "hardCodedExclusions": 0
+  },
+  "atlasPreservation": {
+    "transactionalFingerprint": "e5999e5bf0cddc54d9ff749627424a75f43f1b3dbd87e9406d318345b4125239",
+    "unchanged": true,
+    "world": { "nodes": 19, "boundaries": 26, "rings": 11, "references": 43 },
+    "bloomfall": { "nodes": 8, "boundaries": 10, "rings": 3, "references": 12, "pois": 15, "paths": 2 },
+    "bloomfallManifestSha256": "e24a964bc0f4d2368a145383d5f5a78c84fb8a9c5bd7fd61819747d5dd328c6b"
+  },
+  "productionComparison": {
+    "database": "habitat",
+    "classification": "BOTH",
+    "entriesAudited": 37,
+    "invalidParents": 6,
+    "peninsulaVisibleEntries": 23,
+    "writes": 0,
+    "migrations": 0,
+    "configurationChanges": 0,
+    "atlasChanges": 0,
+    "codexChanges": 0,
+    "baselineFingerprint": "1368aac487354551aad60cb7ec18b572db9b9ea9078de680f309eca89f1ad2ef"
+  },
+  "qa": {
+    "webTests": { "passed": 403, "failed": 0 },
+    "codexSyncTests": { "passed": 3, "failed": 0 },
+    "webTypecheck": "PASS",
+    "sharedTypecheck": "PASS",
+    "databaseTypecheck": "PASS",
+    "codexSyncTypecheck": "PASS",
+    "prismaValidate": "PASS",
+    "webLint": "PASS",
+    "productionBuild": "PASS",
+    "globalHierarchyAudit": "PASS",
+    "peninsulaDossierAudit": "PASS",
+    "atlasDevelopment": "PASS",
+    "atlasAuthoring": "PASS",
+    "atlasRoutes": "PASS",
+    "atlasV2": "PASS",
+    "atlasV2Parity": "PASS",
+    "bloomfallAudit": "PASS",
+    "bloomfallAtlas": "PASS",
+    "bundleV4": { "status": "PASS", "assets": 218 },
+    "responsiveLayout": { "desktop": "PASS", "mobile390x844": "PASS", "horizontalOverflowPixels": 0 }
+  },
+  "decision": "GLOBAL_REGION_HIERARCHY_REPAIRED"
+}

@@ -1,0 +1,1002 @@
+{
+  "analysis": {
+    "boundaries": 10,
+    "boundaryReferences": 12,
+    "expectedExtentArea": 6666700000,
+    "gaps": 0,
+    "holes": 0,
+    "nodes": 8,
+    "overlaps": 0,
+    "partitionArea": 6666700000,
+    "pois": 15,
+    "rings": 3,
+    "sharedInternalBoundaries": 2,
+    "subregions": 3,
+    "topologyValid": true
+  },
+  "art": {
+    "approvedMasterSha256": "508852179b0375c0c2fe8712b99fd77f6062f04ea7834a5d4a67eb4f4bcb9cfe",
+    "protectedTarget": "private/codex-art/maps/candidates/martino-bloomfall-reach-map-v1.png",
+    "runtimeSha256": "af4be2ed7269260cdfffde582e9a2470944ca8dbedb9ac0e0908e430807ad046",
+    "runtimeSource": "private/codex-art/bloomfall/candidates/local-atlas-runtime-candidate.png"
+  },
+  "contract": "martino-bloomfall-local-atlas",
+  "contractVersion": 1,
+  "logicalSha256": "e24a964bc0f4d2368a145383d5f5a78c84fb8a9c5bd7fd61819747d5dd328c6b",
+  "overlayArchitecture": {
+    "baseTopologyMutationRequired": false,
+    "namedCreatureTerritories": "future non-base analytical overlay keyed to Codex entry and scene",
+    "spawnPoints": "not authored"
+  },
+  "placements": [
+    {
+      "entrySlug": "the-shattercore",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              0
+            ],
+            [
+              100000,
+              0
+            ],
+            [
+              100000,
+              14000
+            ],
+            [
+              86000,
+              16500
+            ],
+            [
+              74000,
+              20500
+            ],
+            [
+              62000,
+              23000
+            ],
+            [
+              50000,
+              25000
+            ],
+            [
+              39000,
+              23500
+            ],
+            [
+              27000,
+              25500
+            ],
+            [
+              14000,
+              25000
+            ],
+            [
+              0,
+              25000
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "b2334248-ff13-5a14-8f9f-b66d43bbdf4c",
+      "label": [
+        47000,
+        12500
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 255
+    },
+    {
+      "entrySlug": "the-mutation-belt",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              25000
+            ],
+            [
+              14000,
+              25000
+            ],
+            [
+              27000,
+              25500
+            ],
+            [
+              39000,
+              23500
+            ],
+            [
+              50000,
+              25000
+            ],
+            [
+              62000,
+              23000
+            ],
+            [
+              74000,
+              20500
+            ],
+            [
+              86000,
+              16500
+            ],
+            [
+              100000,
+              14000
+            ],
+            [
+              100000,
+              30000
+            ],
+            [
+              86000,
+              40000
+            ],
+            [
+              75000,
+              38000
+            ],
+            [
+              66000,
+              32000
+            ],
+            [
+              56000,
+              33500
+            ],
+            [
+              46000,
+              35000
+            ],
+            [
+              36000,
+              39000
+            ],
+            [
+              26000,
+              44000
+            ],
+            [
+              14000,
+              46500
+            ],
+            [
+              0,
+              48000
+            ],
+            [
+              0,
+              25000
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "11110b8d-df13-5d1e-af83-39d4a9d04c3e",
+      "label": [
+        47000,
+        28500
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 245
+    },
+    {
+      "entrySlug": "the-living-marsh",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              48000
+            ],
+            [
+              14000,
+              46500
+            ],
+            [
+              26000,
+              44000
+            ],
+            [
+              36000,
+              39000
+            ],
+            [
+              46000,
+              35000
+            ],
+            [
+              56000,
+              33500
+            ],
+            [
+              66000,
+              32000
+            ],
+            [
+              75000,
+              38000
+            ],
+            [
+              86000,
+              40000
+            ],
+            [
+              100000,
+              30000
+            ],
+            [
+              100000,
+              66667
+            ],
+            [
+              0,
+              66667
+            ],
+            [
+              0,
+              48000
+            ]
+          ]
+        ],
+        "type": "POLYGON"
+      },
+      "id": "5caba359-35d3-5551-94ad-5c56c2663adc",
+      "label": [
+        60000,
+        50000
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 235
+    },
+    {
+      "entrySlug": "southreach-complex",
+      "geometry": {
+        "coordinates": [
+          48828,
+          8138
+        ],
+        "type": "POINT"
+      },
+      "id": "77cb0b2a-9061-5259-905a-ce99db1eab88",
+      "label": [
+        50000,
+        10500
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 255
+    },
+    {
+      "entrySlug": "crown-break",
+      "geometry": {
+        "coordinates": [
+          74870,
+          3255
+        ],
+        "type": "POINT"
+      },
+      "id": "d670fe40-6d0e-50ad-8d26-9fde062cfbee",
+      "label": [
+        76000,
+        6000
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 240
+    },
+    {
+      "entrySlug": "reserve-vault-twelve",
+      "geometry": {
+        "coordinates": [
+          32552,
+          3255
+        ],
+        "type": "POINT"
+      },
+      "id": "44ab94b3-7b67-5ee1-b302-90abd7c35a14",
+      "label": [
+        30000,
+        6000
+      ],
+      "maxZoom": null,
+      "minZoom": 1.7,
+      "priority": 150
+    },
+    {
+      "entrySlug": "ashline-exchange",
+      "geometry": {
+        "coordinates": [
+          22786,
+          21159
+        ],
+        "type": "POINT"
+      },
+      "id": "c54e36ac-ff50-5cd4-8cc4-2ec50c7e3bd0",
+      "label": [
+        20000,
+        23500
+      ],
+      "maxZoom": null,
+      "minZoom": 0.8,
+      "priority": 210
+    },
+    {
+      "entrySlug": "redline-shelter-six",
+      "geometry": {
+        "coordinates": [
+          55339,
+          19500
+        ],
+        "type": "POINT"
+      },
+      "id": "2152b582-1605-5308-845b-eca3e190dca5",
+      "label": [
+        57000,
+        21500
+      ],
+      "maxZoom": null,
+      "minZoom": 1.8,
+      "priority": 140
+    },
+    {
+      "entrySlug": "glassroot-observatory",
+      "geometry": {
+        "coordinates": [
+          65104,
+          29297
+        ],
+        "type": "POINT"
+      },
+      "id": "7e9fb05e-14b9-5fdd-8067-8e917f40e9b5",
+      "label": [
+        67000,
+        27500
+      ],
+      "maxZoom": null,
+      "minZoom": 1.2,
+      "priority": 180
+    },
+    {
+      "entrySlug": "walking-orchard",
+      "geometry": {
+        "coordinates": [
+          35807,
+          27669
+        ],
+        "type": "POINT"
+      },
+      "id": "a527d7b9-4b9d-533b-b540-077d77a02c91",
+      "label": [
+        33000,
+        30000
+      ],
+      "maxZoom": null,
+      "minZoom": 1.8,
+      "priority": 130
+    },
+    {
+      "entrySlug": "splicefield-substation",
+      "geometry": {
+        "coordinates": [
+          81380,
+          32552
+        ],
+        "type": "POINT"
+      },
+      "id": "0327108d-ba86-5b84-8be9-9a368a49235e",
+      "label": [
+        82000,
+        30500
+      ],
+      "maxZoom": null,
+      "minZoom": 1.2,
+      "priority": 175
+    },
+    {
+      "entrySlug": "cairnwood-camp",
+      "geometry": {
+        "coordinates": [
+          17904,
+          34180
+        ],
+        "type": "POINT"
+      },
+      "id": "cd919886-f4c2-523f-a738-467bdcd5bcbc",
+      "label": [
+        20000,
+        32500
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 220
+    },
+    {
+      "entrySlug": "long-graze",
+      "geometry": {
+        "coordinates": [
+          48828,
+          30925
+        ],
+        "type": "POINT"
+      },
+      "id": "c0ec61e3-b01b-5fc0-8e9b-95bf19b66018",
+      "label": [
+        47000,
+        33000
+      ],
+      "maxZoom": null,
+      "minZoom": 1.6,
+      "priority": 145
+    },
+    {
+      "entrySlug": "blackweir",
+      "geometry": {
+        "coordinates": [
+          35807,
+          47201
+        ],
+        "type": "POINT"
+      },
+      "id": "6a9bdae4-4992-5e99-b691-a938fe47c432",
+      "label": [
+        33000,
+        49200
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 225
+    },
+    {
+      "entrySlug": "drowned-intake",
+      "geometry": {
+        "coordinates": [
+          66081,
+          61849
+        ],
+        "type": "POINT"
+      },
+      "id": "789863ed-daa7-5cab-94f3-e3e88c38b5df",
+      "label": [
+        68000,
+        60500
+      ],
+      "maxZoom": null,
+      "minZoom": 0,
+      "priority": 215
+    },
+    {
+      "entrySlug": "lantern-pools",
+      "geometry": {
+        "coordinates": [
+          84635,
+          47201
+        ],
+        "type": "POINT"
+      },
+      "id": "c223f635-d6d0-5972-92de-3dc602a41d59",
+      "label": [
+        82000,
+        49000
+      ],
+      "maxZoom": null,
+      "minZoom": 1.5,
+      "priority": 155
+    },
+    {
+      "entrySlug": "reedless-mile",
+      "geometry": {
+        "coordinates": [
+          53711,
+          42318
+        ],
+        "type": "POINT"
+      },
+      "id": "49748149-ab06-5b7f-950a-45f810d30230",
+      "label": [
+        52000,
+        44500
+      ],
+      "maxZoom": null,
+      "minZoom": 1.9,
+      "priority": 135
+    },
+    {
+      "entrySlug": "heartfen",
+      "geometry": {
+        "coordinates": [
+          61849,
+          51432
+        ],
+        "type": "POINT"
+      },
+      "id": "dfb2bc82-2069-5db3-83eb-b06dfa4b0d08",
+      "label": [
+        64000,
+        50000
+      ],
+      "maxZoom": null,
+      "minZoom": 0.8,
+      "priority": 205
+    }
+  ],
+  "routeBacklog": {
+    "AUTHOR_NOW": [
+      "riverlands-road",
+      "ocean-sea-route"
+    ],
+    "DEFER": [
+      "Walking Orchard/Reedless moving route",
+      "Long Graze herd corridor",
+      "Heartfen route",
+      "Magic-Torn Wasteland route",
+      "full-world continuation geometry"
+    ],
+    "REVIEW_REQUIRED": [
+      "Cairnwood–Glassroot expedition trail",
+      "Southreach Complex service/rail alignment"
+    ]
+  },
+  "routes": [
+    {
+      "confidence": "HIGH_CONFIDENCE",
+      "endpointSlug": "riverlands",
+      "geometry": {
+        "coordinates": [
+          [
+            [
+              0,
+              21000
+            ],
+            [
+              10000,
+              21000
+            ],
+            [
+              22786,
+              21159
+            ],
+            [
+              32000,
+              19000
+            ],
+            [
+              40000,
+              15500
+            ],
+            [
+              48828,
+              8138
+            ]
+          ],
+          [
+            [
+              32000,
+              19000
+            ],
+            [
+              43000,
+              20500
+            ],
+            [
+              55339,
+              19500
+            ]
+          ]
+        ],
+        "type": "MULTILINESTRING"
+      },
+      "key": "riverlands-road",
+      "minZoom": 0.6,
+      "priority": 50,
+      "status": "AUTHOR_NOW",
+      "type": "ROAD"
+    },
+    {
+      "confidence": "HIGH_CONFIDENCE",
+      "endpointSlug": "the-ocean",
+      "geometry": {
+        "coordinates": [
+          [
+            66081,
+            66667
+          ],
+          [
+            66081,
+            61849
+          ],
+          [
+            62000,
+            57000
+          ],
+          [
+            55000,
+            52000
+          ],
+          [
+            47000,
+            49000
+          ],
+          [
+            35807,
+            47201
+          ]
+        ],
+        "type": "LINESTRING"
+      },
+      "key": "ocean-sea-route",
+      "minZoom": 0.8,
+      "priority": 45,
+      "status": "AUTHOR_NOW",
+      "type": "SEA_ROUTE"
+    }
+  ],
+  "scene": {
+    "artVersion": "v1",
+    "coordinateHeight": 66667,
+    "coordinateWidth": 100000,
+    "imageHeight": 1024,
+    "imageWidth": 1536,
+    "initialCenter": [
+      50000,
+      33333
+    ],
+    "initialZoom": 0,
+    "maxZoom": 5,
+    "minZoom": 0,
+    "ownerEntrySlug": "bloomfall-reach",
+    "parentSlug": "martino-world",
+    "slug": "martino-bloomfall-reach"
+  },
+  "topology": {
+    "areas": [
+      {
+        "id": "b2334248-ff13-5a14-8f9f-b66d43bbdf4c",
+        "layerKind": "BASE_GEOGRAPHY",
+        "mapSlug": "martino-bloomfall-reach",
+        "rings": [
+          {
+            "boundaries": [
+              {
+                "boundaryId": "93cd64cf-d6ce-5dad-8264-0907f5dddb76",
+                "reversed": false,
+                "sequence": 0
+              },
+              {
+                "boundaryId": "cb2cb6be-708b-5ad9-a012-26c788d790e6",
+                "reversed": false,
+                "sequence": 1
+              },
+              {
+                "boundaryId": "cc537063-5767-5b39-a525-25329b3dc537",
+                "reversed": true,
+                "sequence": 2
+              },
+              {
+                "boundaryId": "53409237-f905-532b-a051-2e29c195d2e0",
+                "reversed": false,
+                "sequence": 3
+              }
+            ],
+            "componentIndex": 0,
+            "id": "4b9d9010-d9e6-556c-9932-31b3cf000110",
+            "role": "SHELL"
+          }
+        ],
+        "version": 1
+      },
+      {
+        "id": "11110b8d-df13-5d1e-af83-39d4a9d04c3e",
+        "layerKind": "BASE_GEOGRAPHY",
+        "mapSlug": "martino-bloomfall-reach",
+        "rings": [
+          {
+            "boundaries": [
+              {
+                "boundaryId": "cc537063-5767-5b39-a525-25329b3dc537",
+                "reversed": false,
+                "sequence": 0
+              },
+              {
+                "boundaryId": "19e7cba8-aab5-5d22-8844-f439dfda009b",
+                "reversed": false,
+                "sequence": 1
+              },
+              {
+                "boundaryId": "87e21274-2819-54cf-ad38-fb48d1890145",
+                "reversed": true,
+                "sequence": 2
+              },
+              {
+                "boundaryId": "0e1931e7-0a44-589e-855b-3a1fd0e0b3ff",
+                "reversed": false,
+                "sequence": 3
+              }
+            ],
+            "componentIndex": 0,
+            "id": "12a706ee-16c0-57aa-8fd2-b4b891aa9742",
+            "role": "SHELL"
+          }
+        ],
+        "version": 1
+      },
+      {
+        "id": "5caba359-35d3-5551-94ad-5c56c2663adc",
+        "layerKind": "BASE_GEOGRAPHY",
+        "mapSlug": "martino-bloomfall-reach",
+        "rings": [
+          {
+            "boundaries": [
+              {
+                "boundaryId": "87e21274-2819-54cf-ad38-fb48d1890145",
+                "reversed": false,
+                "sequence": 0
+              },
+              {
+                "boundaryId": "aa4a72d6-0a71-5c0e-8e6b-8d8a6f4ecad8",
+                "reversed": false,
+                "sequence": 1
+              },
+              {
+                "boundaryId": "1628502a-719a-5e8d-bd6f-1adeb4dd5a6e",
+                "reversed": false,
+                "sequence": 2
+              },
+              {
+                "boundaryId": "3195b194-3cfb-5e51-b369-0cb42f57224b",
+                "reversed": false,
+                "sequence": 3
+              }
+            ],
+            "componentIndex": 0,
+            "id": "0f15eace-f6d0-516d-9fb0-94e19523886f",
+            "role": "SHELL"
+          }
+        ],
+        "version": 1
+      }
+    ],
+    "boundaries": [
+      {
+        "endNodeId": "4e560ea8-6437-5805-9df7-8d5317cd83b7",
+        "id": "93cd64cf-d6ce-5dad-8264-0907f5dddb76",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "ee02b48c-eb8e-5f7b-8c29-6fd91e25175b",
+        "version": 1
+      },
+      {
+        "endNodeId": "35fbfa2c-6216-5213-891e-63263469fa14",
+        "id": "cb2cb6be-708b-5ad9-a012-26c788d790e6",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "4e560ea8-6437-5805-9df7-8d5317cd83b7",
+        "version": 1
+      },
+      {
+        "endNodeId": "35fbfa2c-6216-5213-891e-63263469fa14",
+        "id": "cc537063-5767-5b39-a525-25329b3dc537",
+        "interiorVertices": [
+          [
+            14000,
+            25000
+          ],
+          [
+            27000,
+            25500
+          ],
+          [
+            39000,
+            23500
+          ],
+          [
+            50000,
+            25000
+          ],
+          [
+            62000,
+            23000
+          ],
+          [
+            74000,
+            20500
+          ],
+          [
+            86000,
+            16500
+          ]
+        ],
+        "kind": "INTERNAL_BORDER",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "5e192af4-0b2f-54b3-9111-26e353ea032f",
+        "version": 1
+      },
+      {
+        "endNodeId": "aa726aa0-d2d7-5bde-afc4-a81577120103",
+        "id": "19e7cba8-aab5-5d22-8844-f439dfda009b",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "35fbfa2c-6216-5213-891e-63263469fa14",
+        "version": 1
+      },
+      {
+        "endNodeId": "aa726aa0-d2d7-5bde-afc4-a81577120103",
+        "id": "87e21274-2819-54cf-ad38-fb48d1890145",
+        "interiorVertices": [
+          [
+            14000,
+            46500
+          ],
+          [
+            26000,
+            44000
+          ],
+          [
+            36000,
+            39000
+          ],
+          [
+            46000,
+            35000
+          ],
+          [
+            56000,
+            33500
+          ],
+          [
+            66000,
+            32000
+          ],
+          [
+            75000,
+            38000
+          ],
+          [
+            86000,
+            40000
+          ]
+        ],
+        "kind": "INTERNAL_BORDER",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "03041d9a-1b08-5752-b687-e2d7d584e682",
+        "version": 1
+      },
+      {
+        "endNodeId": "ca2e74b0-6283-5e7d-b834-db8c8cc32b06",
+        "id": "aa4a72d6-0a71-5c0e-8e6b-8d8a6f4ecad8",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "aa726aa0-d2d7-5bde-afc4-a81577120103",
+        "version": 1
+      },
+      {
+        "endNodeId": "da827811-8108-5a79-9209-e76b4002a1de",
+        "id": "1628502a-719a-5e8d-bd6f-1adeb4dd5a6e",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "ca2e74b0-6283-5e7d-b834-db8c8cc32b06",
+        "version": 1
+      },
+      {
+        "endNodeId": "03041d9a-1b08-5752-b687-e2d7d584e682",
+        "id": "3195b194-3cfb-5e51-b369-0cb42f57224b",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "da827811-8108-5a79-9209-e76b4002a1de",
+        "version": 1
+      },
+      {
+        "endNodeId": "5e192af4-0b2f-54b3-9111-26e353ea032f",
+        "id": "0e1931e7-0a44-589e-855b-3a1fd0e0b3ff",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "03041d9a-1b08-5752-b687-e2d7d584e682",
+        "version": 1
+      },
+      {
+        "endNodeId": "ee02b48c-eb8e-5f7b-8c29-6fd91e25175b",
+        "id": "53409237-f905-532b-a051-2e29c195d2e0",
+        "interiorVertices": [],
+        "kind": "OPEN_BOUNDARY",
+        "mapSlug": "martino-bloomfall-reach",
+        "startNodeId": "5e192af4-0b2f-54b3-9111-26e353ea032f",
+        "version": 1
+      }
+    ],
+    "nodes": [
+      {
+        "id": "ee02b48c-eb8e-5f7b-8c29-6fd91e25175b",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          0,
+          0
+        ],
+        "version": 1
+      },
+      {
+        "id": "4e560ea8-6437-5805-9df7-8d5317cd83b7",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          100000,
+          0
+        ],
+        "version": 1
+      },
+      {
+        "id": "35fbfa2c-6216-5213-891e-63263469fa14",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          100000,
+          14000
+        ],
+        "version": 1
+      },
+      {
+        "id": "aa726aa0-d2d7-5bde-afc4-a81577120103",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          100000,
+          30000
+        ],
+        "version": 1
+      },
+      {
+        "id": "ca2e74b0-6283-5e7d-b834-db8c8cc32b06",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          100000,
+          66667
+        ],
+        "version": 1
+      },
+      {
+        "id": "da827811-8108-5a79-9209-e76b4002a1de",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          0,
+          66667
+        ],
+        "version": 1
+      },
+      {
+        "id": "03041d9a-1b08-5752-b687-e2d7d584e682",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          0,
+          48000
+        ],
+        "version": 1
+      },
+      {
+        "id": "5e192af4-0b2f-54b3-9111-26e353ea032f",
+        "mapSlug": "martino-bloomfall-reach",
+        "position": [
+          0,
+          25000
+        ],
+        "version": 1
+      }
+    ]
+  }
+}

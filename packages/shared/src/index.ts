@@ -25,5 +25,6 @@ export * from "./atlas-validation";
 export * from "./atlas-geometry";
 export * from "./atlas-spatial";
 export * from "./atlas-topology";
+export * from "./bloomfall-reach";
 export * from "./atlas-connection";
 export * from "./atlas-v2-projection";

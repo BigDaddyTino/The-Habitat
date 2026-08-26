@@ -2,6 +2,7 @@ import "server-only";
 import { getPrismaClient } from "@habitat/db/client";
 import type { AtlasPersistenceClient } from "./atlas-persistence-service";
 import { parseStoryMapGeometry, type StoryAtlasFeature, type StoryAtlasProjection, type StoryAtlasQuest } from "@habitat/shared";
+import { storyAtlasArtRegistered } from "./story-atlas-art";
 
 const db = getPrismaClient();
 const visibleStatuses = ["DRAFT", "PROPOSED", "CANON"] as const;
@@ -18,7 +19,7 @@ export function createStoryAtlasProjectionService(client: AtlasPersistenceClient
     where: { slug },
     include: {
       parent: { select: { slug: true, title: true } },
-      children: { select: { slug: true, title: true, ownerEntryId: true } },
+      children: { select: { slug: true, title: true, ownerEntryId: true, artVersion: true } },
       placements: { orderBy: [{ priority: "desc" }, { entry: { title: "asc" } }], include: { entry: true } },
       nodePlacements: {
         orderBy: [{ priority: "desc" }, { node: { title: "asc" } }],
@@ -26,7 +27,7 @@ export function createStoryAtlasProjectionService(client: AtlasPersistenceClient
       },
     },
   });
-  if (!scene) return null;
+  if (!scene || !storyAtlasArtRegistered(scene.slug, scene.artVersion)) return null;
 
   const entryIds = scene.placements.map((placement) => placement.entryId);
   const directArcs = await client.storyArc.findMany({
@@ -44,7 +45,7 @@ export function createStoryAtlasProjectionService(client: AtlasPersistenceClient
   }
   const factions = factionSlugs.size ? await client.storyEntry.findMany({ where: { slug: { in: [...factionSlugs] }, kind: "FACTION" }, select: { slug: true, title: true } }) : [];
   const factionTitle = new Map(factions.map((faction) => [faction.slug, faction.title]));
-  const childMapByOwner = new Map(scene.children.flatMap((child) => child.ownerEntryId ? [[child.ownerEntryId, { slug: child.slug, title: child.title }]] : []));
+  const childMapByOwner = new Map(scene.children.flatMap((child) => child.ownerEntryId && storyAtlasArtRegistered(child.slug, child.artVersion) ? [[child.ownerEntryId, { slug: child.slug, title: child.title }]] : []));
 
   const questsByEntry = new Map<string, StoryAtlasQuest[]>();
   const addQuest = (entryId: string, quest: StoryAtlasQuest) => {
@@ -127,3 +128,33 @@ export function createStoryAtlasProjectionService(client: AtlasPersistenceClient
 }
 
 export const getStoryAtlasProjection = createStoryAtlasProjectionService(db);
+
+export type StoryAtlasSearchHit = { sceneSlug: string; sceneTitle: string; slug: string; title: string; layer: StoryAtlasFeature["layer"]; priority: number };
+
+export async function searchStoryAtlas(query: string): Promise<StoryAtlasSearchHit[]> {
+  const normalized = query.trim();
+  if (normalized.length < 2) return [];
+  const rows = await db.storyMapPlacement.findMany({
+    where: { entry: { status: { in: [...visibleStatuses] }, OR: [{ title: { contains: normalized, mode: "insensitive" } }, { slug: { contains: normalized, mode: "insensitive" } }] } },
+    include: { map: { select: { slug: true, title: true, artVersion: true } }, entry: { select: { slug: true, title: true, kind: true, meta: true } } },
+    orderBy: [{ priority: "desc" }, { entry: { title: "asc" } }], take: 30,
+  });
+  return rows.filter((row) => storyAtlasArtRegistered(row.map.slug, row.map.artVersion)).map((row) => {
+    const placeType = text(record(row.entry.meta)?.type);
+    const layer: StoryAtlasFeature["layer"] = row.entry.kind === "SYSTEM" ? "SYSTEM" : placeType === "region" || placeType === "zone" ? "REGION" : placeType === "settlement" ? "SETTLEMENT" : "POI";
+    return { sceneSlug: row.map.slug, sceneTitle: row.map.title, slug: row.entry.slug, title: row.entry.title, layer, priority: row.priority };
+  }).slice(0, 12);
+}
+
+export type StoryAtlasLocation = { sceneSlug: string; sceneTitle: string; selectedSlug: string | null; kind: "OWNED_SCENE" | "PLACEMENT" };
+
+export async function getStoryAtlasLocationsForEntry(entryId: string): Promise<StoryAtlasLocation[]> {
+  const [entry, placements, owned] = await Promise.all([
+    db.storyEntry.findUnique({ where: { id: entryId }, select: { slug: true } }),
+    db.storyMapPlacement.findMany({ where: { entryId }, include: { map: { select: { slug: true, title: true, artVersion: true } } } }),
+    db.storyMap.findFirst({ where: { ownerEntryId: entryId }, select: { slug: true, title: true, artVersion: true } }),
+  ]);
+  const result: StoryAtlasLocation[] = placements.filter((row) => storyAtlasArtRegistered(row.map.slug, row.map.artVersion)).map((row) => ({ sceneSlug: row.map.slug, sceneTitle: row.map.title, selectedSlug: entry?.slug ?? null, kind: "PLACEMENT" }));
+  if (owned && storyAtlasArtRegistered(owned.slug, owned.artVersion)) result.unshift({ sceneSlug: owned.slug, sceneTitle: owned.title, selectedSlug: null, kind: "OWNED_SCENE" });
+  return result;
+}

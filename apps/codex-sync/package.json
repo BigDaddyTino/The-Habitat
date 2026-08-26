@@ -11,7 +11,8 @@
     "sync:verify": "tsx src/cli.ts verify",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test src/*.test.ts"
+    "test": "tsx --test src/*.test.ts",
+    "bloomfall:verify": "tsx src/verify-bloomfall-development.ts"
   },
   "dependencies": {
     "@habitat/db": "workspace:*",

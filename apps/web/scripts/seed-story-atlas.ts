@@ -1,6 +1,8 @@
 import "../lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
+import { bloomfallReachCanon } from "@habitat/shared";
 import { regionMetaSchema } from "../lib/story-meta-schemas";
+import { bloomfallMainRegion } from "../lib/bloomfall-reach-content";
 
 const db = getPrismaClient();
 const apply = process.argv.includes("--apply");
@@ -20,14 +22,14 @@ const macroRegions = [
     title: "The Riverlands",
     summary: "Martino's central watershed: broad buildable floodplains whose branching river corridors reach deep into every surrounding region.",
     body: "The Riverlands are the central watershed, not a round territory. Their navigable branches reach into every neighboring biome, carrying roads, trade, contested crossings, and strips of buildable ground far into higher-risk country. The broad central floodplains are the world's premier player-building territory. Each river arm should remain geographically readable on the atlas because those corridors are a deliberate progression and settlement system, not decorative water.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: "river floodplain, wetlands, and fertile lowland", connections: ["high-cliffs", "grand-rift", "the-desert", "magic-torn-wasteland", "the-peninsula"].map((to) => ({ to, by: "river corridor", notes: "A Riverlands branch carries buildable ground into the neighboring biome." })), status: "Established macro region; major city still unnamed.", openQuestions: ["What is the Riverlands' major city called, and which faction holds it?"] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "river floodplain, wetlands, and fertile lowland", connections: ["high-cliffs", "grand-rift", "the-desert", "magic-torn-wasteland", "the-peninsula"].map((to) => ({ to, by: "river corridor", notes: "A Riverlands branch carries buildable ground into the neighboring biome." })), status: "Established macro region; major city still unnamed.", openQuestions: ["What is the Riverlands' major city called, and which faction holds it?"] },
   },
   {
     slug: "high-cliffs",
     title: "The High Cliffs",
     summary: "Monumental northern heights enclosing the Grand Lake, feeding the lowlands through enormous waterfalls.",
     body: "The High Cliffs form Martino's northern crown: monumental vertical terrain around the elevated Grand Lake. Water leaves the heights in immense waterfalls and becomes the Riverlands below. The Floating City occupies the sky above or immediately beside the lake, while cliff roads, mining settlements, military lifts, and river-cut approaches make the region visibly inhabited rather than untouched wilderness.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: "alpine cliffs, elevated lake, and waterfall valleys", connections: [{ to: "riverlands", by: "waterfalls and river valleys", notes: "The Grand Lake feeds the central watershed." }], status: "Established macro region; the Floating City is its major city.", openQuestions: ["What is the Floating City's final proper name?"] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "alpine cliffs, elevated lake, and waterfall valleys", connections: [{ to: "riverlands", by: "waterfalls and river valleys", notes: "The Grand Lake feeds the central watershed." }], status: "Established macro region; the Floating City is its major city.", openQuestions: ["What is the Floating City's final proper name?"] },
   },
   {
     slug: "grand-lake",
@@ -48,14 +50,14 @@ const macroRegions = [
     title: "The Grand Rift",
     summary: "A colossal crack in the northwest where red forest gives way to broken canyon country and poisonous depths.",
     body: "The Grand Rift is a gigantic crack in the world. Its southern approach passes through an enormous thick red forest before the land breaks into canyon walls and deadly depths. Riverlands branches penetrate the safer shelves, creating valuable settlement corridors inside otherwise end-game terrain. A major city exists in the region, but its name and controlling faction remain deliberately unresolved.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: "red forest, shattered canyon, and toxic rift depths", connections: [{ to: "riverlands", by: "rift river corridor", notes: "A buildable river arm reaches into the broken country." }], status: "Established macro region; major city still unnamed.", openQuestions: ["What is the Grand Rift's major city called, and who built it?"] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "red forest, shattered canyon, and toxic rift depths", connections: [{ to: "riverlands", by: "rift river corridor", notes: "A buildable river arm reaches into the broken country." }], status: "Established macro region; major city still unnamed.", openQuestions: ["What is the Grand Rift's major city called, and who built it?"] },
   },
   {
     slug: "the-red-forest",
     title: "The Red Forest",
     summary: "A vast, dense red woodland whose growth pushes deep into the Grand Rift and Death Canyon transition.",
     body: "The Red Forest does not stop at a neat canyon border. Its dense red canopy advances into broken shelves and ravines, thinning only as the Grand Rift becomes too fractured and toxic to hold it. The atlas should always show this long, irregular transition rather than two biomes meeting at a hard line.",
-    meta: { ...blankPlace, type: "zone", parent: "grand-rift", biome: "dense crimson forest over broken canyon shelves", connections: [{ to: "death-canyon", by: "fractured forest shelves", notes: "The red canopy dies back gradually inside the canyon." }], status: "Established biome transition.", openQuestions: [] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "dense crimson forest over broken canyon shelves", connections: [{ to: "death-canyon", by: "fractured forest shelves", notes: "The red canopy dies back gradually inside the canyon." }], status: "Established biome transition.", openQuestions: [] },
   },
   {
     slug: "death-canyon",
@@ -69,21 +71,21 @@ const macroRegions = [
     title: "The Desert",
     summary: "The southwestern arid region, crossed by Riverlands tributaries that form fertile routes and oasis corridors.",
     body: "The southwestern desert combines badlands, dunes, rock formations, industrial routes, and inhabited river corridors. Riverlands tributaries penetrate it far enough to support agriculture and player construction deep inside the biome. A major city is established visually, but its name and exact faction control remain open.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: "desert, badlands, and river oases", connections: [{ to: "riverlands", by: "oasis river corridor", notes: "Fertile, buildable ground follows the water into the desert." }], status: "Established macro region; major city still unnamed.", openQuestions: ["What is the desert's major city called?", "How much authority does the Desert Nomad Compact exercise there?"] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "desert, badlands, and river oases", connections: [{ to: "riverlands", by: "oasis river corridor", notes: "Fertile, buildable ground follows the water into the desert." }], status: "Established macro region; major city still unnamed.", openQuestions: ["What is the desert's major city called?", "How much authority does the Desert Nomad Compact exercise there?"] },
   },
   {
     slug: "magic-torn-wasteland",
     title: "The Magic-Torn Wasteland",
     summary: "A spectacular northeastern end-game region where weather, gravity, terrain, and physical law visibly fail.",
     body: "The Magic-Torn Wasteland is charged earth under violent shifting weather: luminous faults, lightning, unstable ground, floating fragments, gravity anomalies, and zones where normal physical law visibly fails. It still belongs to Martino's near-future civilization—a fortified major city and engineered infrastructure stand against the impossible—but the city's name and ruler are not yet canon.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: "reality-torn magical wasteland", connections: [{ to: "riverlands", by: "stabilized river corridor", notes: "A Riverlands branch provides one buildable approach into the end-game zone." }], status: "Established end-game macro region; major city still unnamed.", openQuestions: ["What is the shielded city's name?", "Which faction can keep the city's reality defenses running?"] },
+    meta: { ...blankPlace, type: "region", parent: null, biome: "reality-torn magical wasteland", connections: [{ to: "riverlands", by: "stabilized river corridor", notes: "A Riverlands branch provides one buildable approach into the end-game zone." }], status: "Established end-game macro region; major city still unnamed.", openQuestions: ["What is the shielded city's name?", "Which faction can keep the city's reality defenses running?"] },
   },
   {
-    slug: "unknown-southeast",
-    title: "Unknown Southeast",
-    summary: "A deliberately unresolved southeastern macro region reserved for future world needs.",
-    body: "This southeastern territory is intentionally unknown. Its gray presentation is a design lock, not missing work: do not invent ecology, cities, factions, hazards, or lore until the world needs them and an author explicitly establishes them.",
-    meta: { ...blankPlace, type: "region", parent: "the-peninsula", biome: null, connections: [], status: "Unknown by design; no city or faction may be inferred.", openQuestions: ["What does the wider game eventually need this region to become?"] },
+    slug: bloomfallReachCanon.slug,
+    title: bloomfallReachCanon.title,
+    summary: bloomfallMainRegion.summary,
+    body: bloomfallMainRegion.body,
+    meta: bloomfallMainRegion.meta,
   },
 ] as const;
 
@@ -137,7 +139,7 @@ const maps: readonly MapSeed[] = [
       { slug: "the-desert", geometry: polygon([[0, 210], [285, 175], [330, 385], [600, 560], [520, 685], [0, 675]]), label: px(190, 500), priority: 90 },
       { slug: "riverlands", geometry: polygon([[455, 145], [565, 125], [650, 220], [825, 190], [970, 255], [990, 485], [875, 570], [785, 660], [650, 595], [535, 555], [465, 430]]), label: px(700, 385), priority: 105 },
       { slug: "magic-torn-wasteland", geometry: polygon([[900, 0], [1536, 0], [1536, 285], [1220, 345], [970, 275], [875, 145]]), label: px(1175, 135), priority: 100 },
-      { slug: "unknown-southeast", geometry: polygon([[985, 250], [1536, 250], [1536, 725], [1190, 725], [955, 555], [875, 430]]), label: px(1260, 470), priority: 85 },
+      { slug: bloomfallReachCanon.slug, geometry: polygon([[985, 250], [1536, 250], [1536, 725], [1190, 725], [955, 555], [875, 430]]), label: px(1260, 470), priority: 85 },
       { slug: "the-peninsula", geometry: polygon([[520, 450], [965, 435], [1000, 610], [930, 760], [905, 1024], [660, 1024], [585, 760], [485, 590]]), label: px(730, 625), priority: 110 },
       { slug: "port-arcadia", geometry: point(780, 920), label: px(780, 920), priority: 260 },
       { slug: "the-starting-island", geometry: point(575, 900), label: px(575, 900), priority: 255 },

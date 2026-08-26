@@ -9,6 +9,7 @@ import {
   classifyLegacyAtlasConnectionWording,
   deriveAtlasCoordinateDimensions,
   findAtlasReciprocalCandidates,
+  isPublishedStoryMapArtVersion,
   resolveAtlasConnectionEndpoint,
   validateAtlasCoordinateDimensions,
   validateAtlasPoint,
@@ -352,23 +353,25 @@ export async function buildAtlasIntegrityAudit(source: AtlasAuditSource, inspect
   const findings: AtlasValidationFinding[] = [];
   const mapBySlug = new Map(source.maps.map((map) => [map.slug, map]));
   const entryBySlug = new Map(source.entries.map((entry) => [entry.slug, entry]));
-  const childSceneByOwner = new Map(source.maps.flatMap((map) => map.ownerEntrySlug ? [[map.ownerEntrySlug, map.slug] as const] : []));
+  const childSceneByOwner = new Map(source.maps.flatMap((map) => map.ownerEntrySlug && isPublishedStoryMapArtVersion(map.artVersion) ? [[map.ownerEntrySlug, map.slug] as const] : []));
   const exactFeatures: AtlasExactGeometryFeature[] = [];
   const mapReports: unknown[] = [];
 
   for (const map of [...source.maps].sort((left, right) => left.slug.localeCompare(right.slug))) {
     const artwork = await inspectArtwork(map);
+    const published = isPublishedStoryMapArtVersion(map.artVersion);
     const coordinateResult = validateAtlasCoordinateDimensions({ width: map.coordinateWidth, height: map.coordinateHeight });
     const coordinates: AtlasCoordinateDimensions = coordinateResult.ok ? coordinateResult.value : { width: atlasCoordinateWidth, height: Math.max(1, map.coordinateHeight) };
     if (!coordinateResult.ok) findings.push(atlasFinding("ERROR", "MAP_COORDINATE_EXTENT", `maps.${map.slug}`, "Map does not use a valid fixed-point canonical extent."));
-    if (!artwork.allowlisted) findings.push(atlasFinding("ERROR", "ARTWORK_ALLOWLIST", `maps.${map.slug}.artwork`, "Artwork does not resolve through the protected allow-list."));
-    if (!artwork.exists) findings.push(atlasFinding("ERROR", "ARTWORK_MISSING", `maps.${map.slug}.artwork`, "Configured artwork is missing or unreadable."));
-    if (artwork.exists && artwork.format !== "PNG") findings.push(atlasFinding("ERROR", "ARTWORK_FORMAT", `maps.${map.slug}.artwork`, "Artwork is not a valid PNG."));
-    let dimensionStatus = "UNAVAILABLE";
+    if (published && !artwork.allowlisted) findings.push(atlasFinding("ERROR", "ARTWORK_ALLOWLIST", `maps.${map.slug}.artwork`, "Artwork does not resolve through the protected allow-list."));
+    if (published && !artwork.exists) findings.push(atlasFinding("ERROR", "ARTWORK_MISSING", `maps.${map.slug}.artwork`, "Configured artwork is missing or unreadable."));
+    if (published && artwork.exists && artwork.format !== "PNG") findings.push(atlasFinding("ERROR", "ARTWORK_FORMAT", `maps.${map.slug}.artwork`, "Artwork is not a valid PNG."));
+    if (!published) findings.push(atlasFinding("INFO", "MAP_FOUNDATION_INACTIVE", `maps.${map.slug}`, "Unnumbered art version keeps this authoring foundation out of player projection and trusted bundle export."));
+    let dimensionStatus = published ? "UNAVAILABLE" : "FOUNDATION_INACTIVE";
     let decodedAspectRatio: number | null = null;
     const declaredAspectRatio = map.imageWidth / map.imageHeight;
     let expectedCoordinateHeight: number | null = null;
-    if (artwork.decodedWidth && artwork.decodedHeight) {
+    if (published && artwork.decodedWidth && artwork.decodedHeight) {
       decodedAspectRatio = artwork.decodedWidth / artwork.decodedHeight;
       const expected = deriveAtlasCoordinateDimensions({ width: artwork.decodedWidth, height: artwork.decodedHeight });
       expectedCoordinateHeight = expected.ok ? expected.value.height : null;
@@ -435,6 +438,7 @@ export async function buildAtlasIntegrityAudit(source: AtlasAuditSource, inspect
       childSlugs: [...map.childSlugs].sort(),
       ownerEntrySlug: map.ownerEntrySlug,
       artworkIdentity: `${map.slug}:${map.artVersion}`,
+      publication: published ? "PUBLISHED_ART_VERSION" : "INACTIVE_FOUNDATION",
       artwork: {
         ...artwork,
         declaredWidth: map.imageWidth,

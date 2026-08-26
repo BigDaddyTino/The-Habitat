@@ -1,12 +1,19 @@
 import "../lib/environment";
+import path from "node:path";
+import dotenv from "dotenv";
 import { createPrismaClient } from "@habitat/db/client";
+import { bloomfallReachCanon } from "@habitat/shared";
+import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
 import { stableAtlasJson } from "./lib/atlas-integrity";
-import { assertAtlasV2ActivationTarget } from "./lib/atlas-v2-activation";
+import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2ActivationTarget } from "./lib/atlas-v2-activation";
 
+const root = path.resolve(process.cwd(), "..", "..");
 const sourceUrl = process.env.DATABASE_URL;
-const targetUrl = process.env.ATLAS_V2_ACTIVATION_DATABASE_URL;
-if (!sourceUrl || !targetUrl) throw new Error("DATABASE_URL and explicit ATLAS_V2_ACTIVATION_DATABASE_URL are required.");
-const identity = assertAtlasV2ActivationTarget(sourceUrl, targetUrl);
+dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
+const explicitTargetUrl = process.env.ATLAS_V2_ACTIVATION_DATABASE_URL;
+const targetUrl = explicitTargetUrl ?? resolveAtlasDevelopmentDatabaseUrl(process.env);
+if (!sourceUrl || !targetUrl) throw new Error("Atlas V2 parity requires the production source URL and a guarded development or explicit activation target.");
+const identity = explicitTargetUrl ? assertAtlasV2ActivationTarget(sourceUrl, targetUrl) : { mode: "PERSISTENT_DEVELOPMENT_VERIFICATION" as const, source: new URL(sourceUrl).pathname.slice(1), target: assertAtlasPersistentDevelopmentTarget(targetUrl) };
 const database = createPrismaClient(targetUrl);
 
 async function main() {
@@ -24,7 +31,7 @@ async function main() {
   const topologyPlacements = world.placements.filter((placement) => placement.areaRings.length > 0);
   const pointPlacements = world.placements.filter((placement) => placement.areaRings.length === 0);
   for (const placement of topologyPlacements) differences.push({ classification: "EXPECTED_V2_CHANGE", key: placement.entry.slug, detail: "V1 independent polygon remains stored while V2 derives shared-topology geometry for rendering." });
-  const expectedTopology = new Set(["the-desert", "grand-rift", "the-red-forest", "high-cliffs", "riverlands", "magic-torn-wasteland", "unknown-southeast", "the-peninsula", "grand-lake", "death-canyon"]);
+  const expectedTopology = new Set(["the-desert", "grand-rift", "the-red-forest", "high-cliffs", "riverlands", "magic-torn-wasteland", bloomfallReachCanon.slug, "the-peninsula", "grand-lake", "death-canyon"]);
   for (const slug of expectedTopology) if (!topologyPlacements.some((placement) => placement.entry.slug === slug)) differences.push({ classification: "POTENTIAL_REGRESSION", key: slug, detail: "Approved topology placement is missing." });
   for (const child of world.children) if (!child.ownerEntryId || !world.placements.some((placement) => placement.entryId === child.ownerEntryId)) differences.push({ classification: "POTENTIAL_REGRESSION", key: child.slug, detail: "Child scene has no preserved world anchor." });
   differences.push({ classification: "V2_NEW_CAPABILITY", key: "shared-topology", detail: `${topologyPlacements.length} exact geographic regions with hierarchy, neighbors, bounds, and hit geometry.` });

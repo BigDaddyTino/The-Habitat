@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
-import { storyEntryKindLabels, storyPlaceDescendants, type StoryCanonPacket, type StoryPlaceLink } from "@habitat/shared";
+import { canonicalBloomfallReachSlug, storyEntryKindLabels, type StoryCanonPacket } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -13,15 +13,19 @@ import { StoryWarden } from "@/components/story-warden";
 import { CanonPacketPanel } from "@/components/canon-packet-panel";
 import { addComment, resolveComment, setStoryStatus } from "@/app/codex/actions";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
-import { collectionForKind, defaultChildPlaceKind, placeKindLabel, placeTypeOrder } from "@/lib/story-library";
+import { buildContainedPlaceProjection, collectionForKind, defaultChildPlaceKind } from "@/lib/story-library";
 import { canonPacketSchema } from "@/lib/story-meta-schemas";
+import { getStoryAtlasLocationsForEntry } from "@/lib/story-atlas";
 
 export default async function StoryEntryPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ created?: string }> }) {
   const user = await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
   const [{ slug }, { created }] = await Promise.all([params, searchParams]);
+  const canonicalSlug = canonicalBloomfallReachSlug(slug);
+  if (canonicalSlug !== slug) redirect(`/codex/bible/${canonicalSlug}`);
   const entry = await getStoryEntry(slug);
   if (!entry) notFound();
+  const atlasLocations = entry.kind === "REGION" ? await getStoryAtlasLocationsForEntry(entry.id) : [];
 
   const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT", "SYSTEM", "THREAD", "COMPANION_MISSION"] as const;
   const needsPickers = (sheetKinds as readonly string[]).includes(entry.kind);
@@ -198,33 +202,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   // A region dossier IS the "what's in here" page: every place whose sheet
   // names this region as its parent, ordered settlements-first, each carrying
   // whatever sits inside it in turn — the region > place > destination rungs.
-  const order = (meta: Record<string, unknown> | null) => placeTypeOrder[String(meta?.type)] ?? 9;
-  const byTitle = (a: { order: number; title: string }, b: { order: number; title: string }) => a.order - b.order || a.title.localeCompare(b.title);
-  // Descendants per place, computed once from the shared place graph.
-  const placeLinks: StoryPlaceLink[] = regions.map((region) => ({ slug: region.slug, parent: typeof region.meta?.parent === "string" && region.meta.parent.trim() ? region.meta.parent.trim() : null }));
-  const placeDescendants = new Map(regions.map((region) => [region.slug, new Set(storyPlaceDescendants(region.slug, placeLinks))]));
-  const containedPlaces = entry.kind === "REGION"
-    ? regions
-        .filter((region) => (region.meta?.parent ?? null) === entry.slug)
-        .map((place) => ({
-          slug: place.slug,
-          title: place.title,
-          summary: place.summary,
-          label: placeKindLabel(place.meta ?? {}),
-          order: order(place.meta),
-          // Everything beneath this place at any depth, not just its direct
-          // children. A destination filed under a zone under a settlement sat
-          // three rungs down and appeared on no region page at all — the
-          // library atlas already flattens the same way, and a place that
-          // exists but is listed nowhere is how POIs go missing.
-          inside: regions
-            .filter((candidate) => placeDescendants.get(place.slug)?.has(candidate.slug))
-            .map((candidate) => ({ slug: candidate.slug, title: candidate.title, label: placeKindLabel(candidate.meta ?? {}), order: order(candidate.meta) }))
-            .sort(byTitle)
-            .map(({ slug, title, label }) => ({ slug, title, label })),
-        }))
-        .sort(byTitle)
-    : [];
+  const containedPlaces = entry.kind === "REGION" ? buildContainedPlaceProjection(entry.slug, regions) : [];
 
   return (
     <section className="page-shell codex-shell codex-entry-shell">
@@ -249,6 +227,12 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         factionOptions={factions.map((faction) => ({ slug: faction.slug, title: faction.title }))}
         placeAncestry={entry.placeAncestry}
       />
+      {atlasLocations.length ? <nav className="place-trail" aria-label="Atlas locations">{atlasLocations.map((location) => {
+        const query = location.sceneSlug === "martino-world" ? "?atlas=v2" : `?atlas=v2&scene=${encodeURIComponent(location.sceneSlug)}`;
+        const hash = location.selectedSlug ? `#atlas-v2=${encodeURIComponent(location.selectedSlug)}` : "";
+        const copy = location.kind === "OWNED_SCENE" ? "Explore region" : location.sceneSlug === "martino-world" ? "View in world" : "View in Atlas";
+        return <span key={`${location.kind}:${location.sceneSlug}`}><Link href={`/codex/map${query}${hash}`}>{copy}</Link></span>;
+      })}</nav> : null}
 
       <div className="codex-entry-grid codex-entry-workspace-grid">
         <div className="codex-entry-main">

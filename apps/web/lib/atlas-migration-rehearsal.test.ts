@@ -142,7 +142,7 @@ test("V1 polygon coordinates are comparison evidence and never generate the manu
   assert.equal(stableAtlasJson(baseline), stableAtlasJson(changed));
   assert.equal(baseline.coordinateSource, "MANUAL_FROZEN_ARTWORK_TRACE");
   const comparisons = buildAtlasGeometryComparisons(geometry, baseline);
-  assert.deepEqual(comparisons.map((comparison) => comparison.entrySlug), ["death-canyon", "grand-lake", "grand-rift", "high-cliffs", "magic-torn-wasteland", "riverlands", "the-desert", "the-peninsula", "the-red-forest", "unknown-southeast"]);
+  assert.deepEqual(comparisons.map((comparison) => comparison.entrySlug), ["bloomfall-reach", "death-canyon", "grand-lake", "grand-rift", "high-cliffs", "magic-torn-wasteland", "riverlands", "the-desert", "the-peninsula", "the-red-forest"]);
   assert.ok(comparisons.every((comparison) => comparison.v1Fingerprint.length === 64 && comparison.reason.includes("V2")));
 });
 

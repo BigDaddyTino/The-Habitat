@@ -31,3 +31,20 @@ apps/web/public/member-avatars/*
 packages/db/src/generated/
 data/
 backups/
+
+# Bloomfall image-generation history is local review evidence. Release-selected
+# files are copied into tracked production-shaped paths and hash-locked there.
+apps/web/private/codex-art/bloomfall/
+apps/web/scripts/build-bloomfall-visual-package.mjs
+apps/web/scripts/build-bloomfall-visual-v2-evidence.mjs
+apps/web/scripts/build-bloomfall-visual-v3-reset-evidence.mjs
+apps/web/scripts/serve-bloomfall-visual-gallery.mjs
+
+# Superseded visual-direction records remain local history; the V3 release
+# contract and final owner report are tracked separately.
+Docs/BLOOMFALL_REACH_VISUAL_BIBLE.md
+Docs/BLOOMFALL_REACH_VISUAL_BIBLE_V2.md
+Docs/BLOOMFALL_REACH_VISUAL_PROMPTS.md
+Docs/BLOOMFALL_REACH_VISUAL_REPORT.md
+Docs/BLOOMFALL_REACH_VISUAL_V2_PROMPTS.md
+Docs/BLOOMFALL_REACH_VISUAL_V2_REPORT.md

@@ -17,11 +17,12 @@ const db = createPrismaClient(developmentUrl);
 const atlas = createAtlasPersistenceService(db);
 
 async function main() {
-  const [map, actor, connection, pathCountBefore, revisionCountBefore] = await Promise.all([
+  const [map, actor, connection, pathCountBefore, connectionCountBefore, revisionCountBefore] = await Promise.all([
     db.storyMap.findUniqueOrThrow({ where: { slug: "martino-world" }, include: { topologyNodes: { orderBy: { id: "asc" } }, placements: { where: { geometryKind: "POINT" }, orderBy: { id: "asc" } } } }),
     db.user.findFirstOrThrow({ where: { role: "ADMIN", isActive: true }, select: { id: true } }),
     db.storyWorldConnection.findFirstOrThrow({ where: { paths: { none: { map: { slug: "martino-world" } } } }, orderBy: { id: "asc" } }),
     db.storyMapConnectionPath.count(),
+    db.storyWorldConnection.count(),
     db.storyRevision.count(),
   ]);
   const node = map.topologyNodes.find((candidate, index, rows) => !rows.some((other) => other.id !== candidate.id && other.x === candidate.x + 1 && other.y === candidate.y));
@@ -58,7 +59,7 @@ async function main() {
   const connectionCount = connectionInventory.length;
   const byType = Object.fromEntries([...new Set(connectionInventory.map((item) => item.type))].sort().map((type) => { const rows = connectionInventory.filter((item) => item.type === type); return [type, { connections: rows.length, pathsAuthored: rows.filter((item) => item.paths.length > 0).length, missingPaths: rows.filter((item) => item.paths.length === 0).length }]; }));
   const restoredPoint = restoredPlacement.geometry as { coordinates: [number, number] };
-  if (restoredNode.x !== node.x || restoredNode.y !== node.y || restoredPoint.coordinates[0] !== point.coordinates[0] || restoredPoint.coordinates[1] !== point.coordinates[1] || pathCount !== pathCountBefore || connectionCount !== 25 || !staleConnectionRefused || !boundarySplitVerified || revisionCountAfter - revisionCountBefore < 19) throw new Error("Atlas authoring verification did not restore its fixture cleanly.");
+  if (restoredNode.x !== node.x || restoredNode.y !== node.y || restoredPoint.coordinates[0] !== point.coordinates[0] || restoredPoint.coordinates[1] !== point.coordinates[1] || pathCount !== pathCountBefore || connectionCount !== connectionCountBefore || !staleConnectionRefused || !boundarySplitVerified || revisionCountAfter - revisionCountBefore < 19) throw new Error("Atlas authoring verification did not restore its fixture cleanly.");
   process.stdout.write(JSON.stringify({ status: "PASS", database: "habitat_atlas_dev", node: "moved-and-restored", boundarySplit: "fixture-created-split-and-removed", placement: "moved-label-tested-and-restored", connection: "created-updated-stale-refused-and-removed", connectionPath: "created-and-removed", revisionsAdded: revisionCountAfter - revisionCountBefore, remainingConnections: connectionCount, remainingPaths: pathCount, pathProgress: { approved: pathCount, missing: connectionCount - pathCount, byType } }, null, 2) + "\n");
 }
 

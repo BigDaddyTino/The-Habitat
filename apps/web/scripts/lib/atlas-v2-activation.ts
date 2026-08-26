@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { createPrismaClient, type Prisma } from "@habitat/db/client";
-import { validateAtlasMapConnectionPath, validateAtlasTopology, type AtlasTopologyDataset } from "@habitat/shared";
+import { bloomfallReachCanon, canonicalBloomfallReachSlug, validateAtlasMapConnectionPath, validateAtlasTopology, type AtlasTopologyDataset } from "@habitat/shared";
 import { analyzeAtlasCanonicalTopology, buildAtlasCanonicalDerivedGeometry, type AtlasCanonicalTopologyTrace } from "./atlas-canonical-topology";
 import { atlasSha256, stableAtlasJson } from "./atlas-integrity";
 import { verifyAtlasConnectionParity, type AtlasConnectionCandidate, type AtlasV1ConnectionManifest } from "./atlas-migration-rehearsal";
@@ -109,12 +109,23 @@ async function verifyConnectionSource(client: Transaction | Database, manifest: 
 }
 
 async function verifyPersistedState(client: Transaction | Database, manifest: AtlasV1ConnectionManifest, candidates: readonly AtlasConnectionCandidate[], trace: AtlasCanonicalTopologyTrace, routes: readonly AtlasCanonicalRouteBacklogItem[] = []) {
-  const expectedCounts = { topologyNodes: 19, boundaries: 26, areaRings: 11, ringBoundaryReferences: 43, worldConnections: candidates.length };
+  const traceMap = trace.maps[0];
+  const map = await client.storyMap.findUnique({ where: { slug: traceMap.mapSlug }, select: { id: true, coordinateWidth: true, coordinateHeight: true } });
+  if (!map) throw new Error(`Missing Atlas map ${traceMap.mapSlug}.`);
+  const expectedCounts = { topologyNodes: 19, boundaries: 26, areaRings: 11, ringBoundaryReferences: 43 };
   const counts = await atlasCounts(client);
-  const coreCounts = { topologyNodes: counts.topologyNodes, boundaries: counts.boundaries, areaRings: counts.areaRings, ringBoundaryReferences: counts.ringBoundaryReferences, worldConnections: counts.worldConnections };
+  const [topologyNodes, boundariesCount, areaRings, ringBoundaryReferences] = await Promise.all([
+    client.storyMapTopologyNode.count({ where: { mapId: map.id } }),
+    client.storyMapBoundary.count({ where: { mapId: map.id } }),
+    client.storyMapAreaRing.count({ where: { placement: { mapId: map.id } } }),
+    client.storyMapAreaRingBoundary.count({ where: { ring: { placement: { mapId: map.id } } } }),
+  ]);
+  const coreCounts = { topologyNodes, boundaries: boundariesCount, areaRings, ringBoundaryReferences };
   if (stableAtlasJson(coreCounts, false) !== stableAtlasJson(expectedCounts, false)) throw new Error(`Atlas V2 counts conflict: ${stableAtlasJson({ counts: coreCounts, expectedCounts }, false)}`);
+  if (counts.worldConnections < candidates.length) throw new Error(`Atlas V2 is missing activated source connections: expected at least ${candidates.length}, received ${counts.worldConnections}.`);
   await verifyConnectionSource(client, manifest);
-  const connections = await client.storyWorldConnection.findMany({ orderBy: { id: "asc" }, include: { fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } });
+  const connections = await client.storyWorldConnection.findMany({ where: { id: { in: candidates.map((candidate) => candidate.id) } }, orderBy: { id: "asc" }, include: { fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } });
+  if (connections.length !== candidates.length) throw new Error(`Atlas V2 activated connection subset is incomplete: expected ${candidates.length}, received ${connections.length}.`);
   const reconstructed = connections.map((row) => {
     const planned = candidates.find((candidate) => candidate.id === row.id);
     if (!planned) throw new Error(`Unexpected V2 connection ${row.id}.`);
@@ -122,7 +133,7 @@ async function verifyPersistedState(client: Transaction | Database, manifest: At
   });
   const parity = verifyAtlasConnectionParity(manifest, reconstructed);
   if (!parity.valid) throw new Error(`Activated connection provenance failed: ${stableAtlasJson(parity, false)}`);
-  const persistedPaths = await client.storyMapConnectionPath.findMany({ include: { map: { select: { slug: true, coordinateWidth: true, coordinateHeight: true } } } });
+  const persistedPaths = await client.storyMapConnectionPath.findMany({ where: { OR: routes.map((route) => ({ connectionId: route.connectionId, map: { slug: route.recommendedScene } })) }, include: { map: { select: { slug: true, coordinateWidth: true, coordinateHeight: true } } } });
   if (persistedPaths.length !== routes.length) throw new Error(`Atlas V2 connection-path count conflict: expected ${routes.length}, received ${persistedPaths.length}.`);
   for (const path of persistedPaths) {
     const validation = validateAtlasMapConnectionPath({ id: path.id, connectionId: path.connectionId, mapSlug: path.map.slug, geometry: path.geometry as never, minZoom: path.minZoom, maxZoom: path.maxZoom, priority: path.priority, version: path.version }, { width: path.map.coordinateWidth as 100_000, height: path.map.coordinateHeight });
@@ -132,9 +143,6 @@ async function verifyPersistedState(client: Transaction | Database, manifest: At
     if (stableAtlasJson(path.geometry, false) !== stableAtlasJson(route.geometry, false)) throw new Error(`Activated connection path ${path.id} differs from approved route geometry.`);
   }
   for (const route of routes) if (!persistedPaths.some((path) => path.connectionId === route.connectionId && path.map.slug === route.recommendedScene)) throw new Error(`Approved Atlas route ${route.connectionId} is missing from ${route.recommendedScene}.`);
-  const traceMap = trace.maps[0];
-  const map = await client.storyMap.findUnique({ where: { slug: traceMap.mapSlug }, select: { id: true, coordinateWidth: true, coordinateHeight: true } });
-  if (!map) throw new Error(`Missing Atlas map ${traceMap.mapSlug}.`);
   const [nodes, boundaries, placements] = await Promise.all([
     client.storyMapTopologyNode.findMany({ where: { mapId: map.id }, orderBy: { id: "asc" } }),
     client.storyMapBoundary.findMany({ where: { mapId: map.id }, orderBy: { id: "asc" } }),
@@ -147,12 +155,12 @@ async function verifyPersistedState(client: Transaction | Database, manifest: At
   } as unknown as AtlasTopologyDataset;
   const topology = validateAtlasTopology(dataset, { width: map.coordinateWidth as 100_000, height: map.coordinateHeight });
   if (!topology.valid || !topology.value) throw new Error(`Activated topology reconstruction failed: ${stableAtlasJson(topology.findings, false)}`);
-  const actualGeometry = new Map(topology.value.map((area) => [placements.find((placement) => placement.id === area.areaId)!.entry.slug, area.geometry]));
+  const actualGeometry = new Map(topology.value.map((area) => [canonicalBloomfallReachSlug(placements.find((placement) => placement.id === area.areaId)!.entry.slug), area.geometry]));
   const expectedGeometry = buildAtlasCanonicalDerivedGeometry(trace).features;
-  for (const feature of expectedGeometry) if (stableAtlasJson(actualGeometry.get(feature.properties.entrySlug), false) !== stableAtlasJson(feature.geometry, false)) throw new Error(`Activated geometry differs for ${feature.properties.entrySlug}.`);
+  for (const feature of expectedGeometry) if (stableAtlasJson(actualGeometry.get(canonicalBloomfallReachSlug(feature.properties.entrySlug)), false) !== stableAtlasJson(feature.geometry, false)) throw new Error(`Activated geometry differs for ${feature.properties.entrySlug}.`);
   const analysis = analyzeAtlasCanonicalTopology(trace);
   if (!analysis.topologyLocked) throw new Error("Locked topology analysis no longer passes.");
-  return { counts, parity, topology: { topologyLocked: true, partition: analysis.partition, deathCanyon: analysis.deathCanyon, orphanNodes: analysis.orphanNodes, unusedBoundaries: analysis.unusedBoundaries, crossings: analysis.unintendedCrossings, duplicateBorders: analysis.duplicateEditableBorders, sharedDirectionFailures: analysis.sharedDirectionFailures } };
+  return { counts, worldTopologyCounts: coreCounts, additiveWorldConnections: counts.worldConnections - candidates.length, additiveConnectionPaths: counts.connectionPaths - persistedPaths.length, parity, topology: { topologyLocked: true, partition: analysis.partition, deathCanyon: analysis.deathCanyon, orphanNodes: analysis.orphanNodes, unusedBoundaries: analysis.unusedBoundaries, crossings: analysis.unintendedCrossings, duplicateBorders: analysis.duplicateEditableBorders, sharedDirectionFailures: analysis.sharedDirectionFailures } };
 }
 
 function routeRevisionLabel(type: string) {
@@ -176,8 +184,10 @@ async function writeActivation(tx: Transaction, candidates: readonly AtlasConnec
   if (injectFailure) throw new Error("INTENTIONAL_ATLAS_V2_ACTIVATION_ROLLBACK");
   const traceMap = trace.maps[0];
   const map = await tx.storyMap.findUniqueOrThrow({ where: { slug: traceMap.mapSlug }, select: { id: true } });
-  const placements = await tx.storyMapPlacement.findMany({ where: { mapId: map.id, entry: { slug: { in: Object.values(traceMap.areaEntrySlugs) } } }, select: { id: true, entry: { select: { slug: true } } } });
-  const placementId = new Map(placements.map((placement) => [placement.entry.slug, placement.id]));
+  const traceSlugs = Object.values(traceMap.areaEntrySlugs);
+  const placementSlugs = [...new Set(traceSlugs.flatMap((slug) => slug === bloomfallReachCanon.formerDevelopmentPlaceholder.slug ? [slug, bloomfallReachCanon.slug] : [slug]))];
+  const placements = await tx.storyMapPlacement.findMany({ where: { mapId: map.id, entry: { slug: { in: placementSlugs } } }, select: { id: true, entry: { select: { slug: true } } } });
+  const placementId = new Map(placements.map((placement) => [canonicalBloomfallReachSlug(placement.entry.slug), placement.id]));
   for (const node of traceMap.dataset.nodes) {
     await tx.storyMapTopologyNode.create({ data: { id: node.id, mapId: map.id, x: node.position[0], y: node.position[1], version: node.version, createdByUserId: actorUserId } });
     await tx.storyRevision.create({ data: { id: stableRevisionId("TOPO_NODE", node.id), entityType: "TOPO_NODE", entityId: node.id, action: "CREATED", actorUserId, summary: `Activated Atlas V2 node ${traceMap.nodeLocators[node.id]}`, after: { activation: "ATLAS_V2", locator: traceMap.nodeLocators[node.id] } } });
@@ -187,7 +197,7 @@ async function writeActivation(tx: Transaction, candidates: readonly AtlasConnec
     await tx.storyRevision.create({ data: { id: stableRevisionId("BOUNDARY", boundary.id), entityType: "BOUNDARY", entityId: boundary.id, action: "CREATED", actorUserId, summary: `Activated Atlas V2 boundary ${traceMap.boundaryLocators[boundary.id]}`, after: { activation: "ATLAS_V2", locator: traceMap.boundaryLocators[boundary.id], metadata: traceMap.boundaryMetadata[boundary.id] } as Prisma.InputJsonValue } });
   }
   for (const area of traceMap.dataset.areas) {
-    const slug = traceMap.areaEntrySlugs[area.id]; const targetPlacementId = placementId.get(slug);
+    const slug = traceMap.areaEntrySlugs[area.id]; const targetPlacementId = placementId.get(canonicalBloomfallReachSlug(slug));
     if (!targetPlacementId) throw new Error(`Missing canonical placement for ${slug}.`);
     for (const [ringIndex, ring] of area.rings.entries()) {
       await tx.storyMapAreaRing.create({ data: { id: ring.id, placementId: targetPlacementId, componentIndex: ring.componentIndex, ringIndex, role: ring.role, version: 1, createdByUserId: actorUserId } });

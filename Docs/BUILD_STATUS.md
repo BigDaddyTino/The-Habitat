@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-24
+Last updated: 2026-08-25
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -639,3 +639,79 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Passed staged authenticated desktop and 390 x 844 mobile QA with V1 kept default first, then enabled V2 as the production default; search, hierarchy, child scenes, routes, browser history, breadcrumbs, and responsive layout all passed
 - [x] Kept explicit `?atlas=v1` rollback working, kept production Atlas authoring disabled, confirmed both Habitat services healthy, and observed no introduced client, HTTP 5xx, or database errors
 - [x] Recorded the non-secret cutover evidence in `Docs/atlas-v2-production-cutover-2026-08-25.json`; disposable acceptance screenshots remain preserved as untracked local evidence
+
+## 2026-08-25 - Bloomfall Reach canonical rename foundation
+
+- [x] Audited and renamed the retained development StoryEntry from the out-of-world `Unknown Southeast` placeholder to `Bloomfall Reach` / `bloomfall-reach` in place, preserving its record ID, placement, revision lineage, locked ring and boundary ownership, polygon hash, area, bounds, label anchor, and Riverlands/Magic-Torn Wasteland neighbors
+- [x] Migrated current seed, projection, parity, audit, authoring, search, label, Codex, and contract references; added a narrow legacy Codex redirect while preserving immutable evidence and stable topology locators as provenance rather than in-world canon
+- [x] Added one authoritative naming manifest and a repository-specific continuity/content/art foundation for the next phase, explicitly reserving all main-campaign integration decisions
+- [x] Verified V1 compatibility, Atlas V2 label/search/dossier behavior, authoring selectors, topology integrity, route endpoint integrity, Bundle V4 serialization, and zero player-facing former-title results in development
+- [x] Kept production data, migrations, configuration, artwork, and Atlas content unchanged; no new world connections, route geometry, mass lore, POIs, creatures, quests, local scene, or art were authored
+
+## 2026-08-25 - Bloomfall Reach canon-lock architecture proposal
+
+- [x] Added one explicitly non-canonical owner-review package covering the pre-disaster identity, multi-agency Essence complex, layered disaster chronology, three-subregion logic, buildable regional systems, taxonomy boundaries, 15 interconnected POIs, seven regional-only characters/entities, ecology, resources, ten local quest/event structures, connection review, local Atlas architecture, deterministic world-patch specification, and 15-shot AAA art brief
+- [x] Grounded faction roles in current Codex dossiers: Aegis industrial operation, NDD strategic security, Meridian certification/research, Wardens current hunts, constrained ACA/Army/Stormglass/Verdant interests, and no confirmed Helix culpability
+- [x] Kept Blackbloom Exposure separate from Infusion Corruption, kept Aberrant as an orthogonal regional designation rather than a race/synonym, and preserved Abomination/Monstrosity provenance
+- [x] Authored no canonical database records, mainline arcs, world connections, paths, local Atlas geometry, art, production data, migrations, or configuration
+- [x] Owner approved the complete regional architecture for Prompt 3
+
+## 2026-08-25 - Bloomfall Reach canonical development content
+
+- [x] Expanded the retained `Bloomfall Reach` record in place with Southreach history, the multi-agency Southreach Complex, exact public cause, two-decade chronology, north-to-south regional logic, modern value/danger, and explicitly deferred deeper cause and campaign integration
+- [x] Added 3 subregions, all 15 approved POIs, 9 linked concept-status regional systems, 7 regional characters/entities, 8 base creature concepts, 4 taxonomy-preserving Aberrants, 6 new resources plus Essence/Stormglass links, and 11 event dossiers covering the Bloomfall and all 10 regional story concepts
+- [x] Added 6 canonical non-mainline regional arcs with complete graphs and a `Nobody Came` ending in every arc; no mainline arc or mainline node link was modified or created
+- [x] Added the approved bidirectional Riverlands ROAD and Ocean SEA_ROUTE semantic connections with zero route paths, retained Magic-Torn as adjacency only, and created an owned 3:2 local Atlas foundation with zero art, placements, topology, geometry, or player-facing activation
+- [x] Added an idempotent guarded development implementation command and repeatable Bloomfall-specific audit; exact counts, typed metadata, cross-links, taxonomy, story graphs, connections, scene inactivity, zero broken references, and zero orphan major entries pass
+- [x] Finalized the 15-shot AAA visual-production brief without generating or activating imagery; production data, migrations, configuration, artwork, and Atlas state remain unchanged
+
+## 2026-08-25 - Bloomfall Reach AAA visual candidate package
+
+- [x] Established one deterministic visual bible from current Martino key art, preserving grounded cyan/storm-blue Essence, rugged near-future industrial materials, Blackbloom's ecological-adaptation identity, and clear separation from Seven-Phase Corruption and Magic-Torn reality distortion
+- [x] Generated, reviewed, and normalized all 15 Prompt 4 visual assets: the topology-masked world candidate; regional hero; Shattercore, Southreach exterior/interior, Mutation Belt, and Living Marsh day/night environments; Bellwether, Switchmother, marsh-coordination, resource, Bloomstorm, and expedition studies; plus one local Atlas asset with 3072 x 2048 master and 1536 x 1024 runtime representations
+- [x] Revised an ornamental first-pass marsh and an overly oblique first-pass local Atlas, and rejected a Bloomstorm candidate that accidentally implied a Bellwether event connection; retained all three iterations as explicit review evidence
+- [x] Built the world candidate from the frozen 1536 x 1024 raster and exact locked Bloomfall topology using raw deterministic compositing; verification records outside-mask changed pixels `0`, outside maximum channel delta `0`, and unchanged controlling SHA-256 `427bf4967afa8a96afa2175d5aed261225cf7fbeed17944be527f4616b5713b6`
+- [x] Added an authoritative hash/dimension/status manifest, machine-readable mask, aligned RGBA patch, deterministic composite, verification JSON, side-by-side evidence, private owner-review gallery, normalized prompt record, and qualitative 15-POI visual-placement concept with no coordinates
+- [x] Kept all art under the private candidate tree and inactive: no public image registration, database write, migration, production configuration change, Atlas topology change, route geometry, label anchor, Bundle V4 export, or player-visible activation occurred; Prompt 5 geometry and placement remain deferred
+
+## 2026-08-25 - Bloomfall Reach local Atlas development activation
+
+- [x] Registered the owner-approved 1536 x 1024 local Atlas runtime art through the authenticated private map route and activated only the guarded `habitat_atlas_dev` scene as `martino-bloomfall-reach:v1`; production remains unchanged
+- [x] Persisted one deterministic fixed-point partition with 3 subregions, 8 topology nodes, 10 boundaries, 3 rings, 12 ordered boundary references, zero gaps/overlaps/holes, 15 canonical POIs, authored label/zoom priorities, and no fabricated spawn points
+- [x] Added exactly two high-confidence paths for the existing Riverlands ROAD and Ocean SEA_ROUTE connections; retained the Cairnwood–Glassroot trail and Complex service alignment for review and deferred moving/ecological corridors and Magic-Torn routing
+- [x] Connected world drill-down, child-scene breadcrumbs/history, all-scene Atlas search, Codex-to-Atlas links, local V2 projection metadata, and numbered-map Bundle V4 inclusion while retaining explicit V1 rollback and private artwork delivery
+- [x] Added a deterministic manifest, development guard, serializable audited activation, exact verification, and disposable-database rehearsal proving first-run apply and second-run no-op idempotence; no production write or commit was made
+
+## 2026-08-25 - Global geographic hierarchy and Peninsula dossier repair
+
+- [x] Paused Bloomfall production release, traced `Inside the Peninsula` from `StoryEntry.meta.parent` through the shared recursive place graph into the dossier, and identified bad canonical containment rather than a query exclusion/rendering defect
+- [x] Audited all 55 development geographic/place entries and all 37 production comparison entries; captured immutable before/after matrices under `Docs/geographic-hierarchy`, including the complete 41-entry bad development Peninsula projection and the 23-entry production projection
+- [x] Repaired seven existing development records in place: Bloomfall Reach, Desert, Grand Rift, High Cliffs, Magic-Torn Wasteland, Red Forest, and Riverlands are now top-level; Red Forest is normalized from `zone` to `region`; IDs and unrelated metadata remain intact
+- [x] Preserved legitimate hierarchy: Port Arcadia remains inside Peninsula with seven districts and five destinations, Death Canyon remains inside Grand Rift, Grand Lake and Floating City remain inside High Cliffs, all Bloomfall subregions/POIs remain attached, and Igit Island/child-scene/progression structure remains unchanged
+- [x] Added repeatable global hierarchy, live dossier-projection, strict all-or-none repair, parent-integrity, cycle, regression, and idempotency checks; the second repair run returned `ALREADY_APPLIED` with zero mutations
+- [x] Proved all Atlas maps, placements, topology, connections, paths, and geometry byte-logically unchanged inside the repair transaction; world topology remains 19/26/11/43 and Bloomfall remains 8/10/3/12 with 15 POIs and two paths
+- [x] Passed 403 web tests, strict web/shared/database/Codex Sync typechecks, Prisma validation, web lint, production build, Atlas development/authoring/routes/V2/parity checks, Bloomfall audits, dossier audit, 3 Codex Sync tests, and isolated Bundle V4 publish/verification with 218 hashed assets
+- [x] Production was queried read-only and remains affected by the six pre-Bloomfall hierarchy defects; production writes, migrations, configuration changes, Atlas changes, Codex changes, and commits for this repair remain zero pending a revised controlled release prompt
+
+## 2026-08-25 - Bloomfall visual V2 owner-review package
+
+- [x] Completed a native-pixel forensic audit of the V1 world raster, Bloomfall patch, local Atlas master/runtime, and all 13 cinematic/concept assets; retained all V1 files separately as 15 `V1_SUPERSEDED_CANDIDATE` records
+- [x] Locked `WORLD_ATLAS_FULL_VISUAL_REMASTER_REQUIRED` because the repeated boundary/filament/fake-microdetail defect affected the full world raster rather than Bloomfall's 9.79% mask alone
+- [x] Generated 15 clean V2 candidates at true native output resolution: 1536 x 1024 world/local Atlas rasters and 1672 x 941 scene/concept rasters; no simple upscales or fake 8K claims
+- [x] Replaced two native-pixel blockers before selection: the world Atlas advanced to iteration 3 to remove reticulated microdetail and restore topology/anchor alignment, and Bellwether advanced to iteration 3 to pass limb, joint, hoof, and antler anatomy QA
+- [x] Verified all selected assets at or above 8/10 in all ten visual categories; preserved four `V2_REVISE` and two `V2_REJECTED` iterations with explicit reasons
+- [x] Added 15 OLD/NEW comparisons, 20 lossless 100%-pixel crops, world topology overlay, local three-polygon/15-POI/two-route overlay, contact sheet, manifest, normalized prompt record, V2 Visual Bible with prohibited-drift rules, and private owner-review gallery
+- [x] Kept V2 wholly inactive and private: production writes, migrations, configuration changes, art activation, Atlas changes, Codex changes, StoryEntry changes, topology changes, POI/route changes, campaign changes, and Prompt 6 execution remain zero
+- [ ] Owner visual review remains pending; production release remains paused and no release prompt may be regenerated until owner approval identifies the final V2 hashes
+
+## 2026-08-25 - Bloomfall V3 hard visual reset owner-review package
+
+- [x] Re-read the canonical Bloomfall naming authority, regional architecture, implemented development Codex entries, local placement manifest, world topology, and world-anchor support record; previous Bloomfall visual prompts and candidates were excluded as style/content references
+- [x] Applied only the eight authorized world-map anchor and island-identity corrections against the V2 geography anchor: restored the Floating City, offshore island groups, major desert city, and shielded Magic-Torn city; filled Death Canyon with confined purple/green death gas; enlarged Port Arcadia into a crescent major harbor; and reinforced volcanic and tropical island identity
+- [x] Rebuilt the other 14 visual subjects from canon: 13 fresh text-only cinematic/concept generations and one fresh local Atlas generated from the clean canonical placement guide
+- [x] Increased the story weight through state-scale industrial failure, contaminated air/water/soil/materials, severe host-specific mutation, mature environmental consequence, meaningful body horror, human cost, and visibly functional marsh absorption
+- [x] Revised the world once for excessive island density, superseded the original four-correction selection when the Ultra brief added four anchors, and revised the local Atlas twice for missing ocean and then misaligned Drowned Intake support; the selected maps pass locked world topology/anchors and all three local polygons, 15 POIs, and two routes without moving canonical geometry
+- [x] Built 15 V2-versus-V3/reset comparisons, 37 native-pixel crops, world/local alignment overlays, contact sheet, manifest, canon-direction document, final prompt record, owner report, and responsive private review gallery
+- [x] Verified 15 approved V3/reset candidates, four retained revise iterations, 55 evidence files, honest native resolutions, recorded SHA-256 values, inactive runtime copies, and a minimum internal QA score of 8.8
+- [x] Preserved zero StoryEntry, database, topology, POI-coordinate, route, campaign, application-logic, production-write, migration, configuration, Atlas, Codex, and production-art-activation changes; Prompt 6 remains unrun
+- [ ] Owner review of the V3 hard reset remains pending; V1/V2/V3 candidates remain preserved and inactive, and production release stays paused

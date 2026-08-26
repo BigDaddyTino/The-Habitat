@@ -1,18 +1,22 @@
 import "../lib/environment";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import dotenv from "dotenv";
 import { createPrismaClient } from "@habitat/db/client";
+import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
 import { stableAtlasJson } from "./lib/atlas-integrity";
 import type { AtlasCanonicalTopologyTrace } from "./lib/atlas-canonical-topology";
 import type { AtlasConnectionCandidate, AtlasV1ConnectionManifest } from "./lib/atlas-migration-rehearsal";
 import { loadAtlasCanonicalRouteBacklog } from "./lib/atlas-canonical-routes";
-import { assertAtlasV2ActivationTarget, verifyAtlasV2Activation, verifyAtlasV2ArtifactHash } from "./lib/atlas-v2-activation";
+import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2ActivationTarget, verifyAtlasV2Activation, verifyAtlasV2ArtifactHash } from "./lib/atlas-v2-activation";
 
 const root = path.resolve(process.cwd(), "..", "..");
 const sourceUrl = process.env.DATABASE_URL;
-const targetUrl = process.env.ATLAS_V2_ACTIVATION_DATABASE_URL;
-if (!sourceUrl || !targetUrl) throw new Error("DATABASE_URL and explicit ATLAS_V2_ACTIVATION_DATABASE_URL are required.");
-const identity = assertAtlasV2ActivationTarget(sourceUrl, targetUrl);
+dotenv.config({ path: path.join(root, ".env.local"), override: true, quiet: true });
+const explicitTargetUrl = process.env.ATLAS_V2_ACTIVATION_DATABASE_URL;
+const targetUrl = explicitTargetUrl ?? resolveAtlasDevelopmentDatabaseUrl(process.env);
+if (!sourceUrl || !targetUrl) throw new Error("Atlas V2 verification requires the production source URL and a guarded development or explicit activation target.");
+const identity = explicitTargetUrl ? assertAtlasV2ActivationTarget(sourceUrl, targetUrl) : { mode: "PERSISTENT_DEVELOPMENT_VERIFICATION" as const, source: new URL(sourceUrl).pathname.slice(1), target: assertAtlasPersistentDevelopmentTarget(targetUrl) };
 
 async function main() {
   const rehearsal = path.join(root, "Docs", "atlas-migration-rehearsal");

@@ -1,0 +1,77 @@
+{
+  "contract": "martino-bloomfall-local-atlas-prompt-5-verification",
+  "contractVersion": 1,
+  "status": "PASS",
+  "head": "d292b9455106914f13c33b4f513f8ebbd57b458a",
+  "scene": {
+    "database": "habitat_atlas_dev",
+    "id": "1d8fe347-8ce8-5bc1-ae5c-6ee5dedab54f",
+    "slug": "martino-bloomfall-reach",
+    "artVersion": "v1",
+    "extent": [100000, 66667],
+    "image": [1536, 1024]
+  },
+  "art": {
+    "masterSha256": "508852179b0375c0c2fe8712b99fd77f6062f04ea7834a5d4a67eb4f4bcb9cfe",
+    "runtimeSha256": "af4be2ed7269260cdfffde582e9a2470944ca8dbedb9ac0e0908e430807ad046",
+    "developmentOnly": true,
+    "authenticatedPrivateRoute": true
+  },
+  "manifest": {
+    "path": "Docs/bloomfall-local-atlas/bloomfall-local-atlas-manifest.json",
+    "logicalSha256": "e24a964bc0f4d2368a145383d5f5a78c84fb8a9c5bd7fd61819747d5dd328c6b"
+  },
+  "topology": {
+    "subregions": 3,
+    "nodes": 8,
+    "boundaries": 10,
+    "rings": 3,
+    "boundaryReferences": 12,
+    "sharedInternalBoundaries": 2,
+    "holes": 0,
+    "gaps": 0,
+    "overlaps": 0,
+    "partitionArea": 6666700000
+  },
+  "placements": { "pois": 15, "total": 18 },
+  "routes": {
+    "persisted": 2,
+    "authorNow": ["riverlands-road", "ocean-sea-route"],
+    "reviewRequired": ["Cairnwood–Glassroot expedition trail", "Southreach Complex service/rail alignment"],
+    "magicTorn": "ADJACENCY_ONLY"
+  },
+  "idempotency": { "rehearsalFirstRun": "APPLIED", "rehearsalSecondRun": "ALREADY_APPLIED", "developmentSecondRun": "ALREADY_APPLIED" },
+  "bundleV4": { "maps": 4, "bloomfallPlacements": 18, "foundationExported": false },
+  "browserQa": {
+    "desktop": "PASS",
+    "mobile390x844": "PASS",
+    "mobileHorizontalOverflowPixels": 0,
+    "drilldown": "PASS",
+    "crossSceneSearch": "PASS",
+    "history": "PASS",
+    "codexNavigation": "PASS",
+    "routeToggle": "PASS"
+  },
+  "worldPatch": {
+    "developmentRegistered": false,
+    "candidateSha256": "23e271db896ebed25d83ebbf98a15507c11090c8966a358bec02d560020788ce",
+    "maskPixels": 154055,
+    "outsideChangedPixels": 0,
+    "outsideMaxChannelDelta": 0
+  },
+  "campaign": { "mainlineArcsLinked": 0, "mainlineNodeLinks": 0 },
+  "production": { "writes": 0, "migrations": 0, "configChanges": 0, "artChanges": 0, "atlasChanges": 0 },
+  "verification": {
+    "webTests": { "passed": 397, "failed": 0 },
+    "codexSyncTests": { "passed": 3, "failed": 0 },
+    "webTypecheck": "PASS",
+    "sharedTypecheck": "PASS",
+    "codexSyncTypecheck": "PASS",
+    "webLint": "PASS",
+    "productionBuild": "PASS",
+    "bloomfallAudit": "PASS",
+    "localAtlasVerification": "PASS",
+    "productionBaseline": "UNCHANGED"
+  },
+  "decision": "BLOOMFALL_LOCAL_ATLAS_READY_FOR_OWNER_ACCEPTANCE"
+}

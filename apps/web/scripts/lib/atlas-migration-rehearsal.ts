@@ -3,6 +3,8 @@ import {
   validateAtlasPoint,
   validateAtlasTopology,
   validateAtlasWorldConnection,
+  bloomfallReachCanon,
+  canonicalBloomfallReachSlug,
   type AtlasBoundary,
   type AtlasDerivedTopologyArea,
   type AtlasNumericPoint,
@@ -420,10 +422,10 @@ export function buildAtlasGeometryComparisons(manifest: AtlasV1GeometryManifest,
     "the-desert": { included: ["western arid landmass", "oasis corridor context"], excluded: ["river corridor as a hole"], reason: "V2 follows the coast, rift wall, forest transition, and shared Riverlands edge without duplicating neighboring borders." },
     "the-peninsula": { included: ["long south-central landform", "Port Arcadia world anchor"], excluded: ["child-scene district topology"], reason: "V2 preserves the coastline and closes the landform with one exact shared Riverlands neck boundary." },
     "the-red-forest": { included: ["one contiguous crimson selection footprint"], excluded: ["disconnected visual feathering", "Grand Rift and Death Canyon overlap"], reason: "V2 implements the owner decision that Red Forest is one top-level neighbor of Grand Rift, Riverlands, and Desert." },
-    "unknown-southeast": { included: ["current cloud-veiled geographic footprint"], excluded: ["new biome, faction, city, or narrative lore"], reason: "V2 defines selection geometry only and shares exact borders with Magic-Torn Wasteland and Riverlands." },
+    [bloomfallReachCanon.slug]: { included: ["the locked southeastern geographic footprint"], excluded: ["new facility, faction, city, or detailed regional lore"], reason: "The canonical rename preserves the V2 selection geometry and exact borders with Magic-Torn Wasteland and Riverlands." },
   };
   return Object.entries(map.areaEntrySlugs).sort(([, left], [, right]) => left.localeCompare(right)).map(([areaId, entrySlug]) => {
-    const v1 = manifest.records.find((record) => record.mapSlug === map.mapSlug && record.entrySlug === entrySlug);
+    const v1 = manifest.records.find((record) => record.mapSlug === map.mapSlug && canonicalBloomfallReachSlug(record.entrySlug) === entrySlug);
     const v2 = topology.derivedAreas.find((area) => area.areaId === areaId);
     if (!v1 || !v2) throw new Error(`Missing V1/V2 geometry comparison input for ${entrySlug}.`);
     const before = geometryDiagnostic(v1.geometry);

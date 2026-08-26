@@ -6,6 +6,7 @@ import { assertAtlasAuthoringEnvironment } from "../lib/atlas-authoring-environm
 import { resolveAtlasDevelopmentDatabaseUrl } from "../lib/atlas-development-database";
 import { stableAtlasJson } from "./lib/atlas-integrity";
 import { loadAtlasCanonicalRouteBacklog } from "./lib/atlas-canonical-routes";
+import { bloomfallLocalRouteBacklog, bloomfallLocalRoutes } from "./lib/bloomfall-local-atlas";
 
 const root = path.resolve(process.cwd(), "..", "..");
 dotenv.config({ path: path.join(root, ".env"), quiet: true });
@@ -33,7 +34,7 @@ async function main() {
   const backlog = await loadAtlasCanonicalRouteBacklog(root);
   const approved = backlog.routes.filter((route) => route.status === "AUTHOR_NOW");
   const paths = await db.storyMapConnectionPath.findMany({ include: { map: true, connection: { include: { fromEntry: { select: { slug: true } }, toEntry: { select: { slug: true } } } } }, orderBy: { connectionId: "asc" } });
-  if (paths.length !== approved.length) throw new Error(`Expected ${approved.length} approved paths, received ${paths.length}.`);
+  if (paths.length !== approved.length + bloomfallLocalRoutes.length) throw new Error(`Expected ${approved.length} world paths and ${bloomfallLocalRoutes.length} Bloomfall paths, received ${paths.length}.`);
   for (const route of approved) {
     const persisted = paths.find((candidate) => candidate.connectionId === route.connectionId && candidate.map.slug === route.recommendedScene);
     if (!persisted) throw new Error(`Missing approved path ${route.connectionId}.`);
@@ -44,15 +45,22 @@ async function main() {
     const revision = await db.storyRevision.findFirst({ where: { entityType: "CONN_PATH", entityId: persisted.id, action: "CREATED" }, select: { summary: true } });
     if (!revision || !revision.summary.includes(route.source) || !revision.summary.includes(route.destination)) throw new Error(`Approved path ${route.connectionId} lacks an understandable creation revision.`);
   }
-  const scenes = [...new Set(approved.map((route) => route.recommendedScene))];
+  for (const route of bloomfallLocalRoutes) {
+    const persisted = paths.find((candidate) => candidate.map.slug === "martino-bloomfall-reach" && candidate.connection.type === route.type && [candidate.connection.fromEntry.slug, candidate.connection.toEntry.slug].includes("bloomfall-reach") && [candidate.connection.fromEntry.slug, candidate.connection.toEntry.slug].includes(route.endpointSlug));
+    if (!persisted) throw new Error(`Missing approved Bloomfall path ${route.key}.`);
+    if (stableAtlasJson(persisted.geometry, false) !== stableAtlasJson(route.geometry, false) || persisted.minZoom !== route.minZoom || persisted.priority !== route.priority) throw new Error(`Approved Bloomfall path ${route.key} geometry or presentation drifted.`);
+    const validation = validateAtlasMapConnectionPath({ id: persisted.id, connectionId: persisted.connectionId, mapSlug: persisted.map.slug, geometry: persisted.geometry as never, minZoom: persisted.minZoom, maxZoom: persisted.maxZoom, priority: persisted.priority, version: persisted.version }, { width: persisted.map.coordinateWidth as 100_000, height: persisted.map.coordinateHeight });
+    if (!validation.valid) throw new Error(`Approved Bloomfall path ${route.key} failed geometry validation.`);
+  }
+  const scenes = [...new Set([...approved.map((route) => route.recommendedScene), "martino-bloomfall-reach"] )];
   const scenePaths = await Promise.all(scenes.map(async (slug) => ({ slug, paths: await db.storyMapConnectionPath.count({ where: { map: { slug } } }) })));
   for (const scene of scenePaths) {
-    const expected = approved.filter((route) => route.recommendedScene === scene.slug).length;
+    const expected = approved.filter((route) => route.recommendedScene === scene.slug).length + (scene.slug === "martino-bloomfall-reach" ? bloomfallLocalRoutes.length : 0);
     if (scene.paths !== expected) throw new Error(`V2 scene source ${scene.slug} does not contain its ${expected} approved paths.`);
   }
   const connections = await db.storyWorldConnection.findMany({ select: { type: true, paths: { select: { id: true } } } });
   const byType = Object.fromEntries([...new Set(connections.map((connection) => connection.type))].sort().map((type) => { const rows = connections.filter((connection) => connection.type === type); return [type, { connections: rows.length, pathsAuthored: rows.filter((connection) => connection.paths.length > 0).length, missingPaths: rows.filter((connection) => connection.paths.length === 0).length }]; }));
-  process.stdout.write(stableAtlasJson({ contract: "martino-atlas-canonical-route-verification", contractVersion: 1, database: target.database, mode: target.mode, status: "PASS", connections: connections.length, pathsAuthored: paths.length, pathsMissing: connections.length - paths.length, approved: paths.length, reviewRequired: backlog.counts.reviewRequired, deferred: backlog.counts.defer, byType, scenes: Object.fromEntries(scenePaths.map(({ slug, paths: count }) => [slug, count])) }));
+  process.stdout.write(stableAtlasJson({ contract: "martino-atlas-canonical-route-verification", contractVersion: 2, database: target.database, mode: target.mode, status: "PASS", connections: connections.length, pathsAuthored: paths.length, pathsMissing: connections.length - paths.length, approved: paths.length, reviewRequired: backlog.counts.reviewRequired + bloomfallLocalRouteBacklog.REVIEW_REQUIRED.length, deferred: backlog.counts.defer + bloomfallLocalRouteBacklog.DEFER.length, byType, scenes: Object.fromEntries(scenePaths.map(({ slug, paths: count }) => [slug, count])) }));
 }
 
 void main().finally(() => db.$disconnect());

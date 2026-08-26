@@ -1,6 +1,7 @@
 import { getPrismaClient } from "@habitat/db/client";
 import {
   codexBundleContractVersion,
+  isPublishedStoryMapArtVersion,
   type CodexJsonValue,
   type CodexWriterAttribution,
   type MartinoCodexSnapshot,
@@ -98,15 +99,19 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     include: { actor: { select: writerSelect } },
   });
-  const maps = await database.storyMap.findMany({
+  const authoredMaps = await database.storyMap.findMany({
     orderBy: [{ parentMapId: "asc" }, { slug: "asc" }],
     include: { parent: { select: { slug: true } }, owner: { select: { slug: true } } },
   });
+  const maps = authoredMaps.filter((map) => isPublishedStoryMapArtVersion(map.artVersion));
+  const publishedMapIds = maps.map((map) => map.id);
   const placements = await database.storyMapPlacement.findMany({
+    where: { mapId: { in: publishedMapIds } },
     orderBy: [{ mapId: "asc" }, { priority: "desc" }, { entryId: "asc" }],
     include: { map: { select: { slug: true } }, entry: { select: { slug: true } } },
   });
   const nodePlacements = await database.storyMapNodePlacement.findMany({
+    where: { mapId: { in: publishedMapIds } },
     orderBy: [{ mapId: "asc" }, { priority: "desc" }, { nodeId: "asc" }],
     include: { map: { select: { slug: true } }, node: { select: { key: true, arc: { select: { slug: true } } } } },
   });

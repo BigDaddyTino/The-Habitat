@@ -7,6 +7,15 @@
 export const storyMapGeometryKinds = ["POINT", "POLYGON", "MULTIPOLYGON"] as const;
 export type StoryMapGeometryKind = (typeof storyMapGeometryKinds)[number];
 
+/**
+ * Art versions activate a scene for trusted machine export only when they are
+ * explicit numbered releases. Values such as `foundation` remain available to
+ * internal authoring without becoming a broken game/player map.
+ */
+export function isPublishedStoryMapArtVersion(value: string) {
+  return /^v[1-9][0-9]*$/.test(value);
+}
+
 export type StoryMapPoint = readonly [x: number, y: number];
 export type StoryMapGeometry =
   | { type: "POINT"; coordinates: StoryMapPoint }

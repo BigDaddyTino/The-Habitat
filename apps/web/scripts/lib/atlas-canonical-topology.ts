@@ -12,6 +12,8 @@ import {
   type AtlasTopologyArea,
   type AtlasTopologyDataset,
   type AtlasTopologyNode,
+  bloomfallReachCanon,
+  canonicalBloomfallReachSlug,
 } from "@habitat/shared";
 
 export const atlasCanonicalTopologyContract = "martino-atlas-v2-canonical-world-topology" as const;
@@ -25,7 +27,7 @@ export const atlasTopLevelRegionSlugs = [
   "high-cliffs",
   "riverlands",
   "magic-torn-wasteland",
-  "unknown-southeast",
+  bloomfallReachCanon.slug,
   "the-peninsula",
 ] as const;
 
@@ -194,7 +196,7 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
   const definitions: readonly BoundaryDefinition[] = [
     { locator: "coast.high-cliffs", start: "junction.desert-high-cliffs-grand-rift", end: "coast.high-cliffs-magic-torn", kind: "COAST", interiorVertices: [[30_599, 1_628], [39_063, 1_302], [48_177, 1_302], [55_990, 1_628]], semantic: "COASTLINE", confidence: "HIGH", owners: ["high-cliffs"], evidence: "The northern alpine shoreline is a stable geographic feature on the frozen raster." },
     { locator: "coast.magic-torn", start: "coast.high-cliffs-magic-torn", end: "coast.magic-torn-unknown", kind: "COAST", interiorVertices: [[70_313, 1_302], [78_776, 1_953], [87_240, 4_232], [94_401, 7_487], [98_633, 11_068], [98_958, 14_323]], semantic: "COASTLINE", confidence: "HIGH", owners: ["magic-torn-wasteland"], evidence: "The northeastern coast is visually explicit and independent of the magical transition." },
-    { locator: "coast.unknown-southeast", start: "coast.magic-torn-unknown", end: "coast.unknown-peninsula-riverlands", kind: "COAST", interiorVertices: [[99_284, 20_833], [97_982, 26_693], [94_401, 32_552], [89_193, 36_133], [83_333, 41_016], [75_521, 45_573], [70_313, 43_294], [67_057, 41_016]], semantic: "COASTLINE", confidence: "HIGH", owners: ["unknown-southeast"], evidence: "The cloud-veiled southeastern landmass has an unambiguous coastline without requiring new lore." },
+    { locator: "coast.unknown-southeast", start: "coast.magic-torn-unknown", end: "coast.unknown-peninsula-riverlands", kind: "COAST", interiorVertices: [[99_284, 20_833], [97_982, 26_693], [94_401, 32_552], [89_193, 36_133], [83_333, 41_016], [75_521, 45_573], [70_313, 43_294], [67_057, 41_016]], semantic: "COASTLINE", confidence: "HIGH", owners: [bloomfallReachCanon.slug], evidence: "The southeastern coastline is visually explicit; the region's canonical identity is independent of its locked geometry." },
     { locator: "coast.peninsula", start: "coast.unknown-peninsula-riverlands", end: "coast.peninsula-desert-riverlands", kind: "COAST", interiorVertices: [[67_708, 42_318], [65_755, 46_875], [63_802, 52_084], [62_500, 57_292], [59_896, 61_198], [55_339, 63_802], [50_781, 63_151], [46_875, 60_547], [44_271, 56_641], [42_318, 51_433], [40_365, 45_573], [38_086, 42_318]], semantic: "COASTLINE", confidence: "HIGH", owners: ["the-peninsula"], evidence: "The long Peninsula and Port Arcadia tip are among the strongest frozen-raster anchors." },
     { locator: "coast.desert", start: "junction.desert-high-cliffs-grand-rift", end: "coast.peninsula-desert-riverlands", kind: "COAST", interiorVertices: [[19_531, 1_953], [14_323, 2_279], [9_766, 4_557], [6_510, 7_813], [3_906, 13_021], [2_279, 19_531], [2_930, 27_344], [5_859, 33_854], [11_068, 37_761], [16_927, 39_714], [22_786, 41_016], [29_297, 41_667], [33_854, 40_690]], semantic: "COASTLINE", confidence: "HIGH", owners: ["the-desert"], evidence: "The western and southwestern coastline is explicit around the arid landmass." },
 
@@ -207,8 +209,8 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
     { locator: "border.high-cliffs-riverlands", start: "junction.high-cliffs-grand-rift-riverlands", end: "junction.high-cliffs-riverlands-magic-torn", kind: "INTERNAL_BORDER", interiorVertices: [[39_063, 16_927], [44_922, 18_229], [50_781, 18_555], [55_339, 16_927]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["high-cliffs", "riverlands"], evidence: "The line follows the cliff lip and watershed while allowing visible river valleys to cross the ecological transition." },
     { locator: "border.high-cliffs-magic-torn", start: "coast.high-cliffs-magic-torn", end: "junction.high-cliffs-riverlands-magic-torn", kind: "INTERNAL_BORDER", interiorVertices: [[61_849, 5_208], [60_547, 8_464], [59_570, 11_719]], semantic: "CANONICAL_FEATURE", confidence: "HIGH", owners: ["high-cliffs", "magic-torn-wasteland"], evidence: "The alpine rock gives way to the first continuous reality fractures along a strong visible transition." },
     { locator: "border.magic-torn-riverlands", start: "junction.high-cliffs-riverlands-magic-torn", end: "junction.riverlands-magic-torn-unknown", kind: "INTERNAL_BORDER", interiorVertices: [[61_198, 16_927], [64_453, 19_531]], semantic: "CANONICAL_FEATURE", confidence: "HIGH", owners: ["magic-torn-wasteland", "riverlands"], evidence: "The anomaly front provides a clear western edge to the magical terrain." },
-    { locator: "border.magic-torn-unknown", start: "junction.riverlands-magic-torn-unknown", end: "coast.magic-torn-unknown", kind: "INTERNAL_BORDER", interiorVertices: [[74_870, 20_508], [80_078, 18_555], [85_938, 16_927], [91_146, 16_276]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["magic-torn-wasteland", "unknown-southeast"], evidence: "The vector follows the defensible midpoint between active purple fractures and the charcoal cloud-veiled territory." },
-    { locator: "border.riverlands-unknown", start: "junction.riverlands-magic-torn-unknown", end: "coast.unknown-peninsula-riverlands", kind: "INTERNAL_BORDER", interiorVertices: [[68_359, 24_740], [67_057, 27_995], [66_406, 32_552], [65_755, 36_459]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["riverlands", "unknown-southeast"], evidence: "The line follows the western edge of the clouded charcoal terrain without inventing its lore." },
+    { locator: "border.magic-torn-unknown", start: "junction.riverlands-magic-torn-unknown", end: "coast.magic-torn-unknown", kind: "INTERNAL_BORDER", interiorVertices: [[74_870, 20_508], [80_078, 18_555], [85_938, 16_927], [91_146, 16_276]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["magic-torn-wasteland", bloomfallReachCanon.slug], evidence: "The vector follows the defensible midpoint between active purple fractures and Bloomfall Reach." },
+    { locator: "border.riverlands-unknown", start: "junction.riverlands-magic-torn-unknown", end: "coast.unknown-peninsula-riverlands", kind: "INTERNAL_BORDER", interiorVertices: [[68_359, 24_740], [67_057, 27_995], [66_406, 32_552], [65_755, 36_459]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["riverlands", bloomfallReachCanon.slug], evidence: "The line follows the western edge of Bloomfall Reach without changing the locked regional partition." },
     { locator: "border.riverlands-peninsula", start: "coast.peninsula-desert-riverlands", end: "coast.unknown-peninsula-riverlands", kind: "INTERNAL_BORDER", interiorVertices: [[42_318, 37_110], [49_479, 37_761], [57_292, 37_110], [62_500, 38_412]], semantic: "CANONICAL_FEATURE", confidence: "HIGH", owners: ["riverlands", "the-peninsula"], evidence: "The established northern neck closure separates the Peninsula from the central lowlands at one exact edge." },
     { locator: "border.red-forest-riverlands", start: "junction.grand-rift-red-forest-riverlands", end: "junction.desert-red-forest-riverlands", kind: "INTERNAL_BORDER", interiorVertices: [[39_063, 19_531], [42_969, 21_484], [41_016, 25_391], [42_969, 27_995], [40_365, 31_901], [37_109, 35_156]], semantic: "CARTOGRAPHIC_TRANSITION", confidence: "MEDIUM", owners: ["the-red-forest", "riverlands"], evidence: "The exact selection edge follows the center of forest thinning while keeping the Red Forest one contiguous region." },
 
@@ -249,8 +251,8 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
     return { boundaryId: boundary.id, sequence, reversed };
   });
   const areaMetadata: Record<string, AtlasCanonicalAreaMetadata> = {};
-  const area = (entrySlug: string, title: string, role: AtlasCanonicalAreaRole, shell: readonly (string | readonly [string, boolean])[], holes: readonly (readonly (string | readonly [string, boolean])[])[] = [], parentEntrySlug: string | null = null): AtlasTopologyArea => {
-    const id = deterministicUuid(`area:martino-world:${entrySlug}`);
+  const area = (entrySlug: string, title: string, role: AtlasCanonicalAreaRole, shell: readonly (string | readonly [string, boolean])[], holes: readonly (readonly (string | readonly [string, boolean])[])[] = [], parentEntrySlug: string | null = null, stableIdentitySlug = entrySlug): AtlasTopologyArea => {
+    const id = deterministicUuid(`area:martino-world:${stableIdentitySlug}`);
     areaMetadata[id] = { entrySlug, title, role, approval: "APPROVED_FOR_MIGRATION", parentEntrySlug, hierarchyLevel: role === "NESTED_GEOGRAPHY" ? "REGION" : "WORLD" };
     return {
       id,
@@ -258,8 +260,8 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
       layerKind: "BASE_GEOGRAPHY",
       version: 1,
       rings: [
-        { id: deterministicUuid(`ring:martino-world:${entrySlug}:0:0`), componentIndex: 0, role: "SHELL", boundaries: refs(shell) },
-        ...holes.map((hole, index) => ({ id: deterministicUuid(`ring:martino-world:${entrySlug}:0:${index + 1}`), componentIndex: 0, role: "HOLE" as const, boundaries: refs(hole) })),
+        { id: deterministicUuid(`ring:martino-world:${stableIdentitySlug}:0:0`), componentIndex: 0, role: "SHELL", boundaries: refs(shell) },
+        ...holes.map((hole, index) => ({ id: deterministicUuid(`ring:martino-world:${stableIdentitySlug}:0:${index + 1}`), componentIndex: 0, role: "HOLE" as const, boundaries: refs(hole) })),
       ],
     };
   };
@@ -268,7 +270,7 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
     area("high-cliffs", "High Cliffs", "TOP_LEVEL_LAND", ["coast.high-cliffs", "border.high-cliffs-magic-torn", ["border.high-cliffs-riverlands", true], ["border.grand-rift-high-cliffs", true]], [[ ["grand-lake.shore.west", true], ["grand-lake.shore.south", true], ["grand-lake.shore.east", true], ["grand-lake.shore.north", true] ]]),
     area("grand-lake", "Grand Lake", "MAJOR_WATER", ["grand-lake.shore.north", "grand-lake.shore.east", "grand-lake.shore.south", "grand-lake.shore.west"]),
     area("magic-torn-wasteland", "Magic-Torn Wasteland", "TOP_LEVEL_LAND", ["coast.magic-torn", ["border.magic-torn-unknown", true], ["border.magic-torn-riverlands", true], ["border.high-cliffs-magic-torn", true]]),
-    area("unknown-southeast", "Unknown Southeast", "TOP_LEVEL_LAND", ["coast.unknown-southeast", ["border.riverlands-unknown", true], "border.magic-torn-unknown"]),
+    area(bloomfallReachCanon.slug, bloomfallReachCanon.title, "TOP_LEVEL_LAND", ["coast.unknown-southeast", ["border.riverlands-unknown", true], "border.magic-torn-unknown"], [], null, bloomfallReachCanon.formerDevelopmentPlaceholder.slug),
     area("the-peninsula", "The Peninsula", "TOP_LEVEL_LAND", ["coast.peninsula", "border.riverlands-peninsula"]),
     area("riverlands", "Riverlands", "TOP_LEVEL_LAND", ["border.high-cliffs-riverlands", "border.magic-torn-riverlands", "border.riverlands-unknown", ["border.riverlands-peninsula", true], ["border.desert-riverlands", true], ["border.red-forest-riverlands", true], ["border.grand-rift-riverlands", true]]),
     area("the-desert", "The Desert", "TOP_LEVEL_LAND", ["border.desert-grand-rift", "border.desert-red-forest", "border.desert-riverlands", ["coast.desert", true]]),
@@ -356,7 +358,7 @@ export function analyzeAtlasCanonicalTopology(trace: AtlasCanonicalTopologyTrace
   for (const area of validation.value ?? []) {
     const slug = map.areaEntrySlugs[area.areaId];
     if (!slug || area.geometry.type !== "POLYGON") throw new Error(`Canonical world topology requires one polygon component for ${slug ?? area.areaId}.`);
-    derivedBySlug.set(slug, area.geometry);
+    derivedBySlug.set(canonicalBloomfallReachSlug(slug), area.geometry);
   }
   const nodeUse = new Map(map.dataset.nodes.map((node) => [node.id, 0]));
   const boundaryUse = new Map<string, Array<{ areaId: string; slug: string; role: AtlasCanonicalAreaRole; reversed: boolean; ringRole: "SHELL" | "HOLE" }>>(map.dataset.boundaries.map((boundary) => [boundary.id, []]));
@@ -364,7 +366,7 @@ export function analyzeAtlasCanonicalTopology(trace: AtlasCanonicalTopologyTrace
     nodeUse.set(boundary.startNodeId, (nodeUse.get(boundary.startNodeId) ?? 0) + 1);
     nodeUse.set(boundary.endNodeId, (nodeUse.get(boundary.endNodeId) ?? 0) + 1);
   }
-  for (const area of map.dataset.areas) for (const ring of area.rings) for (const reference of ring.boundaries) boundaryUse.get(reference.boundaryId)?.push({ areaId: area.id, slug: map.areaEntrySlugs[area.id]!, role: map.areaMetadata[area.id]!.role, reversed: reference.reversed, ringRole: ring.role });
+  for (const area of map.dataset.areas) for (const ring of area.rings) for (const reference of ring.boundaries) boundaryUse.get(reference.boundaryId)?.push({ areaId: area.id, slug: canonicalBloomfallReachSlug(map.areaEntrySlugs[area.id]!), role: map.areaMetadata[area.id]!.role, reversed: reference.reversed, ringRole: ring.role });
 
   const boundaryLines = new Map(map.dataset.boundaries.map((boundary) => [boundary.id, topologyLine(trace, boundary.id)]));
   const duplicatePathGroups = new Map<string, string[]>();
@@ -401,7 +403,7 @@ export function analyzeAtlasCanonicalTopology(trace: AtlasCanonicalTopologyTrace
   const oneSidedTopLevelInternalBoundaries = boundaries.filter((boundary) => boundary.kind === "INTERNAL_BORDER" && (boundaryUse.get(boundary.id) ?? []).filter((use) => use.role !== "NESTED_GEOGRAPHY").length !== 2 && (boundaryUse.get(boundary.id) ?? []).some((use) => use.role !== "NESTED_GEOGRAPHY")).map((boundary) => map.boundaryLocators[boundary.id]!);
   const sharedDirectionFailures = [...boundaryUse.entries()].filter(([, uses]) => uses.filter((use) => use.role !== "NESTED_GEOGRAPHY").length === 2 && uses.filter((use) => use.role !== "NESTED_GEOGRAPHY")[0]!.reversed === uses.filter((use) => use.role !== "NESTED_GEOGRAPHY")[1]!.reversed).map(([boundaryId]) => map.boundaryLocators[boundaryId]!);
   const boundaryOwnerMismatches = boundaries.flatMap((boundary) => {
-    const declared = [...map.boundaryMetadata[boundary.id]!.owners].sort();
+    const declared = [...map.boundaryMetadata[boundary.id]!.owners].map(canonicalBloomfallReachSlug).sort();
     const actual = [...new Set((boundaryUse.get(boundary.id) ?? []).map((use) => use.slug))].sort();
     return declared.length === actual.length && declared.every((owner, index) => owner === actual[index]) ? [] : [{ boundary: map.boundaryLocators[boundary.id]!, declared, actual }];
   });
@@ -437,11 +439,11 @@ export function analyzeAtlasCanonicalTopology(trace: AtlasCanonicalTopologyTrace
     const confidence = [...new Set(boundaryIds.map((id) => map.boundaryMetadata[id]!.confidence))].sort();
     return {
       areaId: area.id,
-      entrySlug: metadata.entrySlug,
-      title: metadata.title,
+      entrySlug: canonicalBloomfallReachSlug(metadata.entrySlug),
+      title: metadata.entrySlug === bloomfallReachCanon.formerDevelopmentPlaceholder.slug ? bloomfallReachCanon.title : metadata.title,
       role: metadata.role,
       approval: metadata.approval,
-      parentEntrySlug: metadata.parentEntrySlug,
+      parentEntrySlug: metadata.parentEntrySlug ? canonicalBloomfallReachSlug(metadata.parentEntrySlug) : null,
       shellCount: area.rings.filter((ring) => ring.role === "SHELL").length,
       holes: area.rings.filter((ring) => ring.role === "HOLE").length,
       neighbors: [...neighbors].sort(),
@@ -455,7 +457,7 @@ export function analyzeAtlasCanonicalTopology(trace: AtlasCanonicalTopologyTrace
 
   const junctions = map.dataset.nodes.flatMap((node) => {
     const boundaryIds = boundaries.filter((boundary) => boundary.startNodeId === node.id || boundary.endNodeId === node.id).map((boundary) => boundary.id);
-    const regions = [...new Set(boundaryIds.flatMap((id) => map.boundaryMetadata[id]!.owners).filter((slug) => topLevel.has(slug)))].sort();
+    const regions = [...new Set(boundaryIds.flatMap((id) => map.boundaryMetadata[id]!.owners).map(canonicalBloomfallReachSlug).filter((slug) => topLevel.has(slug)))].sort();
     return regions.length >= 3 ? [{ nodeId: node.id, locator: map.nodeLocators[node.id]!, coordinate: node.position, regions, boundaryIds, boundaryLocators: boundaryIds.map((id) => map.boundaryLocators[id]!).sort() }] : [];
   }).sort((left, right) => left.locator.localeCompare(right.locator));
 

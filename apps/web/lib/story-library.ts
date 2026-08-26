@@ -1,4 +1,4 @@
-import { storyPlaceKinds, type StoryEntryKind } from "@habitat/shared";
+import { storyPlaceDescendants, storyPlaceKinds, type StoryEntryKind, type StoryPlaceLink } from "@habitat/shared";
 import gallery from "@/lib/model-gallery.json";
 
 export const storyCollections = {
@@ -152,6 +152,37 @@ export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | n
  *  named ground, then working locations, then the rooms inside those.
  *  Anything untyped sorts last. */
 export const placeTypeOrder: Record<string, number> = { settlement: 0, zone: 1, site: 2, landmark: 3, destination: 4 };
+
+export type PlaceProjectionRow = {
+  slug: string;
+  title: string;
+  summary: string | null;
+  meta: Record<string, unknown> | null;
+};
+
+/** Direct children become dossier rows; every deeper descendant stays grouped
+ * beneath its direct ancestor instead of becoming a flat sibling. */
+export function buildContainedPlaceProjection(parentSlug: string, regions: readonly PlaceProjectionRow[]) {
+  const order = (meta: Record<string, unknown> | null) => placeTypeOrder[String(meta?.type)] ?? 9;
+  const byTitle = (a: { order: number; title: string }, b: { order: number; title: string }) => a.order - b.order || a.title.localeCompare(b.title);
+  const placeLinks: StoryPlaceLink[] = regions.map((region) => ({ slug: region.slug, parent: typeof region.meta?.parent === "string" && region.meta.parent.trim() ? region.meta.parent.trim() : null }));
+  const descendants = new Map(regions.map((region) => [region.slug, new Set(storyPlaceDescendants(region.slug, placeLinks))]));
+  return regions
+    .filter((region) => (region.meta?.parent ?? null) === parentSlug)
+    .map((place) => ({
+      slug: place.slug,
+      title: place.title,
+      summary: place.summary,
+      label: placeKindLabel(place.meta ?? {}),
+      order: order(place.meta),
+      inside: regions
+        .filter((candidate) => descendants.get(place.slug)?.has(candidate.slug))
+        .map((candidate) => ({ slug: candidate.slug, title: candidate.title, label: placeKindLabel(candidate.meta ?? {}), order: order(candidate.meta) }))
+        .sort(byTitle)
+        .map(({ slug, title, label }) => ({ slug, title, label })),
+    }))
+    .sort(byTitle);
+}
 
 /** The values the place picker offers, so a typo cannot ship as a default. */
 export type StoryPlaceKindValue = (typeof storyPlaceKinds)[number]["value"];

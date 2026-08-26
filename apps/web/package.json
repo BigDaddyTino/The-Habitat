@@ -24,7 +24,18 @@
     "atlas:dev": "tsx scripts/start-atlas-development.ts",
     "atlas:authoring:verify": "tsx scripts/verify-atlas-authoring.ts",
     "atlas:routes:author": "tsx scripts/author-canonical-atlas-routes.ts",
-    "atlas:routes:verify": "tsx scripts/verify-canonical-atlas-routes.ts"
+    "atlas:routes:verify": "tsx scripts/verify-canonical-atlas-routes.ts",
+    "bloomfall:implement": "tsx scripts/implement-bloomfall-reach-content.ts",
+    "bloomfall:audit": "tsx scripts/audit-bloomfall-reach-content.ts",
+    "bloomfall:atlas:manifest": "tsx scripts/plan-bloomfall-local-atlas.ts --write",
+    "bloomfall:atlas:rehearse": "tsx scripts/rehearse-bloomfall-local-atlas.ts",
+    "bloomfall:atlas:activate": "tsx scripts/activate-bloomfall-local-atlas.ts",
+    "bloomfall:atlas:verify": "tsx scripts/activate-bloomfall-local-atlas.ts --verify",
+    "geography:audit": "tsx scripts/audit-geographic-hierarchy.ts",
+    "geography:audit:production": "tsx scripts/audit-geographic-hierarchy.ts --production",
+    "geography:dossier:audit": "tsx scripts/audit-peninsula-dossier.ts",
+    "geography:repair": "tsx scripts/repair-geographic-hierarchy.ts",
+    "geography:verify": "tsx scripts/repair-geographic-hierarchy.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.11.3",

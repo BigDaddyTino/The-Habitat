@@ -1,4 +1,5 @@
 import {
+  bloomfallReachLocalAtlas,
   validateAtlasTopology,
   type AtlasDerivedTopologyArea,
   type AtlasNumericPoint,
@@ -21,17 +22,21 @@ function canonicalSceneTitle(legacyTitle: string, ownerTitle?: string) { if (!ow
 export function buildStoryAtlasV2Projection(input: { v1: StoryAtlasProjection; topology: AtlasTopologyDataset; connections: readonly AtlasV2ConnectionProjection[]; connectionPaths?: readonly AtlasV2ConnectionPathProjection[]; revisionCursor: string | null; sceneOwnerTitle?: string }): AtlasV2Projection {
   const validation = validateAtlasTopology(input.topology, { width: input.v1.scene.coordinateWidth as 100_000, height: input.v1.scene.coordinateHeight });
   if (!validation.valid || !validation.value) throw new Error(`Persisted Atlas V2 topology is invalid: ${validation.findings.map((finding) => finding.code).join(", ")}`);
-  const canonical = analyzeAtlasCanonicalTopology(buildAtlasCanonicalTopologyTrace());
-  const canonicalBySlug = new Map(canonical.regionResults.map((region) => [region.entrySlug, region]));
+  const isWorldScene = input.v1.scene.slug === "martino-world";
+  const canonical = isWorldScene ? analyzeAtlasCanonicalTopology(buildAtlasCanonicalTopologyTrace()) : null;
+  const canonicalBySlug = new Map(canonical?.regionResults.map((region) => [region.entrySlug, region]) ?? []);
+  const localBySlug = new Map<string, (typeof bloomfallReachLocalAtlas.subregions)[number]>(bloomfallReachLocalAtlas.subregions.map((region) => [region.slug, region]));
   const v1ByPlacement = new Map(input.v1.features.filter((feature) => feature.source === "ENTRY").map((feature) => [feature.placementId, feature]));
   const regions = validation.value.map((area): AtlasV2RegionProjection => {
     const feature = v1ByPlacement.get(area.areaId);
     if (!feature?.entryId) throw new Error(`Persisted topology area ${area.areaId} has no canonical V1 placement/entry.`);
-    const metadata = canonicalBySlug.get(feature.slug);
-    if (!metadata) throw new Error(`Persisted topology area ${feature.slug} is absent from the locked canonical manifest.`);
+    const worldMetadata = canonicalBySlug.get(feature.slug);
+    const localMetadata = input.v1.scene.slug === bloomfallReachLocalAtlas.sceneSlug ? localBySlug.get(feature.slug) : undefined;
+    if (!worldMetadata && !localMetadata) throw new Error(`Persisted topology area ${feature.slug} is absent from the locked scene manifest.`);
     const areaBounds = boundsFor(area); const explicitLabel = feature.label;
     const labelAnchor = explicitLabel && explicitLabel[0] >= areaBounds[0] && explicitLabel[0] <= areaBounds[2] && explicitLabel[1] >= areaBounds[1] && explicitLabel[1] <= areaBounds[3] ? explicitLabel : defaultLabel(area);
-    return { id: metadata.areaId, placementId: feature.placementId, entryId: feature.entryId, slug: feature.slug, title: feature.title, summary: feature.summary, status: feature.status, role: metadata.role, detailLevel: metadata.role === "NESTED_GEOGRAPHY" ? "L1_REGION" : "L0_WORLD", parentSlug: metadata.parentEntrySlug, childSlugs: canonical.regionResults.filter((candidate) => candidate.parentEntrySlug === feature.slug).map((candidate) => candidate.entrySlug), neighbors: metadata.neighbors, geometry: area.geometry, bounds: areaBounds, labelAnchor, minZoom: metadata.role === "NESTED_GEOGRAPHY" ? 1.8 : metadata.role === "MAJOR_WATER" ? 0.4 : 0, maxZoom: null, childMap: feature.childMap };
+    const role = worldMetadata?.role ?? "NESTED_GEOGRAPHY";
+    return { id: worldMetadata?.areaId ?? area.areaId, placementId: feature.placementId, entryId: feature.entryId, slug: feature.slug, title: feature.title, summary: feature.summary, status: feature.status, role, detailLevel: localMetadata ? "L2_LOCAL" : role === "NESTED_GEOGRAPHY" ? "L1_REGION" : "L0_WORLD", parentSlug: worldMetadata?.parentEntrySlug ?? localMetadata?.parentSlug ?? null, childSlugs: worldMetadata ? (canonical?.regionResults ?? []).filter((candidate) => candidate.parentEntrySlug === feature.slug).map((candidate) => candidate.entrySlug) : [], neighbors: worldMetadata?.neighbors ?? [...(localMetadata?.neighbors ?? [])], geometry: area.geometry, bounds: areaBounds, labelAnchor, minZoom: localMetadata ? 0 : role === "NESTED_GEOGRAPHY" ? 1.8 : role === "MAJOR_WATER" ? 0.4 : 0, maxZoom: null, childMap: feature.childMap };
   }).sort((left, right) => left.slug.localeCompare(right.slug));
   const regionSlugs = new Set(regions.map((region) => region.slug));
   const points = input.v1.features.filter((feature) => feature.source === "ENTRY" && !regionSlugs.has(feature.slug));

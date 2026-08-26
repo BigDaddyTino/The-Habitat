@@ -1,0 +1,3119 @@
+{
+  "contract": "martino-global-geographic-hierarchy-audit",
+  "contractVersion": 1,
+  "counts": {
+    "CITY": 1,
+    "DISTRICT": 7,
+    "FACILITY": 5,
+    "ISLAND": 1,
+    "LANDMARK": 5,
+    "MAJOR_WATER": 2,
+    "NESTED_REGION": 8,
+    "SETTLEMENT": 3,
+    "SITE": 15,
+    "WORLD_REGION": 8
+  },
+  "cycles": [],
+  "database": "habitat_atlas_dev",
+  "geographicEntriesAudited": 55,
+  "logicalSha256": "5a553b9ed3476b0dd3b17f79f556e96d4179f33c80c8ea957c0596c30c2e68ca",
+  "matrix": [
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "ac72ae28-f0df-4284-ac75-b25143db3339",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-soverign-guard",
+      "status": "CANON",
+      "title": "Arcadian Soverign Guard",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "2be504ec-dd0b-46aa-8b20-bfe4b1505f2b",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-special-intelligence-service",
+      "status": "CANON",
+      "title": "Arcadian Special Intelligence Service",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "7b829721-999a-5cda-a067-a2fb70792862",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "ashline-exchange",
+      "status": "CANON",
+      "title": "Ashline Exchange",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "e226071a-bb0f-4e25-864c-79c612cfe8a0",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "blackreef-harbour",
+      "status": "CANON",
+      "title": "Blackreef Harbour",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "e345d625-fd19-59f3-9294-da82e2b438d1",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "blackweir",
+      "status": "CANON",
+      "title": "Blackweir",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "a64869df-c623-49ec-9236-dd306a3fd5c7",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-bloomfall-reach"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "bloomfall-reach",
+      "status": "CANON",
+      "title": "Bloomfall Reach",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": "bloomfall-reach",
+      "id": "e895e2ef-049a-526a-82b2-616114e2f14f",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "cairnwood-camp",
+      "status": "CANON",
+      "title": "Cairnwood Camp",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "waterfront-district",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "9324df71-638f-4027-be64-04935f79a964",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "waterfront-district",
+      "settlementTier": null,
+      "slug": "census-office",
+      "status": "CANON",
+      "title": "Census Office",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "95d5536c-8a2d-4746-b31c-9fcd24e642c1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "chancellory-of-arcadia",
+      "status": "CANON",
+      "title": "Chancellory of Arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "12dc8721-a604-59ba-a04e-f641d3d6bd34",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "crown-break",
+      "status": "CANON",
+      "title": "Crown Break",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "4dd7719a-d88b-42f3-8e23-d94fd29d0ef3",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "death-canyon",
+      "status": "CANON",
+      "title": "Death Canyon",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "b67cd208-35ef-5787-b627-b1a4813fc969",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "drowned-intake",
+      "status": "CANON",
+      "title": "Drowned Intake",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "b0fd9003-0da0-438d-b276-133fa8d15b94",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "embassy-row",
+      "status": "CANON",
+      "title": "Embassy Row",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "2f134023-32db-4bf1-90c3-668c9b7a4c4f",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "exclusion-area",
+      "status": "CANON",
+      "title": "Exclusion Area",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "ef89a98f-deb6-4b3f-9825-05fbe36f3385",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "fort-tempest",
+      "status": "CANON",
+      "title": "Fort Tempest",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "e7916aac-c1f6-4186-80c7-7c741b43c097",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "forward-camp-kestrel",
+      "status": "CANON",
+      "title": "Forward Camp Kestrel",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "a707d209-f36d-57f7-9796-942dce233b38",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "glassroot-observatory",
+      "status": "CANON",
+      "title": "Glassroot Observatory",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": null,
+      "id": "5420d9e5-a279-4fbc-9c71-96ada3bf0182",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": "village",
+      "slug": "glasswater-village",
+      "status": "CANON",
+      "title": "Glasswater Village",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "ff4bb0e0-1c4b-56a8-b708-95b9d65bd5d1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "heartfen",
+      "status": "CANON",
+      "title": "Heartfen",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "ISLAND",
+      "grandparent": null,
+      "id": "ebfda43e-a737-496f-8d4f-755ceeed50a7",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-starting-island"
+      },
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-starting-island",
+      "status": "CANON",
+      "title": "Igit Island",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "1f9369ef-a2b5-50dc-a46b-b839a9be3854",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "lantern-pools",
+      "status": "CANON",
+      "title": "Lantern Pools",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "bloomfall-reach",
+      "id": "b0d2ac56-1d8e-5f1c-9fd2-668732d2ee95",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "long-graze",
+      "status": "CANON",
+      "title": "Long Graze",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "d152c77a-1f3b-49e9-8579-25bc7eb52c4f",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "lower-westside",
+      "status": "CANON",
+      "title": "Lower Westside",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "ba43d924-551f-4f4f-a221-c6d6092198cc",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "northwatch-relay",
+      "status": "CANON",
+      "title": "Northwatch Relay",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "342321cc-e98e-4814-a150-86331a7f0a51",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "pearl-beachhead",
+      "status": "CANON",
+      "title": "Pearl Beachhead",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": null,
+      "id": "4ac125cb-39d8-460a-b530-965e8d303759",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-port-arcadia"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": "city",
+      "slug": "port-arcadia",
+      "status": "CANON",
+      "title": "Port Arcadia",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "da10392a-847b-5964-87e9-bc53e688e475",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "redline-shelter-six",
+      "status": "CANON",
+      "title": "Redline Shelter Six",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "a5d209ce-a53c-5069-8c71-4f88bc73a752",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "reedless-mile",
+      "status": "CANON",
+      "title": "Reedless Mile",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "31a7dac3-d798-5a5d-9167-012d826ad24c",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "reserve-vault-twelve",
+      "status": "CANON",
+      "title": "Reserve Vault Twelve",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "61c02b33-e29f-46d0-83fa-3b4ad6cefcb6",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "shattermarket",
+      "status": "CANON",
+      "title": "Shattermarket",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "6f176b13-c392-507c-ac93-f8c09f1240db",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "splicefield-substation",
+      "status": "CANON",
+      "title": "Splicefield Substation",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "0075a854-9355-4f8c-82e8-e22a4e773692",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "stormglass-landing",
+      "status": "CANON",
+      "title": "Stormglass Landing",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "e97f3dfa-23cb-43df-9d71-b186f08b45e3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "the-desert",
+      "status": "CANON",
+      "title": "The Desert",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "29f88fad-1aab-4eb7-bbf1-1656dd7422b1",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-docks",
+      "status": "CANON",
+      "title": "The Docks",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "50b457e2-7dab-400a-9c6f-3f86a268f66d",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "east-side",
+      "status": "CANON",
+      "title": "The East side",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "high-cliffs",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "CITY",
+      "grandparent": "the-peninsula",
+      "id": "249bbad9-c402-4d6a-8b06-392ba780d96e",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "high-cliffs",
+      "settlementTier": "major-city",
+      "slug": "the-floating-city",
+      "status": "CANON",
+      "title": "The Floating City",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "high-cliffs",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "MAJOR_WATER",
+      "grandparent": "the-peninsula",
+      "id": "57657dc2-59ba-433a-a4af-15f0d315f13e",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "high-cliffs",
+      "settlementTier": null,
+      "slug": "grand-lake",
+      "status": "CANON",
+      "title": "The Grand Lake",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "09ee1dc8-8f3e-462a-9741-ccb6aeecf0ac",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "grand-rift",
+      "status": "CANON",
+      "title": "The Grand Rift",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ec50dc96-805d-480c-a177-ee6cd6bd7fa3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "high-cliffs",
+      "status": "CANON",
+      "title": "The High Cliffs",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "0f458d48-4804-532b-b10c-add18b2a313c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-living-marsh",
+      "status": "CANON",
+      "title": "The Living Marsh",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "087f6d60-db59-482e-a892-04334444bd02",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "magic-torn-wasteland",
+      "status": "CANON",
+      "title": "The Magic-Torn Wasteland",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "c0aa388a-53ec-51bd-aeeb-58d3773a85ab",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-mutation-belt",
+      "status": "CANON",
+      "title": "The Mutation Belt",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "507c8c4e-69cf-4f19-9d7e-cb0e0379d67b",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "the-northside",
+      "status": "CANON",
+      "title": "The Northside",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "MAJOR_WATER",
+      "grandparent": null,
+      "id": "308ba1cb-1ae9-477c-9e46-307e6dc66940",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-ocean",
+      "status": "CANON",
+      "title": "The Ocean",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "1e0e0f19-dca2-461b-be89-8ee5f04ed080",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-peninsula",
+      "status": "CANON",
+      "title": "The Peninsula",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": "the-peninsula",
+      "id": "8908a33a-0cd4-4a56-8610-5521cafade8c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "the-red-forest",
+      "status": "CANON",
+      "title": "The Red Forest",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "28aab80b-c611-4934-b937-9f39679ec52b",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "riftwood-interior",
+      "status": "CANON",
+      "title": "The Riftwood Interior",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ef4b0861-94e3-4cc1-bcfd-42bd1ce318a5",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "riverlands",
+      "status": "CANON",
+      "title": "The Riverlands",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "e0e1c899-65af-5d68-a757-010e04e6a7f1",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-shattercore",
+      "status": "CANON",
+      "title": "The Shattercore",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "8285b0c0-5b84-51da-9117-af6c9bb604f4",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "southreach-complex",
+      "status": "CANON",
+      "title": "The Southreach Complex",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "3c31fd9b-a85d-4473-b3e7-e20dd98d9a47",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "the-southside",
+      "status": "CANON",
+      "title": "The southside",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "9e4e43bb-ff34-4173-beb0-897258c6018f",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "stormglass-quarry",
+      "status": "CANON",
+      "title": "The Stormglass Quarry and Essence Relay",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "f4aa0de4-bba8-4a0b-b7e6-fab88bdb487c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "upper-westside",
+      "status": "CANON",
+      "title": "Upper Westside",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "f8368d1b-e8f2-5b32-aef5-188f132e1c91",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "walking-orchard",
+      "status": "CANON",
+      "title": "Walking Orchard",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "91131379-d860-4ac9-ba3b-0ee53a0424d1",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "waterfront-district",
+      "status": "CANON",
+      "title": "Waterfront district",
+      "worldPlacement": false
+    }
+  ],
+  "missingParents": [],
+  "nestedRegions": [
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "4dd7719a-d88b-42f3-8e23-d94fd29d0ef3",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "death-canyon",
+      "status": "CANON",
+      "title": "Death Canyon",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "bloomfall-reach",
+      "id": "b0d2ac56-1d8e-5f1c-9fd2-668732d2ee95",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "long-graze",
+      "status": "CANON",
+      "title": "Long Graze",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "61c02b33-e29f-46d0-83fa-3b4ad6cefcb6",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "shattermarket",
+      "status": "CANON",
+      "title": "Shattermarket",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "0075a854-9355-4f8c-82e8-e22a4e773692",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "stormglass-landing",
+      "status": "CANON",
+      "title": "Stormglass Landing",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "0f458d48-4804-532b-b10c-add18b2a313c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-living-marsh",
+      "status": "CANON",
+      "title": "The Living Marsh",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "c0aa388a-53ec-51bd-aeeb-58d3773a85ab",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-mutation-belt",
+      "status": "CANON",
+      "title": "The Mutation Belt",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": null,
+      "id": "28aab80b-c611-4934-b937-9f39679ec52b",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "riftwood-interior",
+      "status": "CANON",
+      "title": "The Riftwood Interior",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "e0e1c899-65af-5d68-a757-010e04e6a7f1",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-shattercore",
+      "status": "CANON",
+      "title": "The Shattercore",
+      "worldPlacement": false
+    }
+  ],
+  "peninsulaVisible": [
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "ac72ae28-f0df-4284-ac75-b25143db3339",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-soverign-guard",
+      "status": "CANON",
+      "title": "Arcadian Soverign Guard",
+      "whyItAppears": "recursive descendant through upper-westside -> port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "2be504ec-dd0b-46aa-8b20-bfe4b1505f2b",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-special-intelligence-service",
+      "status": "CANON",
+      "title": "Arcadian Special Intelligence Service",
+      "whyItAppears": "recursive descendant through upper-westside -> port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "7b829721-999a-5cda-a067-a2fb70792862",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "ashline-exchange",
+      "status": "CANON",
+      "title": "Ashline Exchange",
+      "whyItAppears": "recursive descendant through the-shattercore -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "e345d625-fd19-59f3-9294-da82e2b438d1",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "blackweir",
+      "status": "CANON",
+      "title": "Blackweir",
+      "whyItAppears": "recursive descendant through the-living-marsh -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "a64869df-c623-49ec-9236-dd306a3fd5c7",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-bloomfall-reach"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "bloomfall-reach",
+      "status": "CANON",
+      "title": "Bloomfall Reach",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": "bloomfall-reach",
+      "id": "e895e2ef-049a-526a-82b2-616114e2f14f",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "cairnwood-camp",
+      "status": "CANON",
+      "title": "Cairnwood Camp",
+      "whyItAppears": "recursive descendant through the-mutation-belt -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "waterfront-district",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "9324df71-638f-4027-be64-04935f79a964",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "waterfront-district",
+      "settlementTier": null,
+      "slug": "census-office",
+      "status": "CANON",
+      "title": "Census Office",
+      "whyItAppears": "recursive descendant through waterfront-district -> port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "95d5536c-8a2d-4746-b31c-9fcd24e642c1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "chancellory-of-arcadia",
+      "status": "CANON",
+      "title": "Chancellory of Arcadia",
+      "whyItAppears": "recursive descendant through upper-westside -> port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "12dc8721-a604-59ba-a04e-f641d3d6bd34",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "crown-break",
+      "status": "CANON",
+      "title": "Crown Break",
+      "whyItAppears": "recursive descendant through the-shattercore -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "4dd7719a-d88b-42f3-8e23-d94fd29d0ef3",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "death-canyon",
+      "status": "CANON",
+      "title": "Death Canyon",
+      "whyItAppears": "recursive descendant through grand-rift",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "b67cd208-35ef-5787-b627-b1a4813fc969",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "drowned-intake",
+      "status": "CANON",
+      "title": "Drowned Intake",
+      "whyItAppears": "recursive descendant through the-living-marsh -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "b0fd9003-0da0-438d-b276-133fa8d15b94",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "embassy-row",
+      "status": "CANON",
+      "title": "Embassy Row",
+      "whyItAppears": "recursive descendant through upper-westside -> port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "2f134023-32db-4bf1-90c3-668c9b7a4c4f",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "exclusion-area",
+      "status": "CANON",
+      "title": "Exclusion Area",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "a707d209-f36d-57f7-9796-942dce233b38",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "glassroot-observatory",
+      "status": "CANON",
+      "title": "Glassroot Observatory",
+      "whyItAppears": "recursive descendant through the-mutation-belt -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "ff4bb0e0-1c4b-56a8-b708-95b9d65bd5d1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "heartfen",
+      "status": "CANON",
+      "title": "Heartfen",
+      "whyItAppears": "recursive descendant through the-living-marsh -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "1f9369ef-a2b5-50dc-a46b-b839a9be3854",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "lantern-pools",
+      "status": "CANON",
+      "title": "Lantern Pools",
+      "whyItAppears": "recursive descendant through the-living-marsh -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "bloomfall-reach",
+      "id": "b0d2ac56-1d8e-5f1c-9fd2-668732d2ee95",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "long-graze",
+      "status": "CANON",
+      "title": "Long Graze",
+      "whyItAppears": "recursive descendant through the-mutation-belt -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "d152c77a-1f3b-49e9-8579-25bc7eb52c4f",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "lower-westside",
+      "status": "CANON",
+      "title": "Lower Westside",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": null,
+      "id": "4ac125cb-39d8-460a-b530-965e8d303759",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-port-arcadia"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": "city",
+      "slug": "port-arcadia",
+      "status": "CANON",
+      "title": "Port Arcadia",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "da10392a-847b-5964-87e9-bc53e688e475",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "redline-shelter-six",
+      "status": "CANON",
+      "title": "Redline Shelter Six",
+      "whyItAppears": "recursive descendant through the-shattercore -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "a5d209ce-a53c-5069-8c71-4f88bc73a752",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "reedless-mile",
+      "status": "CANON",
+      "title": "Reedless Mile",
+      "whyItAppears": "recursive descendant through the-living-marsh -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "31a7dac3-d798-5a5d-9167-012d826ad24c",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "reserve-vault-twelve",
+      "status": "CANON",
+      "title": "Reserve Vault Twelve",
+      "whyItAppears": "recursive descendant through the-shattercore -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "6f176b13-c392-507c-ac93-f8c09f1240db",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "splicefield-substation",
+      "status": "CANON",
+      "title": "Splicefield Substation",
+      "whyItAppears": "recursive descendant through the-mutation-belt -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "e97f3dfa-23cb-43df-9d71-b186f08b45e3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "the-desert",
+      "status": "CANON",
+      "title": "The Desert",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "50b457e2-7dab-400a-9c6f-3f86a268f66d",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "east-side",
+      "status": "CANON",
+      "title": "The East side",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "high-cliffs",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "CITY",
+      "grandparent": "the-peninsula",
+      "id": "249bbad9-c402-4d6a-8b06-392ba780d96e",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "high-cliffs",
+      "settlementTier": "major-city",
+      "slug": "the-floating-city",
+      "status": "CANON",
+      "title": "The Floating City",
+      "whyItAppears": "recursive descendant through high-cliffs",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "high-cliffs",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "MAJOR_WATER",
+      "grandparent": "the-peninsula",
+      "id": "57657dc2-59ba-433a-a4af-15f0d315f13e",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "high-cliffs",
+      "settlementTier": null,
+      "slug": "grand-lake",
+      "status": "CANON",
+      "title": "The Grand Lake",
+      "whyItAppears": "recursive descendant through high-cliffs",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "09ee1dc8-8f3e-462a-9741-ccb6aeecf0ac",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "grand-rift",
+      "status": "CANON",
+      "title": "The Grand Rift",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ec50dc96-805d-480c-a177-ee6cd6bd7fa3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "high-cliffs",
+      "status": "CANON",
+      "title": "The High Cliffs",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "0f458d48-4804-532b-b10c-add18b2a313c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-living-marsh",
+      "status": "CANON",
+      "title": "The Living Marsh",
+      "whyItAppears": "recursive descendant through bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "087f6d60-db59-482e-a892-04334444bd02",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "magic-torn-wasteland",
+      "status": "CANON",
+      "title": "The Magic-Torn Wasteland",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "c0aa388a-53ec-51bd-aeeb-58d3773a85ab",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-mutation-belt",
+      "status": "CANON",
+      "title": "The Mutation Belt",
+      "whyItAppears": "recursive descendant through bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "507c8c4e-69cf-4f19-9d7e-cb0e0379d67b",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "the-northside",
+      "status": "CANON",
+      "title": "The Northside",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": "the-peninsula",
+      "id": "8908a33a-0cd4-4a56-8610-5521cafade8c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "the-red-forest",
+      "status": "CANON",
+      "title": "The Red Forest",
+      "whyItAppears": "recursive descendant through grand-rift",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ef4b0861-94e3-4cc1-bcfd-42bd1ce318a5",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "riverlands",
+      "status": "CANON",
+      "title": "The Riverlands",
+      "whyItAppears": "direct meta.parent child",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "NESTED_REGION",
+      "grandparent": "the-peninsula",
+      "id": "e0e1c899-65af-5d68-a757-010e04e6a7f1",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "bloomfall-reach",
+      "settlementTier": null,
+      "slug": "the-shattercore",
+      "status": "CANON",
+      "title": "The Shattercore",
+      "whyItAppears": "recursive descendant through bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "8285b0c0-5b84-51da-9117-af6c9bb604f4",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "southreach-complex",
+      "status": "CANON",
+      "title": "The Southreach Complex",
+      "whyItAppears": "recursive descendant through the-shattercore -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "3c31fd9b-a85d-4473-b3e7-e20dd98d9a47",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "the-southside",
+      "status": "CANON",
+      "title": "The southside",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "f4aa0de4-bba8-4a0b-b7e6-fab88bdb487c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "upper-westside",
+      "status": "CANON",
+      "title": "Upper Westside",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "f8368d1b-e8f2-5b32-aef5-188f132e1c91",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "walking-orchard",
+      "status": "CANON",
+      "title": "Walking Orchard",
+      "whyItAppears": "recursive descendant through the-mutation-belt -> bloomfall-reach",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "DISTRICT",
+      "grandparent": "the-peninsula",
+      "id": "91131379-d860-4ac9-ba3b-0ee53a0424d1",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "port-arcadia",
+      "settlementTier": null,
+      "slug": "waterfront-district",
+      "status": "CANON",
+      "title": "Waterfront district",
+      "whyItAppears": "recursive descendant through port-arcadia",
+      "worldPlacement": false
+    }
+  ],
+  "selfParents": [],
+  "settlements": [
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": "bloomfall-reach",
+      "id": "e895e2ef-049a-526a-82b2-616114e2f14f",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "cairnwood-camp",
+      "status": "CANON",
+      "title": "Cairnwood Camp",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": null,
+      "id": "5420d9e5-a279-4fbc-9c71-96ada3bf0182",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": "village",
+      "slug": "glasswater-village",
+      "status": "CANON",
+      "title": "Glasswater Village",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "SETTLEMENT",
+      "grandparent": null,
+      "id": "4ac125cb-39d8-460a-b530-965e8d303759",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-port-arcadia"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": "city",
+      "slug": "port-arcadia",
+      "status": "CANON",
+      "title": "Port Arcadia",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "high-cliffs",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "CITY",
+      "grandparent": "the-peninsula",
+      "id": "249bbad9-c402-4d6a-8b06-392ba780d96e",
+      "kind": "REGION",
+      "metaType": "settlement",
+      "ownedMap": null,
+      "parent": "high-cliffs",
+      "settlementTier": "major-city",
+      "slug": "the-floating-city",
+      "status": "CANON",
+      "title": "The Floating City",
+      "worldPlacement": true
+    }
+  ],
+  "sites": [
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "ac72ae28-f0df-4284-ac75-b25143db3339",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-soverign-guard",
+      "status": "CANON",
+      "title": "Arcadian Soverign Guard",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "2be504ec-dd0b-46aa-8b20-bfe4b1505f2b",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "arcadian-special-intelligence-service",
+      "status": "CANON",
+      "title": "Arcadian Special Intelligence Service",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "7b829721-999a-5cda-a067-a2fb70792862",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "ashline-exchange",
+      "status": "CANON",
+      "title": "Ashline Exchange",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "e226071a-bb0f-4e25-864c-79c612cfe8a0",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "blackreef-harbour",
+      "status": "CANON",
+      "title": "Blackreef Harbour",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "e345d625-fd19-59f3-9294-da82e2b438d1",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "blackweir",
+      "status": "CANON",
+      "title": "Blackweir",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "waterfront-district",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "9324df71-638f-4027-be64-04935f79a964",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "waterfront-district",
+      "settlementTier": null,
+      "slug": "census-office",
+      "status": "CANON",
+      "title": "Census Office",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "95d5536c-8a2d-4746-b31c-9fcd24e642c1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "chancellory-of-arcadia",
+      "status": "CANON",
+      "title": "Chancellory of Arcadia",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "12dc8721-a604-59ba-a04e-f641d3d6bd34",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "crown-break",
+      "status": "CANON",
+      "title": "Crown Break",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "b67cd208-35ef-5787-b627-b1a4813fc969",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "drowned-intake",
+      "status": "CANON",
+      "title": "Drowned Intake",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "upper-westside",
+        "port-arcadia",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-port-arcadia"
+      ],
+      "classification": "SITE",
+      "grandparent": "port-arcadia",
+      "id": "b0fd9003-0da0-438d-b276-133fa8d15b94",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "upper-westside",
+      "settlementTier": null,
+      "slug": "embassy-row",
+      "status": "CANON",
+      "title": "Embassy Row",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "ef89a98f-deb6-4b3f-9825-05fbe36f3385",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "fort-tempest",
+      "status": "CANON",
+      "title": "Fort Tempest",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "e7916aac-c1f6-4186-80c7-7c741b43c097",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "forward-camp-kestrel",
+      "status": "CANON",
+      "title": "Forward Camp Kestrel",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "a707d209-f36d-57f7-9796-942dce233b38",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "glassroot-observatory",
+      "status": "CANON",
+      "title": "Glassroot Observatory",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "ff4bb0e0-1c4b-56a8-b708-95b9d65bd5d1",
+      "kind": "REGION",
+      "metaType": "destination",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "heartfen",
+      "status": "CANON",
+      "title": "Heartfen",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "1f9369ef-a2b5-50dc-a46b-b839a9be3854",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "lantern-pools",
+      "status": "CANON",
+      "title": "Lantern Pools",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "ba43d924-551f-4f4f-a221-c6d6092198cc",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "northwatch-relay",
+      "status": "CANON",
+      "title": "Northwatch Relay",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "342321cc-e98e-4814-a150-86331a7f0a51",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "pearl-beachhead",
+      "status": "CANON",
+      "title": "Pearl Beachhead",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "SITE",
+      "grandparent": "bloomfall-reach",
+      "id": "da10392a-847b-5964-87e9-bc53e688e475",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "redline-shelter-six",
+      "status": "CANON",
+      "title": "Redline Shelter Six",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-living-marsh",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "a5d209ce-a53c-5069-8c71-4f88bc73a752",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-living-marsh",
+      "settlementTier": null,
+      "slug": "reedless-mile",
+      "status": "CANON",
+      "title": "Reedless Mile",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "31a7dac3-d798-5a5d-9167-012d826ad24c",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "reserve-vault-twelve",
+      "status": "CANON",
+      "title": "Reserve Vault Twelve",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "6f176b13-c392-507c-ac93-f8c09f1240db",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "splicefield-substation",
+      "status": "CANON",
+      "title": "Splicefield Substation",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "29f88fad-1aab-4eb7-bbf1-1656dd7422b1",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-docks",
+      "status": "CANON",
+      "title": "The Docks",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-shattercore",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "FACILITY",
+      "grandparent": "bloomfall-reach",
+      "id": "8285b0c0-5b84-51da-9117-af6c9bb604f4",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-shattercore",
+      "settlementTier": null,
+      "slug": "southreach-complex",
+      "status": "CANON",
+      "title": "The Southreach Complex",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-starting-island"
+      ],
+      "atlasScenes": [
+        "martino-starting-island"
+      ],
+      "classification": "SITE",
+      "grandparent": null,
+      "id": "9e4e43bb-ff34-4173-beb0-897258c6018f",
+      "kind": "REGION",
+      "metaType": "site",
+      "ownedMap": null,
+      "parent": "the-starting-island",
+      "settlementTier": null,
+      "slug": "stormglass-quarry",
+      "status": "CANON",
+      "title": "The Stormglass Quarry and Essence Relay",
+      "worldPlacement": false
+    },
+    {
+      "ancestry": [
+        "the-mutation-belt",
+        "bloomfall-reach",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-bloomfall-reach"
+      ],
+      "classification": "LANDMARK",
+      "grandparent": "bloomfall-reach",
+      "id": "f8368d1b-e8f2-5b32-aef5-188f132e1c91",
+      "kind": "REGION",
+      "metaType": "landmark",
+      "ownedMap": null,
+      "parent": "the-mutation-belt",
+      "settlementTier": null,
+      "slug": "walking-orchard",
+      "status": "CANON",
+      "title": "Walking Orchard",
+      "worldPlacement": false
+    }
+  ],
+  "suspicious": [
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "bloomfall-reach"
+    },
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "the-desert"
+    },
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "grand-rift"
+    },
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "high-cliffs"
+    },
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "magic-torn-wasteland"
+    },
+    {
+      "reason": "top-level world region nested under grand-rift",
+      "slug": "the-red-forest"
+    },
+    {
+      "reason": "top-level world region nested under the-peninsula",
+      "slug": "riverlands"
+    },
+    {
+      "reason": "locked top-level Red Forest nested under grand-rift",
+      "slug": "the-red-forest"
+    }
+  ],
+  "target": "development",
+  "topLevelNestedUnderTopLevel": [
+    {
+      "parent": "the-peninsula",
+      "slug": "bloomfall-reach"
+    },
+    {
+      "parent": "the-peninsula",
+      "slug": "the-desert"
+    },
+    {
+      "parent": "the-peninsula",
+      "slug": "grand-rift"
+    },
+    {
+      "parent": "the-peninsula",
+      "slug": "high-cliffs"
+    },
+    {
+      "parent": "the-peninsula",
+      "slug": "magic-torn-wasteland"
+    },
+    {
+      "parent": "grand-rift",
+      "slug": "the-red-forest"
+    },
+    {
+      "parent": "the-peninsula",
+      "slug": "riverlands"
+    }
+  ],
+  "topLevelWorldRegions": [
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "a64869df-c623-49ec-9236-dd306a3fd5c7",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": {
+        "parentSlug": "martino-world",
+        "slug": "martino-bloomfall-reach"
+      },
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "bloomfall-reach",
+      "status": "CANON",
+      "title": "Bloomfall Reach",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "e97f3dfa-23cb-43df-9d71-b186f08b45e3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "the-desert",
+      "status": "CANON",
+      "title": "The Desert",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "09ee1dc8-8f3e-462a-9741-ccb6aeecf0ac",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "grand-rift",
+      "status": "CANON",
+      "title": "The Grand Rift",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ec50dc96-805d-480c-a177-ee6cd6bd7fa3",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "high-cliffs",
+      "status": "CANON",
+      "title": "The High Cliffs",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "087f6d60-db59-482e-a892-04334444bd02",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "magic-torn-wasteland",
+      "status": "CANON",
+      "title": "The Magic-Torn Wasteland",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "1e0e0f19-dca2-461b-be89-8ee5f04ed080",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": null,
+      "settlementTier": null,
+      "slug": "the-peninsula",
+      "status": "CANON",
+      "title": "The Peninsula",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "grand-rift",
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": "the-peninsula",
+      "id": "8908a33a-0cd4-4a56-8610-5521cafade8c",
+      "kind": "REGION",
+      "metaType": "zone",
+      "ownedMap": null,
+      "parent": "grand-rift",
+      "settlementTier": null,
+      "slug": "the-red-forest",
+      "status": "CANON",
+      "title": "The Red Forest",
+      "worldPlacement": true
+    },
+    {
+      "ancestry": [
+        "the-peninsula"
+      ],
+      "atlasScenes": [
+        "martino-world"
+      ],
+      "classification": "WORLD_REGION",
+      "grandparent": null,
+      "id": "ef4b0861-94e3-4cc1-bcfd-42bd1ce318a5",
+      "kind": "REGION",
+      "metaType": "region",
+      "ownedMap": null,
+      "parent": "the-peninsula",
+      "settlementTier": null,
+      "slug": "riverlands",
+      "status": "CANON",
+      "title": "The Riverlands",
+      "worldPlacement": true
+    }
+  ]
+}

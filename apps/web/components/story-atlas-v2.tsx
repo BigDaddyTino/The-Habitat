@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, Crosshair, Search, X } from "lucide-react";
 import OlMap from "ol/Map";
 import View from "ol/View";
@@ -49,15 +49,18 @@ function atlasLocation(sceneSlug: string, selectedSlug: string | null) {
 
 const invisibleHitStyle = new Style({ fill: new Fill({ color: "rgba(0,0,0,0.001)" }), stroke: new Stroke({ color: "rgba(0,0,0,0)", width: 1 }) });
 
-function pointStyle(feature: StoryAtlasFeature, zoom: number, selected: boolean) {
+function pointStyle(feature: StoryAtlasFeature, zoom: number, selected: boolean, height: number) {
   if (!isAtlasV2FeatureVisible(feature, zoom)) return undefined;
   const quest = feature.layer === "QUEST";
   const settlement = feature.layer === "SETTLEMENT";
-  const color = quest ? "#efa455" : settlement ? "#7ed3cb" : "#e7d5a4";
-  return new Style({
+  const color = quest ? "#efa455" : settlement || feature.place?.type === "destination" ? "#7ed3cb" : feature.place?.type === "site" ? "#b6c5b1" : "#e7d5a4";
+  const marker = new Style({
     image: new CircleStyle({ radius: selected ? 8 : settlement ? 6 : 4.5, fill: new Fill({ color }), stroke: new Stroke({ color: "#101512", width: 2 }) }),
-    text: new Text({ text: zoom >= Math.max(feature.minZoom, settlement ? 1.5 : 2.4) ? feature.title : "", font: `${selected ? 700 : 600} 11px Manrope, sans-serif`, fill: new Fill({ color: "#fff8df" }), stroke: new Stroke({ color: "rgba(5,8,7,.96)", width: 4 }), offsetY: -16, overflow: true }),
   });
+  const showLabel = zoom >= (feature.priority >= 200 ? feature.minZoom : Math.max(feature.minZoom, settlement ? 1.5 : 2.4));
+  if (!showLabel) return marker;
+  const label = new Style({ geometry: feature.label ? new Point(mapPoint(feature.label, height)) : undefined, text: new Text({ text: feature.title, font: `${selected ? 700 : 600} 11px Manrope, sans-serif`, fill: new Fill({ color: "#fff8df" }), stroke: new Stroke({ color: "rgba(5,8,7,.96)", width: 4 }), offsetY: feature.label ? 0 : -16, overflow: true }) });
+  return [marker, label];
 }
 
 function replaceProjectionFeatures(input: {
@@ -88,6 +91,7 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
   const [projection, setProjection] = useState(initialProjection);
   const [selectedSlug, setSelectedSlug] = useState<string | null>(() => hashSelection());
   const [query, setQuery] = useState("");
+  const [matches, setMatches] = useState<Array<{ sceneSlug: string; sceneTitle: string; slug: string; title: string; layer: StoryAtlasFeature["layer"] }>>([]);
   const [loadingScene, setLoadingScene] = useState(false);
   const [routesVisible, setRoutesVisible] = useState(false);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -104,8 +108,6 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
   const selectedRegion = projection.regions.find((region) => region.slug === selectedSlug) ?? null;
   const selectedPoint = [...projection.points, ...projection.questNodes].find((point) => point.slug === selectedSlug) ?? null;
   const selected = selectedRegion ?? selectedPoint;
-  const searchable = useMemo(() => [...projection.regions, ...projection.points, ...projection.questNodes], [projection]);
-  const matches = useMemo(() => query.trim().length < 2 ? [] : searchable.filter((item) => `${item.title} ${item.slug}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8), [query, searchable]);
   const sceneKey = [projection.scene.id, projection.scene.imageUrl, projection.scene.coordinateWidth, projection.scene.coordinateHeight, projection.scene.initialCenter[0], projection.scene.initialCenter[1], projection.scene.initialZoom, projection.scene.minZoom, projection.scene.maxZoom].join(":");
 
   const select = useCallback((slug: string | null, fit = false, navigation: "PUSH" | "NONE" = "PUSH") => {
@@ -150,7 +152,7 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
     const extent: [number, number, number, number] = [0, 0, width, height];
     const pixelProjection = new Projection({ code: `martino-atlas-v2-${scene.id}`, units: "pixels", extent });
     const regionSource = new VectorSource();
-    const isNestedVisible = (region: AtlasV2RegionProjection, zoom: number) => region.role !== "NESTED_GEOGRAPHY" || zoom >= region.minZoom && [region.slug, region.parentSlug].includes(selectedRef.current);
+    const isNestedVisible = (region: AtlasV2RegionProjection, zoom: number) => region.detailLevel === "L2_LOCAL" || region.role !== "NESTED_GEOGRAPHY" || zoom >= region.minZoom && [region.slug, region.parentSlug].includes(selectedRef.current);
     const hitLayer = new VectorLayer({ source: regionSource, style: (feature) => isNestedVisible(feature.get("region") as AtlasV2RegionProjection, mapRef.current?.getView().getZoom() ?? 0) ? invisibleHitStyle : undefined });
     const highlightLayer = new VectorLayer({ source: regionSource, style: (feature) => {
       const region = feature.get("region") as AtlasV2RegionProjection;
@@ -170,7 +172,7 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
       return new Style({ text: new Text({ text: region.title, font: `${strong ? 700 : 600} ${region.role === "TOP_LEVEL_LAND" ? 13 : 11}px Manrope, sans-serif`, fill: new Fill({ color: strong ? "#fff3c9" : "rgba(249,240,211,.88)" }), stroke: new Stroke({ color: "rgba(15,18,15,.88)", width: 3 }), overflow: true }) });
     } });
     const pointSource = new VectorSource();
-    const pointLayer = new VectorLayer({ source: pointSource, declutter: true, style: (feature) => pointStyle(feature.get("point") as StoryAtlasFeature, mapRef.current?.getView().getZoom() ?? 0, selectedRef.current === feature.get("slug")) });
+    const pointLayer = new VectorLayer({ source: pointSource, declutter: true, style: (feature) => pointStyle(feature.get("point") as StoryAtlasFeature, mapRef.current?.getView().getZoom() ?? 0, selectedRef.current === feature.get("slug"), height) });
     const routeSource = new VectorSource();
     const routeLayer = new VectorLayer({ source: routeSource, visible: false, style: (feature) => { const path = feature.get("path") as AtlasV2Projection["connectionPaths"][number]; const zoom = mapRef.current?.getView().getZoom() ?? 0; const contextRoute = selectedRef.current !== null && [path.fromSlug, path.toSlug].includes(selectedRef.current); if ((!routesVisibleRef.current && !contextRoute) || zoom < path.minZoom || (path.maxZoom !== null && zoom > path.maxZoom)) return undefined; return new Style({ stroke: new Stroke({ color: path.type === "RIVER_TRAVEL" ? "rgba(111,190,202,.78)" : path.type === "SEA_ROUTE" ? "rgba(111,162,202,.72)" : path.type === "AIR_ROUTE" ? "rgba(205,178,226,.72)" : "rgba(224,194,126,.72)", width: contextRoute ? 2.7 : 1.7, lineDash: path.type === "ROAD" ? undefined : path.type === "AIR_ROUTE" ? [2, 7] : path.type === "TRAIL" ? [3, 5] : [8, 5] }) }); } });
     const view = new View({ projection: pixelProjection, center: mapPoint(scene.initialCenter, height), zoom: scene.initialZoom, minZoom: scene.minZoom, maxZoom: scene.maxZoom, extent, showFullExtent: true });
@@ -216,12 +218,21 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
   useEffect(() => { routesVisibleRef.current = routesVisible; const contextual = projection.connectionPaths.some((path) => selectedRef.current !== null && [path.fromSlug, path.toSlug].includes(selectedRef.current)); routeLayerRef.current?.setVisible(routesVisible || contextual); routeLayerRef.current?.changed(); }, [projection.connectionPaths, routesVisible]);
   useEffect(() => { const onPopState = () => { const url = new URL(window.location.href); const sceneSlug = url.searchParams.get("scene") ?? "martino-world"; void openScene(sceneSlug, "NONE", hashSelection()); }; window.addEventListener("popstate", onPopState); return () => window.removeEventListener("popstate", onPopState); }, [openScene]);
   useEffect(() => {
+    const normalized = query.trim();
+    if (normalized.length < 2) return;
+    const controller = new AbortController();
+    void fetch(`/api/codex/maps/search?q=${encodeURIComponent(normalized)}`, { cache: "no-store", signal: controller.signal }).then((response) => response.ok ? response.json() as Promise<{ results: typeof matches }> : { results: [] }).then((payload) => setMatches(payload.results)).catch((error: unknown) => { if (!(error instanceof DOMException && error.name === "AbortError")) setMatches([]); });
+    return () => controller.abort();
+  }, [query]);
+  useEffect(() => {
     const stream = new EventSource("/api/codex/stream");
     stream.addEventListener("changed", async () => { const response = await fetch(`/api/codex/maps/${projection.scene.slug}?atlas=v2`, { cache: "no-store" }); if (response.ok) setProjection(await response.json() as AtlasV2Projection); });
     return () => stream.close();
   }, [projection.scene.slug]);
 
   const focus = (item: AtlasV2RegionProjection | StoryAtlasFeature) => { setQuery(""); select(item.slug, true); };
+  const focusSearch = (item: (typeof matches)[number]) => { setQuery(""); if (item.sceneSlug === projection.scene.slug) select(item.slug, true); else void openScene(item.sceneSlug, "PUSH", item.slug); };
+  const visibleMatches = query.trim().length >= 2 ? matches : [];
   const breadcrumbs = atlasV2Breadcrumbs(projection.regions, selectedRegion?.slug ?? null);
   const resetWorld = () => { if (projection.scene.slug !== "martino-world") { void openScene("martino-world"); return; } select(null); const scene = projection.scene; mapRef.current?.getView().fit([0, 0, scene.coordinateWidth, scene.coordinateHeight], { padding: [26, 26, 26, 26], duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 420 }); };
   return <section className="atlas-shell atlas-v2-shell" aria-label="Internal Atlas V2 projection">
@@ -230,8 +241,8 @@ export function StoryAtlasV2({ initialProjection }: { initialProjection: AtlasV2
       <div className="atlas-toolbar">
         <nav className="atlas-breadcrumb" aria-label="Atlas location"><button onClick={resetWorld}>World</button>{projection.scene.parentMap ? <span>› {projection.scene.title}</span> : null}{breadcrumbs.map((item) => <button key={item.slug} onClick={() => focus(item)}>› {item.title}</button>)}</nav>
         {projection.connectionPaths.length ? <div className="atlas-filters"><button className={routesVisible ? "active" : ""} aria-pressed={routesVisible} onClick={() => setRoutesVisible((visible) => !visible)}>Authored routes</button></div> : null}
-        <label className="atlas-search"><Search aria-hidden="true" size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && matches[0]) focus(matches[0]); }} placeholder="Find a region, anchor, or quest" aria-label="Search Atlas V2"/></label>
-        {matches.length ? <div className="atlas-search-results">{matches.map((item) => <button key={item.slug} onClick={() => focus(item)}><span>{item.title}</span><small>{"role" in item ? item.role.toLowerCase().replaceAll("_", " ") : item.layer.toLowerCase()}</small></button>)}</div> : null}
+        <label className="atlas-search"><Search aria-hidden="true" size={16}/><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && visibleMatches[0]) focusSearch(visibleMatches[0]); }} placeholder="Find any Atlas region or anchor" aria-label="Search Atlas V2"/></label>
+        {visibleMatches.length ? <div className="atlas-search-results">{visibleMatches.map((item) => <button key={`${item.sceneSlug}:${item.slug}`} onClick={() => focusSearch(item)}><span>{item.title}</span><small>{item.layer.toLowerCase()} · {item.sceneTitle}</small></button>)}</div> : null}
       </div>
       <div className="atlas-map" ref={targetRef}/><div className="atlas-map-help"><Crosshair aria-hidden="true" size={13}/> Hover to reveal boundaries · tap/click to select and fit</div>
       {selected ? <aside className="atlas-dossier" aria-live="polite"><button className="atlas-close" onClick={() => select(null)} aria-label="Close map details"><X size={18}/></button><p className="eyebrow">{"role" in selected ? selected.role.toLowerCase().replaceAll("_", " ") : selected.layer.toLowerCase()}</p><h2>{selected.title}</h2>{selected.summary ? <p className="atlas-summary">{selected.summary}</p> : null}{"neighbors" in selected ? <dl className="atlas-facts"><dt>Neighbors</dt><dd>{selected.neighbors.join(", ") || "None"}</dd><dt>Parent</dt><dd>{selected.parentSlug ?? "World"}</dd>{selected.childSlugs.length ? <><dt>Nested</dt><dd>{selected.childSlugs.join(", ")}</dd></> : null}</dl> : null}{"childMap" in selected && selected.childMap ? <button className="atlas-drilldown" disabled={loadingScene} onClick={() => void openScene(selected.childMap!.slug)}><Crosshair aria-hidden="true" size={15}/> Open high-detail map</button> : null}<Link className="atlas-dossier-link" href={"source" in selected && selected.source === "NODE" ? `/codex/arc/${selected.quests[0]?.slug ?? ""}` : `/codex/bible/${selected.slug}`}><BookOpen aria-hidden="true" size={15}/> Open full Codex dossier</Link></aside> : null}
