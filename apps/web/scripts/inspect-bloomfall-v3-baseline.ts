@@ -8,9 +8,9 @@ import {
 } from "./lib/bloomfall-production-activation";
 
 async function main() {
-  const sourceUrl = process.env.DATABASE_URL;
+  const sourceUrl = process.env.BLOOMFALL_PRODUCTION_SOURCE_DATABASE_URL;
   const targetUrl = process.env.BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL;
-  if (!sourceUrl || !targetUrl) throw new Error("DATABASE_URL and explicit BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL are required.");
+  if (!sourceUrl || !targetUrl) throw new Error("Explicit BLOOMFALL_PRODUCTION_SOURCE_DATABASE_URL and BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL are required.");
   const identity = assertBloomfallProductionActivationTarget(sourceUrl, targetUrl, process.env);
   const database = createPrismaClient(targetUrl);
   try {

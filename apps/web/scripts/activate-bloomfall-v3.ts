@@ -26,9 +26,9 @@ async function main() {
   const apply = process.argv.includes("--apply");
   if (dryRun === apply) throw new Error("Bloomfall V3 activation requires exactly one of --dry-run or --apply.");
 
-  const sourceUrl = process.env.DATABASE_URL;
+  const sourceUrl = process.env.BLOOMFALL_PRODUCTION_SOURCE_DATABASE_URL;
   const targetUrl = process.env.BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL;
-  if (!sourceUrl || !targetUrl) throw new Error("DATABASE_URL and explicit BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL are required.");
+  if (!sourceUrl || !targetUrl) throw new Error("Explicit BLOOMFALL_PRODUCTION_SOURCE_DATABASE_URL and BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL are required.");
   const identity = assertBloomfallProductionActivationTarget(sourceUrl, targetUrl, process.env);
 
   const actualHead = execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim().toLowerCase();

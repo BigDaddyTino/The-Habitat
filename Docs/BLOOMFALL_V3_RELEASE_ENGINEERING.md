@@ -40,7 +40,7 @@ pnpm --filter @habitat/web bloomfall:v3:baseline
 
 The entrypoint never infers its write target from the application URL. It requires:
 
-- `DATABASE_URL` as canonical read-source identity;
+- `BLOOMFALL_PRODUCTION_SOURCE_DATABASE_URL` as the explicit canonical read-source identity (never the development URL rewritten by the normal app environment loader);
 - `BLOOMFALL_PRODUCTION_ACTIVATION_DATABASE_URL` as the explicit target;
 - `BLOOMFALL_PRODUCTION_ACTIVATION_MODE` (`rehearsal` or `production`);
 - `BLOOMFALL_PRODUCTION_ACTIVATION_CONFIRM_DATABASE=habitat` in production;
