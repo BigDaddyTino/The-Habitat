@@ -747,6 +747,21 @@ export const bloomfallCrossLinkBlocks: readonly BloomfallCrossLinkBlock[] = [
     block: `**In the wider Reach.** The Mile's crossings are dynamic under [[bloomfall-travel]]: real, useful, and never permanent. Whatever suppresses the growth here is bound up with [[marsh-absorption]] and the local [[essence-saturation]], and researchers from [[glassroot-observatory]] still cannot separate contaminant, hydrology, and coordinated exclusion as explanations. [[mirejaw]] cross the opening on narrow schedules, and a corridor that opens after [[bloomstorms]] may close again before anyone maps it.`,
   },
   {
+    slug: "reserve-vault-twelve", kind: "REGION", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Reserve Vault Twelve to its systems and neighbours",
+    block: `**In the wider Reach.** Whether the vault is reachable at all is a [[reactor-cycles]] question: seals cycle, a Purge can open a reserve spine, and an Overflow can close it for good. What comes out is the Reach's clearest case of breach extraction under [[harvesting-consequences]], because cutting at an intact seal releases what the seal was holding and raises local [[essence-saturation]] in neighbouring sectors. The vault sits on the conditional Southreach service alignment described in [[bloomfall-travel]].`,
+  },
+  {
+    slug: "ashline-exchange", kind: "REGION", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Ashline Exchange to its systems and neighbours",
+    block: `**In the wider Reach.** Ashline is the one place on the Reach's only permanent route, and [[bloomfall-travel]] is why that matters: everything landward passes through here, so a closure at this junction is felt at [[cairnwood-camp]] and [[southreach-complex]] alike. Whether the interchange is usable depends on power and structure under [[reactor-cycles]] rather than on anyone locking a door, and its buried freight is inert salvage under [[harvesting-consequences]] — the safest class of work in the Shattercore, and the least valuable.`,
+  },
+  {
+    slug: "heartfen", kind: "REGION", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Heartfen to its systems and neighbours",
+    block: `**In the wider Reach.** Heartfen is [[marsh-absorption]] at its most concentrated and least explicable: channels close before upstream surges reach local instruments, and damaged beds are isolated and consumed while their neighbours are fed. That makes its free [[essence-saturation]] low and its bound load enormous, and it makes [[harvesting-consequences]] here a containment question rather than an economic one. [[bloomfall-travel]] gives it no road at all; access is an opening, and an opening is not a path.`,
+  },
+  {
     slug: "reserve-glass", kind: "ITEM", source: "REGION_PACKAGE",
     revisionSummary: "Prompt E: gave Reserve Glass its harvest class and system links",
     block: `**Harvest class.** Loose vault fragments are inert salvage; cutting from an intact seal is **breach extraction** under [[harvesting-consequences]], which is an authored incident rather than a gather. Availability is gated by [[reactor-cycles]], since [[reserve-vault-twelve]] opens and reseals with the cycle, and a bad extraction moves pressure into neighbouring sectors and raises local [[essence-saturation]].`,
@@ -790,6 +805,31 @@ export const bloomfallCrossLinkBlocks: readonly BloomfallCrossLinkBlock[] = [
     slug: "nalia-reed", kind: "CHARACTER", source: "REGION_PACKAGE",
     revisionSummary: "Prompt E: connected Nalia Reed to the systems the Marsh runs on",
     block: `**Where her guiding meets the systems.** Reed navigates the dynamic marsh corridors described in [[bloomfall-travel]], which means she is reading [[marsh-absorption]] directly: which channel closed, which bed is being sacrificed, and which opening is worth trusting. She argues that [[harvesting-consequences]] reach the people living downstream long before they appear in a survey, and she will not describe coordinated behaviour as speech.`,
+  },
+  {
+    slug: "the-bloomfall", kind: "EVENT", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected the Bloomfall to the systems it created",
+    block: `**Systems in play.** Every Bloomfall system dates from this event. The release created [[blackbloom-exposure]] and the ambient pressure now read as [[essence-saturation]]; the surviving plant is why [[reactor-cycles]] still run; the ecology that answered the pressure is [[adaptive-mutation]]; and the front stopped because [[marsh-absorption]] stopped it. What the disaster did not do is settle its own cause.`,
+  },
+  {
+    slug: "the-last-safe-reading", kind: "EVENT", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected the Last Safe Reading to its systems",
+    block: `**Systems in play.** The window is owned by [[reactor-cycles]]: a sector state opens the archive, and the next one overwrites the buffer, so the investigation is a forecast problem before it is a research one. Reaching it at all is a [[bloomfall-travel]] question along the conditional Southreach alignment, and the interior belongs to [[the-last-shift]] and its routines.`,
+  },
+  {
+    slug: "three-failure-reports", kind: "EVENT", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Three Failure Reports to its systems",
+    block: `**Systems in play.** The three reports disagree about where the first failure began, which is why the Codex describes [[reactor-cycles]] as observed sector behaviour rather than as one surviving controller. They are recovered under the same conditions as any Southreach salvage — cycle state, structure, and [[bloomfall-travel]] — and what they establish is that [[blackbloom-exposure]] has an incomplete origin story, not a proven culprit.`,
+  },
+  {
+    slug: "reserve-twelve", kind: "EVENT", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Reserve Twelve to its systems",
+    block: `**Systems in play.** The recovery window is a [[reactor-cycles]] state and the recovery itself is breach extraction under [[harvesting-consequences]]: the material is valuable because a seal is still holding it. A bad cut moves pressure into neighbouring sectors and raises [[essence-saturation]] where nobody is standing, which is the whole reason ownership of the vault matters less than the timing of the entry.`,
+  },
+  {
+    slug: "root-of-the-bargain", kind: "EVENT", source: "REGION_PACKAGE",
+    revisionSummary: "Prompt E: connected Root of the Bargain to its systems",
+    block: `**Systems in play.** The exchange being tested is [[marsh-absorption]] behaving as though it were negotiating: returned biomass, then an opening. Whether the return is worth anything to the marsh is a [[harvesting-consequences]] question about restoring sink capacity, and the opening it grants is a dynamic corridor under [[bloomfall-travel]] that will close again. Coordination is measured; consciousness is not.`,
   },
   {
     slug: "the-bellwether-event", kind: "EVENT", source: "REGION_PACKAGE",

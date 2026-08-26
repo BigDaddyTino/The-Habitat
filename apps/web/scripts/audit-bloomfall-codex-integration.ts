@@ -18,7 +18,7 @@ import {
   bloomfallRouteRecords,
   bloomfallSystemPages,
 } from "../lib/bloomfall-codex-integration";
-import { bloomfallPois, bloomfallRegionId, bloomfallResources } from "../lib/bloomfall-reach-content";
+import { bloomfallEvents, bloomfallPois, bloomfallRegionId, bloomfallResources } from "../lib/bloomfall-reach-content";
 import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2SchemaPresent } from "./lib/atlas-v2-activation";
 import { stableAtlasJson } from "./lib/atlas-integrity";
 
@@ -127,6 +127,24 @@ async function main() {
   const uncoveredPois = poiCoverage.filter((row) => row.systems.length === 0).map((row) => row.slug);
   check(bloomfallPois.length === 15, `Expected 15 Bloomfall POIs, found ${bloomfallPois.length}.`);
   check(uncoveredPois.length === 0, `POIs with no system relationship: ${uncoveredPois.join(", ")}`);
+  // …and reads back out again. A place a system names should be able to name
+  // the system, or the relationship only exists from one side.
+  const bloomfallSystemFamily = new Set([...bloomfallSystemPages.map((page) => page.slug), "marsh-absorption", "blackbloom-exposure", "blackbloom-overcharge", "bloomfall-environmental-hazards"]);
+  const oneWayPois = bloomfallPois
+    .filter((poi) => !storyProseLinks(bySlug.get(poi.slug)?.body ?? "").some((slug) => bloomfallSystemFamily.has(slug)))
+    .map((poi) => poi.slug);
+  check(oneWayPois.length === 0, `POIs that no longer link a system back: ${oneWayPois.join(", ")}`);
+
+  // Regional stories name the systems they turn on. A Ledger with Two Owners
+  // is the deliberate exception: it is a documentary custody dispute, and
+  // attaching a world system to it would be link-stuffing.
+  const storyWithoutSystem = "a-ledger-with-two-owners";
+  const eventCoverage = bloomfallEvents.map((event) => ({
+    slug: event.slug,
+    systems: storyProseLinks(bySlug.get(event.slug)?.body ?? "").filter((slug) => bloomfallSystemFamily.has(slug)),
+  }));
+  const unlinkedEvents = eventCoverage.filter((row) => row.systems.length === 0).map((row) => row.slug);
+  check(jsonEqual(unlinkedEvents, [storyWithoutSystem]), `Regional stories with no system relationship drifted from the one approved exception: ${unlinkedEvents.join(", ") || "none"}`);
 
   // 5. Every classified creature or entity links out to at least one system.
   const creatureCoverage = bloomfallCreatureEnhancements.map((enhancement) => {
@@ -297,6 +315,9 @@ async function main() {
       crossLinkBlocks: bloomfallAllCrossLinkBlocks.length,
       pois: bloomfallPois.length,
       poisWithSystemRelationship: poiCoverage.filter((row) => row.systems.length > 0).length,
+      poisLinkingSystemsBack: bloomfallPois.length - oneWayPois.length,
+      regionalStories: bloomfallEvents.length,
+      regionalStoriesLinkedToSystems: eventCoverage.filter((row) => row.systems.length > 0).length,
       classifiedCreatures: bloomfallCreatureEnhancements.length,
       creatureDossiersLinkedToSystems: creatureCoverage.filter((row) => row.systems.length > 0).length,
       explicitNoneSpecies: noneSpecies.length,

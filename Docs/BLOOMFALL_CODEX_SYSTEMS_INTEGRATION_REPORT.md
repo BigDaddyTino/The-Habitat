@@ -60,14 +60,14 @@ Supporting pages — Blackbloom Exposure, Marsh Absorption, Blackbloom Spell Ins
 
 ## 4. Cross-links
 
-Thirty-five short blocks were **appended** to records the earlier phases left unconnected. Appending rather than rewriting keeps the reviewed Prompt 3 and Prompt B prose exactly as approved and makes the addition auditable on its own.
+Forty-three short blocks were **appended** to records the earlier phases left unconnected. Appending rather than rewriting keeps the reviewed Prompt 3 and Prompt B prose exactly as approved and makes the addition auditable on its own.
 
 | Kind | Records | What the block does |
 | --- | ---: | --- |
-| Region | 8 | The regional dossier and three subregions gain a systems paragraph; four thin POIs gain an *In the wider Reach* paragraph. |
+| Region | 11 | The regional dossier and three subregions gain a systems paragraph; seven POIs that named no system gain an *In the wider Reach* paragraph. |
 | Item | 6 | Each canonical resource states its harvest consequence class and the systems that class answers to. |
 | Character | 4 | Ward, Quill, Reed, and Mender connect to the systems their work actually touches. |
-| Event | 5 | Five regional incidents name the systems in play. |
+| Event | 10 | Ten of the eleven regional stories name the systems in play. |
 | Creature | 12 | Every classified creature dossier gains a grouped *Related in the Codex* block. |
 
 POI-to-system linking in the other direction is data-driven rather than hand-written: each system dossier carries typed `regionNotes`, which the Codex's existing *How the world behaves here* panel already renders on the place it names. All fifteen POIs are covered that way, with no Bloomfall-specific navigation hardcoded into any component.
@@ -105,8 +105,10 @@ This second change is visible in production the next time the web app is deploye
 
 ```text
 system dossiers                      7 / 7 exact against the manifest
-cross-link blocks                    35 / 35 landed
-POIs with a system relationship      15 / 15
+cross-link blocks                    43 / 43 landed
+POIs a system names                  15 / 15
+POIs that name a system back         15 / 15
+regional stories linked to systems   10 / 11 (one deliberate exception)
 creature dossiers linked to systems  13 / 13
 explicit NONE classifications        4
 named Aberrants linked               4 / 4
@@ -186,8 +188,8 @@ git diff --check                     PASS
 
 Two independent read-only comparisons were run against production, which is a different database.
 
-- The Prompt C creature fingerprint is unchanged at `d943433bbdfdcfd70761249da81162782e67b71e08a8e74663a75ed91e54bf4f`.
-- The integration comparison finds 40 of the 42 touched slugs present, the two new dossiers correctly absent, and no Prompt E prose anywhere. Fingerprint `8e1f5ee06274c03e1318fcca6a69612ead7d08cc38989e39e147872c9c0249c8`.
+- The Prompt C creature fingerprint is unchanged at `d943433bbdfdcfd70761249da81162782e67b71e08a8e74663a75ed91e54bf4f`, exactly matching the locked baseline. That comparison covers a fixed record set, so it is the one that proves production data did not move.
+- The integration comparison finds 48 of the 50 touched slugs present, the two new dossiers correctly absent, and no Prompt E prose anywhere. Fingerprint `7eee1c9261c779fe452e05e78422ae4cfaf80ea1a8667b7f94310cf03496fd99`. This fingerprint is taken over whatever set of records the phase touches, so it changes when the phase touches more records — it is a completeness check, not a change detector, and the Prompt C baseline above is what rules out drift.
 
 The apply tool resolves only `HABITAT_ENVIRONMENT=development`, rewrites only to the loopback `habitat_atlas_dev`, independently checks the database identity, requires the Atlas authoring interlock and an explicit confirmation token, refuses any record that has drifted from its approved prior state, writes inside a serializable transaction, and records an audited `StoryRevision` for every change.
 
@@ -200,7 +202,7 @@ The apply tool resolves only `HABITAT_ENVIRONMENT=development`, rewrites only to
 
 ## 14. Owner decisions
 
-1. Approve or revise the seven system dossiers and the thirty-five cross-link blocks.
+1. Approve or revise the seven system dossiers and the forty-three cross-link blocks.
 2. Approve the retitle of `aberrant-escalation` to **Aberrant Escalation & Roaming Threats**. The slug is unchanged, so every existing link still resolves.
 3. Decide whether the system panel should be promoted to production alongside the content, or whether production should carry the prose alone at first.
 4. Optional: Codex search matches title, summary, and body text, so a phrase that prose always writes as a link — "Essence Saturation" — reaches its own dossier but not the pages citing it. Making search slug-aware would fix that for the whole Codex, not only Bloomfall. It is out of scope here and left as a proposal.
