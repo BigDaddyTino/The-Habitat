@@ -60,6 +60,7 @@ test("the release-order hierarchy stage can precede Bloomfall child creation wit
   const preContent = Object.entries(verifiedGeographicParentContracts)
     .filter(([slug]) => !["the-shattercore", "the-mutation-belt", "the-living-marsh"].includes(slug))
     .map(([slug, parent]) => entry(slug, parent));
+  preContent.push(entry("grand-rift", null), entry("high-cliffs", null));
   assert.doesNotThrow(() => assertRepairedHierarchy(preContent, { requireBloomfallSubregions: false }));
   assert.throws(() => assertRepairedHierarchy(preContent), /the-shattercore/);
 });
