@@ -98,23 +98,6 @@ export const bloomfallReactorStates: readonly BloomfallReactorState[] = [
   { key: "CONTAINMENT_BREACH", name: "Containment Breach", frequencyClass: "FAILURE", entry: "An Overflow crosses a failure threshold, or a story action breaks containment.", regionalEffect: "A persistent wound: new damage, a strong storm source, lost routes, displacement, and Lasting Wound risk.", opportunity: "Breached stores may be recoverable only after survival and containment. The world resolves this one with or without the party." },
 ] as const;
 
-/** Prompt B's two-axis classification, presented as a readable ladder. */
-export type BloomfallMutationTier = {
-  key: "NONE" | "MINOR_ADAPTIVE" | "FUNCTIONAL_ADAPTIVE" | "ADVANCED_ADAPTIVE" | "EXCEPTIONAL_ABERRANT";
-  name: string;
-  axis: "SPECIES_ELIGIBILITY" | "INDIVIDUAL_DESIGNATION";
-  meaning: string;
-  expression: string;
-};
-
-export const bloomfallMutationTiers: readonly BloomfallMutationTier[] = [
-  { key: "NONE", name: "None", axis: "SPECIES_ELIGIBILITY", meaning: "The Blackbloom may still shape, injure, or kill the species, but it does not progress through adaptive states.", expression: "One canonical form. Reversible physiology — brightness, dormancy, camouflage — is ordinary biology, not a mutation ladder." },
-  { key: "MINOR_ADAPTIVE", name: "Minor Adaptive", axis: "SPECIES_ELIGIBILITY", meaning: "A small functional response to acute pressure, with no new combat kit.", expression: "One optional exposed variant that thickens or seals what the animal already has." },
-  { key: "FUNCTIONAL_ADAPTIVE", name: "Functional Adaptive", axis: "SPECIES_ELIGIBILITY", meaning: "One authored mutation family with one mechanically meaningful adapted state.", expression: "A change that alters play — armour, sensing, mobility, tolerance, feeding, or coordination — each with a stated counter." },
-  { key: "ADVANCED_ADAPTIVE", name: "Advanced Adaptive", axis: "SPECIES_ELIGIBILITY", meaning: "Several allowed families, a Bloom-evolved state, and eligibility for persistent survivor promotion.", expression: "Four readable states, herd or pack expression, and an individual that can become a named regional threat." },
-  { key: "EXCEPTIONAL_ABERRANT", name: "Exceptional Aberrant", axis: "INDIVIDUAL_DESIGNATION", meaning: "A designation carried by one individual or collective, layered on top of its ordinary taxonomy.", expression: "A singular history rather than a species rung. It never becomes a fifth state on its lineage's ladder." },
-] as const;
-
 /** Prompt A's five-stage Bloomstorm progression. */
 export type BloomfallStormStage = {
   key: string;
@@ -381,7 +364,7 @@ export const bloomfallSystemPages: readonly BloomfallSystemPage[] = [
   },
   {
     slug: "adaptive-mutation", title: "Adaptive Mutation", authoring: "UPGRADED",
-    summary: "Bloomfall's signature rule: a finite, authored set of states that eligible species move through under pressure, and that most species never enter at all.",
+    summary: "Bloomfall's signature rule: wound an eligible creature and let it escape, and it heals into something worse. Four rungs, climbed the same way on every species that has them.",
     parent: "blackbloom-exposure", category: "world simulation",
     dependsOn: ["blackbloom-exposure", "essence-saturation", "nature"],
     pillars: [
@@ -399,14 +382,14 @@ export const bloomfallSystemPages: readonly BloomfallSystemPage[] = [
       { region: "splicefield-substation", note: "The clearest case of a machine ecology shaping a living one — and the reason Latchhound states read as circuitry." },
       { region: "glassroot-observatory", note: "Where the families, states, and counters were catalogued, and where a field sample can identify which family is present." },
     ],
-    whatItIs: "Adaptive Mutation is the canonical rule for how Bloomfall organisms change under sustained Blackbloom pressure. It runs on two independent axes. **Eligibility** is a species fact — None, Minor, Functional, or Advanced — and decides how far that species can go. **Aberrant status** is an individual fact, and describes one creature's exceptional history. Keeping them apart is what stops a designation from pretending to be a species.",
+    whatItIs: "Adaptive Mutation is the canonical rule for how Bloomfall organisms change under sustained Blackbloom pressure, and the player is what drives it. Wound an eligible creature, fail to kill it, and let it get away: it heals into the next rung and remembers what hurt it. The rungs are identical on every eligible species, so a player learns them once and reads them on anything. **None** is the animal as the Reach made it. **Minor** is +20% across the board and one resistance keyed to whatever drove it off. **Functional** is +100%, a second resistance for the second thing that wounded it, and the first resistance turned into an attack. **Advanced** is +250% and **Prisma**: every damage type halved except one hidden weakness that takes 25% extra, and nothing tells you which. **Aberrant status** stays a separate, individual fact — a surviving Advanced carries a 1% chance of seeding a named Exceptional Aberrant, a mini-boss layered on top of its ordinary taxonomy rather than a new species. Eligibility is still selective: species with no ladder have that recorded as a decision, not a gap.",
     whyItExists: "The Reach needed adaptation that a player could learn rather than merely survive. A finite authored ladder gives recurring, recognisable outcomes: the same species produces the same states, for the same reasons, with the same counters. That is what makes the region readable instead of merely strange, and it is why Adaptive Mutation exists here and nowhere else in Martino.",
     whereItOperates: "Only in [[bloomfall-reach]]. [[the-mutation-belt]] is the strongest expression ground, [[the-shattercore]] pushes expression toward charge and heat, and [[the-living-marsh]] pushes it toward sealing and flow. [[glassroot-observatory]] holds the catalogue.",
-    inputs: "Species eligibility and its allowed families; accumulated exposure from [[essence-saturation]] over time; the habitat the animal is actually in; at most one qualifying recent stress imprint; and whether the individual has already been promoted to a persistent threat. Reactor states, storms, harvesting, and Aberrant proximity all matter — but they matter by changing saturation, habitat, or disturbance, not as separate meters.",
+    inputs: "Whether the species has a ladder at all; how many times this individual has been wounded and escaped; and the damage type that did it each time, which is what selects the resistance and the retaliation it grows. Accumulated exposure from [[essence-saturation]] and the habitat it heals in shape how the change expresses. Reactor states, storms, harvesting, and Aberrant proximity all matter — but they matter by changing saturation, habitat, or disturbance, not as separate meters.",
     consequences: "Expression changes what an encounter is: armour, sensing, mobility, tolerance, charge, feeding, attack, or pack coordination. It changes what a body is worth under [[harvesting-consequences]], and a rare qualifying survivor can escalate into a persistent regional threat under [[aberrant-escalation]].",
     playerFacing: "A changed animal should be legible on sight, from continuous anatomy rather than a badge: the same skull, the same limb count, the same scars, with tissue that has visibly answered a specific problem. Behaviour changes with the body. Field scopes and samples identify a family; Wardens report the behaviour that follows.",
     canonRule: "Base taxonomy is never replaced. A [[blackbloom-hart]] stays within Beasts, a Bloommarked human stays Human, and Aberrant is a designation layered on top rather than a race. Adaptive Mutation is also not [[the-seven-phases-of-corruption]]: the two never share a value, a phase, a cure, or a colour.",
-    futureGameplay: "A future runtime would select an authored variant from species data plus local pressure — not generate anatomy. Combat-driven adaptation would be bounded to one retained stress family on a promoted survivor, and ordinary animals would not be persisted at all.",
+    futureGameplay: "A future runtime would track the wound history of individuals a player failed to finish, and select an authored form from species data plus the damage types recorded against it — not generate anatomy. The stat curve (+20%, +100%, +250%), the Prisma rule, and the 1% Aberrant seed are the tuning surface; the forms themselves stay authored per species.",
     atlas: null,
     related: links({
       systems: ["blackbloom-exposure", "essence-saturation", "aberrant-escalation", "bloomstorms", "harvesting-consequences", "marsh-absorption"],

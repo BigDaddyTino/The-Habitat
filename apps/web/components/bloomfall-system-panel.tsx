@@ -6,7 +6,6 @@ import {
   bloomfallHarvestPressureBands,
   bloomfallIntelStates,
   bloomfallMobilityClasses,
-  bloomfallMutationTiers,
   bloomfallReactorStates,
   bloomfallRelationshipDiagram,
   bloomfallRouteClasses,
@@ -18,7 +17,8 @@ import {
   bloomfallSystemPages,
   type BloomfallSystemPage,
 } from "@/lib/bloomfall-codex-integration";
-import { bloomfallCreatureEnhancements } from "@/lib/bloomfall-creature-enhancements";
+import { bloomfallCreatureEnhancements, bloomfallCreatureGuide, bloomfallLadderKindLabels } from "@/lib/bloomfall-creature-enhancements";
+import { bloomfallMutationLadder } from "@/lib/bloomfall-adaptive-ladder";
 import { bloomfallV3Assets, bloomfallV3Package } from "@/lib/bloomfall-v3-art";
 
 /**
@@ -84,51 +84,42 @@ function ReactorStates() {
   </div>;
 }
 
-const eligibilityLabels: Record<string, string> = {
-  NONE: "None", MINOR_ADAPTIVE: "Minor", FUNCTIONAL_ADAPTIVE: "Functional", ADVANCED_ADAPTIVE: "Advanced",
-};
+/** Every dossier with the ladder it actually has, and the Aberrant it can seed. */
+const ladderGroups = (["ADAPTIVE", "FIXED", "BOSS"] as const).map((kind) => ({
+  kind,
+  members: bloomfallCreatureEnhancements
+    .map((entry) => ({ entry, guide: bloomfallCreatureGuide(entry) }))
+    .filter((row) => row.guide.kind === kind),
+})).filter((group) => group.members.length > 0);
 
 function MutationTiers() {
-  const ranked = ["ADVANCED_ADAPTIVE", "FUNCTIONAL_ADAPTIVE", "MINOR_ADAPTIVE", "NONE"] as const;
-  const named = bloomfallCreatureEnhancements.filter((entry) => entry.classification === "EXCEPTIONAL_ABERRANT");
-  const ordinary = ranked.map((tier) => ({
-    tier,
-    members: bloomfallCreatureEnhancements.filter((entry) => entry.classification !== "EXCEPTIONAL_ABERRANT" && entry.mutationEligibility === tier),
-  })).filter((group) => group.members.length > 0);
   return <>
     <Cards columns={5}>
-      {bloomfallMutationTiers.map((tier) => <Card
-        eyebrow={tier.axis === "SPECIES_ELIGIBILITY" ? "Species eligibility" : "Individual designation"}
-        key={tier.key}
-        lead={tier.meaning}
-        rows={[["How it shows", tier.expression]]}
-        title={tier.name}
+      {bloomfallMutationLadder.map((rung, index) => <Card
+        eyebrow={rung.key === "ABERRANT" ? "Rare event" : `Rung ${index + 1} of 4`}
+        key={rung.key}
+        lead={rung.stats}
+        rows={[["How it gets there", rung.earned], ["Defense", rung.defense], ["Attack", rung.offense], ["Temperament", rung.temperament]]}
+        title={rung.name}
       />)}
     </Cards>
-    <h3 className="bloomfall-group-heading">Bloomfall species by tier <span>{bloomfallCreatureEnhancements.length}</span></h3>
+    <h3 className="bloomfall-group-heading">Bloomfall species by ladder <span>{bloomfallCreatureEnhancements.length}</span></h3>
     <div className="bloomfall-index-scroll">
       <table className="bloomfall-index">
-        <caption>Every Bloomfall organism and entity Prompt B classified, with the tier it was given and where it is found.</caption>
-        <thead><tr><th scope="col">Tier</th><th scope="col">Dossier</th><th scope="col">Where</th><th scope="col">States</th><th scope="col">Can be promoted</th></tr></thead>
+        <caption>Every Bloomfall organism and entity, the ladder it has, and the named Aberrant a surviving Advanced can seed.</caption>
+        <thead><tr><th scope="col">Ladder</th><th scope="col">Dossier</th><th scope="col">Where</th><th scope="col">Rungs</th><th scope="col">Aberrant</th></tr></thead>
         <tbody>
-          {ordinary.map((group) => group.members.map((member, index) => <tr key={member.slug}>
-            {index === 0 ? <th rowSpan={group.members.length} scope="rowgroup">{eligibilityLabels[group.tier]}</th> : null}
-            <td><Link href={`/codex/bible/${member.slug}`}>{member.title}<ArrowRight aria-hidden="true" size={11} /></Link></td>
-            <td>{member.distribution[0]?.replaceAll("_", " ").toLowerCase() ?? "the Reach"}</td>
-            <td>{member.states.length}</td>
-            <td>{member.promotedThreat.eligible ? "Yes" : "No"}</td>
+          {ladderGroups.map((group) => group.members.map(({ entry, guide }, index) => <tr className={group.kind === "BOSS" ? "is-exceptional" : undefined} key={entry.slug}>
+            {index === 0 ? <th rowSpan={group.members.length} scope="rowgroup">{bloomfallLadderKindLabels[group.kind]}</th> : null}
+            <td><Link href={`/codex/bible/${entry.slug}`}>{entry.title}<ArrowRight aria-hidden="true" size={11} /></Link></td>
+            <td>{entry.distribution[0]?.replaceAll("_", " ").toLowerCase() ?? "the Reach"}</td>
+            <td>{guide.kind === "ADAPTIVE" ? "4 + Aberrant" : guide.kind === "BOSS" ? "Already an Aberrant" : "None"}</td>
+            <td>{guide.kind === "ADAPTIVE" ? guide.aberrant.name : "—"}</td>
           </tr>))}
-          {named.map((member, index) => <tr className="is-exceptional" key={member.slug}>
-            {index === 0 ? <th rowSpan={named.length} scope="rowgroup">Exceptional Aberrant</th> : null}
-            <td><Link href={`/codex/bible/${member.slug}`}>{member.title}<ArrowRight aria-hidden="true" size={11} /></Link></td>
-            <td>{member.distribution[0]?.replaceAll("_", " ").toLowerCase() ?? "the Reach"}</td>
-            <td>{member.states.length}</td>
-            <td>Already named canon</td>
-          </tr>)}
         </tbody>
       </table>
     </div>
-    <p className="bloomfall-panel-note">A tier of <strong>None</strong> is a decision, not a gap. Those dossiers show one canonical form and explain the fixed ecology behind it.</p>
+    <p className="bloomfall-panel-note">A ladder of <strong>None</strong> is a decision, not a gap. Those dossiers show one canonical form and explain the fixed ecology behind it.</p>
   </>;
 }
 

@@ -9,8 +9,13 @@ import {
   getBloomfallAdaptiveP1P2Presentation,
   type BloomfallAdaptiveP1P2Asset,
 } from "@/lib/bloomfall-adaptive-p1p2";
-import { bloomfallStateGuide } from "@/lib/bloomfall-creature-enhancements";
-import { bloomfallAbilitySentence, type BloomfallStateGuide } from "@/lib/bloomfall-creature-field-guide";
+import {
+  bloomfallCreatureGuide,
+  bloomfallMutationCards,
+  type BloomfallMutationCard,
+} from "@/lib/bloomfall-creature-enhancements";
+import { bloomfallAbilitySentence } from "@/lib/bloomfall-creature-field-guide";
+import { bloomfallLadderSummary } from "@/lib/bloomfall-adaptive-ladder";
 
 type AdaptiveAsset = BloomfallAdaptiveP0Asset | BloomfallAdaptiveP1P2Asset;
 
@@ -18,73 +23,82 @@ function assetUrl(asset: AdaptiveAsset) {
   return "reusedAsset" in asset ? bloomfallAdaptiveP1P2AssetUrl(asset) : bloomfallAdaptiveP0AssetUrl(asset);
 }
 
-function StateCard({ asset, guide }: { asset: AdaptiveAsset; guide?: BloomfallStateGuide }) {
-  const url = assetUrl(asset);
-  return <article className="adaptive-state-card">
-    <a className="adaptive-state-image" href={url} target="_blank" rel="noreferrer">
-      <img alt={asset.alt} src={url} />
-      <span>Open full resolution</span>
-    </a>
+/**
+ * One rung of the ladder: its picture where the art package has one, and
+ * underneath it the only three things a player needs — which rung this is,
+ * what the stats do, and what it can suddenly do to them.
+ *
+ * The art packages predate the ladder and hold a different number of plates
+ * per species, so a rung without a plate keeps its slot and says so rather
+ * than borrowing the picture next to it.
+ */
+function RungCard({ card, asset }: { card: BloomfallMutationCard; asset: AdaptiveAsset | undefined }) {
+  const url = asset ? assetUrl(asset) : null;
+  return <article className={`adaptive-state-card rung-${card.rung.toLowerCase()}`}>
+    {url && asset
+      ? <a className="adaptive-state-image" href={url} target="_blank" rel="noreferrer">
+          <img alt={asset.alt} src={url} />
+          <span>Open full resolution</span>
+        </a>
+      : <div className="adaptive-state-image is-empty"><span>Art pending</span></div>}
     <div className="adaptive-state-copy">
-      <p className="eyebrow">{asset.purpose.replaceAll("_", " ")}</p>
-      <h4>{asset.state}</h4>
-      {/* A state with reader copy shows what the mutation grants; the
-          support and continuity art keeps its own caption. */}
-      {guide ? <>
-        <p>{guide.read}</p>
-        <ul className="adaptive-state-abilities">{guide.abilities.map((item) => <li key={item.name}><strong>{item.name}.</strong> {bloomfallAbilitySentence(item)}</li>)}</ul>
-        <p><strong>Counter.</strong> {guide.counter}</p>
-        <p><strong>How it gets there.</strong> {guide.unlock}</p>
-      </> : <>
-        <p><strong>Physical.</strong> {asset.physicalChanges}</p>
-        <p><strong>Function.</strong> {asset.functionalChanges}</p>
-      </>}
+      <p className="eyebrow">{card.label}</p>
+      <h4>{card.form}</h4>
+      <p><strong>Stats.</strong> {card.stats}</p>
+      <p><strong>Temperament.</strong> {card.temperament}</p>
+      {card.notes.map((note) => <p key={note.label}><strong>{note.label}.</strong> {note.text}</p>)}
+      <p className="adaptive-ability-heading"><strong>{card.abilityHeading}.</strong></p>
+      <ul className="adaptive-state-abilities">
+        {card.abilities.map((item) => <li key={item.name}><strong>{item.name}.</strong> {bloomfallAbilitySentence(item)}</li>)}
+      </ul>
+      <p className="adaptive-state-drop"><strong>Drops.</strong> {card.drop}</p>
     </div>
   </article>;
 }
 
-/** Prompt C proof surface. The resolver returns null outside DEVELOPMENT. */
+/** The Adaptive Mutation gallery. The resolver returns null outside DEVELOPMENT. */
 export function BloomfallAdaptiveMutationPanel({ entrySlug }: { entrySlug: string }) {
   const presentation = getBloomfallAdaptiveP1P2Presentation(entrySlug) ?? getBloomfallAdaptiveP0Presentation(entrySlug);
   if (!presentation) return null;
+  const guide = bloomfallCreatureGuide(presentation.enhancement);
 
-  if (presentation.kind === "NONE") {
+  if (guide.kind !== "ADAPTIVE") {
+    const stateAssets = presentation.assets.filter((asset) => asset.purpose !== "STATE_REFERENCE");
     return <section className="adaptive-mutation-panel adaptive-mutation-none" aria-labelledby="adaptive-mutation-title">
       <div className="adaptive-mutation-heading">
         <div><p className="eyebrow">Bloomfall ecology</p><h2 id="adaptive-mutation-title">Adaptive Mutation</h2></div>
-        <span>NONE</span>
+        <span>{guide.kind === "BOSS" ? "EXCEPTIONAL ABERRANT" : "NONE"}</span>
       </div>
-      <h3>No documented adaptive progression.</h3>
-      <p>{presentation.enhancement.tierReason}</p>
-      {presentation.assets.length ? <div className="adaptive-support-art">
-        <p className="eyebrow">Canonical fixed form</p>
-        {presentation.assets.map((asset) => <StateCard asset={asset} key={asset.id} />)}
+      <h3>{guide.kind === "BOSS" ? "Already an Aberrant." : "No adaptive progression."}</h3>
+      <p>{guide.kind === "BOSS" ? guide.spawn : guide.whyFixed}</p>
+      {(guide.kind === "BOSS" ? presentation.assets : stateAssets).length ? <div className="adaptive-support-art">
+        <p className="eyebrow">{guide.kind === "BOSS" ? "Current form" : "Canonical fixed form"}</p>
+        {(guide.kind === "BOSS" ? presentation.assets : stateAssets).map((asset) => <figure className="adaptive-support-plate" key={asset.id}>
+          <a href={assetUrl(asset)} target="_blank" rel="noreferrer"><img alt={asset.alt} src={assetUrl(asset)} /></a>
+        </figure>)}
       </div> : null}
-      <p className="adaptive-mutation-note">This is an explicit classification, not missing data. Fixed Blackbloom anatomy, mechanical integration, and human-lineage exposure remain distinct from Adaptive Mutation.</p>
+      <ul className="adaptive-state-abilities is-standalone">
+        {guide.abilities.map((item) => <li key={item.name}><strong>{item.name}.</strong> {bloomfallAbilitySentence(item)}</li>)}
+      </ul>
+      <p className="adaptive-mutation-note"><strong>Drops.</strong> {guide.drops}</p>
     </section>;
   }
 
-  const isExceptional = presentation.kind === "EXCEPTIONAL";
-  const stateAssets = presentation.assets.filter((asset) => asset.purpose === "STATE_REFERENCE");
-  const supportAssets = presentation.assets.filter((asset) => asset.purpose !== "STATE_REFERENCE");
-  const cards = isExceptional ? presentation.assets : stateAssets;
+  const cards = bloomfallMutationCards(guide);
+  // The plates were shot against the old per-species state lists, so they are
+  // attached in order and simply run out on species whose package is shorter
+  // than the ladder. Nothing borrows a neighbour's picture.
+  const plates = presentation.assets.filter((asset) => asset.purpose === "STATE_REFERENCE");
 
-  return <section className={`adaptive-mutation-panel${isExceptional ? " adaptive-mutation-exceptional" : ""}`} aria-labelledby="adaptive-mutation-title">
+  return <section className="adaptive-mutation-panel" aria-labelledby="adaptive-mutation-title">
     <div className="adaptive-mutation-heading">
-      <div><p className="eyebrow">Development visual proof · {isExceptional ? "case continuity" : "state progression"}</p><h2 id="adaptive-mutation-title">Adaptive Mutation</h2></div>
-      <span>{isExceptional ? "EXCEPTIONAL ABERRANT" : presentation.enhancement.mutationEligibility}</span>
+      <div><p className="eyebrow">Wound it · let it escape · meet it again</p><h2 id="adaptive-mutation-title">Adaptive Mutation</h2></div>
+      <span>4 RUNGS + ABERRANT</span>
     </div>
-    <p className="adaptive-mutation-intro">{presentation.enhancement.tierReason}</p>
-    <div className={`adaptive-state-track${isExceptional ? " is-continuity" : ""}`} aria-label={isExceptional ? `${presentation.enhancement.title} continuity sequence` : `${presentation.enhancement.title} known mutation states`}>
-      {cards.map((asset, index) => {
-        const state = isExceptional ? undefined : presentation.enhancement.states[index];
-        return <StateCard asset={asset} guide={state ? bloomfallStateGuide(presentation.enhancement, state) : undefined} key={asset.id} />;
-      })}
+    <p className="adaptive-mutation-intro">{guide.hook} {bloomfallLadderSummary}</p>
+    <div className="adaptive-state-track" aria-label={`${presentation.enhancement.title} mutation ladder`}>
+      {cards.map((card, index) => <RungCard asset={plates[index]} card={card} key={card.rung} />)}
     </div>
-    {!isExceptional && supportAssets.length ? <div className="adaptive-support-art">
-      <p className="eyebrow">Ecology in motion</p>
-      {supportAssets.map((asset) => <StateCard asset={asset} key={asset.id} />)}
-    </div> : null}
     <p className="adaptive-mutation-note">Development-only · Bloomfall Adaptive Mutation visual review · no runtime mutation logic is active.</p>
   </section>;
 }

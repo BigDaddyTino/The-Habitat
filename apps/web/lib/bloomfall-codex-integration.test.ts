@@ -20,7 +20,6 @@ import {
   bloomfallIntegrationUpgradedSlugs,
   bloomfallIntelStates,
   bloomfallMobilityClasses,
-  bloomfallMutationTiers,
   bloomfallReactorStates,
   bloomfallRelationshipDiagram,
   bloomfallRouteClasses,
@@ -88,8 +87,6 @@ test("the canonical band, state, tier, stage, and class vocabularies are exact",
   assert.deepEqual(bloomfallReactorStates.filter((state) => state.frequencyClass === "NORMAL_CYCLE").map((state) => state.key), ["DORMANT_INTERVAL", "STABILIZATION", "SECTOR_RESTART", "VENTING"]);
   assert.deepEqual(bloomfallReactorStates.filter((state) => state.frequencyClass === "RARE_CONTROLLED").map((state) => state.key), ["PURGE"]);
   assert.deepEqual(bloomfallReactorStates.filter((state) => state.frequencyClass === "FAILURE").map((state) => state.key), ["OVERFLOW", "CONTAINMENT_BREACH"]);
-  assert.deepEqual(bloomfallMutationTiers.map((tier) => tier.key), ["NONE", "MINOR_ADAPTIVE", "FUNCTIONAL_ADAPTIVE", "ADVANCED_ADAPTIVE", "EXCEPTIONAL_ABERRANT"]);
-  assert.deepEqual(bloomfallMutationTiers.filter((tier) => tier.axis === "INDIVIDUAL_DESIGNATION").map((tier) => tier.key), ["EXCEPTIONAL_ABERRANT"]);
   assert.deepEqual(bloomfallStormStages.map((stage) => stage.key), ["WARNING", "ONSET", "PEAK", "DECAY", "AFTERMATH"]);
   assert.deepEqual(bloomfallHarvestClasses.map((entry) => entry.key), ["INERT_SALVAGE", "REGENERATIVE_TAKE", "FUNCTIONAL_HARVEST", "SINK_HARVEST", "BREACH_EXTRACTION"]);
   assert.deepEqual(bloomfallHarvestPressureBands.map((band) => band.key), ["LIGHT", "WORKED", "STRESSED", "CRITICAL"]);

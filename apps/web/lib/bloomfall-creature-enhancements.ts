@@ -1,5 +1,20 @@
 import type { StoryEntryKind } from "@habitat/shared";
-import { bloomfallAbilitySentence, bloomfallCreatureFieldGuide } from "./bloomfall-creature-field-guide";
+import {
+  bloomfallDamageTypeLabels,
+  bloomfallDamageTypes,
+  bloomfallLadderSummary,
+  bloomfallMutationLadder,
+  type BloomfallMutationRung,
+} from "./bloomfall-adaptive-ladder";
+import {
+  bloomfallAbilitySentence,
+  bloomfallCreatureFieldGuide,
+  type BloomfallAbility,
+  type BloomfallAdaptiveGuide,
+  type BloomfallBossGuide,
+  type BloomfallDamageTable,
+  type BloomfallFixedGuide,
+} from "./bloomfall-creature-field-guide";
 
 export const bloomfallMutationEligibilities = ["NONE", "MINOR_ADAPTIVE", "FUNCTIONAL_ADAPTIVE", "ADVANCED_ADAPTIVE"] as const;
 export type BloomfallMutationEligibility = (typeof bloomfallMutationEligibilities)[number];
@@ -282,20 +297,8 @@ export const bloomfallClassificationLabels: Record<BloomfallAdaptiveClassificati
   ADVANCED_ADAPTIVE: "Advanced Adaptive",
   FUNCTIONAL_ADAPTIVE: "Functional Adaptive",
   MINOR_ADAPTIVE: "Minor Adaptive",
-  NONE: "No mutation ladder",
+  NONE: "No adaptive mutation",
   EXCEPTIONAL_ABERRANT: "Exceptional Aberrant",
-};
-
-const frequencyLabels: Record<BloomfallMutationState["frequency"], string> = {
-  COMMON: "Common",
-  CONDITIONAL: "Conditional, temporary",
-  UNCOMMON: "Uncommon",
-  RARE: "Rare",
-  UNIQUE: "Unique",
-};
-
-const toleranceLabels: Record<BloomfallSaturationTolerance, string> = {
-  LOW: "Low", MODERATE: "Moderate", HIGH: "High", EXTREME: "Extreme", VARIABLE: "Variable, case by case",
 };
 
 /** The field guide for one dossier, or a loud failure — a manifest entry without reader copy is a bug, not a blank page. */
@@ -305,34 +308,101 @@ export function bloomfallCreatureGuide(entry: BloomfallCreatureEnhancement) {
   return guide;
 }
 
-export function bloomfallStateGuide(entry: BloomfallCreatureEnhancement, mutationState: BloomfallMutationState) {
-  const guide = bloomfallCreatureGuide(entry).states[mutationState.key];
-  if (!guide) throw new Error(`${entry.slug} has no field guide for its ${mutationState.name} state.`);
-  return guide;
+/**
+ * What a reader is told this dossier is. Derived from the field guide rather
+ * than the manifest's classification enum: that enum still records the design
+ * decision each species was given during authoring, but every adaptive species
+ * now climbs the same four rungs, so it is no longer what a player sees.
+ */
+export const bloomfallLadderKindLabels = {
+  ADAPTIVE: "Adaptive Mutation",
+  FIXED: bloomfallClassificationLabels.NONE,
+  BOSS: "Exceptional Aberrant",
+} as const;
+
+export type BloomfallMutationCard = {
+  rung: BloomfallMutationRung;
+  /** None, Minor, Functional, Advanced, Exceptional Aberrant. */
+  label: string;
+  /** What this species is called at this rung — and the hook for its art. */
+  form: string;
+  stats: string;
+  temperament: string;
+  /** Rule lines printed above the ability list. */
+  notes: readonly { label: string; text: string }[];
+  abilityHeading: string;
+  abilities: readonly BloomfallAbility[];
+  /** What the corpse is worth at this rung. */
+  drop: string;
+};
+
+/** A damage-keyed table as a flat ability list: "Fire → Ashcoat". */
+const keyed = (table: BloomfallDamageTable): BloomfallAbility[] =>
+  bloomfallDamageTypes.map((damage) => ({
+    name: `${bloomfallDamageTypeLabels[damage]} → ${table[damage].name}`,
+    effect: table[damage].effect,
+  }));
+
+/**
+ * The five cards of an adaptive species, built once so the dossier prose and
+ * the art panel can never describe the same rung two different ways.
+ */
+export function bloomfallMutationCards(guide: BloomfallAdaptiveGuide): BloomfallMutationCard[] {
+  return bloomfallMutationLadder.map((rung) => {
+    const shared = {
+      rung: rung.key,
+      label: rung.name,
+      form: guide.forms[rung.key],
+      stats: rung.stats,
+      temperament: rung.temperament,
+      drop: guide.drops[rung.key],
+    };
+    if (rung.key === "MINOR") return { ...shared, notes: [], abilityHeading: "Resistance — one, matched to the damage that drove it off", abilities: keyed(guide.resistances) };
+    if (rung.key === "FUNCTIONAL") return { ...shared, notes: [{ label: "Defense", text: rung.defense }], abilityHeading: "Attack — built from the damage that made it Minor", abilities: keyed(guide.retaliation) };
+    if (rung.key === "ADVANCED") return { ...shared, notes: [{ label: "Defense", text: rung.defense }], abilityHeading: "Special attacks", abilities: guide.advanced };
+    if (rung.key === "ABERRANT") return { ...shared, notes: [{ label: "Spawn", text: rung.earned }, { label: "What it is", text: guide.aberrant.what }], abilityHeading: "Abilities", abilities: guide.aberrant.abilities };
+    return { ...shared, notes: [], abilityHeading: "Abilities", abilities: guide.base };
+  });
+}
+
+const abilityList = (abilities: readonly BloomfallAbility[]) =>
+  abilities.map((item) => `- **${item.name}.** ${bloomfallAbilitySentence(item)}`).join("\n");
+
+function renderAdaptive(guide: BloomfallAdaptiveGuide) {
+  const cards = bloomfallMutationCards(guide);
+  const loot = cards.map((card) => `- **${card.label}.** ${card.drop}`).join("\n");
+  const rungs = cards.map((card) => [
+    `### ${card.label} — ${card.form}`,
+    `**Stats.** ${card.stats}`,
+    `**Temperament.** ${card.temperament}`,
+    ...card.notes.map((note) => `**${note.label}.** ${note.text}`),
+    `**${card.abilityHeading}.**`,
+    abilityList(card.abilities),
+  ].join("\n\n")).join("\n\n");
+  const dossier = guide.aberrant.slug ? ` It has its own dossier: [[${guide.aberrant.slug}]].` : "";
+  return `${guide.summary}\n\n## Why farm it\n\n${loot}\n\n## Adaptive Mutation\n\n${guide.hook} ${bloomfallLadderSummary}${dossier}\n\n${rungs}`;
+}
+
+function renderFixed(guide: BloomfallFixedGuide) {
+  return `${guide.summary}\n\n## Why farm it\n\n${guide.drops}\n\n## Abilities\n\n${abilityList(guide.abilities)}\n\n## Adaptive Mutation\n\n**${bloomfallClassificationLabels.NONE}.** ${guide.whyFixed}`;
+}
+
+function renderBoss(guide: BloomfallBossGuide) {
+  return `${guide.summary}\n\n## Why farm it\n\n${guide.drops}\n\n## Mini-boss\n\n**Spawn.** ${guide.spawn}\n\n**Stats.** ${guide.stats}\n\n**Abilities.**\n\n${abilityList(guide.abilities)}`;
 }
 
 /**
- * The dossier body a reader sees: the specimen, its field notes, every
- * mutation by name with the abilities it grants and how to counter it, and
- * the reasons to hunt it or leave it alone. The manifest's design fields —
- * triggers, saturation, reactor coupling, visual continuity, image direction —
- * stay in source for the simulation and the artists; they are not printed.
+ * The dossier body a reader sees: one paragraph of summary, what the corpse is
+ * worth at each rung, and the Adaptive Mutation ladder in this species' own
+ * terms. The manifest's design fields — anatomy, triggers, reactor coupling,
+ * visual continuity, image direction — stay in source for the simulation and
+ * for image prompting; they are not printed.
  */
 export function renderBloomfallCreatureEnhancement(entry: BloomfallCreatureEnhancement) {
   const guide = bloomfallCreatureGuide(entry);
-  const mutations = entry.states.map((mutationState) => {
-    const state = bloomfallStateGuide(entry, mutationState);
-    const abilities = state.abilities.map((item) => `- **${item.name}.** ${bloomfallAbilitySentence(item)}`).join("\n");
-    return `### ${mutationState.name} — ${frequencyLabels[mutationState.frequency]}\n\n${state.read}\n\n${abilities}\n\n**Counter.** ${state.counter}\n\n**How it gets there.** ${state.unlock}`;
-  }).join("\n\n");
-  const hunt = [
-    `**Why.** ${guide.hunt.why}`,
-    `**The take.** ${guide.hunt.take}`,
-    `**The cost.** ${guide.hunt.cost}`,
-    guide.hunt.named ? `**Named threat.** ${guide.hunt.named}` : null,
-  ].filter(Boolean).join("\n\n");
-
-  return `${guide.specimen.join("\n\n")}\n\n## Field notes\n\n**Where.** ${guide.where}\n\n**Role.** ${guide.role}\n\n**Company.** ${guide.company}\n\n**In a Bloomstorm.** ${guide.storm}\n\n**Saturation tolerance.** ${toleranceLabels[entry.saturationTolerance]}.\n\n## Mutations\n\n**${bloomfallClassificationLabels[entry.classification]}.** ${guide.ladder}\n\n${mutations}\n\n## Why hunt it\n\n${hunt}`;
+  if (guide.kind === "ADAPTIVE") return renderAdaptive(guide);
+  if (guide.kind === "BOSS") return renderBoss(guide);
+  return renderFixed(guide);
 }
 
 export const bloomfallCreatureEnhancementBySlug = new Map(bloomfallCreatureEnhancements.map((entry) => [entry.slug, entry]));

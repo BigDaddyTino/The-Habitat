@@ -111,7 +111,11 @@ export async function planBloomfallCodexIntegration(db: Client): Promise<Bloomfa
     const seed = packageBySlug.get(record.slug);
     if (!seed) throw new Error(`${record.slug} has no approved baseline.`);
     const baseline = current.title === seed.title && current.summary === seed.summary && current.body === seed.body && jsonEqual(withoutVisualArt(current.meta), seed.meta);
-    if (!baseline) throw new Error(`${record.slug} has drifted from its approved baseline; refusing to overwrite it.`);
+    // A record can also be found holding a *later* approved state than the
+    // seed — one this tooling promoted in an earlier release and has since
+    // rewritten. The body digest identifies that state exactly, so a known
+    // superseded body is as safe to overwrite as the untouched baseline.
+    if (!baseline && !bloomfallIsApprovedPriorBody(record.slug, current.body)) throw new Error(`${record.slug} has drifted from its approved baseline; refusing to overwrite it.`);
     plan.upgrade.push(record.slug);
   }
 
