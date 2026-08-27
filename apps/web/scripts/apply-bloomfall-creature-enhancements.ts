@@ -12,6 +12,7 @@ import { bloomfallAberrants, bloomfallCharacters, bloomfallCreatures } from "../
 import { bloomfallIntegrationExpectedBody } from "../lib/bloomfall-codex-integration";
 import { assertAtlasPersistentDevelopmentTarget, assertAtlasV2SchemaPresent } from "./lib/atlas-v2-activation";
 import { stableAtlasJson } from "./lib/atlas-integrity";
+import { bloomfallIsApprovedPriorBody } from "./lib/bloomfall-codex-promotion";
 
 const confirmation = "--confirm=BLOOMFALL_CREATURE_ENHANCEMENTS_DEVELOPMENT_ONLY";
 const baselines = new Map(
@@ -69,7 +70,7 @@ async function main() {
       // Prompt E appended a cross-link block on top of the Prompt B prose, so
       // that composed body is an approved state this tool must leave alone.
       const expected = bloomfallIntegrationExpectedBody(enhancement.slug) ?? renderBloomfallCreatureEnhancement(enhancement);
-      if (current.body !== seed.body && current.body !== expected && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} body has edits outside the approved Prompt 3, Prompt B, or Prompt E states.`);
+      if (!bloomfallIsApprovedPriorBody(enhancement.slug, current.body) && current.body !== expected && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} body has edits outside the approved Prompt 3, Prompt B, Prompt E, or superseded field-guide states.`);
       if (current.body !== expected) pending += 1;
     }
 
@@ -94,11 +95,10 @@ async function main() {
       const actor = await tx.user.findFirst({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });
       if (!actor) throw new Error("Creature enhancement authoring requires an active administrator for audit authorship.");
       for (const enhancement of bloomfallCreatureEnhancements) {
-        const seed = baselines.get(enhancement.slug)!;
         const current = await tx.storyEntry.findUniqueOrThrow({ where: { slug: enhancement.slug } });
         const expected = bloomfallIntegrationExpectedBody(enhancement.slug) ?? renderBloomfallCreatureEnhancement(enhancement);
         if (current.body === expected) continue;
-        if (current.body !== seed.body && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} changed after preview; transaction stopped.`);
+        if (!bloomfallIsApprovedPriorBody(enhancement.slug, current.body) && !isApprovedPriorPromptBBody(enhancement.slug, current.body, renderBloomfallCreatureEnhancement(enhancement))) throw new Error(`${enhancement.slug} changed after preview; transaction stopped.`);
         const before = { body: current.body, version: current.version };
         const updated = await tx.storyEntry.update({
           where: { id: current.id },

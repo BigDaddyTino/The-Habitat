@@ -1,4 +1,5 @@
 import type { StoryEntryKind } from "@habitat/shared";
+import { bloomfallAbilitySentence, bloomfallCreatureFieldGuide } from "./bloomfall-creature-field-guide";
 
 export const bloomfallMutationEligibilities = ["NONE", "MINOR_ADAPTIVE", "FUNCTIONAL_ADAPTIVE", "ADVANCED_ADAPTIVE"] as const;
 export type BloomfallMutationEligibility = (typeof bloomfallMutationEligibilities)[number];
@@ -276,21 +277,62 @@ export const bloomfallEcologySurfaceDecisions = [
   { slug: "capacitor-tissue", kind: "ITEM", decision: "A cross-species component, not a lineage. Source creature/entity owns the classification." },
 ] as const;
 
-function classificationLabel(entry: BloomfallCreatureEnhancement) {
-  return entry.classification.replaceAll("_", " ");
+/** How the dossier names each tier — the reader's words, not the enum's. */
+export const bloomfallClassificationLabels: Record<BloomfallAdaptiveClassification, string> = {
+  ADVANCED_ADAPTIVE: "Advanced Adaptive",
+  FUNCTIONAL_ADAPTIVE: "Functional Adaptive",
+  MINOR_ADAPTIVE: "Minor Adaptive",
+  NONE: "No mutation ladder",
+  EXCEPTIONAL_ABERRANT: "Exceptional Aberrant",
+};
+
+const frequencyLabels: Record<BloomfallMutationState["frequency"], string> = {
+  COMMON: "Common",
+  CONDITIONAL: "Conditional, temporary",
+  UNCOMMON: "Uncommon",
+  RARE: "Rare",
+  UNIQUE: "Unique",
+};
+
+const toleranceLabels: Record<BloomfallSaturationTolerance, string> = {
+  LOW: "Low", MODERATE: "Moderate", HIGH: "High", EXTREME: "Extreme", VARIABLE: "Variable, case by case",
+};
+
+/** The field guide for one dossier, or a loud failure — a manifest entry without reader copy is a bug, not a blank page. */
+export function bloomfallCreatureGuide(entry: BloomfallCreatureEnhancement) {
+  const guide = bloomfallCreatureFieldGuide[entry.slug];
+  if (!guide) throw new Error(`${entry.slug} has no field guide.`);
+  return guide;
 }
 
-export function renderBloomfallCreatureEnhancement(entry: BloomfallCreatureEnhancement) {
-  const paragraphs = [...entry.overview];
-  const stateText = entry.states.map((mutationState) => `### ${mutationState.name} - ${mutationState.frequency}\n\n**Physical change.** ${mutationState.physicalChanges}\n\n**Function.** ${mutationState.function}\n\n**Behavior.** ${mutationState.behavior}\n\n**Combat.** ${mutationState.combat}\n\n**Triggers and systems.** ${mutationState.triggers} Saturation: ${mutationState.saturation} Bloomstorm: ${mutationState.bloomstorm} Reactor: ${mutationState.reactor}\n\n**Reversibility and persistence.** ${mutationState.reversibility} ${mutationState.persistence}\n\n**Visual read.** ${mutationState.visualDifference}`).join("\n\n");
-  const promotion = entry.promotedThreat.eligible
-    ? `**Persistent promoted threat: YES.** Conditions: ${entry.promotedThreat.conditions.join("; ")}. ${entry.promotedThreat.naming} ${entry.promotedThreat.atlas} ${entry.promotedThreat.persistence} ${entry.promotedThreat.death}`
-    : `**Persistent promoted threat: NO.** ${entry.promotedThreat.conditions.join(" ")} ${entry.promotedThreat.persistence}`;
-  const combat = entry.combatFamilies.length
-    ? `**Bounded combat-driven families.** ${entry.combatFamilies.join(", ")}. A qualifying promoted survivor may retain at most one supported stress imprint; the species receives no other combat-generated family.`
-    : "**Combat-driven adaptation.** None. Combat can wound, displace, or kill this entity, but it does not generate a new mutation family.";
+export function bloomfallStateGuide(entry: BloomfallCreatureEnhancement, mutationState: BloomfallMutationState) {
+  const guide = bloomfallCreatureGuide(entry).states[mutationState.key];
+  if (!guide) throw new Error(`${entry.slug} has no field guide for its ${mutationState.name} state.`);
+  return guide;
+}
 
-  return `${paragraphs.join("\n\n")}\n\n## Ecology\n\n**Distribution.** ${entry.distribution.join("; ")}. **Saturation tolerance: ${entry.saturationTolerance}.**\n\n**Diet and regional role.** ${entry.dietAndRole}\n\n**Relationships.** ${entry.relationships}\n\n**Flora and absorption.** ${entry.floraAndAbsorption}\n\n**Bloomstorm behavior.** ${entry.bloomstormBehaviors.join("; ")}.\n\n**Reactor relationship.** ${entry.reactorRelationship}\n\n## Adaptive Mutation\n\n**Classification: ${classificationLabel(entry)}. Eligibility axis: ${entry.mutationEligibility}. Aberrant status: ${entry.aberrantStatus}.**\n\n${entry.tierReason}\n\n${entry.specialMechanic ? `**Separate mechanic.** ${entry.specialMechanic}\n\n` : ""}${combat}\n\n${stateText}\n\n${promotion}\n\n## Harvest and consequence\n\n${entry.harvestAndConsequence}\n\n## Future state imagery\n\n${entry.visualContinuity} ${entry.image.direction}`;
+/**
+ * The dossier body a reader sees: the specimen, its field notes, every
+ * mutation by name with the abilities it grants and how to counter it, and
+ * the reasons to hunt it or leave it alone. The manifest's design fields —
+ * triggers, saturation, reactor coupling, visual continuity, image direction —
+ * stay in source for the simulation and the artists; they are not printed.
+ */
+export function renderBloomfallCreatureEnhancement(entry: BloomfallCreatureEnhancement) {
+  const guide = bloomfallCreatureGuide(entry);
+  const mutations = entry.states.map((mutationState) => {
+    const state = bloomfallStateGuide(entry, mutationState);
+    const abilities = state.abilities.map((item) => `- **${item.name}.** ${bloomfallAbilitySentence(item)}`).join("\n");
+    return `### ${mutationState.name} — ${frequencyLabels[mutationState.frequency]}\n\n${state.read}\n\n${abilities}\n\n**Counter.** ${state.counter}\n\n**How it gets there.** ${state.unlock}`;
+  }).join("\n\n");
+  const hunt = [
+    `**Why.** ${guide.hunt.why}`,
+    `**The take.** ${guide.hunt.take}`,
+    `**The cost.** ${guide.hunt.cost}`,
+    guide.hunt.named ? `**Named threat.** ${guide.hunt.named}` : null,
+  ].filter(Boolean).join("\n\n");
+
+  return `${guide.specimen.join("\n\n")}\n\n## Field notes\n\n**Where.** ${guide.where}\n\n**Role.** ${guide.role}\n\n**Company.** ${guide.company}\n\n**In a Bloomstorm.** ${guide.storm}\n\n**Saturation tolerance.** ${toleranceLabels[entry.saturationTolerance]}.\n\n## Mutations\n\n**${bloomfallClassificationLabels[entry.classification]}.** ${guide.ladder}\n\n${mutations}\n\n## Why hunt it\n\n${hunt}`;
 }
 
 export const bloomfallCreatureEnhancementBySlug = new Map(bloomfallCreatureEnhancements.map((entry) => [entry.slug, entry]));

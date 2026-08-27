@@ -103,3 +103,15 @@ test("a generated dossier's sections become headings instead of literal hashes",
   assert.deepEqual(storyProseBlocks("# Not a heading"), [{ kind: "paragraph", text: "# Not a heading" }]);
   assert.deepEqual(storyProseBlocks("Bay ## 4 is sealed."), [{ kind: "paragraph", text: "Bay ## 4 is sealed." }]);
 });
+
+test("a paragraph of dashed lines becomes a list, and anything less stays prose", () => {
+  assert.deepEqual(storyProseBlocks("### Grounded Crown\n\n- **Charge Routing.** Shock resistance.\n- **Grounding Pulse.** One discharge, then a [[recovery-window]].\n\n**Counter.** Wait it out."), [
+    { kind: "heading", level: 3, text: "Grounded Crown" },
+    { kind: "list", items: ["**Charge Routing.** Shock resistance.", "**Grounding Pulse.** One discharge, then a [[recovery-window]]."] },
+    { kind: "paragraph", text: "**Counter.** Wait it out." },
+  ]);
+  // A dash inside a sentence, a bare dash, or a half-list is still a paragraph.
+  assert.deepEqual(storyProseBlocks("Long Graze - the migration country."), [{ kind: "paragraph", text: "Long Graze - the migration country." }]);
+  assert.deepEqual(storyProseBlocks("-"), [{ kind: "paragraph", text: "-" }]);
+  assert.deepEqual(storyProseBlocks("- one item\nand a stray line"), [{ kind: "paragraph", text: "- one item\nand a stray line" }]);
+});

@@ -155,7 +155,7 @@ async function main() {
     const verification = await planBloomfallCodexIntegration(database);
     const remaining = bloomfallCodexPlanMutations(verification);
     if (remaining !== 0) throw new Error(`Promotion left ${remaining} records unpromoted.`);
-    if (after.counts.storyEntries !== before.counts.storyEntries + bloomfallIntegrationNewSlugs.length) {
+    if (after.counts.storyEntries !== before.counts.storyEntries + plan.create.length) {
       throw new Error(`Story entry count moved unexpectedly: ${before.counts.storyEntries} to ${after.counts.storyEntries}.`);
     }
 

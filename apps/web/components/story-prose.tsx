@@ -37,12 +37,13 @@ export function StoryProseLine({ text, resolve }: { text: string; resolve: Prose
   return <Tokens resolve={resolve} tokens={parseStoryProse(text)} />;
 }
 
-/** A whole body: its sections as real headings, everything else as paragraphs. */
+/** A whole body: its sections as real headings, its lists as real lists, everything else as paragraphs. */
 export function StoryProse({ body, resolve }: { body: string; resolve: ProseResolver }) {
   return (
     <>
       {storyProseBlocks(body).map((block, index) => {
         if (block.kind === "paragraph") return <p key={index}><Tokens resolve={resolve} tokens={parseStoryProse(block.text)} /></p>;
+        if (block.kind === "list") return <ul className="prose-list" key={index}>{block.items.map((item, itemIndex) => <li key={itemIndex}><Tokens resolve={resolve} tokens={parseStoryProse(item)} /></li>)}</ul>;
         const Heading = block.level === 2 ? "h2" : "h3";
         return <Heading className="prose-heading" key={index}><Tokens resolve={resolve} tokens={parseStoryProse(block.text)} /></Heading>;
       })}

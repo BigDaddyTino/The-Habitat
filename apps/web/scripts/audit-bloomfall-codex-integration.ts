@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { createPrismaClient } from "@habitat/db/client";
 import { storyProseLinks } from "../lib/story-prose";
 import { metaSchemasByKind } from "../lib/story-meta-schemas";
-import { bloomfallCreatureEnhancements } from "../lib/bloomfall-creature-enhancements";
+import { bloomfallClassificationLabels, bloomfallCreatureEnhancements } from "../lib/bloomfall-creature-enhancements";
 import { bloomfallAdaptiveP0Assets } from "../lib/bloomfall-adaptive-p0";
 import { bloomfallAdaptiveP1P2Assets } from "../lib/bloomfall-adaptive-p1p2";
 import { bloomfallV3CodexAssets, bloomfallV3ProductionPath } from "../lib/bloomfall-v3-art";
@@ -168,7 +168,7 @@ async function main() {
       classification: enhancement.classification,
       systems: outbound.filter((slug) => bloomfallSystemSlugs.has(slug)),
       outbound: outbound.length,
-      explicitNone: (stored?.body ?? "").includes("Classification: NONE"),
+      explicitNone: (stored?.body ?? "").includes(`**${bloomfallClassificationLabels.NONE}.**`),
     };
   });
   const deadEnds = creatureCoverage.filter((row) => row.systems.length === 0).map((row) => row.slug);

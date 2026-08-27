@@ -1204,3 +1204,8 @@ p.flow-lock { position: absolute; z-index: 6; bottom: 12px; left: 12px; margin: 
   .campaign-flow-heading > p { max-width: 680px; }
   .campaign-flow-canvas { height: 660px; }
 }
+
+/* Bullet lists inside codex prose: the creature field guides print each mutation's abilities this way. */
+ul.prose-list { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 5px; }
+ul.prose-list li { line-height: 1.7; }
+ul.prose-list li::marker { color: var(--brass); }

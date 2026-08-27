@@ -9,6 +9,20 @@ import {
 } from "../../lib/bloomfall-codex-integration";
 import { bloomfallNewEntries } from "../../lib/bloomfall-reach-content";
 import { stableAtlasJson } from "./atlas-integrity";
+import { bloomfallSupersededCreatureBodySha256 } from "./bloomfall-prior-bodies";
+
+/**
+ * Whether a stored body is one this tooling is allowed to overwrite: an
+ * approved prior state the manifest can still render, or a superseded creature
+ * rendering recognised by digest. Anything else is a hand edit, and the write
+ * refuses rather than silently replacing it.
+ */
+export function bloomfallIsApprovedPriorBody(slug: string, body: string | null) {
+  const current = body ?? "";
+  if (bloomfallIntegrationPriorBodies(slug).includes(current)) return true;
+  const superseded = bloomfallSupersededCreatureBodySha256[slug];
+  return superseded !== undefined && superseded.includes(createHash("sha256").update(current).digest("hex"));
+}
 
 /**
  * The one implementation of the Bloomfall Codex integration write.
@@ -106,7 +120,7 @@ export async function planBloomfallCodexIntegration(db: Client): Promise<Bloomfa
     if (!current) throw new Error(`Cross-link target ${block.slug} is missing.`);
     if (current.kind !== block.kind) throw new Error(`${block.slug} is stored as ${current.kind}, not ${block.kind}.`);
     if (current.body === bloomfallIntegrationExpectedBody(block.slug)) { plan.unchanged.push(block.slug); continue; }
-    if (!bloomfallIntegrationPriorBodies(block.slug).includes(current.body ?? "")) throw new Error(`${block.slug} has edits outside its approved prior states; refusing to append.`);
+    if (!bloomfallIsApprovedPriorBody(block.slug, current.body)) throw new Error(`${block.slug} has edits outside its approved prior states; refusing to append.`);
     plan.link.push(block.slug);
   }
 
@@ -144,7 +158,7 @@ export async function applyBloomfallCodexIntegration(tx: Transaction, actorUserI
       continue;
     }
     if (current.title === record.title && current.summary === record.summary && current.body === record.body && jsonEqual(withoutVisualArt(current.meta), record.meta)) continue;
-    if (!bloomfallIntegrationPriorBodies(record.slug).includes(current.body ?? "")) throw new Error(`${record.slug} changed after the plan was taken; transaction stopped.`);
+    if (!bloomfallIsApprovedPriorBody(record.slug, current.body)) throw new Error(`${record.slug} changed after the plan was taken; transaction stopped.`);
     const before = { title: current.title, summary: current.summary, body: current.body, meta: current.meta, version: current.version };
     const updated = await tx.storyEntry.update({ where: { id: current.id }, data: {
       title: record.title, summary: record.summary, body: record.body,
@@ -164,7 +178,7 @@ export async function applyBloomfallCodexIntegration(tx: Transaction, actorUserI
     const current = await tx.storyEntry.findUniqueOrThrow({ where: { slug: block.slug } });
     const expected = bloomfallIntegrationExpectedBody(block.slug);
     if (current.body === expected) continue;
-    if (!bloomfallIntegrationPriorBodies(block.slug).includes(current.body ?? "")) throw new Error(`${block.slug} changed after the plan was taken; transaction stopped.`);
+    if (!bloomfallIsApprovedPriorBody(block.slug, current.body)) throw new Error(`${block.slug} changed after the plan was taken; transaction stopped.`);
     const before = { body: current.body, version: current.version };
     const updated = await tx.storyEntry.update({ where: { id: current.id }, data: { body: expected, version: { increment: 1 }, updatedByUserId: actorUserId } });
     await tx.storyRevision.create({ data: {

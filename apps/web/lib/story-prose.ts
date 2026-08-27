@@ -67,9 +67,11 @@ export function splitStoryParagraphs(body: string): string[] {
 
 export type ProseBlock =
   | { kind: "heading"; level: 2 | 3; text: string }
+  | { kind: "list"; items: string[] }
   | { kind: "paragraph"; text: string };
 
 const HEADING = /^(#{2,3})\s+(.+)$/;
+const LIST_ITEM = /^-\s+(.+)$/;
 
 /**
  * A body as its blocks rather than a flat list of paragraphs.
@@ -80,13 +82,20 @@ const HEADING = /^(#{2,3})\s+(.+)$/;
  * markup was written to fix: the structure the writer expressed was the one
  * thing the reader could not see. Only two levels are recognised, because a
  * dossier already owns its `h1` and nothing in canon nests deeper.
+ *
+ * A list is a paragraph whose every line starts with `- `. The creature
+ * field guides print each mutation's abilities that way, and a reader scans
+ * four bullets where they would skim one dense paragraph. A lone dash inside
+ * a sentence, or a paragraph that only partly looks like a list, stays prose.
  */
 export function storyProseBlocks(body: string): ProseBlock[] {
   return splitStoryParagraphs(body).map((paragraph) => {
     const heading = HEADING.exec(paragraph);
-    return heading
-      ? { kind: "heading" as const, level: heading[1]!.length as 2 | 3, text: heading[2]!.trim() }
-      : { kind: "paragraph" as const, text: paragraph };
+    if (heading) return { kind: "heading" as const, level: heading[1]!.length as 2 | 3, text: heading[2]!.trim() };
+    const lines = paragraph.split("\n").map((line) => line.trim());
+    const items = lines.map((line) => LIST_ITEM.exec(line)?.[1]?.trim());
+    if (items.length && items.every((item): item is string => Boolean(item))) return { kind: "list" as const, items };
+    return { kind: "paragraph" as const, text: paragraph };
   });
 }
 

@@ -4,7 +4,7 @@ Status: Prompt B development authoring complete; runtime and image production de
 
 Target: guarded local `habitat_atlas_dev` only
 
-Source of truth: `apps/web/lib/bloomfall-creature-enhancements.ts`
+Source of truth: `apps/web/lib/bloomfall-creature-enhancements.ts` (design specification: anatomy, triggers, systems coupling, visual continuity, image direction) and `apps/web/lib/bloomfall-creature-field-guide.ts` (the reader copy the dossier body prints — specimen, field notes, each mutation with the abilities it grants and its counter, and why to hunt it). Since 2026-08-26 the stored dossier body is rendered from the field guide; the specification fields stay in source for the simulation and for image prompting and are no longer printed.
 
 Bloomfall now has a bounded ecology-first rule set:
 
