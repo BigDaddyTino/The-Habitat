@@ -175,6 +175,8 @@ Not doused — *drawn*. One by one, in order, from the far wall inward, every so
 
 The dark is total. You are bleeding into standing Essence, in a worked-out chamber under a peninsula, with something above you that hunts on the wing in a place with no sky.
 
+[[nag]] — which has narrated this entire descent, uninvited, at length, with running commentary on the air quality — stops mid-sentence.
+
 ---
 
 **And for four seconds you are not there.**
@@ -186,6 +188,10 @@ And behind all of it, not seen, *remembered* — a small room with two small bed
 ---
 
 Four seconds. Then the chamber, the dark, the water, the blood you are losing, and the thing coming.
+
+The panel above your wrist is lit. It was not lit before, nobody asked it to be, and it goes out while you are looking at it.
+
+NAG, after a pause that is a little too long: "...air quality remains poor."
 
 You will call it stress. Everyone does, the first time.`,
     effects: ["set flag: the-first-vision"],
@@ -245,6 +251,17 @@ Checked at the close of [[the-captivity-arc]], where a second episode makes "str
   await write.edge("the-hollow-wing", { from: "phase-two-the-reservoir", to: "phase-three-the-dark" });
   await write.edge("the-hollow-wing", { from: "phase-three-the-dark", to: "the-wing-falls", label: "Put it down in the dark" });
   await write.edge("the-hollow-wing", { from: "phase-three-the-dark", to: "walked-out", label: "Break for the adit" });
+
+  // Per-scene links. A blanket link set says nothing; these say who is in the
+  // room. The dark is the only scene NAG appears in, and that is the point.
+  await write.links("the-hollow-wing", "the-board", ["wardens-monster-hunter-guild", "draw-nine"]);
+  await write.links("the-hollow-wing", "the-haul-road", ["draw-nine", "aegis-extraction-consortium"]);
+  await write.links("the-hollow-wing", "shrieker-galleries", ["shrieker-bat", "draw-nine"]);
+  await write.links("the-hollow-wing", "phase-one-the-wing", ["the-hollow-wing-creature"]);
+  await write.links("the-hollow-wing", "phase-two-the-reservoir", ["the-hollow-wing-creature", "essence"]);
+  await write.links("the-hollow-wing", "phase-three-the-dark", ["the-hollow-wing-creature", "nag", "tino"]);
+  await write.links("the-hollow-wing", "the-wing-falls", ["the-hollow-wing-creature", "draw-nine"]);
+  await write.links("the-hollow-wing", "walked-out", ["the-hollow-wing-creature", "shrieker-bat", "draw-nine"]);
 
   // ---------------------------------------------------------------------
   // Entries. Written directly, because REGION and CREATURE sheets are meta

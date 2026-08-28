@@ -129,6 +129,45 @@ At the bottom of the page, in the only line that is not a place name, in handwri
 Then he stopped writing, took a contract that put him on the water off Ignit, and met you, and made you laugh, and never mentioned any of it again.`,
   });
 
+  await write.node("the-captivity-arc", {
+    key: "ask-the-watch",
+    kind: "DIALOGUE",
+    title: "Ask the Watch",
+    summary: "The only idea anybody has had in nine weeks. It was on his arm for a decade. It says it does not know.",
+    speakerSlug: "nag",
+    status: "CANON", x: 120, y: 560,
+    body: `Somebody says it out loud, in a tent, at two in the morning, because somebody was always going to.
+
+"Ask the watch."
+
+It is a reasonable idea. It is arguably the only idea anyone has had in nine weeks. [[nag]] was on his arm for a decade. It came off in your hand. By any measure you can apply, it is the last thing that was with him.
+
+The panel comes up. The head resolves, mostly eyebrows, and for once there is nothing queued behind it.
+
+NAG: "Ask."
+
+"Where is he?"
+
+A pause of exactly the wrong length. Not long enough to be thinking. Too long to be nothing.
+
+NAG: "I don't know."
+
+"Is he—"
+
+NAG: "I don't know."
+
+That is the whole conversation. It does not vary. You can come back to it as often as you like, in any phrasing, with anybody asking, across the entire campaign, and you will get the same four words in the same flat register from a machine that is funny about literally everything else.
+
+**Direction.** Play this absolutely straight and do not signpost it. The scene must read as a dead end, because to the party it is one — they asked the obvious question, got nothing, and moved on. What the player is actually watching is [[nag]] lying, and the two tells are already in the room and neither is a line of dialogue:
+
+It is a *watch*. Ask it the time and it will give you a hundredth of a second. Ask it this and it does not know anything.
+
+And it has never nagged anybody about him. Not once, in nine weeks, from a machine that nags about boots.
+
+Nothing here confirms he is alive, dead, held, or anywhere. That is not restraint on NAG's part — it genuinely does not know any of it. The single thing it knows is how late he is, it has had the figure to a hundredth of a second since the band went, and it will not read it out, because it was built by somebody to expect him home and saying the number out loud is the same as agreeing he is not coming.`,
+    effects: ["The party has asked and been told nothing.", "NAG's refusal is on the record for anyone who rewatches it."],
+  });
+
   // Was the owner gate. The key is a frozen export identity and is never
   // renamed — the node it gated is simply written now that the call is made.
   await write.node("the-captivity-arc", {
@@ -236,9 +275,11 @@ And a direction, which is the only one of the three that is any use.
 
 What you do not have is an explanation for the other thing. Since the island, at the worst possible moments — mid-fight, mid-sentence, waking — there have been four or five seconds that do not belong to you. Restraint. A light directly overhead. Cold going into the arm and everything after it going wrong. And, twice now, a room with two small beds in it, which means nothing to you at all.
 
-You had been calling it stress.
+You had been calling it stress. Raw Essence, a bad week, not sleeping enough.
 
-You will not be calling it that after tonight.`,
+You will not be calling it that after tonight.
+
+And on your wrist, through every one of those four or five seconds, a machine with an opinion about absolutely everything has been completely, uncharacteristically silent.`,
     effects: ["The party can name Helix Arcanobiotics as Tino's captor.", "The vision episodes are established as external, not stress."],
   });
 
@@ -257,7 +298,12 @@ You will not be calling it that after tonight.`,
   });
   await write.edge("the-captivity-arc", { from: "start-from-a-rumour", to: "the-trail-he-left" });
   await write.edge("the-captivity-arc", { from: "the-trail-he-left", to: "the-shape-of-the-nothing" });
-  await write.edge("the-captivity-arc", { from: "the-shape-of-the-nothing", to: "owner-gate-the-captor" });
+  await write.links("the-captivity-arc", "ask-the-watch", ["nag", "tino"]);
+  await write.edge("the-captivity-arc", { from: "the-shape-of-the-nothing", to: "ask-the-watch", label: "Ask the watch", condition: "carries-nag" });
+  await write.edge("the-captivity-arc", { from: "ask-the-watch", to: "owner-gate-the-captor" });
+  await write.edge("the-captivity-arc", { from: "the-shape-of-the-nothing", to: "owner-gate-the-captor", label: "Work the requisitions instead" });
+  await write.retireEdge("the-captivity-arc", "the-shape-of-the-nothing", "owner-gate-the-captor", null,
+    "the second list now offers the obvious idea first, so both routes out of it carry choice text");
   await write.edge("the-captivity-arc", {
     from: "owner-gate-the-captor", to: "expected",
     label: "The site has been cleared",

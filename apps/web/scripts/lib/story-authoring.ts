@@ -277,8 +277,12 @@ export class BoardWriter {
     const wanted = new Map<string, string>();
     for (const slug of slugs) {
       const id = await this.entryId(slug);
-      if (!id) throw new Error(`${arcSlug}/${nodeKey} links to "${slug}", which is not in the bible.`);
-      wanted.set(slug, id);
+      if (id) { wanted.set(slug, id); continue; }
+      // On apply this is fatal — a link to nothing is a broken connection. In
+      // preview it is usually an entry the same run is about to create, so it
+      // is reported rather than aborting the whole dry run at the first one.
+      if (this.apply) throw new Error(`${arcSlug}/${nodeKey} links to "${slug}", which is not in the bible.`);
+      this.changes.push({ kind: "edge", action: "create", label: `${arcSlug}/${nodeKey} links`, detail: `${slug} (not written yet)` });
     }
     const current = await this.db.storyEntryLink.findMany({ where: { nodeId: node.id }, select: { id: true, entry: { select: { id: true, slug: true } } } });
     const currentIds = new Set(current.map((link) => link.entry.id));
