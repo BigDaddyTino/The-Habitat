@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { Activity, ArrowRight, BookOpen, CalendarClock, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { Activity, ArrowRight, BookOpen, Boxes, CalendarClock, ChevronRight, CircleHelp, Compass, Crown, Flag, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import {
   isUnconfirmedThreadStatus,
   storyArcCategoryLabels,
@@ -22,16 +22,13 @@ import {
   type StoryThreadCategory,
   type StoryThreadStatus,
 } from "@habitat/shared";
-import { characterArtSlot, getCharacterArt } from "@/lib/character-keyart";
+import { dossierArtSlot, getDossierArt } from "@/lib/dossier-art";
 import { getCreatureKeyart } from "@/lib/creature-keyart";
-import { getEventArt } from "@/lib/event-art";
 import { timelineEraLabel } from "@/lib/story-timeline";
-import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
-import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 import { bloomfallCreatureArtUrl, getBloomfallCreatureHeroArt } from "@/lib/bloomfall-creature-art";
 import { bloomfallCreatureFieldGuide } from "@/lib/bloomfall-creature-field-guide";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
@@ -49,6 +46,25 @@ const record = (value: unknown): Record<string, unknown> => typeof value === "ob
 const rows = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 const words = (value: unknown): string[] => Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && Boolean(item.trim())) : [];
 const label = (value: unknown) => typeof value === "string" && value.trim() ? value : null;
+
+/**
+ * The icon each empty key-art slot wears. Every kind that can carry a picture
+ * is here, so a dossier with no art still says which shelf it belongs on and
+ * prints the path that would fill it.
+ */
+const artSlotIcons: Partial<Record<StoryEntryKind, React.ReactNode>> = {
+  CHARACTER: <UserRound aria-hidden="true" size={30} />,
+  COMPANION_MISSION: <Handshake aria-hidden="true" size={30} />,
+  CREATURE: <Sparkles aria-hidden="true" size={30} />,
+  EVENT: <CalendarClock aria-hidden="true" size={30} />,
+  FLAG: <Flag aria-hidden="true" size={30} />,
+  ITEM: <Boxes aria-hidden="true" size={30} />,
+  REGION: <Compass aria-hidden="true" size={30} />,
+  RULE: <BookOpen aria-hidden="true" size={30} />,
+  SYSTEM: <Settings2 aria-hidden="true" size={30} />,
+  THEME: <Lightbulb aria-hidden="true" size={30} />,
+  THREAD: <GitBranch aria-hidden="true" size={30} />,
+};
 
 function Fact({ label: name, value }: { label: string; value: unknown }) {
   const shown = label(value);
@@ -82,7 +98,6 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     return null;
   };
   const meta = record(entry.meta);
-  const bloomfallV3Art = getBloomfallV3CodexArt(entry.slug, meta);
   const magic = record(meta.magic);
   const status = record(meta.status);
   const preview = modelPreview(meta.model);
@@ -93,12 +108,6 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const isRace = isCreature && !label(meta.parent);
   const isFaction = entry.kind === "FACTION";
   const isRegion = entry.kind === "REGION";
-  const characterKeyart = isCharacter ? getCharacterArt(entry.slug) : null;
-  const creatureKeyart = isCreature ? getCreatureKeyart(entry.slug) : null;
-  // The Bloomfall creature plates. They cover CREATURE dossiers and Mender,
-  // who is a CHARACTER, so this is not gated on kind.
-  const bloomfallCreaturePlate = getBloomfallCreatureHeroArt(entry.slug);
-  const bloomfallCreatureArt = bloomfallCreaturePlate ? bloomfallCreatureArtUrl(bloomfallCreaturePlate) : null;
   const isSystem = entry.kind === "SYSTEM";
   const isThread = entry.kind === "THREAD";
   const isMission = entry.kind === "COMPANION_MISSION";
@@ -120,10 +129,16 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   // The two dossiers that document the ladder render it in full, from the
   // same constant the character sheet's picker offers.
   const showsLadder = (storyCorruptionLadderSlugs as readonly string[]).includes(entry.slug);
-  const systemArt = isSystem ? getSystemArt(entry.slug) : null;
-  const eventArt = entry.kind === "EVENT" ? getEventArt(entry.slug) : null;
   const factionBrand = isFaction ? getFactionBranding(entry.slug) : null;
   const regionBrand = isRegion ? getRegionBranding(entry.slug) : null;
+  // Which picture this dossier wears, and — when it wears none — the exact
+  // path that would give it one. Both come from lib/dossier-art.ts, which the
+  // library directory reads too; the chain used to live here as a nested
+  // ternary and again over there, and six kinds' artwork went unrendered in
+  // both. Faction branding stays below: its hero is two elements, not one.
+  const art = getDossierArt(entry.kind, entry.slug, meta);
+  const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug);
+  const artSlotIcon = artSlotIcons[entry.kind] ?? <Sparkles aria-hidden="true" size={30} />;
   const characterAffiliations = isCharacter
     ? rows(meta.factions).flatMap((membership) => {
         const slug = label(membership.faction);
@@ -218,8 +233,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {factionBrand ? <>
             <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
             <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : bloomfallCreatureArt ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={bloomfallCreatureArt} /> : bloomfallV3Art ? <img alt={`${entry.title} Bloomfall V3 key art`} className="entity-profile-keyart" src={bloomfallV3Art} /> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-profile-keyart" src={systemArt} /> : eventArt ? <img alt={`${entry.title} timeline key art`} className="entity-profile-keyart" src={eventArt} /> : isSystem || isCharacter ? <div className="system-art-slot system-art-slot-hero">{isCharacter ? <UserRound aria-hidden="true" size={30} /> : <Settings2 aria-hidden="true" size={30} />}<span>Key art slot</span><code>{isCharacter ? characterArtSlot(entry.slug) : systemArtSlot(entry.slug)}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {factionBrand ? <span>Faction identity · original key art</span> : bloomfallCreatureArt ? <span>Bloomfall creature · owner-approved key art</span> : bloomfallV3Art ? <span>Bloomfall V3 · owner-approved key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : creatureKeyart ? <span>Mythical creature · original key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem || isCharacter ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-profile-keyart" src={art.src} /> : artSlot ? <div className="system-art-slot system-art-slot-hero">{artSlotIcon}<span>Key art slot</span><code>{artSlot}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : art ? <span>{art.caption}</span> : artSlot ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
           {/* A race and one of its members are the same kind but not the

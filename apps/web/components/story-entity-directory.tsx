@@ -6,18 +6,15 @@ import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { getCharacterKeyart } from "@/lib/character-keyart";
-import { getCreatureKeyart } from "@/lib/creature-keyart";
+import { dossierArtSlot, getDossierArt } from "@/lib/dossier-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { getPlaceKeyart } from "@/lib/place-art";
-import { getSystemArt, systemArtSlot } from "@/lib/system-art";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
 import { plainStoryProse } from "@/lib/story-prose";
 import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
-import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
-import { bloomfallCreatureArtUrl, getBloomfallCreatureHeroArt } from "@/lib/bloomfall-creature-art";
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
@@ -300,9 +297,13 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             const regionMeta = asRecord(region.meta);
             const places = contained.get(region.slug) ?? [];
             const regionBrand = getRegionBranding(region.slug);
+            // Accent and artwork are separate: a place can have an approved
+            // plate long before anyone settles its identity colour, and asking
+            // branding for the picture is how three finished ones went unseen.
+            const regionArt = getPlaceKeyart(region.slug, region.meta);
             return <article className="region-atlas-card" key={region.id} style={regionBrand ? { "--region-accent": regionBrand.accent } as React.CSSProperties : undefined}>
               <Link className="region-atlas-head" href={`/codex/bible/${region.slug}`}>
-                {regionBrand ? <img alt={`${region.title} environment key art`} src={regionBrand.keyart} /> : null}
+                {regionArt ? <img alt={`${region.title} environment key art`} src={regionArt} /> : null}
                 <div className="region-atlas-head-copy">
                   <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
                   <h2>{region.title}</h2>
@@ -401,15 +402,12 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
         {orderedEntries.map((entry) => {
           const meta = asRecord(entry.meta);
           const preview = modelPreview(meta.model);
-          const characterKeyart = entry.kind === "CHARACTER" ? getCharacterKeyart(entry.slug) : null;
-          const creatureKeyart = entry.kind === "CREATURE" ? getCreatureKeyart(entry.slug) : null;
-          // Bloomfall's package also covers Mender, which is deliberately a
-          // CHARACTER rather than a creature. Resolve by slug, not entry kind,
-          // so its directory card wears the same approved plate as its dossier.
-          const bloomfallCreaturePlate = getBloomfallCreatureHeroArt(entry.slug);
-          const bloomfallCreatureArt = bloomfallCreaturePlate ? bloomfallCreatureArtUrl(bloomfallCreaturePlate) : null;
-          const systemArt = entry.kind === "SYSTEM" ? getSystemArt(entry.slug) : null;
-          const bloomfallV3Art = getBloomfallV3CodexArt(entry.slug, entry.meta);
+          // The card and the dossier read the same resolver, so a picture that
+          // shows on one always shows on the other. When there is none, the
+          // card offers the path that would make one — not just for systems,
+          // which is all this used to do.
+          const art = getDossierArt(entry.kind, entry.slug, entry.meta);
+          const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug);
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
           const characterFactionBrands = entry.kind === "CHARACTER"
@@ -456,7 +454,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               {factionBrand ? <>
                 <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
                 <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : bloomfallCreatureArt ? <img alt={`${entry.title} Bloomfall key art`} className="entity-card-keyart" src={bloomfallCreatureArt} /> : bloomfallV3Art ? <img alt={`${entry.title} Bloomfall V3 key art`} className="entity-card-keyart" src={bloomfallV3Art} /> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-card-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-card-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-card-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-card-keyart" src={systemArt} /> : entry.kind === "SYSTEM" ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{systemArtSlot(entry.slug)}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+              </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-card-keyart" src={art.src} /> : artSlot ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{artSlot}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
                 {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}

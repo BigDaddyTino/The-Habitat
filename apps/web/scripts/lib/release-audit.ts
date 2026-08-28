@@ -8,6 +8,7 @@ import { getCharacterKeyart } from "../../lib/character-keyart";
 import { codexArtFileForUrl, codexArtKinds, codexArtSlot } from "../../lib/codex-art";
 import { getCreatureKeyart, illustratedCreatureSlugs } from "../../lib/creature-keyart";
 import { brandedFactionSlugs, getFactionBranding } from "../../lib/faction-branding";
+import { getDossierArt } from "../../lib/dossier-art";
 import { getRegionKeyart } from "../../lib/region-branding";
 import { metaSchemasByKind, serverOwnedMetaKeys } from "../../lib/story-meta-schemas";
 import { illustratedCharacterSlugs } from "../../lib/character-keyart";
@@ -279,6 +280,22 @@ export async function runReleaseAudit({ honourWaivers = true }: { honourWaivers?
   }
   resolved += maps.length;
   images.notes.push(`${resolved} referenced assets resolved on disk, ${maps.length} atlas scenes decoded`);
+
+  // Coverage, reported and never failed. An entry without a picture is a
+  // commission nobody has placed yet, not a defect — but it is the one number
+  // that says how much of the codex is still grey, and it belongs where
+  // somebody already looks before every deploy. Kinds are listed worst first
+  // so the line doubles as the art worklist.
+  const artGaps = new Map<string, number>();
+  let illustrated = 0;
+  for (const entry of entries) {
+    const art = entry.kind === "FACTION" ? getFactionBranding(entry.slug)?.keyart ?? null : getDossierArt(entry.kind, entry.slug, entry.meta);
+    if (art) { illustrated += 1; continue; }
+    artGaps.set(entry.kind, (artGaps.get(entry.kind) ?? 0) + 1);
+  }
+  const gapSummary = [...artGaps.entries()].sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]));
+  images.notes.push(`${illustrated}/${entries.length} entries wear key art (${entries.length - illustrated} without)`);
+  if (gapSummary.length) images.notes.push(`art still wanted: ${gapSummary.map(([kind, count]) => `${count} ${kind.toLowerCase().replaceAll("_", " ")}`).join(", ")}`);
 
   // --- 5. geography ----------------------------------------------------------
 
