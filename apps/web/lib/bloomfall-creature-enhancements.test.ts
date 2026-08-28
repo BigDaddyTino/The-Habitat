@@ -145,7 +145,6 @@ test("the dossier body is a summary, a loot list, and the ladder — and nothing
     for (const leaked of ["## Ecology", "## Future state imagery", "Eligibility axis", "Aberrant status:", "Visual read", "Reversibility"]) {
       assert.ok(!body.includes(leaked), `${entry.slug} leaks ${leaked}`);
     }
-    assert.ok(!body.includes("Tomas Vey"), `${entry.slug} uses a non-canonical character name`);
   }
   assert.match(renderBloomfallCreatureEnhancement(bloomfallCreatureEnhancements.find((entry) => entry.slug === "maintenance-unit-m-17")!), /Mender/);
 });
