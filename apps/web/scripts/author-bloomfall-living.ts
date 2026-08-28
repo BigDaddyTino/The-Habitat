@@ -74,7 +74,7 @@ So the event is not a disaster to avert. It is a volume, and a set of channels, 
 
 A baseline is not a small thing. Everything the Reach has measured for twenty years is post-event data from a complex that is not the complex it was; she has been modelling a machine by watching its wreckage. With one clean block of how that sector behaved *before*, she can put a volume, a rate, and a window on the vent.
 
-Eleven hours of warning. A number for the load. A confidence interval she states out loud, because she states everything out loud.
+Just under six hours of warning. A number for the load. A confidence interval she states out loud, because she states everything out loud.
 
 She is careful to say what it does not buy. It does not tell her what the load will do inside the marsh, because the marsh is not in the baseline and never was. It does not make the choice easier. What it buys is that the choice gets made in daylight, by people who had time to walk the ground, instead of in the dark by whoever is nearest when the stacks start.
 
@@ -157,7 +157,7 @@ Choose. You do not get to leave it in the sector; the sector is venting either w
 
 **The sea**, and the marsh is untouched and Cairnwood keeps its water and nobody in the Reach can tell you what happened to the load after it left the drainage, because nobody in the Reach owns an instrument that goes out there. There is no bill. There is a bill; it is simply not addressed to anyone currently alive in this containment zone.
 
-**The weir**, and [[blackweir]] amputates. It closes an arm, consumes it over nine days, and relocates its front two kilometres inland — a wall of dying and re-growing barrier that you can watch move if you stand still long enough. Ocean containment holds absolutely. Several square kilometres of the richest ground in the Reach are gone, and [[nalia-reed]] walks routes that no longer exist for a season afterward, correcting her own maps by hand.
+**The weir**, and [[blackweir]] amputates. It closes an arm, consumes it over nine days, and relocates its front three kilometres inland — a wall of dying and re-growing barrier that you can watch move if you stand still long enough. Ocean containment holds absolutely. Several square kilometres of the richest ground in the Reach are gone, and [[nalia-reed]] walks routes that no longer exist for a season afterward, correcting her own maps by hand.
 
 **Cairnwood**, and the camp moves. Again. They do it without much argument, which is worse than an argument would have been, and the new ground is thinner and further from the surveyed approach and everyone knows it.
 
@@ -172,7 +172,7 @@ The one thing the branches share: it landed where a person put it. Twenty years 
     x: 460, y: 820,
     body: `The sector vents and nobody is standing anywhere that matters, so [[blackweir]] answers.
 
-It does what it has done before. It closes an arm — the northern one, the productive one, the one [[nalia-reed]] has been walking for eleven years — isolates it, and begins consuming it, and relocates the front inland to hold the line at the sea. Ocean containment is preserved absolutely. It is, by any measure anyone can apply, the correct call.
+It does what it has done before. It closes an arm — the northern one, the productive one, the one [[nalia-reed]] has been walking since she was a girl — isolates it, and begins consuming it, and relocates the front inland to hold the line at the sea. Ocean containment is preserved absolutely. It is, by any measure anyone can apply, the correct call.
 
 It is also made without any reference whatsoever to the people upstream. The relocation takes ground that [[cairnwood-camp]] draws on. Nobody asked Cairnwood. Nobody could have; there is no mechanism for asking, and the thing making the decision has never given a single piece of evidence that it knows Cairnwood is there.
 
@@ -243,7 +243,7 @@ Meanwhile the corridor moves, and that is why this takes three people and not tw
 
 Quill raises the obvious idea on the second day and then argues herself out of it in front of everybody: mark it permanently, stake it, make it a road. It would save lives. It would also put fixed human structure into the exact behaviour that produces the corridor, and nobody can say what that does, and the honest position is that the route may only exist because nothing has ever tried to own it.
 
-At the end of eleven days you have the cleanest ecological dataset anyone has ever produced in [[the-living-marsh]], an unmarked corridor, and two scientists who cannot agree on a single sentence to put at the top of the first page.`,
+At the end of sixteen days you have the cleanest ecological dataset anyone has ever produced in [[the-living-marsh]], an unmarked corridor, and two scientists who cannot agree on a single sentence to put at the top of the first page.`,
     effects: ["The exchange is documented under controls.", "The corridor is left unmarked."],
   });
   await write.links("root-of-the-bargain", "fieldwork", ["keira-ansel", "nalia-reed", "mara-quill", "the-route-that-moves", "walking-orchard", "reedless-mile"]);

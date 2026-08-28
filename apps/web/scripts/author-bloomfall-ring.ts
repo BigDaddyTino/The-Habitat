@@ -70,7 +70,7 @@ None of them has been wounded. None of them has climbed anything. They are expre
 
 And the predators, which is the part that will actually kill someone. Displaced herds have pulled the whole predator profile of eastern Long Graze onto a road that people use, and those predators are inside the field as well, and behaving accordingly.
 
-Quill insists the change is communicated rather than merely chemical. She cannot prove it. She has been saying it for eleven years and writing down what she sees while she says it, which is more than any of her critics have done.
+Quill insists the change is communicated rather than merely chemical. She cannot prove it. She has been saying it for twelve years and writing down what she sees while she says it, which is more than any of her critics have done.
 
 She is also blunt about the trap: everyone she has ever brought out here works out by day three that all of this stops if the Bellwether stops, and the trap is that they are right.`,
   });

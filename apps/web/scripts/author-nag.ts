@@ -8,7 +8,7 @@ import { BoardWriter, stableJson } from "./lib/story-authoring";
  *
  *   pnpm --filter @habitat/web exec tsx scripts/author-nag.ts [--apply]
  *
- * Owner design, 2026-08-28. A pre-war wristwatch [[amanda]] infused as a gift,
+ * Owner design, 2026-08-28. A pre-war wristwatch [[amanda]] put a gift into,
  * because Tino was always late and she wanted something that would get him
  * home. It picks locks, hot-wires engines, and hacks systems; it talks; it is
  * funny; and it comes off his arm in the player's hand when he is taken.
@@ -50,9 +50,13 @@ async function main() {
 
 **What it does.** Three tools, all taught in one scene on the worst day of the player's life. The case unfolds two fine picks for a mechanical tumbler. It puts out two hair-thin leads that will start any engine built before the war. And it throws a projected panel into the air above the wrist, keyed and typed on directly, for anything with a lockout on it. None of this is exotic in the setting. What is exotic is that it argues with you while you work.
 
-**What it is.** Pre-war consumer tech, mass-produced, worth nothing — and then [[amanda]] put [[essence]] in it. Not as a weapon and not as a favour to a soldier. She infused a watch because the man she loved was late to everything, and she wanted something in the world that would keep telling him to come home when she had stopped being able to.
+**What it is.** Pre-war consumer tech, mass-produced, worth nothing — and then [[amanda]] gave it something.
 
-That is the whole enchantment. It knows what time it is, it knows where he is meant to be, and it will not shut up about the gap between them.
+Not an infusion. This matters more than anything else on the page. Infused magic is extracted magic, and [[the-three-origins-of-magic]] is unambiguous about what extraction costs: every dose is a life converted into product. Amanda did not buy a dose to put in a birthday present. She is a [[lizzarnix]], and the third origin is hers — magic willingly given by a magical creature, the rarest kind, the kind that **consumed no one**.
+
+So the watch on the player's wrist is, as far as anybody in the campaign knows, the only magic in the world that cost nothing. Nobody died for it. In a setting where that sentence is true of essentially nothing else, it is true of a joke gift about being late.
+
+That is the whole enchantment, and it is very small. It knows what time it is, it knows where he is meant to be, and it will not shut up about the gap between them.
 
 **The name.** Tino named it. He used to say the same sentence every morning, to nobody, in the tone of a man describing a medical condition: *nag, nag, nag, all this damn thing does.* The name stuck the way a nickname sticks when it is unkind and accurate, and the watch has never once been given a say in the matter, and brings this up regularly.
 
@@ -67,15 +71,19 @@ The tells are there for anyone who watches it long enough. It nags about everyth
     aliases: ["the watch", "Tino's watch"],
     pronouns: "it/its",
     sex: null,
-    species: "Pre-war consumer chronometer, infused",
-    age: "Older than the war it ended up in. Infused roughly a decade ago.",
+    species: "Pre-war consumer chronometer, carrying a gift",
+    age: "Older than the war it ended up in. Given roughly a decade ago.",
     appearance: "A scuffed steel wristwatch on a band that has been re-stitched twice. The case unfolds picks; two leads spool from the crown; a palm-sized panel and a projected head, mostly eyebrows, sit above the wrist when it has something to say. The band is torn at one lug and has never been repaired.",
     voice: "Dry, formal with strangers, openly insubordinate with Tino, and increasingly fond of whoever is wearing it. Complains about its own hardware. Has never willingly answered a direct question about him.",
     magic: {
-      origin: "infused" as const,
+      // GIFTED, not infused, and the distinction is load-bearing. Infusion is
+      // extracted magic and extraction kills the source, so an infused watch
+      // would mean Amanda bought a life for a birthday present. She is a
+      // Lizzarnix; the third origin is hers, and a gift consumes no one.
+      origin: "gifted" as const,
       schools: [],
       corruptionPhase: null,
-      notes: "Infused by [[amanda]] as a gift, not as equipment. The enchantment does one thing — it knows when he is late — and everything else it does is ordinary pre-war engineering. Whatever ties the player to Tino runs through this, and NAG has never been asked in a way it was willing to answer.",
+      notes: "Given by [[amanda]], not dosed. Under [[the-three-origins-of-magic]] that makes it the rarest kind and the only kind that cost nothing — which is quietly extraordinary in a world where every other unit of power is somebody's severed self. The enchantment does exactly one thing: it knows when he is late. Everything else the watch does is ordinary pre-war engineering. Whatever ties the player to Tino runs through the gift, and NAG has never been asked about it in a way it was willing to answer.",
     },
     factions: [{ faction: "stormglass-cartel", role: "not employed, merely present", standing: "the property of an infuser who is no longer on the payroll" }],
     home: null,
@@ -106,7 +114,7 @@ The tells are there for anyone who watches it long enough. It nags about everyth
   };
 
   const existing = await db.storyEntry.findUnique({ where: { slug: "nag" }, select: { id: true, title: true, summary: true, body: true, meta: true } });
-  const summary = "Tino's infused wristwatch: lockpick, hot-wire rig, hacking deck, permanent comic relief — and the channel the player's visions of him arrive through. It knows how late he is and it lies about it.";
+  const summary = "Tino's watch: lockpick, hot-wire rig, hacking deck, permanent comic relief — and the channel the player's visions of him arrive through. Gifted magic, so it cost nobody anything. It knows how late he is and it lies about it.";
   if (!existing) {
     write.changes.push({ kind: "entry", action: "create", label: "CHARACTER nag", detail: "NAG" });
     if (apply) {
@@ -248,7 +256,9 @@ AMANDA, quietly, to herself, in something close to disbelief: *"I can't believe 
 
 And then she tells the player the one thing nobody has ever explained, in the flat voice of a woman describing something that used to be funny:
 
-She built it. It was ordinary — a cheap watch, a birthday, a joke — and she put [[essence]] in it, because he was late to everything, every time, his whole life, and she wanted one thing in the world that would keep telling him to come home when she could not.
+She built it. It was ordinary — a cheap watch, a birthday, a joke — and she gave it something of her own, because he was late to everything, every time, his whole life, and she wanted one thing in the world that would keep telling him to come home when she could not.
+
+She does not explain what *gave* means, and the player has no framework for it yet. What they can work out, if they are paying attention, is that she did not buy a dose — and everybody in this world knows what a dose costs.
 
 And Tino, every morning, to nobody, in exactly the same tone: *nag, nag, nag, all this damn thing does.*
 

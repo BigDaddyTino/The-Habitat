@@ -53,7 +53,7 @@ async function main() {
 
   const drawNineBody = `An Essence draw is a hole that money made. Draw Nine is the one the money left.
 
-[[aegis-extraction-consortium]] cut it into the rock under the peninsula, worked it for eleven years, and decommissioned it when the yield curve stopped justifying the pumps. Decommissioned, not sealed. Sealing a shaft costs money and abandoning one costs a line in a register, so Draw Nine has been carried as *pending survey* for longer than some of the surveyors have been alive.
+[[aegis-extraction-consortium]] cut it into the rock under the peninsula, worked it for nineteen years, and decommissioned it when the yield curve stopped justifying the pumps. Decommissioned, not sealed. Sealing a shaft costs money and abandoning one costs a line in a register, so Draw Nine has been carried as *pending survey* for longer than some of the surveyors have been alive.
 
 The haul road to [[port-arcadia]] is still there under the scrub, which is the only reason anyone still goes in — a road is an invitation, and there is salvage down there for anyone willing to walk a dark spur nobody maintains.
 

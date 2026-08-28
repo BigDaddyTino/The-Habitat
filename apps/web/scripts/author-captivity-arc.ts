@@ -80,7 +80,7 @@ Start.`,
 
 Six weeks. A boat you paid for. A man in Shattermarket who described the infuser well enough to be believed, and who had — it emerges, later, expensively — described him to three other buyers first.
 
-By the time you understand that you have been running a route somebody built to be run, you have spent money you needed, burned a contact you cannot replace, and put your faces in front of eleven people whose entire trade is telling other people what they saw.
+By the time you understand that you have been running a route somebody built to be run, you have spent money you needed, burned a contact you cannot replace, and put your faces in front of seven people whose entire trade is telling other people what they saw.
 
 That last part does not stay local.
 

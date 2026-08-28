@@ -383,7 +383,7 @@ It was always going to. It is the one thing in [[bloomfall-reach]] that has neve
 
 The tie-in goes live at some point in the night with nobody present. Current moves from [[splicefield-substation]] into a Southreach feeder that was isolated for a reason, into a sector whose behaviour under load nobody has a baseline for, and the grid ecology — the tissue, the resin, the drawn conductor, the whole patient twenty-year improvisation — takes the load and *likes* it. Things that were slow get faster. Things that were dormant in the warm runs are no longer dormant.
 
-Nobody at [[cairnwood-camp]] finds out for eleven days, and what they find out first is that the walking-orchard side of [[long-graze]] has changed and they do not know why.
+Nobody at [[cairnwood-camp]] finds out for sixteen days, and what they find out first is that the walking-orchard side of [[long-graze]] has changed and they do not know why.
 
 Where the last high-load runs came from is not in the log. Mender records substitutions accurately, and there is no entry, and the honest reading of that is that the specification was met from something it did not classify as a substitution.
 
