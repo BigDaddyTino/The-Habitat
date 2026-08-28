@@ -186,7 +186,7 @@ the tie between pacing and story — with `unlockStage` as prose intent while no
 arc exists to link. `dependsOn` lists other SYSTEM slugs this one cannot ship
 without, `pillars` are the loop's promises one per line, and `openQuestions`
 work as everywhere else. Key art is by convention, not by meta: drop a file at
-`public/images/systems/<slug>.png` and the card and dossier pick it up.
+`private/codex-art/systems/<slug>.png` and the card and dossier pick it up.
 
 Systems nest: `parent` names the SYSTEM this one lives inside (Weather sits
 in Environment; the Blood Moon sits in The Sun & Moon), exactly as places nest

@@ -33,7 +33,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requireRole } from "@/lib/authorization";
-import { metaSchemasByKind, metaSlug, threadMetaSchema } from "@/lib/story-meta-schemas";
+import { carryServerOwnedMeta, metaSchemasByKind, metaSlug, threadMetaSchema } from "@/lib/story-meta-schemas";
 import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
@@ -255,7 +255,7 @@ async function linkThreadToArc(tx: Transaction, threadEntryId: string, arcSlug: 
   if (current.data.arcs.includes(arcSlug)) return;
   const next = threadMetaSchema.safeParse({ ...current.data, arcs: [...current.data.arcs, arcSlug] });
   if (!next.success) return;
-  await tx.storyEntry.update({ where: { id: thread.id }, data: { meta: next.data as Prisma.InputJsonValue, updatedByUserId: actorUserId, version: { increment: 1 } } });
+  await tx.storyEntry.update({ where: { id: thread.id }, data: { meta: carryServerOwnedMeta(thread.meta, next.data) as Prisma.InputJsonValue, updatedByUserId: actorUserId, version: { increment: 1 } } });
   await recordRevision(tx, {
     entityType: "ENTRY",
     entityId: thread.id,
@@ -1202,10 +1202,14 @@ export async function updateEntryMeta(formData: FormData) {
     if (!schema) throw refusal(`${entry.kind} entries do not have a sheet yet.`);
     const meta = schema.safeParse(raw);
     if (!meta.success) throw refusal("Some fields on that sheet are too long or the wrong shape. Nothing was saved.");
+    // The sheet owns everything it can see; the publication marker underneath
+    // it belongs to the release that wrote it. Without this the parse above
+    // strips that marker and the entry's approved art goes dark.
+    const stored = carryServerOwnedMeta(entry.meta, meta.data);
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: parsed.data.version },
-      data: { meta: meta.data as Prisma.InputJsonValue, updatedByUserId: user.id, version: { increment: 1 } },
+      data: { meta: stored as Prisma.InputJsonValue, updatedByUserId: user.id, version: { increment: 1 } },
     });
     if (updated.count !== 1) throw refusal("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
 
@@ -1216,7 +1220,7 @@ export async function updateEntryMeta(formData: FormData) {
       actorUserId: user.id,
       summary: `Filled in the ${entry.kind.toLowerCase()} sheet for "${entry.title}"`,
       before: { meta: entry.meta },
-      after: { meta: meta.data },
+      after: { meta: stored },
     });
     return entry.slug;
   });
@@ -1320,7 +1324,7 @@ async function withThreadPackets(
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: input.version },
-      data: { meta: next.data as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
+      data: { meta: carryServerOwnedMeta(entry.meta, next.data) as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
     });
     if (updated.count !== 1) throw refusal("Somebody saved this thread while you were writing. Reopen it to see their version before saving yours.");
 

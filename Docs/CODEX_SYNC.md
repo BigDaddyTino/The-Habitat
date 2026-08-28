@@ -65,7 +65,7 @@ The simplest importer sequence is:
 
 The asset record gives both addresses needed by tooling:
 
-- `logicalPath`: the stable web/game identity, such as `/images/characters/keyart/amanda.jpg`.
+- `logicalPath`: the stable bundle/game identity, such as `/images/characters/keyart/amanda.jpg`. It is deliberately not the web URL — the app serves the same file through the authenticated `/codex-art/characters/amanda.jpg` route — and it does not change when a shelf moves on disk, because importers pin assets by it.
 - `path`: the immutable file inside the active shared release.
 
 If a local cache is preferred, clone/install this workspace on the game-development machine and run:

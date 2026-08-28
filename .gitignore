@@ -1,5 +1,8 @@
 node_modules/
 .next/
+# Versioned release builds from deploy-web.ps1 — the active one is named in
+# HabitatWeb.xml, and superseded ones are kept on disk for rollback.
+.next-*/
 dist/
 apps/agent/dist.building/
 apps/agent/dist.previous/

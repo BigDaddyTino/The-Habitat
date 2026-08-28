@@ -97,8 +97,9 @@ test("art is found by convention and served off disk, not from the static index"
   assert.ok(art, "the seeded timeline art should be found");
   assert.match(art, /^\/codex-art\/timeline\/the-great-purges\.(png|jpg|jpeg|webp)$/);
   assert.equal(findCodexArt("timeline", "nothing-has-been-drawn-for-this"), null);
-  // The slot tells a human where to put the file, in public/ terms.
-  assert.equal(codexArtSlot("timeline", "the-drain"), "images/timeline/the-drain.png");
+  // The slot tells a human where to put the file — under private/, because
+  // that is the only place a dropped-in file is not also a public URL.
+  assert.equal(codexArtSlot("timeline", "the-drain"), "private/codex-art/timeline/the-drain.png");
 });
 
 test("the art route cannot be talked out of its two directories", () => {

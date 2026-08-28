@@ -4,10 +4,10 @@ export type RegionBranding = {
 };
 
 const standaloneRegionKeyart = {
-  "death-canyon": "/images/regions/keyart/death-canyon.png",
-  "grand-lake": "/images/regions/keyart/grand-lake.png",
-  "the-docks": "/images/regions/keyart/the-docks.png",
-  "the-floating-city": "/images/regions/keyart/the-floating-city.jpg",
+  "death-canyon": "/codex-art/regions/death-canyon.png",
+  "grand-lake": "/codex-art/regions/grand-lake.png",
+  "the-docks": "/codex-art/regions/the-docks.png",
+  "the-floating-city": "/codex-art/regions/the-floating-city.jpg",
 } as const satisfies Record<string, string>;
 
 const regionAccents = {
@@ -56,7 +56,7 @@ export function getRegionBranding(slug: string): RegionBranding | null {
 export function getRegionKeyart(slug: string): string | null {
   const standalone = standaloneRegionKeyart[slug as keyof typeof standaloneRegionKeyart];
   if (standalone) return standalone;
-  return slug in regionAccents ? `/images/regions/keyart/${slug}.jpg` : null;
+  return slug in regionAccents ? `/codex-art/regions/${slug}.jpg` : null;
 }
 
 export const brandedRegionCount = Object.keys(regionAccents).length;

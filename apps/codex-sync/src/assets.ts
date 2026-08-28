@@ -5,21 +5,32 @@ import path from "node:path";
 import type { CodexBundleAsset } from "@habitat/shared";
 import { fileMatches } from "./integrity";
 
+/**
+ * Where each art shelf lives on disk, and the logical path it keeps in the
+ * bundle.
+ *
+ * The files moved out of `apps/web/public/images` and into
+ * `apps/web/private/codex-art` so the web app stops serving unreleased
+ * artwork to anonymous callers. The bundle's logical paths are deliberately
+ * unchanged — they are the importer's contract, not web URLs, and an
+ * immutable release is verified against them by hash.
+ */
 const codexArtDirectories = [
-  "characters",
-  "companion-missions",
-  "creatures",
-  "factions",
-  "flags",
-  "items",
-  "races",
-  "regions",
-  "rules",
-  "systems",
-  "themes",
-  "threads",
-  "timeline",
-] as const;
+  ["characters", "characters/keyart"],
+  ["companion-missions", "companion-missions"],
+  ["creatures", "creatures/keyart"],
+  ["factions", "factions/keyart"],
+  ["faction-logos", "factions/logos"],
+  ["flags", "flags"],
+  ["items", "items"],
+  ["races", "races/keyart"],
+  ["regions", "regions/keyart"],
+  ["rules", "rules"],
+  ["systems", "systems"],
+  ["themes", "themes"],
+  ["threads", "threads"],
+  ["timeline", "timeline"],
+] as const satisfies ReadonlyArray<readonly [directory: string, logical: string]>;
 
 const codexRootImages = new Set([
   "codex-characters-ensemble.jpg",
@@ -55,31 +66,35 @@ async function walk(directory: string): Promise<string[]> {
 
 export async function discoverCodexAssets(repositoryRoot: string): Promise<SourceAsset[]> {
   const imagesRoot = path.join(repositoryRoot, "apps", "web", "public", "images");
-  const privateMapsRoot = path.join(repositoryRoot, "apps", "web", "private", "codex-art", "maps");
-  const candidates: string[] = [];
-  for (const directory of codexArtDirectories) {
-    candidates.push(...(await walk(path.join(imagesRoot, directory))));
+  const artRoot = path.join(repositoryRoot, "apps", "web", "private", "codex-art");
+  // sourcePath -> the logical path it keeps in the bundle, so a shelf can move
+  // on disk without renaming an asset an importer has already pinned by hash.
+  const candidates = new Map<string, string>();
+  for (const [directory, logical] of codexArtDirectories) {
+    const root = path.join(artRoot, directory);
+    for (const file of await walk(root)) {
+      candidates.set(file, `/images/${logical}/${path.relative(root, file).split(path.sep).join("/")}`);
+    }
   }
   const rootFiles = await readdir(imagesRoot, { withFileTypes: true });
   for (const entry of rootFiles) {
-    if (entry.isFile() && codexRootImages.has(entry.name)) candidates.push(path.join(imagesRoot, entry.name));
+    if (entry.isFile() && codexRootImages.has(entry.name)) candidates.set(path.join(imagesRoot, entry.name), `/images/${entry.name}`);
   }
-  candidates.push(...(await walk(privateMapsRoot)));
+  const mapsRoot = path.join(artRoot, "maps");
+  for (const file of await walk(mapsRoot)) {
+    candidates.set(file, `/images/maps/${path.relative(mapsRoot, file).split(path.sep).join("/")}`);
+  }
 
   const assets = await Promise.all(
-    candidates
-      .filter((filename) => imageExtensions.has(path.extname(filename).toLowerCase()))
-      .sort((left, right) => left.localeCompare(right))
-      .map(async (sourcePath) => {
+    [...candidates.entries()]
+      .filter(([filename]) => imageExtensions.has(path.extname(filename).toLowerCase()))
+      // Ordered by the logical path, not by where the file happens to sit on
+      // disk: the bundle's asset order is part of what an importer diffs, and
+      // it must not shift because a shelf moved out of public/.
+      .sort(([, left], [, right]) => left.localeCompare(right))
+      .map(async ([sourcePath, logicalPath]) => {
         const info = await stat(sourcePath);
-        return {
-          sourcePath,
-          logicalPath: sourcePath.startsWith(privateMapsRoot)
-            ? `/images/maps/${path.relative(privateMapsRoot, sourcePath).split(path.sep).join("/")}`
-            : `/images/${path.relative(imagesRoot, sourcePath).split(path.sep).join("/")}`,
-          bytes: info.size,
-          modifiedMs: info.mtimeMs,
-        };
+        return { sourcePath, logicalPath, bytes: info.size, modifiedMs: info.mtimeMs };
       }),
   );
   return assets;

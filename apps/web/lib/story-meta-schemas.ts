@@ -6,6 +6,7 @@ import {
   storyCreatureCategories,
   storyEntryKinds,
   storyFactionStances,
+  storyInvolvementKinds,
   storyMagicOrigins,
   storyRegionTypes,
   storySettlementTiers,
@@ -61,7 +62,11 @@ export const characterMetaSchema = z.object({
   status: z.object({ known: metaText(500), actual: metaText(500) }),
   relationships: z.array(z.object({ character: metaSlug.nullable(), who: metaText(160), type: metaText(300) })).max(30),
   storyRole: metaText(500),
-  involvement: z.array(z.object({ arc: metaSlug, how: metaText(300) })).max(20),
+  // Typed on purpose. `kind` has NO default and is not nullable: a row that
+  // does not say which namespace it lives in is the exact ambiguity that let
+  // six event references sit in an arc field, unresolved and unreported. A
+  // legacy row without it fails loudly here rather than being guessed at.
+  involvement: z.array(z.object({ ref: metaSlug, kind: z.enum(storyInvolvementKinds), how: metaText(300) })).max(20),
   gameId: metaText(120),
   model: metaText(200),
   // The COMPANION badge. `capable` is the machine fact; availability and
@@ -275,3 +280,37 @@ export const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number],
 };
 
 
+/**
+ * Meta keys the sheets do not own, and must never lose.
+ *
+ * Every save re-validates the whole meta object, and zod strips what its
+ * schema does not name — so a key written by the server rather than by a
+ * writer vanishes the moment anybody edits that sheet. `visualArt` is the
+ * live one: thirteen production dossiers carry the owner-approved V3
+ * publication marker, and `getBloomfallV3CodexArt` refuses to serve the art in
+ * production without an exact marker match. Editing one sentence of Heartfen's
+ * body used to silently unpublish its key art, with no error and nothing in
+ * the revision to say what had gone.
+ *
+ * These are carried forward from the stored row and never read out of the
+ * submitted payload, so a client cannot forge a publication it was not
+ * granted — the sheet's copy is discarded either way.
+ */
+export const serverOwnedMetaKeys = ["visualArt"] as const;
+
+/**
+ * Returns `next` with the server-owned keys of `previous` restored.
+ *
+ * Call this on the result of every schema parse that is about to REPLACE a
+ * stored meta object. Creating an entry does not need it — there is no prior
+ * row to preserve — but every update path does.
+ */
+export function carryServerOwnedMeta<T>(previous: unknown, next: T): T {
+  const prior = typeof previous === "object" && previous !== null && !Array.isArray(previous) ? previous as Record<string, unknown> : null;
+  if (!prior) return next;
+  const carried: Record<string, unknown> = {};
+  for (const key of serverOwnedMetaKeys) {
+    if (prior[key] !== undefined) carried[key] = prior[key];
+  }
+  return Object.keys(carried).length === 0 ? next : { ...next as object, ...carried } as T;
+}

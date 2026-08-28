@@ -1,7 +1,7 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
+import { liveServerReferenceManifest } from "./lib/live-build";
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
 
 /**
  * Walks every codex surface as a signed-in writer and checks that the things
@@ -20,7 +20,9 @@ import { readFileSync } from "node:fs";
 const db = getPrismaClient();
 const BASE = process.env.AUDIT_BASE ?? "http://127.0.0.1:3000";
 
-const manifest = JSON.parse(readFileSync(".next/server/server-reference-manifest.json", "utf8")) as {
+// Read from the build the SERVICE is serving, not from `.next` — deploys now
+// land in versioned release directories and `.next` can be a stale one.
+const manifest = liveServerReferenceManifest() as {
   node: Record<string, { filename: string; exportedName: string }>;
 };
 const actionById = new Map(Object.entries(manifest.node).map(([id, v]) => [id, v.exportedName]));

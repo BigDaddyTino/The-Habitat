@@ -1303,6 +1303,12 @@ export async function getStoryNeedsWork() {
   ]);
 
   const known = new Set([...entries.map((entry) => entry.slug), ...arcs.map((arc) => arc.slug)]);
+  // The pools kept apart, for the fields that name ONE namespace. Merging them
+  // is what hid six involvement rows pointing at canon EVENT entries: an event
+  // slug is in `known`, so an arc-only field validated against it looked
+  // resolved. A field that legitimately reaches either way still uses `known`.
+  const knownEntries = new Set(entries.map((entry) => entry.slug));
+  const knownArcs = new Set(arcs.map((arc) => arc.slug));
   // Both ways an arc reaches into the bible: the place it is picked up, and
   // the companion whose story it is. A character whose only tie to the world
   // is that somebody opened their companion quest is not an orphan, and
@@ -1342,7 +1348,7 @@ export async function getStoryNeedsWork() {
       for (const row of rows(meta.relations)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.control)) { const slug = slugOf(row.faction); if (slug) targets.push(slug); }
       for (const row of rows(meta.connections)) { const slug = slugOf(row.to); if (slug) targets.push(slug); }
-      for (const row of rows(meta.involvement)) { const slug = slugOf(row.arc); if (slug) targets.push(slug); }
+      for (const row of rows(meta.involvement)) { const slug = slugOf(row.ref) ?? slugOf(row.arc); if (slug) targets.push(slug); }
       for (const row of rows(meta.regionNotes)) { const slug = slugOf(row.region); if (slug) targets.push(slug); }
       { const slug = slugOf(meta.unlockArc); if (slug) targets.push(slug); }
       // The development room's newest links. A packet naming an entry
@@ -1399,9 +1405,9 @@ export async function getStoryNeedsWork() {
       }
     }
 
-    const check = (field: string, target: unknown) => {
+    const check = (field: string, target: unknown, pool: Set<string> = known) => {
       const slug = slugOf(target);
-      if (slug && !known.has(slug)) planned.push({ slug: entry.slug, title: entry.title, field, target: slug });
+      if (slug && !pool.has(slug)) planned.push({ slug: entry.slug, title: entry.title, field, target: slug });
     };
     /** Slug-or-prose fields: only a multi-word kebab value could have been
      *  meant as a link, so "a fishing village on the coast" stays prose and
@@ -1415,7 +1421,13 @@ export async function getStoryNeedsWork() {
       checkIfSlugShaped("race", meta.species);
       for (const row of rows(meta.factions)) check("faction", row.faction);
       for (const row of rows(meta.relationships)) check("relationship", row.character);
-      for (const row of rows(meta.involvement)) check("involvement", row.arc);
+      // Each row is checked against ONLY its own namespace. An untyped legacy
+      // row is checked the old way — against arcs — because that is what it
+      // meant when it was written; the migration retypes it.
+      for (const row of rows(meta.involvement)) {
+        const ref = slugOf(row.ref) ?? slugOf(row.arc);
+        check(row.kind === "EVENT" ? "involvement event" : "involvement", ref, row.kind === "EVENT" ? knownEntries : knownArcs);
+      }
     }
     if (entry.kind === "SYSTEM") {
       // The release gate is the point of this sheet: a system gated on an arc
@@ -1423,7 +1435,7 @@ export async function getStoryNeedsWork() {
       // dependency on a system nobody wrote is a ship-order that cannot be
       // satisfied. Both are slug fields on the sheet, never prose.
       check("parent system", meta.parent);
-      check("unlock arc", meta.unlockArc);
+      check("unlock arc", meta.unlockArc, knownArcs);
       for (const target of Array.isArray(meta.dependsOn) ? meta.dependsOn : []) check("depends on", target);
       for (const row of rows(meta.regionNotes)) check("region note", row.region);
     }

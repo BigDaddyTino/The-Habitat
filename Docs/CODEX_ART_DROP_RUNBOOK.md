@@ -11,13 +11,13 @@ Everything below has been verified against the running production service.
 ## Pipeline A — character portraits (the easy one)
 
 **Use for:** anything in the Character section.
-**Directory:** `apps/web/public/images/characters/keyart/`
+**Directory:** `apps/web/private/codex-art/characters/`
 **Filename:** `<entry-slug>.png` (also accepts `.jpg`, `.jpeg`, `.webp`)
 
 ### Steps
 
 1. Drop the file in that directory, named for the entry slug exactly:
-   `apps/web/public/images/characters/keyart/mara-quill.png`
+   `apps/web/private/codex-art/characters/mara-quill.png`
 2. Reload the dossier. Done.
 
 **No code change. No rebuild. No restart.** The dossier reads the directory per
@@ -31,8 +31,9 @@ are unsure of a slug, open the dossier and read the slot.
 `abraham-islay-kane` are listed explicitly in `apps/web/lib/character-keyart.ts`
 and that map wins over the directory. To **replace** one of those six you must
 either overwrite the exact file the map names (same filename and extension) or
-remove its line from the map. Overwriting a file under `public/` needs a rebuild
-and restart to take effect — see the note at the bottom.
+remove its line from the map. Either way the file is read off disk per request,
+so the replacement shows on the next reload; only editing the map itself needs
+a rebuild.
 
 ### Slugs
 
@@ -105,15 +106,20 @@ means adding a real manifest row and removing its `aberrantOf` entry.
 
 ## The rule that catches people
 
-**A file added under `public/` after the last build returns 404 until the next
-build.** Verified: dropping a new file in `public/images/characters/keyart/` and
-requesting it directly gives 404, while a file that existed at build time gives
-200.
+**Codex art does not live under `public/`, and must not be moved back there.**
+Two separate reasons, and both still bite:
 
-That is exactly why both pipelines above serve through `/codex-art/...` — that
-route reads from disk per request. Pipeline A works without a rebuild *because*
-it goes through the route, not because `public/` is live. Do not "simplify" it
-into a direct `/images/...` link.
+1. **Privacy.** Anything under `public/` is served by Next at its own URL with
+   no session check. The whole art set used to sit there, so every portrait and
+   region plate was downloadable by anyone who guessed a slug while the dossier
+   around it required a member account. `/codex-art/...` applies the same USER
+   gate the codex pages do.
+2. **Freshness.** `public/` is indexed when the app is built, so a file added
+   afterwards returns 404 until the next build. The route reads from disk per
+   request, which is what makes "drop it in and reload" true.
+
+Do not "simplify" either pipeline into a direct `/images/...` link.
+`lib/codex-art-privacy.test.ts` fails if you do.
 
 ## Where the masters live
 

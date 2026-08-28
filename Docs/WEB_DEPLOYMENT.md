@@ -42,13 +42,67 @@ Run `pnpm check:connections` after deployment. A successful audit confirms that 
 
 ## Update
 
-After pulling a web change, rebuild first, then restart the service:
+After pulling a web change, deploy it. From an elevated PowerShell session:
 
 ```powershell
 Set-Location "<repository>"
-& "C:\Program Files\nodejs\corepack.cmd" pnpm --filter @habitat/web build
-Restart-Service HabitatWeb
+.\apps\web\scripts\deploy-web.ps1 -InstallRoot (Get-Location)
 ```
+
+Each deploy runs the release audit first, then builds into its own
+`apps\web\.next-<stamp>` directory while the current release keeps serving, then
+points the service at the new directory and restarts it. The site is down for
+one restart rather than for the whole build, and if the new release does not
+answer `/chronicle` with a 200 the script puts the service back on the previous
+directory and restarts again.
+
+### The release audit
+
+`apps\web\scripts\audit-release.ts` is read-only and runs before anything is
+built. A failure stops the deploy with nothing built and the current release
+still serving. Run it on its own at any time:
+
+```powershell
+pnpm --filter @habitat/web audit:release        # add --json for machine output
+```
+
+Six checks, each standing for a failure that actually reached production:
+
+| Check | Blocks on |
+| --- | --- |
+| METADATA | a stored sheet that would fail its own schema, a key the next save would silently drop, or a lost art publication marker |
+| NAMESPACES | a typed reference that resolves in the **wrong** pool — an event named through an arc field, and the reverse |
+| ART PRIVACY | codex art under `public/`, or a resolver handing out a `/images/...` URL that bypasses the member gate |
+| IMAGES | referenced art that is not on disk, an unreadable header, or declared dimensions that do not match the file |
+| GEOGRAPHY | a place filed under a parent that does not exist, under itself, or in a cycle |
+| GRAPH | a populated board with no way in, a scene nothing reaches, or choices that all land in one place and record nothing |
+
+"Link now, fill later" is canon law, so a reference to something nobody has
+written yet is **reported and never fails**. Only a reference that resolves in
+the wrong namespace fails — that is a mistake, not a plan. An empty quest board
+is likewise a note, not a failure.
+
+Accepted defects live in the `waivers` map at the top of the script, each with
+the reason it is not a blocker, and are printed on every run. There is one
+today: Port Arcadia's art decodes 1599×984 against a declared 1536×1024, and
+correcting the declaration would move every pin placed against the old extent.
+
+`-SkipAudit` ships past a failure. It is for a hotfix whose whole point is to
+repair the data the audit is complaining about; the deploy warns at the start
+and again at the end when it is used.
+
+Which directory the service reads is the `HABITAT_WEB_DIST_DIR` env value in
+`HabitatWeb.xml`; `next.config.ts` reads the same variable. Nothing is renamed,
+so a manual rollback is that one value plus `Restart-Service HabitatWeb`. Three
+superseded releases are kept for exactly that; the active one and the one it
+replaced are never pruned.
+
+**Do not build into the directory the running service is reading.** That was
+the previous instruction here, and it is the cause of the `ChunkLoadError` and
+missing-module entries in `web-logs`: `next build` replaces chunk files under
+the live process, so any request between the start of the build and the restart
+can ask for a chunk that no longer exists. A build that failed halfway also
+left no way back. If you must build by hand, stop the service first.
 
 ## Remove
 

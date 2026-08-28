@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
+import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyInvolvementKinds, storyInvolvementKindLabels, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -87,7 +87,7 @@ function ModelPicker({ value, onChange }: { value: string; onChange: (ref: strin
 // Character sheet
 // ---------------------------------------------------------------------------
 
-export function CharacterSheet({ entryId, version, meta, factions, regions, characters, arcs, races = [] }: {
+export function CharacterSheet({ entryId, version, meta, factions, regions, characters, arcs, events = [], races = [] }: {
   entryId: string;
   version: number;
   meta: Record<string, unknown> | null;
@@ -95,6 +95,10 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   regions: SlugOption[];
   characters: SlugOption[];
   arcs: SlugOption[];
+  /** Canon world events, for involvement in something with no quest board.
+   *  Six production rows named one of these in the arc field, which nothing
+   *  could resolve; the row picks its namespace explicitly now. */
+  events?: SlugOption[];
   /** The races shelf, so a character's people resolve to a real dossier. */
   races?: SlugOption[];
 }) {
@@ -120,7 +124,14 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   const [statusActual, setStatusActual] = useState(text(status.actual));
   const [relationships, setRelationships] = useState(asArray(source.relationships).map((row) => ({ character: text(record(row).character), who: text(record(row).who), type: text(record(row).type) })));
   const [storyRole, setStoryRole] = useState(text(source.storyRole));
-  const [involvement, setInvolvement] = useState(asArray(source.involvement).map((row) => ({ arc: text(record(row).arc), how: text(record(row).how) })));
+  const [involvement, setInvolvement] = useState(asArray(source.involvement).map((row) => {
+    const stored = record(row);
+    // `arc` is the pre-typed shape. Reading it keeps a sheet written before the
+    // migration openable rather than silently blank, and it saves back typed.
+    const ref = text(stored.ref) || text(stored.arc);
+    const kind = text(stored.kind);
+    return { ref, kind: (storyInvolvementKinds as readonly string[]).includes(kind) ? kind : "ARC", how: text(stored.how) };
+  }));
   const [gameId, setGameId] = useState(text(source.gameId));
   const [model, setModel] = useState(text(source.model));
   const raceListId = `character-race-${entryId}`;
@@ -152,7 +163,9 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       .filter((row) => row.character.trim() || row.who.trim() || row.type.trim())
       .map((row) => ({ character: orNull(row.character), who: orNull(row.who), type: orNull(row.type) })),
     storyRole: orNull(storyRole),
-    involvement: involvement.filter((row) => row.arc.trim()).map((row) => ({ arc: row.arc.trim(), how: orNull(row.how) })),
+    involvement: involvement
+      .filter((row) => row.ref.trim())
+      .map((row) => ({ ref: row.ref.trim(), kind: row.kind as StoryCharacterMeta["involvement"][number]["kind"], how: orNull(row.how) })),
     gameId: orNull(gameId),
     model: orNull(model),
     companion: {
@@ -248,12 +261,24 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       </div>
 
       <div className="sheet-rows">
-        <p className="eyebrow">Involvement — authored intent for arcs not yet written <RowButton label="Add an arc" onClick={() => setInvolvement((rows) => [...rows, { arc: "", how: "" }])} /></p>
+        <p className="eyebrow">Involvement — authored intent for arcs and events not yet written <RowButton label="Add an involvement" onClick={() => setInvolvement((rows) => [...rows, { ref: "", kind: "ARC", how: "" }])} /></p>
         {involvement.map((row, index) => (
           <div className="sheet-row sheet-row-two" key={index}>
-            <select aria-label="Arc" onChange={(event) => setInvolvement((rows) => rows.map((other, at) => (at === index ? { ...other, arc: event.target.value } : other)))} value={row.arc}><option value="">Arc…</option>{arcs.map((arc) => <option key={arc.slug} value={arc.slug}>{arc.title}</option>)}</select>
+            {/* Changing the namespace clears the reference: an arc slug is not
+                a valid event and picking one from the other list would store a
+                reference that structurally cannot resolve. */}
+            <select aria-label="Involved in what" onChange={(event) => setInvolvement((rows) => rows.map((other, at) => (at === index ? { ...other, kind: event.target.value, ref: "" } : other)))} value={row.kind}>
+              {storyInvolvementKinds.map((option) => <option key={option} value={option}>{storyInvolvementKindLabels[option]}</option>)}
+            </select>
+            <select aria-label={row.kind === "EVENT" ? "Event" : "Arc"} onChange={(event) => setInvolvement((rows) => rows.map((other, at) => (at === index ? { ...other, ref: event.target.value } : other)))} value={row.ref}>
+              <option value="">{row.kind === "EVENT" ? "Event…" : "Arc…"}</option>
+              {(row.kind === "EVENT" ? events : arcs).map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
+              {/* A reference to something not on the shelf yet stays selected
+                  rather than snapping back to blank on the next render. */}
+              {row.ref && !(row.kind === "EVENT" ? events : arcs).some((option) => option.slug === row.ref) ? <option value={row.ref}>{row.ref} — not written yet</option> : null}
+            </select>
             <input aria-label="How" maxLength={300} onChange={(event) => setInvolvement((rows) => rows.map((other, at) => (at === index ? { ...other, how: event.target.value } : other)))} placeholder="rescue target of the captivity arc" value={row.how} />
-            <RowButton label="Remove this arc" onClick={() => setInvolvement((rows) => rows.filter((_, at) => at !== index))} remove />
+            <RowButton label="Remove this involvement" onClick={() => setInvolvement((rows) => rows.filter((_, at) => at !== index))} remove />
           </div>
         ))}
       </div>

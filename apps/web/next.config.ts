@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@habitat/db", "@habitat/shared"],
+  // Which build directory this process reads or writes. The deploy script sets
+  // it to a fresh `.next-<stamp>` for the build, then points the service at
+  // that directory and restarts — so a deploy never writes into the tree the
+  // running server is serving from. It used to build straight into the live
+  // `.next`, which replaced chunks under the old process and produced the
+  // ChunkLoadError and missing-module failures in the production logs. Unset
+  // everywhere else, which is the ordinary `.next`.
+  distDir: process.env.HABITAT_WEB_DIST_DIR || ".next",
   // Browser-driven local QA may reach the dev server through an explicit LAN
   // address. Keep that origin opt-in so production and normal local dev do not
   // broaden their accepted development origins.

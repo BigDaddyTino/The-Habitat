@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import test from "node:test";
+import { codexArtFileForUrl } from "./codex-art";
 import { getCreatureKeyart, illustratedCreatureSlugs } from "./creature-keyart";
 
 test("every illustrated creature has project-local key art", () => {
@@ -23,7 +22,8 @@ test("every illustrated creature has project-local key art", () => {
   for (const slug of illustratedCreatureSlugs) {
     const keyart = getCreatureKeyart(slug);
     assert.ok(keyart);
-    assert.ok(existsSync(join(process.cwd(), "public", keyart)), `${slug} key art exists`);
+    assert.match(keyart, /^\/codex-art\/(races|creatures)\//, `${slug} key art is served through the authenticated route`);
+    assert.ok(codexArtFileForUrl(keyart), `${slug} key art exists`);
   }
 });
 

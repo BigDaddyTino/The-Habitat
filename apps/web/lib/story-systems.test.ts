@@ -347,7 +347,10 @@ test("the release gate is a real edge, and a broken one is reported", () => {
   // gated on a renamed arc was silently unreleasable and nothing said so.
   const block = codex.slice(codex.indexOf('if (entry.kind === "SYSTEM") {'), codex.indexOf('if (entry.kind === "CREATURE") {'));
   assert.ok(block.length > 0, "SYSTEM must have its own reference checks");
-  for (const field of ['check("parent system", meta.parent)', 'check("unlock arc", meta.unlockArc)', 'check("depends on", target)', 'check("region note", row.region)']) {
+  // The unlock arc names an ARC, so it is checked against the arc pool alone —
+  // against the merged pool a system gated on an entry slug reads as resolved,
+  // which is the bug six character involvement rows sat in for months.
+  for (const field of ['check("parent system", meta.parent)', 'check("unlock arc", meta.unlockArc, knownArcs)', 'check("depends on", target)', 'check("region note", row.region)']) {
     assert.ok(block.includes(field), `the release gate must check ${field}`);
   }
 

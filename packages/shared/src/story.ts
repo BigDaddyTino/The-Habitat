@@ -727,7 +727,10 @@ export type StoryCharacterMeta = {
   };
   relationships: Array<{ character: string | null; who: string | null; type: string | null }>;
   storyRole: string | null;
-  involvement: Array<{ arc: string; how: string | null }>;
+  /** Quest arcs and world events this character is part of. `kind` says which
+   *  namespace `ref` lives in; an ARC row resolves against StoryArc, an EVENT
+   *  row against an EVENT entry in the bible. */
+  involvement: Array<{ ref: string; kind: StoryInvolvementKind; how: string | null }>;
   gameId: string | null;
   /** In-engine asset reference, e.g. "/Game/Creatures_Pack/Mesh/SK_Daemon". */
   model: string | null;
@@ -747,6 +750,24 @@ export type StoryCharacterMeta = {
 export const storyRegionTypes = ["region", "zone", "settlement", "landmark", "site", "destination"] as const;
 export const storySettlementTiers = ["village", "town", "city", "major-city"] as const;
 export const storyControlKinds = ["holds", "contests", "influences"] as const;
+
+/**
+ * What a character's involvement row points AT.
+ *
+ * The field used to be a bare `arc` slug, and six production rows pointed at
+ * canon EVENT entries instead — legitimate involvement ("Reads safe channels
+ * during the surge") in something that has no quest board and may never get
+ * one. Nothing caught it, because the Needs Work scanner validated the slug
+ * against entries and arcs merged into one pool, so an event slug looked like
+ * a resolved arc. The reference carries its own namespace now, and each kind
+ * is checked against only its own pool.
+ */
+export const storyInvolvementKinds = ["ARC", "EVENT"] as const;
+export type StoryInvolvementKind = (typeof storyInvolvementKinds)[number];
+export const storyInvolvementKindLabels: Record<StoryInvolvementKind, string> = {
+  ARC: "Quest arc",
+  EVENT: "World event",
+};
 
 /**
  * A Veil Anchor's tier, I through V — the ladder that decides how dangerous a

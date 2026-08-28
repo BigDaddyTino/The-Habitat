@@ -39,6 +39,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
     : [[], [], [], []];
   // An event can involve anyone and anything, so its picker spans every kind.
   const allEntries = entry.kind === "EVENT" ? await listStoryEntries({}) : [];
+  // A character can be involved in a world event that has no quest board, so
+  // the involvement rows need the timeline shelf beside the arc list.
+  const eventEntries = entry.kind === "CHARACTER" ? await listStoryEntries({ kind: "EVENT" }) : [];
   // Systems form a tree (Weather inside Environment) and express per region
   // (the tropical island cools in winter but never sees snow), so both the
   // system and region dossiers need the systems shelf in hand.
@@ -246,6 +249,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
                   arcs={arcs.map((arc) => ({ slug: arc.slug, title: arc.title }))}
                   characters={characters.filter((option) => option.slug !== entry.slug).map((option) => ({ slug: option.slug, title: option.title }))}
                   entryId={entry.id}
+                  events={eventEntries.map((option) => ({ slug: option.slug, title: option.title }))}
                   factions={factions.map((option) => ({ slug: option.slug, title: option.title }))}
                   key={`sheet-${entry.version}`}
                   meta={entry.meta}

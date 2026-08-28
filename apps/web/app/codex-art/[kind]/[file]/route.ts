@@ -10,15 +10,21 @@ import { storyReadRole } from "@/lib/story-codex";
 /**
  * Serves codex key art off disk at request time.
  *
- * Files under `public/` are indexed when the app is built, so an image dropped
- * in afterwards 404s until the next build — which quietly broke the whole
- * promise the art slots make ("drop a file here and the card wears it on the
- * next load"). Reading from disk per request makes that promise true: add
- * `images/systems/<slug>.png` or `images/timeline/<slug>.jpg`, reload, done.
+ * This route is the ONLY way codex artwork reaches a browser. The files used
+ * to sit under `public/`, where Next serves them as static assets — so every
+ * portrait, region plate, faction identity and world rule was reachable by an
+ * anonymous caller who guessed the slug, while the dossier around it required
+ * a member account. They live under `private/codex-art` now and come through
+ * here, behind the same USER gate as the rest of the codex, because
+ * unreleased key art is unreleased plot.
  *
- * Behind the same USER gate as the rest of the codex, because unreleased key
- * art is unreleased plot. Traversal is impossible: the kind is one of two
- * fixed directories and the filename is pattern-checked before it is resolved.
+ * Serving from disk per request also keeps the art slots' promise true ("drop
+ * a file here and the card wears it on the next load") — `public/` is indexed
+ * at build time, so a file added afterwards used to 404 until the next build.
+ * Add `private/codex-art/systems/<slug>.png`, reload, done.
+ *
+ * Traversal is impossible: the kind is one of a fixed set of directories and
+ * the filename is pattern-checked before it is resolved.
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ kind: string; file: string }> }) {
   const session = await auth();

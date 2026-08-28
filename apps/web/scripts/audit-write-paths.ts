@@ -1,7 +1,7 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { liveServerReferenceManifest } from "./lib/live-build";
 
 /**
  * Drives every save / edit / delete path the way a browser with JavaScript
@@ -16,7 +16,9 @@ import { readFileSync } from "node:fs";
  */
 const db = getPrismaClient();
 const BASE = process.env.AUDIT_BASE ?? "http://127.0.0.1:3000";
-const manifest = JSON.parse(readFileSync(".next/server/server-reference-manifest.json", "utf8")) as { node: Record<string, { exportedName: string }> };
+// Read from the build the SERVICE is serving, not from `.next` — deploys now
+// land in versioned release directories and `.next` can be a stale one.
+const manifest = liveServerReferenceManifest();
 const idOf = (name: string) => Object.entries(manifest.node).find(([, v]) => v.exportedName === name)?.[0];
 
 const out: Array<{ ok: boolean; what: string }> = [];

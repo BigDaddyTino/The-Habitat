@@ -1,6 +1,6 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
-import { canonPacketSchema, metaSchemasByKind } from "../lib/story-meta-schemas";
+import { canonPacketSchema, metaSchemasByKind, serverOwnedMetaKeys } from "../lib/story-meta-schemas";
 
 /**
  * Audits every stored entry's `meta` against the schema its sheet enforces,
@@ -13,7 +13,9 @@ import { canonPacketSchema, metaSchemasByKind } from "../lib/story-meta-schemas"
  *  1. REJECTED — the row would fail validation, so the first person to open
  *     that sheet and save gets "nothing was saved" with no way to fix it.
  *  2. DROPPED — the row carries a key the schema does not know, which zod
- *     strips silently on the next save. Data loss with no error.
+ *     strips silently on the next save. Data loss with no error. The keys in
+ *     `serverOwnedMetaKeys` are the deliberate exception: the save path
+ *     restores those from the stored row, so they are reported as CARRIED.
  *  3. DANGLING — a slug reference pointing at an entry or arc that does not
  *     exist. Some of these are the fill-later law working as intended; the
  *     audit reports them and a human decides.
@@ -47,6 +49,9 @@ async function main() {
   /** Packets that would fail their own schema — settled material at risk. */
   const badPackets: string[] = [];
   const dropped: string[] = [];
+  /** Server-owned keys the save path deliberately carries forward. Counted so
+   *  a release can see its markers are still there, never reported as a drop. */
+  const carried: string[] = [];
   const dangling: string[] = [];
   let validated = 0;
   let references = 0;
@@ -64,7 +69,12 @@ async function main() {
       }
       const keeps = knownKeys(schema);
       for (const key of Object.keys(meta)) {
-        if (!keeps.has(key)) dropped.push(`${entry.kind}:${entry.slug} .${key}`);
+        if (keeps.has(key)) continue;
+        // Not every unknown key is a loss. `serverOwnedMetaKeys` names the ones
+        // updateEntryMeta carries forward across a save on purpose; flagging
+        // those as drops is what made this audit fail on thirteen healthy rows.
+        if ((serverOwnedMetaKeys as readonly string[]).includes(key)) carried.push(`${entry.kind}:${entry.slug} .${key}`);
+        else dropped.push(`${entry.kind}:${entry.slug} .${key}`);
       }
     } else if (meta && !schema) {
       // A kind with meta but no sheet cannot be edited without losing it.
@@ -120,7 +130,15 @@ async function main() {
     check("connections[].to", rowField(meta.connections, "to"), known, "entry");
     check("regionNotes[].region", rowField(meta.regionNotes, "region"), known, "entry");
     check("unlockArc", one(meta.unlockArc), knownArcs, "arc");
-    check("involvement[].arc", rowField(meta.involvement, "arc"), knownArcs, "arc");
+    // Each involvement row against ONLY its own namespace. Reading `arc` as a
+    // fallback keeps an unmigrated row reported rather than skipped.
+    for (const row of (Array.isArray(meta.involvement) ? meta.involvement : [])) {
+      const involvement = asRecord(row);
+      if (!involvement) continue;
+      const ref = one(involvement.ref).length ? one(involvement.ref) : one(involvement.arc);
+      if (involvement.kind === "EVENT") check("involvement[].ref (event)", ref, known, "entry");
+      else check("involvement[].ref (arc)", ref, knownArcs, "arc");
+    }
     // The development room's newest references. A mission points at the board
     // it became; a canon packet points at where it is headed and everyone it
     // names. Checked here so the database-level audit and the zod schemas
@@ -155,6 +173,7 @@ async function main() {
   console.log(`references checked: ${references} typed, ${links} body links`);
   report("REJECTED — would fail on the next sheet save", rejected);
   report("PACKETS — settled material the canon inbox cannot read", badPackets);
+  report("CARRIED — server-owned keys a save preserves", carried);
   report("DROPPED — keys the next save would silently discard", dropped);
   report("DANGLING — references with no target", dangling);
   report("UNWRITTEN — body links to entries nobody has written", brokenLinks);

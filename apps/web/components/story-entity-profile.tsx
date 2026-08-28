@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { Activity, ArrowRight, BookOpen, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
+import { Activity, ArrowRight, BookOpen, CalendarClock, ChevronRight, CircleHelp, Compass, Crown, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import {
   isUnconfirmedThreadStatus,
   storyArcCategoryLabels,
@@ -489,18 +489,22 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             <p className="eyebrow"><GitBranch aria-hidden="true" size={12} /> Story & quest connections</p>
             {entry.appearances.length ? <ul>{entry.appearances.map((node) => <li key={node.id}><Link href={`/codex/arc/${node.arc.slug}`}>{node.title}<ArrowRight aria-hidden="true" size={11} /></Link><span>{node.arc.title}{node.via === "speaks" ? " · dialogue speaker" : " · referenced"}</span></li>)}</ul> : <p className="story-inspector-hint">No written scene touches this yet.</p>}
             {isCharacter ? rows(meta.involvement).map((row) => {
-              if (!label(row.arc)) return null;
-              const arcSlug = String(row.arc);
+              // `arc` is the pre-typed key; an unmigrated row still renders.
+              const ref = label(row.ref) ? String(row.ref) : label(row.arc) ? String(row.arc) : null;
+              if (!ref) return null;
+              const isEvent = row.kind === "EVENT";
               // A planned arc that nobody has opened yet has nowhere to link —
               // that is the point of planning it. Show it as a marker instead
-              // of a link to a page that does not exist.
-              const exists = existingArcSlugs.includes(arcSlug);
-              return <div className="planned-connection" key={arcSlug}>
+              // of a link to a page that does not exist. An event is checked
+              // against the bible instead, because it lives on a dossier.
+              const exists = isEvent ? Boolean(slugTitles[ref]) : existingArcSlugs.includes(ref);
+              const name = (isEvent ? slugTitles[ref] : arcTitles[ref]) ?? ref.replaceAll("-", " ");
+              return <div className="planned-connection" key={`${row.kind ?? "ARC"}:${ref}`}>
                 {exists
-                  ? <Link href={`/codex/arc/${arcSlug}`}><GitBranch aria-hidden="true" size={12} /> {arcSlug.replaceAll("-", " ")}</Link>
-                  : <strong className="planned-unwritten"><GitBranch aria-hidden="true" size={12} /> {arcSlug.replaceAll("-", " ")}</strong>}
+                  ? <Link href={isEvent ? `/codex/bible/${ref}` : `/codex/arc/${ref}`}>{isEvent ? <CalendarClock aria-hidden="true" size={12} /> : <GitBranch aria-hidden="true" size={12} />} {name}</Link>
+                  : <strong className="planned-unwritten">{isEvent ? <CalendarClock aria-hidden="true" size={12} /> : <GitBranch aria-hidden="true" size={12} />} {name}</strong>}
                 {label(row.how) ? <p>{String(row.how)}</p> : null}
-                <span>{exists ? "Planned involvement" : "Planned involvement — arc not opened yet"}</span>
+                <span>{exists ? (isEvent ? "Involvement in a world event" : "Planned involvement") : isEvent ? "Involvement — event not written yet" : "Planned involvement — arc not opened yet"}</span>
               </div>;
             }) : null}
           </section>

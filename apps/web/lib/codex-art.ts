@@ -5,14 +5,20 @@ import path from "node:path";
  * Key art for codex dossiers, found by convention rather than a hand-kept map:
  * drop a file named for the entry's slug and the card and dossier wear it.
  *
- *   public/images/systems/<slug>.(png|jpg|webp)    — game systems
- *   public/images/timeline/<slug>.(png|jpg|webp)   — timeline events
+ *   private/codex-art/systems/<slug>.(png|jpg|webp)    — game systems
+ *   private/codex-art/timeline/<slug>.(png|jpg|webp)   — timeline events
  *
- * The files live under `public/` so they are version-controlled with the rest
- * of the art, but they are SERVED through /codex-art rather than as static
- * assets: Next indexes `public/` at build time, so a file added afterwards
- * would 404 until the next build. Reading from disk per request is what makes
- * "drop it in and reload" actually true.
+ * Every directory here lives under `private/` — still version-controlled with
+ * the rest of the art, but NOT served as a static asset. That is the point:
+ * anything Next finds under `public/` it hands to anonymous callers at its own
+ * URL, so the whole codex art set was reachable without signing in while the
+ * codex pages around it required a member account. Unreleased key art is
+ * unreleased plot, so it is served through /codex-art, which checks the same
+ * USER gate the dossiers do.
+ *
+ * Serving from disk per request also keeps the older promise true — Next
+ * indexes `public/` at build time, so a file dropped in afterwards would have
+ * 404ed until the next build. Here it appears on the next reload.
  *
  * Server-only (node:fs). Never import from a "use client" module.
  */
@@ -20,13 +26,26 @@ import path from "node:path";
 export const codexArtKinds = {
   systems: "systems",
   timeline: "timeline",
+  // The dossier art that used to sit in public/images. Each one is a
+  // directory under private/codex-art named for the shelf it serves.
+  characters: "characters",
+  regions: "regions",
+  races: "races",
+  creatures: "creatures",
+  factions: "factions",
+  "faction-logos": "faction-logos",
+  items: "items",
+  themes: "themes",
+  threads: "threads",
+  "companion-missions": "companion-missions",
+  rules: "rules",
+  flags: "flags",
   "bloomfall-v3": "bloomfall-v3",
   "bloomfall-adaptive-p0": "bloomfall-adaptive-p0",
   "bloomfall-adaptive-p0-source": "bloomfall-adaptive-p0-source",
   "bloomfall-adaptive-p1p2": "bloomfall-adaptive-p1p2",
   "bloomfall-adaptive-p1p2-source": "bloomfall-adaptive-p1p2-source",
   "bloomfall-creatures-v4": "bloomfall-creatures-v4",
-  characters: "characters",
 } as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
@@ -39,18 +58,15 @@ export const codexArtContentTypes = {
 
 const artExtensions = ["png", "jpg", "jpeg", "webp"] as const;
 
+const artRoot = () => path.join(process.cwd(), "private", "codex-art");
+
 function directoryFor(kind: CodexArtKind) {
-  if (kind === "bloomfall-v3") return path.join(process.cwd(), "private", "codex-art", "bloomfall-v3");
-  if (kind === "bloomfall-adaptive-p0") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "candidates");
-  if (kind === "bloomfall-adaptive-p0-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "sources");
-  if (kind === "bloomfall-adaptive-p1p2") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "candidates");
-  if (kind === "bloomfall-adaptive-p1p2-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "sources");
-  if (kind === "bloomfall-creatures-v4") return path.join(process.cwd(), "private", "codex-art", "bloomfall-creatures-v4");
-  // Character portraits sit beside the six that predate this route. Serving
-  // them from disk is what lets a new one appear on a reload instead of
-  // waiting for the next build.
-  if (kind === "characters") return path.join(process.cwd(), "public", "images", "characters", "keyart");
-  return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
+  // The review packages nest their finals and their history separately.
+  if (kind === "bloomfall-adaptive-p0") return path.join(artRoot(), "bloomfall-adaptive-p0", "candidates");
+  if (kind === "bloomfall-adaptive-p0-source") return path.join(artRoot(), "bloomfall-adaptive-p0", "sources");
+  if (kind === "bloomfall-adaptive-p1p2") return path.join(artRoot(), "bloomfall-adaptive-p1p2", "candidates");
+  if (kind === "bloomfall-adaptive-p1p2-source") return path.join(artRoot(), "bloomfall-adaptive-p1p2", "sources");
+  return path.join(artRoot(), codexArtKinds[kind]);
 }
 
 /**
@@ -76,14 +92,13 @@ export function findCodexArt(kind: CodexArtKind, slug: string): string | null {
 
 /** Where to drop the art, shown verbatim on the empty slot. */
 export function codexArtSlot(kind: CodexArtKind, slug: string) {
-  if (kind === "characters") return `images/characters/keyart/${slug}.png`;
-  return `images/${codexArtKinds[kind]}/${slug}.png`;
+  return `private/codex-art/${codexArtKinds[kind]}/${slug}.png`;
 }
 
 /**
  * Resolves a request path to a file on disk, or null. The kind must be one of
- * the two known directories and the filename must be `<slug>.<ext>`, so there
- * is no way to express a traversal — and the resolved path is re-checked to be
+ * the known directories and the filename must be `<slug>.<ext>`, so there is
+ * no way to express a traversal — and the resolved path is re-checked to be
  * inside its directory regardless.
  */
 export function resolveCodexArtFile(kind: string, file: string, environment: Readonly<Record<string, string | undefined>> = process.env): string | null {
@@ -95,4 +110,18 @@ export function resolveCodexArtFile(kind: string, file: string, environment: Rea
   const target = path.resolve(directory, file);
   if (target !== path.join(directory, file)) return null;
   return existsSync(target) ? target : null;
+}
+
+/**
+ * The file behind a `/codex-art/...` URL, or null.
+ *
+ * Every art resolver returns a URL, and the audits and tests that check the
+ * art is really on disk used to rebuild the path themselves by joining the URL
+ * onto `public/`. That stopped being true when the art moved behind the
+ * authenticated route, and it was never something a caller should have had to
+ * know. Ask here instead — this is the same resolution the route performs.
+ */
+export function codexArtFileForUrl(url: string, environment: Readonly<Record<string, string | undefined>> = process.env): string | null {
+  const match = /^\/codex-art\/([a-z0-9-]+)\/([^/]+)$/.exec(url);
+  return match ? resolveCodexArtFile(match[1], match[2], environment) : null;
 }

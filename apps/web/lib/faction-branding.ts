@@ -48,8 +48,8 @@ export function getFactionBranding(slug: string): FactionBranding | null {
 
   return {
     accent,
-    keyart: `/images/factions/keyart/${slug}.jpg`,
-    logo: `/images/factions/logos/${slug}.png`,
+    keyart: `/codex-art/factions/${slug}.jpg`,
+    logo: `/codex-art/faction-logos/${slug}.png`,
   };
 }
 

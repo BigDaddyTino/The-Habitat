@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
 import test from "node:test";
 import { getCharacterKeyart, illustratedCharacterSlugs } from "./character-keyart";
+import { codexArtFileForUrl } from "./codex-art";
 
 test("every illustrated character has project-local key art", () => {
   assert.deepEqual(illustratedCharacterSlugs, [
@@ -23,7 +22,10 @@ test("every illustrated character has project-local key art", () => {
   for (const slug of illustratedCharacterSlugs) {
     const keyart = getCharacterKeyart(slug);
     assert.ok(keyart);
-    assert.ok(existsSync(join(process.cwd(), "public", keyart)), `${slug} key art exists`);
+    // Behind the member gate, never a static asset: a portrait served from
+    // public/ is unreleased character design handed to anonymous callers.
+    assert.match(keyart, /^\/codex-art\/characters\//, `${slug} key art is served through the authenticated route`);
+    assert.ok(codexArtFileForUrl(keyart), `${slug} key art exists`);
   }
 });
 

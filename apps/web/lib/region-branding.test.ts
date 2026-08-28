@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import test from "node:test";
+import { codexArtFileForUrl } from "./codex-art";
 import { brandedRegionCount, brandedRegionSlugs, getRegionBranding, getRegionKeyart } from "./region-branding";
 
 function jpegDimensions(path: string) {
@@ -66,19 +66,23 @@ test("every illustrated canonical region and POI has optimized cinematic key art
   for (const slug of brandedRegionSlugs) {
     const brand = getRegionBranding(slug);
     assert.ok(brand, `${slug} has a visual identity record`);
-    assert.deepEqual(jpegDimensions(join(process.cwd(), "public", brand.keyart)), { height: 900, width: 1600 });
+    const file = codexArtFileForUrl(brand.keyart);
+    assert.ok(file, `${slug} key art exists behind the member gate`);
+    assert.deepEqual(jpegDimensions(file), { height: 900, width: 1600 });
   }
 });
 
 test("an existing place image resolves even before the place receives full branding", () => {
   assert.equal(getRegionBranding("the-docks"), null);
   for (const [slug, expected] of [
-    ["the-docks", "/images/regions/keyart/the-docks.png"],
-    ["death-canyon", "/images/regions/keyart/death-canyon.png"],
-    ["grand-lake", "/images/regions/keyart/grand-lake.png"],
-    ["the-floating-city", "/images/regions/keyart/the-floating-city.jpg"],
+    ["the-docks", "/codex-art/regions/the-docks.png"],
+    ["death-canyon", "/codex-art/regions/death-canyon.png"],
+    ["grand-lake", "/codex-art/regions/grand-lake.png"],
+    ["the-floating-city", "/codex-art/regions/the-floating-city.jpg"],
   ] as const) {
     assert.equal(getRegionKeyart(slug), expected);
-    assert.ok(readFileSync(join(process.cwd(), "public", expected)).byteLength > 0, `${slug} artwork exists`);
+    const file = codexArtFileForUrl(expected);
+    assert.ok(file, `${slug} artwork exists`);
+    assert.ok(readFileSync(file).byteLength > 0, `${slug} artwork is not empty`);
   }
 });

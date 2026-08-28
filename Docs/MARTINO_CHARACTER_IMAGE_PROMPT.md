@@ -4,7 +4,7 @@ Paste everything below the rule into ChatGPT (web, with image generation + the
 Python/data-analysis tool enabled). It runs unattended: 12 character plates
 generated back to back with no check-ins, then one zip to download.
 
-Filenames are the Codex binding convention (`public/images/characters/keyart/<slug>`),
+Filenames are the Codex binding convention (`private/codex-art/characters/<slug>`),
 so the set can be wired straight into the dossiers.
 
 Six of the twelve already have key art — the Ignit Island prologue cast. These are

@@ -186,8 +186,12 @@ export function storyEntryFactLines(kind: StoryEntryKind, meta: Record<string, u
     })));
     fact("Magic", joined([asText(magic.origin), ...asList(magic.schools)].filter((value): value is string => Boolean(value))));
     fact("Involved in", joined(asRows(meta.involvement).flatMap((row) => {
-      const arc = asText(row.arc);
-      return arc ? [`${arc}${asText(row.how) ? ` (${asText(row.how)})` : ""}`] : [];
+      // `arc` is the pre-typed key, still read so an unmigrated row is not
+      // silently dropped out of the assistant's picture of a character.
+      const ref = asText(row.ref) ?? asText(row.arc);
+      if (!ref) return [];
+      const namespace = asText(row.kind) === "EVENT" ? " [event]" : "";
+      return [`${ref}${namespace}${asText(row.how) ? ` (${asText(row.how)})` : ""}`];
     })));
     fact("Known status", asText(status.known));
     fact("SPOILER-TIER — actual status, writers-room truth", asText(status.actual));
