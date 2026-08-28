@@ -37,7 +37,7 @@ export function parseCodexArtWidth(value: string | null): CodexArtWidth | null {
   return (codexArtWidths as readonly number[]).includes(width) ? width as CodexArtWidth : null;
 }
 
-const cacheRoot = () => path.join(process.cwd(), "private", "codex-art-cache");
+const cacheRoot = () => path.join(/*turbopackIgnore: true*/ process.cwd(), "private", "codex-art-cache");
 
 /** Identity of the file as it is right now. A replaced original changes its
  *  size or its mtime, so its derivatives are simply never found again. */

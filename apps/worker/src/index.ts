@@ -1,6 +1,7 @@
 import { HabitatAgentClient } from "./agent-client.js";
 import { loadWorkerConfiguration } from "./config.js";
 import { initialCycleLogState, nextCycleLog } from "./cycle-log.js";
+import { pruneServerMetrics } from "./retention.js";
 import { createPostgresMonitoringRepository, runMonitoringCycle } from "./monitoring.js";
 import { getPrismaClient } from "@habitat/db/client";
 import { startDiscordBot } from "./discord-bot.js";
@@ -155,6 +156,17 @@ async function main(): Promise<void> {
       } catch (error) {
         console.warn("Habitat record reconciliation failed. Existing record holders remain available.");
         console.error("[worker] record reconciliation failed:", error instanceof Error ? error.message : String(error));
+      }
+      try {
+        // Bounded history for the agent's metric samples. Nothing read them
+        // beyond the newest 48 per server, and nothing had ever deleted one.
+        const pruned = await pruneServerMetrics(configuration.metricRetentionDays);
+        if (pruned.deleted > 0) {
+          console.info(`Habitat retention: removed ${pruned.deleted.toLocaleString()} metric sample(s) older than ${configuration.metricRetentionDays} days${pruned.more ? "; more remain and the next scan continues" : ""}.`);
+        }
+      } catch (error) {
+        console.warn("Habitat metric retention failed. Monitoring is unaffected and the next scan retries.");
+        console.error("[worker] metric retention failed:", error instanceof Error ? error.message : String(error));
       }
       nextHistoryScanAt = Date.now() + configuration.historyScanIntervalMs;
     }

@@ -12,6 +12,7 @@ HABITAT_AGENT_TOKEN=<the same token used by the MartServ102 agent>
 HABITAT_WORKER_POLL_INTERVAL_MS=15000
 HABITAT_WORKER_HISTORY_SCAN_INTERVAL_MS=21600000
 HABITAT_WORKER_PROVIDER_SCAN_INTERVAL_MS=300000
+HABITAT_METRIC_RETENTION_DAYS=30
 STEAM_WEB_API_KEY=<optional private key>
 STEAM_DATA_STORAGE_COUNTRY=<required before Steam enrichment runs>
 STEAM_WEB_API_DAILY_REQUEST_BUDGET=5000
@@ -25,6 +26,33 @@ HABITAT_CROSS_GAME_CONSUMERS_ENABLED=false
 The worker rejects public, HTTPS, credentialed, or path-bearing agent URLs. Its token stays in `.env`; it is not typed into a PowerShell variable for normal operation.
 
 When `MARVEL_RIVALS_API_KEY` is blank the worker automatically falls back to the rivalsmeta.com community provider (set `MARVEL_RIVALS_PROVIDER=off` to disable instead). Rivals refreshes are presence-gated and cover only member-linked accounts: a profile pulls once when the member links it, then hourly while the member's verified Steam account shows Marvel Rivals running (plus one pass up to an hour after they stop, since provider data lags live play), with a daily safety pass for everyone else.
+
+
+### Metric retention
+
+`ServerMetricSample` is written on every monitoring cycle and, until
+2026-08-28, was never pruned: 609,931 rows and 129 MB across eighteen days,
+larger than every other table in the database combined and on course for about
+2.5 GB a year. The only reader is the world page, which asks for the newest 48
+samples per server.
+
+The worker now prunes on the history-scan cadence.
+`HABITAT_METRIC_RETENTION_DAYS` sets the window — default 30, minimum 7,
+maximum 3650 — and an out-of-range or non-integer value is refused at startup
+rather than rounded. The floor exists because a window measured in hours would
+delete what the world page is still showing; unbounded growth was the bug, and
+a window too tight is simply a different one.
+
+Deletion runs in batches of 5,000 with a ceiling of 20 batches per scan, so the
+first prune on a database that has never had one cannot hold locks against the
+monitoring cycle still writing to that table. Whatever is left is taken by the
+next scan.
+
+To keep long-range history, widen the window rather than disabling the prune —
+there is no off switch, because "no bound" is the state this replaced. If a
+surface is ever written that charts months of samples, the right change is to
+roll old rows up to hourly in `retention.ts`, not to keep every fifteen-second
+sample forever.
 
 ## First Cycle
 

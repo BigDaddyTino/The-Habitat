@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { isIP } from "node:net";
 import path from "node:path";
+import { parseMetricRetentionDays } from "./retention.js";
 import { z } from "zod";
 
 dotenv.config({ path: path.resolve(import.meta.dirname, "../../../.env"), quiet: true });
@@ -13,6 +14,8 @@ export type WorkerConfiguration = {
   providerScanIntervalMs: number;
   /** How often Habitat Pulse re-evaluates operational signals. */
   pulseIntervalMs: number;
+  /** How much agent metric history to keep. The table had no bound at all. */
+  metricRetentionDays: number;
 };
 
 export function loadWorkerConfiguration(environment = process.env): WorkerConfiguration {
@@ -28,7 +31,8 @@ export function loadWorkerConfiguration(environment = process.env): WorkerConfig
   // Pulse reaches the public origin and the agent on every evaluation, so it runs
   // on its own slower cadence rather than riding the 15-second monitoring cycle.
   const pulseIntervalMs = parseIntervalMs(environment.HABITAT_PULSE_INTERVAL_MS, "HABITAT_PULSE_INTERVAL_MS", 30_000, 3_600_000, 60_000);
-  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs, providerScanIntervalMs, pulseIntervalMs };
+  const metricRetentionDays = parseMetricRetentionDays(environment.HABITAT_METRIC_RETENTION_DAYS);
+  return { agentUrl, agentToken, pollIntervalMs, historyScanIntervalMs, providerScanIntervalMs, pulseIntervalMs, metricRetentionDays };
 }
 
 function parseIntervalMs(rawValue: string | undefined, variableName: string, minimum: number, maximum: number, fallback: number): number {

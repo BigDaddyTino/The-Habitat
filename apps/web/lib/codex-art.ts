@@ -58,15 +58,24 @@ export const codexArtContentTypes = {
 
 const artExtensions = ["png", "jpg", "jpeg", "webp"] as const;
 
-const artRoot = () => path.join(process.cwd(), "private", "codex-art");
+/**
+ * Runtime-only, and deliberately opaque to the bundler.
+ *
+ * These paths are read per request off disk; they are not modules and nothing
+ * about them is knowable at build time. Without the ignore, Turbopack tries to
+ * follow the dynamic join, matches every one of the ~12,000 files under
+ * apps/web, and reports that "the whole project was traced unintentionally" on
+ * every single build — which is exactly what it was doing.
+ */
+const artRoot = () => path.join(/*turbopackIgnore: true*/ process.cwd(), "private", "codex-art");
 
 function directoryFor(kind: CodexArtKind) {
   // The review packages nest their finals and their history separately.
-  if (kind === "bloomfall-adaptive-p0") return path.join(artRoot(), "bloomfall-adaptive-p0", "candidates");
-  if (kind === "bloomfall-adaptive-p0-source") return path.join(artRoot(), "bloomfall-adaptive-p0", "sources");
-  if (kind === "bloomfall-adaptive-p1p2") return path.join(artRoot(), "bloomfall-adaptive-p1p2", "candidates");
-  if (kind === "bloomfall-adaptive-p1p2-source") return path.join(artRoot(), "bloomfall-adaptive-p1p2", "sources");
-  return path.join(artRoot(), codexArtKinds[kind]);
+  if (kind === "bloomfall-adaptive-p0") return path.join(/*turbopackIgnore: true*/ artRoot(), "bloomfall-adaptive-p0", "candidates");
+  if (kind === "bloomfall-adaptive-p0-source") return path.join(/*turbopackIgnore: true*/ artRoot(), "bloomfall-adaptive-p0", "sources");
+  if (kind === "bloomfall-adaptive-p1p2") return path.join(/*turbopackIgnore: true*/ artRoot(), "bloomfall-adaptive-p1p2", "candidates");
+  if (kind === "bloomfall-adaptive-p1p2-source") return path.join(/*turbopackIgnore: true*/ artRoot(), "bloomfall-adaptive-p1p2", "sources");
+  return path.join(/*turbopackIgnore: true*/ artRoot(), codexArtKinds[kind]);
 }
 
 /**
@@ -83,7 +92,7 @@ function isDevelopmentReviewKind(kind: string) {
 export function findCodexArt(kind: CodexArtKind, slug: string): string | null {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return null;
   for (const extension of artExtensions) {
-    if (existsSync(path.join(directoryFor(kind), `${slug}.${extension}`))) {
+    if (existsSync(path.join(/*turbopackIgnore: true*/ directoryFor(kind), `${slug}.${extension}`))) {
       return `/codex-art/${codexArtKinds[kind]}/${slug}.${extension}`;
     }
   }
@@ -107,8 +116,8 @@ export function resolveCodexArtFile(kind: string, file: string, environment: Rea
   const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)\.(png|jpg|jpeg|webp)$/.exec(file);
   if (!match) return null;
   const directory = directoryFor(kind as CodexArtKind);
-  const target = path.resolve(directory, file);
-  if (target !== path.join(directory, file)) return null;
+  const target = path.resolve(/*turbopackIgnore: true*/ directory, file);
+  if (target !== path.join(/*turbopackIgnore: true*/ directory, file)) return null;
   return existsSync(target) ? target : null;
 }
 
