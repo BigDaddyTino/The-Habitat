@@ -108,3 +108,23 @@ The manifest records which release the payload came from:
 The field is optional because bundles published before the boundary existed genuinely lack it — its absence means that canon payload was read live, which is the thing the boundary ended.
 
 **Publishing refuses when no release has been cut.** There is deliberately no fallback to live canon; cut one with `apps/web/scripts/cut-story-release.ts`.
+
+## Health — integrity is not freshness
+
+```powershell
+pnpm --filter @habitat/codex-sync sync:health
+```
+
+`sync:verify` confirms the bundle on the drive hashes correctly. That is not the question the game machine cares about.
+
+On 2026-08-28 the publisher spent eight hours failing every five seconds — the codex art directories had moved out of `public/` and the running service was still walking the old paths — and it failed *safely*, keeping the last complete release active. So `verify` passed the whole time while `N:\Martino_Codex` served a bundle from before a full day of work. Nothing on the drive was wrong. Its **age** was wrong, and nothing said so.
+
+`sync:health` asks the only question that matters: **is what is on the drive what canon says now?** It runs the same code a publish runs, so the two can never disagree, and it reports:
+
+- `STALE` — the drive does not match current canon; the publisher should have republished and has not. Check `codex-sync-logs\CodexSyncPublisher.out.log`.
+- `BEHIND` — a release has been cut that the drive has not picked up.
+- `PRE-BOUNDARY` — the live bundle predates the release boundary, so its canon payload was read live rather than from a named release.
+
+**The publisher runs from source via tsx, so it loads its code at service start.** Any change to `apps/codex-sync` needs `Restart-Service CodexSyncPublisher` before it takes effect — that is how the eight-hour outage happened, and restarting was the whole fix.
+
+**Still missing:** nothing alerts on an unhealthy result. This check has to be run, or scheduled, to be worth anything.

@@ -4,15 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sync:publish": "tsx src/cli.ts publish",
-    "sync:publish:watch": "tsx src/cli.ts publish --watch",
+    "bloomfall:verify": "tsx src/verify-bloomfall-development.ts",
+    "lint": "tsc --noEmit",
+    "sync:health": "tsx src/cli.ts health",
     "sync:mirror": "tsx src/cli.ts mirror",
     "sync:mirror:watch": "tsx src/cli.ts mirror --watch",
+    "sync:publish": "tsx src/cli.ts publish",
+    "sync:publish:watch": "tsx src/cli.ts publish --watch",
     "sync:verify": "tsx src/cli.ts verify",
-    "lint": "tsc --noEmit",
-    "typecheck": "tsc --noEmit",
     "test": "tsx --test src/*.test.ts",
-    "bloomfall:verify": "tsx src/verify-bloomfall-development.ts"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@habitat/db": "workspace:*",

@@ -83,6 +83,40 @@ function assertSafeSyncRoot(repositoryRoot: string, syncRoot: string) {
   }
 }
 
+/**
+ * What a publish WOULD produce, without writing anything.
+ *
+ * Exists because `verify` cannot catch the failure that actually happens. On
+ * 2026-08-28 the publisher spent eight hours failing every five seconds — the
+ * asset directories had moved under it — and the last good bundle stayed
+ * perfectly valid the whole time, so integrity verification passed while the
+ * game machine read a bundle from before a full day of work. Nothing was
+ * wrong with what was on the drive; what was wrong was its age.
+ *
+ * This runs the same code a publish runs, so a health check and a publish can
+ * never disagree about whether the drive is current.
+ */
+export async function codexPublishState(repositoryRoot: string, syncRoot: string) {
+  assertSafeSyncRoot(repositoryRoot, syncRoot);
+  const sourceAssets = await discoverCodexAssets(repositoryRoot);
+  const [snapshot, assets] = await Promise.all([
+    buildCodexSnapshot(new Date()),
+    storeCodexAssets(sourceAssets, syncRoot),
+  ]);
+  const release = await newestPublishedRelease();
+  const current = await readCurrentPointer(syncRoot);
+  if (!release) return { release: null, current, stale: true, reason: "no story release has been cut" as const, contentSha256: null, assets: assets.length };
+  const contentSha256 = sourceContentHash(snapshot, release.payload, assets);
+  return {
+    release,
+    current,
+    contentSha256,
+    assets: assets.length,
+    stale: current?.sourceContentSha256 !== contentSha256,
+    reason: current ? (current.sourceContentSha256 === contentSha256 ? null : ("the drive does not match current canon" as const)) : ("nothing has ever been published" as const),
+  };
+}
+
 export async function publishCodexBundle(repositoryRoot: string, syncRoot: string): Promise<PublishResult> {
   assertSafeSyncRoot(repositoryRoot, syncRoot);
   await mkdir(syncRoot, { recursive: true });
