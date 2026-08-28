@@ -116,6 +116,7 @@ const afterCounts = { storyEntries: 238, storyMaps: 4, placements: 54, nodePlace
  *   Codex systems           + the two dossiers Bloomfall had no page for
  *   Conditional alignments  + the two conditional base alignments and their
  *                             semantic connections
+ *   Named Aberrants         + the three the ladder implies
  */
 const codexIntegrationCounts = { ...afterCounts, storyEntries: afterCounts.storyEntries + 2 };
 const conditionalAtlasCounts = {
@@ -123,7 +124,10 @@ const conditionalAtlasCounts = {
   worldConnections: codexIntegrationCounts.worldConnections + 2,
   connectionPaths: codexIntegrationCounts.connectionPaths + 2,
 };
-const appliedCountSets = [afterCounts, codexIntegrationCounts, conditionalAtlasCounts];
+/** The three named Aberrants the ladder implies — The Slow Hill, The Braid and
+ *  The Groundfault — which existed only inside their parent species' card. */
+const seededAberrantCounts = { ...conditionalAtlasCounts, storyEntries: conditionalAtlasCounts.storyEntries + 3 };
+const appliedCountSets = [afterCounts, codexIntegrationCounts, conditionalAtlasCounts, seededAberrantCounts];
 
 function hierarchyExpected(snapshot: BloomfallActivationSnapshot, phase: "before" | "after") {
   return geographicHierarchyRepairManifest.every((expected) => {
