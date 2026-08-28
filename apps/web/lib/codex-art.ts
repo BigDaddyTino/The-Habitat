@@ -26,6 +26,7 @@ export const codexArtKinds = {
   "bloomfall-adaptive-p1p2": "bloomfall-adaptive-p1p2",
   "bloomfall-adaptive-p1p2-source": "bloomfall-adaptive-p1p2-source",
   "bloomfall-creatures-v4": "bloomfall-creatures-v4",
+  characters: "characters",
 } as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
@@ -45,6 +46,10 @@ function directoryFor(kind: CodexArtKind) {
   if (kind === "bloomfall-adaptive-p1p2") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "candidates");
   if (kind === "bloomfall-adaptive-p1p2-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "sources");
   if (kind === "bloomfall-creatures-v4") return path.join(process.cwd(), "private", "codex-art", "bloomfall-creatures-v4");
+  // Character portraits sit beside the six that predate this route. Serving
+  // them from disk is what lets a new one appear on a reload instead of
+  // waiting for the next build.
+  if (kind === "characters") return path.join(process.cwd(), "public", "images", "characters", "keyart");
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
 }
 
@@ -71,6 +76,7 @@ export function findCodexArt(kind: CodexArtKind, slug: string): string | null {
 
 /** Where to drop the art, shown verbatim on the empty slot. */
 export function codexArtSlot(kind: CodexArtKind, slug: string) {
+  if (kind === "characters") return `images/characters/keyart/${slug}.png`;
   return `images/${codexArtKinds[kind]}/${slug}.png`;
 }
 
