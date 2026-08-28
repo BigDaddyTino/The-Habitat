@@ -240,6 +240,53 @@ link), `dependsOn` names other systems, and `buildStatus` says how real it is
 on the game side. An importer that has never heard of the kind reads these
 entries exactly as it reads a THEME it does not act on.
 
+### Leaving `concept`: what `designed` means
+
+`buildStatus` runs `concept → designed → in-build → playable → live`. For most
+of the codex's life every one of the forty-nine systems sat at `concept`,
+which made the field decorative: nothing had ever left the first rung, so
+nothing showed what leaving it looked like. [[the-soul-forge]], [[soul-binding]]
+and [[reclamation]] are the worked example (2026-08-28), and they set the bar.
+
+A system is `designed` when a reader who is going to build it needs nothing
+further from the writers' room. Concretely, six things:
+
+1. **The verb.** What the player actually does, in the world's own vocabulary.
+   Binding is *bind*, never *set spawn point* — if the interface would need a
+   word the fiction does not use, the design is not finished.
+2. **Numbers, as a rule rather than an anecdote.** Two illustrative figures in
+   prose are a mood; the curve through them is a mechanic. Where the fiction has
+   already committed to numbers, **solve for the rule that makes them true**
+   rather than replacing them — reclamation's awkward 11.7 per level is exactly
+   the line through the 47 and the 386 the story had already promised, and that
+   is a feature. Canon is the constraint, not the first draft.
+3. **State.** What the build must persist for the system to survive a session,
+   a server restart, and a second player. If this list needs a subsystem the
+   game does not otherwise need, say so here rather than discovering it later.
+4. **Failure.** What happens at the edges, and especially at the edge the
+   fiction has already ruled on. Canon says nobody dies permanently from an
+   Essence shortfall, so "the Forge is too poor to build you" cannot resolve to
+   death — which is how *the dead wait in the Core* was arrived at. Design the
+   edge the canon forces, not the edge that is easiest.
+5. **Boundaries.** A short list of what the system must never do, each one
+   protecting something outside itself. Corruption surviving reclamation is
+   what keeps the seven-phase ladder frightening; a Forge never speaking about
+   an Echo it does not hold is what keeps Tino's fate unsettled.
+6. **The fields filled.** `gameTag` (dotted, `System.SoulForge.Binding`),
+   `dependsOn`, and either `unlockArc` or `unlockStage`.
+
+**And the board has to contain it.** This is the part that only shows up when
+somebody tries. A `designed` system claims the game teaches it at a particular
+moment, so that moment must exist as a card somebody can open. Writing the Soul
+Forge's design found that the binding scene — described in detail by the system
+dossier, by Rook's character sheet, and by a region note, and called "the
+prologue's most important scene" — had never been written onto the prologue
+board at all. The prologue ran TUTORIAL COMPLETE straight into the operations
+table. Three dossiers agreed about a scene that did not exist.
+
+So the last check before a system leaves `concept` is the cheapest and the most
+revealing: **open the arc it claims to be taught in, and find the card.**
+
 **REGION `meta.type` gained `destination` (2026-08-18), additive, contract still v1.**
 The world nests three rungs: a **region** holds **places** (`site`, `zone`,
 `settlement`, `landmark`), and a place holds **destinations** — the grocery
