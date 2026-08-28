@@ -86,7 +86,7 @@
     { "slug": "the-ocean", "coordinate": [79753, 57292], "correctionApplied": false },
     { "slug": "port-arcadia", "coordinate": [50781, 59896], "correctionApplied": false },
     { "slug": "the-floating-city", "coordinate": [44922, 6836], "correctionApplied": false },
-    { "slug": "the-starting-island", "canonicalTitle": "Igit Island", "coordinate": [37435, 58594], "correctionApplied": false }
+    { "slug": "the-starting-island", "canonicalTitle": "Ignit Island", "coordinate": [37435, 58594], "correctionApplied": false }
   ],
   "manualQa": {
     "database": "disposable activated clone",
@@ -100,6 +100,6 @@
     "deathCanyonNestedSelection": "PASSED",
     "grandLakeSelection": "PASSED",
     "igitIslandChildScene": "PASSED",
-    "note": "The V2 child-scene heading now derives Igit Island from the canonical owning StoryEntry; V1 data remains unchanged."
+    "note": "The V2 child-scene heading now derives Ignit Island from the canonical owning StoryEntry; V1 data remains unchanged."
   }
 }

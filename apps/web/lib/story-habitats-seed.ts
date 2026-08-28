@@ -9,7 +9,7 @@
  * beside the assignment so the next writer can check the reasoning rather than
  * trust it.
  *
- * The world has exactly three regions: Igit Island, The Ocean, The Peninsula.
+ * The world has exactly three regions: Ignit Island, The Ocean, The Peninsula.
  * A creature whose ground is somewhere nobody has built yet keeps its prose
  * habitat and waits — see `unplaced` at the bottom for those and why.
  */
@@ -27,12 +27,12 @@ export const habitatAssignments: HabitatAssignment[] = [
   {
     creature: "abominations",
     regions: ["the-starting-island"],
-    because: "\"Battlefield abominations already walk Igit Island's fronts, and the clinic's extraction ward in glasswater-village is a reminder of how the pipeline starts.\"",
+    because: "\"Battlefield abominations already walk Ignit Island's fronts, and the clinic's extraction ward in glasswater-village is a reminder of how the pipeline starts.\"",
   },
   {
     creature: "monstrosities",
     regions: ["the-starting-island"],
-    because: "\"On Igit Island their presence is peripheral but real: corporate-bred jungle stock among the tropics' creatures, the catcher camp's cages at the Riftwood's edge, and whatever Pearl keeps in restraints at the beachhead.\"",
+    because: "\"On Ignit Island their presence is peripheral but real: corporate-bred jungle stock among the tropics' creatures, the catcher camp's cages at the Riftwood's edge, and whatever Pearl keeps in restraints at the beachhead.\"",
   },
   {
     creature: "supernaturals",
@@ -47,7 +47,7 @@ export const habitatAssignments: HabitatAssignment[] = [
   {
     creature: "true-demons",
     regions: ["the-starting-island"],
-    because: "\"A true demon follows the risen out of the prologue's first crater\" — the prologue is Igit Island.",
+    because: "\"A true demon follows the risen out of the prologue's first crater\" — the prologue is Ignit Island.",
   },
   {
     creature: "hippogriff",

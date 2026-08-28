@@ -10,8 +10,16 @@ type Database = ReturnType<typeof createPrismaClient>;
 type Transaction = Prisma.TransactionClient;
 
 export const atlasV2ActivationMigration = "20260824230000_add_atlas_topology_connections" as const;
+/**
+ * The locked activation artifacts. A hash moves only when the change behind it
+ * was deliberate and is recorded here.
+ *
+ *   topologyManifest, 2026-08-28 — the island's name was corrected from "Igit"
+ *   to Ignit throughout, which touches one `reason` string in the canonical
+ *   topology. Geometry, node ids, boundaries and areas are unchanged.
+ */
 export const atlasV2ArtifactHashes = {
-  topologyManifest: "6af3fa434526ef853d4ebd3f00599ffa56cb3ad961339afcde94fdd0fe38a647",
+  topologyManifest: "d0a6aae4c2e08af3a045e6429f30e83497da45b1cf3ba1c0a26d2210056745e5",
   derivedGeometry: "bad2aaf43dd08587729ef429f5ba66f37606c8f0a0d54dd04244c61104b8270b",
   connectionCandidates: "333f72dbb1b03155abf7b0c6fbf3688feea1e3fb50e123e476938604e20396e7",
   canonicalRoutes: "058c293a4c43e2b04fc079f1fd99835c6cb258c8bc007f8730464c13cc4b1bda",

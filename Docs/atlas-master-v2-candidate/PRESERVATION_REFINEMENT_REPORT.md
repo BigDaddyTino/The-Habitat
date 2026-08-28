@@ -10,7 +10,7 @@ Prepared: 2026-08-24
 - The established landmass concept and relative arrangement of the Desert, Grand Rift, Red Forest, Riverlands, High Cliffs, Grand Lake, Magic-Torn Wasteland, Unknown Southeast, and long Peninsula.
 - Grand Lake inside the northern heights, its great waterfall, and the central Riverlands drainage direction.
 - Port Arcadia as a large crescent port at the Peninsula’s southern tip.
-- Igit Island as the Starting/tutorial island immediately southwest of Port Arcadia.
+- Ignit Island as the Starting/tutorial island immediately southwest of Port Arcadia.
 - The Floating City above/beside Grand Lake.
 - Near-future industry, infrastructure, magic-tech fusion, inhabited terrain, danger, and mature AAA tone.
 - Unknown Southeast’s deliberate lack of authored lore.
@@ -40,7 +40,7 @@ Prepared: 2026-08-24
 - Confirm the Riverlands / Desert, Riverlands / Magic-Torn Wasteland, and Riverlands / Unknown Southeast segmentation choices.
 - Confirm the Peninsula’s northern-neck line.
 - Owner decision recorded: Red Forest is one independently selectable top-level neighbor of Grand Rift; Death Canyon alone is nested inside Grand Rift.
-- Confirm that the far southwestern inhabited city-island remains intentionally unnamed and distinct from Igit Island.
+- Confirm that the far southwestern inhabited city-island remains intentionally unnamed and distinct from Ignit Island.
 - Confirm whether the strong light boundary treatment should remain at this prominence or receive a subtler final polish pass.
 - Approve Output B as the tracing master before any new art version, placement recalibration, topology migration, renderer switch, or Bundle change.
 
@@ -49,7 +49,7 @@ Prepared: 2026-08-24
 The following would reject this candidate or any follow-up revision:
 
 - Moving Port Arcadia away from the Peninsula tip.
-- Moving the Igit Island identity back to the far southwestern city-island.
+- Moving the Ignit Island identity back to the far southwestern city-island.
 - Losing or relocating the Floating City or Grand Lake.
 - Replacing the established landmass with a new continent, adding arbitrary islands, or changing the region order.
 - Treating cartographic segmentation as political control or faction ownership.

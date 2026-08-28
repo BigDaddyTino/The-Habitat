@@ -26,7 +26,7 @@ export const factionSheetSeeds = [
       relations: [{ faction: "the-riftbound-legion", stance: "ally", notes: "The Legion is the Court's organized military instrument, not an equal banner." }],
       goals: ["Exploit battlefield rifts as doors for incursions.", "Keep the Court's hierarchy, etiquette, and ultimate price opaque."],
       gameTag: null,
-      openQuestions: ["What did the Court know about Pearl's build-up before Igit?", "What does the Court ultimately want from the human world?"],
+      openQuestions: ["What did the Court know about Pearl's build-up before Ignit?", "What does the Court ultimately want from the human world?"],
     },
   },
   {
@@ -89,7 +89,7 @@ export const factionSheetSeeds = [
     slug: "national-defense-directorate",
     meta: {
       scope: "State military and security apparatus", parent: null, independent: false, power: null, seat: null, leaders: [],
-      relations: [{ faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl's private war on Igit left the Directorate defending a state whose authority had already been bypassed." }],
+      relations: [{ faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl's private war on Ignit left the Directorate defending a state whose authority had already been bypassed." }],
       goals: ["Hold the peninsula and preserve a credible chain of command.", "Control Essence, infusion, quarantine, and the evidence those systems produce."],
       gameTag: null,
       openQuestions: ["Which emergency laws still have legitimate force?", "What explains the discrepancies in the Directorate's Essence ledgers?"],
@@ -102,7 +102,7 @@ export const factionSheetSeeds = [
       relations: [{ faction: "the-ashen-court", stance: "rival", notes: "Even the Court reroutes around places where the Hunger's pattern is visible." }],
       goals: ["Feed and wake — an observed pattern, not a confirmed plan.", "Remain unknowable except through the people and powers drawn into its orbit."],
       gameTag: null,
-      openQuestions: ["Is the silhouette beneath Igit the Hunger itself or only an effect of it?", "Where is the island's disappearing magic actually going?"],
+      openQuestions: ["Is the silhouette beneath Ignit the Hunger itself or only an effect of it?", "Where is the island's disappearing magic actually going?"],
     },
   },
   {
@@ -132,12 +132,12 @@ export const factionSheetSeeds = [
     meta: {
       scope: "Criminal maritime cartel and artifact-trade power", parent: null, independent: false, power: null, seat: null, leaders: [],
       relations: [
-        { faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl destroyed Igit and the Cartel's position there; the employer relationship begins in the wreckage." },
+        { faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl destroyed Ignit and the Cartel's position there; the employer relationship begins in the wreckage." },
         { faction: "black-tithe-syndicate", stance: "rival", notes: "An ugly competitor and occasional subcontractor that still depends on Stormglass lanes." },
       ],
-      goals: ["Control the illegal sea lanes and artifact trade.", "Survive Igit's loss without surrendering the ledgers and leverage that make the Cartel valuable."],
+      goals: ["Control the illegal sea lanes and artifact trade.", "Survive Ignit's loss without surrendering the ledgers and leverage that make the Cartel valuable."],
       gameTag: null,
-      openQuestions: ["What is the Cartel's connection to the stormglass that names it?", "What future does it intend to buy with Igit's survivors?"],
+      openQuestions: ["What is the Cartel's connection to the stormglass that names it?", "What future does it intend to buy with Ignit's survivors?"],
     },
   },
   {
@@ -145,12 +145,12 @@ export const factionSheetSeeds = [
     meta: {
       scope: "Commercial and maritime trade bloc", parent: null, independent: false, power: null, seat: null, leaders: [],
       relations: [
-        { faction: "stormglass-cartel", stance: "enemy", notes: "Pearl's strike broke Igit and the Cartel operation there; the consequences are still active." },
+        { faction: "stormglass-cartel", stance: "enemy", notes: "Pearl's strike broke Ignit and the Cartel operation there; the consequences are still active." },
         { faction: "iron-saints-pmc", stance: "ally", notes: "The Saints are Pearl's longest and largest retainer, contractually aligned rather than sworn." },
       ],
       goals: ["Acquire the remaining sources of magic and the routes that move them.", "Win through contracts, retained force, and costs pushed onto everyone else."],
       gameTag: null,
-      openQuestions: ["Who inside Pearl is accountable for the long consequence of Igit?", "How much control does the House truly have over its retained contractors?"],
+      openQuestions: ["Who inside Pearl is accountable for the long consequence of Ignit?", "How much control does the House truly have over its retained contractors?"],
     },
   },
 ] as const;

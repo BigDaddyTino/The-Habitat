@@ -7,7 +7,7 @@ generated back to back with no check-ins, then one zip to download.
 Filenames are the Codex binding convention (`public/images/characters/keyart/<slug>`),
 so the set can be wired straight into the dossiers.
 
-Six of the twelve already have key art — the Igit Island prologue cast. These are
+Six of the twelve already have key art — the Ignit Island prologue cast. These are
 fresh replacements at 4K; keep the old files until you have compared them.
 
 ---
@@ -62,7 +62,7 @@ Append this render tag to the end of every image prompt you compose:
 Martino is a war fought over harvested magic. **Essence** is extracted magic, and
 extraction kills whatever it is taken from. Two grounds matter for this cast:
 
-- **Igit Island** — the prologue. A Stormglass Cartel operation collapsing under an
+- **Ignit Island** — the prologue. A Stormglass Cartel operation collapsing under an
   attack, fought through a market, rooftops and a forward camp. Urban, burning,
   improvised. Military kit mixed with civilian clothing.
 - **Bloomfall Reach** — a "Living Ruin": a former strategic Essence reserve that
@@ -114,7 +114,7 @@ one line, move on, and list it at the end as not delivered.
 
 # THE LIST
 
-## Part one — Igit Island, the prologue cast
+## Part one — Ignit Island, the prologue cast
 
 - `tino.png` — **Tino.** He/him. A Stormglass Cartel magic-infuser and the player's
   war buddy: competent, vulgar, funny under pressure. Late thirties, built like

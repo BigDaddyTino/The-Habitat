@@ -213,7 +213,7 @@ Death Canyon   -> grand-rift        Grand Lake      -> high-cliffs
 Floating City  -> high-cliffs       Port Arcadia    -> the-peninsula
 Shattercore    -> bloomfall-reach   Mutation Belt   -> bloomfall-reach
 Living Marsh   -> bloomfall-reach   Long Graze      -> the-mutation-belt
-Igit Island (the-starting-island)   -> null  (starter progression untouched)
+Ignit Island (the-starting-island)   -> null  (starter progression untouched)
 ```
 
 ## 11. Peninsula dossier

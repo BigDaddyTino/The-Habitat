@@ -313,7 +313,7 @@ export function buildAtlasCanonicalTopologyTrace(): AtlasCanonicalTopologyTrace 
       areaMetadata,
       reviews,
     }],
-    startingIsland: { mapSlug: "martino-starting-island", status: "DEFERRED_CHILD_SCENE", reason: "Prompt 6 locks only the world master. Igit Island remains a world anchor and independent child scene." },
+    startingIsland: { mapSlug: "martino-starting-island", status: "DEFERRED_CHILD_SCENE", reason: "Prompt 6 locks only the world master. Ignit Island remains a world anchor and independent child scene." },
     portArcadia: { mapSlug: "martino-port-arcadia", status: "RECALIBRATION_REQUIRED", decodedArtwork: "1599x984", declaredContract: "1536x1024" },
   };
 }

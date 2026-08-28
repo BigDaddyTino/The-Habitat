@@ -22,7 +22,7 @@ Two pieces of existing engineering confirm this was already an irritant:
 - The prose renderer (`apps/web/lib/story-prose.ts`) has a dedicated `elideLeadingThe`
   mechanism so "the [[the-soul-forge]]" doesn't render as "the The Soul Forge".
 - Three entries already prove slug ≠ title is safe and established:
-  `the-starting-island` → "Igit Island", `the-corruption-system` → "Corruption",
+  `the-starting-island` → "Ignit Island", `the-corruption-system` → "Corruption",
   `the-kestrel-commander` → "Commander Rook".
 
 The same audit surfaced two casing bugs to fold into the fix: **"The southside"** and
@@ -153,7 +153,7 @@ Approve §5 (or amend it) and rule on each OWNER_DECISION row. Nothing proceeds 
 - No topology, placement, or geometry writes (enforced by the preservation snapshot).
 - No mainline arc restructuring — the 4 mainline arcs with "The" titles are
   sentence-style KEEPs anyway.
-- Igit Island / starter progression untouched.
+- Ignit Island / starter progression untouched.
 - Production authoring stays disabled.
 
 ## 8. Effort and risk

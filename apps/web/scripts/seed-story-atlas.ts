@@ -148,7 +148,7 @@ const maps: readonly MapSeed[] = [
   },
   {
     slug: "martino-starting-island",
-    title: "Starting Island Tactical Atlas",
+    title: "Ignit Island Tactical Atlas",
     artVersion: "v1",
     owner: "the-starting-island",
     parent: "martino-world",

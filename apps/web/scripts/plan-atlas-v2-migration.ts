@@ -46,7 +46,7 @@ ${reciprocalRows}
 
 Prompt 6 resolves the world-master geography. All eight top-level land regions, Grand Lake, and nested Death Canyon are approved for migration in the deterministic topology manifest. No world-master boundary remains owner-review-required.
 
-## Starting Island
+## Ignit Island
 
 No canonical base-geography topology was stored. Named polygons are mostly settlements, forts, sites, landings, or markers. \`riftwood-interior\` is the sole broad geography candidate, but its lore and artwork do not define a precise perimeter. Owner decision: decide whether Riftwood is a base-geography area, a narrative/biome overlay, or a point/label-only place before tracing.
 
@@ -74,7 +74,7 @@ export function buildAtlasLegacyPrompt4ReviewHtml() {
   for (const record of geometryManifest.records) v1ByMap.set(record.mapSlug, [...(v1ByMap.get(record.mapSlug) ?? []), record]);
   const mapConfig = [
     { slug: "martino-world", title: "World", art: "martino-world-map-v1.png", width: 100_000, height: 66_667 },
-    { slug: "martino-starting-island", title: "Starting Island", art: "martino-starting-island-map-v1.png", width: 100_000, height: 66_667 },
+    { slug: "martino-starting-island", title: "Ignit Island", art: "martino-starting-island-map-v1.png", width: 100_000, height: 66_667 },
     { slug: "martino-port-arcadia", title: "Port Arcadia — recalibration only", art: "martino-port-arcadia-map-v2.png", width: 100_000, height: 66_667 },
   ];
   const panels = mapConfig.map((map) => {

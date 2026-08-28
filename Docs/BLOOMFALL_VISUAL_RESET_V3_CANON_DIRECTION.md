@@ -116,7 +116,7 @@ Beauty may emerge from atmosphere, scale, survival, and ecological function. Bea
 The V2 world candidate was permitted only as geographic anchor. V3 corrects only:
 
 1. Floating City restored over the middle of Grand Lake.
-2. Offshore island groups restored beyond Igit Island.
+2. Offshore island groups restored beyond Ignit Island.
 3. Major desert city restored on an inhabited oasis corridor.
 4. Fortified shielded city restored in the Magic-Torn Wasteland.
 5. Death Canyon filled with confined luminous purple and sickly green death gases.

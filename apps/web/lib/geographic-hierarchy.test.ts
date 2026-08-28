@@ -32,7 +32,7 @@ test("Bloomfall is top-level while all three canonical subregions remain inside 
   ]);
 });
 
-test("legitimate Peninsula, Grand Rift, High Cliffs, and Igit containment stays explicit", () => {
+test("legitimate Peninsula, Grand Rift, High Cliffs, and Ignit containment stays explicit", () => {
   assert.equal(verifiedGeographicParentContracts["port-arcadia"], "the-peninsula");
   assert.equal(verifiedGeographicParentContracts["death-canyon"], "grand-rift");
   assert.equal(verifiedGeographicParentContracts["grand-lake"], "high-cliffs");

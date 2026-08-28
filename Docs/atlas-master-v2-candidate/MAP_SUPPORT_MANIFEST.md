@@ -38,7 +38,7 @@ These lines define proposed **Atlas segmentation**, not political ownership. Geo
 | --- | --- | --- | --- |
 | Port Arcadia | Major port city | Crescent city at the southern tip of the Peninsula; labeled and marked in Output A. | Established proper name and position. |
 | The Floating City | Major city | Suspended directly above/beside Grand Lake; labeled in Output A. | Descriptive canonical title; final proper name remains unresolved in Codex lore. |
-| Igit Island | Starting/tutorial island and inhabited local scene | The nearer island immediately southwest of Port Arcadia; labeled in Output A. | Owner-confirmed canonical name. “Starting Island” and “tutorial island” are functional aliases only. |
+| Ignit Island | Starting/tutorial island and inhabited local scene | The nearer island immediately southwest of Port Arcadia; labeled in Output A. | Owner-confirmed canonical name. “Starting Island” and “tutorial island” are functional aliases only. |
 | Riverlands major city | Major city | Existing central city silhouette/glyph retained without a name label. | Proper name and controlling faction unresolved. |
 | Grand Rift major city | Major city | Existing built-up rift-shelf silhouette/glyph retained without a name label. | Proper name and controlling faction unresolved. |
 | Desert major city | Major city | Existing western urban silhouette/glyph retained without a name label. | Proper name and exact faction control unresolved. |
@@ -54,7 +54,7 @@ No new city proper names were invented.
 - The Red Forest canopy transition.
 - Port Arcadia’s crescent harbor.
 - The Floating City above/beside Grand Lake.
-- Igit Island immediately southwest of Port Arcadia.
+- Ignit Island immediately southwest of Port Arcadia.
 - The shielded city and controlled anomalies in the Magic-Torn Wasteland.
 - The cloud-veiled Unknown Southeast as reserved future-facing territory.
 

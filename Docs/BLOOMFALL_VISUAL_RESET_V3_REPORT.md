@@ -23,7 +23,7 @@ All previous Bloomfall scene, creature, concept and local-Atlas images were excl
 ## 3. Required world corrections
 
 - Floating City restored: **PASS** — visibly airborne over the middle of Grand Lake with a real underside and water shadow.
-- Missing island groups restored: **PASS** — distinct offshore archipelagos beyond Igit Island.
+- Missing island groups restored: **PASS** — distinct offshore archipelagos beyond Ignit Island.
 - Desert city restored: **PASS** — a dense major settlement, defensive works and industrial route occupy the oasis-fed desert corridor.
 - Magic-Torn Wasteland city restored: **PASS** — a fortified engineered city stands visibly beneath a defensive field inside the reality-failure region.
 - Death Canyon gases corrected: **PASS** — lethal purple/green gas remains pooled inside the nested canyon depth.

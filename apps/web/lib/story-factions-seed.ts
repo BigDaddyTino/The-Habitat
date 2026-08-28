@@ -122,7 +122,7 @@ export const factionAssignments: FactionAssignment[] = [
     faction: "iron-saints-pmc",
     parent: "tropic-pearl-trade-house",
     tier: "OWNER-CALL",
-    because: "\"They fought for Pearl on Igit Island.\" Filed to the retainer that pays them — canon keeps them \"loyal to the signature line, not the flag\", and clause 12 still means whatever the auditor says today.",
+    because: "\"They fought for Pearl on Ignit Island.\" Filed to the retainer that pays them — canon keeps them \"loyal to the signature line, not the flag\", and clause 12 still means whatever the auditor says today.",
   },
 
   // --- The Stormglass Cartel: the criminal world ----------------------------
@@ -180,7 +180,7 @@ export const factionAssignments: FactionAssignment[] = [
     faction: "free-islander-league",
     parent: "the-free-peoples-compact",
     tier: "OWNER-CALL",
-    because: "\"The islands belong to islanders\" — and Igit Island proved that conviction needs allies with ground under them.",
+    because: "\"The islands belong to islanders\" — and Ignit Island proved that conviction needs allies with ground under them.",
   },
   {
     faction: "drifter-renegade-camps",
@@ -231,7 +231,7 @@ export const compactSeed = {
   summary:
     "The newest power on the map: marsh clans, desert caravans, mountain holdfasts, island councils, and road convoys who agree on nothing except that their land is not for sale — one bloc by necessity, five peoples by choice.",
   body: [
-    "The Compact is nine months old and already the third-largest territory on the peninsula, which tells you everything about the decade that produced it. It is not a government, a nation, or an alliance in the treaty sense — it is a defensive pact signed by peoples who had spent centuries ignoring one another, because [[aegis-extraction-consortium]] survey teams, [[national-defense-directorate]] requisitions, [[tropic-pearl-trade-house]] flotillas, and rifts that open where somebody else's war was fought had all finally arrived at the same time. [[verdant-marsh-clans]] brought the pacts, [[mountain-holdfasts]] brought the passes and the grudge, [[desert-nomad-compact]] brought the crossings, [[free-islander-league]] brought a fleet and a wound named Igit Island, and [[drifter-renegade-camps]] — the convoys that signed, at least — brought the one thing none of the others had: they hear everything, everywhere, first.",
+    "The Compact is nine months old and already the third-largest territory on the peninsula, which tells you everything about the decade that produced it. It is not a government, a nation, or an alliance in the treaty sense — it is a defensive pact signed by peoples who had spent centuries ignoring one another, because [[aegis-extraction-consortium]] survey teams, [[national-defense-directorate]] requisitions, [[tropic-pearl-trade-house]] flotillas, and rifts that open where somebody else's war was fought had all finally arrived at the same time. [[verdant-marsh-clans]] brought the pacts, [[mountain-holdfasts]] brought the passes and the grudge, [[desert-nomad-compact]] brought the crossings, [[free-islander-league]] brought a fleet and a wound named Ignit Island, and [[drifter-renegade-camps]] — the convoys that signed, at least — brought the one thing none of the others had: they hear everything, everywhere, first.",
 
     "There is no capital, no standing army, and no shared culture — a marsh pact-keeper and a holdfast reeve can barely agree on what a border is. What the Compact has is a single article, ratified without amendment, that its members quote the way other powers quote scripture: *our land is not yours*. Everything else — water rights, feuds two centuries old, whether the road camps are truly members or merely useful — is argued at assembly, loudly, and settled the way it has always been settled. Every great power on the peninsula has spent the year testing whether five peoples who dislike each other can be split by a good offer. So far, the offers have made the Compact stronger.",
 
@@ -443,10 +443,10 @@ export const bodyPatches: FactionBodyPatch[] = [
   },
   {
     slug: "free-islander-league",
-    guard: "The League carried Igit Island into [[the-free-peoples-compact]]",
+    guard: "The League carried Ignit Island into [[the-free-peoples-compact]]",
     note: "founding member",
     paragraph:
-      "The League carried Igit Island into [[the-free-peoples-compact]] as testimony, and the founding assembly listened to refugees for two full days before anyone discussed terms. What the League gains is ground — allies with mountains and marshes behind them, so an island is no longer alone when the great powers arrive. What it gives is the fleet, and the hardest political lesson the pact has: the islands were also alone because nobody inland thought their fight was theirs.",
+      "The League carried Ignit Island into [[the-free-peoples-compact]] as testimony, and the founding assembly listened to refugees for two full days before anyone discussed terms. What the League gains is ground — allies with mountains and marshes behind them, so an island is no longer alone when the great powers arrive. What it gives is the fleet, and the hardest political lesson the pact has: the islands were also alone because nobody inland thought their fight was theirs.",
   },
   {
     slug: "drifter-renegade-camps",

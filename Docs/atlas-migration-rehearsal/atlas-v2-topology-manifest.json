@@ -1996,7 +1996,7 @@
   },
   "startingIsland": {
     "mapSlug": "martino-starting-island",
-    "reason": "Prompt 6 locks only the world master. Igit Island remains a world anchor and independent child scene.",
+    "reason": "Prompt 6 locks only the world master. Ignit Island remains a world anchor and independent child scene.",
     "status": "DEFERRED_CHILD_SCENE"
   },
   "traceVersion": 2

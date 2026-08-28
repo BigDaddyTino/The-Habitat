@@ -8,10 +8,16 @@ test("every illustrated character has project-local key art", () => {
   assert.deepEqual(illustratedCharacterSlugs, [
     "abraham-islay-kane",
     "amanda",
+    "jaro-fen",
+    "keira-ansel",
+    "mara-quill",
+    "nalia-reed",
+    "selene-ward",
     "steve",
     "the-kestrel-commander",
     "the-war-correspondent",
     "tino",
+    "tomas-vey",
   ]);
 
   for (const slug of illustratedCharacterSlugs) {
