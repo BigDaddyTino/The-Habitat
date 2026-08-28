@@ -61,6 +61,9 @@ const guideV1: Readonly<Record<string, readonly string[]>> = {
  */
 const systemsV1: Readonly<Record<string, readonly string[]>> = {
   "adaptive-mutation": ["0636ff798c5a861c9b62b45d5936c706e808da5a939501b8907c66a079e93e75"],
+  // Said only three species could produce a "promoted survivor" — the retired
+  // pre-ladder vocabulary, and wrong now that all five seed a named Aberrant.
+  "aberrant-escalation": ["1f30141927d52e9afe16b914e4df2b321835e466c5c1afd8e0f9fff7e06915b3"],
 };
 
 const generations = [promptB, guideV1, systemsV1];

@@ -33,6 +33,7 @@ import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
 import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
 import { bloomfallCreatureArtUrl, getBloomfallCreatureHeroArt } from "@/lib/bloomfall-creature-art";
+import { bloomfallCreatureFieldGuide } from "@/lib/bloomfall-creature-field-guide";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
 import { BloomfallSystemPanel } from "@/components/bloomfall-system-panel";
@@ -395,10 +396,15 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {isRace && raceFamily ? <div className="entity-contained-places entity-race-members">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Children of {entry.title}</p>
             {raceFamily.members.length ? <ul>{raceFamily.members.map((member) => {
-              const memberArt = getCreatureKeyart(member.slug);
-              return <li key={member.slug}>
+              // The old illustrated races have their own key art; a Bloomfall
+              // species wears the plate from its own dossier instead of the
+              // empty-slot sparkle.
+              const memberPlate = getBloomfallCreatureHeroArt(member.slug);
+              const memberArt = getCreatureKeyart(member.slug) ?? (memberPlate ? bloomfallCreatureArtUrl(memberPlate) : null);
+              const isAberrant = bloomfallCreatureFieldGuide[member.slug]?.kind === "BOSS";
+              return <li className={isAberrant ? "is-aberrant" : undefined} key={member.slug}>
                 {memberArt ? <img alt="" src={memberArt} /> : <span className="region-place-fallback"><Sparkles aria-hidden="true" size={18} /></span>}
-                <div><Link href={`/codex/bible/${member.slug}`}><strong>{member.title}</strong><i>{member.category ?? "uncategorised"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
+                <div><Link href={`/codex/bible/${member.slug}`}><strong>{member.title}</strong><i>{isAberrant ? "Exceptional Aberrant" : member.category ?? "uncategorised"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {member.summary ? <p><StoryProseLine resolve={resolveProse} text={member.summary} /></p> : null}</div>
               </li>;
             })}</ul> : <p className="story-inspector-hint">Nothing is filed under this race yet — it is a race waiting for its members.</p>}

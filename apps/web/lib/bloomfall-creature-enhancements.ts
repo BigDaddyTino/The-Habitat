@@ -12,6 +12,7 @@ import {
   type BloomfallAbility,
   type BloomfallAdaptiveGuide,
   type BloomfallBossGuide,
+  type BloomfallCreatureGuide,
   type BloomfallDamageTable,
   type BloomfallFixedGuide,
 } from "./bloomfall-creature-field-guide";
@@ -399,7 +400,11 @@ function renderBoss(guide: BloomfallBossGuide) {
  * for image prompting; they are not printed.
  */
 export function renderBloomfallCreatureEnhancement(entry: BloomfallCreatureEnhancement) {
-  const guide = bloomfallCreatureGuide(entry);
+  return renderBloomfallCreatureGuide(bloomfallCreatureGuide(entry));
+}
+
+/** The same body from a guide alone, for dossiers with no design-spec record. */
+export function renderBloomfallCreatureGuide(guide: BloomfallCreatureGuide) {
   if (guide.kind === "ADAPTIVE") return renderAdaptive(guide);
   if (guide.kind === "BOSS") return renderBoss(guide);
   return renderFixed(guide);

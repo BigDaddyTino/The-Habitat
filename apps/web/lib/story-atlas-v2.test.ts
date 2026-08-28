@@ -16,7 +16,11 @@ test("V2 projection assembles locked geography while preserving canonical points
   const quest: StoryAtlasFeature = { ...point, placementId: "quest:1", source: "NODE", entryId: null, nodeId: "node:1", slug: "quest:arc:step", title: "Quest step", layer: "QUEST", childMap: null };
   const v1: StoryAtlasProjection = { contract: "martino-story-atlas", contractVersion: 1, revisionCursor: "v1", scene: { id: "map:world", slug: "martino-world", title: "Starting Island Tactical Atlas", artVersion: "v1", imageUrl: "/codex-map/martino-world/v1.png", imageWidth: 1536, imageHeight: 1024, coordinateWidth: 100_000, coordinateHeight: 66_667, initialCenter: [50_000, 33_333], initialZoom: 0, minZoom: 0, maxZoom: 5, parentMap: null }, features: [...regionFeatures, point, quest], counts: { placed: 12, regions: 10, settlements: 0, pois: 1, quests: 1 } };
   const projection = buildStoryAtlasV2Projection({ v1, topology: map.dataset, connections: [], revisionCursor: "v2", sceneOwnerTitle: "Igit Island" });
-  assert.equal(projection.scene.imageUrl, "/codex-map/martino-world/v2.png");
+  // The projection carries the scene's own art through untouched. It used to
+  // pin martino-world to v2, which quietly served the superseded world map
+  // once v3 shipped — the art version belongs to the StoryMap row, not here.
+  assert.equal(projection.scene.imageUrl, v1.scene.imageUrl);
+  assert.equal(projection.scene.artVersion, v1.scene.artVersion);
   assert.equal(projection.scene.title, "Igit Island Tactical Atlas");
   assert.equal(projection.counts.regions, 10);
   assert.equal(projection.counts.topLevelRegions, 8);

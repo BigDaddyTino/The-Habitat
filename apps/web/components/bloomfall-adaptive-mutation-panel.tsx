@@ -1,11 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import {
   bloomfallCreatureEnhancementBySlug,
-  bloomfallCreatureGuide,
   bloomfallMutationCards,
   type BloomfallMutationCard,
 } from "@/lib/bloomfall-creature-enhancements";
-import { bloomfallAbilitySentence } from "@/lib/bloomfall-creature-field-guide";
+import { bloomfallAbilitySentence, bloomfallCreatureFieldGuide } from "@/lib/bloomfall-creature-field-guide";
 import { bloomfallLadderSummary } from "@/lib/bloomfall-adaptive-ladder";
 import { plainStoryProse } from "@/lib/story-prose";
 import {
@@ -49,9 +48,12 @@ function RungCard({ card, entrySlug }: { card: BloomfallMutationCard; entrySlug:
 
 /** The Adaptive Mutation gallery. Renders for any dossier the creature manifest covers. */
 export function BloomfallAdaptiveMutationPanel({ entrySlug }: { entrySlug: string }) {
-  const enhancement = bloomfallCreatureEnhancementBySlug.get(entrySlug);
-  if (!enhancement) return null;
-  const guide = bloomfallCreatureGuide(enhancement);
+  // Keyed on the field guide, not the enhancement manifest: the three named
+  // Aberrants that a surviving Advanced can seed have a dossier and a boss card
+  // without being a species with its own design spec.
+  const guide = bloomfallCreatureFieldGuide[entrySlug];
+  if (!guide) return null;
+  const title = bloomfallCreatureEnhancementBySlug.get(entrySlug)?.title ?? entrySlug.replaceAll("-", " ");
 
   if (guide.kind !== "ADAPTIVE") {
     const plate = getBloomfallCreatureHeroArt(entrySlug);
@@ -66,7 +68,7 @@ export function BloomfallAdaptiveMutationPanel({ entrySlug }: { entrySlug: strin
         <p className="eyebrow">{guide.kind === "BOSS" ? "Current form" : "Canonical fixed form"}</p>
         <figure className="adaptive-support-plate">
           <a href={bloomfallCreatureArtUrl(plate)} target="_blank" rel="noreferrer">
-            <img alt={`${enhancement.title} key art`} src={bloomfallCreatureArtUrl(plate)} />
+            <img alt={`${title} key art`} src={bloomfallCreatureArtUrl(plate)} />
           </a>
         </figure>
       </div> : null}
@@ -85,8 +87,8 @@ export function BloomfallAdaptiveMutationPanel({ entrySlug }: { entrySlug: strin
       <span>4 RUNGS + ABERRANT</span>
     </div>
     <p className="adaptive-mutation-intro">{guide.hook} {bloomfallLadderSummary}</p>
-    <div className="adaptive-state-track" aria-label={`${enhancement.title} mutation ladder`}>
-      {cards.map((card) => <RungCard card={card} entrySlug={enhancement.slug} key={card.rung} />)}
+    <div className="adaptive-state-track" aria-label={`${title} mutation ladder`}>
+      {cards.map((card) => <RungCard card={card} entrySlug={entrySlug} key={card.rung} />)}
     </div>
     <p className="adaptive-mutation-note">Development-only · Bloomfall Adaptive Mutation visual review · no runtime mutation logic is active.</p>
   </section>;

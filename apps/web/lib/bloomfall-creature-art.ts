@@ -86,6 +86,9 @@ export function getBloomfallCreatureRungArt(entrySlug: string, rung: BloomfallMu
 const aberrantOf: Readonly<Record<string, string>> = {
   "the-bellwether": "blackbloom-hart",
   "old-drowner": "mirejaw",
+  "the-slow-hill": "rootback-grazer",
+  "the-braid": "sump-eel",
+  "the-groundfault": "latchhound",
 };
 
 export function getBloomfallCreatureHeroArt(entrySlug: string): BloomfallCreatureArtAsset | null {

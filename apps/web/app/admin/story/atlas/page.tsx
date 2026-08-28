@@ -37,7 +37,7 @@ export default async function AtlasAuthoringPage({ searchParams }: { searchParam
   ]);
   const pathByConnection = new Map(map.connectionPaths.map((path) => [path.connectionId, path]));
   const data: AtlasAuthoringData = {
-    map: { id: map.id, slug: map.slug, title: map.title, imageUrl: `/codex-map/${map.slug}/${map.slug === "martino-world" ? "v2" : map.artVersion}.png`, width: map.coordinateWidth, height: map.coordinateHeight },
+    map: { id: map.id, slug: map.slug, title: map.title, imageUrl: `/codex-map/${map.slug}/${map.artVersion}.png`, width: map.coordinateWidth, height: map.coordinateHeight },
     scenes,
     nodes: map.topologyNodes.map((node) => ({ id: node.id, x: node.x, y: node.y, version: node.version, boundaryIds: [...node.boundariesFrom, ...node.boundariesTo].map((boundary) => boundary.id) })),
     boundaries: map.boundaries.map((boundary) => ({ id: boundary.id, startNodeId: boundary.startNodeId, endNodeId: boundary.endNodeId, kind: boundary.kind, interiorVertices: boundary.interiorVertices as unknown as readonly (readonly [number, number])[], version: boundary.version, regions: [...new Set(boundary.ringReferences.map((reference) => reference.ring.placement.entry.title))].sort() })),

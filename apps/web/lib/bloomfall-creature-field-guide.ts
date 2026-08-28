@@ -489,4 +489,55 @@ export const bloomfallCreatureFieldGuide: Readonly<Record<string, BloomfallCreat
     drops:
       "None. No lawful harvest and no drop table. Defeating or driving it off changes the emergency routes and the evidence, and nothing else — the people in it are possible persons, not resource nodes.",
   },
+
+  "the-slow-hill": {
+    kind: "BOSS",
+    summary:
+      "A [[rootback-grazer]] that stopped moving for a decade, grew into terrain, and then started moving again. Mature trees, standing water and a broken fence line ride on its back; the legs are barely distinguishable from the slope. Every map of that cell is wrong now, and the survey crews who drew them are the ones who found out.",
+    spawn:
+      "The Exceptional Aberrant of the Rootback Grazer line. Let an Advanced grazer walk away and there is a 1% chance the Belt grows this instead.",
+    stats: "Landmark scale. Prisma defense under a metre of living bark, and it heals from the ground it is standing on.",
+    abilities: [
+      a("Terrain Claim", "The ground it stands on becomes its mat; footing, cover, and routes all belong to it."),
+      a("Root Cathedral", "Raises a cage of living timber around the fight and closes the roof."),
+      a("Buried Herd", "Calls up what has been sheltering underneath it; you are outnumbered by the second minute."),
+      a("Marrow Sink", "Drinks the essence out of anything it pins, and heals what you have managed to do."),
+    ],
+    drops:
+      "**Heartwood core** — a living sink the size of a barrel. Whatever you build around it never needs recharging. Killing it drops a hill on the cell and takes every route through that ground with it.",
+  },
+
+  "the-braid": {
+    kind: "BOSS",
+    summary:
+      "A [[sump-eel]] run that fused. Hundreds of eels braided into a single conductor thicker than a man, living in the Southreach drainage and treating the grid as an extension of its own body. Bodies at the seams are still half-absorbed. It does not hunt so much as re-route, and the machinery it wakes does the hunting.",
+    spawn:
+      "The Exceptional Aberrant of the Sump Eel line. An Advanced run that escapes down a live drain carries the 1% chance.",
+    stats: "Mini-boss scale, measured in metres of cable rather than body mass. Prisma defense, and it draws power faster than you can drain it.",
+    abilities: [
+      a("Grid Graft", "Grafts onto live infrastructure and stops running out of power."),
+      a("Deadline", "Kills every light and powered tool in the area, then hunts in the dark it made."),
+      a("Cable Choir", "Every machine in the room turns hostile at once."),
+      a("Braidfall", "Drops its entire length through a corridor as one strike."),
+    ],
+    drops:
+      "**Braided conductor** — a cable grown rather than made. It will carry anything you put through it. Cutting it live discharges the whole drainage network into the water you are standing in.",
+  },
+
+  "the-groundfault": {
+    kind: "BOSS",
+    summary:
+      "A [[latchhound]] that stopped merely reading the grid and became a fault in it. Power in that sector goes where it says, and it says the floor. Cables have grown into the flesh and the flesh has grown into the switchgear, so the yard and the animal are no longer separable — and the pack it still calls arrives lit only by the arcs it makes.",
+    spawn:
+      "The Exceptional Aberrant of the Latchhound line. Let an Advanced Pack Relay escape while latched and there is a 1% chance the sector answers with this.",
+    stats: "Mini-boss scale, site-coupled. Prisma defense, and its effective health is whatever the sector still has stored.",
+    abilities: [
+      a("Live Floor", "Energizes the ground across the room; there is no neutral footing left."),
+      a("Kennel Call", "Pulls every pack in the sector to it, latched and coordinated."),
+      a("Breaker Trip", "Kills your lamps, your tools, and anything you had on charge."),
+      a("Overload", "Takes a sector's stored power in one gulp and spends all of it on one strike."),
+    ],
+    drops:
+      "**Fault core** — the heart of a grid failure, still drawing. [[splicefield-substation]] crews pay anything and ask nothing. Killing it blacks out the sector it was holding together.",
+  },
 };

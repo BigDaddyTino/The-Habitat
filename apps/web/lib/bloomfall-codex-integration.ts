@@ -493,7 +493,7 @@ export const bloomfallSystemPages: readonly BloomfallSystemPage[] = [
     ],
     openQuestions: [
       "Can each named Aberrant be permanently killed, and what replaces the role it was playing?",
-      "Should a non-lethal resolution be able to retire a promoted survivor for good?",
+      "Should a non-lethal resolution be able to retire a named Aberrant for good?",
     ],
     regionNotes: [
       { region: "bloomfall-reach", note: "The regional threat layer. Canonical world behaviour; its mechanical realisation remains future gameplay design." },
@@ -510,13 +510,13 @@ export const bloomfallSystemPages: readonly BloomfallSystemPage[] = [
     inputs: "Current and neighbouring [[essence-saturation]]; the [[reactor-cycles]] state where the threat is wired into infrastructure; the stage and path of any active [[bloomstorms]]; the condition of prey, herds, sinks, and machinery; harvesting or combat disturbance; and recent contact with the party. There is no separate mutation-pressure meter and no random boss spawn.",
     consequences: "An active threat changes what other animals do, which routes are worth using, and what a place is worth harvesting. Killing one is a legitimate answer with a cost: the Bellwether is also a regional warning network, and the Old Drowner is also a flood control structure.",
     playerFacing: "Tracks, displaced prey, damaged vegetation, altered hydrology, and specific wounds are the evidence. What the Atlas shows is an information state — **Rumoured**, **Tracked**, **Confirmed**, or **Lost** — with an age attached. A confirmed fix decays back toward tracked unless the threat is observed again or deliberately tagged.",
-    canonRule: "Aberrant status is orthogonal to species eligibility under [[adaptive-mutation]]. Only [[blackbloom-hart]], [[mirejaw]], and [[latchhound]] can currently produce a promoted survivor. Named threats retreat when wounded rather than despawning, do not casually respawn, and a successor is a separate authored outcome rather than the same creature returning unexplained.",
-    futureGameplay: "A future runtime would hold a small capped registry of promoted survivors alongside the named threats, move them off-screen with a scheduler, and keep the player's information as a separate record from the world's truth. Permanent GPS boss markers are prohibited.",
+    canonRule: "Aberrant status is an individual fact layered on top of ordinary taxonomy, never a species of its own. Every species with a ladder under [[adaptive-mutation]] can seed one — [[blackbloom-hart]] the Bellwether, [[rootback-grazer]] the Slow Hill, [[mirejaw]] the Old Drowner, [[sump-eel]] the Braid, and [[latchhound]] the Groundfault — at a 1% chance each time an Advanced individual escapes the player. [[switchmother]] and [[the-last-shift]] are the exceptions that prove the rule: both are named Aberrants nobody can cause, with engineered and human origins respectively. Named threats retreat when wounded rather than despawning, do not casually respawn, and a successor is a separate authored outcome rather than the same creature returning unexplained.",
+    futureGameplay: "A future runtime would hold a small capped registry of named Aberrants, move them off-screen with a scheduler, and keep the player's information as a separate record from the world's truth. Permanent GPS boss markers are prohibited.",
     atlas: "Fuzzy areas and directional arrows with an explicit freshness and information state. Never a permanent icon, and never a marker the party did not earn.",
     related: links({
       systems: ["adaptive-mutation", "essence-saturation", "reactor-cycles", "bloomstorms", "bloomfall-travel", "blackbloom-exposure", "harvesting-consequences"],
       places: ["long-graze", "splicefield-substation", "drowned-intake", "southreach-complex", "the-mutation-belt", "the-living-marsh", "cairnwood-camp"],
-      creatures: ["the-bellwether", "switchmother", "old-drowner", "the-last-shift", "blackbloom-hart", "mirejaw", "latchhound", "bloommarked-remnant"],
+      creatures: ["the-bellwether", "switchmother", "old-drowner", "the-last-shift", "the-slow-hill", "the-braid", "the-groundfault", "blackbloom-hart", "rootback-grazer", "mirejaw", "sump-eel", "latchhound", "bloommarked-remnant"],
       resources: ["capacitor-tissue"],
       story: ["the-bellwether-event", "menders-work"],
       people: ["mara-quill", "selene-ward", "maintenance-unit-m-17"],

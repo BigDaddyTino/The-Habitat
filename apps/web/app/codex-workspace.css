@@ -335,3 +335,11 @@
 .adaptive-state-abilities.is-standalone{margin-top:12px}
 .adaptive-state-card.rung-aberrant{border-color:#7a5a2e}
 .adaptive-state-card.rung-aberrant .adaptive-state-copy .eyebrow{color:#e0b877}
+
+/* Exceptional Aberrants read as events, not species: a hot border and a lit edge
+   so the eye finds them first in a race list. */
+.entity-race-members li.is-aberrant{border-color:#c4762a;border-left-color:#ff9b3d;box-shadow:0 0 0 1px rgba(196,118,42,.35),0 0 18px rgba(255,140,45,.22);background:linear-gradient(105deg,#1a1310 0%,#111611 62%)}
+.entity-race-members li.is-aberrant a strong{color:#ffcf95}
+.entity-race-members li.is-aberrant a i{color:#ff9b3d;font-weight:700}
+.entity-race-members li.is-aberrant:hover{box-shadow:0 0 0 1px rgba(255,155,61,.55),0 0 26px rgba(255,140,45,.34)}
+@media (prefers-reduced-motion:no-preference){.entity-race-members li.is-aberrant{transition:box-shadow .25s ease}}

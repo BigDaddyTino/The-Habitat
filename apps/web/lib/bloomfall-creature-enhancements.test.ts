@@ -61,11 +61,16 @@ test("the ladder is one system: four climbable rungs plus the Aberrant seed", ()
 });
 
 test("every dossier has field-guide copy of the right shape, and nothing else does", () => {
-  assert.deepEqual(Object.keys(bloomfallCreatureFieldGuide).sort(), Object.keys(expectedStates).sort());
+  // The guide also covers the three named Aberrants that a surviving Advanced
+  // can seed. They have a dossier and a boss card but no design-spec record.
+  const seededAberrants = ["the-braid", "the-groundfault", "the-slow-hill"];
+  assert.deepEqual(Object.keys(bloomfallCreatureFieldGuide).sort(), [...Object.keys(expectedStates), ...seededAberrants].sort());
+  for (const slug of seededAberrants) assert.equal(bloomfallCreatureFieldGuide[slug]!.kind, "BOSS", `${slug} must be a boss card`);
   const byKind = (kind: string) => Object.entries(bloomfallCreatureFieldGuide).filter(([, guide]) => guide.kind === kind).map(([slug]) => slug).sort();
+  const bossSlugsWithSeeded = [...bossSlugs, "the-braid", "the-groundfault", "the-slow-hill"].sort();
   assert.deepEqual(byKind("ADAPTIVE"), adaptiveSlugs);
   assert.deepEqual(byKind("FIXED"), fixedSlugs);
-  assert.deepEqual(byKind("BOSS"), bossSlugs);
+  assert.deepEqual(byKind("BOSS"), bossSlugsWithSeeded);
 
   for (const [slug, guide] of Object.entries(bloomfallCreatureFieldGuide)) {
     // A summary is a paragraph, not an essay — the whole point of the rewrite.
