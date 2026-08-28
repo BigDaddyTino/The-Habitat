@@ -7,6 +7,7 @@
     "bloomfall:verify": "tsx src/verify-bloomfall-development.ts",
     "lint": "tsc --noEmit",
     "sync:health": "tsx src/cli.ts health",
+    "sync:import": "tsx src/cli.ts import",
     "sync:mirror": "tsx src/cli.ts mirror",
     "sync:mirror:watch": "tsx src/cli.ts mirror --watch",
     "sync:publish": "tsx src/cli.ts publish",

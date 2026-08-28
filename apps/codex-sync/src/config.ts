@@ -41,21 +41,47 @@ export function readPublisherConfig() {
   };
 }
 
-export function readMirrorConfig() {
+function requirePollInterval() {
   const pollIntervalMs = Number(process.env.HABITAT_CODEX_SYNC_INTERVAL_MS ?? "5000");
   if (!Number.isSafeInteger(pollIntervalMs) || pollIntervalMs < 1000 || pollIntervalMs > 300_000) {
     throw new Error("HABITAT_CODEX_SYNC_INTERVAL_MS must be an integer from 1000 through 300000.");
   }
+  return pollIntervalMs;
+}
+
+/**
+ * A local root must not be the share, and must not sit inside it or contain
+ * it. Writing a copy into the thing being copied corrupts the source, and the
+ * game machine is never allowed to write to the share at all.
+ */
+function assertSeparateRoots(sourceRoot: string, localRoot: string, what: string) {
+  const sourcePrefix = `${sourceRoot}${path.sep}`.toLowerCase();
+  const localPrefix = `${localRoot}${path.sep}`.toLowerCase();
+  if (
+    sourceRoot.toLowerCase() === localRoot.toLowerCase() ||
+    sourceRoot.toLowerCase().startsWith(localPrefix) ||
+    localRoot.toLowerCase().startsWith(sourcePrefix)
+  ) {
+    throw new Error(`The Codex source and ${what} roots must be separate, non-nested directories.`);
+  }
+}
+
+export function readMirrorConfig() {
+  const pollIntervalMs = requirePollInterval();
   const sourceRoot = requirePath("HABITAT_CODEX_SYNC_ROOT");
   const mirrorRoot = requirePath("HABITAT_CODEX_MIRROR_ROOT");
-  const sourcePrefix = `${sourceRoot}${path.sep}`.toLowerCase();
-  const mirrorPrefix = `${mirrorRoot}${path.sep}`.toLowerCase();
-  if (
-    sourceRoot.toLowerCase() === mirrorRoot.toLowerCase() ||
-    sourceRoot.toLowerCase().startsWith(mirrorPrefix) ||
-    mirrorRoot.toLowerCase().startsWith(sourcePrefix)
-  ) {
-    throw new Error("The Codex source and mirror roots must be separate, non-nested directories.");
-  }
+  assertSeparateRoots(sourceRoot, mirrorRoot, "mirror");
   return { sourceRoot, mirrorRoot, pollIntervalMs };
+}
+
+/**
+ * The game machine's side. The import root holds the staged releases and the
+ * ledger saying which one the build is actually using.
+ */
+export function readImportConfig() {
+  const pollIntervalMs = requirePollInterval();
+  const sourceRoot = requirePath("HABITAT_CODEX_SYNC_ROOT");
+  const importRoot = requirePath("HABITAT_CODEX_IMPORT_ROOT");
+  assertSeparateRoots(sourceRoot, importRoot, "import");
+  return { sourceRoot, importRoot, pollIntervalMs };
 }

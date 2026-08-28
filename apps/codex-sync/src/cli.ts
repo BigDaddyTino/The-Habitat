@@ -1,5 +1,6 @@
 import { setTimeout as delay } from "node:timers/promises";
-import { readMirrorConfig, readPublisherConfig } from "./config";
+import { readImportConfig, readMirrorConfig, readPublisherConfig } from "./config";
+import { applyCodexImport, describeCodexImportDiff, planCodexImport, readImportLedger, rollbackCodexImport } from "./import";
 import { mirrorCodexBundle, readAndVerifyBundle } from "./mirror";
 import { codexPublishState, publishCodexBundle, publisherFingerprint } from "./publisher";
 
@@ -107,7 +108,52 @@ async function main() {
     log(`Verified ${result.pointer.snapshotId}: ${result.manifest.assets.length} assets and all content hashes are intact.`);
     return;
   }
-  throw new Error("Usage: pnpm --filter @habitat/codex-sync <publish|mirror|verify|health> [--watch]");
+  if (command === "import") {
+    const config = readImportConfig();
+    const rollback = flags.includes("--rollback");
+    const apply = flags.includes("--apply");
+
+    if (rollback) {
+      const at = flags.indexOf("--to");
+      const result = await rollbackCodexImport(config.importRoot, at === -1 ? undefined : flags[at + 1]);
+      log(`Rolled back from ${result.from.snapshotId} to ${result.to.snapshotId}`);
+      log(`  canon  ${result.to.storyRelease ? `${result.to.storyRelease.name} ${result.to.storyRelease.sha256.slice(0, 12)}…` : "pre-boundary bundle"}`);
+      for (const row of describeCodexImportDiff(result.diff)) log(`  ${row}`);
+      log("Nothing was deleted. The staged files for both releases are still on disk.");
+      return;
+    }
+
+    if (flags.includes("--status")) {
+      const ledger = await readImportLedger(config.importRoot);
+      const active = ledger.history.find((entry) => entry.snapshotId === ledger.current);
+      if (!active) { log("Nothing has been imported here yet."); return; }
+      log(`imported  ${active.snapshotId} on ${active.importedAt} (${active.assets} assets)`);
+      log(`canon     ${active.storyRelease ? `${active.storyRelease.name} ${active.storyRelease.sha256.slice(0, 12)}…` : "pre-boundary bundle"}`);
+      const earlier = ledger.history.length - 1;
+      log(`history   ${ledger.history.length} release(s) staged${earlier > 0 ? `, ${earlier} to roll back to` : "; nothing earlier to roll back to"}`);
+      return;
+    }
+
+    // Verifying the share happens first, whether or not anything is applied,
+    // so a corrupt release fails before a single local file is touched.
+    const plan = await planCodexImport(config.sourceRoot, config.importRoot);
+    const release = plan.source.manifest.storyRelease;
+    log(`share     ${plan.source.pointer.snapshotId} (${plan.source.manifest.assets.length} assets), verified`);
+    log(`canon     ${release ? `${release.name} ${release.sha256.slice(0, 12)}…` : "PRE-BOUNDARY — this payload was read live, not from a named cut"}`);
+    log(`imported  ${plan.imported ? plan.imported.snapshotId : "nothing yet"}`);
+
+    if (plan.current) { log("Already imported. Nothing to do."); return; }
+    if (plan.diff.empty && plan.imported) log("The release is new but nothing the game reads has changed.");
+    else for (const row of describeCodexImportDiff(plan.diff)) log(`  ${row}`);
+
+    if (!apply) { log("Dry run. Re-run with --apply to stage and record it."); return; }
+    const result = await applyCodexImport(config.sourceRoot, config.importRoot);
+    log(plan.imported
+      ? `Imported ${result.record.snapshotId}. ${plan.imported.snapshotId} is still staged, so --rollback goes back to it.`
+      : `Imported ${result.record.snapshotId}. This is the first import here, so there is nothing earlier to roll back to.`);
+    return;
+  }
+  throw new Error("Usage: pnpm --filter @habitat/codex-sync <publish|mirror|verify|health|import> [--watch] [--apply] [--status] [--rollback [--to <snapshotId>]]");
 }
 
 main().catch((error: unknown) => {

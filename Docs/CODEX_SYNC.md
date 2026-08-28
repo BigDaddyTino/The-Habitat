@@ -6,13 +6,33 @@ The Codex publishes a complete, immutable resource bundle to a private shared fo
 
 This is a second contract, not a replacement for `/api/story/export`:
 
-- `content/snapshot.json` is Bundle v2 and contains every current arc, node, edge, Bible entry, reference, comment, and revision across every status and entry kind.
+- `content/snapshot.json` is **Bundle v4** and contains every current arc, node, edge, Bible entry, reference, comment, and revision across every status and entry kind — plus the atlas: maps, placements, and node placements.
 - `compatibility/canon-v1.json` is the existing canon-only game-build payload, generated from the same stable read.
 - `images/` contains the Codex artwork under the same logical paths used by the web application.
 - `manifest.json` records exact SHA-256, byte length, MIME type, and image dimensions.
 - `current.json` is the only activation pointer. A consumer must finish and verify the referenced immutable release before switching to it.
 
 Authentication records, export tokens, presence heartbeats, courtesy locks, and Warden prompt/audit records are intentionally not game resources and are never copied.
+
+### Bundle contract history
+
+`codexBundleContractVersion` in `packages/shared/src/codex-bundle.ts` is the
+single source of truth; this table exists because the documentation sat at v2
+for two versions after the code moved on, which is exactly the kind of drift an
+importer pays for.
+
+| Version | Added |
+| --- | --- |
+| v2 | The bundle itself: arcs, nodes, edges, entries, links, comments, revisions. |
+| v3 | The atlas — `maps`, `placements`, `nodePlacements` — so world-map topology travels with the story rather than staying web-only. |
+| v4 | Calibrated regional maps: per-map art version, image extent, and coordinate extent. |
+
+`manifest.storyRelease` was added inside v4 without a bump because it is
+optional and additive: its **absence** is meaningful, and means that bundle's
+canon payload was read live rather than taken from a named cut.
+
+An importer refuses a `contractVersion` it does not know. Additive fields
+inside a version it does know are safe to ignore.
 
 ## Shared-folder layout
 
@@ -78,6 +98,32 @@ pnpm --filter @habitat/codex-sync sync:mirror
 
 `sync:mirror:watch` repeats that operation. It verifies the source before copying, writes into a unique staging directory, verifies every copy, and changes the local `current.json` only after the release is complete. The mirror does not write to the share.
 
+## Importing into the game
+
+Mirroring copies a release; **importing** decides what the build uses. The two
+are separate on purpose, and the importer keeps its own ledger.
+
+```powershell
+$env:HABITAT_CODEX_SYNC_ROOT   = "\\<codex-host>\<share>"
+$env:HABITAT_CODEX_IMPORT_ROOT = "<absolute local path>"
+
+pnpm --filter @habitat/codex-sync sync:import            # plan only, writes nothing
+pnpm --filter @habitat/codex-sync sync:import --apply    # stage and record
+pnpm --filter @habitat/codex-sync sync:import --status
+pnpm --filter @habitat/codex-sync sync:import --rollback
+```
+
+A plan verifies the entire share before reporting, so a corrupt release fails
+with nothing local touched, and it diffs the incoming canon payload against
+what is imported — by arc slug, node key, branch key, entry slug and asset
+logical path — so a one-word edit reads as one changed scene rather than as a
+changed arc. Applying stages into a fresh directory, verifies every copy, and
+only then records the release. Nothing already imported is deleted, which is
+what makes `--rollback` a pointer move.
+
+The full object mapping an Unreal importer needs is
+[CODEX_IMPORT.md](CODEX_IMPORT.md).
+
 ## Operational checks
 
 ```powershell
@@ -88,7 +134,7 @@ $env:HABITAT_CODEX_SYNC_ROOT = "<absolute local or UNC shared-folder path>"
 pnpm --filter @habitat/codex-sync sync:verify
 ```
 
-The old canon API remains available during migration. An Unreal importer should store the last successful Bundle v2 `snapshotId` and should never infer that the newest visible directory is active; only `current.json` makes that claim.
+The old canon API remains available during migration. An importer stores the last successful `snapshotId` and never infers that the newest visible directory is active; only `current.json` makes that claim. `apps/codex-sync/src/import.ts` does all of this already — see [CODEX_IMPORT.md](CODEX_IMPORT.md).
 
 ## The release boundary
 
