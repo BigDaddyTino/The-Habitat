@@ -38,7 +38,7 @@ Expected result: `200`. Also verify the Great Hall with a signed-out browser, th
 
 For tunnel verification, confirm `Get-Service Cloudflared` reports `Running` with automatic startup and verify `https://habitat.martinobear.com/` from both the LAN and a public resolver. MartServDMC maintains short-TTL local A records matching the current authoritative Cloudflare answers; recheck them if Cloudflare changes its edge response. The Cloudflare dashboard route must remain exactly `HTTP` to `127.0.0.1:3000` with no path restriction.
 
-Run `pnpm --filter @habitat/codex-sync sync:health` after any deployment that touched the codex, the art directories, or `apps/codex-sync`. The publisher runs from source and loads its code at service start, so it needs `Restart-Service CodexSyncPublisher` to pick up changes — and it fails safely, meaning a stale bundle on `N:Martino_Codex` looks perfectly valid until something asks whether it is current.
+Run `pnpm --filter @habitat/codex-sync sync:health` after any deployment that touched the codex, the art directories, or `apps/codex-sync`. The publisher runs from source and loads its code at service start, so it needs `Restart-Service CodexSyncPublisher` to pick up changes — and it fails safely, meaning a stale bundle on `N:\Martino_Codex` looks perfectly valid until something asks whether it is current.
 
 Run `pnpm check:connections` after deployment. A successful audit confirms that the public callbacks, database, private agent, Steam, Discord application and guild, and configured club provider agree with the deployed environment without exposing their secrets.
 

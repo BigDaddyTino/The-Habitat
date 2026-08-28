@@ -127,4 +127,24 @@ On 2026-08-28 the publisher spent eight hours failing every five seconds — the
 
 **The publisher runs from source via tsx, so it loads its code at service start.** Any change to `apps/codex-sync` needs `Restart-Service CodexSyncPublisher` before it takes effect — that is how the eight-hour outage happened, and restarting was the whole fix.
 
-**Still missing:** nothing alerts on an unhealthy result. This check has to be run, or scheduled, to be worth anything.
+**This check no longer has to be remembered.** Habitat Pulse evaluates the same
+question every worker cycle as `pipeline.codex-drive`, shows it on
+`/admin/pulse`, and queues one Discord alert when it turns warn or critical —
+5 minutes behind warns, 20 minutes is critical. It reads the drive's pointer and
+manifest rather than calling `codexPublishState`, which rebuilds the snapshot and
+writes assets to the share to reach its answer; that is fine for a command
+somebody typed and far too heavy to run on a loop. See
+[OBSERVABILITY.md](OBSERVABILITY.md).
+
+Two things gate the alert actually reaching somebody:
+
+- the worker needs `HABITAT_CODEX_SYNC_ROOT` to see the drive — supply it with
+  `install-worker.ps1 -SyncRoot`, read-only. Without it the signal is UNKNOWN,
+  and UNKNOWN is never alerted on.
+- Pulse alerts go only to a guild's `operationsChannelId`, set on
+  `/admin/discord`. While that is blank the verdict is still evaluated and still
+  shown on the page, but no message is sent anywhere.
+
+`sync:health` remains the right thing to run by hand after a deploy that touched
+the codex, the art directories, or `apps/codex-sync` — it also verifies the
+bundle's integrity, which the Pulse signal deliberately does not re-do.

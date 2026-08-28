@@ -408,3 +408,89 @@ export function evaluateClaimReconciliation(fact: ReconciliationFact): PulseVerd
   }
   return { key: "pipeline.claim-reconciliation", status: "OK", summary: `No stuck reconciliations; ${fact.pendingClaims} claim(s) awaiting an administrator.`, detail };
 }
+
+/**
+ * What the drive says about itself, and what canon says it should say. Every
+ * field is cheap to gather: one small JSON off the share and a handful of
+ * aggregates. Deliberately NOT the publisher's own `codexPublishState`, which
+ * rebuilds the snapshot and writes assets to the share to work out its answer
+ * — that is a fine thing for a CLI somebody typed and a terrible thing to do
+ * every worker cycle.
+ */
+export type CodexDriveFact = {
+  /** Null when HABITAT_CODEX_SYNC_ROOT is unset — nobody has asked for this. */
+  syncRoot: string | null;
+  /** Set when the root is configured but could not be read at all. */
+  unreadable: string | null;
+  /** When the drive's current bundle was published. Null when nothing ever was. */
+  publishedAt: Date | null;
+  /** The release the drive is carrying, and the newest one that has been cut. */
+  driveRelease: { name: string; sha256: string } | null;
+  canonRelease: { name: string; sha256: string } | null;
+  /** The newest change to the codex the publisher would have republished for. */
+  canonChangedAt: Date | null;
+  assets: number | null;
+};
+
+export function evaluateCodexDrive(fact: CodexDriveFact, now: Date): PulseVerdict {
+  const key = "pipeline.codex-drive" as const;
+  const detail: Record<string, unknown> = {
+    syncRoot: fact.syncRoot,
+    publishedAt: fact.publishedAt?.toISOString() ?? null,
+    driveRelease: fact.driveRelease,
+    canonRelease: fact.canonRelease,
+    canonChangedAt: fact.canonChangedAt?.toISOString() ?? null,
+    assets: fact.assets,
+  };
+
+  // Nobody configured a drive, so there is nothing to be behind. Unknown, and
+  // never alerted on — the same treatment as an unconfigured integration.
+  if (!fact.syncRoot) {
+    return { key, status: "UNKNOWN", summary: "No shared drive is configured, so nothing publishes the codex.", detail };
+  }
+  // Configured is the operator asserting the drive should be there. A path
+  // that was promised and cannot be read is a real problem, not an unknown.
+  if (fact.unreadable) {
+    return { key, status: "CRITICAL", summary: `The codex drive at ${fact.syncRoot} could not be read: ${fact.unreadable}`, detail };
+  }
+  if (!fact.canonRelease) {
+    return { key, status: "UNKNOWN", summary: "No story release has been cut, so there is no canon payload to publish yet.", detail };
+  }
+  if (!fact.publishedAt) {
+    return { key, status: "CRITICAL", summary: "The drive is configured but nothing has ever been published to it.", detail };
+  }
+
+  const behindMs = fact.canonChangedAt ? fact.canonChangedAt.getTime() - fact.publishedAt.getTime() : 0;
+  const lagMs = behindMs > 0 ? now.getTime() - fact.canonChangedAt!.getTime() : 0;
+  const releaseMismatch = Boolean(fact.driveRelease && fact.driveRelease.sha256 !== fact.canonRelease.sha256);
+  detail.behindBy = behindMs > 0 ? formatPulseDuration(lagMs) : null;
+
+  // A bundle cut before the release boundary carried live canon rather than a
+  // named cut. It verifies perfectly and is still the wrong kind of thing.
+  if (!fact.driveRelease) {
+    return { key, status: "WARN", summary: "The published bundle predates the release boundary — its canon payload was read live rather than from a named cut. Republish.", detail };
+  }
+
+  const reason = releaseMismatch
+    ? `release ${fact.canonRelease.name} has been cut and the drive is still carrying ${fact.driveRelease.name}`
+    : "the codex has changed since the drive was last published";
+
+  if (behindMs > 0 && lagMs >= pulseThresholds.codexDriveCriticalMinutes * 60_000) {
+    return { key, status: "CRITICAL", summary: `The codex drive is ${formatPulseDuration(lagMs)} behind — ${reason}.`, detail };
+  }
+  if (behindMs > 0 && lagMs >= pulseThresholds.codexDriveWarnMinutes * 60_000) {
+    return { key, status: "WARN", summary: `The codex drive is ${formatPulseDuration(lagMs)} behind — ${reason}.`, detail };
+  }
+  // A cut release the drive has not taken is worth saying even inside the
+  // grace window, because that is the state a build machine reads wrongly.
+  if (releaseMismatch && lagMs >= pulseThresholds.codexDriveWarnMinutes * 60_000) {
+    return { key, status: "WARN", summary: `The drive is carrying ${fact.driveRelease.name}; ${fact.canonRelease.name} has been cut since.`, detail };
+  }
+
+  return {
+    key,
+    status: "OK",
+    summary: `The drive matches canon — ${fact.driveRelease.name}, ${fact.assets ?? "?"} assets, published ${formatPulseDuration(now.getTime() - fact.publishedAt.getTime())} ago.`,
+    detail,
+  };
+}

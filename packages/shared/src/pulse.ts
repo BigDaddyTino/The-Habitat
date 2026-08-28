@@ -67,6 +67,7 @@ export const pulseSignalKeys = [
   "provider.twitch",
   "pipeline.achievement-evaluations",
   "pipeline.claim-reconciliation",
+  "pipeline.codex-drive",
 ] as const;
 
 export type PulseSignalKey = typeof pulseSignalKeys[number];
@@ -160,6 +161,13 @@ export const pulseSignalDefinitions: readonly PulseSignalDefinition[] = [
     remedy: "Each failure names the stage and record that failed. Fix the rule or record; a successful replay resolves it automatically.",
   },
   {
+    key: "pipeline.codex-drive",
+    category: "PIPELINE",
+    title: "Codex drive freshness",
+    description: "The bundle on the shared drive is as new as the codex it came from. Integrity is not freshness: a bundle whose hashes all verify is still wrong if the publisher stopped and the machine building the game is reading yesterday's canon.",
+    remedy: "Read codex-sync-logs, then Restart-Service CodexSyncPublisher — it runs from source and loads its code at start, so a change it has not been restarted for will fail every poll while the drive keeps looking valid.",
+  },
+  {
     key: "pipeline.claim-reconciliation",
     category: "PIPELINE",
     title: "Claim reconciliation",
@@ -244,6 +252,16 @@ export const pulseThresholds = {
   reconciliationStuckMinutes: 30,
   reconciliationStuckAttempts: 3,
   reconciliationCriticalCount: 5,
+  /**
+   * How far the shared drive may fall behind the codex before somebody hears
+   * about it. The publisher polls every few seconds, so minutes of lag is
+   * already a stopped publisher rather than a slow one — but a bundle is
+   * hundreds of assets, and a legitimate republish is allowed to take its
+   * time. On 2026-08-28 the drive sat eight hours behind while every integrity
+   * check passed, which is the case these two numbers exist to catch.
+   */
+  codexDriveWarnMinutes: 5,
+  codexDriveCriticalMinutes: 20,
   /** Provider queues. */
   notificationDeadLetterAttempts: 8,
   providerBudgetWarnPercent: 90,

@@ -6,6 +6,7 @@ import {
   evaluateAgent,
   evaluateBackup,
   evaluateClaimReconciliation,
+  evaluateCodexDrive,
   evaluateCollectorSource,
   evaluateCollectors,
   evaluateDiscordProvider,
@@ -15,6 +16,7 @@ import {
   evaluateTunnel,
   evaluateTwitchProvider,
   pulseAlertTransition,
+  type CodexDriveFact,
   type CollectorFact,
 } from "./pulse-signals.js";
 
@@ -177,4 +179,85 @@ test("a reconciliation past its retry ceiling is critical even when only one job
   assert.equal(evaluateClaimReconciliation({ stuck: 0, oldestQueuedMs: null, exhausted: 0, pendingClaims: 2, lastError: null }).status, "OK");
   assert.equal(evaluateClaimReconciliation({ stuck: 1, oldestQueuedMs: 45 * 60_000, exhausted: 0, pendingClaims: 0, lastError: null }).status, "WARN");
   assert.equal(evaluateClaimReconciliation({ stuck: 1, oldestQueuedMs: 45 * 60_000, exhausted: 1, pendingClaims: 0, lastError: "identity_not_verified" }).status, "CRITICAL");
+});
+
+// ---------------------------------------------------------------------------
+// Codex drive freshness
+//
+// The failure this signal exists for: on 2026-08-28 the publisher had been
+// failing every poll for eight hours while every integrity check passed, so
+// the machine building the game read stale canon and nothing said a word.
+// Integrity is not freshness.
+// ---------------------------------------------------------------------------
+
+const driveFact = (overrides: Partial<CodexDriveFact> = {}): CodexDriveFact => ({
+  syncRoot: "N:\Martino_Codex",
+  unreadable: null,
+  publishedAt: new Date(now.getTime() - 60_000),
+  driveRelease: { name: "martino-2026.08.2", sha256: "a".repeat(64) },
+  canonRelease: { name: "martino-2026.08.2", sha256: "a".repeat(64) },
+  canonChangedAt: new Date(now.getTime() - 90_000),
+  assets: 229,
+  ...overrides,
+});
+
+test("a drive nobody configured is unknown, not broken", () => {
+  const verdict = evaluateCodexDrive(driveFact({ syncRoot: null }), now);
+  assert.equal(verdict.status, "UNKNOWN");
+});
+
+test("a drive that was promised and cannot be read is a real problem", () => {
+  assert.equal(evaluateCodexDrive(driveFact({ unreadable: "EPERM: operation not permitted" }), now).status, "CRITICAL");
+  assert.equal(evaluateCodexDrive(driveFact({ publishedAt: null }), now).status, "CRITICAL");
+});
+
+test("no release cut yet is unknown — there is nothing to publish", () => {
+  const verdict = evaluateCodexDrive(driveFact({ canonRelease: null, driveRelease: null }), now);
+  assert.equal(verdict.status, "UNKNOWN");
+});
+
+test("a publisher that stopped is caught by lag, with no release needed to notice", () => {
+  const stopped = (minutes: number) => evaluateCodexDrive(driveFact({
+    publishedAt: new Date(now.getTime() - (minutes + 1) * 60_000),
+    canonChangedAt: new Date(now.getTime() - minutes * 60_000),
+  }), now);
+  assert.equal(stopped(1).status, "OK", "a minute of publish latency is normal, not an outage");
+  assert.equal(stopped(pulseThresholds.codexDriveWarnMinutes).status, "WARN");
+  assert.equal(stopped(pulseThresholds.codexDriveCriticalMinutes).status, "CRITICAL");
+  // The eight-hour case that produced this signal.
+  const real = stopped(8 * 60);
+  assert.equal(real.status, "CRITICAL");
+  assert.match(real.summary, /behind/);
+});
+
+test("a cut the drive never took is named in the summary", () => {
+  const verdict = evaluateCodexDrive(driveFact({
+    canonRelease: { name: "martino-2026.09.1", sha256: "b".repeat(64) },
+    publishedAt: new Date(now.getTime() - 40 * 60_000),
+    canonChangedAt: new Date(now.getTime() - 35 * 60_000),
+  }), now);
+  assert.equal(verdict.status, "CRITICAL");
+  assert.match(verdict.summary, /martino-2026\.09\.1/);
+  assert.match(verdict.summary, /martino-2026\.08\.2/);
+});
+
+test("a bundle from before the release boundary is flagged however fresh it is", () => {
+  const verdict = evaluateCodexDrive(driveFact({ driveRelease: null }), now);
+  assert.equal(verdict.status, "WARN");
+  assert.match(verdict.summary, /predates the release boundary/);
+});
+
+test("a drive that matches canon is green and says what it is carrying", () => {
+  const verdict = evaluateCodexDrive(driveFact(), now);
+  assert.equal(verdict.status, "OK");
+  assert.match(verdict.summary, /martino-2026\.08\.2/);
+  assert.match(verdict.summary, /229 assets/);
+});
+
+test("canon changing before the last publish is not lag", () => {
+  const verdict = evaluateCodexDrive(driveFact({
+    publishedAt: new Date(now.getTime() - 60_000),
+    canonChangedAt: new Date(now.getTime() - 10 * 60 * 60_000),
+  }), now);
+  assert.equal(verdict.status, "OK", "an old edit already on the drive must not read as hours of lag");
 });

@@ -53,11 +53,33 @@ Three rules run through the whole design:
 | Twitch | Helix polling is succeeding on its configured cadence and inside its daily budget | The budget is exhausted or every channel is failing (critical); some channels failing, 90% of budget spent, or the newest sync is late (warn, then critical) |
 | Pipeline evaluations | No import, activity, identity, or reward evaluation threw in the last 24h | 1+ unresolved failure (warn), 10+ (critical) |
 | Claim reconciliation | No identity reward job is stuck | A job is 30m old or on its 3rd attempt (warn); 5+ stuck, or any past the retry ceiling (critical) |
+| Codex drive freshness | The bundle on the shared drive is as new as the codex it came from | The codex has changed, or a release has been cut, and the drive has not caught up for 5m (warn) / 20m (critical); the configured drive cannot be read, or nothing was ever published (critical); the published bundle predates the release boundary (warn). Unknown when no drive is configured or no release has been cut |
 
 A readable source that parses zero records is treated as **critical**, not
 healthy. That is exactly what a parser whose pattern no longer matches the real
 log format looks like, and it is the failure that cost this installation days of
 missing Valheim joins in August 2026.
+
+### Why codex drive freshness is not the same as `sync:verify`
+
+Integrity is not freshness. `pnpm --filter @habitat/codex-sync sync:verify` confirms
+that the bundle on `N:\Martino_Codex` hashes correctly — and it does, perfectly,
+while the publisher has been failing on every poll for hours and the machine
+building the game is reading yesterday's canon. That is not a hypothetical: it
+happened on 2026-08-28, for eight hours, and the reason nobody noticed is that
+the publisher **fails safely**. It leaves the last good bundle exactly where it
+was.
+
+This signal asks the only question that matters to the build machine: is what is
+on the drive what canon says now? It compares the drive's own pointer and
+manifest against the newest cut release and the newest codex change, which is
+cheap enough to run every worker cycle — deliberately *not* the publisher's
+`codexPublishState`, which rebuilds the snapshot and writes assets to the share
+to reach its answer.
+
+The worker needs `HABITAT_CODEX_SYNC_ROOT` to see the drive at all; supply it
+with `install-worker.ps1 -SyncRoot`. It reads and never writes. Without it the
+signal is UNKNOWN, and UNKNOWN is never alerted on.
 
 ### Alerting
 

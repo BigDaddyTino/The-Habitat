@@ -2,6 +2,8 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
+  isCodexBundleManifest,
+  isCodexBundlePointer,
   overallPulseStatus,
   pulseSignalDefinition,
   pulseThresholds,
@@ -19,6 +21,7 @@ import {
   evaluateAgent,
   evaluateBackup,
   evaluateClaimReconciliation,
+  evaluateCodexDrive,
   evaluateCollectors,
   evaluateDiscordProvider,
   evaluateEventVolume,
@@ -28,6 +31,7 @@ import {
   evaluateTunnel,
   evaluateTwitchProvider,
   type BackupFact,
+  type CodexDriveFact,
   type CollectorFact,
   type PulseVerdict,
   type TunnelFact,
@@ -85,6 +89,7 @@ export async function runPulseCycle(options: PulseCycleOptions): Promise<PulseCy
   verdicts.push(evaluateTwitchProvider(await readTwitchFact(environment), now));
   verdicts.push(evaluateAchievementFailures(await readEvaluationFailureFact(now)));
   verdicts.push(evaluateClaimReconciliation(await readReconciliationFact(now)));
+  verdicts.push(evaluateCodexDrive(await readCodexDriveFact(environment), now));
 
   let changed = 0;
   let alerts = 0;
@@ -269,6 +274,84 @@ async function readCollectorFacts(): Promise<CollectorFact[]> {
 }
 
 /** Reads the summary scripts/backup-habitat.ps1 writes; the script is the authority, not this. */
+/**
+ * The codex drive, read the cheap way.
+ *
+ * Two small JSON files off the share and a few indexed aggregates — never the
+ * publisher's own state function, which rebuilds the whole snapshot and writes
+ * assets to the drive to reach its answer.
+ *
+ * The timestamps below mirror the inputs to the publisher's own change
+ * fingerprint, because the question is not "did the codex change" but "did it
+ * change in a way that should have triggered a republish". Cutting a release
+ * counts: the bundle's canon payload comes from the newest cut, so a cut with
+ * no other edit still leaves the drive behind.
+ */
+async function readCodexDriveFact(environment: NodeJS.ProcessEnv): Promise<CodexDriveFact> {
+  const syncRoot = environment.HABITAT_CODEX_SYNC_ROOT?.trim() || null;
+  const database = getPrismaClient();
+
+  const [release, revision, arcs, nodes, edges, entries, links, comments, maps, placements, nodePlacements] = await Promise.all([
+    database.storyRelease.findFirst({ orderBy: { cutAt: "desc" }, select: { name: true, sha256: true, cutAt: true } }),
+    database.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { createdAt: true } }),
+    database.storyArc.aggregate({ _max: { updatedAt: true } }),
+    database.storyNode.aggregate({ _max: { updatedAt: true } }),
+    database.storyEdge.aggregate({ _max: { updatedAt: true } }),
+    database.storyEntry.aggregate({ _max: { updatedAt: true } }),
+    database.storyEntryLink.aggregate({ _max: { createdAt: true } }),
+    database.storyComment.aggregate({ _max: { createdAt: true, resolvedAt: true } }),
+    database.storyMap.aggregate({ _max: { updatedAt: true } }),
+    database.storyMapPlacement.aggregate({ _max: { updatedAt: true } }),
+    database.storyMapNodePlacement.aggregate({ _max: { updatedAt: true } }),
+  ]);
+
+  // Every table the publisher's fingerprint reads, so there is no edit that
+  // would make it republish and leave this signal thinking all is well. A
+  // placement moved on the atlas counts exactly as much as a scene rewritten.
+  const canonChangedAt = [
+    release?.cutAt ?? null,
+    revision?.createdAt ?? null,
+    arcs._max.updatedAt, nodes._max.updatedAt, edges._max.updatedAt, entries._max.updatedAt,
+    links._max.createdAt, comments._max.createdAt, comments._max.resolvedAt,
+    maps._max.updatedAt, placements._max.updatedAt, nodePlacements._max.updatedAt,
+  ].reduce<Date | null>((newest, candidate) => (candidate && (!newest || candidate > newest) ? candidate : newest), null);
+
+  const canonRelease = release ? { name: release.name, sha256: release.sha256 } : null;
+  if (!syncRoot) {
+    return { syncRoot: null, unreadable: null, publishedAt: null, driveRelease: null, canonRelease, canonChangedAt, assets: null };
+  }
+
+  try {
+    const pointer: unknown = JSON.parse(await readFile(path.join(syncRoot, "current.json"), "utf8"));
+    if (!isCodexBundlePointer(pointer)) {
+      return { syncRoot, unreadable: "current.json is not a codex bundle pointer", publishedAt: null, driveRelease: null, canonRelease, canonChangedAt, assets: null };
+    }
+    const manifest: unknown = JSON.parse(await readFile(path.join(syncRoot, pointer.manifestPath), "utf8"));
+    const driveRelease = isCodexBundleManifest(manifest) && manifest.storyRelease
+      ? { name: manifest.storyRelease.name, sha256: manifest.storyRelease.sha256 }
+      : null;
+    const assets = isCodexBundleManifest(manifest) ? manifest.assets.length : null;
+    const publishedAt = new Date(pointer.generatedAt);
+    return {
+      syncRoot,
+      unreadable: null,
+      publishedAt: Number.isNaN(publishedAt.getTime()) ? null : publishedAt,
+      driveRelease,
+      canonRelease,
+      canonChangedAt,
+      assets,
+    };
+  } catch (error) {
+    // ENOENT on current.json is "nothing has ever been published", which the
+    // verdict says in its own words; anything else is the share itself.
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "ENOENT") {
+      return { syncRoot, unreadable: null, publishedAt: null, driveRelease: null, canonRelease, canonChangedAt, assets: null };
+    }
+    return { syncRoot, unreadable: error instanceof Error ? error.message : String(error), publishedAt: null, driveRelease: null, canonRelease, canonChangedAt, assets: null };
+  }
+}
+
 async function readBackupFact(environment: NodeJS.ProcessEnv): Promise<BackupFact> {
   const root = environment.HABITAT_BACKUP_PATH?.trim();
   if (!root) return { configured: false };
