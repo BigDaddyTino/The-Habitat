@@ -55,7 +55,7 @@ export const bloomfallCreatureArtAssets: readonly BloomfallCreatureArtAsset[] = 
   { entrySlug: "glasswing-kite", rung: null, filename: "glasswing-kite.webp", width: 1365, height: 2048, sha256: "5c734ff8521b8afc88b07abf81731cbf72a79ab34ee1aeb3279fae4ff22e0241" },
   { entrySlug: "spore-lantern-colony", rung: null, filename: "spore-lantern-colony.webp", width: 1639, height: 2048, sha256: "5d3353d34f7ad8a0bb4d9e581ee625c41a67c64012d30cacfcea3ffd80bba263" },
   { entrySlug: "maintenance-unit-m-17", rung: null, filename: "maintenance-unit-m-17.webp", width: 1639, height: 2048, sha256: "22291b342e4103356216ebe1f0429ac9b946322b7e60dfc345cd6eb9a4fc53bc" },
-  { entrySlug: "switchmother", rung: null, filename: "switchmother.webp", width: 1639, height: 2048, sha256: "d98174620524be07f589fe9b65b5ebbf12b8c351509e574e590fb77d6213e648" },
+  { entrySlug: "switchmother", rung: null, filename: "switchmother.webp", width: 1365, height: 2048, sha256: "4ed7e48a30dd9d78eb4db74fff1dfa3751d2500ee7e6c1af15c21fba02129b25" },
 ] as const;
 
 const byEntry = new Map<string, BloomfallCreatureArtAsset[]>();
