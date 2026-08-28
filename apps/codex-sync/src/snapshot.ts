@@ -313,8 +313,15 @@ export async function codexDatabaseFingerprint() {
   const maps = await database.storyMap.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const placements = await database.storyMapPlacement.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const nodePlacements = await database.storyMapNodePlacement.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
+  // The bundle's canon payload comes from the newest release, so cutting one
+  // has to count as a change even when nothing else moved. Without this the
+  // publisher never notices a cut: the codex rows are identical, the assets
+  // are identical, the fingerprint matches, and the drive quietly keeps
+  // serving the previous release to the machine building the game.
+  const release = await database.storyRelease.findFirst({ orderBy: { cutAt: "desc" }, select: { name: true, sha256: true } });
   return JSON.stringify({
     revision: newestRevision?.id ?? null,
+    release: release ? [release.name, release.sha256] : null,
     arcs: [arcs._count._all, arcs._max.updatedAt?.toISOString() ?? null],
     nodes: [nodes._count._all, nodes._max.updatedAt?.toISOString() ?? null],
     edges: [edges._count._all, edges._max.updatedAt?.toISOString() ?? null],

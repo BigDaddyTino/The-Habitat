@@ -457,7 +457,16 @@ export async function buildAtlasIntegrityAudit(source: AtlasAuditSource, inspect
     });
   }
 
-  const regions = source.entries.filter((entry) => entry.kind === "REGION").sort((left, right) => left.slug.localeCompare(right.slug));
+  // Archived places are not canonical places, and auditing them as such
+  // reported an entry the room had deliberately retired as an outstanding
+  // gap — "The Docks" sat in the unplaced count after being archived on
+  // 2026-08-28, described in the finding text as canonical. The shared audit
+  // source is deliberately left unfiltered because the migration-manifest
+  // generator reads it too; the filter belongs here, where the question is
+  // "what does canon look like".
+  const regions = source.entries
+    .filter((entry) => entry.kind === "REGION" && entry.status !== "ARCHIVED")
+    .sort((left, right) => left.slug.localeCompare(right.slug));
   const placeReports = regions.map((entry) => {
     const meta = record(entry.meta);
     const parentSlug = text(meta?.parent);
