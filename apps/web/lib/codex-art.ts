@@ -25,6 +25,7 @@ export const codexArtKinds = {
   "bloomfall-adaptive-p0-source": "bloomfall-adaptive-p0-source",
   "bloomfall-adaptive-p1p2": "bloomfall-adaptive-p1p2",
   "bloomfall-adaptive-p1p2-source": "bloomfall-adaptive-p1p2-source",
+  "bloomfall-creatures-v4": "bloomfall-creatures-v4",
 } as const;
 export type CodexArtKind = keyof typeof codexArtKinds;
 
@@ -43,6 +44,7 @@ function directoryFor(kind: CodexArtKind) {
   if (kind === "bloomfall-adaptive-p0-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p0", "sources");
   if (kind === "bloomfall-adaptive-p1p2") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "candidates");
   if (kind === "bloomfall-adaptive-p1p2-source") return path.join(process.cwd(), "private", "codex-art", "bloomfall-adaptive-p1p2", "sources");
+  if (kind === "bloomfall-creatures-v4") return path.join(process.cwd(), "private", "codex-art", "bloomfall-creatures-v4");
   return path.join(process.cwd(), "public", "images", codexArtKinds[kind]);
 }
 

@@ -330,7 +330,7 @@
 .adaptive-state-image.is-empty span{position:static;right:auto;bottom:auto;border-style:dashed;color:#7c8a7d;background:none}
 .adaptive-state-drop{margin-top:3px;border-top:1px solid #303730;padding-top:7px}
 .adaptive-ability-heading{margin-top:3px}
-.adaptive-support-plate{margin:9px 0 0}
+.adaptive-support-plate{margin:9px 0 0;max-width:460px}
 .adaptive-support-plate img{display:block;width:100%;height:auto;border:1px solid #394238}
 .adaptive-state-abilities.is-standalone{margin-top:12px}
 .adaptive-state-card.rung-aberrant{border-color:#7a5a2e}

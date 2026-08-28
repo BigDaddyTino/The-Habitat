@@ -32,6 +32,7 @@ import { getRegionBranding } from "@/lib/region-branding";
 import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
 import { getBloomfallV3CodexArt } from "@/lib/bloomfall-v3-art";
+import { bloomfallCreatureArtUrl, getBloomfallCreatureHeroArt } from "@/lib/bloomfall-creature-art";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
 import { BloomfallSystemPanel } from "@/components/bloomfall-system-panel";
@@ -93,6 +94,10 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const isRegion = entry.kind === "REGION";
   const characterKeyart = isCharacter ? getCharacterKeyart(entry.slug) : null;
   const creatureKeyart = isCreature ? getCreatureKeyart(entry.slug) : null;
+  // The Bloomfall creature plates. They cover CREATURE dossiers and Mender,
+  // who is a CHARACTER, so this is not gated on kind.
+  const bloomfallCreaturePlate = getBloomfallCreatureHeroArt(entry.slug);
+  const bloomfallCreatureArt = bloomfallCreaturePlate ? bloomfallCreatureArtUrl(bloomfallCreaturePlate) : null;
   const isSystem = entry.kind === "SYSTEM";
   const isThread = entry.kind === "THREAD";
   const isMission = entry.kind === "COMPANION_MISSION";
@@ -212,8 +217,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {factionBrand ? <>
             <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
             <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : bloomfallV3Art ? <img alt={`${entry.title} Bloomfall V3 key art`} className="entity-profile-keyart" src={bloomfallV3Art} /> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-profile-keyart" src={systemArt} /> : eventArt ? <img alt={`${entry.title} timeline key art`} className="entity-profile-keyart" src={eventArt} /> : isSystem ? <div className="system-art-slot system-art-slot-hero"><Settings2 aria-hidden="true" size={30} /><span>Key art slot</span><code>{systemArtSlot(entry.slug)}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
-          {factionBrand ? <span>Faction identity · original key art</span> : bloomfallV3Art ? <span>Bloomfall V3 · owner-approved key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : creatureKeyart ? <span>Mythical creature · original key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
+          </> : bloomfallCreatureArt ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={bloomfallCreatureArt} /> : bloomfallV3Art ? <img alt={`${entry.title} Bloomfall V3 key art`} className="entity-profile-keyart" src={bloomfallV3Art} /> : regionBrand ? <img alt={`${entry.title} environment key art`} className="entity-profile-keyart" src={regionBrand.keyart} /> : characterKeyart ? <img alt={`${entry.title} character key art`} className="entity-profile-keyart" src={characterKeyart} /> : creatureKeyart ? <img alt={`${entry.title} creature key art`} className="entity-profile-keyart" src={creatureKeyart} /> : systemArt ? <img alt={`${entry.title} system key art`} className="entity-profile-keyart" src={systemArt} /> : eventArt ? <img alt={`${entry.title} timeline key art`} className="entity-profile-keyart" src={eventArt} /> : isSystem ? <div className="system-art-slot system-art-slot-hero"><Settings2 aria-hidden="true" size={30} /><span>Key art slot</span><code>{systemArtSlot(entry.slug)}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+          {factionBrand ? <span>Faction identity · original key art</span> : bloomfallCreatureArt ? <span>Bloomfall creature · owner-approved key art</span> : bloomfallV3Art ? <span>Bloomfall V3 · owner-approved key art</span> : regionBrand ? <span>Region identity · original environment key art</span> : characterKeyart ? <span>Original character key art</span> : creatureKeyart ? <span>Mythical creature · original key art</span> : systemArt ? <span>Game system · original key art</span> : eventArt ? <span>From the timeline archive</span> : isSystem ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
           {/* A race and one of its members are the same kind but not the
