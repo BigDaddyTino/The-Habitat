@@ -64,8 +64,11 @@ const check = (name: string): Check => {
  * rather than being quietly dropped from the checks.
  */
 const waivers: Record<string, string> = {
-  "maps.martino-port-arcadia.artwork":
-    "Port Arcadia's art decodes 1599x984 against a declared 1536x1024. Correcting the declaration moves every pin placed against the old extent, so it needs a deliberate visual recalibration, not a number change.",
+  // Empty, and worth keeping that way. The only entry this map ever held was
+  // Port Arcadia's artwork mismatch, which was recalibrated on 2026-08-28 —
+  // see scripts/recalibrate-port-arcadia.ts. A waiver is a defect somebody
+  // agreed to live with, and under the release-canon rules a waiver does not
+  // travel: a deploy honours this map, a release cut does not.
 };
 
 /**

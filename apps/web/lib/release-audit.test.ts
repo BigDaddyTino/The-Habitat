@@ -56,8 +56,11 @@ test("the deploy runs the audit before it builds, and can only skip it deliberat
 test("every waiver carries the reason it is not a blocker", () => {
   const source = audit();
   const block = source.slice(source.indexOf("const waivers"), source.indexOf("const artworkFindingCodes"));
+  assert.ok(block.length > 0, "the waiver map should be readable by this test");
+  // An empty map is the healthy state and the one we are in — the only waiver
+  // this ever held was Port Arcadia's artwork, now actually recalibrated. The
+  // rule only bites once somebody adds one back.
   const entries = [...block.matchAll(/"([a-z0-9.-]+)":\s*\n?\s*"([^"]+)"/gi)];
-  assert.ok(entries.length > 0, "the waiver map should be readable by this test");
   for (const [, path, reason] of entries) {
     // A waiver without a reason is just a check somebody turned off.
     assert.ok(reason.length > 60, `the waiver for ${path} does not say why it is accepted`);
