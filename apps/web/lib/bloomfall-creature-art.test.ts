@@ -16,8 +16,10 @@ import { bloomfallMutationRungs } from "./bloomfall-adaptive-ladder";
 
 const directory = path.join(process.cwd(), "private", "codex-art", bloomfallCreatureArtPackage);
 
-/** The two the generator refused. Delete from here the moment they are drawn. */
-const undrawn = ["bloommarked-remnant", "the-last-shift"];
+/** Nothing is undrawn any more. A slug only belongs here while its plate is
+ *  genuinely missing — the list exists so a gap has to be declared, not
+ *  discovered. */
+const undrawn: string[] = [];
 
 test("every plate on disk is in the manifest, byte for byte", () => {
   const onDisk = readdirSync(directory).filter((file) => file.endsWith(".webp")).sort();
@@ -41,7 +43,7 @@ test("every adaptive species has a plate for all five rungs", () => {
   }
 });
 
-test("every dossier has a hero plate except the two still undrawn", () => {
+test("every dossier has a hero plate, and any gap is declared", () => {
   const without = bloomfallCreatureEnhancements
     .filter((entry) => !getBloomfallCreatureHeroArt(entry.slug))
     .map((entry) => entry.slug)

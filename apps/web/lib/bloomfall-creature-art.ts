@@ -55,7 +55,9 @@ export const bloomfallCreatureArtAssets: readonly BloomfallCreatureArtAsset[] = 
   { entrySlug: "glasswing-kite", rung: null, filename: "glasswing-kite.webp", width: 1365, height: 2048, sha256: "5c734ff8521b8afc88b07abf81731cbf72a79ab34ee1aeb3279fae4ff22e0241" },
   { entrySlug: "spore-lantern-colony", rung: null, filename: "spore-lantern-colony.webp", width: 1639, height: 2048, sha256: "5d3353d34f7ad8a0bb4d9e581ee625c41a67c64012d30cacfcea3ffd80bba263" },
   { entrySlug: "maintenance-unit-m-17", rung: null, filename: "maintenance-unit-m-17.webp", width: 1639, height: 2048, sha256: "22291b342e4103356216ebe1f0429ac9b946322b7e60dfc345cd6eb9a4fc53bc" },
+  { entrySlug: "bloommarked-remnant", rung: null, filename: "bloommarked-remnant.webp", width: 1639, height: 2048, sha256: "6e1fe1f597ed04680fb504e078626fe056fa48b13764caabcdb27ab9bfe6ee69" },
   { entrySlug: "switchmother", rung: null, filename: "switchmother.webp", width: 1365, height: 2048, sha256: "4ed7e48a30dd9d78eb4db74fff1dfa3751d2500ee7e6c1af15c21fba02129b25" },
+  { entrySlug: "the-last-shift", rung: null, filename: "the-last-shift.webp", width: 1230, height: 2048, sha256: "7b7d18a32c1f4459c64a2832f9eaebd1a032389633901ae15369a010124a0c9b" },
 ] as const;
 
 const byEntry = new Map<string, BloomfallCreatureArtAsset[]>();
