@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, CircleHelp, History, MapPin, Plus, Scale, Shield, Sparkles, UsersRound } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
 import { listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { getEventArt, eventArtSlot } from "@/lib/event-art";
 import { findCodexArt } from "@/lib/codex-art";
 import { arrangeTimeline, timelineEraLabel } from "@/lib/story-timeline";
@@ -76,7 +77,7 @@ export default async function StoryTimelinePage() {
             <li className={`codex-timeline-entry ${index % 2 === 0 ? "is-left" : "is-right"}${art ? " is-major" : ""}`} key={event.id}>
               <span aria-hidden="true" className="codex-timeline-node" />
               <article className="codex-timeline-card">
-                {art ? <Link className="codex-timeline-art" href={`/codex/bible/${event.slug}`}><img alt={`${event.title} key art`} src={art} /></Link> : null}
+                {art ? <Link className="codex-timeline-art" href={`/codex/bible/${event.slug}`}><img alt={`${event.title} key art`} src={codexArtSized(art, 960)} /></Link> : null}
                 <p className="codex-timeline-era">{era}</p>
                 <h2><Link href={`/codex/bible/${event.slug}`}>{event.title}</Link></h2>
                 <p className="codex-timeline-summary">{event.summary ? plainStoryProse(event.summary) : "No summary yet — open the dossier and give this moment its one line."}</p>

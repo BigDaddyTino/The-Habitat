@@ -6,6 +6,7 @@ import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
 import { getCharacterKeyart } from "@/lib/character-keyart";
+import { codexArtSized, codexArtSrcSet } from "@/lib/codex-art-derivative";
 import { dossierArtSlot, getDossierArt } from "@/lib/dossier-art";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
@@ -15,6 +16,13 @@ import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
 import { plainStoryProse } from "@/lib/story-prose";
 import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
 import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
+
+/**
+ * The atlas card's art column is fluid; the entity cards below it are pinned
+ * to a 128px visual, so those ask for one width and no more.
+ */
+const regionArtSizes = "(max-width: 900px) 100vw, 44vw";
+const regionArtWidths = [640, 960, 1440] as const;
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
@@ -262,7 +270,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           const companionArt = companion ? getCharacterKeyart(companion.slug) : null;
           return <article className="companion-mission-chain-card" key={companionSlug}>
             <Link className="companion-mission-chain-head" href={`/codex/bible/${companionSlug}`}>
-              {companionArt ? <img alt={`${companion?.title ?? companionSlug} key art`} src={companionArt} /> : <span className="companion-chain-fallback"><Handshake aria-hidden="true" size={20} /></span>}
+              {companionArt ? <img alt={`${companion?.title ?? companionSlug} key art`} src={codexArtSized(companionArt, 320)} /> : <span className="companion-chain-fallback"><Handshake aria-hidden="true" size={20} /></span>}
               <span>
                 <small><Handshake aria-hidden="true" size={11} /> Companion arc{companion ? "" : " — character not written yet"}</small>
                 <strong>{companion?.title ?? companionSlug.replaceAll("-", " ")}</strong>
@@ -303,7 +311,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             const regionArt = getPlaceKeyart(region.slug, region.meta);
             return <article className="region-atlas-card" key={region.id} style={regionBrand ? { "--region-accent": regionBrand.accent } as React.CSSProperties : undefined}>
               <Link className="region-atlas-head" href={`/codex/bible/${region.slug}`}>
-                {regionArt ? <img alt={`${region.title} environment key art`} src={regionArt} /> : null}
+                {regionArt ? <img alt={`${region.title} environment key art`} sizes={regionArtSizes} src={codexArtSized(regionArt, 960)} srcSet={codexArtSrcSet(regionArt, regionArtWidths)} /> : null}
                 <div className="region-atlas-head-copy">
                   <p className="eyebrow"><Compass aria-hidden="true" size={11} /> {[regionMeta.biome, regionMeta.status].filter(Boolean).join(" · ") || "top-level region"}</p>
                   <h2>{region.title}</h2>
@@ -321,7 +329,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                       const placeArt = getPlaceKeyart(place.slug, place.meta);
                       return <li key={place.id}>
                         <Link href={`/codex/bible/${place.slug}`}>
-                          {placeArt ? <img alt="" src={placeArt} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
+                          {placeArt ? <img alt="" src={codexArtSized(placeArt, 320)} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={15} /></span>}
                           <span><strong>{place.title}</strong><i>{placeKindLabel(asRecord(place.meta))}</i></span>
                           <ArrowRight aria-hidden="true" size={11} />
                         </Link>
@@ -355,10 +363,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               const wings = [...(factionWings.get(entry.slug) ?? [])].sort((a, b) => a.title.localeCompare(b.title));
               return <article className="faction-banner-card" key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
                 <Link className="faction-banner-hero" href={`/codex/bible/${entry.slug}`}>
-                  {brand ? <img alt={`${entry.title} faction key art`} src={brand.keyart} /> : null}
+                  {brand ? <img alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
                   <span className="faction-banner-shade" />
                   <span className="faction-banner-identity">
-                    {brand ? <span className="faction-banner-logo"><img alt="" src={brand.logo} /></span> : null}
+                    {brand ? <span className="faction-banner-logo"><img alt="" src={codexArtSized(brand.logo, 320)} /></span> : null}
                     <span><small>{[meta.scope, meta.seat].filter(Boolean).join(" · ") || "Major power"}</small><strong>{entry.title}</strong><em>{wings.length} wing{wings.length === 1 ? "" : "s"} beneath this banner</em></span>
                   </span>
                 </Link>
@@ -368,7 +376,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                     <p className="eyebrow">Inside its sphere</p>
                     {wings.length ? <ul>{wings.map((wing) => {
                       const wingBrand = getFactionBranding(wing.slug);
-                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}>{wingBrand ? <img alt="" src={wingBrand.logo} /> : null}<span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
+                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}>{wingBrand ? <img alt="" src={codexArtSized(wingBrand.logo, 320)} /> : null}<span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
                     })}</ul> : <p className="story-inspector-hint">No wings are filed beneath this power.</p>}
                   </div>
                   <Link className="faction-banner-open" href={`/codex/bible/${entry.slug}`}>Open full dossier <ArrowRight aria-hidden="true" size={12} /></Link>
@@ -387,10 +395,10 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             {independentFactionEntries.map((entry) => {
               const brand = getFactionBranding(entry.slug);
               return <Link className="faction-independent-card" href={`/codex/bible/${entry.slug}`} key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
-                {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={brand.keyart} /> : null}
+                {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
                 <span className="faction-independent-shade" />
                 <span className="faction-independent-copy">
-                  {brand ? <span className="faction-independent-logo"><img alt="" src={brand.logo} /></span> : null}
+                  {brand ? <span className="faction-independent-logo"><img alt="" src={codexArtSized(brand.logo, 320)} /></span> : null}
                   <span><small>Independent power</small><strong>{entry.title}</strong><em>{entry.summary ? plainStoryProse(entry.summary) : "Open dossier"}</em></span>
                   <ArrowRight aria-hidden="true" size={13} />
                 </span>
@@ -452,11 +460,11 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           >
             <div className="entity-card-visual">
               {factionBrand ? <>
-                <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={factionBrand.keyart} />
-                <span className="entity-card-logo"><img alt="" src={factionBrand.logo} /></span>
-              </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-card-keyart" src={art.src} /> : artSlot ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{artSlot}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
+                <img alt={`${entry.title} faction key art`} className="entity-card-keyart" src={codexArtSized(factionBrand.keyart, 320)} />
+                <span className="entity-card-logo"><img alt="" src={codexArtSized(factionBrand.logo, 320)} /></span>
+              </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-card-keyart" src={codexArtSized(art.src, 320)} /> : artSlot ? <div className="system-art-slot"><Cog aria-hidden="true" size={24} /><span>Art slot</span><code>{artSlot}</code></div> : preview ? <img alt={`${entry.title} selected game model`} src={`/model-gallery/${preview.image}`} /> : <div><UserRoundSearch aria-hidden="true" size={30} /><span>{entry.title.slice(0, 1)}</span></div>}
               {!factionBrand && characterFactionBrands.length ? <span className="character-card-factions" title="Faction affiliations">
-                {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={brand.logo} />)}
+                {characterFactionBrands.slice(0, 3).map(({ slug, brand }) => <img alt={`${slug.replaceAll("-", " ")} logo`} key={slug} src={codexArtSized(brand.logo, 320)} />)}
                 {characterFactionBrands.length > 3 ? <b>+{characterFactionBrands.length - 3}</b> : null}
               </span> : null}
               {entry.kind === "CHARACTER" && asRecord(meta.companion).capable === true ? <span className="companion-badge is-card" title={[asRecord(meta.companion).availability, asRecord(meta.companion).status].filter((value) => typeof value === "string" && value).join(" · ") || "Can join the party as an active companion"}>

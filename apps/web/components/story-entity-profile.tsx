@@ -22,6 +22,7 @@ import {
   type StoryThreadCategory,
   type StoryThreadStatus,
 } from "@habitat/shared";
+import { codexArtSized, codexArtSrcSet } from "@/lib/codex-art-derivative";
 import { dossierArtSlot, getDossierArt } from "@/lib/dossier-art";
 import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { timelineEraLabel } from "@/lib/story-timeline";
@@ -34,6 +35,14 @@ import { bloomfallCreatureFieldGuide } from "@/lib/bloomfall-creature-field-guid
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
 import { BloomfallSystemPanel } from "@/components/bloomfall-system-panel";
+
+/**
+ * The dossier hero is the only fluid art box in the codex: the whole width of
+ * a phone, a little over a third of a desktop page. Everything else sits in a
+ * column the CSS pins, and asks for one width.
+ */
+const heroArtSizes = "(max-width: 760px) 100vw, 42vw";
+const heroArtWidths = [640, 960, 1440, 1920] as const;
 
 type Connection = { slug: string; title: string; kind: StoryEntryKind; relation: string };
 /** One mission in a companion's chain, in order, statused. */
@@ -231,9 +240,9 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
       >
         <div className="entity-profile-art">
           {factionBrand ? <>
-            <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" src={factionBrand.keyart} />
-            <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={factionBrand.logo} /></div>
-          </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-profile-keyart" src={art.src} /> : artSlot ? <div className="system-art-slot system-art-slot-hero">{artSlotIcon}<span>Key art slot</span><code>{artSlot}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
+            <img alt={`${entry.title} faction key art`} className="entity-profile-keyart" sizes={heroArtSizes} src={codexArtSized(factionBrand.keyart, 960)} srcSet={codexArtSrcSet(factionBrand.keyart, heroArtWidths)} />
+            <div className="faction-profile-logo"><img alt={`${entry.title} logo`} src={codexArtSized(factionBrand.logo, 320)} /></div>
+          </> : art ? <img alt={`${entry.title} ${art.alt}`} className="entity-profile-keyart" sizes={heroArtSizes} src={codexArtSized(art.src, 960)} srcSet={codexArtSrcSet(art.src, heroArtWidths)} /> : artSlot ? <div className="system-art-slot system-art-slot-hero">{artSlotIcon}<span>Key art slot</span><code>{artSlot}</code><small>Drop an image at that path and this dossier wears it on the next load.</small></div> : preview ? <img alt={`${entry.title} selected in-game model`} src={`/model-gallery/${preview.image}`} /> : <div className="entity-profile-placeholder">{isFaction ? <Shield aria-hidden="true" /> : isRegion ? <Compass aria-hidden="true" /> : <UserRound aria-hidden="true" />}<span>{entry.title.slice(0, 1)}</span></div>}
           {factionBrand ? <span>Faction identity · original key art</span> : art ? <span>{art.caption}</span> : artSlot ? <span>Awaiting key art</span> : preview ? <span>In-game model · {preview.asset}</span> : isCharacter ? <span>No in-game model cast yet</span> : null}
         </div>
         <div className="entity-profile-copy">
@@ -264,7 +273,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           <p className="entity-profile-summary">{entry.summary ? <StoryProseLine resolve={resolveProse} text={entry.summary} /> : "This entry still needs its one-line pitch."}</p>
           {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
             {characterAffiliations.map(({ brand, role, slug, standing, title }) => <Link href={`/codex/bible/${slug}`} key={slug} style={{ "--affiliation-accent": brand.accent } as React.CSSProperties}>
-              <img alt="" src={brand.logo} />
+              <img alt="" src={codexArtSized(brand.logo, 320)} />
               <span><small>Faction affiliation</small><strong>{title}</strong>{role || standing ? <em>{[role, standing].filter(Boolean).join(" · ")}</em> : null}</span>
               <ArrowRight aria-hidden="true" size={12} />
             </Link>)}
@@ -386,7 +395,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
                 {/* Registered place art fills the fixed image column. The pin
                     remains only for a genuinely unillustrated new place so its
                     copy cannot collapse into the art column. */}
-                {placeArt ? <img alt="" src={placeArt} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={18} /></span>}
+                {placeArt ? <img alt="" src={codexArtSized(placeArt, 320)} /> : <span className="region-place-fallback"><MapPin aria-hidden="true" size={18} /></span>}
                 <div><Link href={`/codex/bible/${place.slug}`}><strong>{place.title}</strong><i>{place.label}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {place.summary ? <p><StoryProseLine resolve={resolveProse} text={place.summary} /></p> : null}
                 {/* The third rung, shown in place: a POI's own destinations
@@ -418,7 +427,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               const memberArt = getCreatureKeyart(member.slug) ?? (memberPlate ? bloomfallCreatureArtUrl(memberPlate) : null);
               const isAberrant = bloomfallCreatureFieldGuide[member.slug]?.kind === "BOSS";
               return <li className={isAberrant ? "is-aberrant" : undefined} key={member.slug}>
-                {memberArt ? <img alt="" src={memberArt} /> : <span className="region-place-fallback"><Sparkles aria-hidden="true" size={18} /></span>}
+                {memberArt ? <img alt="" src={codexArtSized(memberArt, 320)} /> : <span className="region-place-fallback"><Sparkles aria-hidden="true" size={18} /></span>}
                 <div><Link href={`/codex/bible/${member.slug}`}><strong>{member.title}</strong><i>{isAberrant ? "Exceptional Aberrant" : member.category ?? "uncategorised"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {member.summary ? <p><StoryProseLine resolve={resolveProse} text={member.summary} /></p> : null}</div>
               </li>;
@@ -437,7 +446,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
             {factionFamily.wings.length ? <ul>{factionFamily.wings.map((wing) => {
               const wingBrand = getFactionBranding(wing.slug);
               return <li key={wing.slug}>
-                {wingBrand ? <img alt="" className="entity-card-keyart" src={wingBrand.keyart} /> : <span className="region-place-fallback"><Shield aria-hidden="true" size={18} /></span>}
+                {wingBrand ? <img alt="" className="entity-card-keyart" src={codexArtSized(wingBrand.keyart, 320)} /> : <span className="region-place-fallback"><Shield aria-hidden="true" size={18} /></span>}
                 <div><Link href={`/codex/bible/${wing.slug}`}><strong>{wing.title}</strong><i>{wing.scope ?? "a wing"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {wing.summary ? <p><StoryProseLine resolve={resolveProse} text={wing.summary} /></p> : null}</div>
               </li>;

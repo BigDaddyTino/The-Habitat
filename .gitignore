@@ -57,3 +57,10 @@ Docs/BLOOMFALL_REACH_VISUAL_V2_REPORT.md
 
 # Throwaway inspection scripts used during a release; never part of one.
 apps/web/scripts/tmp/
+
+# Resized copies of codex art, made on demand by the /codex-art route. Derived
+# output with the original's size and mtime in every filename, so it rebuilds
+# itself the moment it is wrong. Deliberately a sibling of codex-art rather
+# than a shelf inside it: everything under codex-art is enumerated by the
+# release audit and swept into the machine bundle, and derivatives are neither.
+apps/web/private/codex-art-cache/
