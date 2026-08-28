@@ -818,3 +818,10 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Added the approved Mara Quill, Keira Ansel, Nalia Reed, Major Selene Ward, Jaro Fen, and Tomas Vey 4:5 portraits to the shared character key-art resolver for their directory cards and individual Codex dossiers
 - [x] Added resolver regression coverage for all six exact character slugs and static asset paths
 - [x] Passed the focused resolver tests, strict web typecheck, web lint, production build, diff check, and HabitatWeb restart; authenticated live desktop and 390 × 844 mobile QA confirmed all six 3072 × 3840 portraits, zero horizontal overflow on Tomas's dossier, and zero browser console errors
+
+## 2026-08-28 - Bloomfall character and Human-lineage art discoverability
+
+- [x] Reused the production Bloomfall V4 art resolver on directory cards so Maintenance Unit M-17 “Mender” wears its approved 1639 × 2048 plate on the Characters page instead of the generic placeholder
+- [x] Made nested creature parents render their direct children, exposing Bloommarked Remnant and The Last Shift with approved artwork beneath the Human dossier while preserving their Human-origin CREATURE taxonomy
+- [x] Locked explicit hero-resolution tests for Mender, Bloommarked Remnant, and The Last Shift and corrected stale art-package documentation that still described the two Human-derived plates as missing
+- [x] Passed five focused art/resolver tests, strict web typecheck, web lint, production build, HabitatWeb restart, and authenticated live desktop/mobile QA; all three served plates report their locked native dimensions, both navigation links are present, mobile has zero horizontal overflow, and browser errors are zero

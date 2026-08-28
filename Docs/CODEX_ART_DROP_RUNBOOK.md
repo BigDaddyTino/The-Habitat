@@ -87,11 +87,12 @@ steps, not one.
 `<slug>-<rung>.webp` for the five adaptive species (`latchhound-advanced.webp`),
 `<slug>.webp` for everything else (`switchmother.webp`).
 
-### Still missing
+### Declaring a missing plate
 
-`bloommarked-remnant` and `the-last-shift` have no plate. Their cards show the
-empty slot, and `undrawn` in the test file pins that list — delete a slug from it
-when its plate lands, or the test will fail for the right reason.
+Every Bloomfall creature dossier now has a plate, including `bloommarked-remnant`
+and `the-last-shift`; Mender is covered by the same package despite remaining a
+CHARACTER record. `undrawn` in the test file pins any future declared gap, so a
+missing plate still fails for the right reason.
 
 ### Aberrants share a plate
 

@@ -54,4 +54,8 @@ test("every dossier has a hero plate, and any gap is declared", () => {
   assert.equal(getBloomfallCreatureHeroArt("old-drowner")?.filename, "mirejaw-aberrant.webp");
   // An adaptive species leads with its baseline, not a later rung.
   assert.equal(getBloomfallCreatureHeroArt("latchhound")?.filename, "latchhound-none.webp");
+  // The three formerly hard-to-find subjects each resolve their own final.
+  assert.equal(getBloomfallCreatureHeroArt("maintenance-unit-m-17")?.filename, "maintenance-unit-m-17.webp");
+  assert.equal(getBloomfallCreatureHeroArt("bloommarked-remnant")?.filename, "bloommarked-remnant.webp");
+  assert.equal(getBloomfallCreatureHeroArt("the-last-shift")?.filename, "the-last-shift.webp");
 });

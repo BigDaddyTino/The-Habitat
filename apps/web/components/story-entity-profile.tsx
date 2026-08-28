@@ -393,7 +393,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {entry.kind === "EVENT" ? <p className="entity-map-note is-prose"><History aria-hidden="true" size={13} /> {typeof meta.timelineYearsAgo === "number"
             ? <>Sits on <Link href="/codex/timeline">the timeline</Link>, {timelineEraLabel(meta.timelineYearsAgo)}.</>
             : <>Not on <Link href="/codex/timeline">the timeline</Link> yet — set &ldquo;years before the present&rdquo; on the sheet below, or leave it off if the unknown age is the canon.</>}</p> : null}
-          {isRace && raceFamily ? <div className="entity-contained-places entity-race-members">
+          {raceFamily && (isRace || raceFamily.members.length > 0) ? <div className="entity-contained-places entity-race-members">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Children of {entry.title}</p>
             {raceFamily.members.length ? <ul>{raceFamily.members.map((member) => {
               // The old illustrated races have their own key art; a Bloomfall

@@ -21,10 +21,9 @@ export type BloomfallCreatureArtAsset = {
  * at 2048px and encoded as WebP; the 4K masters they came from are archived
  * outside the repository and are not needed at runtime.
  *
- * Two dossiers have no plate yet — Bloommarked Remnant and The Last Shift, the
- * two human-derived subjects, which the generator refused. Their cards fall
- * back to the empty art slot, which is why the resolver returns null rather
- * than throwing.
+ * The package now covers every Bloomfall creature dossier plus Mender, the
+ * deliberately character-classified maintenance entity. Human-derived subjects
+ * retain their CREATURE taxonomy while wearing their own approved plates.
  */
 export const bloomfallCreatureArtAssets: readonly BloomfallCreatureArtAsset[] = [
   { entrySlug: "blackbloom-hart", rung: "NONE", filename: "blackbloom-hart-none.webp", width: 1365, height: 2048, sha256: "e1bec3a30e75dd70c014c4e6f3691147e217325b9b2384d57d445c504a7898ab" },
