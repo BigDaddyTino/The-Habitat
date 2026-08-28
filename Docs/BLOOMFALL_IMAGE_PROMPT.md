@@ -336,3 +336,43 @@ When every file is saved, build the archive:
 ```
 
 containing all 31 PNGs, and give me the download link and its contents.
+
+---
+
+# Appendix — the two the generator refused
+
+`bloommarked-remnant.png` and `the-last-shift.png` did not come back in the first
+run. Both are human-derived subjects, and image tools tend to refuse a prompt that
+combines a recognisable person with graphic injury however the brief is worded.
+
+The content direction has not changed — these are Mature 17+ subjects and should be
+harrowing. What changes is the framing: lead with the industrial and botanical
+transformation, keep the camera off intact human faces, and let the horror come from
+the growth and the machinery rather than from an injury described on a body. If a
+tool still refuses, that is a tool limit rather than a brief limit, and the plate is
+worth sourcing from a generator that will produce it.
+
+Paste this on its own:
+
+> Two more images for the same Martino / Bloomfall Reach reference set. Same
+> quality bar: realistic AAA game concept art, photorealistic, physically-based
+> materials, wet tissue and industrial grime, natural cinematic light, mature 17+
+> horror tone, extreme detail, 4:5 portrait, no text, no watermark. Generate both
+> without stopping, save each to /mnt/data/ under the exact filename, then add them
+> to the existing bloomfall-creatures.zip.
+>
+> `bloommarked-remnant.png` — A figure in the shredded remains of an industrial work
+> uniform, standing in a flooded reactor corridor. Black crystalline-organic growth
+> has erupted through the shoulder, forearm and jaw, splitting the fabric and fusing
+> the sleeve to the arm; the growth is clearly the same material as the contamination
+> on the walls. Head turned away and partly silhouetted, one gloved hand still
+> resting on a valve wheel as if mid-task. Grim, wet, industrial, deeply unsettling.
+> The horror is the transformation and the posture, not a wound.
+>
+> `the-last-shift.png` — A wrecked plant control room where a maintenance crew has
+> been absorbed into the machinery. Six or seven figures in hard hats and heavy PPE,
+> seen from behind and in silhouette, are joined to each other and to the consoles by
+> thick ropes of black organic growth and salvaged cable and conduit. They are frozen
+> mid-procedure — hands on levers, one reaching for an alarm panel. Emergency lighting,
+> steam, standing water, decades of grime. Reads as one coordinated organism made of
+> a work crew, not a crowd of zombies.
