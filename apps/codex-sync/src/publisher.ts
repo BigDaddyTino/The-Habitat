@@ -10,6 +10,7 @@ import {
 import { assetStatFingerprint, discoverCodexAssets, storeCodexAssets } from "./assets";
 import { buildCanonCompatibilityExport } from "./compatibility";
 import { jsonBytes, replaceFileAtomically, sha256Bytes, writeFileDurably } from "./integrity";
+import { newestPublishedRelease } from "./release";
 import { buildCodexSnapshot, codexDatabaseFingerprint } from "./snapshot";
 
 export type PublishResult = {
@@ -94,7 +95,23 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
     buildCodexSnapshot(generatedAt),
     storeCodexAssets(sourceAssets, syncRoot),
   ]);
-  const compatibility = buildCanonCompatibilityExport(snapshot);
+  // The canon payload comes from a NAMED RELEASE, never from the live read.
+  //
+  // The snapshot above is a mirror of the codex and is meant to move whenever
+  // the room does. This payload is what an importer turns into game assets, so
+  // it is subject to the release boundary: it is a frozen cut with a hash an
+  // importer can pin, and it does not change because somebody saved a
+  // sentence. Publishing without one would put live canon back into the
+  // bundle through the side door.
+  const release = await newestPublishedRelease();
+  if (!release) {
+    throw new Error(
+      "No story release has been cut, so there is no canon payload to publish. " +
+      "Codex Sync bundles a named release rather than live canon — cut one with " +
+      "apps/web/scripts/cut-story-release.ts and publish again.",
+    );
+  }
+  const compatibility = release.payload;
   const contentSha256 = sourceContentHash(snapshot, compatibility, assets);
   const current = await readCurrentPointer(syncRoot);
   if (current?.sourceContentSha256 === contentSha256) {
@@ -123,6 +140,7 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
     generatedAt: generatedAt.toISOString(),
     revisionCursor: snapshot.revisionCursor,
     sourceContentSha256: contentSha256,
+    storyRelease: { name: release.name, sha256: release.sha256, contractVersion: release.contractVersion, cutAt: release.cutAt },
     counts: {
       arcs: snapshot.arcs.length,
       nodes: snapshot.nodes.length,

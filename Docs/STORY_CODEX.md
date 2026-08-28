@@ -676,3 +676,44 @@ feature, and no migration here affects an enum the worker writes.
 - Comments are node- or entry-scoped only; there is no thread on a branch.
 - Search over the bible is a `contains` scan. Fine at the scale of one game's
   lore; it would want a real index long before it became slow.
+
+## Cutting a release
+
+The writers' room lands every save straight at CANON, which is the point of it. That used to mean everything downstream — the export endpoint, Codex Sync, and therefore the game — read whatever happened to be true the second it asked. A **release** is the boundary: a named, frozen, hash-locked cut of canon. The room goes on moving; nothing outside it shifts until somebody cuts again.
+
+```powershell
+pnpm --filter @habitat/web exec tsx scripts/cut-story-release.ts --name martino-2026.08.2 --notes "..."   # dry run
+pnpm --filter @habitat/web exec tsx scripts/cut-story-release.ts --name martino-2026.08.2 --apply
+```
+
+**Cutting is the strictest gate in the system, and deliberately stricter than a deploy.** Both run the same checks from `scripts/lib/release-audit.ts`, but a deploy honours the waiver map — a bad deploy costs a website — while a cut honours nothing. A release is what the game imports and what an importer pins by hash, so a defect somebody agreed to live with does not get to travel.
+
+A cut refuses to happen when:
+
+- any release check fails;
+- any finding is only passing because of a waiver;
+- canon is byte-identical to the newest release (there is nothing to cut);
+- the name already exists — release names are frozen identities, like slugs and node keys.
+
+The hash is over **content**: `generatedAt` and `revisionCursor` are normalised out, because both move when nothing about the story has. This is the same normalisation Codex Sync uses for its own content hash.
+
+**Releases are immutable, enforced by the database.** `StoryRelease` carries triggers that refuse `UPDATE` and `DELETE` outright — "nothing in the app edits them" is a property of today's code, and a release outlives today's code. Withdraw a release by cutting a newer one.
+
+### Reading them
+
+```
+GET /api/story/export                    the newest release
+GET /api/story/export?release=<name>     that release, forever
+```
+
+There is no way to ask this endpoint for live canon; that is what the codex UI is for. Freshness is the release identity — send `If-None-Match`, or `?since=` with the release name or its sha256, and a 304 comes back without the payload being read. The response carries `X-Story-Release`, `X-Story-Release-Sha256` and `X-Story-Release-Cut-At` so an importer can pin what it just took.
+
+With no release cut the endpoint answers `503 no_release_cut` rather than falling back to live canon, and an unknown name is a `404` rather than a silent substitution.
+
+### What changed between two releases
+
+```powershell
+pnpm --filter @habitat/web exec tsx scripts/diff-story-releases.ts --from martino-2026.08.1
+```
+
+Entries and arcs added, removed, and rewritten — down to which scenes changed and how the branch count moved. Against live canon the honest answer to "what changed since you last saw it" was always "everything might have."

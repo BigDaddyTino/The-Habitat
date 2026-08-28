@@ -553,6 +553,7 @@ model User {
   storyCommentsResolved          StoryComment[]                 @relation("StoryCommentResolver")
   storyPresence                  StoryPresence?
   storyExportTokens              StoryExportToken[]             @relation("StoryExportTokenCreator")
+  storyReleases                  StoryRelease[]                 @relation("StoryReleaseCutBy")
   storyAssistantMessages         StoryAssistantMessage[]        @relation("StoryAssistantAsker")
   storyMapsCreated               StoryMap[]                     @relation("StoryMapCreator")
   storyMapsUpdated               StoryMap[]                     @relation("StoryMapEditor")
@@ -2649,4 +2650,43 @@ model StoryExportToken {
   creator         User      @relation("StoryExportTokenCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   @@index([revokedAt])
+}
+
+/// A named, frozen, hash-locked cut of canon — the boundary between the
+/// writers' room and everything downstream.
+///
+/// The room lands every save straight at CANON on purpose, which used to mean
+/// the export endpoint and Codex Sync read a moving target. A release freezes
+/// what canon was at one moment; downstream reads a release by name and
+/// nothing outside the room shifts until somebody deliberately cuts again.
+///
+/// Immutable, and enforced by database triggers rather than convention — see
+/// migration 20260828150000_add_story_releases. A release is withdrawn by
+/// cutting a newer one, never by editing the row.
+model StoryRelease {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// Frozen identity, e.g. martino-2026.08.1. Never renamed.
+  name            String   @unique @db.VarChar(80)
+  notes           String?  @db.VarChar(500)
+  /// The story export contract this payload satisfies.
+  contractVersion Int
+  /// The frozen MartinoStoryExport, exactly as the endpoint serves it.
+  payload         Json
+  /// sha256 over the stable serialisation of `payload` — what an importer pins.
+  sha256          String   @unique @db.VarChar(64)
+  bytes           Int
+  /// The Atlas at cut time. Deliberately outside `contractVersion`: whether
+  /// Atlas topology ships to the game is still open, and a release is a
+  /// complete record of canon regardless of what the wire format carries.
+  atlas           Json
+  atlasSha256     String   @db.VarChar(64)
+  counts          Json
+  /// Proof the gate ran. A cut is refused unless the release audit passes with
+  /// no waivers honoured.
+  audit           Json
+  cutAt           DateTime @default(now())
+  cutByUserId     String   @db.Uuid
+  cutBy           User     @relation("StoryReleaseCutBy", fields: [cutByUserId], references: [id], onDelete: Restrict)
+
+  @@index([cutAt(sort: Desc)])
 }

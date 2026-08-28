@@ -42,6 +42,26 @@ export type CodexBundleCounts = {
   assets: number;
 };
 
+/**
+ * Which named, frozen release the bundle's canon payload was taken from.
+ *
+ * Codex Sync publishes two different things and only one is game content. The
+ * snapshot mirrors the codex and moves whenever the room does; the canon
+ * payload is what an importer turns into assets, and since 2026-08-28 it comes
+ * from a release rather than a live read. This records which one, so a
+ * consumer can pin a name and a hash instead of trusting a timestamp.
+ *
+ * Optional because bundles published before the release boundary existed
+ * genuinely do not have it — its absence means "this canon payload was read
+ * live", which is exactly the thing the boundary was introduced to end.
+ */
+export type CodexBundleStoryRelease = {
+  name: string;
+  sha256: string;
+  contractVersion: number;
+  cutAt: string;
+};
+
 export type CodexBundleManifest = {
   contract: "martino-codex-bundle";
   contractVersion: typeof codexBundleContractVersion;
@@ -49,6 +69,8 @@ export type CodexBundleManifest = {
   generatedAt: string;
   revisionCursor: string | null;
   sourceContentSha256: string;
+  /** Absent on bundles published before the release boundary. */
+  storyRelease?: CodexBundleStoryRelease;
   counts: CodexBundleCounts;
   content: CodexBundleFile;
   compatibility: CodexBundleFile;

@@ -11,7 +11,9 @@ import test from "node:test";
  * running it, which a test must not do.
  */
 
-const audit = () => readFileSync(join(process.cwd(), "scripts", "audit-release.ts"), "utf8");
+// The checks moved into a library so the deploy gate and the release cut
+// run the same code; the CLI is now a thin wrapper over it.
+const audit = () => readFileSync(join(process.cwd(), "scripts", "lib", "release-audit.ts"), "utf8");
 const deploy = () => readFileSync(join(process.cwd(), "scripts", "deploy-web.ps1"), "utf8");
 
 test("the release audit never writes", () => {

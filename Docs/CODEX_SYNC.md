@@ -89,3 +89,22 @@ pnpm --filter @habitat/codex-sync sync:verify
 ```
 
 The old canon API remains available during migration. An Unreal importer should store the last successful Bundle v2 `snapshotId` and should never infer that the newest visible directory is active; only `current.json` makes that claim.
+
+## The release boundary
+
+Since 2026-08-28 the bundle's canon payload comes from a **named, frozen release**, not from a live read of the codex.
+
+Codex Sync publishes two different things and only one of them is game content:
+
+- `content/snapshot.json` mirrors the codex — every entry, revision and comment, for reading. It moves whenever the writers' room does, which is the point of it.
+- `compatibility/canon-v1.json` is what an importer turns into game assets. That is subject to the boundary: it is a cut, by name, with a sha256 an importer can pin, and it does not change because somebody saved a sentence.
+
+The manifest records which release the payload came from:
+
+```json
+"storyRelease": { "name": "martino-2026.08.1", "sha256": "…", "contractVersion": 1, "cutAt": "…" }
+```
+
+The field is optional because bundles published before the boundary existed genuinely lack it — its absence means that canon payload was read live, which is the thing the boundary ended.
+
+**Publishing refuses when no release has been cut.** There is deliberately no fallback to live canon; cut one with `apps/web/scripts/cut-story-release.ts`.
