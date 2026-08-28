@@ -20,6 +20,7 @@ apps/agent/game-services.json
 apps/agent/game-services/
 HabitatWorker.exe
 HabitatWorker.xml
+HabitatWorker.xml.bak
 worker-logs/
 CodexSyncPublisher.exe
 CodexSyncPublisher.xml
