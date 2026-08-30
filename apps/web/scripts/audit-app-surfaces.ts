@@ -78,7 +78,7 @@ async function main() {
   ]);
 
   const allSeasons = await db.season.findMany({ select: { slug: true }, take: 5 });
-  const collections = ["characters", "factions", "regions", "races", "items", "events", "themes", "rules", "systems", "companion-missions"];
+  const collections = ["characters", "factions", "regions", "species", "items", "events", "themes", "rules", "systems", "companion-missions"];
   const routes = [
     "/", "/achievements", "/chronicle", "/club-games", "/club-games/marvel-rivals", "/departure-board", "/games",
     "/hall-of-legends", "/hall-of-shame", "/halls", "/leaderboards", "/leaderboards/season", "/members", "/polls",

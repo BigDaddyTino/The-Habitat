@@ -84,6 +84,10 @@ const characterMeta = (input: {
   appearance: input.appearance, voice: input.voice,
   magic: { origin: null, schools: [], corruptionPhase: null, notes: "Blackbloom exposure is environmental adaptation, not Seven-Phase Corruption." },
   factions: input.factions, home: input.home, status: { known: input.known, actual: input.actual }, relationships: input.relationships ?? [],
+  // The four character-bible ledgers. Empty here: these are regional dossiers
+  // written before the ledgers existed, and an invented trade would be a claim
+  // nobody made.
+  background: null, professions: [], skills: [], cybernetics: [],
   storyRole: input.storyRole, involvement: input.involvement, gameId: null, model: input.model,
   companion: { capable: false, availability: "Regional non-companion character.", status: "Not recruitable." }, openQuestions: input.questions ?? [],
 });

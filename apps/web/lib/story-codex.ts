@@ -381,14 +381,14 @@ export async function getStoryEntry(slug: string) {
     };
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
-    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this race" : candidate.kind === "FACTION" ? "answers to this power" : "belongs inside this region");
+    if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this species" : candidate.kind === "FACTION" ? "answers to this power" : "belongs inside this region");
     if (referencesSlug(meta.origin)) add("originates here");
     // A character's race. `species` is slug-or-prose like `home` and `origin`:
     // Amanda's reads "Lizzarnix — half lizard, half phoenix; publicly passes
     // as a lizardwoman", which is the spoiler-tier truth and must stay prose.
     // An exact match against a real race is a link either way, so the race's
     // dossier finally lists the people who are one.
-    if (referencesSlug(meta.species)) add("is one of this race");
+    if (referencesSlug(meta.species)) add("is one of this species");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
     if (Array.isArray(meta.where) && meta.where.some(referencesSlug)) add("happened here");

@@ -173,7 +173,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     !(containedPlaces.length && connection.relation === "belongs inside this region") &&
     !(systemFamily && connection.relation === "is a subsystem of this") &&
     // The race's own member list already shows these in full.
-    !(isRace && connection.relation === "belongs to this race") &&
+    !(isRace && connection.relation === "belongs to this species") &&
     // A thread's forward links already name its missions; the missions
     // pointing back is the same fact twice in one list.
     !(isThread && connection.relation === "is advanced by this companion mission" && words(meta.companionMissions).includes(connection.slug)) &&
@@ -206,7 +206,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
     // The race reads back on the member the same way a parent region reads
     // back on a place: the breadcrumb is navigation, this is the graph, and
     // a member whose aside knows nothing about its race is a one-way edge.
-    if (label(meta.parent)) entityLinks.push({ slug: String(meta.parent), detail: "Belongs to this race" });
+    if (label(meta.parent)) entityLinks.push({ slug: String(meta.parent), detail: "Belongs to this species" });
     for (const habitat of words(meta.biomes)) if (slugShaped(habitat)) entityLinks.push({ slug: habitat, detail: "Habitat" });
   }
   if (entry.kind === "ITEM" && slugShaped(meta.origin)) entityLinks.push({ slug: meta.origin, detail: "Origin" });
@@ -249,7 +249,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {/* A race and one of its members are the same kind but not the
               same thing, and calling Mythical a "creature dossier" reads as
               a filing mistake. */}
-          <p className="eyebrow">{isRace ? "Race" : isFaction && factionFamily ? (factionFamily.banner ? "Wing" : "Major power") : storyEntryKindLabels[entry.kind]} dossier · {isThread
+          <p className="eyebrow">{isRace ? "Species" : isFaction && factionFamily ? (factionFamily.banner ? "Wing" : "Major power") : storyEntryKindLabels[entry.kind]} dossier · {isThread
             ? (threadStatus ? storyThreadStatusLabels[threadStatus] : "No status yet")
             : isMission
               ? (missionStatus ? storyCompanionMissionStatusLabels[missionStatus] : "No status yet")
@@ -260,7 +260,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {placeAncestry.length ? <nav aria-label="Where this sits" className="place-trail">
             {placeAncestry.map((ancestor) => <span key={ancestor.slug}><Link href={`/codex/bible/${ancestor.slug}`}>{ancestor.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>)}
           </nav> : null}
-          {raceFamily?.race ? <nav aria-label="Which race this belongs to" className="place-trail">
+          {raceFamily?.race ? <nav aria-label="Which species this belongs to" className="place-trail">
             <span><Link href={`/codex/bible/${raceFamily.race.slug}`}>{raceFamily.race.title}</Link><ChevronRight aria-hidden="true" size={11} /></span>
           </nav> : null}
           {factionFamily?.banner ? <nav aria-label="Which power this answers to" className="place-trail">
@@ -431,8 +431,8 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
                 <div><Link href={`/codex/bible/${member.slug}`}><strong>{member.title}</strong><i>{isAberrant ? "Exceptional Aberrant" : member.category ?? "uncategorised"}</i><ArrowRight aria-hidden="true" size={11} /></Link>
                 {member.summary ? <p><StoryProseLine resolve={resolveProse} text={member.summary} /></p> : null}</div>
               </li>;
-            })}</ul> : <p className="story-inspector-hint">Nothing is filed under this race yet — it is a race waiting for its members.</p>}
-            <Link className="entity-add-place" href={`/codex/library/races?parent=${entry.slug}#new-entry`}>
+            })}</ul> : <p className="story-inspector-hint">Nothing is filed under this species yet — it is a species waiting for its members.</p>}
+            <Link className="entity-add-place" href={`/codex/library/species?parent=${entry.slug}#new-entry`}>
               <Plus aria-hidden="true" size={13} /> Add a child to {entry.title}
             </Link>
           </div> : null}

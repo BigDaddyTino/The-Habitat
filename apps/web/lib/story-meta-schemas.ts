@@ -61,6 +61,16 @@ export const characterMetaSchema = z.object({
   home: metaText(64),
   status: z.object({ known: metaText(500), actual: metaText(500) }),
   relationships: z.array(z.object({ character: metaSlug.nullable(), who: metaText(160), type: metaText(300) })).max(30),
+  // The four character-bible ledgers. Free text on purpose — a background, a
+  // trade rung, a skill rank and a fitted augment are positions inside a
+  // system dossier, not entries, so a slug here could never resolve. Adding
+  // them is a schema change with a backfill in the same pass: every field is
+  // required-but-nullable, so a sheet that omits one is rejected whole, and an
+  // un-backfilled row would fail on its next save.
+  background: metaText(120),
+  professions: metaLines(12, 160),
+  skills: metaLines(24, 160),
+  cybernetics: metaLines(12, 200),
   storyRole: metaText(500),
   // Typed on purpose. `kind` has NO default and is not nullable: a row that
   // does not say which namespace it lives in is the exact ambiguity that let

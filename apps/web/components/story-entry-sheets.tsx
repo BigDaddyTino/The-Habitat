@@ -123,6 +123,10 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   const [statusKnown, setStatusKnown] = useState(text(status.known));
   const [statusActual, setStatusActual] = useState(text(status.actual));
   const [relationships, setRelationships] = useState(asArray(source.relationships).map((row) => ({ character: text(record(row).character), who: text(record(row).who), type: text(record(row).type) })));
+  const [background, setBackground] = useState(text(source.background));
+  const [professions, setProfessions] = useState(asArray(source.professions).map(text).join("\n"));
+  const [skills, setSkills] = useState(asArray(source.skills).map(text).join("\n"));
+  const [cybernetics, setCybernetics] = useState(asArray(source.cybernetics).map(text).join("\n"));
   const [storyRole, setStoryRole] = useState(text(source.storyRole));
   const [involvement, setInvolvement] = useState(asArray(source.involvement).map((row) => {
     const stored = record(row);
@@ -162,6 +166,10 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
     relationships: relationships
       .filter((row) => row.character.trim() || row.who.trim() || row.type.trim())
       .map((row) => ({ character: orNull(row.character), who: orNull(row.who), type: orNull(row.type) })),
+    background: orNull(background),
+    professions: splitLines(professions),
+    skills: splitLines(skills),
+    cybernetics: splitLines(cybernetics),
     storyRole: orNull(storyRole),
     involvement: involvement
       .filter((row) => row.ref.trim())
@@ -187,9 +195,9 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
         <label>Full name<input maxLength={160} onChange={(event) => setFullName(event.target.value)} type="text" value={fullName} /></label>
         <label>Pronouns<input maxLength={40} onChange={(event) => setPronouns(event.target.value)} placeholder="null = writers use they/them" type="text" value={pronouns} /></label>
         <label>Sex<input maxLength={40} onChange={(event) => setSex(event.target.value)} type="text" value={sex} /></label>
-        <label>Race — their people<input aria-label="Race" list={raceListId} maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" type="text" value={species} />
+        <label>Species — their people<input aria-label="Species" list={raceListId} maxLength={80} onChange={(event) => setSpecies(event.target.value)} placeholder="human (a new people needs owner sign-off)" type="text" value={species} />
         <datalist id={raceListId}>{races.map((race) => <option key={race.slug} value={race.slug}>{race.title}</option>)}</datalist>
-        <small className="sheet-hint">Pick one of the races and their dossier lists this character back. Free text still works when the truth is more complicated than a name.</small></label>
+        <small className="sheet-hint">Pick one of the species and their dossier lists this character back. Free text still works when the truth is more complicated than a name.</small></label>
         <label>Age<input maxLength={80} onChange={(event) => setAge(event.target.value)} placeholder="late twenties" type="text" value={age} /></label>
         <label>Home<select onChange={(event) => setHome(event.target.value)} value={home}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
       </div>
@@ -200,6 +208,14 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       <label>Appearance<textarea maxLength={2000} onChange={(event) => setAppearance(event.target.value)} rows={2} value={appearance} /></label>
       <label>Voice — what their dialogue sounds like<textarea maxLength={2000} onChange={(event) => setVoice(event.target.value)} rows={3} value={voice} /></label>
       <label>Story role — why this character exists<textarea maxLength={500} onChange={(event) => setStoryRole(event.target.value)} rows={2} value={storyRole} /></label>
+
+      {/* The character-bible ledgers. Free text, written the way the world
+          writes them — the trades and ranks are positions inside a system
+          dossier rather than entries, so there is nothing to pick from. */}
+      <label>Background — the door they came in through<input maxLength={120} onChange={(event) => setBackground(event.target.value)} placeholder="Contract Security, Field Medicine, Infusion Technician…" type="text" value={background} /></label>
+      <label>Professions — one per line, with the rung<textarea onChange={(event) => setProfessions(event.target.value)} placeholder={"Medicine · licensed\nLogistics · apprentice"} rows={2} value={professions} /></label>
+      <label>Skills — one per line, with the rank<textarea onChange={(event) => setSkills(event.target.value)} placeholder={"Trauma · Expert\nNavigation · Reliable"} rows={3} value={skills} /></label>
+      <label>Cybernetics — one per line; the Forge never records these<textarea onChange={(event) => setCybernetics(event.target.value)} placeholder={"Limb — Union shop, unfinanced\nSensory overlay — Ascendancy, financed"} rows={2} value={cybernetics} /></label>
 
       <div className="sheet-grid sheet-companion-grid">
         <label>Can become a companion — the COMPANION badge<select onChange={(event) => setCompanionCapable(event.target.value)} value={companionCapable}>
@@ -542,7 +558,7 @@ export function CreatureSheet({ entryId, version, meta, regions, races }: {
       <input name="version" type="hidden" value={version} />
       <input name="metaJson" type="hidden" value={JSON.stringify(composed)} />
 
-      <label>Which race this belongs to<select onChange={(event) => setParent(event.target.value)} value={parent}>
+      <label>Which species this belongs to<select onChange={(event) => setParent(event.target.value)} value={parent}>
         <option value="">Nothing above it — this entry IS a race</option>
         {races.map((race) => <option key={race.slug} value={race.slug}>{race.title}</option>)}
       </select></label>

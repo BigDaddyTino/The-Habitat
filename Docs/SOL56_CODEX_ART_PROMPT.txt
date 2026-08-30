@@ -1,0 +1,120 @@
+SOL 5.6 — CODEX KEY ART RUN: THE CHARACTER BIBLE'S 41 EMPTY SLOTS
+==================================================================
+
+You are producing key art for the Martino Story Codex, not for a cinematic.
+There is no timeline, no dialogue, no sequencing — 41 single still images,
+each one the hero image of one codex dossier. Your brief for each image is
+already written: it is the entry itself. Read the dossier before you draw it.
+
+THE MANIFEST IS THE JOB
+-----------------------
+Docs/MARTINO_CHARACTER_BIBLE_ART.md lists all 41 slots: entry title, slug,
+the EXACT output file path, and a one-line description of the subject.
+That list is the complete scope. Produce every slot, save each file at
+exactly the path the manifest gives — filename, directory and extension are
+load-bearing (the app finds art by convention: the file named for the slug
+IS the wiring; there is no registry to update). Species art goes in the
+races/ directory — the folder name on disk is historical, do not "fix" it.
+
+FORMAT
+------
+- Landscape, 16:9, minimum 1600 px wide. House convention is 1672x941 —
+  match it. PNG.
+- One image per slot. No variants, no contact sheets, no collages.
+
+ART DIRECTION — TWO AUTHORITIES, IN ORDER
+-----------------------------------------
+1. The codex entry "the-look-of-the-world" (the law):
+   - Near-future fusion worn casually. Enchanted firearms beside security
+     cameras, crystal ammunition from ordinary crates, a field-infusion rig
+     maintained like a truck engine. Nobody in-frame is amazed by magic-tech.
+   - Magic leaves its own scars: glass bowing before it breaks, gravity
+     forgetting itself, strange scarring — never ordinary explosive damage.
+   - Old power, new kit: the fusion test applies to every subject.
+   - Mature, not performative. People who might not survive the next five
+     minutes.
+2. Docs/BLOOMFALL_REACH_VISUAL_BIBLE.md (the shared material language):
+   AAA cinematic realism; wet charcoal concrete, oxidized steel, blackened
+   ceramic, dull brass fittings; Essence as contained cyan-to-storm-blue
+   light that is always physically motivated (conduit, vessel, vapor,
+   mineral charge — never omnipresent neon); overcast daylight, cold work
+   lights, amber emergency lamps — light always has a source.
+
+HARD PROHIBITIONS (every frame)
+-------------------------------
+- NO text in frame. No signage that reads, no tickers, no labels, no fake
+  alphabets, no baked footers or frame numbers. Abstract hazard bands and
+  blank plates only.
+- NO UI. No health bars, menus, icons, map overlays.
+- NO fantasy register. No wizard towers, robes, staffs, steampunk ornament,
+  cyberpunk neon signage, glossy sci-fi plastic. Engineering, not smithing.
+- No real-world brands or broadcaster identities.
+- No omniscient hero shots for horror subjects — this world is witnessed at
+  human scale.
+
+THE FOUR SHELVES, AND WHAT EACH DEMANDS
+---------------------------------------
+SYSTEMS (14) — Each is a scene that teaches the system without a caption.
+  The manifest's one-liner names the scene. Two rules:
+  - the-six-pillars and its six children (thermodynamics, kinetics,
+    structure, biologics, cognition, resonance) are ONE SET: design the
+    visual grammar once — same framing logic, same registry/institutional
+    feel — and let the six differ only in subject. They are shelves in one
+    licensing registry, not six unrelated paintings. Do the-six-pillars
+    first and derive the children from it.
+  - Match the existing systems shelf (apps/web/private/codex-art/systems/
+    has 30+ finished examples). Study three of them before you start.
+
+SPECIES (5) — returnees, carriers, chartered, the-unregistered, the-latent.
+  They join a shelf with illustrated members (human, humanoid, beasts,
+  mythical in the same directory). Match THAT set — portrait-of-a-people
+  compositions — NOT the Bloomfall creature plates. These are all human
+  peoples; the differences are history, bearing, and context, not anatomy.
+  Do not invent visible mutations, ears, or glowing marks — especially for
+  the-latent, whose entire nature is that nothing shows.
+
+ITEMS (6) — The history is the subject, not the object. The hole in the
+  torso plate a medic cut a shard out of; the spent shell case in a
+  rating's hand; the page torn out of a ledger; a grave marker with one
+  word's worth of space (shown so no word is legible). An object catalog
+  shot is a failure here.
+
+CHARACTERS (16) — Lowest priority, do them LAST. All sixteen are PROPOSED
+  with placeholder names; art commits a face nobody has written a scene
+  for. Rules:
+  - The four Kestrel command staff (medic, mechanic, quartermaster, scout)
+    are the only ones worth polishing — they are canon-adjacent to the
+    prologue. Do those four first within this shelf.
+  - Sixteen DIFFERENT faces, ages, and builds. Reuse of one face across
+    extras has been a defect in your work before — it will be checked.
+  - Correct faction kit per dossier (Kestrel field gear, Stormglass range
+    kit, Sovereign Guard drill dress, Ascendancy clinic whites, Tropic
+    Pearl rider harness). Wrong-kit extras have also been a defect before.
+  - The captured rider's hypogriff (if shown) uses the codex sheet
+    silhouette — eagle forward anatomy, horse hindquarters. No invented
+    creature anatomy.
+  - Faces read as people under stress, not portrait-studio heroes.
+
+ORDER OF WORK
+-------------
+1. the-six-pillars, then its six children (the set grammar).
+2. The remaining 7 systems.
+3. The 5 species.
+4. The 6 items.
+5. The 4 Kestrel command staff, then the 12 teachers.
+
+SELF-QA BEFORE YOU REPORT DONE (view every image at full resolution)
+--------------------------------------------------------------------
+- Zero legible text anywhere in any frame, including debris and signage.
+- Every light source visible or implied; Essence glow always contained.
+- The six pillar images sit side by side as one set.
+- No two characters share a face.
+- Every file at its exact manifest path, landscape, >=1600 px wide.
+- Nothing that would read as another franchise's fantasy.
+
+Then re-run the audit so the manifest updates itself:
+  pnpm --filter @habitat/web exec tsx scripts/audit-character-bible.ts --write-art-manifest
+A clean run reports "41 of 41 have key art; 0 slots are empty" and the
+manifest lists nothing. Deliver: the audit output plus a one-line-per-image
+ledger of what each frame depicts. Do not write to the codex, the database,
+or any file other than the 41 image paths and your ledger.

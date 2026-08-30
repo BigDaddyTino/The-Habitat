@@ -1,3 +1,5 @@
+import { storyDamageTypes, storyDamageTypeLabels, type StoryDamageType } from "@habitat/shared";
+
 /**
  * The Adaptive Mutation ladder: Bloomfall's one escalation rule.
  *
@@ -13,16 +15,17 @@
  * looks like, what falls off the corpse. See `bloomfall-creature-field-guide`.
  */
 
-export const bloomfallDamageTypes = ["PHYSICAL", "FIRE", "ELECTRICAL", "ARCANE", "TOXIC"] as const;
-export type BloomfallDamageType = (typeof bloomfallDamageTypes)[number];
-
-export const bloomfallDamageTypeLabels: Record<BloomfallDamageType, string> = {
-  PHYSICAL: "Physical",
-  FIRE: "Fire",
-  ELECTRICAL: "Electrical",
-  ARCANE: "Arcane",
-  TOXIC: "Toxic",
-};
+/**
+ * The five damage types are the GAME’s taxonomy now, not the region’s.
+ *
+ * They were written here first because Bloomfall was the region with the most
+ * writing, and the character bible then resolved every weapon, ward, plate and
+ * licence class onto the same five. Re-exported rather than redefined so the
+ * region and the game can never drift apart.
+ */
+export const bloomfallDamageTypes = storyDamageTypes;
+export type BloomfallDamageType = StoryDamageType;
+export const bloomfallDamageTypeLabels = storyDamageTypeLabels;
 
 export const bloomfallMutationRungs = ["NONE", "MINOR", "FUNCTIONAL", "ADVANCED", "ABERRANT"] as const;
 export type BloomfallMutationRung = (typeof bloomfallMutationRungs)[number];

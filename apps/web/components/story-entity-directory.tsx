@@ -229,7 +229,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <p>{collection.description}</p>
           <div className="entity-directory-actions">
             <a className="primary-link" href="#new-entry"><Plus aria-hidden="true" size={14} /> Add {collection.singular}</a>
-            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent races` : isFactionsLibrary && !search ? "Nobody holds this peninsula alone" : `${entries.length} in the Codex`}</span>
+            <span>{isRacesLibrary && !search ? `${orderedEntries.length} parent species` : isFactionsLibrary && !search ? "Nobody holds this peninsula alone" : `${entries.length} in the Codex`}</span>
           </div>
         </div>
         {collection.kind === "CHARACTER" ? <div className="casting-strip" aria-label="Available in-game model previews">{castingImages.map((image) => <img alt="" key={image.ref} src={`/model-gallery/${image.image}`} />)}<span>{modelGalleryImages.length} models ready to cast</span></div> : null}
@@ -440,7 +440,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                     ].filter(Boolean).join(" · ")
                   : entry.kind === "CREATURE"
                     ? [
-                        typeof meta.parent === "string" && meta.parent ? `one of the ${systemTitles.get(meta.parent) ?? String(meta.parent).replaceAll("-", " ")}` : "a race",
+                        typeof meta.parent === "string" && meta.parent ? `one of the ${systemTitles.get(meta.parent) ?? String(meta.parent).replaceAll("-", " ")}` : "a species",
                         meta.category,
                       ].filter(Boolean).join(" · ")
                   : entry.kind === "COMPANION_MISSION"
@@ -484,7 +484,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
 
       <details className="entity-create-panel" id="new-entry" open={(entries.length === 0 && !search) || Boolean(addingInside) || Boolean(placeKind)}>
         <summary><Plus aria-hidden="true" size={15} /><span>
-          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : isRacesLibrary ? (addingInside ? `Add one of the ${addingInside.title}` : "Add a race, or something that belongs to one") : isFactionsLibrary ? (addingInside ? `Add a wing of ${addingInside.title}` : "Add a power, or a wing of one") : `Add a new ${collection.singular}`}</strong>
+          <strong>{isRegionLibrary ? (addingInside ? `Add a place inside ${addingInside.title}` : "Add a place") : isSystemsLibrary && addingInside ? `Add a system inside ${addingInside.title}` : isRacesLibrary ? (addingInside ? `Add one of the ${addingInside.title}` : "Add a species, or something that belongs to one") : isFactionsLibrary ? (addingInside ? `Add a wing of ${addingInside.title}` : "Add a power, or a wing of one") : `Add a new ${collection.singular}`}</strong>
           <small>{isRegionLibrary ? "A point of interest, a settlement, a zone, or a whole region — say where it sits and it files itself." : "Start with the pitch. The full visual sheet opens next."}</small>
         </span></summary>
         <form action={createEntry} className="story-form">
@@ -507,8 +507,8 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             <option value="">No one above it — major or deliberately independent</option>
             {factionBanners.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
-          {isRacesLibrary ? <label>Which race it belongs to<select defaultValue={addingInside?.slug ?? ""} name="parent">
-            <option value="">Nothing above it — this IS a new race</option>
+          {isRacesLibrary ? <label>Which species it belongs to<select defaultValue={addingInside?.slug ?? ""} name="parent">
+            <option value="">Nothing above it — this IS a new species</option>
             {raceParents.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
           </select></label> : null}
           {collection.kind === "CHARACTER" ? <>
@@ -516,12 +516,12 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
               <option value="">Not decided yet</option>
               {peoplesByRace.map(({ race, peoples }) => (
                 <optgroup key={race.slug} label={race.title}>
-                  <option value={race.slug}>{race.title} — the race itself</option>
+                  <option value={race.slug}>{race.title} — the species itself</option>
                   {peoples.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}
                 </optgroup>
               ))}
             </select>
-            <small className="sheet-hint">Their race’s dossier will list them back. You can write something more complicated on the sheet later.</small></label> : null}
+            <small className="sheet-hint">Their species’ dossier will list them back. You can write something more complicated on the sheet later.</small></label> : null}
             <label>Where do they call home?<select defaultValue="" name="home">
               <option value="">Not decided yet</option>
               {regionsForPickers.map((option) => <option key={option.slug} value={option.slug}>{option.title}</option>)}

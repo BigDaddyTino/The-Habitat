@@ -17,7 +17,8 @@ import { metaSchemasByKind } from "./story-meta-schemas";
 const character = {
   fullName: null, aliases: [], pronouns: null, sex: null, species: null, age: null, appearance: null, voice: null,
   magic: { origin: null, schools: [], corruptionPhase: null, notes: null },
-  factions: [], home: null, status: { known: null, actual: null }, relationships: [], storyRole: null,
+  factions: [], home: null, status: { known: null, actual: null }, relationships: [],
+  background: null, professions: [], skills: [], cybernetics: [], storyRole: null,
   involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [],
 };
 

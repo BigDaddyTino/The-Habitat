@@ -56,6 +56,10 @@ Her whole story — the family she built with Tino, the night everything broke, 
     relationships: [
       { character: "tino", who: null, type: "former partner — they built a life and had two children; she believes he abandoned the family, and does not know whether she wants to embrace him or kill him. Probably both." },
     ],
+    background: null,
+    professions: [],
+    skills: [],
+    cybernetics: [],
     storyRole:
       "Companion recruited in the Peninsula whose personal arc quietly carries the campaign's emotional spine: her missions reconstruct the Amanda/Tino family, reverse everything she believed about his disappearance, and end at the Soul Forge of his containment cell.",
     involvement: [],

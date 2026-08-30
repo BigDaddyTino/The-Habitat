@@ -35,13 +35,13 @@ export const storyCollections = {
     placeholder: "The Sunken Reach",
     summaryPlaceholder: "What makes this place matter to the story?",
   },
-  races: {
+  species: {
     kind: "CREATURE",
-    label: "Races",
-    singular: "race",
-    eyebrow: "The parent races",
-    title: "Choose a race to see what belongs beneath it",
-    description: "This landing page shows parent races only. Open one to see its children: Mythical holds the exceptionally rare Lizzarnix, Beasts holds the Hippogriff, and Humanoid holds Human.",
+    label: "Species",
+    singular: "species",
+    eyebrow: "The parent species",
+    title: "Choose a species to see what belongs beneath it",
+    description: "This landing page shows parent species only. Open one to see its children: Mythical holds the exceptionally rare Lizzarnix, Beasts holds the Hypogriff, and Humanoid holds Human, the Returnees, the Carriers, the Chartered, the Unregistered and the Latent.",
     hero: "/images/story-codex-archive.webp",
     placeholder: "Glasswing Manticore",
     summaryPlaceholder: "What is it, where does it live, and why does it matter?",
@@ -140,7 +140,10 @@ export function isStoryCollectionSlug(value: string): value is StoryCollectionSl
 export const renamedStoryCollections: Record<string, StoryCollectionSlug> = {
   // Renamed 2026-08-20: the bestiary became the races library when creatures
   // gained the race they belong to.
-  creatures: "races",
+  creatures: "species",
+  // Renamed 2026-08-30 by the character bible: near-future world, near-future
+  // words. A people is a species; nothing in this setting says race.
+  races: "species",
 };
 
 export function collectionForKind(kind: StoryEntryKind): StoryCollectionSlug | null {

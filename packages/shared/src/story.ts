@@ -541,6 +541,38 @@ export type StoryExportEntry = {
 /** Magic origins, mirroring the game's Magic.Origin.* tags. */
 export const storyMagicOrigins = ["none", "born", "infused", "gifted"] as const;
 
+/**
+ * The five damage types, promoted from Bloomfall's constants to the game's.
+ *
+ * They were written for one region's creature ladder and turned out to be the
+ * whole taxonomy: every weapon, ward, plate and licence class in the character
+ * bible resolves to one of these five, and there is deliberately no COLD among
+ * them — Cryogenic deals PHYSICAL, because its signature is *vitrify, then
+ * strike*. It is the pillar that does not hurt you until something else does.
+ *
+ * `bloomfall-adaptive-ladder` re-exports this list rather than keeping its own,
+ * so the region and the game can never drift apart.
+ */
+export const storyDamageTypes = ["PHYSICAL", "FIRE", "ELECTRICAL", "ARCANE", "TOXIC"] as const;
+export type StoryDamageType = (typeof storyDamageTypes)[number];
+
+export const storyDamageTypeLabels: Record<StoryDamageType, string> = {
+  PHYSICAL: "Physical",
+  FIRE: "Fire",
+  ELECTRICAL: "Electrical",
+  ARCANE: "Arcane",
+  TOXIC: "Toxic",
+};
+
+/** What each type argues with a plate about — the one line a writer needs. */
+export const storyDamageTypeNotes: Record<StoryDamageType, string> = {
+  PHYSICAL: "The plate game. A plate absorbs one hit and is gone; the next round finds the hole.",
+  FIRE: "Ignores half a plate, and a fire-warded plate ignores it back. Doses cook off, and a leaking rig is a fuse.",
+  ELECTRICAL: "Through the plate to whatever conducts. Vents rigs and augments, and leaves nothing visible — the most deniable damage there is.",
+  ARCANE: "Ignores the plate entirely. Leaves a scar that reads as itself, so anyone who walks past later knows a spell was here.",
+  TOXIC: "Does not care about the plate; it cares about the air. A clock that resilience resists and an antitoxin stops.",
+};
+
 // ---------------------------------------------------------------------------
 // The seven phases of corruption
 // ---------------------------------------------------------------------------
@@ -726,6 +758,21 @@ export type StoryCharacterMeta = {
     actual: string | null;
   };
   relationships: Array<{ character: string | null; who: string | null; type: string | null }>;
+  /**
+   * The four character-bible ledgers a sheet had no place for.
+   *
+   * All four are free text rather than slugs, and deliberately so: a
+   * background, a trade rung, a skill rank and a fitted augment are all
+   * *positions inside* a system dossier rather than entries of their own, and
+   * a slug-typed field whose target can never exist is a link that
+   * structurally cannot come true. Write them the way the world writes them —
+   * "Contract Security", "Medicine · licensed", "Trauma · Expert",
+   * "Limb — Union shop, financed" — and the prose stays primary.
+   */
+  background: string | null;
+  professions: string[];
+  skills: string[];
+  cybernetics: string[];
   storyRole: string | null;
   /** Quest arcs and world events this character is part of. `kind` says which
    *  namespace `ref` lives in; an ARC row resolves against StoryArc, an EVENT

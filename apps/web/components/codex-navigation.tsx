@@ -9,7 +9,7 @@ const destinations = [
   { href: "/codex/library/characters", label: "Characters", icon: UsersRound },
   { href: "/codex/library/factions", label: "Factions", icon: Shield },
   { href: "/codex/library/regions", label: "Regions", icon: Map },
-  { href: "/codex/library/races", label: "Races", icon: Castle },
+  { href: "/codex/library/species", label: "Species", icon: Castle },
   { href: "/codex/library/systems", label: "Systems", icon: Cog },
   { href: "/codex/timeline", label: "Timeline", icon: History },
   { href: "/codex/bible", label: "All lore", icon: BookOpen },

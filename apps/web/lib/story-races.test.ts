@@ -10,13 +10,14 @@ import { isStoryCollectionSlug, renamedStoryCollections, storyCollections } from
 import { storyProseLinks } from "./story-prose";
 
 test("the races shelf replaced the bestiary, and the old address still answers", () => {
-  assert.ok(isStoryCollectionSlug("races"), "the races shelf must exist");
-  assert.equal(storyCollections.races.kind, "CREATURE");
-  assert.equal(storyCollections.races.label, "Races");
+  assert.ok(isStoryCollectionSlug("species"), "the species shelf must exist");
+  assert.equal(storyCollections.species.kind, "CREATURE");
+  assert.equal(storyCollections.species.label, "Species");
   // The rename must not strand anything: "creatures" is gone as a shelf but
   // still resolves, because links to it were written by hand all over.
   assert.equal(isStoryCollectionSlug("creatures"), false, "the old shelf must be gone");
-  assert.equal(renamedStoryCollections.creatures, "races", "the old address must still redirect");
+  assert.equal(renamedStoryCollections.creatures, "species", "the oldest address must still redirect");
+  assert.equal(renamedStoryCollections.races, "species", "the races address must still redirect after the rename");
   const page = readFileSync(join(process.cwd(), "app/codex/library/[collection]/page.tsx"), "utf8");
   assert.match(page, /renamedStoryCollections\[collection\]/, "the library page must honour renamed shelves");
   assert.match(page, /redirect\(`\/codex\/library\/\$\{renamed\}`\)/, "a renamed shelf must redirect rather than 404");
@@ -120,7 +121,7 @@ test("a character's people is a real edge, in both directions", () => {
   // Human dossier listed none of them: the shelf existed, and nothing in the
   // world pointed into it.
   const codex = readFileSync(join(process.cwd(), "lib/story-codex.ts"), "utf8");
-  assert.match(codex, /if \(referencesSlug\(meta\.species\)\) add\("is one of this race"\)/, "a race must list the people who are one");
+  assert.match(codex, /if \(referencesSlug\(meta\.species\)\) add\("is one of this species"\)/, "a species must list the people who are one");
   // And the outbound half, so a character whose only tie is their people is
   // not reported as unconnected.
   assert.match(codex, /meta\.origin, meta\.companion, meta\.species\]/, "species must count as an outbound reference");
@@ -154,7 +155,7 @@ test("the sheet and the create form both offer the whole shelf, not just the umb
   // of the race Humanoid. A picker that only offered top-level races would
   // lose exactly the distinction the parent-child shelf was built to make.
   const sheets = readFileSync(join(process.cwd(), "components/story-entry-sheets.tsx"), "utf8");
-  assert.match(sheets, /<label>Race — their people<input aria-label="Race" list=\{raceListId\}/, "the character sheet must offer the shelf");
+  assert.match(sheets, /<label>Species — their people<input aria-label="Species" list=\{raceListId\}/, "the character sheet must offer the shelf");
   const directory = readFileSync(join(process.cwd(), "components/story-entity-directory.tsx"), "utf8");
   assert.match(directory, /<optgroup key=\{race\.slug\} label=\{race\.title\}>/, "the create form groups peoples under their race");
   assert.match(directory, /name="species"/, "a character is born knowing their people");

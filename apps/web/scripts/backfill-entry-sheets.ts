@@ -33,6 +33,7 @@ const emptySheets: Record<string, Record<string, unknown>> = {
     appearance: null, voice: null,
     magic: { origin: null, schools: [], corruptionPhase: null, notes: null },
     factions: [], home: null, status: { known: null, actual: null }, relationships: [],
+    background: null, professions: [], skills: [], cybernetics: [],
     storyRole: null, involvement: [], gameId: null, model: null,
     companion: { capable: null, availability: null, status: null }, openQuestions: [],
   },
