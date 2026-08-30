@@ -166,28 +166,52 @@ const skills = `Twenty skills, five ranks, and sixty techniques — and every te
 
 ## Designed
 
-**The sixty techniques.** Three to a skill, and each one is a named move rather than a number.
+### The ladder
 
-- **Marksmanship** — Steady Breath, Double Tap, *Called Shot*: name the plate, and the round finds the hole.
-- **Close Quarters** — Doorway, Disarm, *Three Seconds*: the fight ends in the three seconds before it starts.
-- **Demolition** — Shaped Charge, Load Path, *Controlled Collapse*: choose where it lands, and on whom.
-- **Suppression** — Walk the Fire, Danger Close, *Battery Voice*: the fire mission arrives a round early, because the guns know your name.
-- **Infiltration** — Unhurried, Second Entry, *Blind Spot*: you know where the lattice cannot see, and you are standing in it.
-- **Traversal** — Carry, Rooftop, *Rider's Eye*: read a route from above, the way a thing that flies would.
-- **Navigation** — Dead Reckoning, Sign, *Agreement*: a route is a recent agreement with the ground, so you find the crossing that moved.
-- **Survival Craft** — Dry Fire, Clean Water, *Marsh Sense*: predict a coordinated response before the instruments confirm it.
-- **Systems** — Readout, Terminology, *Interlock*: reverse an isolation command that was meant to be final.
-- **Bypass** — Quiet Lock, Ward Seam, *Credential*: a paper that works exactly once, anywhere.
-- **Rig Maintenance** — Tighten, Honest Read, *Overrun*: push a rig past service once, safely, knowing you will never do it twice.
-- **Diagnostics** — Glance, Two Phases Early, *The Recruit's Question*: see what an implant is really for, and who it reports to.
-- **Negotiation** — Terms, What They'll Take, *Close*: a contract that holds afterwards, because both sides think they won.
-- **Interrogation** — Silence, Tell, *Demonstration*: you will not enjoy learning this, and they will not enjoy you knowing it.
-- **Deception** — Cover, Paper, *One Signature*: the mark that has kept born casters alive for twenty years.
-- **Command** — Rally, Triage, *Written Defeat*: fall back with the line intact, after the horn. Canon's law is that defeat is written, never reloaded.
-- **Channelling** — Envelope, Sustain, *Edge*: run at overcharge without crossing, for as long as your nerve holds.
-- **Trauma** — Pressure, Four Minutes, *Field Surgery*: the thing that needed a table, done on the ground, while it is still being shot at.
-- **Fabrication** — Patch, True, *History*: a piece good enough to be named, and to be taken.
-- **Handling** — Calm, Sample, *Rung Read*: an animal's state on sight, and what your own party did to put it there.
+- **Green** — untrained.
+- **Practised** — earned by use under pressure; grants the first technique, self-taught.
+- **Reliable** — the skill stops failing at the moment it matters.
+- **Expert** — as far as practice alone carries anybody; grants the second technique, taught by any competent practitioner.
+- **Ceiling** — a hard wall only a person can lift; grants the third technique, and the relationship it cost.
+
+### The sixty techniques
+
+Three to a skill, and each one is a named move rather than a number. The ceiling technique is marked, with the one person who teaches it.
+
+**Combat**
+
+- **Marksmanship** — Steady Breath · Double Tap · Ceiling: *Called Shot* — name the plate, and the round finds the hole. Teacher: [[the-range-instructor]].
+- **Close Quarters** — Doorway · Disarm · Ceiling: *Three Seconds* — the fight ends in the three seconds before it starts. Teacher: [[the-drill-master]].
+- **Demolition** — Shaped Charge · Load Path · Ceiling: *Controlled Collapse* — choose where it lands, and on whom. Teacher: [[the-blast-foreman]].
+- **Suppression** — Walk the Fire · Danger Close · Ceiling: *Battery Voice* — the fire mission arrives a round early, because the guns know your name. Teacher: [[the-tempest-battery-officer]].
+
+**Field**
+
+- **Infiltration** — Unhurried · Second Entry · Ceiling: *Blind Spot* — you know where the lattice cannot see, and you are standing in it. Teacher: [[the-bureau-analyst]].
+- **Traversal** — Carry · Rooftop · Ceiling: *Rider's Eye* — read a route from above, the way a thing that flies would. Teacher: [[the-captured-rider]].
+- **Navigation** — Dead Reckoning · Sign · Ceiling: *Agreement* — a route is a recent agreement with the ground, so you find the crossing that moved. Teacher: [[mara-quill]].
+- **Survival Craft** — Dry Fire · Clean Water · Ceiling: *Marsh Sense* — predict a coordinated response before the instruments confirm it. Teacher: [[nalia-reed]].
+
+**Technical**
+
+- **Systems** — Readout · Terminology · Ceiling: *Interlock* — reverse an isolation command that was meant to be final. Teacher: [[tomas-vey]].
+- **Bypass** — Quiet Lock · Ward Seam · Ceiling: *Credential* — a paper that works exactly once, anywhere. Teacher: [[the-ashline-fixer]].
+- **Rig Maintenance** — Tighten · Honest Read · Ceiling: *Overrun* — push a rig past service once, safely, knowing you will never do it twice. Teacher: [[the-infuser-tech]].
+- **Diagnostics** — Glance · Two Phases Early · Ceiling: *The Recruit's Question* — see what an implant is really for, and who it reports to. Teacher: [[the-clinic-surgeon]].
+
+**Social**
+
+- **Negotiation** — Terms · What They'll Take · Ceiling: *Close* — a contract that holds afterwards, because both sides think they won. Teacher: [[jaro-fen]].
+- **Interrogation** — Silence · Tell · Ceiling: *Demonstration* — you will not enjoy learning this, and they will not enjoy you knowing it. Teacher: [[the-asis-officer]].
+- **Deception** — Cover · Paper · Ceiling: *One Signature* — the mark that has kept born casters alive for twenty years. Teacher: [[the-paper-hand]].
+- **Command** — Rally · Triage · Ceiling: *Written Defeat* — fall back with the line intact, after the horn. Canon's law is that defeat is written, never reloaded. Teacher: [[the-kestrel-commander]].
+
+**Applied**
+
+- **Channelling** — Envelope · Sustain · Ceiling: *Edge* — run at overcharge without crossing, for as long as your nerve holds. Teacher: a hidden Concordance elder.
+- **Trauma** — Pressure · Four Minutes · Ceiling: *Field Surgery* — the thing that needed a table, done on the ground, while it is still being shot at. Teacher: [[the-kestrel-medic]].
+- **Fabrication** — Patch · True · Ceiling: *History* — a piece good enough to be named, and to be taken. Teacher: [[the-foundry-master]].
+- **Handling** — Calm · Sample · Ceiling: *Rung Read* — an animal's state on sight, and what your own party did to put it there. Teacher: [[keira-ansel]].
 
 **Who lifts each ceiling.** Six teachers already exist in the codex: [[mara-quill]] for Navigation, [[nalia-reed]] for Survival Craft, [[tomas-vey]] for Systems, [[jaro-fen]] for Negotiation, [[keira-ansel]] for Handling, and [[the-kestrel-commander]] for Command. Twelve more are written as [[the-range-instructor]], [[the-drill-master]], [[the-blast-foreman]], [[the-tempest-battery-officer]], [[the-bureau-analyst]], [[the-captured-rider]], [[the-ashline-fixer]], [[the-infuser-tech]], [[the-clinic-surgeon]], [[the-asis-officer]], [[the-paper-hand]], and [[the-foundry-master]] — each with a home that is either written or openly a placeholder, because the codex is still growing and a teacher can move to the region that eventually deserves them. Channelling's ceiling is a hidden Concordance elder who stays deliberately unnamed, and Trauma's sits with [[the-kestrel-medic]], who lifts it herself.
 
@@ -207,17 +231,25 @@ This is a classification layer above the schools, not a new way to hold magic. [
 
 ## Designed
 
-**Three tiers.** Licensed opens two abilities; Certified opens a third; Master opens the signature. [[meridian-arcane-institute]] certifies Licensed for a fee and a record. Certified needs practice and a certified practitioner. Master needs a ceiling teacher and a licence review that will ask about your corruption phase.
+### The registry
 
-**Three classes, two pillars, one master.** A character holds at most three licence classes across at most two pillars, and masters exactly one. Disciplines are exclusive rather than additive: you cannot end the game holding all of them, and a respec bench does not exist anywhere in the world.
+- **[[thermodynamics]]** — Thermal · Cryogenic · Electrical · Radiant.
+- **[[kinetics]]** — Kinetic · Gravitic · Inertial · Ballistic.
+- **[[structure]]** — Containment · Tensile · Occlusive · Corrosive.
+- **[[biologics]]** — Regenerative · Morphic · Necrotic · Xenic · Bionic · Hematic.
+- **[[cognition]]** — Perceptual · Technomantic · Empathic · Memetic · Coercive.
+- **[[resonance]]** — Echoic · Translocative · Temporal · Reanimative.
 
-**The first class comes from origin.** Born — the bloodline sets the pillar, and the class declares itself under pressure, which is a scene. Gifted — the giver decides. Infused — chosen from a menu, which is a purchase. That difference is the whole texture of [[magic]] in one moment.
+Each class holds four abilities: two at Licensed, a third at Certified, and the signature at Master. The full rosters are on the six pillar dossiers.
 
-**Instant or channelled is a property of the ability, never of the pillar.** A channelled cast is a commit window nobody can shoot through, and Coordination decides whether it survives being jostled.
+### The rules
 
-**Cost by tier:** 2 · 4 · 8 units of a born caster's pool, or 1 · 2 · 4 charges on an infused rig. A level-8 born caster casts a master ability twice and then sleeps. A rig with two doses casts it twice and goes dark.
-
-**Overcharge** doubles the cost for more effect, and on a bad outcome it fails in the pillar's own way — the six failure modes are on the six children's dossiers. It is chosen anywhere, and it is ambient in [[bloomfall-reach]] whether anyone asked for it or not. Channelling's *Edge* technique is how a master runs at the line without crossing it.
+- **Three tiers.** Licensed opens two abilities; Certified opens a third; Master opens the signature. [[meridian-arcane-institute]] certifies Licensed for a fee and a record. Certified needs practice and a certified practitioner. Master needs a ceiling teacher and a licence review that will ask about your corruption phase.
+- **Three classes, two pillars, one master.** A character holds at most three licence classes across at most two pillars, and masters exactly one. Disciplines are exclusive rather than additive: you cannot end the game holding all of them, and a respec bench does not exist anywhere in the world.
+- **The first class comes from origin.** Born — the bloodline sets the pillar, and the class declares itself under pressure, which is a scene. Gifted — the giver decides. Infused — chosen from a menu, which is a purchase. That difference is the whole texture of [[magic]] in one moment.
+- **Instant or channelled is a property of the ability, never of the pillar.** A channelled cast is a commit window nobody can shoot through, and Coordination decides whether it survives being jostled.
+- **Cost by tier:** 2 · 4 · 8 units of a born caster's pool, or 1 · 2 · 4 charges on an infused rig. A level-8 born caster casts a master ability twice and then sleeps. A rig with two doses casts it twice and goes dark.
+- **Overcharge** doubles the cost for more effect, and on a bad outcome it fails in the pillar's own way — the six failure modes are on the six children's dossiers. It is chosen anywhere, and it is ambient in [[bloomfall-reach]] whether anyone asked for it or not. Channelling's *Edge* technique is how a master runs at the line without crossing it.
 
 **Unlicensed practice is a crime.** [[concordance-of-natural-casters]] hides the born, [[drone-surveillance-bureau]] logs everyone else, and [[abomination-containment-authority]] collects anyone who reaches phase 6. Every born caster begins the game as an unlicensed practitioner, which is why the prologue is where that quietly becomes somebody's business.
 
@@ -251,17 +283,41 @@ const thermodynamics = `Energy moved from where it is to where somebody wants it
 
 ## Designed
 
-**Thermal** — Ignition, a thing lit at distance with no visible source · Warmth, a squad's hands kept working in the cold · **Flashover**, a room's air igniting at once, doors first · Master: **Sublimation**, skipping the liquid phase, so a body goes to steam inside armour that stays sealed.
+### Thermal
 
-**Cryogenic** — Freeze the Ground · Cold Store, which keeps a body, a sample or a dose · **Brittle**, taking a plate or a limb past brittleness so the next hit shatters it · Master: **Vitrify** — glass bows before it breaks, which is canon's arcane scar, on anything you like.
+- **Licensed · Ignition** — a thing lit at distance with no visible source.
+- **Licensed · Warmth** — a squad's hands kept working in the cold.
+- **Certified · Flashover** — a room's air igniting at once, doors first.
+- **Master · Sublimation** — skipping the liquid phase, so a body goes to steam inside armour that stays sealed.
 
-**Electrical** — Kill the Circuit, holding doors, cameras and ignition off · Jump, starting a dead machine once · **Ground**, deciding what is grounded, spine included · Master: **Conduction**, in which every conductor in the room becomes one circuit and you close it.
+### Cryogenic
 
-**Radiant** — Overexpose · Dark Flash, a signal only your squad sees · **Bleach**, light delivered as a dose, with nothing looking damaged for six hours · Master: **Noon**, no shadow anywhere in the volume, so nothing Occlusive works and nothing hides.
+- **Licensed · Freeze the Ground** — footing and routes, denied.
+- **Licensed · Cold Store** — keeps a body, a sample or a dose.
+- **Certified · Brittle** — taking a plate or a limb past brittleness so the next hit shatters it.
+- **Master · Vitrify** — glass bows before it breaks, which is canon's arcane scar, on anything you like.
 
-**Pushed.** Overcharge Ignition and what lit was your sleeve. Overcharge Warmth and the hands keep working while the skin does not. Flashover includes the room you are standing in. Sublimation is beautiful inside sealed armour, and you are wearing some. Freeze the Ground takes the road with it, for a season, and [[persistent-damage]] keeps it. Cold Store keeps your hand. Brittle finds your own plate first. Vitrify bows the glass in your optics. Kill the Circuit kills yours — augments vent, rig goes dark. Jump starts it and does not stop it. Ground makes you the ground. Conduction closes the circuit with your spine. Overexpose blinds you for a minute; Dark Flash is seen by the enemy's optics too; Bleach lands its dose on the nearest skin, which is the caster's; Noon leaves no cover for either side.
+### Electrical
 
-**Counterplay.** Wet ground, Cryogenic, and a Containment Seal between you and it. Shoot the rig — a leaking dose ignites. Against Cryogenic: Thermal, movement, and Inertial Brace for footing. Against Electrical: unplug, so there is no augment and no rig to vent, and stand on a gridcore ground line. Against Radiant: eyes closed on the call, Occlusive Dim, or smoke.
+- **Licensed · Kill the Circuit** — holding doors, cameras and ignition off.
+- **Licensed · Jump** — starting a dead machine once.
+- **Certified · Ground** — deciding what is grounded, spine included.
+- **Master · Conduction** — every conductor in the room becomes one circuit and you close it.
+
+### Radiant
+
+- **Licensed · Overexpose** — light where eyes were.
+- **Licensed · Dark Flash** — a signal only your squad sees.
+- **Certified · Bleach** — light delivered as a dose, with nothing looking damaged for six hours.
+- **Master · Noon** — no shadow anywhere in the volume, so nothing Occlusive works and nothing hides.
+
+### When a cast is pushed
+
+Overcharge Ignition and what lit was your sleeve. Overcharge Warmth and the hands keep working while the skin does not. Flashover includes the room you are standing in. Sublimation is beautiful inside sealed armour, and you are wearing some. Freeze the Ground takes the road with it, for a season, and [[persistent-damage]] keeps it. Cold Store keeps your hand. Brittle finds your own plate first. Vitrify bows the glass in your optics. Kill the Circuit kills yours — augments vent, rig goes dark. Jump starts it and does not stop it. Ground makes you the ground. Conduction closes the circuit with your spine. Overexpose blinds you for a minute; Dark Flash is seen by the enemy's optics too; Bleach lands its dose on the nearest skin, which is the caster's; Noon leaves no cover for either side.
+
+### Counterplay
+
+Wet ground, Cryogenic, and a Containment Seal between you and it. Shoot the rig — a leaking dose ignites. Against Cryogenic: Thermal, movement, and Inertial Brace for footing. Against Electrical: unplug, so there is no augment and no rig to vent, and stand on a gridcore ground line. Against Radiant: eyes closed on the call, Occlusive Dim, or smoke.
 
 **How the pillar fails:** it does not stop at the target. Everything wet within reach changes state at once, including whoever is holding on to you.`;
 
@@ -275,17 +331,41 @@ const kinetics = `Momentum and weight, borrowed briefly. The pillar that changed
 
 ## Designed
 
-**Kinetic** — Shove · Catch, stopping one thrown thing · **Arrest**, a round caught in flight and held · Master: **Return**, held momentum sent back to whoever fired it, at speed, starting from inside them.
+### Kinetic
 
-**Gravitic** — Lighten, which is every salvage crew's first hire · Weight · **Plumb**, in which down is now that way and a stairwell becomes a well · Master: **Well**, a volume where everything falls toward one point and stays. It persists after you leave.
+- **Licensed · Shove** — force, applied.
+- **Licensed · Catch** — stopping one thrown thing.
+- **Certified · Arrest** — a round caught in flight and held.
+- **Master · Return** — held momentum sent back to whoever fired it, at speed, starting from inside them.
 
-**Inertial** — Brace, so you do not get moved by blast, current or anybody bigger · Set · **Anchor**, stopping a moving vehicle, badly · Master: **Stillpoint**, where nothing in the volume moves that you did not move.
+### Gravitic
 
-**Ballistic** — Correct · Carry, one more decision for something already thrown · **Curve**, a round around a corner · Master: **Convoy**, in which every round in the air goes where you are looking.
+- **Licensed · Lighten** — which is every salvage crew's first hire.
+- **Licensed · Weight** — the reverse.
+- **Certified · Plumb** — down is now that way, and a stairwell becomes a well.
+- **Master · Well** — a volume where everything falls toward one point and stays. It persists after you leave.
 
-**Pushed.** Shove puts him through the wall and you through the opposite one. Catch means you caught it and cannot let go. Arrest leaves the round travelling, in your hand. Return arrives from inside the wrong person. Lighten lifts the load, then the crew. Weight finds your own boots. Plumb points down at you first. A failed Well will not close, and the locals route around it for forty years. Brace means you cannot move either; Anchor stops the vehicle and not its cargo; Stillpoint includes you. Correct corrects onto the nearest warm thing, Carry lets the round decide, Curve comes back around the corner, and Convoy sends every round where you looked — which was at your medic.
+### Inertial
 
-**Counterplay.** Stormglass rounds, because an Arrested crystal round is unstable and detonates in the hand. Blades, because nothing is in flight to catch. Inertial Brace and anchor lines against Gravitic, and distance, since Gravitic is short-ranged by design. Against Inertial, wait — every master ability in it is channelled — or hit the channel and make them pass a Coordination check. Against Ballistic, a Containment Seal, Occlusive Fade to break the look, or simply not being where they are looking.
+- **Licensed · Brace** — so you do not get moved by blast, current or anybody bigger.
+- **Licensed · Set** — a thing fixed where it is.
+- **Certified · Anchor** — stopping a moving vehicle, badly.
+- **Master · Stillpoint** — nothing in the volume moves that you did not move.
+
+### Ballistic
+
+- **Licensed · Correct** — a shot, adjusted after firing.
+- **Licensed · Carry** — one more decision for something already thrown.
+- **Certified · Curve** — a round around a corner.
+- **Master · Convoy** — every round in the air goes where you are looking.
+
+### When a cast is pushed
+
+Shove puts him through the wall and you through the opposite one. Catch means you caught it and cannot let go. Arrest leaves the round travelling, in your hand. Return arrives from inside the wrong person. Lighten lifts the load, then the crew. Weight finds your own boots. Plumb points down at you first. A failed Well will not close, and the locals route around it for forty years. Brace means you cannot move either; Anchor stops the vehicle and not its cargo; Stillpoint includes you. Correct corrects onto the nearest warm thing, Carry lets the round decide, Curve comes back around the corner, and Convoy sends every round where you looked — which was at your medic.
+
+### Counterplay
+
+Stormglass rounds, because an Arrested crystal round is unstable and detonates in the hand. Blades, because nothing is in flight to catch. Inertial Brace and anchor lines against Gravitic, and distance, since Gravitic is short-ranged by design. Against Inertial, wait — every master ability in it is channelled — or hit the channel and make them pass a Coordination check. Against Ballistic, a Containment Seal, Occlusive Fade to break the look, or simply not being where they are looking.
 
 **How the pillar fails:** what you take, you keep. Held force spends itself within seconds, and if you do not choose a target it chooses you.`;
 
@@ -299,17 +379,41 @@ const structure = `Matter and boundaries — what holds together, what comes apa
 
 ## Designed
 
-**Containment** — Seal, a doorway or hull that holds as long as you do · Hold · **Quiet**, no sound leaving · Master: **Muzzle**, where nothing leaves at all: not light, not sound, not blood, not air if you are careless.
+### Containment
 
-**Tensile** — Patch, a field repair with no bench · Set, matter holding a shape while you keep telling it · **Brace**, a wall that gains capacity [[structural-integrity]] can read · Master: **Frame**, a structure built from what is lying there, standing while you stand.
+- **Licensed · Seal** — a doorway or hull that holds as long as you do.
+- **Licensed · Hold** — a thing kept where it is.
+- **Certified · Quiet** — no sound leaving.
+- **Master · Muzzle** — nothing leaves at all: not light, not sound, not blood, not air if you are careless.
 
-**Occlusive** — Dim, killing the light without touching the source · Fade · **Shroud**, so a squad casts nothing and no ward keys on them · Master: **Umbra**, in which you are not there to be warded against.
+### Tensile
 
-**Corrosive** — Open, a silent lock or weld · Etch · **Unbind**, a material that stops being one piece · Master: **Dissolution**, which removes the reason a structure is a structure, and brings it down the way it went up, reversed.
+- **Licensed · Patch** — a field repair with no bench.
+- **Licensed · Set** — matter holding a shape while you keep telling it.
+- **Certified · Brace** — a wall that gains capacity [[structural-integrity]] can read.
+- **Master · Frame** — a structure built from what is lying there, standing while you stand.
 
-**Pushed.** A failed Seal seals against you; Hold makes the jar the room; Quiet takes your own squad's voices; Muzzle takes the air. Patch closes over the wound as well; Set holds your shape; Brace braces the wall and not the floor; Frame stands while you stand, so you cannot sit down. Dim includes your optics; Fade fades you from your own squad; Shroud means the squad receives nothing either — no Empathic Anchor, no Warmth, no Close; and Umbra means you are not there to the Forge, briefly, so do not die inside it. Corrosive failures open the frame and the wall, put the mark in you, unbind your own plate, and reverse the construction of the floor you cast from.
+### Occlusive
 
-**Counterplay.** Corrosive Unbind against Containment, or simply waiting, since a seal holds only as long as its caster. Fire and Demolition's Load Path against Tensile. Radiant Noon, thermal optics, or an Empathic Read against Occlusive — feeling what cannot be seen. Tensile Brace, distance, and gridcore-framed structures against Corrosive.
+- **Licensed · Dim** — killing the light without touching the source.
+- **Licensed · Fade** — harder to see.
+- **Certified · Shroud** — a squad casts nothing and no ward keys on them.
+- **Master · Umbra** — you are not there to be warded against.
+
+### Corrosive
+
+- **Licensed · Open** — a silent lock or weld.
+- **Licensed · Etch** — a surface marked or weakened.
+- **Certified · Unbind** — a material that stops being one piece.
+- **Master · Dissolution** — removes the reason a structure is a structure, and brings it down the way it went up, reversed.
+
+### When a cast is pushed
+
+A failed Seal seals against you; Hold makes the jar the room; Quiet takes your own squad's voices; Muzzle takes the air. Patch closes over the wound as well; Set holds your shape; Brace braces the wall and not the floor; Frame stands while you stand, so you cannot sit down. Dim includes your optics; Fade fades you from your own squad; Shroud means the squad receives nothing either — no Empathic Anchor, no Warmth, no Close; and Umbra means you are not there to the Forge, briefly, so do not die inside it. Corrosive failures open the frame and the wall, put the mark in you, unbind your own plate, and reverse the construction of the floor you cast from.
+
+### Counterplay
+
+Corrosive Unbind against Containment, or simply waiting, since a seal holds only as long as its caster. Fire and Demolition's Load Path against Tensile. Radiant Noon, thermal optics, or an Empathic Read against Occlusive — feeling what cannot be seen. Tensile Brace, distance, and gridcore-framed structures against Corrosive.
 
 **How the pillar fails:** boundaries are symmetrical whether you intended them to be or not. People have died inside their own ward with the door standing open.`;
 
@@ -323,21 +427,55 @@ const biologics = `Living systems — repair, alteration, and the one child no s
 
 ## Designed
 
-**Regenerative** — Close, stopping a four-minute bleed · Knit · **Debridement**, a wound closed from elsewhere on the same body, where the donor site is the entire conversation · Master: **Rebuild**, a limb made from the patient's own mass, so somebody walks away lighter.
+### Regenerative
 
-**Morphic** — Adjust, an hour of grip or lungs or night sight · Wear, one trait from harvested material · **Graft**, a trait that holds a week with the Wardens signing the material · Master: **Assume**, a whole body's shape taken from what you killed, which comes off on schedule or does not.
+- **Licensed · Close** — stopping a four-minute bleed.
+- **Licensed · Knit** — tissue mended.
+- **Certified · Debridement** — a wound closed from elsewhere on the same body, where the donor site is the entire conversation.
+- **Master · Rebuild** — a limb made from the patient's own mass, so somebody walks away lighter.
 
-**Necrotic** — Spoil · Wither, a wound that will not close · **Hasten**, all the years a thing has not had, at once · Master: **Season**, a district's harvest gone. It is an economy weapon and everybody treats it as one.
+### Morphic
 
-**Xenic** — Calm · Provenance, telling you what a creature is, what it was, and in the Reach what drove its rung · **Herd**, changing a migration's next move · Master: **Bellwether**, where a region's animals read you as the signal — and the Reach already has [[the-bellwether]], which noticed.
+- **Licensed · Adjust** — an hour of grip or lungs or night sight.
+- **Licensed · Wear** — one trait from harvested material.
+- **Certified · Graft** — a trait that holds a week with the Wardens signing the material.
+- **Master · Assume** — a whole body's shape taken from what you killed, which comes off on schedule or does not.
 
-**Bionic** — Accept · Seat, hardware taking with no scar at the boundary · **Interface**, an implant answering to a body it was not built for, at which point Aegis's lawyers are informed · Master: **Conversion**, a body that is mostly hardware — and the Forge rebuilds only the meat, so you come back a fraction. That is [[cybernetic-ascendancy]]'s dream and its trap in one ability.
+### Necrotic
 
-**Hematic** — Staunch · Draw · **Levy**, every open wound in range, which opens none and distinguishes nobody · Master: **Transfusion**, one body's vitality into another. The Choir's loan, made literal.
+- **Licensed · Spoil** — supplies or a sample, ruined.
+- **Licensed · Wither** — a wound that will not close.
+- **Certified · Hasten** — all the years a thing has not had, at once.
+- **Master · Season** — a district's harvest gone. It is an economy weapon and everybody treats it as one.
 
-**Pushed.** Close closes the airway. Knit knits wrong, and permanently if you bind afterwards. Debridement chooses the donor site for you. Rebuild takes the limb from the surgeon. Adjust leaves the night sight and makes daylight the problem; Wear wears you; a failed Graft does not come off; Assume comes off on its own schedule, mid-crossing. Necrotic failures spoil your own supply, put the wound on the caster, land the years on the nearest living thing, and — at Season — take a district's harvest and its dead at once, which is when the Covenant calls. Xenic failures calm the caster, teach you what *you* are, route the migration through you, and make a region's animals read you as the signal. Bionic failures accept the toxin too, seat deeper than intended, hand the implant to somebody else, and at Conversion bring you back a fraction — and the fraction remembers. Hematic failures reopen with the next wound, draw from the caster's own, count the caster in the Levy, and call the loan.
+### Xenic
 
-**Counterplay.** Necrotic Wither and Hematic Levy against Regenerative, or simply targeting the medic, since a squad's regeneration is one person. Xenic Calm and the Wardens' tranquilliser doctrine against Morphic. Regenerative, Cold Store, and burning the vector against Necrotic. Noise against Xenic — it is not an attack, and the counter is being louder than the animal. ELECTRICAL vents Bionic, and an Aegis patent lockout kills an interface remotely, which is the Ascendancy's recurring nightmare. Against Hematic: do not bleed, seal the wound, or buy the Choir's debt off them, which is the only counter that ever ends it.
+- **Licensed · Calm** — an animal, settled.
+- **Licensed · Provenance** — what a creature is, what it was, and in the Reach what drove its rung.
+- **Certified · Herd** — changing a migration's next move.
+- **Master · Bellwether** — a region's animals read you as the signal — and the Reach already has [[the-bellwether]], which noticed.
+
+### Bionic
+
+- **Licensed · Accept** — a body takes hardware without rejection.
+- **Licensed · Seat** — hardware taking with no scar at the boundary.
+- **Certified · Interface** — an implant answering to a body it was not built for, at which point Aegis's lawyers are informed.
+- **Master · Conversion** — a body that is mostly hardware — and the Forge rebuilds only the meat, so you come back a fraction. That is [[cybernetic-ascendancy]]'s dream and its trap in one ability.
+
+### Hematic
+
+- **Licensed · Staunch** — bleeding stopped, anyone's.
+- **Licensed · Draw** — blood taken at range.
+- **Certified · Levy** — every open wound in range, which opens none and distinguishes nobody.
+- **Master · Transfusion** — one body's vitality into another. The Choir's loan, made literal.
+
+### When a cast is pushed
+
+Close closes the airway. Knit knits wrong, and permanently if you bind afterwards. Debridement chooses the donor site for you. Rebuild takes the limb from the surgeon. Adjust leaves the night sight and makes daylight the problem; Wear wears you; a failed Graft does not come off; Assume comes off on its own schedule, mid-crossing. Necrotic failures spoil your own supply, put the wound on the caster, land the years on the nearest living thing, and — at Season — take a district's harvest and its dead at once, which is when the Covenant calls. Xenic failures calm the caster, teach you what *you* are, route the migration through you, and make a region's animals read you as the signal. Bionic failures accept the toxin too, seat deeper than intended, hand the implant to somebody else, and at Conversion bring you back a fraction — and the fraction remembers. Hematic failures reopen with the next wound, draw from the caster's own, count the caster in the Levy, and call the loan.
+
+### Counterplay
+
+Necrotic Wither and Hematic Levy against Regenerative, or simply targeting the medic, since a squad's regeneration is one person. Xenic Calm and the Wardens' tranquilliser doctrine against Morphic. Regenerative, Cold Store, and burning the vector against Necrotic. Noise against Xenic — it is not an attack, and the counter is being louder than the animal. ELECTRICAL vents Bionic, and an Aegis patent lockout kills an interface remotely, which is the Ascendancy's recurring nightmare. Against Hematic: do not bleed, seal the wound, or buy the Choir's debt off them, which is the only counter that ever ends it.
 
 **How the pillar fails:** it optimises for the outcome rather than the patient, and it selects the donor site itself.`;
 
@@ -351,19 +489,48 @@ const cognition = `Minds, born and made. The pillar includes machines, because i
 
 ## Designed
 
-**Perceptual** — Blur, which makes you unmemorable rather than invisible · Static · **Jam**, one sense closed for everyone in range · Master: **Erase**, where they cannot retain you and every glance is the first.
+### Perceptual
 
-**Technomantic** — Ask · Wake, a dead machine answering once · **Handshake**, one question about the last person who gave it an order · Master: **Testimony**, everything it has ever been told, in order. It is what [[nag]] gives you if you push, and pushing is the whole scene.
+- **Licensed · Blur** — unmemorable rather than invisible.
+- **Licensed · Static** — a sense, fuzzed.
+- **Certified · Jam** — one sense closed for everyone in range.
+- **Master · Erase** — they cannot retain you, and every glance is the first.
 
-**Empathic** — Steady · Read, what a room feels slightly before it feels it · **Anchor**, a companion's Composure held to yours · Master: **Communion**, a squad sharing one nerve — so when one breaks, all of them do.
+### Technomantic
 
-**Memetic** — Suggest · Forget · **Seed**, an idea that arrives with a memory of always having been there · Master: **Doctrine**, a settlement believing something by morning. The Bureau would pay anything for it.
+- **Licensed · Ask** — one question to a working machine.
+- **Licensed · Wake** — a dead machine answering once.
+- **Certified · Handshake** — one question about the last person who gave it an order.
+- **Master · Testimony** — everything it has ever been told, in order. It is what [[nag]] gives you if you push, and pushing is the whole scene.
 
-**Coercive** — Halt · Yield · **Imperative**, one instruction obeyed once, and they remember choosing it · Master: **Muster**, a line obeying as though it chose to. Illegal everywhere and denied by everyone who has ever used it.
+### Empathic
 
-**Pushed.** Blur makes you forget yourself for a minute. Static closes the sense in you. Jam takes your squad's. Erase means you cannot retain yourself, and every glance in a mirror is the first. Ask asks you; Wake wakes it, displeased; Handshake tells you about the last person and then about everyone; Testimony includes what it was told about you. Steady takes the edge into the caster; Read cannot be switched off; Anchor breaks yours instead of holding theirs; Communion means the horn breaks all of you at once. Memetic failures put the suggestion in you, make you forget the cast, seed the idea in your own memory, and at Doctrine convince you along with the settlement, by morning. Coercive failures halt you, open your hand, make you obey your own instruction, and at Muster have the line obey *you* as if it chose to — and then remember that it did not.
+- **Licensed · Steady** — the edge, taken off.
+- **Licensed · Read** — what a room feels slightly before it feels it.
+- **Certified · Anchor** — a companion's Composure held to yours.
+- **Master · Communion** — a squad sharing one nerve — so when one breaks, all of them do.
 
-**Counterplay.** Instruments beat Perceptual, because a camera retains you when a person cannot, and the lattice does not blink. Unplugging beats Technomantic: a machine that was never given an order has nothing to say. Composure and distance beat Empathic, and a squad that has already broken has nothing left to share. Written orders and a Returnee's long memory beat Memetic. Against Coercive: Composure at its ceiling, an Unregistered's nerve, or killing the caster, since it is channelled and short.
+### Memetic
+
+- **Licensed · Suggest** — a small idea, planted.
+- **Licensed · Forget** — a recent detail, removed.
+- **Certified · Seed** — an idea that arrives with a memory of always having been there.
+- **Master · Doctrine** — a settlement believing something by morning. The Bureau would pay anything for it.
+
+### Coercive
+
+- **Licensed · Halt** — a person stopped mid-step.
+- **Licensed · Yield** — a hand opened, a weapon lowered.
+- **Certified · Imperative** — one instruction obeyed once, and they remember choosing it.
+- **Master · Muster** — a line obeying as though it chose to. Illegal everywhere and denied by everyone who has ever used it.
+
+### When a cast is pushed
+
+Blur makes you forget yourself for a minute. Static closes the sense in you. Jam takes your squad's. Erase means you cannot retain yourself, and every glance in a mirror is the first. Ask asks you; Wake wakes it, displeased; Handshake tells you about the last person and then about everyone; Testimony includes what it was told about you. Steady takes the edge into the caster; Read cannot be switched off; Anchor breaks yours instead of holding theirs; Communion means the horn breaks all of you at once. Memetic failures put the suggestion in you, make you forget the cast, seed the idea in your own memory, and at Doctrine convince you along with the settlement, by morning. Coercive failures halt you, open your hand, make you obey your own instruction, and at Muster have the line obey *you* as if it chose to — and then remember that it did not.
+
+### Counterplay
+
+Instruments beat Perceptual, because a camera retains you when a person cannot, and the lattice does not blink. Unplugging beats Technomantic: a machine that was never given an order has nothing to say. Composure and distance beat Empathic, and a squad that has already broken has nothing left to share. Written orders and a Returnee's long memory beat Memetic. Against Coercive: Composure at its ceiling, an Unregistered's nerve, or killing the caster, since it is channelled and short.
 
 **How the pillar fails:** the channel closes both ways, and you will not notice which side of it you have ended up on.`;
 
@@ -377,19 +544,43 @@ const resonance = `Soul and continuum. The pillar nobody fully understands, hold
 
 ## Designed
 
-**Echoic** — Presence, telling you whether an Echo is in the Core and lit · Register, which Forges hold you and which hold them · **Echo Read**, the shape an ending left, inside a register only; outside one, there is only the roar · Master: **Call**, a reclamation beginning from where you stand. The Forge still does the building. You rang the bell.
+### Echoic
 
-**Translocative** — Fetch · Send · **Consignment**, an object or a person, where arrival is negotiated with something that does not negotiate · Master: **Crossing**, a whole squad — the Veil's discourtesy at close range.
+- **Licensed · Presence** — whether an Echo is in the Core, and lit.
+- **Licensed · Register** — which Forges hold you and which hold them.
+- **Certified · Echo Read** — the shape an ending left, inside a register only; outside one, there is only the roar.
+- **Master · Call** — a reclamation beginning from where you stand. The Forge still does the building. You rang the bell.
 
-**Temporal** — Steady the Hand, half a second returned · Second Look, the last three seconds again, for you alone · **Recoil**, a wound returned to the state it held seconds ago, because the tissue forgets · Master: **Rewind**, a room, ten seconds. You remember. They do not.
+### Translocative
 
-**Reanimative** — Still · Stand, a body working a shift · **Last Order**, its final instruction once and correctly, and whoever gave it is usually nearby · Master: **Witness**, where the dead testify and the Covenant's lawyers make it admissible.
+- **Licensed · Fetch** — a thing brought to hand.
+- **Licensed · Send** — the reverse.
+- **Certified · Consignment** — an object or a person, where arrival is negotiated with something that does not negotiate.
+- **Master · Crossing** — a whole squad — the Veil's discourtesy at close range.
+
+### Temporal
+
+- **Licensed · Steady the Hand** — half a second returned.
+- **Licensed · Second Look** — the last three seconds again, for you alone.
+- **Certified · Recoil** — a wound returned to the state it held seconds ago, because the tissue forgets.
+- **Master · Rewind** — a room, ten seconds. You remember. They do not.
+
+### Reanimative
+
+- **Licensed · Still** — a moving body, stopped.
+- **Licensed · Stand** — a body working a shift.
+- **Certified · Last Order** — its final instruction once and correctly, and whoever gave it is usually nearby.
+- **Master · Witness** — the dead testify, and the Covenant's lawyers make it admissible.
 
 **The Risen are not this class's work.** [[the-risen]] rise with nobody in the room, which is precisely why they are the Covenant's nightmare rather than its product. Never write a Reanimative caster as the cause of a Risen, and never let a licensed chapter be blamed for one without the story knowing it is a false charge.
 
-**Pushed.** Presence makes you feel every Echo in the Core, lit or not. Register shows you a Forge you never bound at. Echo Read gives the roar. A failed Call begins somebody else's reclamation. Fetch fetches you; Send is away, unspecified; Consignment negotiates and loses; Crossing takes the floor, and the room, with you. Temporal failures take the half second from your own future, loop the three seconds again and again, make you forget along with the tissue, and at Rewind leave you remembering ten seconds you did not have. Reanimative failures stop what you started mid-cast, have the body work your shift, have the nearest body obey your own last order, and at Witness have the dead testify against you.
+### When a cast is pushed
 
-**Counterplay.** Distance from a Core, a Containment Muzzle so no resonance leaves, or an Unregistered, who offers nothing to read. Inertial Set, Containment, and Gravitic Weight against Translocative — heavy things arrive late. Against Temporal there is nothing reliable, which is exactly why the licence is provisional. Against Reanimative: burn the body, or bring lawyers.
+Presence makes you feel every Echo in the Core, lit or not. Register shows you a Forge you never bound at. Echo Read gives the roar. A failed Call begins somebody else's reclamation. Fetch fetches you; Send is away, unspecified; Consignment negotiates and loses; Crossing takes the floor, and the room, with you. Temporal failures take the half second from your own future, loop the three seconds again and again, make you forget along with the tissue, and at Rewind leave you remembering ten seconds you did not have. Reanimative failures stop what you started mid-cast, have the body work your shift, have the nearest body obey your own last order, and at Witness have the dead testify against you.
+
+### Counterplay
+
+Distance from a Core, a Containment Muzzle so no resonance leaves, or an Unregistered, who offers nothing to read. Inertial Set, Containment, and Gravitic Weight against Translocative — heavy things arrive late. Against Temporal there is nothing reliable, which is exactly why the licence is provisional. Against Reanimative: burn the body, or bring lawyers.
 
 **How the pillar fails:** you reach for one and hear all of them at once, and some of them have not finished.`;
 
@@ -769,17 +960,54 @@ For writers: name the ledger a scene is spending. If it spends none of them, it 
 
 **Backgrounds.** The near-future vocabulary law applies to this shelf as much as anywhere else: nobody in this world says *class*. A background grants exactly four things — a kit, starting skill ranks and ceilings, a **read**, and a **contact** — plus one thing the character does not discuss. It grants no exclusive ability ever, because an exclusive ability is a wall, and canon's rule is that the door is not the walls.
 
-**Contract Security** — the Stormglass merc. Worn plate refitted twice for two bodies, a rifle with somebody else's filing on the serial, sixty rounds when issue is thirty. Marksmanship at Reliable. Read: *Price the Room* — on entry you see who is armed, who is paid, and who is about to stop being either. Contact: a former squadmate drawing [[iron-saints-pmc]] pay. Buried: a checkpoint where the paperwork was in order and the people were not.
+### Contract Security — the Stormglass merc
 
-**Infusion Technician** — Tino's trade, and playable, as his peer. A rig nobody else touches, a torque driver worn smooth in one spot, three doses on no manifest. Rig Maintenance at Reliable. Read: *Bad Valve* — you hear a rig running past service across a room, including the one on the enemy. Contact: a supplier who has never asked what it is for. Buried: whose crate those three doses came out of. This door is the only one that sees Tino close the leaking valve and hide the tremor and knows what both mean.
+- **Kit** — worn plate refitted twice for two bodies, a rifle with somebody else's filing on the serial, sixty rounds when issue is thirty.
+- **Skill** — Marksmanship at Reliable.
+- **Read** — *Price the Room*: on entry you see who is armed, who is paid, and who is about to stop being either.
+- **Contact** — a former squadmate drawing [[iron-saints-pmc]] pay.
+- **Buried** — a checkpoint where the paperwork was in order and the people were not.
 
-**Field Medicine** — the medic. A trauma bag rebuilt for weight rather than completeness, and a phase-reader that was supposed to be handed back. Trauma at Reliable, and a provisional Regenerative licence. Read: *Triage Eye* — a body's history at a glance, and corruption tells two phases before anybody else in the room, including the person carrying them. Contact: a clinic that still forwards your mail. Buried: the first reading you falsified — not that you did it, but who asked.
+### Infusion Technician — Tino's trade, and playable, as his peer
 
-**Reconnaissance** — the scout. Optics worth more than everything else you own, and a map wrong in two places you know about. Navigation at Reliable. Read: *Ground Truth* — wildlife, weather and ground tell you what is coming. Contact: somebody in a village who feeds you and is not supposed to. Buried: a position you reported clear.
+- **Kit** — a rig nobody else touches, a torque driver worn smooth in one spot, three doses on no manifest.
+- **Skill** — Rig Maintenance at Reliable.
+- **Read** — *Bad Valve*: you hear a rig running past service across a room, including the one on the enemy.
+- **Contact** — a supplier who has never asked what it is for.
+- **Buried** — whose crate those three doses came out of.
+- **Only this door** — sees Tino close the leaking valve and hide the tremor, and knows what both mean.
 
-**Materiel** — the quartermaster. Keys to four things you should not have keys to, and a ledger in your own shorthand. Negotiation at Reliable. Read: *Count the Crates* — stock, prices and shortfalls on sight, and at Reliable, who took it. Contact: a [[black-tithe-syndicate]] buyer holding the other half of a ledger you would like back. Buried: a shortfall that killed somebody, and the entry that covered it.
+### Field Medicine — the medic
 
-**Salvage Engineering** — the mechanic, and the only door that starts with chrome: one limb augment, unfinanced, built for somebody else. Fabrication at Reliable. Read: *Load Path* — structures show you what they are holding up. Contact: a [[foundry-workers-union]] steward who considers you a member whether you agreed or not. Buried: who the prosthetic was for.
+- **Kit** — a trauma bag rebuilt for weight rather than completeness, and a phase-reader that was supposed to be handed back.
+- **Skill** — Trauma at Reliable, and a provisional Regenerative licence.
+- **Read** — *Triage Eye*: a body's history at a glance, and corruption tells two phases before anybody else in the room, including the person carrying them.
+- **Contact** — a clinic that still forwards your mail.
+- **Buried** — the first reading you falsified: not that you did it, but who asked.
+
+### Reconnaissance — the scout
+
+- **Kit** — optics worth more than everything else you own, and a map wrong in two places you know about.
+- **Skill** — Navigation at Reliable.
+- **Read** — *Ground Truth*: wildlife, weather and ground tell you what is coming.
+- **Contact** — somebody in a village who feeds you and is not supposed to.
+- **Buried** — a position you reported clear.
+
+### Materiel — the quartermaster
+
+- **Kit** — keys to four things you should not have keys to, and a ledger in your own shorthand.
+- **Skill** — Negotiation at Reliable.
+- **Read** — *Count the Crates*: stock, prices and shortfalls on sight, and at Reliable, who took it.
+- **Contact** — a [[black-tithe-syndicate]] buyer holding the other half of a ledger you would like back.
+- **Buried** — a shortfall that killed somebody, and the entry that covered it.
+
+### Salvage Engineering — the mechanic
+
+- **Kit** — the only door that starts with chrome: one limb augment, unfinanced, built for somebody else.
+- **Skill** — Fabrication at Reliable.
+- **Read** — *Load Path*: structures show you what they are holding up.
+- **Contact** — a [[foundry-workers-union]] steward who considers you a member whether you agreed or not.
+- **Buried** — who the prosthetic was for.
 
 **Six doors, one prologue, six different games.** The read decides what the player is looking at when the Strike lands — exits, a rig, a dying cameraman, a search pattern over the rooftops, the island's remaining rounds, or the supports under the arcade going before the street does.
 
@@ -819,15 +1047,56 @@ For writers: before power solves anything, say which economy paid — a pool tha
 
 **The rule for play:** the licensed rung in as many trades as you can staff, and the master rung in exactly one. Trades level by being needed on settled ground — jobs done, orders filled, people who came back.
 
-- **Medicine** — apprentice stabilises, sets and stitches. Licensed does surgery, reads a phase with an instrument, and manages corruption without ever curing it: one tell suppressed for a day, one night bought for a phase-three. Master **falsifies a reading**, and the instrument says what the master tells it to. Ceiling: everyone you protect is permanently in your debt, and you never had to ask.
-- **Refining** — canon's own line about where skill and complicity become the same thing. Licensed processes to grade, grades [[reserve-glass]] so a containment frame does not kill its wearer, and feeds a Forge. Master reads **provenance**: a dose named by species, sometimes by individual, sometimes by facility. Ceiling: you are the only person in the room who knows whose soul is in the crate, and you keep working.
-- **Chemistry** — kept apart from Refining, because they are different institutions and merging them would put the setting's two sharpest moral ceilings on one sheet. Licensed makes the [[quietwater-culture]] tonic and the stabiliser that takes the misfire out of stormglass. Master makes the **cut** — refined blended with nature-drawn, slower on the ladder, weaker per dose, undetectable in the field — and the **assay blank**, which makes a reading come back inconclusive.
-- **Engineering** — absorbs Fabrication as a trade, because it is one job: keeping people's equipment alive, including the equipment that is part of them. Licensed does bench work, seals a rig, fits a prosthetic, and recovers an augment from a body in ninety seconds. Master makes **cosmesis**, the conductor-grade rig, and a piece good enough to acquire a history.
-- **Logistics** — canon's quartermaster. Licensed allocates under scarcity in writing and keeps the dose ledger. Master holds **the order** — a Forge rebuilds one body at a time, and somebody sequences it — and sounds the horn.
-- **Architecture** — licensed fortifies against load paths and builds a Forge housing that survives a shell. Master **holds**: walls that survive a third assault, and a plan for the collapse when they do not.
-- **Extraction** — absorbs Agronomy, because their master rungs were the same idea at two scales. Licensed works the dark tier with quotas and paperwork, which always pays better. Master manages **partial take and recovery**: harvest without killing the source, and worked ground brought back toward baseline and no further.
-- **Culinary** — licensed stretches a store a week past where it ends. Master serves **a real meal**, which restores Composure — the attribute corruption takes hardest and nothing else gives back — and a quarter of a caster's pool.
-- **Xenobiology** — Wardens certify. Licensed does husbandry, transport and field assay, and signs off Morphic material. Master reads the **rung**: in the Reach an animal's mutation state on sight and what damage type drove it there, and elsewhere whatever that region's signature turns out to be.
+### Medicine
+
+- **Apprentice** — stabilises, sets and stitches.
+- **Licensed** — surgery; reads a phase with an instrument; manages corruption without ever curing it: one tell suppressed for a day, one night bought for a phase-three.
+- **Master** — **falsifies a reading**: the instrument says what the master tells it to.
+- **The ceiling** — everyone you protect is permanently in your debt, and you never had to ask.
+
+### Refining — where skill and complicity become the same thing
+
+- **Licensed** — processes to grade, grades [[reserve-glass]] so a containment frame does not kill its wearer, and feeds a Forge.
+- **Master** — reads **provenance**: a dose named by species, sometimes by individual, sometimes by facility.
+- **The ceiling** — canon's own line: you are the only person in the room who knows whose soul is in the crate, and you keep working.
+
+### Chemistry — kept apart from Refining on purpose
+
+- **Why apart** — they are different institutions, and merging them would put the setting's two sharpest moral ceilings on one sheet.
+- **Licensed** — makes the [[quietwater-culture]] tonic and the stabiliser that takes the misfire out of stormglass.
+- **Master** — makes the **cut** — refined blended with nature-drawn, slower on the ladder, weaker per dose, undetectable in the field — and the **assay blank**, which makes a reading come back inconclusive.
+
+### Engineering — absorbs Fabrication as a trade
+
+- **Why** — it is one job: keeping people's equipment alive, including the equipment that is part of them.
+- **Licensed** — bench work; seals a rig; fits a prosthetic; recovers an augment from a body in ninety seconds.
+- **Master** — makes **cosmesis**, the conductor-grade rig, and a piece good enough to acquire a history.
+
+### Logistics — canon's quartermaster
+
+- **Licensed** — allocates under scarcity in writing and keeps the dose ledger.
+- **Master** — holds **the order** — a Forge rebuilds one body at a time, and somebody sequences it — and sounds the horn.
+
+### Architecture
+
+- **Licensed** — fortifies against load paths and builds a Forge housing that survives a shell.
+- **Master** — **holds**: walls that survive a third assault, and a plan for the collapse when they do not.
+
+### Extraction — absorbs Agronomy
+
+- **Why** — their master rungs were the same idea at two scales.
+- **Licensed** — works the dark tier with quotas and paperwork, which always pays better.
+- **Master** — manages **partial take and recovery**: harvest without killing the source, and worked ground brought back toward baseline and no further.
+
+### Culinary
+
+- **Licensed** — stretches a store a week past where it ends.
+- **Master** — serves **a real meal**, which restores Composure — the attribute corruption takes hardest and nothing else gives back — and a quarter of a caster's pool.
+
+### Xenobiology — Wardens certify
+
+- **Licensed** — husbandry, transport and field assay, and signs off Morphic material.
+- **Master** — reads the **rung**: in the Reach an animal's mutation state on sight and what damage type drove it there, and elsewhere whatever that region's signature turns out to be.
 
 **The trades' end-game is documents.** Chemistry's assay blank and Refining's clean grade are the two most valuable pieces of paper a master can produce, and neither is a weapon: one makes a person read as nothing, the other makes a crate worth more than the same crate without it. That is why Standing is a ledger.
 

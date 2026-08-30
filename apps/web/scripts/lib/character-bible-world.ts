@@ -65,13 +65,11 @@ export const species: NewCreature[] = [
     summary: "Two generations out of the hidden realms their ancestors fled to during the Great Purges — long-lived, slow to mend, and remembering the fire from people who stood in it.",
     body: `Their ancestors did not die in [[the-great-purges]]. They went somewhere, and two generations ago they came back out, into a world that had spent two thousand years rearranging itself around their absence.
 
-**Long Memory.** Old things read to a Returnee. Purge-era murals, relic country, an [[ossuary-covenant]] chapter's bone-archive — on anything older than the states, their reads succeed where a human's fail, and a Returnee knows a [[lizzarnix]] mural is not sun worship. It is also why a Returnee quartermaster who can read Purge-era ledgers is worth a great deal to people who would rather those ledgers stayed unread.
-
-**Slow to Mend.** Resilience recovers at half pace. A long life is a body that takes its time, and the wound taken at [[forward-camp-kestrel]] is still there at [[port-arcadia]].
-
-**What a Forge makes of them.** The pattern is dense: [[reclamation]] costs ten percent more, and a quartermaster who has never bound a Returnee finds that out by quoting one wrong, out loud, in front of everybody.
-
-**Ceilings** run Conditioning 7 · Coordination 8 · Resilience 7 · Acuity 9 · Composure 9 · Conductivity 7. A long life carries less. Lifespan is two to three human spans, with very few children.
+- **Perk · Long Memory** — old things read to a Returnee. Purge-era murals, relic country, an [[ossuary-covenant]] chapter's bone-archive — on anything older than the states, their reads succeed where a human's fail, and a Returnee knows a [[lizzarnix]] mural is not sun worship. It is also why a Returnee quartermaster who can read Purge-era ledgers is worth a great deal to people who would rather those ledgers stayed unread.
+- **Drawback · Slow to Mend** — Resilience recovers at half pace. A long life is a body that takes its time, and the wound taken at [[forward-camp-kestrel]] is still there at [[port-arcadia]].
+- **Drawback · Dense pattern** — what a Forge makes of them: [[reclamation]] costs ten percent more, and a quartermaster who has never bound a Returnee finds that out by quoting one wrong, out loud, in front of everybody.
+- **Ceilings** — Conditioning 7 · Coordination 8 · Resilience 7 · Acuity 9 · Composure 9 · Conductivity 7. A long life carries less.
+- **Lifespan** — two to three human spans, with very few children.
 
 **How they live with it.** Children take a calendar name — a place in the Long Count, the reckoning that dates everything from the Purges — so a child called *Tenth of the Second* is the tenth born in the second year outside. The states find it eccentric; it is a census. They bind like anyone, and keep two graves: one for the body the Forge did not need, one for the count. Every reclamation is entered in the Long Count as a return, which is how a people with two thousand years of memory make the machine mean something. *We have been told it is safe before* is the thing they say. *Vaulters*, *the walked-out*, and in port *claimants* — which is the polite word for the fear — are what others say.
 
@@ -96,13 +94,10 @@ For writers: a Returnee is not an elf. They are recently displaced people with a
     summary: "Bloodlines infused so many generations back that something bred true — not the debt, the resistance. Born clean, and the most wanted assay on the peninsula.",
     body: `Somebody in the line was infused, long enough ago that nobody kept the record, and what came down the generations was not the corruption. It was the tolerance for it.
 
-**Tolerance.** Corruption phases advance at two-thirds pace, the body conducts to nine, and a Carrier reads tells on other people a phase early — because they grew up in a house that talked about them. It is the only discount on the ladder in the game, and it is inherited rather than earned.
-
-**Born clean.** A Carrier starts at phase 0 like anyone else. The inheritance is the *pace*, never the debt, and a settlement that works this out will want to keep binding them.
-
-**Wanted.** A body that conducts to nine is the ideal infusion subject, and an assay says so in a single line — [[helix-arcanobiotics]] knows exactly what a Carrier assay looks like. The bloodline is a product line that has not been licensed yet, and the children are watched.
-
-**Ceilings** run Conditioning 8 · Coordination 8 · Resilience 8 · Acuity 8 · Composure 7 · Conductivity 9. Ordinary lifespan, standard Forge rate.
+- **Perk · Tolerance** — corruption phases advance at two-thirds pace, the body conducts to nine, and a Carrier reads tells on other people a phase early, because they grew up in a house that talked about them. It is the only discount on the ladder in the game, and it is inherited rather than earned.
+- **Born clean** — a Carrier starts at phase 0 like anyone else. The inheritance is the *pace*, never the debt, and a settlement that works this out will want to keep binding them.
+- **Drawback · Wanted** — a body that conducts to nine is the ideal infusion subject, and an assay says so in a single line — [[helix-arcanobiotics]] knows exactly what a Carrier assay looks like. The bloodline is a product line that has not been licensed yet, and the children are watched.
+- **Ceilings** — Conditioning 8 · Coordination 8 · Resilience 8 · Acuity 8 · Composure 7 · Conductivity 9. Ordinary lifespan, standard Forge rate.
 
 **How they live with it.** Ordinary names, and a family ledger: the child's assay recorded in the parents' own hand, because the alternative is a stranger recording it. They are reclaimed like anyone, and what a Carrier family fears is not death but an assay. *Slow blood* is what the family calls it, and it is a compliment. *Slow-bloods* is what others call it; *stock-grade*, from a Helix recruiter, who means it kindly.
 
@@ -127,13 +122,10 @@ For writers: the horror here is entirely paperwork. Nothing about a Carrier look
     summary: "Built by a Helix cross-breeding wing and reclassified as people by a document that can be challenged anywhere that did not issue it. Purpose-made, and running on a clock.",
     body: `They were made — by the same programmes that make [[monstrosities]], in the same buildings, on the same budget lines. What separates a Chartered person from a monstrosity is not biology. It is a piece of paper and who honours it.
 
-**Specification.** One attribute starts at rung 5 — the thing they were made for — which is why a Chartered arrives at the enlistment desk at the top of the recruit band. The charter itself is a document that opens doors in four jurisdictions and is a licence in its own right, reviewable like any other.
-
-**Expiry.** Past a threshold the world does not disclose, Resilience begins to decay unless maintained, and maintenance is a [[helix-arcanobiotics]] service. The only people who can keep a Chartered alive are the people who made them inventory.
-
-**Ceilings** run Conditioning 9 · Coordination 8 · Resilience 8 · Acuity 7 · Composure 7 · Conductivity 9 — built to take doses. Lifespan is *unknown*, which is the honest word: Helix builds soldiers with expiry dates.
-
-**What a Forge makes of them.** The pattern is patented. A Forge will rebuild it, and every [[reclamation]] is a reproduction of Helix intellectual property. Somebody, eventually, sends an invoice.
+- **Perk · Specification** — one attribute starts at rung 5, the thing they were made for, which is why a Chartered arrives at the enlistment desk at the top of the recruit band. The charter itself is a document that opens doors in four jurisdictions and is a licence in its own right, reviewable like any other.
+- **Drawback · Expiry** — past a threshold the world does not disclose, Resilience begins to decay unless maintained, and maintenance is a [[helix-arcanobiotics]] service. The only people who can keep a Chartered alive are the people who made them inventory.
+- **Drawback · Patented pattern** — what a Forge makes of them: a Forge will rebuild it, and every [[reclamation]] is a reproduction of Helix intellectual property. Somebody, eventually, sends an invoice.
+- **Ceilings** — Conditioning 9 · Coordination 8 · Resilience 8 · Acuity 7 · Composure 7 · Conductivity 9 — built to take doses. Lifespan is *unknown*, which is the honest word: Helix builds soldiers with expiry dates.
 
 **How they live with it.** A serial, then a chosen name, in that order and never the reverse — and most keep the serial as a middle name, out of something between spite and honesty. Their dead are contested three ways at once: returned property under Helix's reading, a person's remains under the charter, and a patented pattern being reproduced at the Forge. [[bone-market-families]] broker all three. *Read the charter* is the answer to every question about what they are allowed to be, and every Chartered can recite it. Others say *product*, or *basement*, after where they were made; the [[abomination-containment-authority]] field manual says *subject*, which is worse.
 
@@ -158,11 +150,9 @@ For writers: never write a Chartered as an artificial person questioning whether
     summary: "A people whose Echo does not take. The Core cuts them, the sphere reacts, and the readout says the one thing it never says: pattern unresolved.",
     body: `A Forge can record an Unregistered and cannot rebuild one. The readout gets as far as *Soul Echo established* and then reports the sentence nobody wants to hear: **pattern unresolved**. Nobody knows why. [[ossuary-covenant]] has theories, and does not share them.
 
-**Unreadable.** Phase-readers return noise. Assays return noise. Echoic reads find nothing to read. Suspicion instruments cannot see them at all, which makes them the only people in the world concealed by default, for free, forever — and a Core cannot resolve a Conductivity it cannot read, which is the closest anyone has come to an explanation.
-
-**Unbindable.** Every death is [[true-death]]. Canon's law applies from the first minute: the run is over, and it starts again.
-
-**Ceilings** run Conditioning 8 · Coordination 8 · Resilience 8 · Acuity 8 · Composure 9 · Conductivity unreadable. People who live once learn nerve.
+- **Perk · Unreadable** — phase-readers return noise. Assays return noise. Echoic reads find nothing to read. Suspicion instruments cannot see them at all, which makes them the only people in the world concealed by default, for free, forever — and a Core cannot resolve a Conductivity it cannot read, which is the closest anyone has come to an explanation.
+- **Drawback · Unbindable** — every death is [[true-death]]. Canon's law applies from the first minute: the run is over, and it starts again.
+- **Ceilings** — Conditioning 8 · Coordination 8 · Resilience 8 · Acuity 8 · Composure 9 · Conductivity unreadable. People who live once learn nerve.
 
 **How they live with it.** One name. No family name, no calendar name, no serial — you only get one of everything. They bury their dead under a marker with one word on it ([[the-single-name]]), the only people on the peninsula who still do, and theirs are the only funerals where nobody makes a joke about the Forge queue; other peoples come to them to remember what a funeral is. *Once* is the toast, the warning and the whole philosophy. Others say *one-lifers*, with something close to awe, which the Unregistered find tiresome.
 
@@ -189,13 +179,10 @@ For writers: never soften the law for drama, and never write an Unregistered dea
     summary: "Descendants of peoples who survived the Purges by becoming indistinguishable and staying that way for two thousand years. The passing worked so well it erased its own record.",
     body: `Their ancestors did not retreat to a hidden realm during [[the-great-purges]]. They stayed, and they passed — so thoroughly, for so long, that the passing erased its own record, and a Latent family today is a human family with an odd story about an uncle.
 
-**Surfacing.** Once, and once only, something dormant expresses: a licence class never trained (born, after all), a creature-native sense — night sight, pressure sense, a nose for essence — or a Returnee's memory of things nobody ever told them. It is triggered by a near-death, a first dose, a corruption phase, or a [[resonance]]-pillar overcharge nearby, and the world chooses from what the story has already set up. One ceiling becomes 9, and the person finds out which.
-
-**Inconclusive.** No assay can say what they are, including [[meridian-arcane-institute]]'s — and an inconclusive assay is the most interesting result an [[aegis-extraction-consortium]] buyer ever sees. Before Surfacing they read as human, completely, which is the whole achievement and the whole cost.
-
-**Ceilings** are 8 across until Surfacing. Conductivity is the usual one to move, and the assay that was inconclusive suddenly is not.
-
-**What a Forge makes of them.** Standard rate before Surfacing. Afterwards, the pattern the Forge holds is the *old* one — so the first [[reclamation]] after Surfacing is the scene where the machine tries to build the person they used to be.
+- **Perk · Surfacing** — once, and once only, something dormant expresses: a licence class never trained (born, after all), a creature-native sense — night sight, pressure sense, a nose for essence — or a Returnee's memory of things nobody ever told them. It is triggered by a near-death, a first dose, a corruption phase, or a [[resonance]]-pillar overcharge nearby, and the world chooses from what the story has already set up. One ceiling becomes 9, and the person finds out which.
+- **Inconclusive** — no assay can say what they are, including [[meridian-arcane-institute]]'s — and an inconclusive assay is the most interesting result an [[aegis-extraction-consortium]] buyer ever sees. Before Surfacing they read as human, completely, which is the whole achievement and the whole cost.
+- **Ceilings** — 8 across until Surfacing. Conductivity is the usual one to move, and the assay that was inconclusive suddenly is not.
+- **Forge** — standard rate before Surfacing. Afterwards, the pattern the Forge holds is the *old* one — so the first [[reclamation]] after Surfacing is the scene where the machine tries to build the person they used to be.
 
 **How they live with it.** Deliberately, generationally ordinary names: a Latent family has been choosing unremarkable ones for two thousand years and is very good at it. They are reclaimed like humans until Surfacing, after which the family holds a story about the quiet uncle who came back different — every Latent family has one, and none of them tells it. *Ask what happened to your uncle* is said only inside the family, and only once the child is old enough. Others say nothing at all, which is the achievement.
 

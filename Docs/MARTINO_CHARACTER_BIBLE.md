@@ -191,6 +191,30 @@ coordinated response") is vaguer than its fifty-nine siblings and is left for
 the owner to sharpen, as is whether "the Gun" in the Southside rifle's open
 question is the maker or the rifle.
 
+## The layout ruling (2026-08-30, evening)
+
+The owner read the integrated bible and could not navigate it: "we have a lot
+of this, we just do not have it layed out properly." Three rulings followed:
+
+1. **Codex entries lead with the game-manual layout** — headed lists first,
+   prose below. Applied to the six pillar dossiers (every licence class is now
+   a `### Class` heading over four `Licensed / Certified / Master` bullets),
+   `the-six-pillars` (a registry list plus a rules list), `skills` (a rank
+   ladder plus the twenty grouped by category with each ceiling teacher
+   inline), the `character-classes` layer (each background is a Kit / Skill /
+   Read / Contact / Buried block), the `professions` layer (each trade is a
+   heading over per-rung blueprint bullets), and the five species (Perk /
+   Drawback / Ceilings blocks). Zero content words lost; the Pushed,
+   Counterplay, and writers' prose all kept, below the rosters.
+2. **Skills stay open.** A background gives a head start, not a lock; the
+   ruling was explicitly re-confirmed against a hard class-locked alternative.
+3. **World vocabulary stays.** Background, licence class, ability — the
+   near-future naming law holds, in the codex and in the world's mouth.
+
+A gamer-facing companion view exists as the **Recruit's Handbook** artifact
+(schools→spells, classes, skills, professions→blueprints, species perks):
+https://claude.ai/code/artifact/cd17902a-a988-4f85-9e37-22745b6a2752
+
 ## Where the remaining design material lives
 
 The bible artifact itself — Part II·20 (interlocks), Part III·11 (seven combat
