@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, RotateCcw, Share2 } from "lucide-react";
+import { corruptedEffects, describeEffects, effectsForNode } from "@/lib/talent-effects";
 import { talentClasses, talentPointsAtLevel, type TalentClass, type TalentNode } from "@/lib/talent-trees";
 
 /**
@@ -48,6 +49,9 @@ function indexClass(tree: TalentClass) {
 export function TalentCalculator({ constellationArt = {} }: { constellationArt?: Record<string, string | null> }) {
   const [state, setState] = useState<BuildState>(defaultState);
   const [copied, setCopied] = useState(false);
+  // The inspected node: clicking opens the popout with the real numbers;
+  // buying happens from inside it, so nobody spends blind.
+  const [inspected, setInspected] = useState<{ node: TalentNode; corrupt?: false } | { phase: number; name: string; desc: string; corrupt: true } | null>(null);
 
   // A shared link restores the whole build. The hash keeps the page static;
   // the restore is deferred a frame so hydration completes on the default
@@ -188,9 +192,8 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                   return (
                     <button
                       className={`talent-node ${state1}${node.fork ? " is-fork" : ""}`}
-                      disabled={!isOwned && (locked || !openable || !affordable)}
                       key={node.id}
-                      onClick={() => toggle(node)}
+                      onClick={() => setInspected({ node })}
                       title={locked ? `Locked — you took ${byId.get(node.fork ?? "")?.node.name ?? "the other fork"}` : node.desc}
                       type="button"
                     >
@@ -218,11 +221,16 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
             {tree.corrupted.nodes.map((node) => {
               const lit = node.phase <= state.phase;
               return (
-                <div className={`talent-node is-corrupt${lit ? " is-lit" : ""}${node.phase === 7 ? " is-terminal" : ""}`} key={node.name}>
+                <button
+                  className={`talent-node is-corrupt${lit ? " is-lit" : ""}${node.phase === 7 ? " is-terminal" : ""}`}
+                  key={node.name}
+                  onClick={() => setInspected({ phase: node.phase, name: node.name, desc: node.desc, corrupt: true })}
+                  type="button"
+                >
                   <span className="talent-cost">P{node.phase}</span>
                   <b>{node.name}</b>
                   <small>{node.desc}</small>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -242,6 +250,74 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
         {terminal ? <p className="talent-terminal">Phase 7. An abomination stands where this build stood. The campaign continues with what is left.</p> : null}
         <p className="talent-plays"><b>How it plays:</b> {tree.plays}</p>
       </aside>
+
+      {inspected ? (
+        <div aria-modal="true" className="talent-popout-backdrop" onClick={() => setInspected(null)} role="dialog">
+          <div className="talent-popout" onClick={(event) => event.stopPropagation()}>
+            {inspected.corrupt ? (() => {
+              const effect = corruptedEffects[tree.slug]?.[inspected.phase];
+              const lines = effect ? describeEffects(effect) : [];
+              const lit = inspected.phase <= state.phase;
+              return (
+                <>
+                  <header className="is-corrupt-head">
+                    <b>{inspected.name}</b>
+                    <span>{tree.corrupted.title} · phase {inspected.phase} · costs no points, ever</span>
+                  </header>
+                  <p className="talent-popout-desc">{inspected.desc}</p>
+                  {inspected.phase === 7 ? (
+                    <p className="talent-popout-terminal">The hard end. An abomination stands where you stood, and the campaign continues with what is left. Nothing here is a power — it is what the seventh phase is.</p>
+                  ) : (
+                    <>
+                      <h4>What actually changes</h4>
+                      <ul>{lines.map((line) => <li key={line}>{line}</li>)}</ul>
+                      <p className="talent-popout-note">Free — this node lights when phase {inspected.phase} does, and never goes out. The price was paid on the ladder: the phase&apos;s own attribute trades still apply, the tells still show, and the doors still close.</p>
+                    </>
+                  )}
+                  <footer>
+                    <span className={lit ? "is-lit-tag" : undefined}>{lit ? `Lit — you are phase ${state.phase}` : `Dark — lights at phase ${inspected.phase}`}</span>
+                    <button onClick={() => setInspected(null)} type="button">Close</button>
+                  </footer>
+                </>
+              );
+            })() : (() => {
+              const node = inspected.node;
+              const effect = effectsForNode(tree.slug, node.id);
+              const lines = effect ? describeEffects(effect) : [];
+              const isOwned = owned.has(node.id);
+              const locked = forkLocked(node);
+              const openable = !locked && unlockable(node.id, owned);
+              const affordable = node.cost <= remaining;
+              return (
+                <>
+                  <header>
+                    <b>{node.name}</b>
+                    <span>{node.cost} point{node.cost === 1 ? "" : "s"}</span>
+                  </header>
+                  <p className="talent-popout-desc">{node.desc}</p>
+                  <h4>What actually changes</h4>
+                  {lines.length
+                    ? <ul>{lines.map((line) => <li key={line}>{line}</li>)}</ul>
+                    : <p className="talent-popout-note">A narrative node: its effect happens in scenes — a door it opens, a person it changes, a thing the world starts doing — not in combat arithmetic. The simulations carry no number for it yet.</p>}
+                  {node.spell ? <p className="talent-popout-tag is-spell">Unlocks abilities from the six schools&apos; 108 — {node.spell}</p> : null}
+                  {node.ceiling ? <p className="talent-popout-tag is-ceiling">Ceiling: the points aren&apos;t enough — find {node.ceiling}, and pay the favour.</p> : null}
+                  {node.weave ? <p className="talent-popout-tag is-weave">Weave: bridges to {byId.get(node.weave)?.node.name ?? node.weave} — buying either end links both paths.</p> : null}
+                  {node.fork ? <p className="talent-popout-tag is-fork-tag">Fork: taking this locks {byId.get(node.fork)?.node.name ?? node.fork} for good. No respec exists in the world.</p> : null}
+                  {lines.length ? <p className="talent-popout-note">Numbers are the same ones the balance simulations run on — first-pass weights, tuned by the campaign.</p> : null}
+                  <footer>
+                    {isOwned
+                      ? <button className="is-refund" onClick={() => { toggle(node); setInspected(null); }} type="button">Refund {node.cost} pt{node.cost === 1 ? "" : "s"}</button>
+                      : <button disabled={locked || !openable || !affordable} onClick={() => { toggle(node); setInspected(null); }} type="button">
+                          {locked ? `Locked by ${byId.get(node.fork ?? "")?.node.name ?? "the fork"}` : !openable ? "Path not reached yet" : !affordable ? `Needs ${node.cost} pts — ${remaining} left` : `Take it — ${node.cost} pt${node.cost === 1 ? "" : "s"}`}
+                        </button>}
+                    <button onClick={() => setInspected(null)} type="button">Close</button>
+                  </footer>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
