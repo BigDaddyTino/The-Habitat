@@ -12,6 +12,7 @@ import { getTalentClass, talentPointsAtLevel, type TalentNode } from "../../lib/
 import type { AttackProfile, AttributeKey, NodeEffect, OriginProfile, ProfessionProfile, SimCharacter, SpeciesProfile } from "./talent-sim";
 import { attributesFor, mergeEffects } from "./talent-sim";
 import { corruptedEffects, institutionalCosts, nodeEffects } from "../../lib/talent-effects";
+import { effectsForTrade, professions as designedProfessions, rungOrder } from "../../lib/professions";
 
 export { corruptedEffects, institutionalCosts, nodeEffects };
 
@@ -34,15 +35,25 @@ export const origins: OriginProfile[] = [
   { slug: "infused", name: "Infused", economy: "charges", startingPhase: 1, composureBonus: 0 },
 ];
 
+/**
+ * Every trade at every rung, built from the shared source in lib/professions
+ * so the website's blueprints and the campaign's arithmetic cannot drift.
+ * A bare slug ("medicine") means the master rung — what the tuned campaign
+ * has always measured; "medicine/licensed" addresses a rung directly.
+ */
 export const professions: ProfessionProfile[] = [
-  { slug: "medicine", name: "Medicine (master)", effects: { partyRecovery: 2, partyDyingClock: 6 } },
-  { slug: "logistics", name: "Logistics (master)", effects: { extraDoses: 2, ammoMultiplier: 1.5 } },
-  { slug: "chemistry", name: "Chemistry (master)", effects: { corruptionPace: 0.7, extraDoses: 1 } },
-  { slug: "engineering", name: "Engineering (master)", effects: { extraPlates: 1 } },
-  { slug: "culinary", name: "Culinary (master)", effects: { composureRestore: 2, partyRecovery: 1 } },
-  { slug: "xenobiology", name: "Xenobiology (master)", effects: { partyRecovery: 1, extraPlates: 1 } },
+  ...designedProfessions.flatMap((trade) =>
+    rungOrder.map((rung) => ({
+      slug: rung === "master" ? trade.slug : `${trade.slug}/${rung}`,
+      name: `${trade.name} (${rung})`,
+      effects: effectsForTrade(trade.slug, rung),
+    })),
+  ),
   { slug: "none", name: "No trade", effects: {} },
 ];
+
+/** The sentinel every unknown slug must fall back to — never a real trade. */
+export const noTrade: ProfessionProfile = professions[professions.length - 1];
 
 
 /** Base attacks per class. Spell attacks drop out for a `none` origin. */
@@ -162,7 +173,9 @@ export function validateBuild(spec: BuildSpec): ValidatedBuild {
 export function makeCharacter(build: ValidatedBuild, speciesSlug: string, originSlug: string, professionSlugs: string[], phase = 0, level = 100): SimCharacter {
   const kind = species.find((entry) => entry.slug === speciesSlug) ?? species[0];
   const origin = origins.find((entry) => entry.slug === originSlug) ?? origins[0];
-  const trades = professionSlugs.map((slug) => professions.find((entry) => entry.slug === slug) ?? professions[5]);
+  // An unknown slug is NO trade. It used to land on professions[5] —
+  // Xenobiology — which silently handed out a plate and a wound of recovery.
+  const trades = professionSlugs.map((slug) => professions.find((entry) => entry.slug === slug) ?? noTrade);
   const [primary, secondary] = primaries[build.spec.classSlug];
 
   const corrupted = Object.entries(corruptedEffects[build.spec.classSlug] ?? {})

@@ -28,6 +28,8 @@ export const codexArtKinds = {
   timeline: "timeline",
   // The Eight Trees: one constellation per class, worn by /codex/talents.
   talents: "talents",
+  // The Nine Trades: one plate per profession, worn by /codex/professions.
+  trades: "trades",
   // The dossier art that used to sit in public/images. Each one is a
   // directory under private/codex-art named for the shelf it serves.
   characters: "characters",

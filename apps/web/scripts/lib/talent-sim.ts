@@ -85,6 +85,17 @@ export type ProfessionProfile = {
     corruptionPace: number;
     /** Plates carried beyond issue. */
     extraPlates: number;
+    /** Extra fraction of a caster's pool restored between fights. */
+    poolRestore: number;
+    /** Fractional cut in cast costs  Engineering's conductor-grade rig. */
+    castCostRelief: number;
+    /**
+     * Fractional cut in damage taken by everyone on the ground this trade
+     * prepared  Architecture's walls. MODEL ASSUMPTION: the column is
+     * treated as fighting on ground it built, which is what a defensive day
+     * is and is not what an ambush is.
+     */
+    damageReduction: number;
   }>;
 };
 
@@ -276,16 +287,22 @@ export function reset(character: SimCharacter) {
   character.ammo = Math.round(30 * (1 + ammoMultiplier));
 }
 
+/** What one attack costs after talents and a fitted rig both take their cut. */
+function costOf(character: SimCharacter, attack: AttackProfile): number {
+  const relief = character.professions.reduce((sum, p) => sum + (p.effects.castCostRelief ?? 0), 0);
+  return Math.max(1, Math.round(attack.cost * (character.effects.castCost ?? 1) * Math.max(0.5, 1 - relief)));
+}
+
 function affordable(character: SimCharacter, attack: AttackProfile): boolean {
   if (attack.onceOnly && character.usedOnce.has(attack.name)) return false;
-  const cost = Math.max(1, Math.round(attack.cost * (character.effects.castCost ?? 1)));
+  const cost = costOf(character, attack);
   if (attack.costs === "pool" || attack.costs === "charges") return character.resource >= cost;
   if (attack.costs === "ammo") return character.ammo >= cost;
   return true;
 }
 
 function spend(character: SimCharacter, attack: AttackProfile) {
-  const cost = Math.max(1, Math.round(attack.cost * (character.effects.castCost ?? 1)));
+  const cost = costOf(character, attack);
   if (attack.costs === "pool" || attack.costs === "charges") character.resource -= cost;
   else if (attack.costs === "ammo") character.ammo -= cost;
   if (attack.onceOnly) character.usedOnce.add(attack.name);
@@ -328,7 +345,9 @@ export function resolveAttack(attacker: SimCharacter, defender: SimCharacter, at
     wounds += 1; // vented chrome is a limb that does not answer
   }
 
-  wounds = Math.max(0, wounds * (defender.effects.incoming ?? 1));
+  // Talents first, then the ground somebody built to stand on.
+  const prepared = defender.professions.reduce((sum, p) => sum + (p.effects.damageReduction ?? 0), 0);
+  wounds = Math.max(0, wounds * (defender.effects.incoming ?? 1) * Math.max(0.5, 1 - prepared));
   defender.wounds += wounds;
   if (attack.bleeds) defender.bleeding += 1;
   return wounds;
@@ -399,12 +418,19 @@ export function recover(character: SimCharacter, hoursOfCare = 1) {
   character.plates = Math.min(character.plates + 1, 2 + (character.effects.extraPlates ?? 0) + character.professions.reduce((sum, p) => sum + (p.effects.extraPlates ?? 0), 0));
   const ammoMultiplier = (character.effects.ammo ?? 0) + character.professions.reduce((sum, p) => sum + ((p.effects.ammoMultiplier ?? 1) - 1), 0);
   character.ammo = Math.min(Math.round(30 * (1 + ammoMultiplier)), character.ammo + Math.round(12 * (1 + ammoMultiplier)));
+  // A cook's real meal and a chemist's tonic are the two things in the world
+  // that put a pool back faster than rest does.
+  const poured = character.professions.reduce((sum, p) => sum + (p.effects.poolRestore ?? 0), 0);
   if (character.origin.economy === "pool") {
     // Sleep is full; a real meal is a quarter. A fight-to-fight lull is neither.
-    character.resource = Math.min(character.resourceMax, character.resource + character.resourceMax * 0.45);
+    character.resource = Math.min(character.resourceMax, character.resource + character.resourceMax * (0.45 + poured));
+  } else if (character.origin.economy === "charges" && poured > 0) {
+    // Charges do not come back on their own — but a tonic is not a charge,
+    // and an infused caster can drink one like anybody else.
+    character.resource = Math.min(character.resourceMax, character.resource + character.resourceMax * poured);
   }
-  // Charges do not come back. Only the next dose does, and the doses were
-  // counted into the ceiling when the day started.
+  // Otherwise charges do not come back. Only the next dose does, and the
+  // doses were counted into the ceiling when the day started.
 }
 
 export type FightResult = {

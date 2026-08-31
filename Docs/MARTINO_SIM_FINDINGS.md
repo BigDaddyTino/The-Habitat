@@ -142,6 +142,53 @@ fights with civilian obligations, and the horn.*
   arithmetic in the model; the rest are narrative — real in play, nothing to
   measure. Every "How it plays" line from the gameplay audit still stands.
 
+## The trades pass (owner's ruling: use, gated by a licence)
+
+The nine trades had prose and no mechanics: the only progression rule ever
+written was *"trades level by being needed on settled ground."* The owner
+ruled the shape on 2026-08-31 — **you raise a trade by doing its work, and
+the two rung-ups are gated by a licence somebody has to sign.** Only work at
+your current rung counts, so nobody grinds bandages into mastery; 60 jobs
+makes you eligible for a licence and 300 makes you eligible for mastery, and
+eligibility is never promotion. Licensed in as many trades as you can keep
+busy, Master in exactly one, ever.
+
+The design that fell out of the licence gate is the best part of it: **the
+licence is the state and the corporations, and several of the masteries are
+crimes.** Helix certifies a physician; the Black Tithe Syndicate is the only
+place to learn to falsify a reading. Aegis grades your dose; the Bone Market
+Families teach you to name whose it was. Aegis permits the dark tier; the
+Verdant Marsh Clans teach the partial take, and check that you stopped. The
+codex pillar already said craft has a moral ceiling and the game prices it —
+now the price is on the door.
+
+Three findings from wiring it to the campaign:
+
+1. **An unknown trade slug silently paid out.** The lookup fell through to
+   `professions[5]` — Xenobiology — so a typo handed out an armour plate and
+   a wound of recovery. It now falls through to `none`, which is what it
+   always meant.
+2. **Three designed effects were never read.** Culinary's Composure restore
+   and Chemistry's corruption cut were set and ignored, which is why Culinary
+   measured *below having no trade at all*. The pool restore, the conductor
+   rig's cast relief and Architecture's prepared ground are all wired now;
+   the corruption cut stays deliberately unmodelled and is labelled as such,
+   because one engagement has no ladder clock.
+3. **The trade table was measuring the wrong thing.** It ran one fight, and
+   almost everything a trade does lands *between* fights. It now runs a
+   column of four through the hardest day in the game, and — this was the
+   fix that mattered — every trade replays the **identical** day from a
+   shared seed. Before that, the differences between rows were dice: the
+   ladder read backwards at 45 trials and flat at 400.
+
+Re-measured that way, nobody walks out of that day often (the no-trade
+baseline is 5%), and every master rung beats it: Engineering and Logistics
++7 points, Medicine +5, Chemistry +4, Refining and Extraction +3,
+Architecture, Culinary and Xenobiology +2. Every ladder is monotone, and a
+test now enforces that a master rung can never measure worse than its own
+licensed rung — a player who spends a career reaching mastery must never be
+punished by the arithmetic for it.
+
 ## The continuous-time conversion (owner's ruling: this is an FPS)
 
 The game runs on a live dedicated server — no rounds, no turns, no pausing —

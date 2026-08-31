@@ -204,19 +204,45 @@ say("");
 
 // --- 5 · professions --------------------------------------------------------
 
-say("5 · Professions — what a trade is worth in a fight");
+say("5 · Professions — what a trade is worth to a column across a day");
+say("      (a trade is not an exchange, it is a day, and it is a party thing.");
+say("       Recovery, doses, a bleed-out clock and a pool poured back all land");
+say("       BETWEEN fights — invisible in one exchange, and invisible to a lone");
+say("       wolf who dies inside the first. Four bodies, four fights, one trade");
+say("       carried by the whole column, and every trade replays the identical");
+say("       day from a shared seed so a row is the trade and not the dice.");
+say("       The day is the hardest one in the game — four fights against elite");
+say("       tripled encounters — because that is where a trade decides anything.");
+say("       Almost nobody walks out: the baseline is the story's floor, and the");
+say("       column that walks out has a tradesman in it.)");
+const tradeDay = ["Pearl fire team (3)", "Directorate checkpoint (2)", "Reach creature, Advanced rung", "Iron Saints shock team (2)"]
+  .map((name) => encounters.find((entry) => entry.name === name)!);
+const tradeColumn = ["Bastion · Fortress", "Conduit · Field Surgeon", "Spector · One Round", "Procurator · Fire Plan"];
+const tradeRows: Array<[string, number]> = [];
 for (const trade of professions) {
-  let wins = 0, games = 0;
-  for (const build of builds) {
-    for (const encounter of encounters) {
-      for (let trial = 0; trial < 30; trial++) {
-        const character = makeCharacter(build, "human", defaultOrigin[build.spec.classSlug], [trade.slug]);
-        const result = fight([character], encounter.make(), rng);
-        games += 1; if (result.winner === "a") wins += 1;
-      }
+  // COMMON RANDOM NUMBERS: every trade replays the identical sequence of
+  // days from the same seed, so a difference between two rows is the trade
+  // and not the dice. Without this the whole table is noise at this scale.
+  const tradeRng = makeRng(20260901);
+  let survived = 0, days = 0;
+  for (let trial = 0; trial < TRIALS; trial++) {
+    const column = tradeColumn.map((label) =>
+      makeCharacter(builds.find((b) => b.spec.label === label)!, "human", defaultOrigin[builds.find((b) => b.spec.label === label)!.spec.classSlug], [trade.slug]));
+    let intact = true;
+    for (let index = 0; index < tradeDay.length; index++) {
+      const result = fight(column, [...tradeDay[index].make(), ...tradeDay[index].make(), ...tradeDay[index].make()].map(elite), tradeRng, 75, index === 0);
+      if (result.winner !== "a") { intact = false; break; }
+      for (const member of column) recover(member);
     }
+    days += 1; if (intact && column.every((member) => !member.dead)) survived += 1;
   }
-  say(`   ${pad(trade.name, 22)} ${pct(wins / games)}`);
+  tradeRows.push([trade.name, survived / days]);
+}
+const noTradeRate = tradeRows.find(([name]) => name === "No trade")?.[1] ?? 0;
+for (const [name, rate] of tradeRows) {
+  const delta = rate - noTradeRate;
+  const worth = name === "No trade" ? "the baseline" : `${delta >= 0 ? "+" : "−"}${Math.abs(Math.round(delta * 100))} pts`;
+  say(`   ${pad(name, 24)} ${pad(pct(rate), 5)} survived the day   ${worth}`);
 }
 say("");
 
@@ -339,10 +365,16 @@ say("MODEL ASSUMPTIONS — the part to argue with");
 say("   · Attribute growth: primary attribute reaches its species ceiling near level 80,");
 say("     secondary near the cap, untouched attributes drift to about 5. Canon fixes the");
 say("     rungs and the ceilings, not the curve.");
-say("   · Node weights: ~250 of the ~450 nodes carry explicit arithmetic here; the rest are");
-say("     narrative in-sim — real in play, nothing to test.");
+say("   · Node weights: every one of the ~450 nodes now carries something the popout can");
+say("     show; roughly 250 of them carry fight arithmetic, and the rest are world numbers");
+say("     — carry weight, lock times, market margins — real in play, outside this model.");
 say("   · Enemy statlines are invented to canon's descriptions, not measured from a build.");
-say("   · One fight at a time. Attrition across a day of them is the sims' next campaign.");
+say("   · Trades: the column is treated as fighting on ground it prepared, which is what");
+say("     makes Architecture measurable. That is a defensive day and not an ambush.");
+say("   · Chemistry's corruption-pace cut is real in the world and deliberately unmodelled:");
+say("     one engagement has no ladder clock to slow down.");
+say("   · One fight at a time, except where a section says otherwise — the trades and the");
+say("     day-of-four both run attrition, which is where a trade decides anything.");
 say("");
 say("=".repeat(78));
 say(`${TRIALS} trials per duel · seeded 20260831 · rerun reproduces exactly.`);

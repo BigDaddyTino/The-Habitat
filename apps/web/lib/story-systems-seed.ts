@@ -235,16 +235,18 @@ For writers: construction is a promise with a delivery date. Write quests around
   {
     slug: "professions",
     title: "Professions",
-    summary: "Medic, mechanic, harvester, smith, infuser-tech: deep craft lines for players and companions who want to be needed for what they can make.",
-    body: `Canon already reserves the medic, the mechanic, and the quartermaster in [[the-unnamed]] — professions make that party texture mechanical. Craft lines with real depth: medicine including corruption care, rig maintenance for equipment like [[field-infusion-rig]], smithing, and Essence refinement — the moral ceiling of craft, where skill and complicity become the same thing. Companions carry professions, and settled ground needs them staffed.
+    summary: "Nine trades — Medicine, Refining, Chemistry, Engineering, Logistics, Architecture, Extraction, Culinary, Xenobiology — three rungs each, for players and companions who want to be needed for what they can make.",
+    body: `Canon already reserves the medic, the mechanic, and the quartermaster in [[the-unnamed]] — professions make that party texture mechanical. Nine trades carry it, three rungs each: Medicine including corruption care, Engineering keeping rigs like the [[field-infusion-rig]] alive, and Refining — the moral ceiling of craft, where skill and complicity become the same thing. Companions carry professions, and settled ground needs them staffed.
 
-For writers: expertise is voice. Write profession-gated dialogue and profession-shaped solutions — the medic reads a body differently, the infuser-tech smells a bad valve across the room. A master teaching a technique is a reward worth a whole quest. And the infuser-tech line should always feel like handling live ordnance, because it is.`,
+**A trade levels by use, and a licence gates the rungs.** Doing the work raises the trade and nothing else does; only work at your current rung counts, so nobody grinds bandages into mastery. Reaching the count makes you eligible, not promoted — an institution or a master has to sign, which is why the middle rung is called Licensed. Licensed in as many trades as you can keep busy, and Master in exactly one, ever. Trades are Earned, so death keeps them: your kit is on the corpse, your licences are not.
+
+For writers: expertise is voice. Write profession-gated dialogue and profession-shaped solutions — the medic reads a body differently, the engineer smells a bad valve across the room. A master teaching a technique is a reward worth a whole quest, and now it is also literally the gate. The licence is a scene: somebody with authority decides whether you are one of them, and several of the master rungs are taught only by people the law would rather you never met.`,
     meta: meta({
       category: "progression",
       unlockStage: "Act I — settled ground on the peninsula",
       dependsOn: ["gathering-and-harvest", "trade-and-economy"],
-      pillars: ["Being needed is progression", "Craft has a moral ceiling, and the game prices it"],
-      openQuestions: ["One profession per character, or a skill web?", "Which professions can companions master beyond the player?"],
+      pillars: ["Being needed is progression", "Craft has a moral ceiling, and the game prices it", "The world hands you your rung — you never hand it to yourself"],
+      openQuestions: ["Does a licence lapse if you stop working the trade, and can it be revoked as a punishment?", "Which professions can companions master beyond the player?", "Can a master rung be bought outright by a character rich enough, and what does the trade think of them afterwards?"],
     }),
   },
   {
