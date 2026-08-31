@@ -94,7 +94,36 @@ chart and crops cleanly. Deliver a one-line-per-image ledger in
 Docs/SOL56_TALENT_ART_LEDGER.md. Touch nothing else — not the codex, not
 the database, not the calculator's code.
 
-LATER, NOT NOW: the fourteen new trainer portraits (the Gun, Serrat, the
-Resident, the Unridden and the rest) wait until the talent-system codex
-integration writes their dossiers — they will arrive on the standard
-character-art manifest then.
+LATER, NOT NOW — BUT ALREADY DECIDED: THE TRAINER PORTRAITS
+-----------------------------------------------------------
+The new trainers' portraits wait until the talent-system codex
+integration writes their dossiers; they will arrive on the standard
+character-art manifest then. Two standing directions bind that run NOW,
+so read them before it starts:
+
+1. SPECIES ARE LOAD-BEARING. Each portrait's species comes from the
+   sheet, never from fantasy defaults. No pointed ears, no glowing eyes,
+   no mutation the sheet does not name. The table is the law:
+
+   | Trainer | Species | Reads as |
+   | The Cordon Captain [Marta Voss] | human (she) | ACA cordon officer, grey coat |
+   | The Instructor of the Ninth [Ninth of the First] | RETURNEE | NOT an elf — canon says so in as many words. Long-lived human bearing, old eyes, Long Count formality |
+   | The Bureau Examiner [Ffion Locke] | LATENT, Surfaced (she) | looks ENTIRELY human — that is the whole species. Nothing shows. |
+   | The Resident [Brother Aster] | human, dead — an ECHO | presence rendered as light held inside a Forge Core, never a ghost cliché |
+   | The Skinner [Maghda Twice-Worn] | human (she) | Wardens lodge master; what she wears is the unsettling part, not her body |
+   | The Gate Clerk [Emrys Toll] | CHARTERED | purpose-built human silhouette, serial-then-name bearing; a person, not an android |
+   | The Advocate of the Dead [Maitre Halloway] | human | Ossuary courtroom formality |
+   | The Fully Converted [Elder Sylvane] | human, mostly hardware (he) | the Ascendancy elder canon sketches — presents human at a glance, and the longer you look the less settles |
+   | The Pearl Factor [Madame Isolde Ka] | human (she) | trade-house power dressed like it |
+   | The Gun | human (he) | old, unarmed, Southside; the absence of a weapon IS the portrait |
+   | Serrat | UNREGISTERED (he) | fully human; one name, one life, and a stillness the others don't have |
+   | The Phase-Five [Ash Kader] | CARRIER, at phase five (he) | the species looks human — his PHASE shows: veining, the phase-five tells, worn with discipline |
+   | The Unridden | hypogriff (beast) | the codex sheet silhouette exactly: eagle forward anatomy, horse hindquarters. A matriarch, wild, never tacked |
+   | NAG | machine | a wristwatch with opinions — object portrait, on a wrist or a bench |
+   | The crossroads bargain | NEVER DEPICTED | no portrait, ever. The myth survives by not being seen |
+   | The hidden Concordance elder | NOT DEPICTED until their scene is written | hidden is the character |
+
+2. WOMEN LOOK GOOD. Female characters are drawn attractive — striking
+   faces, flattering builds, presence the camera likes. Owner's standing
+   direction, and it applies to Voss, Locke, Maghda, Isolde and every
+   female face after them.

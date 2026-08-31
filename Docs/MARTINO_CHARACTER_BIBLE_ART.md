@@ -22,3 +22,5 @@ fantasy register, no UI, no text in frame.
 - **The species** join a shelf that already has illustrated members (`human`, `humanoid`, `beasts`, `mythical`). Match that set, not the Bloomfall creature plates.
 - **The named pieces** are objects with histories. The history is the subject: the hole in the plate, the spent case in a hand, the page torn out of a ledger.
 - **The sixteen people** are all PROPOSED and carry placeholder names. Art commits a face to a person nobody has written a scene for yet, so these are the lowest-priority slots on this list, and the Kestrel command staff are the four worth doing first.
+- **Species are load-bearing.** A portrait's species comes from the character's sheet and its people's dossier, never from fantasy defaults — a Returnee is NOT an elf (canon says so in as many words), a Latent looks entirely human because that is the whole species, a Chartered is a purpose-built human silhouette, and nothing grows pointed ears, glowing eyes, or a mutation the sheet does not name.
+- **Women look good.** Female characters are drawn attractive — striking faces, flattering builds, presence the camera likes. Owner's standing direction.
