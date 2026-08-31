@@ -67,6 +67,12 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
     const encoded = encodeURIComponent(encodeState(state));
     window.history.replaceState(null, "", `#${encoded}`);
   }, [state]);
+  // Escape closes the popout, same as clicking outside it.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setInspected(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const tree = talentClasses.find((entry) => entry.slug === state.classSlug) ?? talentClasses[0];
   const byId = useMemo(() => indexClass(tree), [tree]);

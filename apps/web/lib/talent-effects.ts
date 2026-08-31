@@ -391,20 +391,21 @@ export function institutionalCosts(phase: number): NodeEffect {
   return costs;
 }
 
-const signed = (value: number, digits = 0) => `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(digits)}`;
+const signed = (value: number, digits = 0) => `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(digits).replace(/\.?0+$/, "")}`;
 const signedPct = (value: number) => `${value >= 0 ? "+" : "−"}${Math.round(Math.abs(value) * 100)}%`;
+const plural = (value: number, word: string) => `${word}${Math.abs(value) === 1 ? "" : "s"}`;
 
 /** The plain gameplay lines a popout shows for one effect object. */
 export function describeEffects(effect: NodeEffect): string[] {
   const lines: string[] = [];
   if (effect.accuracy) lines.push(`${signedPct(effect.accuracy)} hit chance`);
-  if (effect.damageBonus) lines.push(`${signed(effect.damageBonus, 2).replace(/\.?0+$/, "")} damage on every hit that lands`);
+  if (effect.damageBonus) lines.push(`${signed(effect.damageBonus, 2)} damage on every hit that lands`);
   if (effect.incoming !== undefined && effect.incoming !== 1) {
     lines.push(effect.incoming < 1 ? `${signedPct(effect.incoming - 1)} damage taken` : `${signedPct(effect.incoming - 1)} damage taken (the cost half)`);
   }
-  if (effect.toughness) lines.push(`${signed(effect.toughness)} hits before Down`);
-  if (effect.extraPlates) lines.push(`${signed(effect.extraPlates)} armour plate${Math.abs(effect.extraPlates) === 1 ? "" : "s"} carried`);
-  if (effect.dyingClock) lines.push(`${signed(effect.dyingClock)} rounds on your Dying clock`);
+  if (effect.toughness) lines.push(`${signed(effect.toughness)} ${plural(effect.toughness, "hit")} before Down`);
+  if (effect.extraPlates) lines.push(`${signed(effect.extraPlates)} armour ${plural(effect.extraPlates, "plate")} carried`);
+  if (effect.dyingClock) lines.push(`${signed(effect.dyingClock)} ${plural(effect.dyingClock, "round")} on your Dying clock`);
   if (effect.initiative) lines.push(`${signedPct(effect.initiative)} initiative — you act earlier`);
   if (effect.castCost !== undefined && effect.castCost !== 1) lines.push(`${signedPct(effect.castCost - 1)} cast costs`);
   if (effect.resourceCap) lines.push(`${signed(effect.resourceCap)} maximum pool / charges`);
