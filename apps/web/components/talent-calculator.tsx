@@ -45,7 +45,7 @@ function indexClass(tree: TalentClass) {
   return byId;
 }
 
-export function TalentCalculator() {
+export function TalentCalculator({ constellationArt = {} }: { constellationArt?: Record<string, string | null> }) {
   const [state, setState] = useState<BuildState>(defaultState);
   const [copied, setCopied] = useState(false);
 
@@ -164,8 +164,14 @@ export function TalentCalculator() {
 
       <div className="talent-constellation-note">
         <b>{tree.constellation}</b> — {tree.constellationNote}
-        <span className="talent-artslot">constellation art slot — Sol · <code>private/codex-art/talents/{tree.slug}.png</code></span>
+        {constellationArt[tree.slug]
+          ? null
+          : <span className="talent-artslot">constellation art slot — Sol · <code>private/codex-art/talents/{tree.slug}.png</code></span>}
       </div>
+      {constellationArt[tree.slug] ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img alt={`${tree.name} constellation — ${tree.constellation}`} className="talent-constellation-art" src={constellationArt[tree.slug] ?? undefined} />
+      ) : null}
 
       <div className="talent-board">
         <div className="talent-grid">

@@ -69,7 +69,7 @@ async function main() {
 
   const collections = ["characters", "factions", "regions", "species", "items", "events", "themes", "rules", "systems", "companion-missions"];
   const surfaces = [
-    "/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises",
+    "/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises", "/codex/talents",
     ...collections.map((c) => `/codex/library/${c}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}/flow`),

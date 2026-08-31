@@ -28,6 +28,8 @@
 .talent-artslot { float: right; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); opacity: .8; }
 .talent-artslot code { font-size: 9.5px; }
 
+.talent-constellation-art { width: 100%; max-height: 300px; object-fit: cover; border: 1px solid var(--line); display: block; }
+
 .talent-board { overflow-x: auto; border: 1px solid var(--line); padding: 16px; background: rgba(12, 16, 13, .35); }
 .talent-grid { display: grid; grid-template-columns: repeat(6, minmax(168px, 1fr)); gap: 12px; min-width: 1020px; }
 .talent-branch h3 { font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 8px; }

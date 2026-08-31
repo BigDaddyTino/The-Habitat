@@ -26,6 +26,8 @@ import path from "node:path";
 export const codexArtKinds = {
   systems: "systems",
   timeline: "timeline",
+  // The Eight Trees: one constellation per class, worn by /codex/talents.
+  talents: "talents",
   // The dossier art that used to sit in public/images. Each one is a
   // directory under private/codex-art named for the shelf it serves.
   characters: "characters",
