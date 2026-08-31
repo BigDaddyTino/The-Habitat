@@ -1,0 +1,100 @@
+SOL 5.6 — CONSTELLATION RUN: THE EIGHT TREES' CLASS CONSTELLATIONS
+===================================================================
+
+Eight single still images, one per character class, for the talent
+calculator at /codex/talents. This is NOT the cinematic-realism brief you
+ran for the codex dossiers — these are STAR CHARTS. Read the difference
+before you generate anything.
+
+THE JOB
+-------
+One constellation image per class, saved at EXACTLY these paths (the
+filename is the wiring — the calculator wears the file on the next
+reload, nothing else to register):
+
+  apps/web/private/codex-art/talents/bastion.png
+  apps/web/private/codex-art/talents/spector.png
+  apps/web/private/codex-art/talents/conduit.png
+  apps/web/private/codex-art/talents/surger.png
+  apps/web/private/codex-art/talents/archon.png
+  apps/web/private/codex-art/talents/procurator.png
+  apps/web/private/codex-art/talents/cypherist.png
+  apps/web/private/codex-art/talents/maverick.png
+
+FORMAT
+------
+- Landscape 1672x941 PNG, house convention. The calculator crops to a
+  wide banner (center-weighted, ~300px tall on screen) — keep the whole
+  constellation inside the middle two-thirds vertically.
+- One image per class. No variants, no contact sheets.
+
+THE STYLE — A STAR CHART, NOT A SCENE
+-------------------------------------
+- Ground: near-black charcoal-green, matching the codex UI's dark panels.
+  A breath of nebula haze is allowed if it stays dim.
+- The class image is drawn AS A CONSTELLATION: points of light joined by
+  hairline strokes, the way a star atlas draws a hunter from eleven stars.
+  The viewer should see the shape the way they see Orion — suggested,
+  not illustrated. NO drawn figures, NO rendered objects, NO scenery.
+- Stars: Essence cyan-white, varying sizes (capstones read as the
+  brightest stars). Linework: faint brass, one hairline weight.
+- Each chart carries ONE dim VIOLET cluster of seven small stars along
+  its lower edge, slightly apart from the main figure — the corrupted
+  branch. Same position language on all eight, the seventh star faintest.
+- The eight are a SET: same ground, same star rendering, same line
+  weight, same violet cluster convention. Design the grammar once on
+  Bastion and hold it.
+
+HARD PROHIBITIONS
+-----------------
+- NO text, numbers, labels, glyphs, or fake script anywhere.
+- NO figures, faces, creatures, or objects rendered as art — only star
+  points and connecting lines forming the suggestion.
+- No lens flares, no bright nebula soup, no astrology symbols.
+
+THE EIGHT CONSTELLATIONS — what each figure suggests
+----------------------------------------------------
+1. bastion — THE GATE: a gatehouse arch. The core spine is the keystone
+   course; two towers (Shieldwall, Breacher); a ward-light star above the
+   arch (Aegis); heavy foundation stars (Juggernaut, Last Stand).
+2. spector — THE LONG EYE: a rifle in profile, stock to muzzle. Branches
+   hang like scope rings and rail fittings. Two nearly-twin stars at the
+   muzzle — one bright (the loud round), one barely there (the quiet one).
+3. conduit — THE LANTERN: a six-rayed lantern; the core is the flame, each
+   branch a ray. Two stars inside the flame itself sit close but never
+   touch — the deep reservoir and the live wire.
+4. surger — THE PULSE: a heartbeat trace crossing a faint body silhouette
+   (suggested by outline stars only). Branches hang off each spike. The
+   biggest spike carries the fork pair.
+5. archon — THE CHORUS: a raised hand ringed by orbiting shapes — a beast
+   form, a machine form, a summoned form, a still form — each orbit one
+   branch, all drawn from the same star grammar.
+6. procurator — THE LEDGER: balance scales over a faint map grid. The core
+   spine is the beam; branches hang from both pans; two stars at the
+   fulcrum — the one who stands on the field, the one who stands above it.
+7. cypherist — THE CIRCUIT: a closed circuit diagram; the core is the
+   power rail, each branch a parallel circuit. FOUR switch stars (this is
+   the only chart with two fork pairs) drawn as breaks in the line that
+   only bridge one way.
+8. maverick — THE CROSSED IRONS: two pistols crossed at the cylinder. The
+   core climbs the X where they meet; branches fan out like ejected
+   casings; the two muzzle stars are the fork — both iron, or iron and
+   ember (make the ember muzzle's star faintly warm, the one warm note
+   allowed in the set).
+
+SELF-QA BEFORE YOU REPORT DONE (view every image at full resolution)
+--------------------------------------------------------------------
+- Zero legible text or symbols in any frame.
+- All eight sit side by side as one atlas — same ground, stars, lines.
+- Violet seven-star cluster present and consistent on every chart.
+- The figure reads as a constellation (points + lines), never a painting.
+- Files at the exact paths above, 1672x941 PNG.
+Then reload /codex/talents per class and confirm each banner wears its
+chart and crops cleanly. Deliver a one-line-per-image ledger in
+Docs/SOL56_TALENT_ART_LEDGER.md. Touch nothing else — not the codex, not
+the database, not the calculator's code.
+
+LATER, NOT NOW: the fourteen new trainer portraits (the Gun, Serrat, the
+Resident, the Unridden and the rest) wait until the talent-system codex
+integration writes their dossiers — they will arrive on the standard
+character-art manifest then.
