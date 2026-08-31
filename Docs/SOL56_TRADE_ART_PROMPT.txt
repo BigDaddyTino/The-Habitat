@@ -1,0 +1,288 @@
+SOL 5.6 — THE NINE TRADES ART RUN
+Date issued: 2026-08-31
+Source of truth: apps/web/lib/professions.ts (trades, seats, kinds) and /codex/professions.
+Deliverables ledger: on completion write Docs/SOL56_TRADE_ART_LEDGER.md in the same
+format as your talent and trainer ledgers (per-asset prompt blocks, dimensions,
+SHA-256 manifest, QA record, publication-state note).
+
+==============================================================================
+MISSION
+==============================================================================
+
+Two batches.
+
+BATCH A — NINE TRADE PLATES. One emblem image per profession for the trades page.
+NO PEOPLE in these: each plate is the trade itself — a workbench, an instrument,
+a document, a scene of the work with the worker just out of frame. Think of the
+constellation charts' discipline applied to still-life: one readable idea per
+plate, center-safe, no text.
+
+Drop-in paths (they appear on the live page on the next reload):
+  apps/web/private/codex-art/trades/medicine.png
+  apps/web/private/codex-art/trades/refining.png
+  apps/web/private/codex-art/trades/chemistry.png
+  apps/web/private/codex-art/trades/engineering.png
+  apps/web/private/codex-art/trades/logistics.png
+  apps/web/private/codex-art/trades/architecture.png
+  apps/web/private/codex-art/trades/extraction.png
+  apps/web/private/codex-art/trades/culinary.png
+  apps/web/private/codex-art/trades/xenobiology.png
+
+BATCH B — TWENTY-SEVEN SEAT-KEEPER PORTRAITS. The named keepers of the trades'
+regional seats. These are dormant convention-path assets (same publication state
+as the trainer batch): only Mara Quill has an existing canonical CHARACTER
+record; the other twenty-six dossiers are not authored yet, so nothing you stage
+here is new canon — faces, clothing and backgrounds are proposals.
+
+Drop-in path per subject: apps/web/private/codex-art/characters/<slug>.png
+(slugs given per subject below).
+
+Reserved seats (keeper "— seat drawn, keeper unnamed") get NO image. Nine of the
+thirty-six seats are reserved; do not invent their keepers.
+
+==============================================================================
+STANDING DIRECTIONS (owner's, load-bearing, same as your prior runs)
+==============================================================================
+
+- Format: 1672x941 RGB24 PNG, wide cinematic 16:9, center-safe for the
+  directory-card crop (~564x941 center window) and the responsive crop.
+- Style: mature AAA grounded cinematic photorealism; hard-lived production
+  design; cool overcast charcoal / dirty green / wet grey / muted rust / storm
+  blue / bone, one restrained motivated warm practical. Cyan only as contained
+  technology; white-gold only as contained willing light.
+- NO text, letters, numbers, labels, readable papers, logos, insignia, UI,
+  watermarks, borders, split panels.
+- Species and state locks are LOAD-BEARING. Every subject block below names
+  what the keeper IS. Do not soften a nonhuman into a costume, and do not
+  drift a stated look toward a default.
+- THE ROSTER RULING (owner, this run): the bench is not all humanoid, and the
+  humanoids are NOT all white. Each human subject's block states their look —
+  skin, features, region — and that statement is a lock, not a suggestion.
+- Any female portraits have appealing features — we like our women to look
+  good. This coexists with the species and ethnicity locks; it never overrides
+  them.
+- References are style-only. Never copy an identity.
+
+==============================================================================
+BATCH A — THE NINE PLATES, subject by subject
+==============================================================================
+
+medicine.png — THE HEALER'S TABLE. A field surgery mid-pause: instrument roll
+open, one basin, sutures, a phase-reading instrument with its dial turned away
+from camera (unreadable), a cot's edge. The patient just left alive. One warm
+practical over the table.
+
+refining.png — THE GRADE. A refinery bench: containment glass racked by size,
+one crate open with graded doses seated in straw, a brass scale, and one sealed
+crate apart from the others — the one whose provenance somebody read and did
+not say aloud. No glow beyond a contained cool shimmer in the glass.
+
+chemistry.png — THE BENCH. A working chemistry bench, near-future not fantasy:
+burners, condensers, a rack of field vials, one stormglass shard clamped for
+stabilising, faint fume. Everything labelled with BLANK tags (no text law).
+
+engineering.png — THE HALL PIECE. A machinist's bench holding one beautiful
+finished piece — a sealed infusion rig — surrounded by the honest mess that
+made it: swarf, calipers, a prosthetic hand clamped mid-fit, tool wall behind.
+
+logistics.png — THE LEDGER AND THE HORN. A quartermaster's table: a thick
+closed ledger, dose tins counted into ranks, ammunition boxed and chalk-marked
+with BLANK marks, and hanging above the table a battered signal horn. Everything
+squared to the grain of the wood.
+
+architecture.png — THE WALL. A fortification section under construction at
+dusk: the ninth course going in, load-path bracing exposed, a collapse-plan
+sand table in the foreground with BLANK markers. Scale figures absent; their
+scaffolds present.
+
+extraction.png — THE PARTIAL TAKE. A claim face where the vein is half-worked
+and deliberately stopped: clean tool marks ending at a chalk line (BLANK), the
+living seam left intact, a rack of samples, one lantern. The restraint IS the
+image.
+
+culinary.png — THE REAL MEAL. A long camp table just before the company sits:
+steam off real food, mismatched tin plates set with care, one good knife, bread
+broken not cut, rain on the canvas above. The only warm image in the nine —
+earn it.
+
+xenobiology.png — THE HANDLER'S YARD. A husbandry yard at first light: an open
+travel crate, harness and plate-cutting tools on a rail, feed buckets, and one
+large animal presence implied — shadow, dented rail, wet prints — without the
+animal in frame.
+
+==============================================================================
+BATCH B — THE TWENTY-SEVEN KEEPERS, subject by subject
+==============================================================================
+
+--- MEDICINE ---
+
+registrar-oduya — Registrar Oduya. One tall adult Igbo man, he/him, dark
+skin, grey locks, harbour registrar's practical clothing, standing at the
+medicine book's lectern (book CLOSED, unreadable). Reads sponsors like
+invoices: the expression is the audit. Fully human.
+
+the-ansel-sisters — the Ansel Sisters. ONE Bloommarked body that learned to be
+in two places: two identical clinician figures in one frame whose symmetry is
+slightly too exact — same stance mirrored, same breath — with subtle adaptive
+tells shared between them (a vine-grain sheen along matching forearms). NOT
+twins, NOT a copy-paste: one organism, two stations. Clinical, composed, wrong
+only on the second look. No gore, no body horror.
+
+matron-ayida — Matron Ayida. One broad adult marshwoman, she/her, very dark
+skin, strong handsome features, clan wraps in marsh-dyed cloth, standing in a
+stilt-clinic doorway. Her thumb is inked from signing. Fully human.
+
+--- REFINING ---
+
+the-tally — the Tally. A MACHINE OBJECT PORTRAIT, never humanoid: an Aegis
+assay engine older than the harbour — brass drums, one great lens, a dispute
+bell, wooden housing polished by a century of hands. It fills its counting
+room like furniture that outranks people. No face, no limbs, no anthropomorphic
+cues.
+
+ferren-of-the-third-compact — Ferren of the Third Compact. One adult desert
+woman, she/her, sun-blackened skin, striking sharp-featured face, compact road
+clothing, grading doses by lamplight on a moving wagon bench. Fully human.
+
+the-wet-assayer — the Wet Assayer. A RISEN who kept his trade: a drowned man
+returned — waterlogged pallor, dark venous shadow, calm and terribly still —
+at a salvage bench on League water, grading stock with careful dead hands. He
+is not a monster and not rotting spectacle: he is a tradesman who happens to
+have died. Understated. The horror is that the work is good.
+
+--- CHEMISTRY ---
+
+doctor-anaya-chandrasekar — Doctor Anaya Chandrasekar. One adult South Asian
+woman, she/her, silver-braided dark hair, elegant intelligent presence,
+Institute chair's tailored civilian formal, in a bench-lined office. Fully
+human.
+
+grandmother-sedge — Grandmother Sedge. A SUPERNATURAL wearing a grandmother's
+shape: a small shawled figure at a marsh bench whose details refuse to resolve
+— shadow where a face should settle, hands right in count but wrong in joint,
+reeds bending toward her. Older than the Institute. Kindly and absolutely not
+human. No monster reveal; the wrongness stays quiet.
+
+powder-warden-tsering — Powder Warden Tsering. One adult woman of Himalayan
+features, she/her, wind-burned cheeks, braided black hair, mountain munitions
+warden's heavy coat, at a powder magazine door with BLANK stencils. Fully
+human.
+
+--- ENGINEERING ---
+
+hallmaster-adaeze-quill — Hallmaster Adaeze Quill. One stately adult West
+African woman, she/her, dark skin, silvering close-cropped hair, hall judge's
+leather apron over good clothes, standing over a submitted piece with judgment
+not yet spoken. Fully human.
+
+the-guns-armourer — the Gun's Armourer. One adult CHARTERED at a Southside
+bench: purpose-built HUMAN silhouette (fully human skin, face, hands — a
+person, never an android; no seams, no chrome), androgynous presentation,
+economy in every motion, workbench immaculate where the room is not. The
+serial-before-a-name bearing does the talking.
+
+forgemistress-ada-krail — Forgemistress Ada Krail. One adult mountain woman,
+she/her, pale soot-scarred skin, strong forge-built frame, handsome severe
+face, at an anvil in a hall cut into living rock. Fully human.
+
+--- LOGISTICS ---
+
+harbourmaster-teuila-wren — Harbourmaster Teuila Wren. One big adult Pacific
+Islander woman, she/her, brown skin, tattooed forearms in island linework
+(abstract, no readable symbols), warm commanding laugh caught mid-order on a
+quay, manifest board (BLANK) under one arm. Fully human.
+
+caravan-mother-ilyas — Caravan-Mother Ilyas. One adult desert matriarch,
+she/her, hawk-faced and handsome, deep-brown skin, indigo veils and road
+leathers, standing at a wagon line at dawn. Fully human.
+
+the-ledger-of-brine — the Ledger of Brine. NO PERSON: an ECHO in a hull-mounted
+Forge Core — the count-house ship's heart. Show the Core's rings set into a
+ship's timber hull-space, contained white-gold light at center, and around it
+the League's counting room: strung shell-tokens, knotted cords, closed books.
+The light is the accountant. Absolute exclusions: no figure, face, silhouette,
+spirit shape.
+
+--- ARCHITECTURE ---
+
+surveyor-ines-alarcon — Surveyor Inés Alarcón. One adult RETURNEE woman,
+she/her: olive-skinned, dark-eyed, Iberian features, unhurried long-lived
+bearing, old observant eyes. Explicitly not an elf: rounded human ears,
+ordinary non-glowing eyes. Vault-survey gear and a map case (maps unreadable),
+in a lamplit undercity gallery. Beautiful in the way of somebody with all the
+time in the world.
+
+stonemother-ravn — Stonemother Ravn. One adult northern woman, she/her, pale
+weathered flint-eyed face, grey-blonde braids, nine-generation wall behind her
+in mountain light. Fully human.
+
+warden-builder-naledi-osk — Warden-Builder Naledi Osk. One wiry adult southern
+African woman, she/her, very dark skin, close-cropped hair, ranger-builder kit,
+beside a living-lumber wall that is visibly growing along her lashing lines.
+Fully human.
+
+--- EXTRACTION ---
+
+quotamaster-jexa-hale — Quotamaster Jexa Hale. One adult CHARTERED woman:
+purpose-built HUMAN silhouette (a person, never an android — no seams, no
+chrome), she/her, attractive in an exact, calibrated way, Aegis field-office
+clothing, tally counter in hand, at a Reach extraction head. The counting
+never stops behind her eyes.
+
+the-seam-witch — the Seam Witch. A BEAST, never humanoid: a blind burrowing
+animal the size of a wagon, surfaced to the shoulders at a spoil-heap in
+desert starlight — plated blunt head, no eyes, sensory whisker-fans, ore-dust
+ground into its hide. Caravan offerings (carrion, water) laid at a respectful
+distance. Ancient, calm, utterly indifferent.
+
+delver-ossian-krail — Delver Ossian Krail. One adult mountain man, he/him,
+pale, quiet-faced, half his hair gone to rockdust, at a shaft mouth with a
+hand on the rock as if listening. Fully human.
+
+--- CULINARY ---
+
+auntie-meridian — Auntie Meridian. One round adult Black matriarch, she/her,
+iron-eyed and magnificent, apron over good cloth, her harbour kitchen behind
+her in full service — the one warm interior of the batch. Fully human.
+
+first-cook-nzinga — First-Cook Nzinga. One adult clanswoman, she/her, deep
+brown skin, scar-knuckled strong hands, marsh kitchen of live tanks and
+hanging herbs, handsome fierce face mid-instruction. Fully human.
+
+the-galley-saint — the Galley Saint. One whip-lean adult islander man, he/him,
+brown skin, salt-white hair, at a single swinging stove in a ship's galley,
+weather heeling everything but him. Fully human.
+
+--- XENOBIOLOGY ---
+
+mara-quill — Lodge-Keeper Mara Quill. EXISTING CANONICAL CHARACTER (slug
+mara-quill, CANON, human, Warden tracker, Bloomfall Reach lodge). One adult
+human woman per her dossier; check the record before staging and contradict
+nothing it says. Lodge interior, the real census book (CLOSED) on its chain.
+
+the-heron-speaker — the Heron Speaker. A BEAST, and specifically A HERON: one
+grey heron standing in dawn shallows where the clans' beast-work happens —
+pens and handling rails behind it, handlers deferring to it at a distance.
+Ordinary heron anatomy, extraordinary composure. It is watching the work the
+way a master watches an apprentice. No glow, no aura, no size change: the
+joke and the truth are that it is just a heron, and it is in charge.
+
+drover-ashkani — Drover Ashkani. One adult desert man, he/him, copper skin,
+kohl-rimmed eyes against glare, road-worn drover's layers, moving a herd
+through a waterless pan at dusk. Fully human.
+
+==============================================================================
+QA GATES (your ledger must attest each)
+==============================================================================
+
+1. Every asset 1672x941 RGB24 PNG; full-resolution and center-crop review done.
+2. Batch A: zero people, zero readable text or symbols.
+3. Batch B: every species/kind lock held exactly — the Tally has no face, the
+   Ledger of Brine has no figure, the Heron Speaker is an ordinary heron, the
+   Ansel Sisters are one organism, the Chartered are people not androids, the
+   Returnee is not an elf, the Risen is a tradesman not a spectacle.
+4. The roster ruling held: the humanoid roster reads as the mixed world the
+   subject blocks describe — no drift toward a default look.
+5. Reserved seats received no images. Mara Quill contradicts nothing canonical.
+6. No StoryEntry, database, taxonomy, or production-state changes; Batch B
+   remains dormant convention-path assets pending authored dossiers.

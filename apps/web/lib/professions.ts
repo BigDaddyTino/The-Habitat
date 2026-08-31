@@ -94,6 +94,17 @@ export type Seat = {
   ground: string;
   /** Who holds the seat — the gate with a face. */
   keeper: string;
+  /**
+   * Future codex slug for the keeper — the address their dossier and their
+   * portrait will live at. Absent on reserved seats.
+   */
+  keeperSlug?: string;
+  /**
+   * What the keeper IS — a species lock, load-bearing for art and dossiers.
+   * Owner's ruling: the bench is not all humanoid, and the humanoids are
+   * not all white. "human" kinds carry their look in the note.
+   */
+  kind?: string;
   /** What the keeper is like, in one line. */
   note: string;
   /** The seat-exclusive blueprint. */
@@ -227,9 +238,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Registrar Havel", note: "Signs the harbour's medicine book and reads sponsors like invoices.", teaches: { name: "Dock lung", does: ["Cure the harbour's own disease — the wet-lung the clinics call chronic", "Cures it in 3 days; the clinics charge for years"] } },
-      { ground: "bloomfall-reach", keeper: "the Ansel Sisters", note: "Two clinicians, one signature. Nobody has ever met both.", teaches: { name: "Bloom debridement", does: ["Cut adaptive growth without waking it: mutation-driven wounds close clean", "−50% infection from Reach-born injuries"] } },
-      { ground: "the-verdant-marsh", keeper: "Matron Ecke", note: "Clan medicine. She signs with a thumbprint and forgets nothing.", teaches: { name: "Marsh antivenin", does: ["Immunity to the marsh's whole venom table for 12 hours, from a field brew"] } },
+      { ground: "port-arcadia", keeper: "Registrar Oduya", keeperSlug: "registrar-oduya", kind: "human", note: "A tall, grey-locked Igbo man who signs the harbour's medicine book and reads sponsors like invoices.", teaches: { name: "Dock lung", does: ["Cure the harbour's own disease — the wet-lung the clinics call chronic", "Cures it in 3 days; the clinics charge for years"] } },
+      { ground: "bloomfall-reach", keeper: "the Ansel Sisters", keeperSlug: "the-ansel-sisters", kind: "bloommarked", note: "Two clinicians, one signature, one Bloommarked body that learned to be in two places. Nobody has ever met both, because there is no both.", teaches: { name: "Bloom debridement", does: ["Cut adaptive growth without waking it: mutation-driven wounds close clean", "−50% infection from Reach-born injuries"] } },
+      { ground: "the-verdant-marsh", keeper: "Matron Ayida", keeperSlug: "matron-ayida", kind: "human", note: "Clan medicine — a broad, dark-skinned marshwoman who signs with a thumbprint and forgets nothing.", teaches: { name: "Marsh antivenin", does: ["Immunity to the marsh's whole venom table for 12 hours, from a field brew"] } },
       { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "The book already has a spine. Somebody will hold it.", teaches: { name: "— reserved", does: ["The far shore's medicine is not written yet, and the seat is kept open on purpose"] } },
     ],
   },
@@ -274,9 +285,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Assessor Brandt", note: "Aegis's harbour man. His stamp is worth more than his word.", teaches: { name: "Harbour assay", does: ["Grade a sealed crate without opening it — 85% accurate through the boards"] } },
-      { ground: "the-dust-roads", keeper: "Ferren of the Third Compact", note: "Grades by starlight on a moving wagon and has never been wrong twice.", teaches: { name: "Dry storage", does: ["Doses keep 3× longer in desert cache — no glass, no cooling, no loss"] } },
-      { ground: "the-free-islands", keeper: "the Wet Assayer", note: "No name, one bench, League water. Everything that cannot be graded legally is graded here.", teaches: { name: "Salvage grade", does: ["Water-damaged and contested stock recovered to grade at 70%", "No questions asked, in either direction"] } },
+      { ground: "port-arcadia", keeper: "the Tally", keeperSlug: "the-tally", kind: "machine", note: "An Aegis assay engine older than the harbour it sits in — brass drums, one lens, a bell for disputes. Its stamp outranks every hand in the building.", teaches: { name: "Harbour assay", does: ["Grade a sealed crate without opening it — 85% accurate through the boards"] } },
+      { ground: "the-dust-roads", keeper: "Ferren of the Third Compact", keeperSlug: "ferren-of-the-third-compact", kind: "human", note: "A sun-black desert woman who grades by starlight on a moving wagon and has never been wrong twice.", teaches: { name: "Dry storage", does: ["Doses keep 3× longer in desert cache — no glass, no cooling, no loss"] } },
+      { ground: "the-free-islands", keeper: "the Wet Assayer", keeperSlug: "the-wet-assayer", kind: "risen", note: "A refiner who drowned with his bench and climbed back to it. No name, League water, and everything that cannot be graded legally is graded here — the dead keep no ledgers for the law.", teaches: { name: "Salvage grade", does: ["Water-damaged and contested stock recovered to grade at 70%", "No questions asked, in either direction"] } },
       { ground: "bloomfall-reach", keeper: "— seat drawn, keeper unnamed", note: "The Reach's take mutates in the crate. Somebody will learn to grade that.", teaches: { name: "— reserved", does: ["Living-grade is not written yet; the Reach is still deciding what it produces"] } },
     ],
   },
@@ -319,9 +330,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Doctor Imre Voss", note: "Institute chair, Aegis-funded, honest about neither.", teaches: { name: "Vault reagents", does: ["Access to pre-Drain stock under the old quarters — mixes at +20% potency"] } },
-      { ground: "the-verdant-marsh", keeper: "Grandmother Sedge", note: "Never took the licence. The Institute sends students to her anyway, quietly.", teaches: { name: "Nature-drawn base", does: ["Mixes from living stock instead of refined — half cost, and the ladder never notices them"] } },
-      { ground: "the-high-holdfasts", keeper: "the Powder Warden", note: "Keeps the mountains' munitions book and a personal grudge against imprecision.", teaches: { name: "Cold synthesis", does: ["Mixing at altitude and frost without loss — no heat source, full yield"] } },
+      { ground: "port-arcadia", keeper: "Doctor Anaya Chandrasekar", keeperSlug: "doctor-anaya-chandrasekar", kind: "human", note: "Institute chair — a silver-braided South Asian woman, Aegis-funded, honest about neither.", teaches: { name: "Vault reagents", does: ["Access to pre-Drain stock under the old quarters — mixes at +20% potency"] } },
+      { ground: "the-verdant-marsh", keeper: "Grandmother Sedge", keeperSlug: "grandmother-sedge", kind: "supernatural", note: "Never took the licence, and was mixing before there was an Institute to refuse. Whatever wears that shawl is older than the marsh's name for it. Students are sent to her anyway, quietly.", teaches: { name: "Nature-drawn base", does: ["Mixes from living stock instead of refined — half cost, and the ladder never notices them"] } },
+      { ground: "the-high-holdfasts", keeper: "Powder Warden Tsering", keeperSlug: "powder-warden-tsering", kind: "human", note: "A wind-burned Himalayan-featured woman who keeps the mountains' munitions book and a personal grudge against imprecision.", teaches: { name: "Cold synthesis", does: ["Mixing at altitude and frost without loss — no heat source, full yield"] } },
       { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Whatever the far shore burns for fuel, somebody there mixes with it.", teaches: { name: "— reserved", does: ["The far shore's shelf is not written yet; the seat holds its place"] } },
     ],
   },
@@ -366,9 +377,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Hallmaster Quill", note: "Runs the harbour hall. Judged the piece that got a man killed for plagiarising it.", teaches: { name: "Harbour proofing", does: ["Salt-and-storm sealing: equipment stops degrading at sea entirely"] } },
-      { ground: "southside", keeper: "the Gun's Armourer", note: "Nobody knows the name. Everybody knows the work.", teaches: { name: "The quiet action", does: ["A firearm silent to 10m without losing a grain of power", "Southside will not teach it twice"] } },
-      { ground: "the-high-holdfasts", keeper: "Forgemistress Ada Krail", note: "Her hall is a mountain's heart and her standards are its bedrock.", teaches: { name: "Cold-forge lamination", does: ["Plates +1 hit before breaking, forged in freezing air", "The holdfasts' plate, and nobody else's"] } },
+      { ground: "port-arcadia", keeper: "Hallmaster Adaeze Quill", keeperSlug: "hallmaster-adaeze-quill", kind: "human", note: "A stately dark-skinned West African woman who runs the harbour hall. Judged the piece that got a man killed for plagiarising it.", teaches: { name: "Harbour proofing", does: ["Salt-and-storm sealing: equipment stops degrading at sea entirely"] } },
+      { ground: "southside", keeper: "the Gun's Armourer", keeperSlug: "the-guns-armourer", kind: "chartered", note: "Purpose-built hands and a serial before a name — Southside forgave the origin because of the work. Nobody knows the name. Everybody knows the work.", teaches: { name: "The quiet action", does: ["A firearm silent to 10m without losing a grain of power", "Southside will not teach it twice"] } },
+      { ground: "the-high-holdfasts", keeper: "Forgemistress Ada Krail", keeperSlug: "forgemistress-ada-krail", kind: "human", note: "A pale, soot-scarred mountain woman. Her hall is a mountain's heart and her standards are its bedrock.", teaches: { name: "Cold-forge lamination", does: ["Plates +1 hit before breaking, forged in freezing air", "The holdfasts' plate, and nobody else's"] } },
       { ground: "the-ocean", keeper: "— seat drawn, keeper unnamed", note: "Somewhere on the lanes is a ship-engineer worth a book signature. The lanes are not written.", teaches: { name: "— reserved", does: ["Marine engineering waits on the sea lanes, with Pilotage"] } },
     ],
   },
@@ -411,9 +422,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Harbourmaster Wren", note: "Pearl's dockside ledger walks and talks. Nothing crosses the quay unsigned.", teaches: { name: "Bonded warehouse", does: ["Stores held in the harbour's bond survive theft, fire and seizure — on paper, and paper wins"] } },
-      { ground: "the-dust-roads", keeper: "Caravan-Mother Ilyas", note: "Runs the compacts' longest route. Has buried three partners and zero cargoes.", teaches: { name: "Dead reckoning freight", does: ["Route a convoy across unmapped ground with zero loss — the desert signs your book itself"] } },
-      { ground: "the-free-islands", keeper: "the Ledger of Brine", note: "The League's floating count-house. It moves; the debts do not.", teaches: { name: "Grey manifest", does: ["Move cargo no charter would touch, clean at both ends", "The League's price is that you never ask theirs"] } },
+      { ground: "port-arcadia", keeper: "Harbourmaster Teuila Wren", keeperSlug: "harbourmaster-teuila-wren", kind: "human", note: "A big, laughing Pacific-islander woman — Pearl's dockside ledger walks and talks, and nothing crosses the quay unsigned.", teaches: { name: "Bonded warehouse", does: ["Stores held in the harbour's bond survive theft, fire and seizure — on paper, and paper wins"] } },
+      { ground: "the-dust-roads", keeper: "Caravan-Mother Ilyas", keeperSlug: "caravan-mother-ilyas", kind: "human", note: "A hawk-faced desert matriarch in indigo veils. Runs the compacts' longest route; has buried three partners and zero cargoes.", teaches: { name: "Dead reckoning freight", does: ["Route a convoy across unmapped ground with zero loss — the desert signs your book itself"] } },
+      { ground: "the-free-islands", keeper: "the Ledger of Brine", keeperSlug: "the-ledger-of-brine", kind: "echo", note: "An Echo in a hull-mounted Forge Core — the League's count-house is a ship, and its accountant is a light that has never once been wrong about a debt. The ship moves; the debts do not.", teaches: { name: "Grey manifest", does: ["Move cargo no charter would touch, clean at both ends", "The League's price is that you never ask theirs"] } },
       { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Every shore has a quartermaster. This one is not written yet.", teaches: { name: "— reserved", does: ["The far shore's supply lines wait for their writer"] } },
     ],
   },
@@ -456,9 +467,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "the Vault Surveyor", note: "Keeps the map of the sealed refinery vaults under the old quarters. Parts of it are for sale.", teaches: { name: "Undercity purchase", does: ["Build downward safely into pre-Drain works — basements, tunnels, vault access"] } },
-      { ground: "the-high-holdfasts", keeper: "Stonemother Ravn", note: "Her family has held one wall for nine generations. It has never fallen.", teaches: { name: "The ninth course", does: ["The holdfasts' bonding course: walls +1 assault survived beyond their rating"] } },
-      { ground: "bloomfall-reach", keeper: "Warden-Builder Osk", note: "Builds in country that grows back overnight. His walls negotiate.", teaches: { name: "Living lumber", does: ["Build with adaptive growth instead of against it — structures self-repair 10% a day"] } },
+      { ground: "port-arcadia", keeper: "Surveyor Inés Alarcón", keeperSlug: "surveyor-ines-alarcon", kind: "returnee", note: "A Returnee — olive-skinned, unhurried, older than the seals on the vaults she maps, because she watched them being poured. Parts of her map are for sale.", teaches: { name: "Undercity purchase", does: ["Build downward safely into pre-Drain works — basements, tunnels, vault access"] } },
+      { ground: "the-high-holdfasts", keeper: "Stonemother Ravn", keeperSlug: "stonemother-ravn", kind: "human", note: "A weathered, flint-eyed northern woman. Her family has held one wall for nine generations; it has never fallen.", teaches: { name: "The ninth course", does: ["The holdfasts' bonding course: walls +1 assault survived beyond their rating"] } },
+      { ground: "bloomfall-reach", keeper: "Warden-Builder Naledi Osk", keeperSlug: "warden-builder-naledi-osk", kind: "human", note: "A wiry, dark-skinned southern-African woman who builds in country that grows back overnight. Her walls negotiate.", teaches: { name: "Living lumber", does: ["Build with adaptive growth instead of against it — structures self-repair 10% a day"] } },
       { ground: "the-verdant-marsh", keeper: "— seat drawn, keeper unnamed", note: "The clans build on water and have never written down how.", teaches: { name: "— reserved", does: ["Marsh foundations wait for the clans' writer"] } },
     ],
   },
@@ -501,9 +512,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "bloomfall-reach", keeper: "Quotamaster Jexa Hale", note: "Aegis's Reach office. Counts what the Reach grows back and pretends not to notice it growing.", teaches: { name: "Bloom harvest", does: ["Take adaptive stock live and stable — the Reach's variants, worth 5× ordinary take"] } },
-      { ground: "the-dust-roads", keeper: "the Seam Witch", note: "Finds water and ore where surveys find nothing. The compacts pay her in silence.", teaches: { name: "Dry farming", does: ["Yield off ground the maps call dead — the desert's own agriculture"] } },
-      { ground: "the-high-holdfasts", keeper: "Delver Ossian Krail", note: "The Forgemistress's brother. Digs where the mountain permits and not one span further.", teaches: { name: "Deep-rock reading", does: ["Know a shaft's collapse risk exactly before entering — cave-ins stop being surprises"] } },
+      { ground: "bloomfall-reach", keeper: "Quotamaster Jexa Hale", keeperSlug: "quotamaster-jexa-hale", kind: "chartered", note: "Purpose-built for counting — Aegis's Reach office in one person, serial number filed before her name. Counts what the Reach grows back and pretends not to notice it growing.", teaches: { name: "Bloom harvest", does: ["Take adaptive stock live and stable — the Reach's variants, worth 5× ordinary take"] } },
+      { ground: "the-dust-roads", keeper: "the Seam Witch", keeperSlug: "the-seam-witch", kind: "beast", note: "A blind burrower older than the compacts — a beast the size of a wagon that surfaces where water and ore run. The caravans follow her casts, sign their books at her spoil-heaps, and pay her in carrion and silence.", teaches: { name: "Dry farming", does: ["Yield off ground the maps call dead — the desert's own agriculture"] } },
+      { ground: "the-high-holdfasts", keeper: "Delver Ossian Krail", keeperSlug: "delver-ossian-krail", kind: "human", note: "The Forgemistress's brother — pale, quiet, half his hair gone to rockdust. Digs where the mountain permits and not one span further.", teaches: { name: "Deep-rock reading", does: ["Know a shaft's collapse risk exactly before entering — cave-ins stop being surprises"] } },
       { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Whatever the far shore grows or hides, somebody there works it.", teaches: { name: "— reserved", does: ["The far shore's ground waits for its writer"] } },
     ],
   },
@@ -545,9 +556,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "port-arcadia", keeper: "Auntie Meridian", note: "Her harbour kitchen has fed four coups and catered two. Neutral ground, absolutely enforced.", teaches: { name: "The neutral table", does: ["A meal at which nobody fights — enemies eat together under your roof, and it holds"] } },
-      { ground: "the-verdant-marsh", keeper: "First-Cook Brannagh", note: "Clan tables. Everything on them was alive this morning and most of it argued.", teaches: { name: "The marsh table", does: ["Cook the marsh's own venom table safe — delicacies from what kills other people's cooks"] } },
-      { ground: "the-free-islands", keeper: "the Galley Saint", note: "One ship, one stove, and a reputation the whole League defers to.", teaches: { name: "Sea-legs supper", does: ["Meals that hold down in any weather — seasickness and fatigue penalties erased for a day"] } },
+      { ground: "port-arcadia", keeper: "Auntie Meridian", keeperSlug: "auntie-meridian", kind: "human", note: "A round, iron-eyed Black matriarch whose harbour kitchen has fed four coups and catered two. Neutral ground, absolutely enforced.", teaches: { name: "The neutral table", does: ["A meal at which nobody fights — enemies eat together under your roof, and it holds"] } },
+      { ground: "the-verdant-marsh", keeper: "First-Cook Nzinga", keeperSlug: "first-cook-nzinga", kind: "human", note: "A scar-knuckled, deep-brown clanswoman. Everything on her tables was alive this morning and most of it argued.", teaches: { name: "The marsh table", does: ["Cook the marsh's own venom table safe — delicacies from what kills other people's cooks"] } },
+      { ground: "the-free-islands", keeper: "the Galley Saint", keeperSlug: "the-galley-saint", kind: "human", note: "A whip-lean brown islander man with salt-white hair — one ship, one stove, and a reputation the whole League defers to.", teaches: { name: "Sea-legs supper", does: ["Meals that hold down in any weather — seasickness and fatigue penalties erased for a day"] } },
       { ground: "southside", keeper: "— seat drawn, keeper unnamed", note: "Southside eats late and talks quietly. Its kitchen is not written yet.", teaches: { name: "— reserved", does: ["The gun quarter's table waits for its writer"] } },
     ],
   },
@@ -591,9 +602,9 @@ export const professions: Profession[] = [
       },
     ],
     seats: [
-      { ground: "bloomfall-reach", keeper: "Lodge-Keeper Mara Quill", note: "Warden tracker. Her lodge book is the Reach's real census.", teaches: { name: "Variant handling", does: ["Work the Reach's adaptive stock safely — mutation tells read before they fire"] } },
-      { ground: "the-verdant-marsh", keeper: "the Heron Speaker", note: "Clan beast-lore. Speaks to the marsh's animals in their own cadence, allegedly.", teaches: { name: "Marsh string", does: ["Bond semi-aquatic stock nobody else works — the marsh's own mounts and watchers"] } },
-      { ground: "the-dust-roads", keeper: "Drover Ashkani", note: "Moves the compacts' herds through country with no water and worse. Loses none.", teaches: { name: "Dry drove", does: ["Animals cross waterless ground at full pace for 3 days — the desert's own husbandry"] } },
+      { ground: "bloomfall-reach", keeper: "Lodge-Keeper Mara Quill", keeperSlug: "mara-quill", kind: "human", note: "Warden tracker — an existing codex character; her lodge book is the Reach's real census.", teaches: { name: "Variant handling", does: ["Work the Reach's adaptive stock safely — mutation tells read before they fire"] } },
+      { ground: "the-verdant-marsh", keeper: "the Heron Speaker", keeperSlug: "the-heron-speaker", kind: "beast", note: "A heron. The clans stopped explaining years ago. It stands where the beast-work happens, it approves or it leaves, and every handler the marsh has ever produced was watched by it first.", teaches: { name: "Marsh string", does: ["Bond semi-aquatic stock nobody else works — the marsh's own mounts and watchers"] } },
+      { ground: "the-dust-roads", keeper: "Drover Ashkani", keeperSlug: "drover-ashkani", kind: "human", note: "A copper-skinned, kohl-eyed desert man who moves the compacts' herds through country with no water and worse. Loses none.", teaches: { name: "Dry drove", does: ["Animals cross waterless ground at full pace for 3 days — the desert's own husbandry"] } },
       { ground: "the-ocean", keeper: "— seat drawn, keeper unnamed", note: "The lanes have their own animals. Their handler is not written yet.", teaches: { name: "— reserved", does: ["The sea's stock waits on the lanes, with Pilotage"] } },
     ],
   },

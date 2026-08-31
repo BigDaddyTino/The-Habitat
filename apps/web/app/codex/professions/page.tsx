@@ -111,6 +111,7 @@ export default async function ProfessionsPage() {
                     return (
                       <li className={reserved ? "is-reserved" : undefined} key={seat.ground}>
                         <b>{ground?.name ?? seat.ground}</b> — {seat.keeper}
+                        {seat.kind && seat.kind !== "human" ? <i className="seat-kind">{seat.kind}</i> : null}
                         <em>{seat.note}</em>
                         {reserved
                           ? <span className="seat-reserved">{seat.teaches.does[0]}</span>

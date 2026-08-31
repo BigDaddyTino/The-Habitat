@@ -86,6 +86,29 @@ test("seats: every trade sits on real grounds, spread across the world", () => {
   }
 });
 
+test("named keepers carry a slug and a kind — the art and the dossiers need the lock", () => {
+  const slugs: string[] = [];
+  for (const trade of professions) {
+    for (const seat of trade.seats) {
+      const reserved = seat.keeper.startsWith("—");
+      if (reserved) continue;
+      assert.ok(seat.keeperSlug, `${trade.slug}/${seat.ground}: ${seat.keeper} has no slug`);
+      assert.match(seat.keeperSlug!, /^[a-z0-9]+(-[a-z0-9]+)*$/, `${trade.slug}/${seat.ground}: bad keeper slug`);
+      assert.ok(seat.kind && seat.kind.length > 0, `${trade.slug}/${seat.ground}: ${seat.keeper} has no kind — the species lock is load-bearing`);
+      slugs.push(seat.keeperSlug!);
+    }
+  }
+  assert.equal(new Set(slugs).size, slugs.length, "keeper slugs collide");
+});
+
+test("the bench is not all humanoid, and it is never all one look — owner's ruling", () => {
+  const named = professions.flatMap((trade) => trade.seats.filter((seat) => !seat.keeper.startsWith("—")));
+  const nonHuman = named.filter((seat) => seat.kind !== "human");
+  const nonHumanoid = named.filter((seat) => ["machine", "echo", "beast", "supernatural", "bloommarked", "risen"].includes(seat.kind ?? ""));
+  assert.ok(nonHuman.length >= 8, `only ${nonHuman.length} keepers are anything but plain human`);
+  assert.ok(nonHumanoid.length >= 5, `only ${nonHumanoid.length} keepers are non-humanoid — mix it up`);
+});
+
 test("every trade reserves at least one seat on unwritten ground — placeholders, not gaps", () => {
   const unwritten = new Set(tradeGrounds.filter((ground) => ground.unwritten).map((ground) => ground.slug));
   for (const trade of professions) {
