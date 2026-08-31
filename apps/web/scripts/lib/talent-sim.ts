@@ -212,6 +212,8 @@ export function mergeEffects(effects: NodeEffect[]): NodeEffect {
   const sum: NodeEffect = {};
   for (const effect of effects) {
     for (const [key, value] of Object.entries(effect)) {
+      // Display-only keys (the hand-written `world` lines) never sum.
+      if (typeof value !== "number" && typeof value !== "boolean") continue;
       if (typeof value === "boolean") { (sum as Record<string, unknown>)[key] = ((sum as Record<string, unknown>)[key] as boolean) || value; continue; }
       const multiplicative = key === "incoming" || key === "castCost" || key === "enemyCastCost";
       const current = (sum as Record<string, number>)[key];

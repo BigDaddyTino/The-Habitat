@@ -60,6 +60,12 @@ export type NodeEffect = Partial<{
   refuseDown: boolean;
   /** Once per fight, spend everything for a burst. */
   burst: number;
+  /**
+   * Concrete out-of-combat numbers, written by hand per node: carry weight,
+   * travel speed, prices, durations, chances. The popout shows them first;
+   * the combat simulations ignore them (mergeEffects skips non-numerics).
+   */
+  world: string[];
 }>;
 
 /** Keys are `<class>/<node id>`, so a renamed node fails the tests loudly. */
@@ -94,7 +100,6 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/knuckle-plate": { damageBonus: 0.3 },
   "bastion/faraday-bones": { hardenedChrome: true },
   "bastion/past-the-governor": { damageBonus: 0.3 },
-  "bastion/come-take-it": {},
   "bastion/walking-armoury": { partyMitigation: 0.12, extraPlates: 1 },
   "bastion/slow-leak": { selfRepair: 0.1 },
   "bastion/field-dressing": { selfRepair: 0.12 },
@@ -135,12 +140,10 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "spector/pocket-thunder": { damageBonus: 0.3 },
   "spector/kill-the-circuit": { control: 0.12 },
   "spector/daisy-chain": { damageBonus: 0.4 },
-  "spector/credential": {},
   "spector/clean-water": { selfRepair: 0.06 },
   "spector/search-pattern": { detection: 0.12, initiative: 0.08 },
   "spector/agreement": { initiative: 0.1 },
   "spector/tell": { detection: 0.1 },
-  "spector/one-signature": {},
 
   // ---------------------------------------------------------------- Conduit
   "conduit/envelope": { castCost: 0.95 },
@@ -363,6 +366,132 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "maverick/larger-than-life": { partyMitigation: 0.08 },
   "maverick/sung-about": { control: 0.12 },
   "maverick/myth": { control: 0.12, concealment: 0.08 },
+
+  // ------------------------------------------------------- The world pass
+  // Out-of-combat nodes, given their real numbers by hand (2026-08-31 owner
+  // ruling: every node labeled accurately — carry weight is carry weight,
+  // not "narrative"). The sims ignore `world` lines; the popout leads with
+  // them.
+  "bastion/bear-the-weight": { world: ["+40% carry weight", "Over-limit slowdown halved"] },
+  "bastion/thousand-round-stare": { world: ["Enemy plate count, ward type and chrome read on sight — exact, no check", "Works at rifle range"] },
+  "bastion/forced-march": { world: ["Squad overland travel +20% faster", "March noise −50% — the column moves quiet"] },
+  "bastion/loud-mercy": { world: ["Breach charges can be set non-lethal: 8m blind-and-deafen, 6 seconds, nobody dies", "Lethal or loud is chosen at placement"] },
+  "bastion/static-on-the-skin": { world: ["Wards within 10m felt through the skin — direction and rough strength", "No line of sight needed"] },
+  "bastion/first-ward": { world: ["Unlocks Seal: a doorway ward that holds as long as you stand it", "One door, window or breach; breaks if you move or go Down"] },
+  "bastion/hold": { world: ["Unlocks Hold: one object kept exactly where it is", "Up to door weight, 30 seconds per cast"] },
+  "bastion/the-moving-wall": { world: ["Your Seal advances with you at walking pace", "Covers a doorway's width as it moves"] },
+  "bastion/quiet-ground": { world: ["No sound leaves your position — 6m radius, gunfire included", "Holds while you hold still"] },
+  "bastion/union-fittings": { world: ["Union counters sell at member prices: −15% on parts, plate and chrome work", "No questions on chrome-legal goods"] },
+  "bastion/come-take-it": { world: ["Your chrome ignores every remote lockout and kill-switch", "A revocation agent must reach you in person"] },
+
+  "spector/quiet-lock": { world: ["Standard locks open silent in 10 seconds, no check", "Quality locks: 30 seconds with kit"] },
+  "spector/ward-seam": { world: ["A ward's weak seam shown after 6 seconds of study", "Cross it without tripping — one person at a time"] },
+  "spector/wrong-shadow": { world: ["Traps, rigged doors and doctored rigs reveal themselves within 8m", "Automatic — no searching"] },
+  "spector/credential": { world: ["Once per day: a paper that passes one checkpoint — any checkpoint", "Burns on use; a second look kills it"] },
+  "spector/dead-reckoning": { world: ["Position, heading and depth always known — no sky, no map needed"] },
+  "spector/weather-nose": { world: ["Tomorrow's weather known today, to the hour", "Storms called a full day early"] },
+  "spector/sign": { world: ["Tracks read number, species, load and age of what passed", "Up to three days cold, on any ground"] },
+  "spector/cold-camp": { world: ["Your party's camp cannot be found unless you want it found", "Fire shielded, tracks swept, scent killed — every night, automatic"] },
+  "spector/high-route": { world: ["Rooftops, ridges and rigging at full move speed", "No climbing checks on anything with a handhold"] },
+  "spector/everyones-cousin": { world: ["Strangers open friendly: +20 disposition everywhere", "Rumors surface 2× faster when you ask around"] },
+  "spector/cover-story": { world: ["A worked identity: name, history and references that survive a records check"] },
+  "spector/paper": { world: ["Forged documents pass first inspection anywhere", "Expert scrutiny: even odds"] },
+  "spector/borrowed-voice": { world: ["Any accent, cadence or rank heard for one minute, worn convincingly", "Voice-keyed doors and codewords included"] },
+  "spector/forget": { world: ["Once per scene: the last 30 seconds removed from one witness", "They fill the gap themselves — no trace"] },
+  "spector/suggest": { world: ["Once per scene: one small idea planted mid-sentence, acted on as their own", "Nothing against their core interests"] },
+  "spector/one-signature": { world: ["Your casts carry no arcane signature — untraceable to you, ever"] },
+
+  "conduit/cook-the-air": { world: ["Squad immune to cold-weather penalties", "10m around you stays warm through hard frost"] },
+  "conduit/masons-eye": { world: ["Load-bearing points of any structure shown at a glance", "Where to cut, where to brace, what comes down"] },
+  "conduit/shapers-licence": { world: ["Unlocks the Tensile pair: Patch (mend a break clean) and Set (harden a surface)"] },
+  "conduit/etch": { world: ["Unlocks Etch: mark or weaken a surface by touch", "Cutting a weakened line takes half the work"] },
+  "conduit/where-it-falls": { world: ["Collapse shape and timing predicted exactly on your own demolitions", "Nothing lands where you didn't say"] },
+  "conduit/blank-ledger": { world: ["Your face shows only what you choose — lie-reads and empaths get a wall"] },
+  "conduit/empaths-licence": { world: ["Unlocks the Empathic pair: Steady (calm a mind) and Read (surface a feeling, consented)"] },
+  "conduit/distant-pulse": { world: ["Party vitals felt at any range — wounds, panic, Down, direction", "No line of sight; nothing to jam"] },
+  "conduit/room-tone": { world: ["A room's mood read half a second before it turns", "Riots, ambushes and drawn steel stop being surprises"] },
+  "conduit/whisper-range": { world: ["Mindwork at conversation subtlety from 40m", "Nobody sees you working"] },
+  "conduit/grave-quiet": { world: ["Death within 20m registers — count, direction, freshness"] },
+  "conduit/presence": { world: ["Whether an Echo sits in its Core — and whether it's lit — known from anywhere"] },
+  "conduit/second-look": { world: ["Once per scene: the last three seconds replayed, for you alone", "Enough to re-read a face, a hand, a card"] },
+  "conduit/forge-manners": { world: ["Forge Cores answer you first: −10% on all Core work", "The queue moves you up one place"] },
+
+  "surger/shove": { world: ["Active — borrowed momentum in someone's face: thrown 2m", "60% to floor anyone your size or lighter"] },
+  "surger/skin-sense": { world: ["Borrowed traits report their needs — feeding, cooling, rest — before they fail"] },
+  "surger/wear": { world: ["Hold one trait from harvested material: claws, gills, plate, eyes", "Swapped at a bench in ten minutes"] },
+  "surger/trophy-rack": { world: ["Three harvested traits kept ready to wear", "Signed, sealed, and legal-ish at checkpoints"] },
+  "surger/quiet-blood": { world: ["Predators read you as neither prey nor threat", "Wild beasts will not start a fight with you"] },
+  "surger/marsh-lungs": { world: ["Immune to bad air: spore, smoke, swamp gas, mine damp"] },
+  "surger/sporecast": { world: ["Overcharge weather and sporefall felt one hour out", "Time enough to shelter the squad"] },
+  "surger/seat": { world: ["Augments seat clean: no scar, no inflammation, no rejection checks"] },
+  "surger/hot-swap": { world: ["Field augment swaps in 5 minutes — no surgeon, no bench", "One free swap per day; more cost a wound"] },
+  "surger/red-scent": { world: ["Blood and open wounds smelled through walls — 15m, with direction and freshness"] },
+  "surger/draw": { world: ["Active — blood pulled from a wound at 10m: the target staggers, your Bloodwork feeds", "Once per fight per target"] },
+
+  "archon/calm": { world: ["Active — one animal settled in seconds, panicked or hostile", "Works up to great-beast size"] },
+  "archon/taught-once": { world: ["Behaviours taught to bonded animals never decay", "One demonstration holds for life"] },
+  "archon/watchword": { world: ["A bond holds a post alone — ground, door or person — for days if fed", "It sends for you the moment it's tested"] },
+  "archon/groom-and-feed": { world: ["Your great beast opens every fight fight-ready — fed, calm, checked", "No readiness rolls, ever"] },
+  "archon/thermal-roads": { world: ["Mounted flight rides thermals: +30% air travel speed at half the beast's fatigue"] },
+  "archon/weather-wings": { world: ["Storms are flying weather — wind and rain no longer ground you", "Lightning still will"] },
+  "archon/ask": { world: ["Active — one question to a working machine, answered honestly", "Once per machine per day"] },
+  "archon/patch-loop": { world: ["Your machines mend themselves between fights — full function by the next one", "Destroyed stays destroyed"] },
+  "archon/ledger-of-places": { world: ["Everywhere you've stood is a saved anchor, addressable for Summoner work", "No cap; anchors never expire"] },
+  "archon/fetch": { world: ["Unlocks Fetch: a known object brought to hand from any anchor", "Satchel weight, 30 seconds"] },
+  "archon/send": { world: ["Unlocks Send: satchel weight delivered to any anchor in 30 seconds"] },
+  "archon/return-address": { world: ["Anything you sent returns on one word — back in hand"] },
+  "archon/stable-arrival": { world: ["Consignments arrive exactly where declared — no drift, no damage, stacked as packed"] },
+  "archon/freight-class": { world: ["Send and Fetch scale to freight: crates, emplacements, a mount", "One freight move per day"] },
+  "archon/respect-the-dead": { world: ["Gravecalling costs no standing with peoples who bury their dead", "Rites observed automatically — families see care, not theft"] },
+  "archon/still": { world: ["Active — one moving body stopped mid-step", "Holds 10 seconds, or until touched"] },
+  "archon/preservation-clause": { world: ["Raised bodies hold four days in the field, not hours"] },
+  "archon/last-order": { world: ["A body's final instruction executes once, exactly as spoken", "Survives your distance, your Down, your death"] },
+
+  "procurator/names-and-faces": { world: ["Every name, face, debt and grudge you've met, recalled perfectly", "+10 disposition — people remember being remembered"] },
+  "procurator/read-the-horn": { world: ["Reserve state known live — counts, morale, ammunition — before the quartermaster reports"] },
+  "procurator/ledger-hand": { world: ["Your books audit clean, always", "Inspectors wave you through — institutional trust +15%"] },
+  "procurator/protocol": { world: ["Every institution's manners, fluent — zero etiquette failures", "Doors open one rank above your station"] },
+  "procurator/terms": { world: ["Every deal opens on your paper — your clauses are the baseline"] },
+  "procurator/the-right-gift": { world: ["The correct gift known before the door opens — rank, faith and grudge accounted"] },
+  "procurator/what-theyll-take": { world: ["The other side's bottom line read before it's spoken"] },
+  "procurator/back-channel": { world: ["Every organization holds someone who'll talk to you first — quietly, within a day"] },
+  "procurator/close": { world: ["Closed deals stay closed — both sides think they won", "Renegotiation fails unless you allow it"] },
+  "procurator/coin-eye": { world: ["True value, provenance and best buyer of anything, at a glance"] },
+  "procurator/price-the-room": { world: ["Who is paid, who is owed and who is for sale — read on entry"] },
+  "procurator/margin": { world: ["Trade runs profit +15% — buy low here, sell high there, repeat"] },
+  "procurator/escrow": { world: ["Your deals cannot be welched — the structure guarantees both deliveries"] },
+  "procurator/black-book": { world: ["Black markets open to your knock in any port", "Fence prices run 10% in your favour"] },
+  "procurator/cornered-market": { world: ["For one good in one port, you set the price", "Changing the good or the port takes a season"] },
+  "procurator/letters-of-credit": { world: ["Your paper spends as coin in four ports of your choosing", "Nothing worth robbing in your strongbox"] },
+  "procurator/cartel-terms": { world: ["Trade at price-making scale: your volume moves any market ±10%"] },
+  "procurator/claim-ground": { world: ["Claimed ground produces: scavenge rights, rents or taxes flow weekly"] },
+  "procurator/census": { world: ["Your ground's people known live: heads, skills, needs, grudges"] },
+  "procurator/boots-on-the-wall": { world: ["No surprise attacks on your ground — patrols actually patrol", "Watch rotations run themselves"] },
+  "procurator/the-board": { world: ["Unlocks Outpost management: walls, beds, workshops, a Forge housing"] },
+  "procurator/tithe-and-wage": { world: ["Staying pays: +20% settler growth and a raised loyalty floor"] },
+  "procurator/standing-court": { world: ["Disputes end at your table and rulings stick", "Loyalty compounds +10% a season"] },
+  "procurator/charter": { world: ["Your ground becomes a jurisdiction — your signature carries law beyond it"] },
+  "procurator/crown-without-a-name": { world: ["Unlocks Kingdom management — holding ground becomes ruling it", "Vassals, levies, law, legacy"] },
+
+  "cypherist/bench-anywhere": { world: ["A working bench stood up on anything flat in 60 seconds", "Full crafting menu, anywhere"] },
+  "cypherist/schematic-memory": { world: ["Anything you've taken apart is a known schematic — buildable from memory"] },
+  "cypherist/quick-doff": { world: ["Exoframe on or off in 5 seconds — no help, no crane"] },
+  "cypherist/ghost-credentials": { world: ["Machine systems remember you as cleared — doors, terminals, checkpoints", "Human double-checks are still your problem"] },
+  "cypherist/steady-scalpel": { world: ["Install work heals clean every time: no infection, no rejection, half recovery"] },
+  "cypherist/ninety-seconds": { world: ["Full augment recovery from a body in 90 seconds, anywhere", "The trade's named time, met every time"] },
+  "cypherist/donor-bank": { world: ["Recovered augments cleaned, tuned and kept ready", "Sell or install at full value, not salvage rates"] },
+  "cypherist/safe-hands": { world: ["Unstable devices go stable in your hands — bombs, cores, hot cells", "Set down, the countdown resumes"] },
+
+  "maverick/showmans-flame": { world: ["Every cast is signed — witnesses attribute your wins correctly", "Your legend spreads 50% faster"] },
+  "maverick/call-it": { world: ["Active — name a one-on-one: most take it, refusing costs them standing", "A refuser who fights you anyway does it shaken: −10% hit"] },
+  "maverick/witnesses": { world: ["Each witnessed duel won: +5% hit chance in your next duel", "Stacks to +15%"] },
+  "maverick/spin-and-show": { world: ["Handling alone announces you — 60% of small trouble stands down before it starts"] },
+  "maverick/disarming-shot": { world: ["Active — shoot the weapon, not the hand: 70% disarm at pistol range", "The iron lands 3m away"] },
+  "maverick/cut-the-rope": { world: ["Called shots on objects: 90% at pistol range — locks, lines, triggers, hinges"] },
+  "maverick/a-name-that-travels": { world: ["The next town has already heard of you: +10 disposition on arrival"] },
+  "maverick/a-round-on-the-house": { world: ["Lodging and information find you free anywhere the name has reached", "One solid rumor per night, unasked"] },
+  "maverick/table-stakes": { world: ["Name your loss cap before cards, bets or shakedowns — it holds", "You never lose more than you meant to"] },
+  "maverick/price-on-paper": { world: ["Bounties on you are leverage — spend them as fear, or bargain them down", "Bounties you claim pay double"] },
 };
 
 /** The corrupted branch's free power, cumulative by phase. Tuned so the
@@ -398,6 +527,7 @@ const plural = (value: number, word: string) => `${word}${Math.abs(value) === 1 
 /** The plain gameplay lines a popout shows for one effect object. */
 export function describeEffects(effect: NodeEffect): string[] {
   const lines: string[] = [];
+  if (effect.world) lines.push(...effect.world);
   if (effect.accuracy) lines.push(`${signedPct(effect.accuracy)} hit chance`);
   if (effect.damageBonus) lines.push(`${signed(effect.damageBonus, 2)} damage on every hit that lands`);
   if (effect.incoming !== undefined && effect.incoming !== 1) {

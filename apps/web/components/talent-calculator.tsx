@@ -156,32 +156,46 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
     }
     const measure = () => {
       const rect = grid.getBoundingClientRect();
-      const center = (id: string) => {
+      // Cards are opaque, so lines must live in the gutters: each segment
+      // runs edge to edge — bottom to top down a column, side to side across
+      // one — never through a card's face.
+      const box = (id: string) => {
         const el = grid.querySelector<HTMLElement>(`[data-node-id="${id}"]`);
         if (!el) return null;
         const r = el.getBoundingClientRect();
-        return { x: r.left - rect.left + r.width / 2, y: r.top - rect.top + r.height / 2 };
+        return { left: r.left - rect.left, top: r.top - rect.top, right: r.right - rect.left, bottom: r.bottom - rect.top, cx: r.left - rect.left + r.width / 2, cy: r.top - rect.top + r.height / 2 };
+      };
+      type Box = NonNullable<ReturnType<typeof box>>;
+      const join = (a: Box, b: Box) => {
+        const dx = b.cx - a.cx;
+        const dy = b.cy - a.cy;
+        if (Math.abs(dy) >= Math.abs(dx)) {
+          return dy >= 0
+            ? { x1: a.cx, y1: a.bottom, x2: b.cx, y2: b.top }
+            : { x1: a.cx, y1: a.top, x2: b.cx, y2: b.bottom };
+        }
+        return dx >= 0
+          ? { x1: a.right, y1: a.cy, x2: b.left, y2: b.cy }
+          : { x1: a.left, y1: a.cy, x2: b.right, y2: b.cy };
       };
       const lines: Array<{ x1: number; y1: number; x2: number; y2: number; kind: "path" | "weave" | "fork" }> = [];
       const dots: Array<{ x: number; y: number; kind: "path" | "weave" | "fork" }> = [];
-      for (let i = 0; i < route.length; i++) {
-        const here = center(route[i]);
-        if (!here) continue;
-        dots.push({ ...here, kind: "path" });
-        const next = i + 1 < route.length ? center(route[i + 1]) : null;
-        if (next) lines.push({ x1: here.x, y1: here.y, x2: next.x, y2: next.y, kind: "path" });
-      }
-      const self = center(inspectedNode.id);
-      const weaveFar = inspectedNode.weave ? center(inspectedNode.weave) : null;
-      if (self && weaveFar) {
-        lines.push({ x1: self.x, y1: self.y, x2: weaveFar.x, y2: weaveFar.y, kind: "weave" });
-        dots.push({ ...weaveFar, kind: "weave" });
-      }
-      const forkFar = inspectedNode.fork ? center(inspectedNode.fork) : null;
-      if (self && forkFar) {
-        lines.push({ x1: self.x, y1: self.y, x2: forkFar.x, y2: forkFar.y, kind: "fork" });
-        dots.push({ ...forkFar, kind: "fork" });
-      }
+      const link = (fromId: string, toId: string, kind: "path" | "weave" | "fork") => {
+        const a = box(fromId);
+        const b = box(toId);
+        if (!a || !b) return;
+        const seg = join(a, b);
+        // A gutter too tight for a dashed line gets a single junction star.
+        if (Math.hypot(seg.x2 - seg.x1, seg.y2 - seg.y1) < 15) {
+          dots.push({ x: (seg.x1 + seg.x2) / 2, y: (seg.y1 + seg.y2) / 2, kind });
+          return;
+        }
+        lines.push({ ...seg, kind });
+        dots.push({ x: seg.x1, y: seg.y1, kind }, { x: seg.x2, y: seg.y2, kind });
+      };
+      for (let i = 0; i + 1 < route.length; i++) link(route[i], route[i + 1], "path");
+      if (inspectedNode.weave) link(inspectedNode.id, inspectedNode.weave, "weave");
+      if (inspectedNode.fork) link(inspectedNode.id, inspectedNode.fork, "fork");
       setTrace({ lines, dots });
     };
     const frame = requestAnimationFrame(() => {
@@ -274,13 +288,13 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
 
       <div className={`talent-board${inspectedNode ? " is-inspecting" : ""}`}>
         <div className="talent-grid" ref={gridRef}>
-          {trace.lines.length ? (
+          {trace.lines.length || trace.dots.length ? (
             <svg aria-hidden className="talent-pathlines">
               {trace.lines.map((line, index) => (
                 <line className={`line-${line.kind}`} key={`l${index}`} x1={line.x1} x2={line.x2} y1={line.y1} y2={line.y2} />
               ))}
               {trace.dots.map((dot, index) => (
-                <circle className={`dot-${dot.kind}`} cx={dot.x} cy={dot.y} key={`d${index}`} r={3} />
+                <circle className={`dot-${dot.kind}`} cx={dot.x} cy={dot.y} key={`d${index}`} r={4} />
               ))}
             </svg>
           ) : null}
@@ -397,6 +411,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
               const node = inspected.node;
               const effect = effectsForNode(tree.slug, node.id);
               const lines = effect ? describeEffects(effect) : [];
+              const simBacked = effect ? Object.keys(effect).some((key) => key !== "world") : false;
               const isOwned = owned.has(node.id);
               const locked = forkLocked(node);
               const openable = !locked && unlockable(node.id, owned);
@@ -418,7 +433,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                   {node.ceiling ? <p className="talent-popout-tag is-ceiling">Ceiling: the points aren&apos;t enough — find {node.ceiling}, and pay the favour.</p> : null}
                   {node.weave ? <p className="talent-popout-tag is-weave">Weave: bridges to {byId.get(node.weave)?.node.name ?? node.weave} — buying either end links both paths.</p> : null}
                   {node.fork ? <p className="talent-popout-tag is-fork-tag">Fork: taking this locks {byId.get(node.fork)?.node.name ?? node.fork} for good. No respec exists in the world.</p> : null}
-                  {lines.length ? <p className="talent-popout-note">Numbers are the same ones the balance simulations run on — first-pass weights, tuned by the campaign.</p> : null}
+                  {lines.length && simBacked ? <p className="talent-popout-note">Combat numbers are the same ones the balance simulations run on — first-pass weights, tuned by the campaign.</p> : null}
                   {isOwned ? (
                     <p className="talent-popout-path"><b>On the tree:</b> yours — its road is lit behind this card.</p>
                   ) : unwalked.length ? (

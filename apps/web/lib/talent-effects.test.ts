@@ -29,14 +29,16 @@ test("the popout never shows an empty numbers list for a weighted node", () => {
   }
 });
 
-test("most of each tree carries numbers, and pure-narrative nodes are the exception", () => {
-  // The Procurator sets the floor: half its tree — Envoy, Magnate,
-  // Sovereign — does its work at tables, markets and thrones, which is the
-  // class. Every other tree clears sixty percent.
+test("every node describes something concrete — the narrative fallback is extinct", () => {
+  // Owner's ruling, 2026-08-31: carry weight is carry weight, not
+  // "narrative". Combat nodes carry sim weights; world nodes carry
+  // hand-written numbers. Nothing shows the fallback.
   for (const tree of talentClasses) {
-    const ids = tree.branches.flatMap((branch) => branch.nodes.map((node) => `${tree.slug}/${node.id}`));
-    const weighted = ids.filter((id) => nodeEffects[id] && Object.keys(nodeEffects[id]).length > 0);
-    const floor = tree.slug === "procurator" ? 0.45 : 0.6;
-    assert.ok(weighted.length / ids.length >= floor, `${tree.slug}: only ${weighted.length}/${ids.length} nodes carry numbers`);
+    for (const branch of tree.branches) {
+      for (const node of branch.nodes) {
+        const effect = nodeEffects[`${tree.slug}/${node.id}`];
+        assert.ok(effect && describeEffects(effect).length > 0, `${tree.slug}/${node.id} ("${node.name}") shows the narrative fallback`);
+      }
+    }
   }
 });

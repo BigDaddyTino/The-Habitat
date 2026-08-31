@@ -111,16 +111,21 @@
 .talent-grid { position: relative; }
 .talent-pathlines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; overflow: visible; }
 .talent-pathlines line { stroke-linecap: round; }
-.talent-pathlines .line-path { stroke: var(--brass); stroke-width: 1.6; opacity: .95; stroke-dasharray: 7 5; animation: talent-trace .8s linear infinite; filter: drop-shadow(0 0 5px rgba(198, 151, 76, .9)); }
-.talent-pathlines .line-weave { stroke: #8ec98a; stroke-width: 1.4; opacity: .85; stroke-dasharray: 3 7; animation: talent-trace 1.2s linear infinite; filter: drop-shadow(0 0 5px rgba(142, 201, 138, .8)); }
-.talent-pathlines .line-fork { stroke: var(--danger); stroke-width: 1.2; opacity: .6; stroke-dasharray: 2 8; filter: drop-shadow(0 0 4px rgba(200, 90, 80, .7)); }
-.talent-pathlines .dot-path { fill: #f2e3c4; filter: drop-shadow(0 0 6px rgba(198, 151, 76, 1)); }
-.talent-pathlines .dot-weave { fill: #8ec98a; filter: drop-shadow(0 0 6px rgba(142, 201, 138, .9)); }
-.talent-pathlines .dot-fork { fill: var(--danger); filter: drop-shadow(0 0 6px rgba(200, 90, 80, .9)); }
-@keyframes talent-trace { to { stroke-dashoffset: -12; } }
+.talent-pathlines .line-path { stroke: #ffd98a; stroke-width: 3; opacity: 1; stroke-dasharray: 10 7; animation: talent-trace .7s linear infinite; filter: drop-shadow(0 0 6px rgba(255, 200, 110, 1)) drop-shadow(0 0 14px rgba(198, 151, 76, .7)); }
+.talent-pathlines .line-weave { stroke: #9fe89a; stroke-width: 2.5; opacity: .95; stroke-dasharray: 4 8; animation: talent-trace 1.1s linear infinite; filter: drop-shadow(0 0 6px rgba(142, 201, 138, 1)); }
+.talent-pathlines .line-fork { stroke: #e0705f; stroke-width: 2; opacity: .85; stroke-dasharray: 3 9; filter: drop-shadow(0 0 6px rgba(200, 90, 80, .9)); }
+.talent-pathlines .dot-path { fill: #fff3d6; filter: drop-shadow(0 0 5px rgba(255, 220, 140, 1)) drop-shadow(0 0 12px rgba(198, 151, 76, .9)); }
+.talent-pathlines .dot-weave { fill: #c8f4c5; filter: drop-shadow(0 0 8px rgba(142, 201, 138, 1)); }
+.talent-pathlines .dot-fork { fill: #f0968a; filter: drop-shadow(0 0 8px rgba(200, 90, 80, 1)); }
+@keyframes talent-trace { to { stroke-dashoffset: -17; } }
 
-.talent-board.is-inspecting .talent-node:not(.is-target):not(.is-path):not(.is-weave-far):not(.is-fork-far):not(.is-corrupt) { opacity: .18; }
-.talent-board.is-inspecting .talent-branch h3 { opacity: .4; }
+/* While a road is lit the board goes to night sky, so the road is the light. */
+.talent-board.is-inspecting { background: rgba(3, 5, 4, .96); }
+.talent-board.is-inspecting .talent-node:not(.is-target):not(.is-path):not(.is-weave-far):not(.is-fork-far):not(.is-corrupt) { opacity: .12; }
+.talent-board.is-inspecting .talent-node.is-corrupt { opacity: .1; }
+.talent-board.is-inspecting .talent-node.is-corrupt.is-lit { opacity: .25; }
+.talent-board.is-inspecting .talent-branch h3 { opacity: .3; }
+.talent-board.is-inspecting .talent-corrupted { opacity: .5; }
 .talent-node.is-path { opacity: 1; border-color: rgba(198, 151, 76, .8); box-shadow: 0 0 12px rgba(198, 151, 76, .3), inset 0 0 18px rgba(198, 151, 76, .06); }
 .talent-node.is-weave-far { opacity: 1; border-color: rgba(142, 201, 138, .8); box-shadow: 0 0 12px rgba(142, 201, 138, .3); }
 .talent-node.is-fork-far { opacity: .8; border-color: rgba(200, 90, 80, .8); box-shadow: 0 0 12px rgba(200, 90, 80, .25); }
