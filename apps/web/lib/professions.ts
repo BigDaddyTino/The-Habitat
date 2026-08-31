@@ -1,25 +1,33 @@
 /**
  * The nine trades — one source of truth.
  *
- * Design source: the character bible's `professions` layer (nine trades,
- * three rungs each, near-future names) plus the owner's ruling of
- * 2026-08-31: **trades level by use, and the two rung-ups are gated by a
- * licence.** You raise a trade by doing its work; you cannot cross into the
- * next rung until an institution or a master signs for you — the same law
- * the talent trees use for ceilings, and the reason the middle rung is
- * called Licensed.
+ * Design source: the character bible's `professions` layer plus the owner's
+ * rulings of 2026-08-31, second sitting:
  *
- * Every blueprint carries real numbers, in the same continuous-time
- * language as the talents: seconds, percentages, counts. No rounds, no
- * turns, no scenes — this is an FPS on a live server.
+ *  - **The grind is real.** Nothing in a trade is handed to the player —
+ *    every rung is an uphill count of actual jobs, gates are people who can
+ *    say no, and the ladder has FOUR rungs now:
+ *    Apprentice → Licensed → Journeyman → Master.
+ *  - **A journeyman journeys.** The rung means what the word means: your
+ *    trade-book must be signed on three different grounds before the rung
+ *    opens. That is what pushes the trades out into every region — and into
+ *    the ones nobody has written yet, where a seat is drawn and waiting.
+ *  - **Master in exactly one — except the Procurator.** The class whose
+ *    whole life is licences holds the Second Seal: two masteries. Every
+ *    other class holds one, ever.
+ *  - **Ignit Island has no seats.** The island is destroyed. No trade takes
+ *    root on ground that burns.
+ *
+ * Every blueprint carries real numbers in continuous-time language —
+ * seconds, percentages, counts. No rounds, no turns, no scenes.
  *
  * The sim weights live here too, so what a player reads on the website and
  * what the balance campaign measures can never drift apart.
  */
 
-export type Rung = "apprentice" | "licensed" | "master";
+export type Rung = "apprentice" | "licensed" | "journeyman" | "master";
 
-export const rungOrder: Rung[] = ["apprentice", "licensed", "master"];
+export const rungOrder: Rung[] = ["apprentice", "licensed", "journeyman", "master"];
 
 /** What a trade can do to the fight model. Read by scripts/lib/talent-sim. */
 export type ProfessionEffect = Partial<{
@@ -75,6 +83,23 @@ export type Tier = {
   gate?: Gate;
 };
 
+/**
+ * A trade's seat on a ground: who signs the book there, and the one
+ * blueprint that can be learned nowhere else. Seats are why a journeyman
+ * travels — three signatures from three different grounds open the rung,
+ * and every seat teaches something the halls at home never will.
+ */
+export type Seat = {
+  /** Ground slug from `tradeGrounds`. */
+  ground: string;
+  /** Who holds the seat — the gate with a face. */
+  keeper: string;
+  /** What the keeper is like, in one line. */
+  note: string;
+  /** The seat-exclusive blueprint. */
+  teaches: Blueprint;
+};
+
 export type Profession = {
   slug: string;
   name: string;
@@ -82,35 +107,82 @@ export type Profession = {
   tagline: string;
   /** What one unit of work is, for the use track. */
   workUnit: string;
+  /** The masterwork: the proving the trade accepts nothing instead of. */
+  proving: string;
   tiers: Tier[];
+  /** Where the trade's book can be signed, across the world. */
+  seats: Seat[];
   /** The moral ceiling, where canon has one. */
   ceiling?: string;
 };
 
 /**
- * THE PROGRESSION RULE — use, gated.
+ * The grounds the trades live on. Three are written, the rest are canon's
+ * own geography waiting for its writers — a seat on unwritten ground is a
+ * reservation, not a gap, per the standing law: the codex is growing, and
+ * design never scopes to current coverage.
  *
- * Work of your current rung's difficulty raises the trade. Work below it
- * stops counting the moment you outgrow it, which is the classic crafting
- * grey-out and the reason nobody grinds bandages to mastery. Reaching the
- * count does not promote you: it makes you ELIGIBLE, and then somebody has
- * to sign.
+ * Ignit Island is deliberately absent. It gets destroyed; no trade takes
+ * root on ground that burns.
+ */
+export type TradeGround = {
+  slug: string;
+  name: string;
+  /** One line of what the ground is. */
+  note: string;
+  /** True when the ground has no written dossier yet — the seat waits. */
+  unwritten?: boolean;
+};
+
+export const tradeGrounds: TradeGround[] = [
+  { slug: "port-arcadia", name: "Port Arcadia", note: "The capital of buying and selling — five hundred years of alchemists' money under the streets." },
+  { slug: "bloomfall-reach", name: "Bloomfall Reach", note: "The mutation country. Everything here is a variant of something, including the work." },
+  { slug: "southside", name: "Southside", note: "The gun quarter. Institutions end at its edge; reputations do not.", unwritten: true },
+  { slug: "the-verdant-marsh", name: "The Verdant Marsh", note: "Clan ground. The marsh teaches what the schools refuse to.", unwritten: true },
+  { slug: "the-high-holdfasts", name: "The High Holdfasts", note: "Mountain ground, held by people who intend to die where they built.", unwritten: true },
+  { slug: "the-dust-roads", name: "The Dust Roads", note: "The desert compacts' routes. Everything is freight here, including you.", unwritten: true },
+  { slug: "the-free-islands", name: "The Free Islands", note: "League water. No charter reaches it, which is the whole point.", unwritten: true },
+  { slug: "the-ocean", name: "The Ocean Lanes", note: "Crossed, not lived on — the ground Pilotage is waiting for." },
+  { slug: "the-far-shore", name: "The Far Shore", note: "Not yet written. The seat is drawn, the keeper unnamed, the door already owed.", unwritten: true },
+];
+
+/**
+ * THE PROGRESSION LAW — the grind is the game.
+ *
+ * Work of your current rung's difficulty raises the trade, and nothing else
+ * does. Work below your rung stops counting the moment you outgrow it, a
+ * botched job counts for nothing but the materials it wasted, and reaching
+ * a count never promotes you — it makes you ELIGIBLE, and then a person
+ * with the authority to refuse you decides. Every rung-up is somebody's
+ * signature, and signatures are earned, bought, owed, or denied.
  */
 export const progression = {
-  jobsToLicence: 60,
-  jobsToMastery: 300,
-  /** Licensed rungs you may hold at once — as many as you can staff. */
+  jobsToLicence: 75,
+  jobsToJourneyman: 250,
+  jobsToMastery: 600,
+  /** Grounds whose books must carry your signature before Journeyman opens. */
+  wanderGrounds: 3,
+  /** Licensed rungs you may hold at once — as many as you can keep busy. */
   licensedLimit: Infinity,
-  /** Master rungs, ever. */
+  /** Master rungs, ever — for every class but one. */
   masterLimit: 1,
+  /** The Second Seal: the Procurator's class perk, and nobody else's. */
+  procuratorMasterLimit: 2,
   rules: [
-    "Every character is Apprentice in every trade from the first day. Nobody is licensed on day one.",
-    "Only work at your current rung counts. Apprentice jobs stop feeding the track the moment you are Licensed.",
-    "60 jobs makes you eligible for a licence; 300 licensed jobs makes you eligible for mastery. Eligibility is not promotion — somebody signs, or you stay where you are.",
-    "Licensed in as many trades as you can keep busy. Master in exactly one, ever, and the choice does not come back.",
-    "Trades are Earned, so death keeps them. Your kit is on the corpse; your licences are not.",
+    "Every character is Apprentice in every trade from the first day. Nobody is licensed on day one, and nothing after day one is free.",
+    "Only work at your current rung counts. Apprentice jobs stop feeding the track the moment you are Licensed, and a botched job feeds nothing at all.",
+    "75 jobs makes you eligible for a licence. 250 licensed jobs makes you eligible for the journeyman's rung — and eligibility opens nothing until your book is signed on three different grounds, because a journeyman journeys.",
+    "600 journeyman jobs, a proving the trade accepts, and a living master's signature make a Master. Any of the three can be refused.",
+    "Licensed in as many trades as you can keep busy. Master in exactly one, ever — except the Procurator, whose class carries the Second Seal: two masteries, because the Procurator's whole life is licences. The choice never comes back for anyone.",
+    "Trades are Earned, so death keeps them. Your kit is on the corpse; your rungs, your signatures and your standing in the halls are not.",
+    "No seat opens on Ignit Island. The island burns; the trades already know.",
   ],
 } as const;
+
+/** How many masteries a class may hold. The Procurator's Second Seal. */
+export function masterLimitFor(classSlug: string): number {
+  return classSlug === "procurator" ? progression.procuratorMasterLimit : progression.masterLimit;
+}
 
 export const professions: Profession[] = [
   {
@@ -118,6 +190,7 @@ export const professions: Profession[] = [
     name: "Medicine",
     tagline: "The healer. Manages corruption without ever curing it.",
     workUnit: "a person treated",
+    proving: "Bring back somebody the instruments already called finished — with witnesses, and without a Forge.",
     ceiling: "Everyone you protect is permanently in your debt, and you never had to ask.",
     tiers: [
       {
@@ -129,7 +202,7 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Practitioner's certificate", issuer: "helix-arcanobiotics", issuerName: "Helix Arcanobiotics", price: "A board examination, a named sponsor, and your name on their register for good" },
+        gate: { licence: "Practitioner's certificate", issuer: "helix-arcanobiotics", issuerName: "Helix Arcanobiotics", price: "A board examination with a 40% first-pass rate, a named sponsor who answers for you, and your name on their register for good" },
         blueprints: [
           { name: "Field surgery", does: ["Removes one lasting wound in 20 minutes", "Once per person per week — the body needs the gap"] },
           { name: "Read the phase", does: ["An instrument names a corruption phase exactly, in 30 seconds"] },
@@ -137,12 +210,27 @@ export const professions: Profession[] = [
         ],
       },
       {
-        rung: "master",
-        gate: { licence: "No paper at all", issuer: "black-tithe-syndicate", issuerName: "Black Tithe Syndicate", price: "The Syndicate teaches it because the Syndicate needs it. You will be asked, and not once", illicit: true },
+        rung: "journeyman",
+        gate: { licence: "The circuit book", issuer: "helix-arcanobiotics", issuerName: "Helix Arcanobiotics", price: "Three grounds' books signed, and a season riding circuit where the certificate means nothing and the work still has to" },
         blueprints: [
-          { name: "Falsify a reading", does: ["The instrument reports whatever phase you name", "Holds against a second opinion 90% of the time", "A caught falsification ends the certificate and starts a file"] },
+          { name: "Theatre anywhere", does: ["Field surgery no longer needs a ward — a table and 20 minutes, anywhere", "Two lasting wounds per session instead of one"] },
+          { name: "Triage command", does: ["Allies mend +50% faster between fights while you run the line", "You call the order and the order is right"] },
         ],
       },
+      {
+        rung: "master",
+        gate: { licence: "No paper at all", issuer: "black-tithe-syndicate", issuerName: "Black Tithe Syndicate", price: "The Syndicate teaches it because the Syndicate needs it. The proving comes first, then the asking price — and you will be asked more than once", illicit: true },
+        blueprints: [
+          { name: "Falsify a reading", does: ["The instrument reports whatever phase you name", "Holds against a second opinion 90% of the time", "A caught falsification ends the certificate and starts a file"] },
+          { name: "The long save", does: ["A Dying body holds for an hour under your hands, not seconds", "Once per person, ever — the body remembers being argued for"] },
+        ],
+      },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Registrar Havel", note: "Signs the harbour's medicine book and reads sponsors like invoices.", teaches: { name: "Dock lung", does: ["Cure the harbour's own disease — the wet-lung the clinics call chronic", "Cures it in 3 days; the clinics charge for years"] } },
+      { ground: "bloomfall-reach", keeper: "the Ansel Sisters", note: "Two clinicians, one signature. Nobody has ever met both.", teaches: { name: "Bloom debridement", does: ["Cut adaptive growth without waking it: mutation-driven wounds close clean", "−50% infection from Reach-born injuries"] } },
+      { ground: "the-verdant-marsh", keeper: "Matron Ecke", note: "Clan medicine. She signs with a thumbprint and forgets nothing.", teaches: { name: "Marsh antivenin", does: ["Immunity to the marsh's whole venom table for 12 hours, from a field brew"] } },
+      { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "The book already has a spine. Somebody will hold it.", teaches: { name: "— reserved", does: ["The far shore's medicine is not written yet, and the seat is kept open on purpose"] } },
     ],
   },
   {
@@ -150,6 +238,7 @@ export const professions: Profession[] = [
     name: "Refining",
     tagline: "The dose-maker. Where skill and complicity become the same thing.",
     workUnit: "a dose processed to grade",
+    proving: "A blind assay: five crates, one of them wrong in a way only provenance shows. Name it, and name why.",
     ceiling: "You are the only person in the room who knows whose soul is in the crate, and you keep working.",
     tiers: [
       {
@@ -160,7 +249,7 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Grade certification", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "A quota you meet every month, and the Consortium's audit rights over your bench" },
+        gate: { licence: "Grade certification", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "A monthly quota that does not care what the month did to you, and the Consortium's audit rights over your bench" },
         blueprints: [
           { name: "Process to grade", does: ["Yield to 90%, and the grade holds under assay"] },
           { name: "Grade reserve glass", does: ["A containment frame that will not kill its wearer", "Drops frame failure from 1-in-20 to 1-in-500"] },
@@ -168,13 +257,27 @@ export const professions: Profession[] = [
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The route stamp", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "Three grounds' books signed. Grade travels; a refiner who has only ever graded one region's take has only ever graded one lie" },
+        blueprints: [
+          { name: "Grade on the move", does: ["Full-grade processing from a wagon bench — no fixed shop needed", "+1 dose carried into every fight, off your own line"] },
+          { name: "Stretch a reserve", does: ["A Forge reserve lasts +30% longer under your rationing", "Somebody notices. Somebody always notices"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "The provenance sitting", issuer: "bone-market-families", issuerName: "Bone Market Families", price: "The Families teach you to name the dead. They will expect you to name some of theirs, and to stay quiet about the rest", illicit: true },
+        gate: { licence: "The provenance sitting", issuer: "bone-market-families", issuerName: "Bone Market Families", price: "The Families teach you to name the dead. The sitting is one long night, the blind assay is the door, and what you owe after is not written down", illicit: true },
         blueprints: [
           { name: "Read provenance", does: ["A dose named by species, often by individual, sometimes by facility", "Takes 2 minutes with the crate open"] },
           { name: "The clean grade", does: ["A crate worth double the same crate without the paper", "One of the two most valuable documents a master can produce"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Assessor Brandt", note: "Aegis's harbour man. His stamp is worth more than his word.", teaches: { name: "Harbour assay", does: ["Grade a sealed crate without opening it — 85% accurate through the boards"] } },
+      { ground: "the-dust-roads", keeper: "Ferren of the Third Compact", note: "Grades by starlight on a moving wagon and has never been wrong twice.", teaches: { name: "Dry storage", does: ["Doses keep 3× longer in desert cache — no glass, no cooling, no loss"] } },
+      { ground: "the-free-islands", keeper: "the Wet Assayer", note: "No name, one bench, League water. Everything that cannot be graded legally is graded here.", teaches: { name: "Salvage grade", does: ["Water-damaged and contested stock recovered to grade at 70%", "No questions asked, in either direction"] } },
+      { ground: "bloomfall-reach", keeper: "— seat drawn, keeper unnamed", note: "The Reach's take mutates in the crate. Somebody will learn to grade that.", teaches: { name: "— reserved", does: ["Living-grade is not written yet; the Reach is still deciding what it produces"] } },
     ],
   },
   {
@@ -182,6 +285,7 @@ export const professions: Profession[] = [
     name: "Chemistry",
     tagline: "The alchemist, near-future. Kept apart from Refining on purpose.",
     workUnit: "a batch mixed",
+    proving: "Synthesise a named compound from a hostile shelf — the Institute picks the shelf, and it picks it to be unfair.",
     tiers: [
       {
         rung: "apprentice",
@@ -191,20 +295,34 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Institute licence", issuer: "meridian-arcane-institute", issuerName: "Meridian Arcane Institute", price: "Tuition, or a scholarship that comes with somebody's expectations attached" },
+        gate: { licence: "Institute licence", issuer: "meridian-arcane-institute", issuerName: "Meridian Arcane Institute", price: "Tuition that costs a season's wages, or a scholarship that comes with somebody's expectations attached — the procurement clerks know which conclusions are not pursued" },
         blueprints: [
           { name: "Mana tonic", does: ["Restores a third of a caster's pool", "One dose per person per fight — the second does nothing"] },
           { name: "Stormglass stabiliser", does: ["Takes the misfire out of stormglass: 1-in-8 becomes 1-in-100"] },
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The field book", issuer: "meridian-arcane-institute", issuerName: "Meridian Arcane Institute", price: "Three grounds' books signed. A chemist who has only mixed on one ground has only ever had one water, one heat, and one excuse" },
+        blueprints: [
+          { name: "Hostile-shelf synthesis", does: ["Licensed mixes from whatever the ground offers — no supply line needed", "+1 dose carried into every fight"] },
+          { name: "Batch scale", does: ["One mixing session supplies a whole column, not a person", "Tonic for four costs the materials of two"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "No licence exists for this", issuer: "stormglass-cartel", issuerName: "Stormglass Cartel", price: "The Cartel owns the only benches where it can be learned, and it does not lend them", illicit: true },
+        gate: { licence: "No licence exists for this", issuer: "stormglass-cartel", issuerName: "Stormglass Cartel", price: "The Cartel owns the only benches where it can be learned, lends nothing, and takes its teaching fee in product — yours, for a year", illicit: true },
         blueprints: [
           { name: "The cut", does: ["Refined blended with nature-drawn: corruption advances 30% slower", "Costs 25% potency per dose, and no field test finds it"] },
           { name: "Assay blank", does: ["A reading comes back inconclusive — a person reads as nothing", "The other of the two most valuable documents in the trades"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Doctor Imre Voss", note: "Institute chair, Aegis-funded, honest about neither.", teaches: { name: "Vault reagents", does: ["Access to pre-Drain stock under the old quarters — mixes at +20% potency"] } },
+      { ground: "the-verdant-marsh", keeper: "Grandmother Sedge", note: "Never took the licence. The Institute sends students to her anyway, quietly.", teaches: { name: "Nature-drawn base", does: ["Mixes from living stock instead of refined — half cost, and the ladder never notices them"] } },
+      { ground: "the-high-holdfasts", keeper: "the Powder Warden", note: "Keeps the mountains' munitions book and a personal grudge against imprecision.", teaches: { name: "Cold synthesis", does: ["Mixing at altitude and frost without loss — no heat source, full yield"] } },
+      { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Whatever the far shore burns for fuel, somebody there mixes with it.", teaches: { name: "— reserved", does: ["The far shore's shelf is not written yet; the seat holds its place"] } },
     ],
   },
   {
@@ -212,6 +330,7 @@ export const professions: Profession[] = [
     name: "Engineering",
     tagline: "The smith, near-future. Keeps equipment alive, including the equipment that is part of a person.",
     workUnit: "a piece repaired, sealed or fitted",
+    proving: "The hall's piece: build something the judges cannot break in a day of trying. They have seen everything, and they try hard.",
     tiers: [
       {
         rung: "apprentice",
@@ -221,7 +340,7 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Union card", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "An apprenticeship served under a card-holder, and dues for the rest of your life" },
+        gate: { licence: "Union card", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "An apprenticeship served under a card-holder who can end it with a word, and dues for the rest of your life" },
         blueprints: [
           { name: "Seal a rig", does: ["An infusion rig that will not vent: +1 armour plate carried"] },
           { name: "Fit a prosthetic", does: ["A limb that answers, in 4 hours on a bench"] },
@@ -229,8 +348,16 @@ export const professions: Profession[] = [
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The travelling card", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "Three grounds' books signed — the Union's oldest law. A hand that has only worked one shop's tolerances is a shop hand, not a tradesman" },
+        blueprints: [
+          { name: "Shop speed anywhere", does: ["Full-shop repair speed from a field bench", "A weapon rebuilt between fights, not between weeks"] },
+          { name: "Pattern work", does: ["Copy any piece you can disassemble — 80% of the original's quality, every time"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "Master's mark", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "A piece the hall accepts, judged by people who have seen everything" },
+        gate: { licence: "Master's mark", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "The hall's piece, judged in the open by people who have seen everything. A rejected piece can be resubmitted once a year, and the hall remembers every one" },
         blueprints: [
           { name: "Cosmesis", does: ["Chrome that reads as flesh — no scanner short of a surgeon finds it"] },
           { name: "Conductor-grade rig", does: ["−15% cast costs for whoever wears it"] },
@@ -238,12 +365,19 @@ export const professions: Profession[] = [
         ],
       },
     ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Hallmaster Quill", note: "Runs the harbour hall. Judged the piece that got a man killed for plagiarising it.", teaches: { name: "Harbour proofing", does: ["Salt-and-storm sealing: equipment stops degrading at sea entirely"] } },
+      { ground: "southside", keeper: "the Gun's Armourer", note: "Nobody knows the name. Everybody knows the work.", teaches: { name: "The quiet action", does: ["A firearm silent to 10m without losing a grain of power", "Southside will not teach it twice"] } },
+      { ground: "the-high-holdfasts", keeper: "Forgemistress Ada Krail", note: "Her hall is a mountain's heart and her standards are its bedrock.", teaches: { name: "Cold-forge lamination", does: ["Plates +1 hit before breaking, forged in freezing air", "The holdfasts' plate, and nobody else's"] } },
+      { ground: "the-ocean", keeper: "— seat drawn, keeper unnamed", note: "Somewhere on the lanes is a ship-engineer worth a book signature. The lanes are not written.", teaches: { name: "— reserved", does: ["Marine engineering waits on the sea lanes, with Pilotage"] } },
+    ],
   },
   {
     slug: "logistics",
     name: "Logistics",
     tagline: "The quartermaster's trade. Decides who gets what, in writing.",
     workUnit: "a load allocated and signed for",
+    proving: "Run a starving column's books for a month and end it with nobody dead of your arithmetic. The Army picks the column.",
     tiers: [
       {
         rung: "apprentice",
@@ -253,20 +387,34 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Quartermaster's warrant", issuer: "peninsula-expeditionary-army", issuerName: "Peninsula Expeditionary Army", price: "A warrant is a signature you cannot take back — shortages become yours" },
+        gate: { licence: "Quartermaster's warrant", issuer: "peninsula-expeditionary-army", issuerName: "Peninsula Expeditionary Army", price: "A warrant is a signature you cannot take back — shortages become yours, in writing, with your name where the blame goes" },
         blueprints: [
           { name: "Allocate under scarcity", does: ["+30% ammunition carried and +1 dose into every fight", "In writing, which means somebody goes without and it is on your paper"] },
           { name: "The dose ledger", does: ["Every dose in the column tracked by name — theft becomes visible in a day"] },
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The route warrant", issuer: "peninsula-expeditionary-army", issuerName: "Peninsula Expeditionary Army", price: "Three grounds' books signed. Supply is geography; a quartermaster who knows one road knows nothing yet" },
+        blueprints: [
+          { name: "The manifest", does: ["Run supply for three columns at once without a count slipping", "+40% ammunition carried, and +1 dose for every ally near you"] },
+          { name: "Cold chain", does: ["Perishables, doses and blood move at full grade across any distance you plan"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "The order", issuer: "peninsula-expeditionary-army", issuerName: "Peninsula Expeditionary Army", price: "Handed to one officer per column, and it is never given back" },
+        gate: { licence: "The order", issuer: "peninsula-expeditionary-army", issuerName: "Peninsula Expeditionary Army", price: "Handed to one officer per column after the month that proves you, and it is never given back — resigning the order is a court-martial with better manners" },
         blueprints: [
           { name: "Hold the order", does: ["A Forge rebuilds one body at a time, and you sequence the queue", "+50% ammunition and +2 doses into every fight"] },
           { name: "Sound the horn", does: ["Calls the reserve. It comes, once, and the ground it leaves is uncovered"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Harbourmaster Wren", note: "Pearl's dockside ledger walks and talks. Nothing crosses the quay unsigned.", teaches: { name: "Bonded warehouse", does: ["Stores held in the harbour's bond survive theft, fire and seizure — on paper, and paper wins"] } },
+      { ground: "the-dust-roads", keeper: "Caravan-Mother Ilyas", note: "Runs the compacts' longest route. Has buried three partners and zero cargoes.", teaches: { name: "Dead reckoning freight", does: ["Route a convoy across unmapped ground with zero loss — the desert signs your book itself"] } },
+      { ground: "the-free-islands", keeper: "the Ledger of Brine", note: "The League's floating count-house. It moves; the debts do not.", teaches: { name: "Grey manifest", does: ["Move cargo no charter would touch, clean at both ends", "The League's price is that you never ask theirs"] } },
+      { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Every shore has a quartermaster. This one is not written yet.", teaches: { name: "— reserved", does: ["The far shore's supply lines wait for their writer"] } },
     ],
   },
   {
@@ -274,6 +422,7 @@ export const professions: Profession[] = [
     name: "Architecture",
     tagline: "The builder. Walls, and a plan for when they fail.",
     workUnit: "a structure raised or shored",
+    proving: "A wall of yours must survive a third assault it was watched being built for. The trade waits for the assault; so do you.",
     tiers: [
       {
         rung: "apprentice",
@@ -283,20 +432,34 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Builder's certificate", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "The hall signs for load paths. If your wall drops on somebody, the hall answers too" },
+        gate: { licence: "Builder's certificate", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "The hall signs for load paths. If your wall drops on somebody, the hall answers too — which is why the hall says no easily and often" },
         blueprints: [
           { name: "Fortify to load path", does: ["Prepared ground gives everyone in it +1 armour plate"] },
           { name: "Forge housing", does: ["A housing that survives a shell — the Forge stays lit through a bombardment"] },
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The survey book", issuer: "foundry-workers-union", issuerName: "Foundry Workers' Union", price: "Three grounds' books signed. Ground is the whole trade — marsh, rock, sand and street each break a different builder" },
+        blueprints: [
+          { name: "Field works", does: ["Real fortification in hours, not days: prepared ground −5% damage for everyone on it"] },
+          { name: "Read a ruin", does: ["Any structure's collapse story at a glance — what fell, what was pushed, what is still waiting to"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "The holdfast sitting", issuer: "mountain-holdfasts", issuerName: "Mountain Holdfasts", price: "They teach it to people who intend to stay. Leaving early ends the teaching" },
+        gate: { licence: "The holdfast sitting", issuer: "mountain-holdfasts", issuerName: "Mountain Holdfasts", price: "They teach it to people who intend to stay — the sitting lasts a season, and leaving early ends it forever. Your proving wall must already have held" },
         blueprints: [
           { name: "Hold", does: ["Walls that survive a third assault, not a first", "Prepared ground gives +1 plate and −10% damage to everyone behind it"] },
           { name: "The collapse plan", does: ["When the wall goes, it goes the way you drew it — the fallback is already built"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "the Vault Surveyor", note: "Keeps the map of the sealed refinery vaults under the old quarters. Parts of it are for sale.", teaches: { name: "Undercity purchase", does: ["Build downward safely into pre-Drain works — basements, tunnels, vault access"] } },
+      { ground: "the-high-holdfasts", keeper: "Stonemother Ravn", note: "Her family has held one wall for nine generations. It has never fallen.", teaches: { name: "The ninth course", does: ["The holdfasts' bonding course: walls +1 assault survived beyond their rating"] } },
+      { ground: "bloomfall-reach", keeper: "Warden-Builder Osk", note: "Builds in country that grows back overnight. His walls negotiate.", teaches: { name: "Living lumber", does: ["Build with adaptive growth instead of against it — structures self-repair 10% a day"] } },
+      { ground: "the-verdant-marsh", keeper: "— seat drawn, keeper unnamed", note: "The clans build on water and have never written down how.", teaches: { name: "— reserved", does: ["Marsh foundations wait for the clans' writer"] } },
     ],
   },
   {
@@ -304,6 +467,7 @@ export const professions: Profession[] = [
     name: "Extraction",
     tagline: "Mining and farming, one trade. The dark tier always pays better.",
     workUnit: "a claim worked",
+    proving: "Bring a worked-dead claim back to yield inside a season — the trade hands you the corpse of somebody else's greed.",
     tiers: [
       {
         rung: "apprentice",
@@ -313,20 +477,34 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Dark-tier permit", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "Quotas, paperwork, and a permit that names you when the ground stops producing" },
+        gate: { licence: "Dark-tier permit", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "Quotas, paperwork, and a permit that names you personally when the ground stops producing — Aegis never signs the blame" },
         blueprints: [
           { name: "Dark-tier extraction", does: ["3× the value per claim, with quotas and paperwork", "The ground is measurably worse afterwards, and the permit has your name on it"] },
           { name: "Field supply", does: ["+1 dose into every fight, off your own take"] },
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The prospector's book", issuer: "aegis-extraction-consortium", issuerName: "Aegis Extraction Consortium", price: "Three grounds' books signed. Every ground hides its wealth differently, and a digger who knows one seam knows one seam" },
+        blueprints: [
+          { name: "Vein sense", does: ["Read what a claim actually holds before breaking ground — no more dry shafts", "+25% yield from every claim you site yourself"] },
+          { name: "Two crews", does: ["Run a second claim without being on it, at 70% of your own hand's yield"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "Clan teaching", issuer: "verdant-marsh-clans", issuerName: "Verdant Marsh Clans", price: "They teach the partial take to people who stop working the dark tier. They check", illicit: false },
+        gate: { licence: "Clan teaching", issuer: "verdant-marsh-clans", issuerName: "Verdant Marsh Clans", price: "They teach the partial take to people who stop working the dark tier — the proving claim comes first, and they check for the rest of your life that you stopped" },
         blueprints: [
           { name: "Partial take", does: ["Harvest without killing the source — the claim produces again next season"] },
           { name: "Recovery", does: ["Worked ground brought back toward baseline, and no further", "Takes a season per claim, and nobody pays you for it"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "bloomfall-reach", keeper: "Quotamaster Jexa Hale", note: "Aegis's Reach office. Counts what the Reach grows back and pretends not to notice it growing.", teaches: { name: "Bloom harvest", does: ["Take adaptive stock live and stable — the Reach's variants, worth 5× ordinary take"] } },
+      { ground: "the-dust-roads", keeper: "the Seam Witch", note: "Finds water and ore where surveys find nothing. The compacts pay her in silence.", teaches: { name: "Dry farming", does: ["Yield off ground the maps call dead — the desert's own agriculture"] } },
+      { ground: "the-high-holdfasts", keeper: "Delver Ossian Krail", note: "The Forgemistress's brother. Digs where the mountain permits and not one span further.", teaches: { name: "Deep-rock reading", does: ["Know a shaft's collapse risk exactly before entering — cave-ins stop being surprises"] } },
+      { ground: "the-far-shore", keeper: "— seat drawn, keeper unnamed", note: "Whatever the far shore grows or hides, somebody there works it.", teaches: { name: "— reserved", does: ["The far shore's ground waits for its writer"] } },
     ],
   },
   {
@@ -334,6 +512,7 @@ export const professions: Profession[] = [
     name: "Culinary",
     tagline: "The cook. The only thing in the world that gives Composure back.",
     workUnit: "a company fed",
+    proving: "Cook for a company the day after it lost people. If they talk to each other again by the end of the meal, you passed.",
     tiers: [
       {
         rung: "apprentice",
@@ -343,19 +522,33 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Provisioner's contract", issuer: "tropic-pearl-trade-house", issuerName: "Tropic Pearl Trade House", price: "Pearl signs provisioning contracts. Pearl also decides what your stores cost next month" },
+        gate: { licence: "Provisioner's contract", issuer: "tropic-pearl-trade-house", issuerName: "Tropic Pearl Trade House", price: "Pearl signs provisioning contracts and Pearl decides what your stores cost next month — the contract is a leash with a wage attached" },
         blueprints: [
           { name: "Stretch a store", does: ["A week past where the store ends, with nobody weaker for it"] },
           { name: "Hot food under fire", does: ["1 wound closed per person between fights"] },
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The road kitchen", issuer: "tropic-pearl-trade-house", issuerName: "Tropic Pearl Trade House", price: "Three grounds' books signed. Every ground eats differently, and a cook who cannot feed strangers their own food is a camp cook forever" },
+        blueprints: [
+          { name: "Forage table", does: ["A full meal from any ground's own shelf — no supply line, no stores drawn down"] },
+          { name: "Mess at scale", does: ["Feed a whole outpost to field standard from one kitchen", "+10% of a caster's pool back for everyone at the table"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "No certificate — a table", issuer: "free-islander-league", issuerName: "Free Islander League", price: "You cook for the League's own until they say it was a real meal. They are honest about it" },
+        gate: { licence: "No certificate — a table", issuer: "free-islander-league", issuerName: "Free Islander League", price: "You cook for the League's own until they say it was a real meal. They are honest about it, they are patient about it, and they have said no for years at a stretch" },
         blueprints: [
           { name: "A real meal", does: ["Restores Composure — nothing else in the world does", "+25% of a caster's pool back", "1 wound closed per person, and the company talks to each other again"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "port-arcadia", keeper: "Auntie Meridian", note: "Her harbour kitchen has fed four coups and catered two. Neutral ground, absolutely enforced.", teaches: { name: "The neutral table", does: ["A meal at which nobody fights — enemies eat together under your roof, and it holds"] } },
+      { ground: "the-verdant-marsh", keeper: "First-Cook Brannagh", note: "Clan tables. Everything on them was alive this morning and most of it argued.", teaches: { name: "The marsh table", does: ["Cook the marsh's own venom table safe — delicacies from what kills other people's cooks"] } },
+      { ground: "the-free-islands", keeper: "the Galley Saint", note: "One ship, one stove, and a reputation the whole League defers to.", teaches: { name: "Sea-legs supper", does: ["Meals that hold down in any weather — seasickness and fatigue penalties erased for a day"] } },
+      { ground: "southside", keeper: "— seat drawn, keeper unnamed", note: "Southside eats late and talks quietly. Its kitchen is not written yet.", teaches: { name: "— reserved", does: ["The gun quarter's table waits for its writer"] } },
     ],
   },
   {
@@ -363,6 +556,7 @@ export const professions: Profession[] = [
     name: "Xenobiology",
     tagline: "The beast-worker. The Wardens certify, and the Sanctuary teaches.",
     workUnit: "an animal handled or assayed",
+    proving: "Move an animal the lodges have written off as unmovable, without a scratch on either of you. The Wardens pick the animal.",
     tiers: [
       {
         rung: "apprentice",
@@ -372,7 +566,7 @@ export const professions: Profession[] = [
       },
       {
         rung: "licensed",
-        gate: { licence: "Warden certification", issuer: "wardens-monster-hunter-guild", issuerName: "Wardens' Monster Hunter Guild", price: "The Guild certifies. It also expects you to answer a lodge call, and remembers if you do not" },
+        gate: { licence: "Warden certification", issuer: "wardens-monster-hunter-guild", issuerName: "Wardens' Monster Hunter Guild", price: "The Guild certifies, expects you to answer a lodge call, and remembers if you do not — the charter is older than the state and so are the grudges" },
         blueprints: [
           { name: "Field assay", does: ["Names what a creature is and what it can do, in 60 seconds at 20m"] },
           { name: "Sign off Morphic material", does: ["Harvested traits that are legal to carry and safe to wear"] },
@@ -380,13 +574,27 @@ export const professions: Profession[] = [
         ],
       },
       {
+        rung: "journeyman",
+        gate: { licence: "The range book", issuer: "wardens-monster-hunter-guild", issuerName: "Wardens' Monster Hunter Guild", price: "Three grounds' books signed. An animal is its ground; a handler who knows one ecology handles one ecology" },
+        blueprints: [
+          { name: "String a team", does: ["Work three bonded animals at once — pack, mount and watcher on one whistle"] },
+          { name: "Field surgery, animal", does: ["A wounded beast stabilised and moving in 5 minutes", "Bonded animals mend fully between fights"] },
+        ],
+      },
+      {
         rung: "master",
-        gate: { licence: "The Sanctuary's teaching", issuer: "sanctuary-of-living-beasts", issuerName: "Sanctuary of Living Beasts", price: "They teach people who have stopped taking trophies. The Wardens notice that too" },
+        gate: { licence: "The Sanctuary's teaching", issuer: "sanctuary-of-living-beasts", issuerName: "Sanctuary of Living Beasts", price: "They teach people who have stopped taking trophies — the proving move comes first, the Wardens watch you make it, and the Sanctuary decides whether they liked how" },
         blueprints: [
           { name: "Read the rung", does: ["A creature's mutation tier on sight, and the damage type that drove it there", "Instant, at any range you can see it"] },
           { name: "Handle the unhandleable", does: ["Animals nobody else can move, moved"] },
         ],
       },
+    ],
+    seats: [
+      { ground: "bloomfall-reach", keeper: "Lodge-Keeper Mara Quill", note: "Warden tracker. Her lodge book is the Reach's real census.", teaches: { name: "Variant handling", does: ["Work the Reach's adaptive stock safely — mutation tells read before they fire"] } },
+      { ground: "the-verdant-marsh", keeper: "the Heron Speaker", note: "Clan beast-lore. Speaks to the marsh's animals in their own cadence, allegedly.", teaches: { name: "Marsh string", does: ["Bond semi-aquatic stock nobody else works — the marsh's own mounts and watchers"] } },
+      { ground: "the-dust-roads", keeper: "Drover Ashkani", note: "Moves the compacts' herds through country with no water and worse. Loses none.", teaches: { name: "Dry drove", does: ["Animals cross waterless ground at full pace for 3 days — the desert's own husbandry"] } },
+      { ground: "the-ocean", keeper: "— seat drawn, keeper unnamed", note: "The lanes have their own animals. Their handler is not written yet.", teaches: { name: "— reserved", does: ["The sea's stock waits on the lanes, with Pilotage"] } },
     ],
   },
 ];
@@ -400,44 +608,55 @@ export const reservedTrade = {
 
 /**
  * Sim weights per `<slug>/<rung>`. Master values are the ones the tuned
- * balance campaign already measured; the lower rungs scale beneath them.
+ * balance campaign measured; the lower rungs scale beneath them, and every
+ * ladder is monotone — a test enforces that a higher rung never measures
+ * worse than the rung below it.
  */
 export const professionEffects: Record<string, ProfessionEffect> = {
   "medicine/apprentice": { partyRecovery: 0.5 },
   "medicine/licensed": { partyRecovery: 1, partyDyingClock: 3 },
+  "medicine/journeyman": { partyRecovery: 1.5, partyDyingClock: 4 },
   "medicine/master": { partyRecovery: 2, partyDyingClock: 6 },
 
   "refining/apprentice": {},
   "refining/licensed": { extraDoses: 1, poolRestore: 0.1 },
+  "refining/journeyman": { extraDoses: 2, poolRestore: 0.1 },
   "refining/master": { extraDoses: 2, poolRestore: 0.15 },
 
   "chemistry/apprentice": { poolRestore: 0.1 },
   "chemistry/licensed": { extraDoses: 1, poolRestore: 0.33 },
-  "chemistry/master": { extraDoses: 1, corruptionPace: 0.7, poolRestore: 0.33 },
+  "chemistry/journeyman": { extraDoses: 2, poolRestore: 0.33 },
+  "chemistry/master": { extraDoses: 2, corruptionPace: 0.7, poolRestore: 0.33 },
 
   "engineering/apprentice": {},
   "engineering/licensed": { extraPlates: 1 },
+  "engineering/journeyman": { extraPlates: 1, castCostRelief: 0.08 },
   "engineering/master": { extraPlates: 1, castCostRelief: 0.15 },
 
   "logistics/apprentice": { ammoMultiplier: 1.15 },
   "logistics/licensed": { extraDoses: 1, ammoMultiplier: 1.3 },
+  "logistics/journeyman": { extraDoses: 1, ammoMultiplier: 1.4 },
   "logistics/master": { extraDoses: 2, ammoMultiplier: 1.5 },
 
   "architecture/apprentice": {},
-  "architecture/licensed": { extraPlates: 1, damageReduction: 0.05 },
+  "architecture/licensed": { extraPlates: 1 },
+  "architecture/journeyman": { extraPlates: 1, damageReduction: 0.05 },
   "architecture/master": { extraPlates: 1, damageReduction: 0.1 },
 
   "extraction/apprentice": {},
   "extraction/licensed": { extraDoses: 1 },
+  "extraction/journeyman": { extraDoses: 1, ammoMultiplier: 1.1 },
   "extraction/master": { extraDoses: 1, ammoMultiplier: 1.2 },
 
   "culinary/apprentice": { partyRecovery: 0.5 },
   "culinary/licensed": { partyRecovery: 1, composureRestore: 1 },
-  "culinary/master": { composureRestore: 2, partyRecovery: 1, poolRestore: 0.25 },
+  "culinary/journeyman": { partyRecovery: 1, composureRestore: 1, poolRestore: 0.1 },
+  "culinary/master": { partyRecovery: 1, composureRestore: 2, poolRestore: 0.25 },
 
   "xenobiology/apprentice": {},
   "xenobiology/licensed": { partyRecovery: 0.5, extraPlates: 1 },
-  "xenobiology/master": { partyRecovery: 1, extraPlates: 1 },
+  "xenobiology/journeyman": { partyRecovery: 1, extraPlates: 1 },
+  "xenobiology/master": { partyRecovery: 1, extraPlates: 1, partyDyingClock: 2 },
 };
 
 export function professionBySlug(slug: string): Profession | null {

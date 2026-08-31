@@ -30,38 +30,38 @@ THE EIGHT TREES — BALANCE CAMPAIGN
    spread: 80% between the best and worst duellist.
 
 2 · PvE — every archetype, alone, against the world
-   Cypherist · Remote War         94%   solo   worst: ACA cordon team (4) 54%            ran dry 0%
-   Archon · Sky Cavalry           87%   solo   worst: ACA cordon team (4) 24%            ran dry 0%
-   Cypherist · Warframe           76%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
+   Cypherist · Remote War         94%   solo   worst: ACA cordon team (4) 55%            ran dry 0%
+   Archon · Sky Cavalry           86%   solo   worst: ACA cordon team (4) 23%            ran dry 0%
+   Cypherist · Warframe           77%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Surger · Clean Shifter         74%   solo   worst: ACA cordon team (4) 13%            ran dry 0%
    Spector · The Nobody           70%   solo   worst: ACA cordon team (4) 6%             ran dry 0%
-   Surger · Red Ladder            69%   solo   worst: Risen wave (6) 18%                 ran dry 0%
-   Archon · The Flock             65%   solo   worst: ACA cordon team (4) 7%             ran dry 0%
+   Surger · Red Ladder            69%   solo   worst: Risen wave (6) 19%                 ran dry 0%
+   Archon · The Flock             66%   solo   worst: ACA cordon team (4) 6%             ran dry 0%
    Spector · One Round            60%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Bastion · Breach               54%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Bastion · Fortress             53%   solo   worst: ACA cordon team (4) 4%             ran dry 0%
+   Maverick · Ember Duelist       46%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Conduit · Siege Lantern        46%   solo   worst: ACA cordon team (4) 3%             ran dry 0%
-   Maverick · Ember Duelist       44%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Maverick · Cylinder Storm      42%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
-   Procurator · Fire Plan         34%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
+   Procurator · Fire Plan         33%   solo   worst: ACA cordon team (4) 0%             ran dry 0%
    Conduit · Field Surgeon        23%   solo   worst: Pearl fire team (3) 0%             ran dry 0%
    Procurator · Supply Line       11%   solo   worst: Pearl fire team (3) 0%             ran dry 0%
 
 3 · Lone wolf against the party
-   Line party (Bastion · Conduit surgeon · Spector · Procurator 87%   vs tripled encounters · held the siege 87%
-   No-commander party (Bastion · Conduit · Spector · Maverick)  84%   vs tripled encounters · held the siege 80%
-   No-medic party (Bastion · Cypherist · Spector · Procurator)  97%   vs tripled encounters · held the siege 97%
-   All-damage party (Surger · Maverick · Spector · Conduit sieg 72%   vs tripled encounters · held the siege 43%
-   best lone wolf on hard ground: Cypherist · Remote War 99%
+   Line party (Bastion · Conduit surgeon · Spector · Procurator 87%   vs tripled encounters · held the siege 76%
+   No-commander party (Bastion · Conduit · Spector · Maverick)  81%   vs tripled encounters · held the siege 70%
+   No-medic party (Bastion · Cypherist · Spector · Procurator)  95%   vs tripled encounters · held the siege 99%
+   All-damage party (Surger · Maverick · Spector · Conduit sieg 71%   vs tripled encounters · held the siege 41%
+   best lone wolf on hard ground: Cypherist · Remote War 98%
    worst lone wolf on hard ground: Procurator · Supply Line 9%
 
 4 · Species and origin
+   Human            56% across every build and encounter
    Unregistered     56% across every build and encounter
    Carrier          56% across every build and encounter
    Latent           56% across every build and encounter
-   Returnee         56% across every build and encounter
    Chartered        56% across every build and encounter
-   Human            55% across every build and encounter
+   Returnee         56% across every build and encounter
 
    origin Gifted    52%
    origin Born      52%
@@ -79,34 +79,43 @@ THE EIGHT TREES — BALANCE CAMPAIGN
        tripled encounters — because that is where a trade decides anything.
        Almost nobody walks out: the baseline is the story's floor, and the
        column that walks out has a tradesman in it.)
-   Medicine (apprentice)    6%    survived the day   +1 pts
-   Medicine (licensed)      8%    survived the day   +2 pts
-   Medicine (master)        10%   survived the day   +5 pts
-   Refining (apprentice)    5%    survived the day   +0 pts
-   Refining (licensed)      8%    survived the day   +3 pts
-   Refining (master)        8%    survived the day   +3 pts
-   Chemistry (apprentice)   8%    survived the day   +3 pts
-   Chemistry (licensed)     9%    survived the day   +4 pts
-   Chemistry (master)       9%    survived the day   +4 pts
-   Engineering (apprentice) 5%    survived the day   +0 pts
-   Engineering (licensed)   5%    survived the day   +0 pts
-   Engineering (master)     12%   survived the day   +7 pts
-   Logistics (apprentice)   7%    survived the day   +2 pts
-   Logistics (licensed)     8%    survived the day   +3 pts
-   Logistics (master)       12%   survived the day   +7 pts
-   Architecture (apprentice 5%    survived the day   +0 pts
-   Architecture (licensed)  7%    survived the day   +2 pts
-   Architecture (master)    8%    survived the day   +2 pts
-   Extraction (apprentice)  5%    survived the day   +0 pts
-   Extraction (licensed)    5%    survived the day   +0 pts
-   Extraction (master)      8%    survived the day   +3 pts
-   Culinary (apprentice)    6%    survived the day   +1 pts
-   Culinary (licensed)      6%    survived the day   +1 pts
-   Culinary (master)        7%    survived the day   +2 pts
-   Xenobiology (apprentice) 5%    survived the day   +0 pts
-   Xenobiology (licensed)   7%    survived the day   +2 pts
-   Xenobiology (master)     7%    survived the day   +2 pts
-   No trade                 5%    survived the day   the baseline
+   Medicine (apprentice)      6%    survived the day   +1 pts
+   Medicine (licensed)        8%    survived the day   +2 pts
+   Medicine (journeyman)      6%    survived the day   +1 pts
+   Medicine (master)          10%   survived the day   +5 pts
+   Refining (apprentice)      5%    survived the day   +0 pts
+   Refining (licensed)        8%    survived the day   +3 pts
+   Refining (journeyman)      8%    survived the day   +3 pts
+   Refining (master)          8%    survived the day   +3 pts
+   Chemistry (apprentice)     8%    survived the day   +3 pts
+   Chemistry (licensed)       9%    survived the day   +4 pts
+   Chemistry (journeyman)     9%    survived the day   +4 pts
+   Chemistry (master)         9%    survived the day   +4 pts
+   Engineering (apprentice)   5%    survived the day   +0 pts
+   Engineering (licensed)     5%    survived the day   +0 pts
+   Engineering (journeyman)   6%    survived the day   +1 pts
+   Engineering (master)       12%   survived the day   +7 pts
+   Logistics (apprentice)     7%    survived the day   +2 pts
+   Logistics (licensed)       8%    survived the day   +3 pts
+   Logistics (journeyman)     10%   survived the day   +5 pts
+   Logistics (master)         12%   survived the day   +7 pts
+   Architecture (apprentice)  5%    survived the day   +0 pts
+   Architecture (licensed)    5%    survived the day   +0 pts
+   Architecture (journeyman)  7%    survived the day   +2 pts
+   Architecture (master)      8%    survived the day   +2 pts
+   Extraction (apprentice)    5%    survived the day   +0 pts
+   Extraction (licensed)      5%    survived the day   +0 pts
+   Extraction (journeyman)    8%    survived the day   +3 pts
+   Extraction (master)        8%    survived the day   +3 pts
+   Culinary (apprentice)      6%    survived the day   +1 pts
+   Culinary (licensed)        6%    survived the day   +1 pts
+   Culinary (journeyman)      8%    survived the day   +3 pts
+   Culinary (master)          7%    survived the day   +2 pts
+   Xenobiology (apprentice)   5%    survived the day   +0 pts
+   Xenobiology (licensed)     7%    survived the day   +2 pts
+   Xenobiology (journeyman)   7%    survived the day   +2 pts
+   Xenobiology (master)       10%   survived the day   +5 pts
+   No trade                   5%    survived the day   the baseline
 
 6 · The ladder — what each phase is actually worth
    phase 0  56%
@@ -159,7 +168,7 @@ THE EIGHT TREES — BALANCE CAMPAIGN
    · Forced onto their worst option across a day: Maverick · Cylinder Storm (79% of trigger-pulls), Maverick · Ember Duelist (78% of trigger-pulls) — canon's person with a rifle, on schedule.
    · Never degraded and still standing at day's end: Cypherist · Remote War, Archon · Sky Cavalry, Surger · Red Ladder, Spector · The Nobody — the resource engines do what the audit said they would.
    · The ladder pays: a phase-six build wins meaningfully more than a clean one across the same encounters — canon's claim, now measured. Phase 7 remains the hard end, and nothing above it is playable.
-   · Lone-wolf gap on hard ground is 90% — Procurator · Supply Line genuinely needs a party, which is the design.
+   · Lone-wolf gap on hard ground is 89% — Procurator · Supply Line genuinely needs a party, which is the design.
    · Species spread is 1%; the ceilings tilt play without deciding it.
 
 MODEL ASSUMPTIONS — the part to argue with

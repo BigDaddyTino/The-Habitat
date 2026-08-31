@@ -1039,64 +1039,75 @@ For writers: before power solves anything, say which economy paid — a pool tha
   },
   {
     slug: "professions",
-    note: "nine trades, three rungs each, and the documents a master rung really produces",
+    note: "nine trades, four rungs each, the wander-years, the Second Seal, and the documents a master rung really produces",
     meta: { buildStatus: "designed", parent: "character-progression", dependsOn: ["gathering-and-harvest", "trade-and-economy", "character-progression"], gameTag: "System.Professions" },
     append: `${DESIGN_MARKER}
 
-**Nine trades, three rungs each, and the near-future names are the point.** Engineering, not smithing. Chemistry, not alchemy. Every rung unlocks something a settlement can write on a board and count, and the master rung is where being good stops being neutral.
+**Nine trades, four rungs each, and the near-future names are the point.** Engineering, not smithing. Chemistry, not alchemy. Every rung unlocks something a settlement can write on a board and count, and the master rung is where being good stops being neutral. The ladder is Apprentice, Licensed, Journeyman, Master, and every rung of it is uphill: trades level by being needed on settled ground — jobs done, orders filled, people who came back — only work at your current rung counts, and every rung-up is a signature somebody with the authority to refuse you has to give. Seventy-five jobs earns eligibility for a licence, two hundred and fifty licensed jobs for the journeyman's rung, six hundred journeyman jobs for mastery — and eligibility is never promotion.
 
-**The rule for play:** the licensed rung in as many trades as you can staff, and the master rung in exactly one. Trades level by being needed on settled ground — jobs done, orders filled, people who came back.
+**A journeyman journeys.** The rung means what the word has always meant: before it opens, the trade's book must be signed on three different grounds. That is what carries the trades out of the capital and into the world — the Reach, the marsh, the holdfasts, the dust roads, the free islands, and the grounds nobody has written yet, where a seat is drawn and a keeper waits to be named. Every seat teaches one thing the halls at home never will. No seat opens on Ignit Island; the island burns, and the trades already know.
+
+**The rule for play:** the licensed rung in as many trades as you can staff, and the master rung in exactly one, ever — except the Procurator, whose class carries the **Second Seal**: two masteries, because the Procurator's whole life is licences and a second seal is not a favour, it is what the class is. Mastery itself takes three things and any of them can be refused: the count, a proving the trade accepts nothing instead of, and a living master's signature.
 
 ### Medicine
 
 - **Apprentice** — stabilises, sets and stitches.
 - **Licensed** — surgery; reads a phase with an instrument; manages corruption without ever curing it: one tell suppressed for a day, one night bought for a phase-three.
-- **Master** — **falsifies a reading**: the instrument says what the master tells it to.
+- **Journeyman** — the circuit rider: a theatre anywhere, and triage command that makes a whole line mend faster.
+- **Master** — **falsifies a reading**: the instrument says what the master tells it to. The proving: bring back somebody the instruments already called finished.
 - **The ceiling** — everyone you protect is permanently in your debt, and you never had to ask.
 
 ### Refining — where skill and complicity become the same thing
 
 - **Licensed** — processes to grade, grades [[reserve-glass]] so a containment frame does not kill its wearer, and feeds a Forge.
-- **Master** — reads **provenance**: a dose named by species, sometimes by individual, sometimes by facility.
+- **Journeyman** — grade on the move: a wagon bench that holds full grade, and a reserve stretched a third further under real rationing.
+- **Master** — reads **provenance**: a dose named by species, sometimes by individual, sometimes by facility. The proving is a blind assay — five crates, one wrong in a way only provenance shows.
 - **The ceiling** — canon's own line: you are the only person in the room who knows whose soul is in the crate, and you keep working.
 
 ### Chemistry — kept apart from Refining on purpose
 
 - **Why apart** — they are different institutions, and merging them would put the setting's two sharpest moral ceilings on one sheet.
 - **Licensed** — makes the [[quietwater-culture]] tonic and the stabiliser that takes the misfire out of stormglass.
+- **Journeyman** — hostile-shelf synthesis: licensed mixes from whatever the ground offers, and batches that supply a column instead of a person.
 - **Master** — makes the **cut** — refined blended with nature-drawn, slower on the ladder, weaker per dose, undetectable in the field — and the **assay blank**, which makes a reading come back inconclusive.
 
 ### Engineering — absorbs Fabrication as a trade
 
 - **Why** — it is one job: keeping people's equipment alive, including the equipment that is part of them.
 - **Licensed** — bench work; seals a rig; fits a prosthetic; recovers an augment from a body in ninety seconds.
-- **Master** — makes **cosmesis**, the conductor-grade rig, and a piece good enough to acquire a history.
+- **Journeyman** — the travelling card, the Union's oldest law: shop speed from a field bench, and pattern work — any piece you can take apart, copied.
+- **Master** — makes **cosmesis**, the conductor-grade rig, and a piece good enough to acquire a history. The proving is the hall's piece, judged in the open.
 
 ### Logistics — canon's quartermaster
 
 - **Licensed** — allocates under scarcity in writing and keeps the dose ledger.
-- **Master** — holds **the order** — a Forge rebuilds one body at a time, and somebody sequences it — and sounds the horn.
+- **Journeyman** — the manifest: supply for three columns at once, and a cold chain that moves doses and blood at full grade across any planned distance.
+- **Master** — holds **the order** — a Forge rebuilds one body at a time, and somebody sequences it — and sounds the horn. The proving is a starving column's books, run for a month, ended with nobody dead of the arithmetic.
 
 ### Architecture
 
 - **Licensed** — fortifies against load paths and builds a Forge housing that survives a shell.
-- **Master** — **holds**: walls that survive a third assault, and a plan for the collapse when they do not.
+- **Journeyman** — field works in hours instead of days, and the reading of ruins: what fell, what was pushed, what is still waiting to.
+- **Master** — **holds**: walls that survive a third assault, and a plan for the collapse when they do not. The proving is a wall of yours surviving the third assault it was watched being built for.
 
 ### Extraction — absorbs Agronomy
 
 - **Why** — their master rungs were the same idea at two scales.
 - **Licensed** — works the dark tier with quotas and paperwork, which always pays better.
-- **Master** — manages **partial take and recovery**: harvest without killing the source, and worked ground brought back toward baseline and no further.
+- **Journeyman** — vein sense: what a claim actually holds, known before ground breaks; and a second crew run at distance.
+- **Master** — manages **partial take and recovery**: harvest without killing the source, and worked ground brought back toward baseline and no further. The proving is a worked-dead claim brought back to yield in a season.
 
 ### Culinary
 
 - **Licensed** — stretches a store a week past where it ends.
-- **Master** — serves **a real meal**, which restores Composure — the attribute corruption takes hardest and nothing else gives back — and a quarter of a caster's pool.
+- **Journeyman** — the forage table: a full meal from any ground's own shelf, and a mess that feeds an outpost to field standard.
+- **Master** — serves **a real meal**, which restores Composure — the attribute corruption takes hardest and nothing else gives back — and a quarter of a caster's pool. The proving is a company fed the day after it lost people, and talking again by the end of it.
 
 ### Xenobiology — Wardens certify
 
 - **Licensed** — husbandry, transport and field assay, and signs off Morphic material.
-- **Master** — reads the **rung**: in the Reach an animal's mutation state on sight and what damage type drove it there, and elsewhere whatever that region's signature turns out to be.
+- **Journeyman** — strings a team: pack, mount and watcher on one whistle, and animal field surgery in five minutes.
+- **Master** — reads the **rung**: in the Reach an animal's mutation state on sight and what damage type drove it there, and elsewhere whatever that region's signature turns out to be. The proving is an animal the lodges wrote off as unmovable, moved.
 
 **The trades' end-game is documents.** Chemistry's assay blank and Refining's clean grade are the two most valuable pieces of paper a master can produce, and neither is a weapon: one makes a person read as nothing, the other makes a crate worth more than the same crate without it. That is why Standing is a ledger.
 

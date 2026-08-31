@@ -189,6 +189,37 @@ test now enforces that a master rung can never measure worse than its own
 licensed rung — a player who spends a career reaching mastery must never be
 punished by the arithmetic for it.
 
+## The trades, second sitting (owner's ruling: the grind is the game)
+
+Same day, second ruling, and it reshaped the ladder: **four rungs now —
+Apprentice, Licensed, Journeyman, Master — and nothing on any of them is
+handed to the player.** 75 jobs to licence-eligibility, 250 to the
+journeyman's rung, 600 to mastery, only current-rung work ever counts, a
+botched job counts for nothing, and every rung-up is a person who can say
+no. Mastery takes three refusable things: the count, a proving the trade
+accepts nothing instead of, and a living master's signature.
+
+The journeyman rung is where the second ruling — push the trades out to
+every region — became mechanical instead of aspirational: **a journeyman
+journeys.** The rung does not open until the trade's book is signed on three
+different grounds, and every ground's seat teaches one blueprint the halls
+at home never will. Nine grounds carry seats (Port Arcadia, Bloomfall Reach,
+Southside, the Verdant Marsh, the High Holdfasts, the Dust Roads, the Free
+Islands, the Ocean Lanes, and the Far Shore — the last reserved and
+unwritten on purpose, per the standing placeholder law), thirty-six seats in
+all, each with a named keeper who is a future codex character. **No seat
+opens on Ignit Island.** The island burns; the trades already know.
+
+And the exception that proves the one-mastery law: **the Second Seal.** The
+Procurator — and only the Procurator — masters two trades, because the
+class whose whole life is licences holding a second one is not a favour, it
+is the class. A test pins the limit to exactly that class and exactly two.
+
+The campaign now measures all 36 trade rungs across the elite day. Ladders
+are monotone by test; the survival table's ±1-point wiggles between adjacent
+rungs are measurement noise at a 5% baseline, not weight regressions — the
+weights themselves can never invert without failing the suite.
+
 ## The continuous-time conversion (owner's ruling: this is an FPS)
 
 The game runs on a live dedicated server — no rounds, no turns, no pausing —

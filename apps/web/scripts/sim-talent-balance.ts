@@ -242,7 +242,7 @@ const noTradeRate = tradeRows.find(([name]) => name === "No trade")?.[1] ?? 0;
 for (const [name, rate] of tradeRows) {
   const delta = rate - noTradeRate;
   const worth = name === "No trade" ? "the baseline" : `${delta >= 0 ? "+" : "−"}${Math.abs(Math.round(delta * 100))} pts`;
-  say(`   ${pad(name, 24)} ${pad(pct(rate), 5)} survived the day   ${worth}`);
+  say(`   ${pad(name, 26)} ${pad(pct(rate), 5)} survived the day   ${worth}`);
 }
 say("");
 

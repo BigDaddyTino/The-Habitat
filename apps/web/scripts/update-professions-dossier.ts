@@ -14,6 +14,7 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import { storySystemsSeed } from "../lib/story-systems-seed";
+import { layers } from "./lib/character-bible";
 
 const db = getPrismaClient();
 
@@ -23,6 +24,8 @@ const apply = process.argv.includes("--apply");
 async function main() {
   const seed = storySystemsSeed.find((entry) => entry.slug === "professions");
   if (!seed) throw new Error("no professions seed — the corrected text is missing");
+  const bibleLayer = layers.find((entry) => entry.slug === "professions");
+  if (!bibleLayer) throw new Error("no professions layer in the character bible source");
 
   const entry = await db.storyEntry.findUnique({
     where: { slug: "professions" },
@@ -32,13 +35,20 @@ async function main() {
 
   const body = entry.body ?? "";
   const at = body.indexOf(DESIGN_MARKER);
-  const layer = at >= 0 ? body.slice(at) : "";
-  if (at < 0) console.warn("! no design layer found — writing the base alone");
+  const oldLayer = at >= 0 ? body.slice(at) : "";
+  if (at < 0) console.warn("! no design layer found — writing base + fresh layer");
 
-  const nextBody = layer ? `${seed.body.trimEnd()}\n\n${layer}` : seed.body;
+  // Both halves rebuild from source: the seed base, and the bible's design
+  // layer — the latter carries the owner's four-rung ruling now, so the
+  // stored copy is replaced rather than preserved. A word-level loss report
+  // (the integrate script's own discipline) shows what the replacement drops.
+  const layer = bibleLayer.append.trimStart();
+  const nextBody = `${seed.body.trimEnd()}\n\n${layer}`;
 
-  // The bible's nine-trade layer is canon and must survive untouched.
-  if (layer && !nextBody.endsWith(layer)) throw new Error("the design layer would not survive this rewrite — refusing");
+  const words = (value: string) => new Set(value.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((word) => word.length > 3));
+  const now = words(nextBody);
+  const lost = [...words(body)].filter((word) => !now.has(word));
+  if (lost.length) console.warn(`! words not carried: ${lost.join(", ")}`);
 
   const currentMeta = (entry.meta as Record<string, unknown>) ?? {};
   const seedMeta = seed.meta as Record<string, unknown>;
@@ -54,9 +64,9 @@ async function main() {
 
   console.log("professions dossier");
   console.log(`  body     ${changedBody ? `${body.length} -> ${nextBody.length} chars` : "unchanged"}`);
-  console.log(`  summary  ${changedSummary ? "rewritten to name the nine trades" : "unchanged"}`);
-  console.log(`  meta     ${changedMeta ? "pillars + open questions updated (the answered one retired)" : "unchanged"}`);
-  console.log(`  layer    ${layer ? `${layer.length} chars preserved verbatim` : "none"}`);
+  console.log(`  summary  ${changedSummary ? "rewritten from the seed" : "unchanged"}`);
+  console.log(`  meta     ${changedMeta ? "pillars + open questions updated" : "unchanged"}`);
+  console.log(`  layer    ${oldLayer.length} -> ${layer.length} chars, rebuilt from the bible source`);
 
   if (!changedBody && !changedSummary && !changedMeta) return console.log("\nnothing to do.");
   if (!apply) return console.log("\ndry run — pass --apply to write.");

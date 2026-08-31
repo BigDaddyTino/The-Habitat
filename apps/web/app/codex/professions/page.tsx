@@ -1,18 +1,18 @@
 import { requireRole } from "@/lib/authorization";
 import { findCodexArt } from "@/lib/codex-art";
-import { professions, progression, reservedTrade, rungOrder } from "@/lib/professions";
+import { professions, progression, reservedTrade, rungOrder, tradeGrounds } from "@/lib/professions";
 import { storyReadRole } from "@/lib/story-codex";
 import "./professions.css";
 
 export const metadata = { title: "The Nine Trades | Story Codex" };
 
-const rungLabel: Record<string, string> = { apprentice: "Apprentice", licensed: "Licensed", master: "Master" };
+const rungLabel: Record<string, string> = { apprentice: "Apprentice", licensed: "Licensed", journeyman: "Journeyman", master: "Master" };
 
 /**
- * The nine trades, laid out the way a player reads them: what each rung can
- * make, what it actually changes, and who has to sign before you cross into
- * the next one. Design source: `lib/professions.ts` — the same file the
- * balance campaign runs its arithmetic from.
+ * The nine trades, laid out the way a player reads them: the grind, the
+ * gates, what each rung can make, where the world signs your book, and what
+ * the proving costs. Design source: `lib/professions.ts` — the same file
+ * the balance campaign runs its arithmetic from.
  */
 export default async function ProfessionsPage() {
   await requireRole(storyReadRole);
@@ -21,19 +21,41 @@ export default async function ProfessionsPage() {
       <header className="trades-hero">
         <p className="eyebrow">Professions</p>
         <h1>The Nine Trades</h1>
-        <p>Three rungs each, and the near-future names are the point: Engineering, not smithing. Chemistry, not alchemy. You raise a trade by <b>doing its work</b> — but the two rung-ups are gated by a licence, and somebody has to sign. Licensed in as many trades as you can keep busy; <b>Master in exactly one, ever</b>.</p>
+        <p>Four rungs, and every one of them is uphill: <b>Apprentice → Licensed → Journeyman → Master</b>. You raise a trade by doing its work — nothing is handed out, gates are people who can say no, and a journeyman <b>journeys</b>: three grounds&apos; books signed before the rung opens. Licensed in as many trades as you can keep busy. <b>Master in exactly one, ever</b> — unless you are a Procurator.</p>
       </header>
 
       <div className="trades-law">
-        <h2>How a trade levels</h2>
+        <h2>How a trade levels — the grind is the game</h2>
         <div className="trades-track">
           <div className="track-rung"><b>Apprentice</b><span>Everyone, in every trade, from day one</span></div>
           <div className="track-gate"><i>{progression.jobsToLicence} jobs</i><span>then a licence</span></div>
           <div className="track-rung"><b>Licensed</b><span>As many trades as you can staff</span></div>
-          <div className="track-gate"><i>{progression.jobsToMastery} jobs</i><span>then a master signs</span></div>
+          <div className="track-gate"><i>{progression.jobsToJourneyman} jobs</i><span>+ {progression.wanderGrounds} grounds&apos; books</span></div>
+          <div className="track-rung"><b>Journeyman</b><span>The wander-years — the word means the walk</span></div>
+          <div className="track-gate"><i>{progression.jobsToMastery} jobs</i><span>+ a proving + a master&apos;s signature</span></div>
           <div className="track-rung is-master"><b>Master</b><span>One trade. Ever.</span></div>
         </div>
         <ul>{progression.rules.map((rule) => <li key={rule}>{rule}</li>)}</ul>
+        <p className="trades-seal"><b>The Second Seal.</b> The Procurator — and only the Procurator — masters two trades. It is the class whose whole life is licences; holding a second mastery is not a favour, it is what a Procurator <i>is</i>. Every other class chooses once and lives with it.</p>
+      </div>
+
+      <div className="trades-map">
+        <h2>Where the trades live</h2>
+        <p>A journeyman&apos;s book is signed on grounds, and the grounds are the world — including the parts nobody has written yet, where a seat is drawn and waiting. <b>No seat opens on Ignit Island.</b> The island burns; the trades already know.</p>
+        <div className="trades-map-grid">
+          {tradeGrounds.map((ground) => (
+            <div className={`map-ground${ground.unwritten ? " is-unwritten" : ""}`} key={ground.slug}>
+              <b>{ground.name}</b>
+              {ground.unwritten ? <i>not yet written — seats reserved</i> : null}
+              <span>{ground.note}</span>
+            </div>
+          ))}
+          <div className="map-ground is-burned">
+            <b>Ignit Island</b>
+            <i>no seats, ever</i>
+            <span>The prologue&apos;s ground. It is destroyed, and no trade takes root on ground that burns.</span>
+          </div>
+        </div>
       </div>
 
       <div className="trades-grid">
@@ -63,7 +85,7 @@ export default async function ProfessionsPage() {
                         <span>{tier.gate.issuerName}</span>
                         {tier.gate.price}
                       </p>
-                    ) : <p className="trade-gate is-open"><b>No gate</b><span>Where everyone starts</span>Nobody is licensed on day one.</p>}
+                    ) : <p className="trade-gate is-open"><b>No gate</b><span>Where everyone starts</span>Nobody is licensed on day one, and nothing after day one is free.</p>}
                     <ul className="trade-blueprints">
                       {tier.blueprints.map((blueprint) => (
                         <li key={blueprint.name}>
@@ -75,6 +97,30 @@ export default async function ProfessionsPage() {
                   </div>
                 );
               })}
+
+              <div className="trade-proving">
+                <b>The proving</b> {trade.proving}
+              </div>
+
+              <div className="trade-seats">
+                <h3>Seats — where the book is signed, and what only that ground teaches</h3>
+                <ul>
+                  {trade.seats.map((seat) => {
+                    const ground = tradeGrounds.find((entry) => entry.slug === seat.ground);
+                    const reserved = seat.teaches.name.startsWith("—");
+                    return (
+                      <li className={reserved ? "is-reserved" : undefined} key={seat.ground}>
+                        <b>{ground?.name ?? seat.ground}</b> — {seat.keeper}
+                        <em>{seat.note}</em>
+                        {reserved
+                          ? <span className="seat-reserved">{seat.teaches.does[0]}</span>
+                          : <span className="seat-teaches"><b>{seat.teaches.name}</b>{seat.teaches.does.map((line) => <i key={line}>{line}</i>)}</span>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
               {trade.ceiling ? <p className="trade-ceiling"><b>The ceiling</b> {trade.ceiling}</p> : null}
             </article>
           );
