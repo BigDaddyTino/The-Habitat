@@ -834,3 +834,15 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Verified all fourteen slugs resolve through authenticated `/codex-art/characters/...` URLs and passed the focused Codex art privacy/key-art tests with 6 passed and 0 failed
 - [x] Preserved the publication boundary: NAG is the only subject with an existing canonical character record; the other thirteen images remain dormant assets pending authored dossiers, with zero StoryEntry, database, taxonomy, credential, infrastructure, or production-state changes
 - [ ] Owner art-direction review and the thirteen missing dossier writes remain future gates; dormant assets are not represented as live Codex entries
+
+## 2026-08-31 - SEQ-000 Codex enlistment handoff
+
+- [x] Matched the named `20260831T112820920Z-4ce7b0474f87` release against the loopback live `habitat` database before writing: Steve was unchanged at CANON v9, Enlistment was unchanged at CANON v1, and Wendy did not yet exist
+- [x] Created `wendy` as a PROPOSED v1 CHARACTER with the four established enlistment questions, queue-driven voice, exactly one earned non-contempt beat, Materiel background, non-magical phase-zero state, Stormglass employment, and unresolved scalar facts left null with an explicit `TBD — ask Tino` owner question
+- [x] Revised `steve` additively to CANON v10: he used Wendy's desk, shipped to Ignit Island beside the player, and is grieved at Forward Camp Kestrel by Tino; his death, wordless stealth lesson, and original eulogy remain unchanged
+- [x] Revised `enlistment` to PROPOSED v2 while retaining the complete v1 prose as the prior canonical baseline; added pre-form grooming/uniform/appearance intake, Wendy's desk beat, the terminal injection, and the first-person mid-gauntlet cinematic handoff without inventing a missing cinematic slug
+- [x] Preserved all seven owner decisions exactly once on their responsible records and explicitly exposed the inherited desk-location conflict instead of erasing the v1 unlock-stage metadata; Commander Rook and the protected out-of-scope character remained outside the authoring query and mutation paths
+- [x] Applied the three-row change in one Serializable, optimistic-version-guarded transaction with four Tino-attributed revisions, a closed introduced-link allow-list, exact post-commit state and revision-provenance checks, and an idempotent second preview reporting zero changes
+- [x] Captured and byte-verified the target-only preimage at `N:\The Habitat\backups\codex-preimages\seq-000-2026-08-31T17-02-05-026Z.json` (25,202 bytes; SHA-256 `e847a3616b9a3ec2d7ec6a5543785067d92158420c624407001b690585e8fb5c`); no broad database dump was taken
+- [x] The guarded authoring script, focused ESLint, and full workspace strict TypeScript check pass
+- [ ] The display spelling “hypogriff” versus canonical `hippogriff` slug/link remains separately flagged; this handoff made no spelling change
