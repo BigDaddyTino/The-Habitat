@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-25
+Last updated: 2026-08-31
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -825,3 +825,12 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Made nested creature parents render their direct children, exposing Bloommarked Remnant and The Last Shift with approved artwork beneath the Human dossier while preserving their Human-origin CREATURE taxonomy
 - [x] Locked explicit hero-resolution tests for Mender, Bloommarked Remnant, and The Last Shift and corrected stale art-package documentation that still described the two Human-derived plates as missing
 - [x] Passed five focused art/resolver tests, strict web typecheck, web lint, production build, HabitatWeb restart, and authenticated live desktop/mobile QA; all three served plates report their locked native dimensions, both navigation links are present, mobile has zero horizontal overflow, and browser errors are zero
+
+## 2026-08-31 - Eight Trees trainer portrait run
+
+- [x] Generated the fourteen depictable standing trainer subjects as distinct mature cinematic portraits with species/state locks treated as load-bearing; the prohibited Crossroads bargain and unwritten hidden Concordance elder were not depicted
+- [x] Added all fourteen selected finals to the private convention-path character-art shelf as 1672 x 941 RGB24 PNGs; normalized two one-pixel generator deviations without changing image content and retained the final prompt, hash, and QA ledger in `Docs/SOL56_TRAINER_PORTRAIT_LEDGER.md`
+- [x] Inspected every full-resolution final and simulated both the destructive 104 x 174 directory-card center crop and responsive mobile dossier crop; all defining faces, objects, actions, and non-human anatomy remain readable
+- [x] Verified all fourteen slugs resolve through authenticated `/codex-art/characters/...` URLs and passed the focused Codex art privacy/key-art tests with 6 passed and 0 failed
+- [x] Preserved the publication boundary: NAG is the only subject with an existing canonical character record; the other thirteen images remain dormant assets pending authored dossiers, with zero StoryEntry, database, taxonomy, credential, infrastructure, or production-state changes
+- [ ] Owner art-direction review and the thirteen missing dossier writes remain future gates; dormant assets are not represented as live Codex entries
