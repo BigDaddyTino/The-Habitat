@@ -1,8 +1,18 @@
 .codex-navigation{position:sticky;top:68px;z-index:38;border-bottom:1px solid rgba(192,155,79,.24);background:rgba(9,12,10,.94);box-shadow:0 12px 28px rgba(0,0,0,.2);backdrop-filter:blur(18px)}
-.codex-navigation-inner{display:flex;align-items:center;gap:4px;width:min(1420px,calc(100% - 32px));min-height:54px;margin:auto;overflow-x:auto;scrollbar-width:none}
-.codex-navigation-inner::-webkit-scrollbar{display:none}.codex-navigation-mark{display:grid;place-items:center;width:28px;height:28px;flex:0 0 auto;margin-right:8px;border:1px solid #9d7b3d;color:#e2c985;font:700 12px var(--font-serif);transform:rotate(45deg)}
-.codex-navigation-mark::first-letter{transform:rotate(-45deg)}.codex-navigation a{display:flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;color:#aeb7ac;font:700 9px var(--font-mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase;white-space:nowrap;transition:.18s ease}
-.codex-navigation a:hover,.codex-navigation a:focus-visible{background:#20251f;color:#f4dfad;outline:none}
+.codex-navigation-inner{display:flex;align-items:center;flex-wrap:wrap;gap:4px;width:min(1420px,calc(100% - 32px));min-height:54px;margin:auto}
+.codex-navigation-mark{display:grid;place-items:center;width:28px;height:28px;flex:0 0 auto;margin-right:8px;border:1px solid #9d7b3d;color:#e2c985;font:700 12px var(--font-serif);transform:rotate(45deg)}
+.codex-navigation-mark::first-letter{transform:rotate(-45deg)}.codex-navigation a,.codex-navigation .codex-nav-group>button{display:flex;align-items:center;gap:7px;min-height:36px;padding:0 12px;border:0;background:none;cursor:pointer;color:#aeb7ac;font:700 9px var(--font-mono);letter-spacing:.08em;text-decoration:none;text-transform:uppercase;white-space:nowrap;transition:.18s ease}
+.codex-navigation a:hover,.codex-navigation a:focus-visible,.codex-navigation .codex-nav-group>button:hover,.codex-navigation .codex-nav-group>button:focus-visible{background:#20251f;color:#f4dfad;outline:none}
+.codex-navigation a.is-here,.codex-navigation .codex-nav-group>button.is-here{color:#f4dfad;box-shadow:inset 0 -2px 0 #9d7b3d}
+.codex-nav-group{position:relative}
+.codex-nav-group>button.is-open{background:#20251f;color:#f4dfad}
+.codex-nav-group>button svg:last-child{opacity:.6;transition:transform .18s ease}
+.codex-nav-group>button.is-open svg:last-child{transform:rotate(180deg)}
+.codex-nav-menu{position:absolute;top:calc(100% + 1px);left:0;z-index:40;min-width:186px;padding:5px;display:grid;border:1px solid rgba(192,155,79,.3);background:rgba(9,12,10,.98);box-shadow:0 18px 40px rgba(0,0,0,.5);backdrop-filter:blur(18px)}
+.codex-nav-menu a{min-height:34px}
+.codex-nav-menu a.is-here{box-shadow:inset 2px 0 0 #9d7b3d}
+.codex-nav-group:last-child .codex-nav-menu{right:0;left:auto}
+@media(max-width:560px){.codex-navigation .codex-nav-group .codex-nav-menu{position:fixed;left:8px;right:8px;top:auto;margin-top:6px;min-width:0}}
 
 .codex-story-compass{margin:34px 0 24px;border:1px solid #4c4c3c;background:linear-gradient(145deg,rgba(29,30,24,.94),rgba(12,16,13,.98));box-shadow:0 25px 55px rgba(0,0,0,.22)}
 .codex-compass-heading{display:grid;grid-template-columns:minmax(240px,.7fr) 1.3fr;gap:28px;padding:25px 28px;border-bottom:1px solid #393d34}.codex-compass-heading h2{margin:6px 0 0;color:#f3e6c8;font:600 clamp(24px,3vw,38px)/1 var(--font-serif)}.codex-compass-heading>p{max-width:680px;margin:auto 0;color:#9ba69c;line-height:1.7}
