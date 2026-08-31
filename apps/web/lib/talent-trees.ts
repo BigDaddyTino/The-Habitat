@@ -521,7 +521,7 @@ export const talentClasses: TalentClass[] = [
         n("danger-close", "Danger Close", "Fire support lands closer than anyone likes, safely.", 3),
         n("kill-box", "Kill Box", "Ground chosen in advance; whatever walks into it is already lost.", 3),
         n("overwatch-grid", "Overwatch Grid", "The battlefield renders as lines and timing.", 3, { weave: "the-map" }),
-        n("battery-voice", "Battery Voice", "The fire mission arrives a round early, because the guns know your name.", 5, { ceiling: "the Tempest Battery Officer" }),
+        n("battery-voice", "Battery Voice", "The fire mission arrives seconds sooner, because the guns know your name.", 5, { ceiling: "the Tempest Battery Officer" }),
       ]},
       { name: "Quartermaster", nodes: [
         n("ledger-hand", "Ledger Hand", "Your books balance, and everyone knows it.", 1),
@@ -735,7 +735,7 @@ export const talentClasses: TalentClass[] = [
         n("stare-down", "Stare Down", "Lesser enemies remember an appointment elsewhere.", 2),
         n("price-on-paper", "Price on Paper", "Bounties on you are leverage; bounties you claim pay double.", 3),
         n("larger-than-life", "Larger Than Life", "Allies stand taller near you; enemies second-guess. Neither knows why.", 3),
-        n("sung-about", "Sung About", "Named enemies hesitate their first round. They know the song.", 4, { weave: "witnesses" }),
+        n("sung-about", "Sung About", "Named enemies hesitate before their first shot. They know the song.", 4, { weave: "witnesses" }),
         n("myth", "Myth", "Suspicion, standing and fear read the story before they read you.", 5),
       ]},
     ],

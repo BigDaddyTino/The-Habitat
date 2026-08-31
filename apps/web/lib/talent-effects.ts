@@ -20,7 +20,7 @@ export type NodeEffect = Partial<{
   /** Multiplier on wounds taken — mitigation below 1, exposure above. */
   incoming: number;
   initiative: number;
-  /** Extra Dying-clock rounds for the owner. */
+  /** Extra SECONDS on the owner's bleed-out timer. */
   dyingClock: number;
   /** Wounds before Down, added. */
   toughness: number;
@@ -34,19 +34,19 @@ export type NodeEffect = Partial<{
   resourceCap: number;
   /** Ammunition multiplier bonus (0.3 = +30%). */
   ammo: number;
-  /** Chance per round to shrug a bleed or heal a wound. */
+  /** Chance per 3s contact beat to shrug a bleed or heal a wound. */
   selfRepair: number;
-  /** Ally wounds healed per round — party value. */
+  /** Ally wounds restored when pulling somebody back up — party value. */
   partyHeal: number;
   /** Reduces every ally's incoming wounds — auras and cover. */
   partyMitigation: number;
-  /** Extra action chance per round. */
+  /** Action tempo bonus — attacks, casts and swaps cycle faster. */
   extraAction: number;
   /** Chance to avoid being targeted, and to be missed when targeted. */
   concealment: number;
   /** Sees through concealment. */
   detection: number;
-  /** Chance per round to strip a plate or deny the enemy ground. */
+  /** Chance per committed attack to strip a plate or stagger footing. */
   control: number;
   /** Multiplier on enemy cast costs in range — the Dampening Coil. */
   enemyCastCost: number;
@@ -75,7 +75,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/spit-and-stand": { selfRepair: 0.12 },
   "bastion/dig-in": { incoming: 0.9 },
   "bastion/hold-the-line": { partyMitigation: 0.1 },
-  "bastion/written-defeat": { partyMitigation: 0.1, dyingClock: 1 },
+  "bastion/written-defeat": { partyMitigation: 0.1, dyingClock: 3 },
   "bastion/stand-over-them": { partyMitigation: 0.08 },
   "bastion/meet-the-wall": { control: 0.1 },
   "bastion/look-at-me": { partyMitigation: 0.15, incoming: 1.12 },
@@ -106,7 +106,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/walk-it-off": { toughness: 1 },
   "bastion/pain-ledger": { damageBonus: 0.3 },
   "bastion/on-your-feet": { partyHeal: 1 },
-  "bastion/argue-with-the-clock": { dyingClock: 3 },
+  "bastion/argue-with-the-clock": { dyingClock: 9 },
   "bastion/refuse-the-ground": { refuseDown: true },
   "bastion/three-seconds": { damageBonus: 0.6, initiative: 0.2 },
 
@@ -373,7 +373,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   // not "narrative"). The sims ignore `world` lines; the popout leads with
   // them.
   "bastion/bear-the-weight": { world: ["+40% carry weight", "Over-limit slowdown halved"] },
-  "bastion/thousand-round-stare": { world: ["Enemy plate count, ward type and chrome read on sight — exact, no check", "Works at rifle range"] },
+  "bastion/thousand-round-stare": { world: ["Enemy plate count, ward type and chrome read on sight — exact, instantly", "Works at rifle range"] },
   "bastion/forced-march": { world: ["Squad overland travel +20% faster", "March noise −50% — the column moves quiet"] },
   "bastion/loud-mercy": { world: ["Breach charges can be set non-lethal: 8m blind-and-deafen, 6 seconds, nobody dies", "Lethal or loud is chosen at placement"] },
   "bastion/static-on-the-skin": { world: ["Wards within 10m felt through the skin — direction and rough strength", "No line of sight needed"] },
@@ -384,7 +384,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/union-fittings": { world: ["Union counters sell at member prices: −15% on parts, plate and chrome work", "No questions on chrome-legal goods"] },
   "bastion/come-take-it": { world: ["Your chrome ignores every remote lockout and kill-switch", "A revocation agent must reach you in person"] },
 
-  "spector/quiet-lock": { world: ["Standard locks open silent in 10 seconds, no check", "Quality locks: 30 seconds with kit"] },
+  "spector/quiet-lock": { world: ["Standard locks open silent in 10 seconds, every time", "Quality locks: 30 seconds with kit"] },
   "spector/ward-seam": { world: ["A ward's weak seam shown after 6 seconds of study", "Cross it without tripping — one person at a time"] },
   "spector/wrong-shadow": { world: ["Traps, rigged doors and doctored rigs reveal themselves within 8m", "Automatic — no searching"] },
   "spector/credential": { world: ["Once per day: a paper that passes one checkpoint — any checkpoint", "Burns on use; a second look kills it"] },
@@ -392,13 +392,13 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "spector/weather-nose": { world: ["Tomorrow's weather known today, to the hour", "Storms called a full day early"] },
   "spector/sign": { world: ["Tracks read number, species, load and age of what passed", "Up to three days cold, on any ground"] },
   "spector/cold-camp": { world: ["Your party's camp cannot be found unless you want it found", "Fire shielded, tracks swept, scent killed — every night, automatic"] },
-  "spector/high-route": { world: ["Rooftops, ridges and rigging at full move speed", "No climbing checks on anything with a handhold"] },
+  "spector/high-route": { world: ["Rooftops, ridges and rigging at full move speed", "Anything with a handhold climbs like a ladder"] },
   "spector/everyones-cousin": { world: ["Strangers open friendly: +20 disposition everywhere", "Rumors surface 2× faster when you ask around"] },
   "spector/cover-story": { world: ["A worked identity: name, history and references that survive a records check"] },
   "spector/paper": { world: ["Forged documents pass first inspection anywhere", "Expert scrutiny: even odds"] },
   "spector/borrowed-voice": { world: ["Any accent, cadence or rank heard for one minute, worn convincingly", "Voice-keyed doors and codewords included"] },
-  "spector/forget": { world: ["Once per scene: the last 30 seconds removed from one witness", "They fill the gap themselves — no trace"] },
-  "spector/suggest": { world: ["Once per scene: one small idea planted mid-sentence, acted on as their own", "Nothing against their core interests"] },
+  "spector/forget": { world: ["Once every 15 minutes: the last 30 seconds removed from one witness", "They fill the gap themselves — no trace"] },
+  "spector/suggest": { world: ["Once every 15 minutes: one small idea planted mid-sentence, acted on as their own", "Nothing against their core interests"] },
   "spector/one-signature": { world: ["Your casts carry no arcane signature — untraceable to you, ever"] },
 
   "conduit/cook-the-air": { world: ["Squad immune to cold-weather penalties", "10m around you stays warm through hard frost"] },
@@ -413,7 +413,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "conduit/whisper-range": { world: ["Mindwork at conversation subtlety from 40m", "Nobody sees you working"] },
   "conduit/grave-quiet": { world: ["Death within 20m registers — count, direction, freshness"] },
   "conduit/presence": { world: ["Whether an Echo sits in its Core — and whether it's lit — known from anywhere"] },
-  "conduit/second-look": { world: ["Once per scene: the last three seconds replayed, for you alone", "Enough to re-read a face, a hand, a card"] },
+  "conduit/second-look": { world: ["On a 5-minute cooldown: the last three seconds replayed, for you alone", "Enough to re-read a face, a hand, a card"] },
   "conduit/forge-manners": { world: ["Forge Cores answer you first: −10% on all Core work", "The queue moves you up one place"] },
 
   "surger/shove": { world: ["Active — borrowed momentum in someone's face: thrown 2m", "60% to floor anyone your size or lighter"] },
@@ -423,7 +423,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "surger/quiet-blood": { world: ["Predators read you as neither prey nor threat", "Wild beasts will not start a fight with you"] },
   "surger/marsh-lungs": { world: ["Immune to bad air: spore, smoke, swamp gas, mine damp"] },
   "surger/sporecast": { world: ["Overcharge weather and sporefall felt one hour out", "Time enough to shelter the squad"] },
-  "surger/seat": { world: ["Augments seat clean: no scar, no inflammation, no rejection checks"] },
+  "surger/seat": { world: ["Augments seat clean: no scar, no inflammation, no rejection, ever"] },
   "surger/hot-swap": { world: ["Field augment swaps in 5 minutes — no surgeon, no bench", "One free swap per day; more cost a wound"] },
   "surger/red-scent": { world: ["Blood and open wounds smelled through walls — 15m, with direction and freshness"] },
   "surger/draw": { world: ["Active — blood pulled from a wound at 10m: the target staggers, your Bloodwork feeds", "Once per fight per target"] },
@@ -431,7 +431,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "archon/calm": { world: ["Active — one animal settled in seconds, panicked or hostile", "Works up to great-beast size"] },
   "archon/taught-once": { world: ["Behaviours taught to bonded animals never decay", "One demonstration holds for life"] },
   "archon/watchword": { world: ["A bond holds a post alone — ground, door or person — for days if fed", "It sends for you the moment it's tested"] },
-  "archon/groom-and-feed": { world: ["Your great beast opens every fight fight-ready — fed, calm, checked", "No readiness rolls, ever"] },
+  "archon/groom-and-feed": { world: ["Your great beast opens every fight fight-ready — fed, calm, checked", "Always, automatically"] },
   "archon/thermal-roads": { world: ["Mounted flight rides thermals: +30% air travel speed at half the beast's fatigue"] },
   "archon/weather-wings": { world: ["Storms are flying weather — wind and rain no longer ground you", "Lightning still will"] },
   "archon/ask": { world: ["Active — one question to a working machine, answered honestly", "Once per machine per day"] },
@@ -523,41 +523,57 @@ export function institutionalCosts(phase: number): NodeEffect {
 const signed = (value: number, digits = 0) => `${value >= 0 ? "+" : "−"}${Math.abs(value).toFixed(digits).replace(/\.?0+$/, "")}`;
 const signedPct = (value: number) => `${value >= 0 ? "+" : "−"}${Math.round(Math.abs(value) * 100)}%`;
 const plural = (value: number, word: string) => `${word}${Math.abs(value) === 1 ? "" : "s"}`;
+/** A per-contact-beat rate shown as a human interval: "about every 25s". */
+const everySeconds = (perBeat: number) => {
+  const seconds = 3 / perBeat;
+  return seconds >= 10 ? `${Math.round(seconds / 5) * 5}s` : `${Math.round(seconds)}s`;
+};
 
-/** The plain gameplay lines a popout shows for one effect object. */
+/**
+ * The plain gameplay lines a popout shows for one effect object.
+ *
+ * LIVE-SERVER LANGUAGE: this is an FPS on a dedicated server — no rounds,
+ * no turns, no pausing — so every line speaks in seconds, rates, and
+ * per-shot chances. Internal rates are stored per contact beat (3s) and
+ * converted here; the Dying clock is stored in seconds outright.
+ */
 export function describeEffects(effect: NodeEffect): string[] {
   const lines: string[] = [];
   if (effect.world) lines.push(...effect.world);
-  if (effect.accuracy) lines.push(`${signedPct(effect.accuracy)} hit chance`);
+  if (effect.accuracy) lines.push(`${signedPct(effect.accuracy)} shots on target — tighter spread, steadier recoil`);
   if (effect.damageBonus) lines.push(`${signed(effect.damageBonus, 2)} damage on every hit that lands`);
   if (effect.incoming !== undefined && effect.incoming !== 1) {
     lines.push(effect.incoming < 1 ? `${signedPct(effect.incoming - 1)} damage taken` : `${signedPct(effect.incoming - 1)} damage taken (the cost half)`);
   }
   if (effect.toughness) lines.push(`${signed(effect.toughness)} ${plural(effect.toughness, "hit")} before Down`);
   if (effect.extraPlates) lines.push(`${signed(effect.extraPlates)} armour ${plural(effect.extraPlates, "plate")} carried`);
-  if (effect.dyingClock) lines.push(`${signed(effect.dyingClock)} ${plural(effect.dyingClock, "round")} on your Dying clock`);
-  if (effect.initiative) lines.push(`${signedPct(effect.initiative)} initiative — you act earlier`);
+  if (effect.dyingClock) lines.push(`${signed(effect.dyingClock)} seconds on your bleed-out timer once you're Down`);
+  if (effect.initiative) lines.push(`${signedPct(effect.initiative)} readiness — draw, mount and first shot come sooner`);
   if (effect.castCost !== undefined && effect.castCost !== 1) lines.push(`${signedPct(effect.castCost - 1)} cast costs`);
   if (effect.resourceCap) lines.push(`${signed(effect.resourceCap)} maximum pool / charges`);
   if (effect.resourcePerHit) lines.push(`${signed(effect.resourcePerHit, 1)} pool or charges back per landed hit`);
   if (effect.resourcePerWound) lines.push(`${signed(effect.resourcePerWound, 1)} back per wound taken`);
   if (effect.ammo) lines.push(`${signedPct(effect.ammo)} ammunition carried`);
-  if (effect.selfRepair) lines.push(`${Math.round(effect.selfRepair * 100)}% chance each round to close one of your own wounds`);
-  if (effect.partyHeal) lines.push(`heals allies ${effect.partyHeal} wound${effect.partyHeal === 1 ? "" : "s"} worth per round`);
+  if (effect.selfRepair) lines.push(`one of your wounds closes about every ${everySeconds(effect.selfRepair)} while you're in the fight`);
+  if (effect.partyHeal) {
+    lines.push(effect.partyHeal >= 1
+      ? `pulls a downed ally back to their feet — up with ${effect.partyHeal} ${plural(effect.partyHeal, "wound")} restored`
+      : `field-mends nearby allies ${Math.round(effect.partyHeal * 20)} wounds' worth a minute`);
+  }
   if (effect.partyMitigation) lines.push(`allies near you take ${signedPct(-effect.partyMitigation)} damage`);
-  if (effect.extraAction) lines.push(`${Math.round(effect.extraAction * 100)}% chance of an extra action each round`);
+  if (effect.extraAction) lines.push(`${signedPct(effect.extraAction)} action tempo — attacks, casts and swaps cycle faster`);
   if (effect.concealment) {
     lines.push(effect.concealment > 0
       ? `${Math.round(effect.concealment * 100)}% harder to target — and to hit when targeted`
       : `${Math.round(-effect.concealment * 100)}% easier to read and to hit (a cost)`);
   }
   if (effect.detection) lines.push(`sees through ${Math.round(effect.detection * 100)}% concealment`);
-  if (effect.control) lines.push(`${Math.round(effect.control * 100)}% chance each round to strip a plate or deny ground`);
+  if (effect.control) lines.push(`${Math.round(effect.control * 100)}% chance on each attack to strip a plate or stagger footing`);
   if (effect.enemyCastCost && effect.enemyCastCost !== 1) lines.push(`enemy casts in range cost ×${effect.enemyCastCost}`);
   if (effect.minions) {
     lines.push(effect.minions >= 1
       ? `${effect.minions} bonded ${effect.minions === 1 ? "body fights" : "bodies fight"} beside you, on their own strength`
-      : `an extra bonded action every other round`);
+      : `your bond strikes on its own every few seconds`);
   }
   if (effect.hardenedChrome) lines.push(`ELECTRICAL no longer vents your chrome`);
   if (effect.chrome) lines.push(`counts as chrome — ELECTRICAL can vent it (a cost, unless hardened)`);

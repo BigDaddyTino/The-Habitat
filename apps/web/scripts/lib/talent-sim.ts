@@ -18,6 +18,25 @@
 
 export type DamageType = "PHYSICAL" | "FIRE" | "ELECTRICAL" | "ARCANE" | "TOXIC";
 
+/**
+ * CONTINUOUS TIME. This is an FPS on a live dedicated server: there are no
+ * rounds and no pausing, so the model runs on a real clock. One "contact
+ * beat" — the cadence at which a fighter commits an attack, the old round —
+ * is BEAT_SECONDS of wall time, and every rate in the model is defined
+ * against seconds. The integrator steps at TICK_SECONDS, the way a server
+ * ticks; probabilities per beat are converted to per-tick so expected values
+ * are identical at any step size.
+ */
+export const BEAT_SECONDS = 3;
+export const TICK_SECONDS = 0.5;
+
+/**
+ * Per-beat event rate → per-tick probability, preserving the EXPECTED NUMBER
+ * of events (each event carries a fixed amount — a bleed's seep, a mended
+ * wound — so the count is what must match, not the chance of at-least-one).
+ */
+const perTick = (perBeat: number) => Math.min(1, Math.max(0, perBeat) * (TICK_SECONDS / BEAT_SECONDS));
+
 export type Attributes = {
   conditioning: number; coordination: number; resilience: number;
   acuity: number; composure: number; conductivity: number;
@@ -54,7 +73,7 @@ export type ProfessionProfile = {
   effects: Partial<{
     /** Doses carried into a fight beyond the standard issue. */
     extraDoses: number;
-    /** Rounds of Dying clock added to the whole party. */
+    /** Seconds of Dying clock added to the whole party. */
     partyDyingClock: number;
     /** Wounds healed between fights, per person. */
     partyRecovery: number;
@@ -95,8 +114,9 @@ export type NodeEffect = Partial<{
   extraPlates: number;
   /** Multiplier on wounds taken  mitigation. */
   incoming: number;
+  /** Readiness: shaves the delay before the first shot. */
   initiative: number;
-  /** Extra Dying-clock rounds for the owner. */
+  /** Extra SECONDS on the owner's Dying clock. */
   dyingClock: number;
   /** Wounds before Down, added. */
   toughness: number;
@@ -110,19 +130,19 @@ export type NodeEffect = Partial<{
   resourceCap: number;
   /** Ammunition multiplier. */
   ammo: number;
-  /** Chance per round to shrug a bleed or heal a wound. */
+  /** Chance per contact beat to shrug a bleed or heal a wound (continuous). */
   selfRepair: number;
-  /** Ally wounds healed per round  party value. */
+  /** Ally wounds restored when pulling somebody back up  party value. */
   partyHeal: number;
   /** Reduces every ally's incoming wounds  auras and cover. */
   partyMitigation: number;
-  /** Extra action chance per round. */
+  /** Action tempo bonus: attacks cycle this much faster. */
   extraAction: number;
   /** Chance to avoid being targeted first in PvP  the unseen. */
   concealment: number;
   /** Sees through concealment. */
   detection: number;
-  /** Chance per round to deny the enemy their action  control. */
+  /** Chance per committed attack to strip a plate or stagger  control. */
   control: number;
   /** Multiplier on enemy cast costs in range  the Dampening Coil. */
   enemyCastCost: number;
@@ -314,25 +334,41 @@ export function resolveAttack(attacker: SimCharacter, defender: SimCharacter, at
   return wounds;
 }
 
-export function tickState(character: SimCharacter, rng: () => number) {
+/**
+ * One integrator tick of continuous state: bleeds seep, self-repair mends,
+ * and the Dying clock runs down in real seconds. Per-beat probabilities are
+ * converted through perTick() so the expected rates are identical no matter
+ * the step size.
+ *
+ * The Down TRANSITION is the caller's business when `checkDown` is false:
+ * fight() grants a body past its threshold the rest of its current exchange
+ * (it fires the shot it was already committing, then drops). Damage in this
+ * model travels in whole-exchange packets, and letting death interrupt
+ * mid-packet silently hands every duel to whoever fires first — which is
+ * not what the wound model says.
+ */
+export function tickState(character: SimCharacter, rng: () => number, checkDown = true) {
   if (character.dead) return;
-  if (character.bleeding > 0 && rng() < 0.5) character.wounds += 0.5 * character.bleeding;
-  if ((character.effects.selfRepair ?? 0) > 0 && rng() < (character.effects.selfRepair ?? 0)) {
+  if (character.bleeding > 0 && rng() < perTick(0.5)) character.wounds += 0.5 * character.bleeding;
+  if ((character.effects.selfRepair ?? 0) > 0 && rng() < perTick(character.effects.selfRepair ?? 0)) {
     character.wounds = Math.max(0, character.wounds - 1);
     character.bleeding = Math.max(0, character.bleeding - 1);
   }
-  if (!character.down && character.wounds >= hitsBeforeDown(character)) {
+  if (checkDown && !character.down && character.wounds >= hitsBeforeDown(character)) {
     if (character.effects.refuseDown && !character.refusedDown) {
       character.refusedDown = true;
       character.wounds = hitsBeforeDown(character) - 1;
     } else {
       character.down = true;
-      character.dying = 3 + Math.floor(character.attributes.resilience / 3) + (character.effects.dyingClock ?? 0)
+      // The Dying clock, in seconds: canon's base window plus what the body,
+      // the talents and the party's trades add to it.
+      character.dying = (3 + Math.floor(character.attributes.resilience / 3)) * BEAT_SECONDS
+        + (character.effects.dyingClock ?? 0)
         + character.professions.reduce((sum, p) => sum + (p.effects.partyDyingClock ?? 0), 0);
     }
   }
   if (character.down) {
-    character.dying -= 1;
+    character.dying -= TICK_SECONDS;
     if (character.dying <= 0) character.dead = true;
   }
 }
@@ -372,91 +408,162 @@ export function recover(character: SimCharacter, hoursOfCare = 1) {
 }
 
 export type FightResult = {
-  winner: "a" | "b" | "draw"; rounds: number; aDry: boolean; bDry: boolean; aDownRound: number | null;
-  /** Rounds side A spent on a worse attack than their best, because the
-   * — better one was unaffordable  canon's person with a rifle. */
-  aDegraded: number; aRounds: number;
+  winner: "a" | "b" | "draw";
+  /** Wall-clock length of the engagement, in seconds. */
+  seconds: number;
+  aDry: boolean; bDry: boolean;
+  /** Second at which side A's first body hit the floor, or null. */
+  aDownAt: number | null;
+  /** Attacks side A committed with a worse weapon than their best, because
+   * the better one was unaffordable — canon's person with a rifle. */
+  aDegraded: number;
+  /** Total attacks side A committed. */
+  aActions: number;
 };
 
-/** One fight between two sides. A side is one or more characters.
- * — `fresh` false continues a day already in progress. */
-export function fight(sideA: SimCharacter[], sideB: SimCharacter[], rng: () => number, maxRounds = 25, fresh = true): FightResult {
+/**
+ * One engagement between two sides on a continuous clock. A side is one or
+ * more characters; `fresh` false continues a day already in progress.
+ *
+ * No rounds: every fighter runs their own attack timer. The base cadence is
+ * one committed attack per BEAT_SECONDS, sped up by action tempo; readiness
+ * (initiative) decides how soon the first shot comes. Bonded bodies fight
+ * on their own timers at their own strength. State — bleeds, repair, the
+ * Dying clock — integrates every TICK_SECONDS, the way a server ticks.
+ */
+export function fight(sideA: SimCharacter[], sideB: SimCharacter[], rng: () => number, maxSeconds = 75, fresh = true): FightResult {
   for (const character of [...sideA, ...sideB]) if (fresh || character.classSlug === "enemy") reset(character);
-  let aDry = false, bDry = false, aDownRound: number | null = null, aDegraded = 0, aRounds = 0;
-
-  const initiative = (side: SimCharacter[]) => side.reduce((sum, c) => sum + c.attributes.coordination + (c.effects.initiative ?? 0) * 10, 0) / side.length;
-  const aFirst = initiative(sideA) >= initiative(sideB);
+  let aDry = false, bDry = false, aDownAt: number | null = null, aDegraded = 0, aActions = 0;
 
   const standing = (side: SimCharacter[]) => side.filter((c) => !c.down && !c.dead);
 
-  for (let round = 1; round <= maxRounds; round++) {
-    const order: Array<["a" | "b", SimCharacter]> = aFirst
-      ? [...sideA.map((c) => ["a", c] as ["a", SimCharacter]), ...sideB.map((c) => ["b", c] as ["b", SimCharacter])]
-      : [...sideB.map((c) => ["b", c] as ["b", SimCharacter]), ...sideA.map((c) => ["a", c] as ["a", SimCharacter])];
+  // Readiness: the better-drilled side clears leather sooner. The gap in
+  // coordination-plus-readiness converts to a head start in fractions of a
+  // beat, capped at half a beat — worth what shooting first used to be.
+  const readiness = (side: SimCharacter[]) => side.reduce((sum, c) => sum + c.attributes.coordination + (c.effects.initiative ?? 0) * 10, 0) / side.length;
+  const halfBeat = BEAT_SECONDS / 2;
+  const READY_SCALE = 0.05;
+  const readyGap = Math.max(-halfBeat, Math.min(halfBeat, (readiness(sideB) - readiness(sideA)) * READY_SCALE));
+  const firstShotDelay = (side: "a" | "b") => 0.5 + Math.max(0, side === "a" ? readyGap : -readyGap);
 
-    for (const [side, actor] of order) {
+  type Fighter = { side: "a" | "b"; actor: SimCharacter; nextAttackAt: number; nextMinionAt: number };
+  // Bonded bodies are already on the field when it starts — a flock does not
+  // wait for its keeper's draw — so their first strike shares the readiness
+  // window instead of trailing it.
+  const fighters: Fighter[] = [
+    ...sideA.map((actor) => ({ side: "a" as const, actor, nextAttackAt: firstShotDelay("a"), nextMinionAt: firstShotDelay("a") })),
+    ...sideB.map((actor) => ({ side: "b" as const, actor, nextAttackAt: firstShotDelay("b"), nextMinionAt: firstShotDelay("b") })),
+  ];
+
+  const attackPeriod = (actor: SimCharacter) => BEAT_SECONDS / (1 + (actor.effects.extraAction ?? 0));
+  /** Fighters past their threshold, and the second their fall completes. */
+  const falling = new Map<SimCharacter, number>();
+
+  const commitAttack = (side: "a" | "b", actor: SimCharacter): void => {
+    const allies = side === "a" ? sideA : sideB;
+    const live = standing(side === "a" ? sideB : sideA);
+    if (!live.length) return;
+
+    // A medic pulls somebody off the floor before doing anything else.
+    const fallen = allies.find((c) => c.down && !c.dead);
+    if (fallen && (actor.effects.partyHeal ?? 0) > 0 && rng() < 0.7) {
+      fallen.down = false;
+      fallen.wounds = Math.max(0, hitsBeforeDown(fallen) - 1 - (actor.effects.partyHeal ?? 0));
+      return;
+    }
+
+    // Concealment decides who gets shot at: the unseen are chosen last.
+    const visible = live.filter((c) => rng() > (c.effects.concealment ?? 0) - (actor.effects.detection ?? 0));
+    const target = (visible.length ? visible : live)[Math.floor(rng() * (visible.length ? visible.length : live.length))];
+
+    if ((actor.effects.control ?? 0) > 0 && rng() < (actor.effects.control ?? 0)) { target.plates = Math.max(0, target.plates - 1); }
+    const attack = chooseAttack(actor);
+    if (!attack) { if (side === "a") aDry = true; else bDry = true; return; }
+    if (side === "a") {
+      aActions += 1;
+      const best = actor.attacks.reduce((top, candidate) => (candidate.wounds > top.wounds ? candidate : top), actor.attacks[0]);
+      if (attack.wounds < best.wounds) aDegraded += 1;
+    }
+    spend(actor, attack);
+    const landed = resolveAttack(actor, target, attack, rng);
+    if (landed > 0 && (actor.effects.resourcePerHit ?? 0) > 0) {
+      actor.resource = Math.min(actor.resourceMax, actor.resource + (actor.effects.resourcePerHit ?? 0));
+    }
+  };
+
+  const minionStrike = (side: "a" | "b", actor: SimCharacter): void => {
+    // A bonded body: its own claws or bullets, free, and weaker — a drone is
+    // a body on the field, never a second copy of the person who built it.
+    const live = standing(side === "a" ? sideB : sideA);
+    if (!live.length) return;
+    const target = live[Math.floor(rng() * live.length)];
+    const bite: AttackProfile = { name: "Bonded body", type: "PHYSICAL", wounds: 1, accuracy: 0.55, cost: 0, costs: "none" };
+    const minion: SimCharacter = { ...actor, effects: { accuracy: actor.effects.accuracy, damageBonus: (actor.effects.damageBonus ?? 0) * 0.35 } };
+    resolveAttack(minion, target, bite, rng);
+  };
+
+  for (let now = TICK_SECONDS; now <= maxSeconds; now += TICK_SECONDS) {
+    for (const fighter of fighters) {
+      const { side, actor } = fighter;
       if (actor.down || actor.dead) continue;
-      const allies = side === "a" ? sideA : sideB;
-      const foes = standing(side === "a" ? sideB : sideA);
-      if (!foes.length) break;
+      if (!standing(side === "a" ? sideB : sideA).length) continue;
 
-      // A medic pulls somebody off the floor before doing anything else.
-      const fallen = allies.find((c) => c.down && !c.dead);
-      if (fallen && (actor.effects.partyHeal ?? 0) > 0 && rng() < 0.7) {
-        fallen.down = false;
-        fallen.wounds = Math.max(0, hitsBeforeDown(fallen) - 1 - (actor.effects.partyHeal ?? 0));
-        continue;
+      if (now >= fighter.nextAttackAt) {
+        fighter.nextAttackAt = now + attackPeriod(actor);
+        commitAttack(side, actor);
       }
-
-      // The owner acts, then anything bonded to them acts  at its own
-      // strength, not the owner's. A drone is a body on the field, never a
-      // second copy of the person who built it.
-      const minionActions = Math.round(actor.effects.minions ?? 0);
-      const actions = 1 + ((actor.effects.extraAction ?? 0) > rng() ? 1 : 0) + minionActions;
-      for (let act = 0; act < actions; act++) {
-        const isMinion = act >= actions - minionActions;
-        const live = standing(side === "a" ? sideB : sideA);
-        if (!live.length) break;
-        // Concealment decides who gets shot at: the unseen are chosen last.
-        const visible = live.filter((c) => rng() > (c.effects.concealment ?? 0) - (actor.effects.detection ?? 0));
-        const target = (visible.length ? visible : live)[Math.floor(rng() * (visible.length ? visible.length : live.length))];
-
-        if (!isMinion && (actor.effects.control ?? 0) > 0 && rng() < (actor.effects.control ?? 0)) { target.plates = Math.max(0, target.plates - 1); }
-        if (isMinion) {
-          // A bonded body: its own claws or rounds, free, and weaker.
-          const bite: AttackProfile = { name: "Bonded body", type: "PHYSICAL", wounds: 1, accuracy: 0.55, cost: 0, costs: "none" };
-          const minion: SimCharacter = { ...actor, effects: { accuracy: actor.effects.accuracy, damageBonus: (actor.effects.damageBonus ?? 0) * 0.35 } };
-          resolveAttack(minion, target, bite, rng);
-          continue;
-        }
-        const attack = chooseAttack(actor);
-        if (!attack) { if (side === "a") aDry = true; else bDry = true; break; }
-        if (side === "a") {
-          aRounds += 1;
-          const best = actor.attacks.reduce((top, candidate) => (candidate.wounds > top.wounds ? candidate : top), actor.attacks[0]);
-          if (attack.wounds < best.wounds) aDegraded += 1;
-        }
-        spend(actor, attack);
-        const landed = resolveAttack(actor, target, attack, rng);
-        if (landed > 0) {
-          if ((actor.effects.resourcePerHit ?? 0) > 0) actor.resource = Math.min(actor.resourceMax, actor.resource + (actor.effects.resourcePerHit ?? 0));
-        }
+      const minionCount = Math.round(actor.effects.minions ?? 0);
+      if (minionCount > 0 && now >= fighter.nextMinionAt) {
+        fighter.nextMinionAt = now + BEAT_SECONDS;
+        for (let m = 0; m < minionCount; m++) minionStrike(side, actor);
       }
     }
 
+    // Continuous integration every tick; the Down transition is handled
+    // here. A body that crosses its threshold is FALLING: it completes the
+    // exchange it was already committing — its next queued attack, at most
+    // one beat away — and then it drops. Order-independent, so neither side
+    // buys kills purely by phase against the clock.
     for (const character of [...sideA, ...sideB]) {
-      const before = character.down;
-      tickState(character, rng);
-      if (!before && character.down && sideA.includes(character) && aDownRound === null) aDownRound = round;
+      tickState(character, rng, false);
+      const threshold = hitsBeforeDown(character);
+      if (!character.down && !character.dead && character.wounds >= threshold) {
+        if (!falling.has(character)) {
+          const own = fighters.find((f) => f.actor === character);
+          falling.set(character, Math.min(own ? own.nextAttackAt : now, now + BEAT_SECONDS));
+        }
+        if (now >= (falling.get(character) ?? now)) {
+          falling.delete(character);
+          if (character.effects.refuseDown && !character.refusedDown) {
+            character.refusedDown = true;
+            character.wounds = threshold - 1;
+          } else {
+            character.down = true;
+            character.dying = (3 + Math.floor(character.attributes.resilience / 3)) * BEAT_SECONDS
+              + (character.effects.dyingClock ?? 0)
+              + character.professions.reduce((sum, p) => sum + (p.effects.partyDyingClock ?? 0), 0);
+            if (sideA.includes(character) && aDownAt === null) aDownAt = now;
+          }
+        }
+      } else if (character.wounds < threshold) {
+        falling.delete(character); // mended back over the line mid-fall
+      }
       if (character.down && (character.effects.resourcePerWound ?? 0) > 0) character.resource = Math.min(character.resourceMax, character.resource);
     }
 
-    if (!standing(sideA).length && !standing(sideB).length) return { winner: "draw", rounds: round, aDry, bDry, aDownRound, aDegraded, aRounds };
-    if (!standing(sideB).length) return { winner: "a", rounds: round, aDry, bDry, aDownRound, aDegraded, aRounds };
-    if (!standing(sideA).length) return { winner: "b", rounds: round, aDry, bDry, aDownRound, aDegraded, aRounds };
+    // Victory is declared on beat boundaries only, after every pending fall
+    // has matured — otherwise a fraction of a second of head start converts
+    // every mutual kill into a clean win for whoever fired first, which the
+    // wound model never intended.
+    const boundary = Math.round(now / TICK_SECONDS) % Math.round(BEAT_SECONDS / TICK_SECONDS) === 0;
+    if (boundary || now >= maxSeconds) {
+      if (!standing(sideA).length && !standing(sideB).length) return { winner: "draw", seconds: now, aDry, bDry, aDownAt, aDegraded, aActions };
+      if (!standing(sideB).length) return { winner: "a", seconds: now, aDry, bDry, aDownAt, aDegraded, aActions };
+      if (!standing(sideA).length) return { winner: "b", seconds: now, aDry, bDry, aDownAt, aDegraded, aActions };
+    }
   }
   // A fight nobody can finish is decided by who is closer to the floor.
   const health = (side: SimCharacter[]) => side.reduce((sum, c) => sum + (hitsBeforeDown(c) - c.wounds), 0);
   const gap = health(sideA) - health(sideB);
-  return { winner: gap > 0.5 ? "a" : gap < -0.5 ? "b" : "draw", rounds: maxRounds, aDry, bDry, aDownRound, aDegraded, aRounds };
+  return { winner: gap > 0.5 ? "a" : gap < -0.5 ? "b" : "draw", seconds: maxSeconds, aDry, bDry, aDownAt, aDegraded, aActions };
 }

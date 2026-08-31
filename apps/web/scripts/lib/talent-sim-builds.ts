@@ -35,7 +35,7 @@ export const origins: OriginProfile[] = [
 ];
 
 export const professions: ProfessionProfile[] = [
-  { slug: "medicine", name: "Medicine (master)", effects: { partyRecovery: 2, partyDyingClock: 2 } },
+  { slug: "medicine", name: "Medicine (master)", effects: { partyRecovery: 2, partyDyingClock: 6 } },
   { slug: "logistics", name: "Logistics (master)", effects: { extraDoses: 2, ammoMultiplier: 1.5 } },
   { slug: "chemistry", name: "Chemistry (master)", effects: { corruptionPace: 0.7, extraDoses: 1 } },
   { slug: "engineering", name: "Engineering (master)", effects: { extraPlates: 1 } },

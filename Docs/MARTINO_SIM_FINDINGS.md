@@ -141,6 +141,35 @@ fights with civilian obligations, and the horn.*
 - **Roughly half the nodes.** About 250 of the ~450 talent nodes carry
   arithmetic in the model; the rest are narrative — real in play, nothing to
   measure. Every "How it plays" line from the gameplay audit still stands.
+
+## The continuous-time conversion (owner's ruling: this is an FPS)
+
+The game runs on a live dedicated server — no rounds, no turns, no pausing —
+so the round-based engine was rebuilt on a real clock and every player-facing
+number now speaks in seconds. The mapping that keeps the approved balance:
+
+- **One contact beat = 3 seconds.** A committed attack cycles once per beat,
+  faster with action tempo; readiness (the old initiative) buys a real head
+  start on the first shot, capped at half a beat. State — bleeds, self-repair,
+  the Dying clock — integrates every half-second like a server tick, with
+  per-beat rates converted so expected values are identical.
+- **The Dying clock is stored and displayed in seconds** (canon's base window
+  ×3s; Argue With the Clock is +9s, master Medicine +6s for the party).
+- **A body past its threshold completes the exchange it is committing before
+  it drops**, and victory is only declared on beat boundaries after every
+  pending fall has matured. Without those two rules, a quarter-second of
+  readiness converted every near-mutual kill into a clean win for whoever
+  fired first — the round engine never allowed that, and the wound model
+  never intended it.
+
+Re-measured after conversion, same seed: Sky Cavalry tops the duel table at
+86% (was 86% under the round engine — parity held), the Bastion keeps its
+tuned teeth (40% of duels), parties run 72–97% into tripled encounters with
+the all-damage comp still failing sieges (43%), and the ladder still dips at
+phase five (48%) before phase six pays (58%). The one honest shift: Red Line
+at phase six reads 60% instead of 75%, because kills that used to land a
+tick before the berserker's own collapse now count as the mutual downs they
+always were.
 - **The enemy statlines are invented** to canon's descriptions. They are
   internally consistent and nothing more.
 

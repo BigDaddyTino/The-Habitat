@@ -145,7 +145,7 @@ for (const [name, labels] of parties) {
     const waves = [hardEncounters[0], hardEncounters[1], hardEncounters[2]];
     for (let wave = 0; wave < waves.length; wave++) {
       const enemies = [...waves[wave].make(), ...waves[wave].make()].map(elite);
-      const result = fight(party, enemies, rng, 25, wave === 0);
+      const result = fight(party, enemies, rng, 75, wave === 0);
       if (result.winner !== "a") { held = false; break; }
     }
     siegeGames += 1; if (held) siegeWins += 1;
@@ -246,14 +246,14 @@ const dayEncounters = ["Pearl fire team (3)", "Directorate checkpoint (2)", "Rea
   .map((name) => encounters.find((entry) => entry.name === name)!);
 const dayRows: Array<{ label: string; survived: number; lastFight: number; dry: number; degraded: number }> = [];
 for (const build of builds) {
-  let survivedDays = 0, lastFightWins = 0, dryDays = 0, degradedRounds = 0, totalRounds = 0;
+  let survivedDays = 0, lastFightWins = 0, dryDays = 0, degradedActions = 0, totalActions = 0;
   for (let day = 0; day < TRIALS / 4; day++) {
     const character = standard(build);
     let alive = true, dry = false;
     for (let index = 0; index < dayEncounters.length; index++) {
-      const result = fight([character], dayEncounters[index].make(), rng, 25, index === 0);
+      const result = fight([character], dayEncounters[index].make(), rng, 75, index === 0);
       if (result.aDry) dry = true;
-      degradedRounds += result.aDegraded; totalRounds += result.aRounds;
+      degradedActions += result.aDegraded; totalActions += result.aActions;
       if (character.dead || result.winner === "b") { alive = false; break; }
       if (index === dayEncounters.length - 1 && result.winner === "a") lastFightWins += 1;
       recover(character);
@@ -263,11 +263,11 @@ for (const build of builds) {
   }
   dayRows.push({
     label: build.spec.label, survived: survivedDays / (TRIALS / 4), lastFight: lastFightWins / (TRIALS / 4),
-    dry: dryDays / (TRIALS / 4), degraded: totalRounds ? degradedRounds / totalRounds : 0,
+    dry: dryDays / (TRIALS / 4), degraded: totalActions ? degradedActions / totalActions : 0,
   });
 }
 for (const row of dayRows.sort((a, b) => b.survived - a.survived)) {
-  say(`   ${pad(row.label, 30)} survived ${pad(pct(row.survived), 5)}  won the fourth ${pad(pct(row.lastFight), 5)}  fought on their worst option ${pct(row.degraded)} of rounds`);
+  say(`   ${pad(row.label, 30)} survived ${pad(pct(row.survived), 5)}  won the fourth ${pad(pct(row.lastFight), 5)}  fought on their worst option ${pct(row.degraded)} of trigger-pulls`);
 }
 const bornDay = dayRows.filter((row) => defaultOrigin[builds.find((b) => b.spec.label === row.label)!.spec.classSlug] === "born");
 const infusedDay = dayRows.filter((row) => defaultOrigin[builds.find((b) => b.spec.label === row.label)!.spec.classSlug] === "infused");
@@ -285,7 +285,7 @@ for (const kind of species) {
     const character = makeCharacter(dayBuild, kind.slug, "born", ["medicine"]);
     let alive = true;
     for (let index = 0; index < dayEncounters.length; index++) {
-      const result = fight([character], dayEncounters[index].make(), rng, 25, index === 0);
+      const result = fight([character], dayEncounters[index].make(), rng, 75, index === 0);
       if (character.dead || result.winner === "b") { alive = false; break; }
       recover(character);
     }
@@ -323,7 +323,7 @@ const findings: string[] = [];
 if (pvpSpread > 0.35) findings.push(`PvP spread is ${pct(pvpSpread)} — wider than a healthy roster wants; the top duellist needs a look.`);
 else findings.push(`PvP spread is ${pct(pvpSpread)}: no archetype dominates the duel, and none is unplayable in one.`);
 const degradedDay = dayRows.filter((row) => row.degraded > 0.2).sort((a, b) => b.degraded - a.degraded);
-if (degradedDay.length) findings.push(`Forced onto their worst option across a day: ${degradedDay.slice(0, 4).map((row) => `${row.label} (${pct(row.degraded)} of rounds)`).join(", ")} — canon's person with a rifle, on schedule.`);
+if (degradedDay.length) findings.push(`Forced onto their worst option across a day: ${degradedDay.slice(0, 4).map((row) => `${row.label} (${pct(row.degraded)} of trigger-pulls)`).join(", ")} — canon's person with a rifle, on schedule.`);
 else findings.push("Nobody is forced onto their worst option across a day — the economies are generous enough that scarcity never bites, which is worth a look.");
 const engineBuilds = dayRows.filter((row) => row.degraded < 0.05 && row.survived > 0.4).map((row) => row.label);
 if (engineBuilds.length) findings.push(`Never degraded and still standing at day's end: ${engineBuilds.slice(0, 4).join(", ")} — the resource engines do what the audit said they would.`);
