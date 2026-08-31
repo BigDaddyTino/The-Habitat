@@ -1,0 +1,81 @@
+/* The talent calculator — the Eight Trees, in the codex's own dark palette.
+   Violet is the corruption colour, reserved for the phase-lit branch. */
+
+.talent-shell { --talent-violet: #b98fd6; --talent-violet-dim: rgba(125, 62, 160, .18); }
+.talent-hero { margin-bottom: 22px; }
+.talent-hero h1 { margin: 2px 0 8px; }
+.talent-hero p:last-child { max-width: 720px; color: var(--muted); }
+
+.talent-calculator { display: grid; gap: 18px; }
+
+.talent-classes { display: flex; gap: 6px; flex-wrap: wrap; }
+.talent-classes button { padding: 6px 14px; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); color: var(--muted); font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+.talent-classes button:hover { color: var(--paper); border-color: rgba(198, 151, 76, .5); }
+.talent-classes button.is-active { color: var(--paper); border-color: var(--brass); background: rgba(198, 151, 76, .12); }
+
+.talent-controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 16px; align-items: end; border: 1px solid var(--line); padding: 14px 16px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
+.talent-controls label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.talent-controls label b { color: var(--paper); font-size: 15px; }
+.talent-controls label b.is-terminal-count { color: var(--danger); }
+.talent-controls input[type="range"] { accent-color: var(--brass); }
+.talent-controls small { font-size: 10.5px; }
+.talent-actions { display: flex; gap: 8px; }
+.talent-actions button { display: inline-flex; gap: 6px; align-items: center; padding: 7px 12px; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); color: var(--ink); font-size: 12px; cursor: pointer; }
+.talent-actions button:hover { border-color: var(--brass); color: var(--paper); }
+
+.talent-constellation-note { border: 1px dashed var(--line); padding: 9px 13px; font-size: 12.5px; color: var(--muted); }
+.talent-constellation-note b { color: var(--brass); text-transform: uppercase; letter-spacing: .8px; margin-right: 6px; }
+.talent-artslot { float: right; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); opacity: .8; }
+.talent-artslot code { font-size: 9.5px; }
+
+.talent-board { overflow-x: auto; border: 1px solid var(--line); padding: 16px; background: rgba(12, 16, 13, .35); }
+.talent-grid { display: grid; grid-template-columns: repeat(6, minmax(168px, 1fr)); gap: 12px; min-width: 1020px; }
+.talent-branch h3 { font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 8px; }
+.talent-branch.is-core h3 { color: var(--brass); }
+.talent-nodes { display: flex; flex-direction: column; gap: 8px; }
+
+.talent-node { position: relative; text-align: left; padding: 8px 10px; border: 1px solid var(--line); background: rgba(27, 34, 29, .75); color: var(--ink); font-size: 12px; cursor: pointer; transition: border-color .12s ease, background .12s ease; }
+.talent-node b { display: block; font-size: 12.5px; padding-right: 26px; color: var(--paper); }
+.talent-node small { display: block; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.talent-cost { position: absolute; top: 7px; right: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.talent-chips { display: block; margin-top: 4px; }
+.talent-chips i { display: inline-block; margin: 2px 4px 0 0; padding: 1px 6px; border: 1px solid; border-radius: 3px; font-style: normal; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; }
+.chip-spell { color: #7fc7d0; border-color: rgba(127, 199, 208, .6); }
+.chip-ceiling { color: var(--brass); border-color: rgba(198, 151, 76, .6); }
+.chip-weave { color: #8ec98a; border-color: rgba(142, 201, 138, .55); }
+.chip-fork { color: var(--danger); border-color: rgba(200, 90, 80, .55); }
+
+.talent-node.is-open:hover { border-color: var(--brass); background: rgba(198, 151, 76, .1); }
+.talent-node.is-owned { border-color: var(--canon); background: rgba(90, 140, 90, .16); }
+.talent-node.is-owned .talent-cost { color: var(--canon); }
+.talent-node.is-closed, .talent-node.is-poor { opacity: .45; cursor: not-allowed; }
+.talent-node.is-locked { opacity: .35; cursor: not-allowed; border-style: dashed; }
+.talent-node.is-fork:not(.is-locked) { border-color: rgba(200, 90, 80, .5); }
+
+.talent-corrupted { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; min-width: 1020px; }
+.talent-corrupted h3 { margin: 0 0 2px; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--talent-violet); }
+.talent-corrupted > p { margin: 0 0 10px; font-size: 11.5px; color: var(--muted); }
+.talent-corrupted-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.talent-node.is-corrupt { border-color: rgba(125, 62, 160, .45); background: rgba(125, 62, 160, .07); opacity: .45; cursor: default; }
+.talent-node.is-corrupt .talent-cost { color: var(--talent-violet); }
+.talent-node.is-corrupt.is-lit { opacity: 1; background: var(--talent-violet-dim); border-color: var(--talent-violet); }
+.talent-node.is-corrupt.is-terminal { border-style: dashed; }
+.talent-node.is-corrupt.is-terminal.is-lit { border-color: var(--danger); background: rgba(200, 90, 80, .12); }
+
+.talent-summary { display: grid; gap: 12px; border: 1px solid var(--line); padding: 14px 16px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
+.talent-tally { display: flex; gap: 22px; }
+.talent-tally div { display: grid; }
+.talent-tally b { font-size: 22px; color: var(--paper); font-family: var(--font-mono); }
+.talent-tally span { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.talent-hint { margin: 0; font-size: 11.5px; color: var(--muted); }
+.talent-list h4 { margin: 0 0 4px; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); }
+.talent-list ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; font-size: 11.5px; color: var(--muted); }
+.talent-list li b { color: var(--ink); }
+.talent-list.is-corrupt-list h4 { color: var(--talent-violet); }
+.talent-terminal { margin: 0; font-size: 12px; color: var(--danger); }
+.talent-plays { margin: 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.talent-plays b { color: var(--paper); }
+
+@media (max-width: 760px) {
+  .talent-controls { grid-template-columns: 1fr; }
+}
