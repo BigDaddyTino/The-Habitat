@@ -119,16 +119,38 @@ const parties: Array<[string, string[]]> = [
   ["No-medic party (Bastion · Cypherist · Spector · Procurator)", ["Bastion · Fortress", "Cypherist · Remote War", "Spector · One Round", "Procurator · Fire Plan"]],
   ["All-damage party (Surger · Maverick · Spector · Conduit siege)", ["Surger · Red Ladder", "Maverick · Cylinder Storm", "Spector · One Round", "Conduit · Siege Lantern"]],
 ];
+// The ruling: parties were steamrolling, and more weak bodies only feed the
+// auras. Party content is ELITE — veterans of the same kinds, harder in
+// quality and still greater in number — and the signature party fight is
+// the siege: waves with no recovery between them, the reserve clock wearing
+// a fight suit.
+const elite = (character: SimCharacter): SimCharacter => {
+  for (const key of Object.keys(character.attributes) as Array<keyof typeof character.attributes>) character.attributes[key] += 2;
+  character.effects = { ...character.effects, toughness: (character.effects.toughness ?? 0) + 4, damageBonus: (character.effects.damageBonus ?? 0) + 0.5, accuracy: (character.effects.accuracy ?? 0) + 0.05 };
+  character.label = `Veteran ${character.label}`;
+  return character;
+};
 for (const [name, labels] of parties) {
-  let wins = 0, games = 0;
+  let wins = 0, games = 0, siegeWins = 0, siegeGames = 0;
   for (const encounter of hardEncounters) {
     for (let trial = 0; trial < TRIALS / 2; trial++) {
-      const enemies = [...encounter.make(), ...encounter.make()]; // scaled for four
+      const enemies = [...encounter.make(), ...encounter.make(), ...encounter.make()].map(elite);
       const result = fight(partyOf(labels), enemies, rng);
       games += 1; if (result.winner === "a") wins += 1;
     }
   }
-  say(`   ${pad(name, 60)} ${pct(wins / games)} against doubled hard encounters`);
+  for (let trial = 0; trial < TRIALS / 2; trial++) {
+    const party = partyOf(labels);
+    let held = true;
+    const waves = [hardEncounters[0], hardEncounters[1], hardEncounters[2]];
+    for (let wave = 0; wave < waves.length; wave++) {
+      const enemies = [...waves[wave].make(), ...waves[wave].make()].map(elite);
+      const result = fight(party, enemies, rng, 25, wave === 0);
+      if (result.winner !== "a") { held = false; break; }
+    }
+    siegeGames += 1; if (held) siegeWins += 1;
+  }
+  say(`   ${pad(name, 60)} ${pad(pct(wins / games), 5)} vs tripled encounters · held the siege ${pct(siegeWins / siegeGames)}`);
 }
 const soloHard = builds.map((build) => {
   let wins = 0, games = 0;

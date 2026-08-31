@@ -65,3 +65,5 @@ apps/web/scripts/tmp/
 # than a shelf inside it: everything under codex-art is enumerated by the
 # release audit and swept into the machine bundle, and derivatives are neither.
 apps/web/private/codex-art-cache/
+
+.codex-tmp-*

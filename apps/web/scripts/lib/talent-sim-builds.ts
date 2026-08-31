@@ -60,6 +60,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/lend-the-wall": { partyMitigation: 0.08 },
   "bastion/rooted": { incoming: 0.95 },
   "bastion/between": { partyMitigation: 0.12, incoming: 1.05 },
+  "bastion/answer-in-kind": { damageBonus: 0.45 },
   "bastion/immovable": { incoming: 0.85, toughness: 1 },
   "bastion/point-man": { accuracy: 0.03 },
   "bastion/doorway": { damageBonus: 0.3, initiative: 0.1 },
@@ -73,7 +74,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/muzzle": { control: 0.18, partyMitigation: 0.08 },
   "bastion/first-chrome": { chrome: true, damageBonus: 0.1 },
   "bastion/room-for-more": { damageBonus: 0.1 },
-  "bastion/knuckle-plate": { damageBonus: 0.2 },
+  "bastion/knuckle-plate": { damageBonus: 0.3 },
   "bastion/faraday-bones": { hardenedChrome: true },
   "bastion/past-the-governor": { damageBonus: 0.3 },
   "bastion/come-take-it": {},
@@ -81,7 +82,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "bastion/slow-leak": { selfRepair: 0.1 },
   "bastion/field-dressing": { selfRepair: 0.12 },
   "bastion/walk-it-off": { toughness: 1 },
-  "bastion/pain-ledger": { damageBonus: 0.2 },
+  "bastion/pain-ledger": { damageBonus: 0.3 },
   "bastion/on-your-feet": { partyHeal: 1 },
   "bastion/argue-with-the-clock": { dyingClock: 3 },
   "bastion/refuse-the-ground": { refuseDown: true },
@@ -239,6 +240,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "procurator/rally": { partyHeal: 0.6 },
   "procurator/triage-order": { partyMitigation: 0.08 },
   "procurator/dry-powder": { incoming: 0.96 },
+  "procurator/your-own-orders": { damageBonus: 0.35, accuracy: 0.05, incoming: 0.92 },
   "procurator/steady-the-line": { partyMitigation: 0.14 },
   "procurator/the-field": { partyMitigation: 0.16 },
   "procurator/the-map": { partyMitigation: 0.1, detection: 0.15 },
@@ -290,7 +292,9 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "cypherist/handshake": { control: 0.1 },
   "cypherist/dead-mans-switch": { damageBonus: 0.3 },
   "cypherist/testimony": { detection: 0.2, control: 0.1 },
-  "cypherist/uplink": { minions: 1, concealment: 0.3, incoming: 0.85 },
+  // The ruling: the feed traces both ways. The operator hides well but not
+  // absolutely, and once found the body has no frame around it.
+  "cypherist/uplink": { minions: 1, concealment: 0.14, incoming: 1.1 },
   "cypherist/fit-a-friend": { partyMitigation: 0.08 },
   "cypherist/cosmesis": { concealment: 0.12 },
   "cypherist/aftermarket": { damageBonus: 0.3 },
@@ -355,21 +359,35 @@ export const nodeEffects: Record<string, NodeEffect> = {
  * a claim.
  */
 export const corruptedEffects: Record<string, Record<number, NodeEffect>> = {
-  bastion: { 1: { accuracy: 0.04 }, 2: { incoming: 0.95 }, 3: { selfRepair: 0.08 }, 4: { detection: 0.1 }, 5: { damageBonus: 0.2 }, 6: { toughness: 2, incoming: 0.92 } },
-  spector: { 1: { accuracy: 0.06 }, 2: { concealment: 0.1 }, 3: { accuracy: 0.04 }, 4: { detection: 0.2 }, 5: { damageBonus: 0.25 }, 6: { concealment: 0.25 } },
-  conduit: { 1: { castCost: 0.95 }, 2: { resourceCap: 8 }, 3: { resourcePerHit: 1 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.3 }, 6: { castCost: 0.85, incoming: 0.95 } },
-  surger: { 1: { extraAction: 0.05 }, 2: { resourceCap: 8 }, 3: { damageBonus: 0.2 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.3 }, 6: { damageBonus: 0.4, refuseDown: true } },
-  archon: { 1: { initiative: 0.1 }, 2: { toughness: 1 }, 3: { minions: 1 }, 4: { detection: 0.2 }, 5: { damageBonus: 0.2 }, 6: { concealment: 0.15 } },
-  procurator: { 1: { partyMitigation: 0.05 }, 2: { control: 0.08 }, 3: { partyHeal: 0.3 }, 4: { detection: 0.2 }, 5: { damageBonus: 0.3 }, 6: { control: 0.12 } },
-  cypherist: { 1: { accuracy: 0.05 }, 2: { resourceCap: 6 }, 3: { selfRepair: 0.06 }, 4: { detection: 0.2 }, 5: { damageBonus: 0.3 }, 6: { concealment: 0.2 } },
-  maverick: { 1: { extraAction: 0.1 }, 2: { control: 0.08 }, 3: { damageBonus: 0.2 }, 4: { detection: 0.2 }, 5: { initiative: 0.3 }, 6: { control: 0.2 } },
+  bastion: { 1: { accuracy: 0.04 }, 2: { incoming: 0.96 }, 3: { selfRepair: 0.06 }, 4: { detection: 0.1 }, 5: { damageBonus: 0.15 }, 6: { toughness: 2 } },
+  spector: { 1: { accuracy: 0.05 }, 2: { concealment: 0.08 }, 3: { accuracy: 0.03 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.15 }, 6: { concealment: 0.15 } },
+  conduit: { 1: { castCost: 0.96 }, 2: { resourceCap: 6 }, 3: { resourcePerHit: 0.8 }, 4: { detection: 0.12 }, 5: { damageBonus: 0.2 }, 6: { castCost: 0.92 } },
+  surger: { 1: { extraAction: 0.05 }, 2: { resourceCap: 6 }, 3: { damageBonus: 0.15 }, 4: { detection: 0.12 }, 5: { damageBonus: 0.2 }, 6: { damageBonus: 0.2, refuseDown: true } },
+  archon: { 1: { initiative: 0.08 }, 2: { toughness: 1 }, 3: { minions: 0.5 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.15 }, 6: { concealment: 0.1 } },
+  procurator: { 1: { partyMitigation: 0.04 }, 2: { control: 0.06 }, 3: { partyHeal: 0.2 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.2 }, 6: { control: 0.1 } },
+  cypherist: { 1: { accuracy: 0.04 }, 2: { resourceCap: 5 }, 3: { selfRepair: 0.05 }, 4: { detection: 0.15 }, 5: { damageBonus: 0.2 }, 6: { concealment: 0.12 } },
+  maverick: { 1: { extraAction: 0.08 }, 2: { control: 0.06 }, 3: { damageBonus: 0.15 }, 4: { detection: 0.15 }, 5: { initiative: 0.2 }, 6: { control: 0.14 } },
 };
+
+/**
+ * The ruling that makes the ladder a bargain instead of a checklist: the
+ * institutional costs are mechanically real. Tells show (you are easier to
+ * read and to hit), nobody sells to a phase-five (one plate short), and at
+ * Turning nobody billets with you — between-fight care halves, which the
+ * recover() model applies through mendPace.
+ */
+export function institutionalCosts(phase: number): NodeEffect {
+  const costs: NodeEffect = {};
+  if (phase >= 4) costs.concealment = -0.12;
+  if (phase >= 5) costs.extraPlates = -1;
+  return costs;
+}
 
 /** Base attacks per class. Spell attacks drop out for a `none` origin. */
 const classAttacks: Record<string, AttackProfile[]> = {
   bastion: [
-    { name: "Rifle", type: "PHYSICAL", wounds: 1, accuracy: 0.55, cost: 1, costs: "ammo" },
-    { name: "Plate and boot", type: "PHYSICAL", wounds: 1, accuracy: 0.62, cost: 0, costs: "none" },
+    { name: "Rifle", type: "PHYSICAL", wounds: 1.2, accuracy: 0.58, cost: 1, costs: "ammo" },
+    { name: "Plate and boot", type: "PHYSICAL", wounds: 1.3, accuracy: 0.62, cost: 0, costs: "none" },
     { name: "Seal (Containment)", type: "ARCANE", wounds: 1, accuracy: 0.6, cost: 2, costs: "pool" },
   ],
   spector: [
@@ -394,7 +412,7 @@ const classAttacks: Record<string, AttackProfile[]> = {
     { name: "Consignment", type: "ARCANE", wounds: 2, accuracy: 0.6, cost: 4, costs: "pool" },
   ],
   procurator: [
-    { name: "Sidearm", type: "PHYSICAL", wounds: 1, accuracy: 0.52, cost: 1, costs: "ammo" },
+    { name: "Sidearm", type: "PHYSICAL", wounds: 1.2, accuracy: 0.56, cost: 1, costs: "ammo" },
     { name: "Called fire mission", type: "FIRE", wounds: 2.5, accuracy: 0.55, cost: 4, costs: "ammo" },
   ],
   cypherist: [
@@ -488,7 +506,11 @@ export function makeCharacter(build: ValidatedBuild, speciesSlug: string, origin
   const corrupted = Object.entries(corruptedEffects[build.spec.classSlug] ?? {})
     .filter(([phaseKey]) => Number(phaseKey) <= phase)
     .map(([, effect]) => effect);
-  const effects = mergeEffects([...build.nodes.map((node) => nodeEffects[`${build.spec.classSlug}/${node.id}`] ?? {}), ...corrupted]);
+  const effects = mergeEffects([
+    ...build.nodes.map((node) => nodeEffects[`${build.spec.classSlug}/${node.id}`] ?? {}),
+    ...corrupted,
+    institutionalCosts(phase),
+  ]);
   const attributes = attributesFor(level, primary, secondary, kind, phase);
   attributes.composure = Math.min(kind.caps.composure, attributes.composure + origin.composureBonus);
 
@@ -511,7 +533,7 @@ export function makeCharacter(build: ValidatedBuild, speciesSlug: string, origin
 
 /** The archetype builds: the shapes the gameplay audit said each tree makes. */
 export const archetypes: BuildSpec[] = [
-  { label: "Bastion · Fortress", classSlug: "bastion", forks: ["immovable"], take: { "The Line": 8, "Shieldwall": 8, "Last Stand": 8, "Aegis": 6 } },
+  { label: "Bastion · Fortress", classSlug: "bastion", forks: ["immovable"], take: { "The Line": 8, "Shieldwall": 9, "Last Stand": 8, "Aegis": 5 } },
   { label: "Bastion · Breach", classSlug: "bastion", forks: ["unstoppable"], take: { "The Line": 5, "Breacher": 8, "Juggernaut": 8, "Last Stand": 6 } },
   { label: "Spector · One Round", classSlug: "spector", forks: ["signature-shot"], take: { "Fieldcraft": 9, "Marksman": 8, "Tracker": 6, "Saboteur": 4 } },
   { label: "Spector · The Nobody", classSlug: "spector", forks: ["never-here"], take: { "Fieldcraft": 8, "Ghost": 8, "Face": 8, "Saboteur": 5 } },
@@ -521,8 +543,8 @@ export const archetypes: BuildSpec[] = [
   { label: "Surger · Clean Shifter", classSlug: "surger", forks: ["clean-burn"], take: { "Overdrive": 8, "Shifter": 8, "Symbiont": 8, "Berserk": 4 } },
   { label: "Archon · Sky Cavalry", classSlug: "archon", forks: ["one-bond"], take: { "The Bond": 8, "Apex": 8, "Packleader": 7, "Dronewright": 3 } },
   { label: "Archon · The Flock", classSlug: "archon", forks: ["many-voices"], take: { "The Bond": 8, "Dronewright": 8, "Packleader": 8, "Gravecaller": 4 } },
-  { label: "Procurator · Fire Plan", classSlug: "procurator", forks: ["the-map"], take: { "Command": 8, "Tactician": 8, "Quartermaster": 8, "Envoy": 3 } },
-  { label: "Procurator · Supply Line", classSlug: "procurator", forks: ["the-field"], take: { "Command": 8, "Quartermaster": 8, "Sovereign": 6, "Envoy": 5 } },
+  { label: "Procurator · Fire Plan", classSlug: "procurator", forks: ["the-map"], take: { "Command": 9, "Tactician": 8, "Quartermaster": 8, "Envoy": 2 } },
+  { label: "Procurator · Supply Line", classSlug: "procurator", forks: ["the-field"], take: { "Command": 9, "Quartermaster": 8, "Sovereign": 6, "Envoy": 4 } },
   { label: "Cypherist · Warframe", classSlug: "cypherist", forks: ["wired", "pilot"], take: { "The Bench": 9, "Exoframe": 8, "Chromewright": 7, "Cellworks": 4 } },
   { label: "Cypherist · Remote War", classSlug: "cypherist", forks: ["clean-hands", "uplink"], take: { "The Bench": 9, "Gridrunner": 8, "Emplacer": 8, "Cellworks": 5 } },
   { label: "Maverick · Cylinder Storm", classSlug: "maverick", forks: ["two-irons"], take: { "The Draw": 8, "Twin Irons": 8, "Trickwork": 7, "The Legend": 4 } },

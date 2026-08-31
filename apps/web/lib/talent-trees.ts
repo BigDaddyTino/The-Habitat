@@ -84,6 +84,7 @@ export const talentClasses: TalentClass[] = [
         n("lend-the-wall", "Lend the Wall", "Your ward, their plate.", 2, { weave: "first-ward" }),
         n("rooted", "Rooted", "Blast and shove barely move you.", 3),
         n("between", "Between", "One step, taken in time — the hit meant for them lands on you.", 3),
+        n("answer-in-kind", "Answer in Kind", "Every hit your plates ate this fight is a debt. Active — pay it back, with interest.", 3),
         n("immovable", "Immovable", "You cannot be moved. Ever.", 4, { fork: "unstoppable" }),
       ]},
       { name: "Breacher", nodes: [
@@ -506,6 +507,7 @@ export const talentClasses: TalentClass[] = [
         n("rally", "Rally", "A broken line reforms on you.", 2),
         n("triage-order", "Triage Order", "The wheel reaches everyone; your squad obeys faster.", 2),
         n("dry-powder", "Dry Powder", "Your own Composure holds when the plan doesn't.", 2),
+        n("your-own-orders", "Your Own Orders", "The wheel turns for a column, or for one person: you. Commanding yourself is still command.", 3),
         n("steady-the-line", "Steady the Line", "Your presence is a Composure aura.", 3),
         n("the-field", "The Field", "Stand with them: auras double at your side.", 4, { fork: "the-map", requiresAny: ["steady-the-line"] }),
         n("the-map", "The Map", "Stand above it: command through drones and the lattice, at any range.", 4, { fork: "the-field", weave: "overwatch-grid", requiresAny: ["steady-the-line"] }),
@@ -627,7 +629,7 @@ export const talentClasses: TalentClass[] = [
         n("handshake", "Handshake", "Who last gave it an order.", 3, { spell: "Spell · Technomantic" }),
         n("dead-mans-switch", "Dead Man's Switch", "If you stop answering, something you rigged doesn't.", 3),
         n("testimony", "Testimony", "Everything it has ever been told, in order.", 5, { spell: "Master spell", ceiling: "NAG — yes, the watch" }),
-        n("uplink", "Uplink", "You never touch the fight — drones, turrets and feeds, run from cover at any range.", 5, { fork: "pilot" }),
+        n("uplink", "Uplink", "You never touch the fight — drones, turrets and feeds, run from cover at any range. But the feed traces both ways: whoever looks hard enough finds the body, and the body is soft.", 5, { fork: "pilot" }),
       ]},
       { name: "Chromewright", nodes: [
         n("steady-scalpel", "Steady Scalpel", "Install work that heals clean, every time.", 1),

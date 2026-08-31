@@ -348,8 +348,10 @@ export function recover(character: SimCharacter, hoursOfCare = 1) {
   if (character.dead) return;
   const trades = character.professions.reduce((sum, p) => sum + (p.effects.partyRecovery ?? 0), 0);
   // Hours between engagements, not a night's sleep: most of a body back,
-  // and a Returnee gets half of what everyone else does.
-  const care = (hitsBeforeDown(character) * 0.45 + trades) * character.species.mendPace * hoursOfCare;
+  // and a Returnee gets half of what everyone else does. At Turning nobody
+  // billets with you, and care that will not touch you is half care.
+  const billeted = character.phase >= 6 ? 0.5 : 1;
+  const care = (hitsBeforeDown(character) * 0.45 + trades) * character.species.mendPace * billeted * hoursOfCare;
   character.wounds = Math.max(0, character.wounds - care);
   character.bleeding = 0;
   character.down = false;
