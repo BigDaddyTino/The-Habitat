@@ -1,0 +1,10 @@
+# SOL 5.6 Talent Art Ledger
+
+- `bastion.png` -- THE GATE: gatehouse arch, twin towers, ward-light, and foundation capstones; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `spector.png` -- THE LONG EYE: point-and-hairline rifle profile with scope/rail branches and bright/quiet muzzle pair; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `conduit.png` -- THE LANTERN: six-rayed lantern with a two-star inner flame; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `surger.png` -- THE PULSE: heartbeat trace across an outline-star body suggestion with hanging branches and forked peak; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `archon.png` -- THE CHORUS: raised-hand constellation with four abstract orbit branches; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `procurator.png` -- THE LEDGER: balance scales, paired fulcrum stars, hanging pans, and faint map grid; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `cypherist.png` -- THE CIRCUIT: closed power rail, parallel branches, and four one-way switch stars in two fork pairs; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
+- `maverick.png` -- THE CROSSED IRONS: crossed pistol constellation, casing fans, and cyan/ember muzzle pair; 1672x941 RGB24 PNG; full-resolution and live centered-banner crop verified; consistent lower seven-star violet branch with the seventh star faintest.
