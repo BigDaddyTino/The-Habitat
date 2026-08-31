@@ -443,7 +443,7 @@ export const talentClasses: TalentClass[] = [
         n("war-mount", "War Mount", "Your mount fights under you, not despite you.", 3),
         n("weather-wings", "Weather Wings", "Storms are flying weather now.", 3),
         n("riders-eye", "Rider's Eye", "Read a route from above, the way a thing that flies would.", 4, { ceiling: "the Captured Rider" }),
-        n("skyborne", "Skyborne", "Mounted flight. The hypogriff dream, earned.", 5, { ceiling: "the Unridden — a beast that consents" }),
+        n("skyborne", "Skyborne", "Mounted flight. The Hypogriff dream, earned.", 5, { ceiling: "the Unridden — a beast that consents" }),
       ]},
       { name: "Dronewright", nodes: [
         n("everything-flies-twice", "Everything Flies Twice", "Downed machines are parts, and parts are drones.", 1),

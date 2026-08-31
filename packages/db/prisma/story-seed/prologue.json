@@ -88,15 +88,15 @@
           "key": "the-roof-and-the-rider",
           "kind": "SCENE",
           "title": "Something Is Hunting You",
-          "summary": "The first world-scale reveal, ten seconds of beauty — then an armored hypogriff rider with a machine gun turns the rooftops into a predator sequence. Rest in peace, Steve.",
-          "body": "The roof feels safer. Wind. Distant battle. A tropical horizon half-hidden by smoke — for five, maybe ten seconds you are allowed to see how beautiful this island was, and how big, and how much of it is burning. This is the first time the world admits its own scale.\n\nThen a shadow crosses the roof.\n\nAn armored hypogriff rider, machine gun slung against the beast's barding, begins sweeping the rooftops — an old war-beast integrated with modern kit, hunting with a search pattern you can learn if you live long enough to study it. Tino drops flat. TINO: \"DOWN.\" Gunfire tears an HVAC unit into confetti. TINO: \"That thing sees us, we're meat.\"\n\nYou move when it looks away. Crouch behind roof structures, sprint the gaps between safe zones, mantle low obstacles, jump the alley — and never, ever try to outshoot a thing you were only meant to outlast. It will fire through weak cover to remind you that hiding is not a plan; timing is.\n\nA nearby friendly breaks too early. The gunner sees him. You watch what happens next, and no tutorial text insults the moment.\n\nTINO: \"...yeah. Don't do what Steve did.\" A beat. TINO: \"Sorry, Steve.\"",
+          "summary": "The first world-scale reveal, ten seconds of beauty — then an armored Hypogriff rider with a machine gun turns the rooftops into a predator sequence. Rest in peace, Steve.",
+          "body": "The roof feels safer. Wind. Distant battle. A tropical horizon half-hidden by smoke — for five, maybe ten seconds you are allowed to see how beautiful this island was, and how big, and how much of it is burning. This is the first time the world admits its own scale.\n\nThen a shadow crosses the roof.\n\nAn armored Hypogriff rider, machine gun slung against the beast's barding, begins sweeping the rooftops — an old war-beast integrated with modern kit, hunting with a search pattern you can learn if you live long enough to study it. Tino drops flat. TINO: \"DOWN.\" Gunfire tears an HVAC unit into confetti. TINO: \"That thing sees us, we're meat.\"\n\nYou move when it looks away. Crouch behind roof structures, sprint the gaps between safe zones, mantle low obstacles, jump the alley — and never, ever try to outshoot a thing you were only meant to outlast. It will fire through weak cover to remind you that hiding is not a plan; timing is.\n\nA nearby friendly breaks too early. The gunner sees him. You watch what happens next, and no tutorial text insults the moment.\n\nTINO: \"...yeah. Don't do what Steve did.\" A beat. TINO: \"Sorry, Steve.\"",
           "choices": [
             { "order": 0, "label": null, "condition": null, "toKey": "one-idiot" }
           ],
           "references": [
             { "kind": "CHARACTER", "slug": "tino", "title": "Tino" },
             { "kind": "CHARACTER", "slug": "steve", "title": "Steve" },
-            { "kind": "CREATURE", "slug": "hippogriff", "title": "Hippogriff" }
+            { "kind": "CREATURE", "slug": "hippogriff", "title": "Hypogriff" }
           ]
         },
         {
@@ -590,7 +590,7 @@
       "slug": "steve",
       "title": "Steve",
       "summary": "A Stormglass soldier who ran too early on the rooftops. The tutorial's shortest, most effective lesson.",
-      "body": "Steve broke cover before the hypogriff rider's search pattern allowed it, and the gunner saw him, and the player watched the consequence land without a single line of tutorial text. His entire memorial is Tino's eulogy: '...yeah. Don't do what Steve did.' A beat. 'Sorry, Steve.'\n\nSteve is canon now. Every future lesson about patience, timing, and the cost of panic on this island is taught in his name."
+      "body": "Steve broke cover before the Hypogriff rider's search pattern allowed it, and the gunner saw him, and the player watched the consequence land without a single line of tutorial text. His entire memorial is Tino's eulogy: '...yeah. Don't do what Steve did.' A beat. 'Sorry, Steve.'\n\nSteve is canon now. Every future lesson about patience, timing, and the cost of panic on this island is taught in his name."
     },
     {
       "kind": "CHARACTER",
@@ -637,9 +637,9 @@
     {
       "kind": "CREATURE",
       "slug": "hippogriff",
-      "title": "Hippogriff",
+      "title": "Hypogriff",
       "summary": "An intelligent eagle-and-horse beast of the old world, dangerous in its own right and entirely separate from the human who may ride it.",
-      "body": "A Hippogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.\n\nThe prologue's rooftop hunter is one of these animals fitted into Tropic Pearl doctrine. The human rider brings the weapon, orders, and faction allegiance; the Hippogriff brings flight, senses, learned search behaviour, and the old-world presence that makes the silhouette unforgettable. Separating the two matters because a beast cannot inherit its rider's guilt.\n\nGive the animal behaviour before statistics. A Hippogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]"
+      "body": "A Hypogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.\n\nThe prologue's rooftop hunter is one of these animals fitted into Tropic Pearl doctrine. The human rider brings the weapon, orders, and faction allegiance; the Hypogriff brings flight, senses, learned search behaviour, and the old-world presence that makes the silhouette unforgettable. Separating the two matters because a beast cannot inherit its rider's guilt.\n\nGive the animal behaviour before statistics. A Hypogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]"
     },
     {
       "kind": "CREATURE",

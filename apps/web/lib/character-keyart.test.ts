@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { getCharacterKeyart, illustratedCharacterSlugs } from "./character-keyart";
+import { getCharacterArt, getCharacterKeyart, illustratedCharacterSlugs } from "./character-keyart";
 import { codexArtFileForUrl } from "./codex-art";
 
 test("every illustrated character has project-local key art", () => {
@@ -31,4 +31,8 @@ test("every illustrated character has project-local key art", () => {
 
 test("unknown characters fall back to their model or placeholder", () => {
   assert.equal(getCharacterKeyart("not-yet-illustrated"), null);
+});
+
+test("Wendy resolves through the private convention-path portrait shelf", () => {
+  assert.equal(getCharacterArt("wendy"), "/codex-art/characters/wendy.png");
 });

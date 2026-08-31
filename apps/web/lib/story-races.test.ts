@@ -55,7 +55,7 @@ test("Mythical exists and the Lizzarnix belong to it", () => {
   assert.equal(raceAssignments.filter((row) => row.parent === "mythical").length, 1, "Lizzarnix is the only mythical creature at present");
 });
 
-test("Hippogriff and Human are distinct children of the requested parents", () => {
+test("Hypogriff and Human are distinct children of the requested parents", () => {
   assert.equal(raceAssignments.some((row) => row.slug === "the-hypogriff-riders"), false);
   assert.equal(raceAssignments.find((row) => row.slug === "hippogriff")?.parent, "beasts");
   assert.equal(raceAssignments.find((row) => row.slug === "human")?.parent, "humanoid");

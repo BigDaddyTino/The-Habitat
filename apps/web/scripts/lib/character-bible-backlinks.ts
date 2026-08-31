@@ -104,7 +104,7 @@ export const backlinks: Layer[] = [
     marker: M,
     append: `
 
-**The character bible names a prisoner.** [[the-captured-rider]] is a captured hypogriff rider who wants the animal back a great deal more than they want to be released, and who regards the party's insistence on staying at ground level as a strange personal choice. They are the entry point for writing Pearl as people rather than as a wave, which is what [[combat]]'s own rule asks for.`,
+**The character bible names a prisoner.** [[the-captured-rider]] is a captured Hypogriff rider who wants the animal back a great deal more than they want to be released, and who regards the party's insistence on staying at ground level as a strange personal choice. They are the entry point for writing Pearl as people rather than as a wave, which is what [[combat]]'s own rule asks for.`,
   },
   {
     slug: "cybernetic-ascendancy",

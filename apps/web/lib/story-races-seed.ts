@@ -111,13 +111,13 @@ Future mythical beings may be proposed, but none are canon now. Until the room m
 export const raceMemberSeeds: RaceMemberSeed[] = [
   member(
     "hippogriff",
-    "Hippogriff",
+    "Hypogriff",
     "An intelligent eagle-and-horse beast of the old world, dangerous in its own right and entirely separate from the human who may ride it.",
-    `A Hippogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.
+    `A Hypogriff is a beast: eagle in its forward anatomy, horse through the hindquarters, and powerful enough in the air to turn a rooftop into exposed ground. It is not a rider, a military unit, or a piece of equipment. Those are roles humans place around it.
 
 The prologue's rooftop hunter is one of these animals fitted into Tropic Pearl doctrine. The human rider brings the weapon, orders, and faction allegiance; the [[hippogriff]] brings flight, senses, learned search behaviour, and the old-world presence that makes the silhouette unforgettable. Separating the two matters because a beast cannot inherit its rider's guilt.
 
-**Writing them.** Give the animal behaviour before statistics. A Hippogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]`,
+**Writing them.** Give the animal behaviour before statistics. A Hypogriff circles, searches, warns, tires, chooses, and can be frightened or mistreated. It may be trained for war, but it is never born belonging to an army. Steve dies because he misreads its search pattern, not because the species is evil. [[steve]]`,
     "beasts",
     "natural",
     { biomes: ["highlands", "coastal cliffs", "urban roosts"], threat: "Severe in exposed terrain. Its eyesight, speed, and aerial reach make timing and cover more important than damage.", harvest: "Feathers, organs, and magical essence make the species valuable to handlers and harvesters alike." },
@@ -151,7 +151,7 @@ export const existingRaceSheets: Array<{ slug: string; category: StoryCreatureMe
 /**
  * Where every creature that is not itself a race belongs. Each assignment
  * follows the taxonomy law rather than taste: the Arcadian Devil is an animal,
- * the Hippogriff is a beast, true demons are the supernatural the rule
+ * the Hypogriff is a beast, true demons are the supernatural the rule
  * names, and the Lizzarnix are the mythical bloodline the ending turns on.
  */
 export const raceAssignments: Array<{ slug: string; parent: string; category: StoryCreatureMeta["category"] }> = [

@@ -392,10 +392,10 @@ For writers: she is the party's crate and the party's conscience. She will tell 
   {
     slug: "the-kestrel-scout",
     title: "The Kestrel Scout [Dov Marren]",
-    summary: "Kestrel's scout, who called the hypogriff rider's search pattern over Shattermarket before anyone believed him — and is Latent, and does not know it.",
+    summary: "Kestrel's scout, who called the Hypogriff rider's search pattern over Shattermarket before anyone believed him — and is Latent, and does not know it.",
     body: `One of the four command staff [[the-unnamed]] reserves, drawn as a companion — and one of [[the-latent]], which nobody knows, including him.
 
-He called the hypogriff rider's search pattern over [[shattermarket]], out loud, before [[steve]] broke cover. Nobody believed him in time. He has not decided yet whether that is a thing that happened to him or a thing he did.
+He called the Hypogriff rider's search pattern over [[shattermarket]], out loud, before [[steve]] broke cover. Nobody believed him in time. He has not decided yet whether that is a thing that happened to him or a thing he did.
 
 **His want.** Somebody in [[glasswater-village]] fed him for three weeks and was not supposed to. He wants to know she got on a boat. He follows the party because the party is going where the boats went.
 
@@ -541,7 +541,7 @@ For writers: the Bureau sells blindness, and this is the person who writes the i
   {
     slug: "the-captured-rider",
     title: "The Captured Rider [Hollis Vane]",
-    summary: "A captured Tropic Pearl hypogriff rider who wants the animal back more than freedom, and thinks staying on the ground is a strange personal choice.",
+    summary: "A captured Tropic Pearl Hypogriff rider who wants the animal back more than freedom, and thinks staying on the ground is a strange personal choice.",
     body: `A prisoner, wherever the party is holding one — which makes this entry a person rather than a place, and deliberately portable.
 
 **Their want.** The bird. Pearl doctrine puts the human in the saddle and the animal in restraints, and the rider wants the animal back a great deal more than they want to be released.
@@ -552,7 +552,7 @@ ${teacher("Traversal", "Rider's Eye")} They describe the rooftops you crossed ye
 
 For writers: canon fixes the rider as a Pearl doctrine role and the [[hippogriff]] as its own animal. This is the entry point for writing Pearl as people rather than as a wave.`,
     meta: person({
-      background: "Tropic Pearl hypogriff rider", professions: ["Xenobiology · licensed"], skills: ["Traversal · Ceiling — Rider's Eye", "Handling · Expert"], cybernetics: [],
+      background: "Tropic Pearl Hypogriff rider", professions: ["Xenobiology · licensed"], skills: ["Traversal · Ceiling — Rider's Eye", "Handling · Expert"], cybernetics: [],
       fullName: "Hollis Vane (placeholder)",
       species: "human", home: null,
       magic: { origin: "none", schools: [], corruptionPhase: 0, notes: null },
