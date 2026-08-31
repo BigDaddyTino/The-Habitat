@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, Share2 } from "lucide-react";
 import { corruptedEffects, describeEffects, effectsForNode } from "@/lib/talent-effects";
 import { talentClasses, talentPointsAtLevel, type TalentClass, type TalentNode } from "@/lib/talent-trees";
@@ -74,6 +74,15 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  // The traced path: constellation lines drawn over the tree while a node is
+  // inspected — the road from the branch mouth down to it, its weave bridge,
+  // and the fork it would kill.
+  const [trace, setTrace] = useState<{
+    lines: Array<{ x1: number; y1: number; x2: number; y2: number; kind: "path" | "weave" | "fork" }>;
+    dots: Array<{ x: number; y: number; kind: "path" | "weave" | "fork" }>;
+  }>({ lines: [], dots: [] });
+
   const tree = talentClasses.find((entry) => entry.slug === state.classSlug) ?? talentClasses[0];
   const byId = useMemo(() => indexClass(tree), [tree]);
   const owned = useMemo(() => new Set(state.owned.filter((id) => byId.has(id))), [state.owned, byId]);
@@ -103,6 +112,86 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
   }, [byId, tree]);
 
   const forkLocked = useCallback((node: TalentNode): boolean => Boolean(node.fork && owned.has(node.fork)), [owned]);
+
+  // The road to a node: its branch chain from the mouth down, jumping through
+  // requiresAny gates (preferring the option actually owned) and crossing a
+  // weave bridge when that is the walked way in. Returned mouth-first.
+  const routeTo = useCallback((nodeId: string): string[] => {
+    const route: string[] = [];
+    const visited = new Set<string>();
+    let entry = byId.get(nodeId);
+    while (entry && !visited.has(entry.node.id)) {
+      visited.add(entry.node.id);
+      route.unshift(entry.node.id);
+      const { node, branch, index } = entry;
+      if (node.requiresAny) {
+        const via = node.requiresAny.find((id) => owned.has(id)) ?? node.requiresAny[0];
+        entry = byId.get(via);
+      } else if (index === 0) {
+        break;
+      } else {
+        const previous = tree.branches[branch].nodes[index - 1];
+        if (node.weave && owned.has(node.weave) && !owned.has(previous.id)) {
+          // The walked way in was over the bridge, not up the column.
+          route.unshift(node.weave);
+          break;
+        }
+        entry = byId.get(previous.id);
+      }
+    }
+    return route;
+  }, [byId, owned, tree]);
+
+  const inspectedNode = inspected && !inspected.corrupt ? inspected.node : null;
+  const route = useMemo(() => (inspectedNode ? routeTo(inspectedNode.id) : []), [inspectedNode, routeTo]);
+  const routeSet = useMemo(() => new Set(route), [route]);
+
+  // Measure the inspected road and draw it as constellation lines — the same
+  // grammar as Sol's star charts, live on the tree itself.
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!inspectedNode || !grid) {
+      const frame = requestAnimationFrame(() => setTrace({ lines: [], dots: [] }));
+      return () => cancelAnimationFrame(frame);
+    }
+    const measure = () => {
+      const rect = grid.getBoundingClientRect();
+      const center = (id: string) => {
+        const el = grid.querySelector<HTMLElement>(`[data-node-id="${id}"]`);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { x: r.left - rect.left + r.width / 2, y: r.top - rect.top + r.height / 2 };
+      };
+      const lines: Array<{ x1: number; y1: number; x2: number; y2: number; kind: "path" | "weave" | "fork" }> = [];
+      const dots: Array<{ x: number; y: number; kind: "path" | "weave" | "fork" }> = [];
+      for (let i = 0; i < route.length; i++) {
+        const here = center(route[i]);
+        if (!here) continue;
+        dots.push({ ...here, kind: "path" });
+        const next = i + 1 < route.length ? center(route[i + 1]) : null;
+        if (next) lines.push({ x1: here.x, y1: here.y, x2: next.x, y2: next.y, kind: "path" });
+      }
+      const self = center(inspectedNode.id);
+      const weaveFar = inspectedNode.weave ? center(inspectedNode.weave) : null;
+      if (self && weaveFar) {
+        lines.push({ x1: self.x, y1: self.y, x2: weaveFar.x, y2: weaveFar.y, kind: "weave" });
+        dots.push({ ...weaveFar, kind: "weave" });
+      }
+      const forkFar = inspectedNode.fork ? center(inspectedNode.fork) : null;
+      if (self && forkFar) {
+        lines.push({ x1: self.x, y1: self.y, x2: forkFar.x, y2: forkFar.y, kind: "fork" });
+        dots.push({ ...forkFar, kind: "fork" });
+      }
+      setTrace({ lines, dots });
+    };
+    const frame = requestAnimationFrame(() => {
+      grid.querySelector<HTMLElement>(`[data-node-id="${inspectedNode.id}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      measure();
+    });
+    window.addEventListener("resize", measure);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", measure); };
+  }, [inspectedNode, route]);
 
   const toggle = (node: TalentNode) => {
     setState((current) => {
@@ -183,8 +272,18 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
         <img alt={`${tree.name} constellation — ${tree.constellation}`} className="talent-constellation-art" src={constellationArt[tree.slug] ?? undefined} />
       ) : null}
 
-      <div className="talent-board">
-        <div className="talent-grid">
+      <div className={`talent-board${inspectedNode ? " is-inspecting" : ""}`}>
+        <div className="talent-grid" ref={gridRef}>
+          {trace.lines.length ? (
+            <svg aria-hidden className="talent-pathlines">
+              {trace.lines.map((line, index) => (
+                <line className={`line-${line.kind}`} key={`l${index}`} x1={line.x1} x2={line.x2} y1={line.y1} y2={line.y2} />
+              ))}
+              {trace.dots.map((dot, index) => (
+                <circle className={`dot-${dot.kind}`} cx={dot.x} cy={dot.y} key={`d${index}`} r={3} />
+              ))}
+            </svg>
+          ) : null}
           {tree.branches.map((branch) => (
             <div className={`talent-branch${branch.core ? " is-core" : ""}`} key={branch.name}>
               <h3>{branch.core ? `⌂ ${branch.name}` : branch.name}</h3>
@@ -195,9 +294,17 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                   const openable = !locked && unlockable(node.id, owned);
                   const affordable = node.cost <= remaining;
                   const state1 = isOwned ? "is-owned" : locked ? "is-locked" : !openable ? "is-closed" : !affordable ? "is-poor" : "is-open";
+                  const isTarget = inspectedNode?.id === node.id;
+                  const traceClass = isTarget
+                    ? " is-target"
+                    : routeSet.has(node.id) ? " is-path"
+                    : inspectedNode?.weave === node.id ? " is-weave-far"
+                    : inspectedNode?.fork === node.id ? " is-fork-far"
+                    : "";
                   return (
                     <button
-                      className={`talent-node ${state1}${node.fork ? " is-fork" : ""}`}
+                      className={`talent-node ${state1}${node.fork ? " is-fork" : ""}${traceClass}`}
+                      data-node-id={node.id}
                       key={node.id}
                       onClick={() => setInspected({ node })}
                       title={locked ? `Locked — you took ${byId.get(node.fork ?? "")?.node.name ?? "the other fork"}` : node.desc}
@@ -258,7 +365,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
       </aside>
 
       {inspected ? (
-        <div aria-modal="true" className="talent-popout-backdrop" onClick={() => setInspected(null)} role="dialog">
+        <div aria-modal="true" className={`talent-popout-backdrop${inspected.corrupt ? "" : " is-docked"}`} onClick={() => setInspected(null)} role="dialog">
           <div className="talent-popout" onClick={(event) => event.stopPropagation()}>
             {inspected.corrupt ? (() => {
               const effect = corruptedEffects[tree.slug]?.[inspected.phase];
@@ -294,6 +401,8 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
               const locked = forkLocked(node);
               const openable = !locked && unlockable(node.id, owned);
               const affordable = node.cost <= remaining;
+              const unwalked = route.filter((id) => !owned.has(id) && id !== node.id);
+              const travel = unwalked.reduce((sum, id) => sum + (byId.get(id)?.node.cost ?? 0), 0);
               return (
                 <>
                   <header>
@@ -310,6 +419,18 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                   {node.weave ? <p className="talent-popout-tag is-weave">Weave: bridges to {byId.get(node.weave)?.node.name ?? node.weave} — buying either end links both paths.</p> : null}
                   {node.fork ? <p className="talent-popout-tag is-fork-tag">Fork: taking this locks {byId.get(node.fork)?.node.name ?? node.fork} for good. No respec exists in the world.</p> : null}
                   {lines.length ? <p className="talent-popout-note">Numbers are the same ones the balance simulations run on — first-pass weights, tuned by the campaign.</p> : null}
+                  {isOwned ? (
+                    <p className="talent-popout-path"><b>On the tree:</b> yours — its road is lit behind this card.</p>
+                  ) : unwalked.length ? (
+                    <p className="talent-popout-path">
+                      <b>The road there</b> — lit on the tree behind this card:{" "}
+                      {unwalked.map((id) => byId.get(id)?.node.name ?? id).join(" → ")}.{" "}
+                      {travel} pt{travel === 1 ? "" : "s"} of walking before this one&apos;s {node.cost}
+                      {travel + node.cost > remaining ? ` — more than the ${remaining} you have left.` : `, and you have ${remaining} left.`}
+                    </p>
+                  ) : (
+                    <p className="talent-popout-path"><b>On the tree:</b> you stand at its door — nothing left to walk.</p>
+                  )}
                   <footer>
                     {isOwned
                       ? <button className="is-refund" onClick={() => { toggle(node); setInspected(null); }} type="button">Refund {node.cost} pt{node.cost === 1 ? "" : "s"}</button>

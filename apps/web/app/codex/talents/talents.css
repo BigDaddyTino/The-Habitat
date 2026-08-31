@@ -105,6 +105,41 @@
 .talent-popout footer span { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
 .talent-popout footer span.is-lit-tag { color: var(--talent-violet); }
 
+/* The traced road: while a node is inspected, its path lights on the tree —
+   constellation lines in the same grammar as Sol's star charts. The popout
+   docks right so the tree stays in view behind it. */
+.talent-grid { position: relative; }
+.talent-pathlines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; overflow: visible; }
+.talent-pathlines line { stroke-linecap: round; }
+.talent-pathlines .line-path { stroke: var(--brass); stroke-width: 1.6; opacity: .95; stroke-dasharray: 7 5; animation: talent-trace .8s linear infinite; filter: drop-shadow(0 0 5px rgba(198, 151, 76, .9)); }
+.talent-pathlines .line-weave { stroke: #8ec98a; stroke-width: 1.4; opacity: .85; stroke-dasharray: 3 7; animation: talent-trace 1.2s linear infinite; filter: drop-shadow(0 0 5px rgba(142, 201, 138, .8)); }
+.talent-pathlines .line-fork { stroke: var(--danger); stroke-width: 1.2; opacity: .6; stroke-dasharray: 2 8; filter: drop-shadow(0 0 4px rgba(200, 90, 80, .7)); }
+.talent-pathlines .dot-path { fill: #f2e3c4; filter: drop-shadow(0 0 6px rgba(198, 151, 76, 1)); }
+.talent-pathlines .dot-weave { fill: #8ec98a; filter: drop-shadow(0 0 6px rgba(142, 201, 138, .9)); }
+.talent-pathlines .dot-fork { fill: var(--danger); filter: drop-shadow(0 0 6px rgba(200, 90, 80, .9)); }
+@keyframes talent-trace { to { stroke-dashoffset: -12; } }
+
+.talent-board.is-inspecting .talent-node:not(.is-target):not(.is-path):not(.is-weave-far):not(.is-fork-far):not(.is-corrupt) { opacity: .18; }
+.talent-board.is-inspecting .talent-branch h3 { opacity: .4; }
+.talent-node.is-path { opacity: 1; border-color: rgba(198, 151, 76, .8); box-shadow: 0 0 12px rgba(198, 151, 76, .3), inset 0 0 18px rgba(198, 151, 76, .06); }
+.talent-node.is-weave-far { opacity: 1; border-color: rgba(142, 201, 138, .8); box-shadow: 0 0 12px rgba(142, 201, 138, .3); }
+.talent-node.is-fork-far { opacity: .8; border-color: rgba(200, 90, 80, .8); box-shadow: 0 0 12px rgba(200, 90, 80, .25); }
+.talent-node.is-target { opacity: 1; border-color: #f2e3c4; animation: talent-target-pulse 1.6s ease-in-out infinite; }
+@keyframes talent-target-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--brass), 0 0 16px rgba(198, 151, 76, .5); }
+  50% { box-shadow: 0 0 0 1px var(--brass), 0 0 28px rgba(198, 151, 76, .9); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .talent-pathlines .line-path, .talent-pathlines .line-weave, .talent-node.is-target { animation: none; }
+  .talent-node.is-target { box-shadow: 0 0 0 1px var(--brass), 0 0 22px rgba(198, 151, 76, .7); }
+}
+
+.talent-popout-backdrop.is-docked { background: linear-gradient(100deg, rgba(6, 9, 7, .12) 42%, rgba(6, 9, 7, .82) 82%); place-items: center end; }
+.talent-popout-backdrop.is-docked .talent-popout { box-shadow: -18px 0 48px rgba(6, 9, 7, .8); }
+.talent-popout-path { margin: 0 0 10px; font-size: 12px; color: var(--muted); padding: 7px 9px; border: 1px solid rgba(198, 151, 76, .35); background: rgba(198, 151, 76, .05); line-height: 1.5; }
+.talent-popout-path b { color: var(--brass); }
+
 @media (max-width: 760px) {
   .talent-controls { grid-template-columns: 1fr; }
+  .talent-popout-backdrop.is-docked { background: rgba(6, 9, 7, .72); place-items: center; }
 }
