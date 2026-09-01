@@ -1,22 +1,24 @@
-# Bloomfall Adaptive Mutation P0 — Final Report
+# Bloomfall Adaptive Mutation P0 — SUPERSEDED Historical Report
 
-Status: ready for owner visual review
+Status: **SUPERSEDED — UNAPPROVED HISTORICAL ITERATION EVIDENCE**
 
 Package: `Bloomfall Adaptive Mutation P0` / `p0-owner-review-1`
 
 Scope authority: `Docs/BLOOMFALL_CREATURE_MUTATION_CLASSIFICATION.md`
 
+This retired, unserved package is preserved only as iteration evidence. Internal terms such as “selected,” “final,” “pass,” and “reused” below describe the historical production workflow; they do not record owner approval, canon, or current continuity. Only art returned by the current live Codex resolver is authoritative.
+
 ## 1. P0 scope
 
-Prompt B requires exactly twelve new P0 finals: Blackbloom Hart has four matched state references and one hero; Latchhound has four matched state references and one hero; The Last Shift has one pre-Bloomfall continuity reference and one current hero. All twelve are present. No P1, P2, P3, bonus creature, schema, or runtime implementation entered this pass.
+Prompt B historically requested twelve new P0 candidates: Blackbloom Hart has four matched state references and one hero; Latchhound has four matched state references and one hero; The Last Shift has one pre-Bloomfall continuity reference and one current hero. All twelve historical candidates are present. No P1, P2, P3, bonus creature, schema, or runtime implementation entered this pass.
 
 ## 2. Blackbloom Hart
 
 Tier: `ADVANCED_ADAPTIVE`.
 
-Sequence: Gradient-Sensing Hart → Charge-Raised → Grounded Crown → Storm-Tuned Relay. The separate Long Graze herd hero demonstrates the states in ecology. The owner-approved Bellwether V3 hero is reused as a lineage comparison only; it is not a fifth Hart state.
+Sequence: Gradient-Sensing Hart → Charge-Raised → Grounded Crown → Storm-Tuned Relay. The separate Long Graze herd hero demonstrates the states in ecology. The current live-resolved Bellwether V3 hero was referenced as a lineage comparison only; it is not a fifth Hart state.
 
-| State / purpose | Selected file | SHA-256 |
+| State / purpose | Historical candidate file | SHA-256 |
 | --- | --- | --- |
 | Gradient-Sensing Hart | `blackbloom-hart-gradient-sensing.png` | `d4c83effeef16abcda0971121db23fd784fcfbe7041e46c8aecd04b7fbf7c0d7` |
 | Charge-Raised | `blackbloom-hart-charge-raised.png` | `3611be98f685941d59e0222a470fef41927a5c6245db0343ea1b29629e759b04` |
@@ -36,7 +38,7 @@ Tier: `ADVANCED_ADAPTIVE`.
 
 Sequence: Corridor Latcher → Live-Latched → Circuit Stalker → Pack Relay. The separate Splicefield pack hero shows the pressure-driven predator in a real connected machine ecology.
 
-| State / purpose | Selected file | SHA-256 |
+| State / purpose | Historical candidate file | SHA-256 |
 | --- | --- | --- |
 | Corridor Latcher | `latchhound-corridor-latcher.png` | `72d60174dc856d47196131c1490b10fbf7d3b44e33a06f0eac85964f7e7214bd` |
 | Live-Latched | `latchhound-live-latched.png` | `1834248f6ac24958cfc8a0ba26e2f4003940e6aa14b39502dfa5dba878ae740e` |
@@ -54,7 +56,7 @@ V3 support: `the-shattercore.png`, unchanged.
 
 Treatment: `EXCEPTIONAL_ABERRANT`, Human-lineage, unique. It is explicitly not a Baseline/Exposed/Adapted/Bloom-Evolved ladder.
 
-| Continuity evidence | Selected file | SHA-256 |
+| Continuity evidence | Historical candidate file | SHA-256 |
 | --- | --- | --- |
 | Pre-Bloomfall shift context | `the-last-shift-pre-bloomfall-context.png` | `53b8c77f815a47bf108faca2406f297587f53b123628500d1a664a67dbce92db` |
 | Current collective hero | `the-last-shift-current-collective.png` | `06934a4921151ebfd2c0b6134df7883aa96c894951c775465f6cdf5263e3a107` |
@@ -74,14 +76,15 @@ new generated attempts = 16
 V3 reused references = 4
 revised attempts = 4
 rejected attempts = 0
-final approved P0 = 12
+historically selected P0 candidates = 12
+owner-approved adaptive package finals = 0
 ```
 
-The twelve finals are exact project-bound copies of their selected generation outputs. Sources and revision evidence remain separate from the flat selected-candidate directory.
+The twelve historical candidates are exact project-bound copies of their selected generation outputs. Sources and revision evidence remain separate from the flat selected-candidate directory.
 
 ## 6. AAA QA
 
-Selected-final score summary (minimum / average):
+Historical candidate score summary (minimum / average):
 
 | Category | Minimum | Average |
 | --- | ---: | ---: |
@@ -94,7 +97,7 @@ Selected-final score summary (minimum / average):
 | Canon | 9.6 | 9.78 |
 | Mature 17+ impact | 9.1 | 9.41 |
 
-Every selected final clears 9/10 in every recorded category. Full scores and revision notes are in the typed manifest.
+Every historical candidate cleared the package's internal 9/10 gates. Those internal gates were not owner approval. Full scores and revision notes are in the typed manifest.
 
 ## 7. Horror design
 
@@ -125,16 +128,16 @@ Glasswing Kite is the explicit `NONE` example. In development its dossier says �
 ```text
 blackbloom-hart:known-states:0..3
 blackbloom-hart:hero-support
-blackbloom-hart:lineage-comparison (locked V3 Bellwether)
-blackbloom-hart:environment-reference (locked V3 Mutation Belt)
+blackbloom-hart:lineage-comparison (current live-resolved V3 Bellwether)
+blackbloom-hart:environment-reference (current live-resolved V3 Mutation Belt)
 
 latchhound:known-states:0..3
 latchhound:hero-support
-latchhound:environment-reference (locked V3 Shattercore)
+latchhound:environment-reference (current live-resolved V3 Shattercore)
 
 the-last-shift:continuity:before
 the-last-shift:continuity:current
-the-last-shift:environment-reference (locked V3 Southreach interior)
+the-last-shift:environment-reference (current live-resolved V3 Southreach interior)
 ```
 
 Both the presentation resolver and private art resolver return `null` outside `HABITAT_ENVIRONMENT=development`. The review page itself returns 404 outside development and retains the normal Codex review-role gate.
@@ -145,11 +148,11 @@ Authoritative typed manifest: `apps/web/lib/bloomfall-adaptive-p0.ts`.
 
 The audit checks all 20 records for file existence, decoded PNG dimensions, SHA-256, status counts, selected score gates, concise alt text, exact Prompt B totals, bindings, and P0-only scope.
 
-## 14. Owner review gallery
+## 14. Superseded historical gallery
 
 Protected development route: `/codex/bloomfall-adaptive-p0`.
 
-It groups Hart, Latchhound, Last Shift, revision evidence, and locked V3 references; every image includes state, purpose, status, iteration, and a full-resolution link. Revision evidence is collapsed by default. Source files remain private and the loopback-only visual harness serves only one allow-listed HTML file and allow-listed candidate PNG names.
+It groups Hart, Latchhound, Last Shift, revision evidence, and live-resolved V3 references as historical package context; every image includes state, purpose, status, iteration, and a full-resolution link. Revision evidence is collapsed by default. Source files remain private and the loopback-only visual harness serves only one allow-listed HTML file and allow-listed candidate PNG names.
 
 ## 15. Contact sheets
 
@@ -169,7 +172,7 @@ Authenticated Codex pages and private art keep their established sign-in/role ga
 
 ## 17. Tests
 
-- P0 visual manifest audit: PASS, 20/20 files and 12/12 finals.
+- P0 visual manifest audit: PASS, 20/20 files and 12/12 historical candidate files.
 - Creature enhancement audit: PASS, 13 records, zero broken references.
 - Web test suite: PASS, 425 tests.
 - Strict web TypeScript: PASS.
@@ -190,18 +193,14 @@ production Atlas changes = 0
 
 Production was read only. The P0 art kinds cannot resolve there, the presentation returns no content there, and no activation tool exists in this package.
 
-## 19. Remaining owner decisions
+## 19. Owner decision record
 
-The only remaining P0 decision is visual approval or a named revision request against one or more of the twelve selected candidates. There are no unresolved canon, anatomy, continuity, artifact, UX, or production-safety blockers in the implemented package.
+No visual-approval decision remains pending for this package. It was retired unapproved; any future adaptive art requires a new commission grounded in current live-resolved art.
 
 ## 20. Final decision
 
-`BLOOMFALL_ADAPTIVE_P0_READY_FOR_OWNER_REVIEW`
+`BLOOMFALL_ADAPTIVE_P0_SUPERSEDED_UNAPPROVED`
 
 ## 21. Next phase
 
-After owner approval, recommend:
-
-`PROMPT C2 — BLOOMFALL ADAPTIVE MUTATION P1/P2 AAA CREATURE VISUAL PRODUCTION`
-
-Do not execute it from this package.
+This historical next-phase recommendation is obsolete. Do not use this package as an approval or continuity premise.

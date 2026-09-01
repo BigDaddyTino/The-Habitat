@@ -882,3 +882,12 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Registered Draw Nine as standalone region key art without inventing an accent or full branding identity, and added resolver coverage for the dossier and place-thumbnail surfaces
 - [x] Reviewed the full final plus 564 x 941 and 1122 x 941 center crops; final SHA-256 is `4ba717c4d6708d129c040b8c1a5243e84484a9e2cf55cc18c7b42852c16f3b1a`
 - [x] Passed the 6/6 read-only release audit and production build, switched HabitatWeb from `.next-20260831-142014` to healthy release `.next-20260831-201524`, and published the image to the production dossier and region-directory surfaces
+
+## 2026-08-31 - World's Missing Pictures art run
+
+- [x] Filled all 56 audited missing Codex-art slots: 2 creatures, 11 events, 11 flags, 6 items, 18 regions, and 8 systems; the coverage audit moved from exactly 56 empty slots to 0
+- [x] Produced or live-authority-carried every final as a 1672 x 941 RGB24 sRGB PNG; an independent 56-file manifest pass recomputed all SHA-256 hashes and reported zero dimension, channel, depth, alpha, or format failures
+- [x] Read each live dossier before its plate, preserved canonical NAG and SEQ-000 recruitment-camp continuity, reviewed every full frame and exact 564 x 941 center crop, and kept all five RADIANT plates at full earned brightness
+- [x] Added convention-path region discovery so new region plates resolve without requiring an invented branding/accent registration; focused Codex art, dossier, privacy, derivative, and region tests pass 22 of 22
+- [x] Marked the retired Bloomfall adaptive P0 and P1/P2 review packages, reports, package readmes, index entry, and every displayed candidate as SUPERSEDED / UNAPPROVED HISTORICAL evidence; only current live-resolved Bloomfall art is authoritative
+- [x] Preserved scope: no StoryEntry, database, taxonomy, credential, infrastructure, service, or production-state mutation was made

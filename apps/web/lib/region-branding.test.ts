@@ -87,3 +87,10 @@ test("an existing place image resolves even before the place receives full brand
     assert.ok(readFileSync(file).byteLength > 0, `${slug} artwork is not empty`);
   }
 });
+
+test("a convention-only region image resolves without a branding registry entry", () => {
+  assert.equal(getRegionBranding("riverlands"), null);
+  const art = getRegionKeyart("riverlands");
+  assert.equal(art, "/codex-art/regions/riverlands.png");
+  assert.ok(codexArtFileForUrl(art), "the convention-only region art exists behind the member gate");
+});

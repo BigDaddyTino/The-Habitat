@@ -32,7 +32,7 @@ export default async function CodexReviewPage() {
       </div>
 
       {process.env.HABITAT_ENVIRONMENT === "development" ? <div className="codex-review-list">
-        <article><div><p className="eyebrow">Development art gate</p><h2><Link href="/codex/bloomfall-adaptive-p1p2">Bloomfall Adaptive Mutation P1/P2</Link></h2><p>Fourteen selected creature visuals, exceptional continuity, fixed-form treatment, and native-resolution review links.</p></div></article>
+        <article><div><p className="eyebrow">Superseded visual evidence</p><h2><Link href="/codex/bloomfall-adaptive-p1p2">Bloomfall Adaptive Mutation P1/P2 — historical</Link></h2><p>Retired, unapproved iteration package. Only current live-resolved Codex art is authoritative.</p></div></article>
         <article><div><p className="eyebrow">Development content gate</p><h2><Link href="/codex/bloomfall-systems">Bloomfall Codex systems</Link></h2><p>Seven interconnected system dossiers — two of them new — and the cross-links that turn the region into one readable package.</p></div></article>
       </div> : null}
 

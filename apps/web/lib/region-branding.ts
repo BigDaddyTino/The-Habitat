@@ -1,3 +1,5 @@
+import { findCodexArt } from "./codex-art";
+
 export type RegionBranding = {
   accent: string;
   keyart: string;
@@ -55,6 +57,9 @@ export function getRegionBranding(slug: string): RegionBranding | null {
 /** Artwork and full branding are separate concerns. A place can already have
  * approved key art without yet having a settled accent/identity package. */
 export function getRegionKeyart(slug: string): string | null {
+  const convention = findCodexArt("regions", slug);
+  if (convention) return convention;
+
   const standalone = standaloneRegionKeyart[slug as keyof typeof standaloneRegionKeyart];
   if (standalone) return standalone;
   return slug in regionAccents ? `/codex-art/regions/${slug}.jpg` : null;

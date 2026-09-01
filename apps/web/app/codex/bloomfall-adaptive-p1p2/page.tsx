@@ -14,14 +14,14 @@ import {
   type BloomfallAdaptiveP1P2Asset,
 } from "@/lib/bloomfall-adaptive-p1p2";
 
-export const metadata = { title: "Bloomfall Adaptive Mutation P1/P2 review" };
+export const metadata = { title: "SUPERSEDED — Bloomfall Adaptive Mutation P1/P2 history" };
 
 function ReviewCard({ asset }: { asset: BloomfallAdaptiveP1P2Asset }) {
   const url = bloomfallAdaptiveP1P2AssetUrl(asset);
   return <article className={`adaptive-review-card status-${asset.status.toLowerCase()}`}>
     <a className="adaptive-review-image" href={url} target="_blank" rel="noreferrer"><img alt={asset.alt} src={url} /></a>
     <div>
-      <p className="eyebrow">{asset.status.replaceAll("_", " ")} · iteration {asset.generationIteration ?? asset.reusedAsset}</p>
+      <p className="eyebrow">UNAPPROVED HISTORICAL · {asset.status.replaceAll("_", " ")} · iteration {asset.generationIteration ?? asset.reusedAsset}</p>
       <h3>{asset.state}</h3>
       <p>{asset.functionalChanges}</p>
       <p>{asset.matureTone}</p>
@@ -37,10 +37,10 @@ const sections = [
   { slug: "sump-eel", title: "Sump Eel", note: "Minor adaptive · one deliberately bounded charge-storage step." },
   { slug: "glasswing-kite", title: "Glasswing Kite", note: "NONE · one canonical fixed-form warning species hero." },
   { slug: "spore-lantern-colony", title: "Spore Lantern Colony", note: "NONE · fixed animal-fungal-algal ecology, no invented ladder." },
-  { slug: "switchmother", title: "Switchmother", note: "Exceptional Aberrant · engineered provenance followed by the locked V3 current hero." },
+  { slug: "switchmother", title: "Switchmother", note: "Exceptional Aberrant · engineered provenance followed by the current live-resolved V3 hero." },
   { slug: "old-drowner", title: "Old Drowner", note: "Exceptional Aberrant · uncertain probable lineage followed by the singular hydrological form." },
   { slug: "maintenance-unit-m-17", title: "Maintenance Unit M-17 (Mender)", note: "NONE · mechanical-organic repair history is not Adaptive Mutation." },
-  { slug: "the-bellwether", title: "The Bellwether", note: "Exceptional Aberrant · P0 Hart comparison plus locked V3 hero; no fifth Hart state." },
+  { slug: "the-bellwether", title: "The Bellwether", note: "Exceptional Aberrant · historical P0 Hart comparison plus the current live-resolved V3 hero; no fifth Hart state." },
 ] as const;
 
 export default async function BloomfallAdaptiveP1P2ReviewPage() {
@@ -50,14 +50,14 @@ export default async function BloomfallAdaptiveP1P2ReviewPage() {
   return <section className="page-shell codex-shell adaptive-review-page">
     <div className="page-intro">
       <Link className="codex-back" href="/codex/review"><ArrowLeft aria-hidden="true" size={13} /> Codex review</Link>
-      <p className="eyebrow">Development only · owner visual gate</p>
-      <h1>Bloomfall Adaptive Mutation P1/P2</h1>
-      <p>Package <code>{bloomfallAdaptiveP1P2Version}</code>. Fourteen selected finals complete the required P1/P2 visual matrix. Fixed forms and exceptional history are intentionally separated from ordinary adaptive ladders.</p>
+      <p className="eyebrow">Superseded · unapproved historical evidence</p>
+      <h1>Bloomfall Adaptive Mutation P1/P2 — Historical package</h1>
+      <p>Package <code>{bloomfallAdaptiveP1P2Version}</code> is retired and was never owner-approved. It remains available only as iteration evidence; its internal selected, final, and reused labels do not make it canon or a continuity source. Only art returned by the current live Codex resolver is authoritative.</p>
       <dl className="adaptive-review-totals">
-        <div><dt>Selected</dt><dd>{bloomfallAdaptiveP1P2SelectedAssets.length}</dd></div>
-        <div><dt>Revised</dt><dd>{bloomfallAdaptiveP1P2GenerationSummary.revisedSubjects}</dd></div>
-        <div><dt>Rejected</dt><dd>{bloomfallAdaptiveP1P2GenerationSummary.rejectedAttempts}</dd></div>
-        <div><dt>Reused</dt><dd>{bloomfallAdaptiveP1P2ReusedAssets.length}</dd></div>
+        <div><dt>Historical picks</dt><dd>{bloomfallAdaptiveP1P2SelectedAssets.length}</dd></div>
+        <div><dt>Revision records</dt><dd>{bloomfallAdaptiveP1P2GenerationSummary.revisedSubjects}</dd></div>
+        <div><dt>Rejected records</dt><dd>{bloomfallAdaptiveP1P2GenerationSummary.rejectedAttempts}</dd></div>
+        <div><dt>Referenced live context</dt><dd>{bloomfallAdaptiveP1P2ReusedAssets.length}</dd></div>
       </dl>
     </div>
 
@@ -66,13 +66,13 @@ export default async function BloomfallAdaptiveP1P2ReviewPage() {
         .filter((asset) => asset.entitySlug === section.slug && asset.status !== "REJECTED")
         .sort((left, right) => section.slug === "the-bellwether" ? Number(left.status !== "REUSED_P0") - Number(right.status !== "REUSED_P0") : 0);
       return <section className="adaptive-review-section" data-review-section={section.slug} key={section.slug}>
-        <header><p className="eyebrow">P1/P2 visual treatment</p><h2>{section.title}</h2><p>{section.note}</p></header>
+        <header><p className="eyebrow">Superseded P1/P2 treatment</p><h2>{section.title}</h2><p>{section.note}</p></header>
         <div className={`adaptive-review-grid entity-${section.slug}`}>{assets.map((asset) => <ReviewCard asset={asset} key={asset.id} />)}</div>
       </section>;
     })}
 
     <section className="adaptive-review-section" data-review-section="bloommarked-remnant">
-      <header><p className="eyebrow">Explicit scope protection</p><h2>Bloommarked Remnant</h2><p>NONE. Human lineage remains protected; Blackbloom Exposure is not Seven-Phase Corruption. Optional P3 art was not generated and this is not missing data.</p></header>
+      <header><p className="eyebrow">Historical scope record</p><h2>Bloommarked Remnant</h2><p>NONE. Human lineage remains protected; Blackbloom Exposure is not Seven-Phase Corruption. Optional P3 art was not generated and this is not missing data.</p></header>
     </section>
   </section>;
 }

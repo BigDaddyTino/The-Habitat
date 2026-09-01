@@ -14,7 +14,7 @@ import {
   type BloomfallAdaptiveP0Asset,
 } from "@/lib/bloomfall-adaptive-p0";
 
-export const metadata = { title: "Bloomfall Adaptive Mutation P0 review" };
+export const metadata = { title: "SUPERSEDED — Bloomfall Adaptive Mutation P0 history" };
 
 function reviewUrl(asset: BloomfallAdaptiveP0Asset) {
   if (asset.existingV3Reused) return `/codex-art/bloomfall-v3/${asset.filename}`;
@@ -27,7 +27,7 @@ function ReviewCard({ asset }: { asset: BloomfallAdaptiveP0Asset }) {
   return <article className={`adaptive-review-card status-${asset.status.toLowerCase()}`}>
     <a className="adaptive-review-image" href={url} target="_blank" rel="noreferrer"><img alt={asset.alt} src={url} /></a>
     <div>
-      <p className="eyebrow">{asset.status.replaceAll("_", " ")} · iteration {asset.generationIteration ?? "V3"}</p>
+      <p className="eyebrow">UNAPPROVED HISTORICAL · {asset.status.replaceAll("_", " ")} · iteration {asset.generationIteration ?? "V3"}</p>
       <h3>{asset.state}</h3>
       <p>{asset.functionalChanges}</p>
       {asset.reviewNote ? <p className="adaptive-review-note">{asset.reviewNote}</p> : null}
@@ -48,19 +48,19 @@ export default async function BloomfallAdaptiveP0ReviewPage() {
   return <section className="page-shell codex-shell adaptive-review-page">
     <div className="page-intro">
       <Link className="codex-back" href="/codex/review"><ArrowLeft aria-hidden="true" size={13} /> Codex review</Link>
-      <p className="eyebrow">Development only · owner visual gate</p>
-      <h1>Bloomfall Adaptive Mutation P0</h1>
-      <p>Package <code>{bloomfallAdaptiveP0Version}</code>. Twelve selected finals prove natural, combat-driven, and exceptional cases. Revisions remain visible as process evidence; no asset on this page is published to production.</p>
+      <p className="eyebrow">Superseded · unapproved historical evidence</p>
+      <h1>Bloomfall Adaptive Mutation P0 — Historical package</h1>
+      <p>Package <code>{bloomfallAdaptiveP0Version}</code> is retired and was never owner-approved. It remains available only as iteration evidence; its internal selected, final, and reused labels do not make it canon or a continuity source. Only art returned by the current live Codex resolver is authoritative.</p>
       <dl className="adaptive-review-totals">
-        <div><dt>Selected</dt><dd>{bloomfallAdaptiveP0SelectedAssets.length}</dd></div>
-        <div><dt>Revised</dt><dd>{bloomfallAdaptiveP0RevisionAssets.length}</dd></div>
-        <div><dt>Rejected</dt><dd>{bloomfallAdaptiveP0Assets.filter((asset) => asset.status === "REJECTED").length}</dd></div>
-        <div><dt>V3 references</dt><dd>{bloomfallAdaptiveP0ReusedAssets.length}</dd></div>
+        <div><dt>Historical picks</dt><dd>{bloomfallAdaptiveP0SelectedAssets.length}</dd></div>
+        <div><dt>Revision records</dt><dd>{bloomfallAdaptiveP0RevisionAssets.length}</dd></div>
+        <div><dt>Rejected records</dt><dd>{bloomfallAdaptiveP0Assets.filter((asset) => asset.status === "REJECTED").length}</dd></div>
+        <div><dt>Referenced live context</dt><dd>{bloomfallAdaptiveP0ReusedAssets.length}</dd></div>
       </dl>
     </div>
 
     {sections.map((section) => <section className="adaptive-review-section" data-review-section={section.slug} key={section.slug}>
-      <header><p className="eyebrow">P0 visual sequence</p><h2>{section.title}</h2><p>{section.note}</p></header>
+      <header><p className="eyebrow">Superseded P0 sequence</p><h2>{section.title}</h2><p>{section.note}</p></header>
       <div className={`adaptive-review-grid entity-${section.slug}`}>
         {bloomfallAdaptiveP0Assets.filter((asset) => asset.entitySlug === section.slug && asset.status !== "REVISE").map((asset) => <ReviewCard asset={asset} key={asset.id} />)}
       </div>
@@ -71,7 +71,7 @@ export default async function BloomfallAdaptiveP0ReviewPage() {
     </section>)}
 
     <section className="adaptive-review-section" data-review-section="v3-references">
-      <header><p className="eyebrow">Locked context · unchanged</p><h2>Owner-approved V3 references</h2><p>These files remain in the V3 package and are not copied or overwritten.</p></header>
+      <header><p className="eyebrow">Live-resolved context · package use superseded</p><h2>Independent live references</h2><p>These files remain authoritative only where the current live resolver serves them. Their appearance in this historical package does not approve the package.</p></header>
       <div className="adaptive-review-grid is-reference">{bloomfallAdaptiveP0ReusedAssets.map((asset) => <ReviewCard asset={asset} key={asset.id} />)}</div>
     </section>
   </section>;

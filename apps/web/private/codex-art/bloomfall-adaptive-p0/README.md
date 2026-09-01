@@ -1,4 +1,4 @@
-# SUPERSEDED — Bloomfall Adaptive Mutation P1/P2 art
+# SUPERSEDED — Bloomfall Adaptive Mutation P0 art
 
 Status: **UNAPPROVED HISTORICAL ITERATION EVIDENCE**.
 

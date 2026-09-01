@@ -1,4 +1,8 @@
-# Bloomfall Reach — Adaptive Mutation P1/P2 visual report
+# Bloomfall Reach — Adaptive Mutation P1/P2 SUPERSEDED historical report
+
+Status: **SUPERSEDED — UNAPPROVED HISTORICAL ITERATION EVIDENCE**
+
+This retired, unserved package is preserved only as iteration evidence. Internal terms such as “selected,” “final,” “pass,” and “reused” below describe the historical production workflow; they do not record owner approval, canon, or current continuity. Only art returned by the current live Codex resolver is authoritative.
 
 ## 1. Starting state
 
@@ -6,21 +10,21 @@
 - HEAD: `04425b05b931cadd9b73e1220d7178bc73bd7e31`
 - Worktree: clean
 - Prompt B planned new-art total: 27
-- P0 satisfied: 12
+- P0 historical candidate count: 12
 - Remaining required P1/P2: 14
 - Optional P3 remaining outside scope: 1 Bloommarked Remnant image
 
-## 2. Final P1/P2 scope
+## 2. Historical P1/P2 scope
 
 - Rootback Grazer: three P1 adaptive state references.
 - Mirejaw: three P1 adaptive state references.
 - Sump Eel: two P2 minor-adaptive state references.
-- Glasswing Kite: one P2 canonical fixed-form hero.
-- Spore Lantern Colony: one P2 canonical fixed-ecology hero.
-- Switchmother: one P1 engineered-origin structural reference plus locked V3 hero reuse.
+- Glasswing Kite: one P2 candidate fixed-form depiction.
+- Spore Lantern Colony: one P2 candidate fixed-ecology depiction.
+- Switchmother: one P1 engineered-origin structural reference plus current live-resolved V3 hero reuse.
 - Old Drowner: one P1 probable-lineage reconstruction and one P1 final hero.
 - Maintenance Unit M-17 (Mender): one P2 current integrated-chassis hero.
-- The Bellwether: locked V3 hero and P0 Hart baseline reuse; no new image.
+- The Bellwether: current live-resolved V3 hero and P0 Hart baseline reuse; no new image.
 - Bloommarked Remnant: explicit `NONE`; P3 optional art remains excluded.
 
 ## 3. Classification matrix
@@ -52,11 +56,11 @@ Two matched 4:5 references preserve the exact eel silhouette, fin plan, lateral-
 
 ## 7. Glasswing Kite
 
-Classification remains `NONE`. One 16:9 canonical hero establishes an elegant two-wing fixed regional form and its pressure-warning behavior. No mutation stages were created.
+Classification remains `NONE`. One historical 16:9 candidate depicts an elegant two-wing fixed regional form and its pressure-warning behavior. No mutation stages were created.
 
 ## 8. Spore Lantern Colony
 
-Classification remains `NONE`. One 16:9 canonical ecology hero shows substrate-bound animal, fungal, and algal tissues with restrained functional bioluminescence. No animal-style mutation ladder was invented.
+Classification remains `NONE`. One historical 16:9 candidate depicts substrate-bound animal, fungal, and algal tissues with restrained functional bioluminescence. No animal-style mutation ladder was invented.
 
 ## 9. Bloommarked Remnant
 
@@ -64,11 +68,11 @@ Human lineage remains authoritative. Blackbloom Exposure is not Seven-Phase Corr
 
 ## 10. Bellwether
 
-No new image was required. The locked V3 hero remains the current exceptional form and the P0 Gradient-Sensing Hart is reused only as lineage comparison. Bellwether is never presented as a fifth Hart state.
+No new image was required. The current live-resolved V3 hero remains the current exceptional form and the P0 Gradient-Sensing Hart was referenced only as historical lineage-comparison evidence. Bellwether is never presented as a fifth Hart state.
 
 ## 11. Switchmother
 
-One 4:5 engineered-origin structural reference shares meaningful capacitor sacs, plates, load anchors, and terminated routing with the locked V3 hero without asserting exact individual ancestry. The sequence is engineered history, not a natural mutation ladder.
+One 4:5 engineered-origin structural reference shares meaningful capacitor sacs, plates, load anchors, and terminated routing with the current live-resolved V3 hero without asserting exact individual ancestry. The sequence is engineered history, not a natural mutation ladder.
 
 ## 12. Old Drowner
 
@@ -85,11 +89,12 @@ Mender remains `NONE`. Mechanical-organic self-repair is corrupted maintenance b
 - P0 reused: 1 lineage comparison
 - Revised: 1 subject
 - Rejected: 1 generation
-- Approved final: 14 new images
+- Historically selected candidates: 14 new images
+- Owner-approved adaptive package finals: 0
 
-## 15. Full Adaptive Mutation art package total
+## 15. Historical Adaptive Mutation package inventory
 
-P0 12 + P1/P2 14 = **26 required newly produced creature-state visuals**. Reuse records are provenance/context and do not inflate that requirement. The one optional P3 image remains deferred.
+P0 12 + P1/P2 14 = **26 historically produced creature-state candidates**. This is archive inventory, not canonical coverage. Reuse records are provenance/context and do not inflate that count. The one optional P3 image remained deferred.
 
 ## 16. AAA QA
 
@@ -104,7 +109,7 @@ P0 12 + P1/P2 14 = **26 required newly produced creature-state visuals**. Reuse 
 | Canon accuracy | 9.7 | 9.84 |
 | Visual storytelling | 9.5 | 9.69 |
 
-All selected images clear every critical 9/10 gate.
+All historical candidates cleared the package's internal 9/10 gates. Those internal gates were not owner approval.
 
 ## 17. Mature 17+ result
 
@@ -121,8 +126,8 @@ PASS. Horror intensity is species-specific: Rootback is protective ecological un
 ## 19. Codex mutation presentation
 
 - Extended development-only dossier panel: `apps/web/components/bloomfall-adaptive-mutation-panel.tsx`
-- Authoritative P1/P2 resolver/manifest: `apps/web/lib/bloomfall-adaptive-p1p2.ts`
-- Protected owner gallery: `/codex/bloomfall-adaptive-p1p2`
+- Historical P1/P2 package manifest: `apps/web/lib/bloomfall-adaptive-p1p2.ts`
+- Protected superseded-history gallery: `/codex/bloomfall-adaptive-p1p2`
 - Review queue development link: `/codex/review`
 - Development art resolver kinds: `bloomfall-adaptive-p1p2` and `bloomfall-adaptive-p1p2-source`
 
@@ -138,7 +143,7 @@ Bellwether, Switchmother, Old Drowner, and Last Shift remain singular continuity
 
 `apps/web/lib/bloomfall-adaptive-p1p2.ts`
 
-## 23. Owner review gallery
+## 23. Superseded historical gallery
 
 Source: `apps/web/app/codex/bloomfall-adaptive-p1p2/page.tsx`
 
@@ -161,7 +166,7 @@ PASS. The standalone gallery rendered all five sequences with zero broken images
 ## 26. Tests
 
 - Creature enhancement audit: PASS
-- P0 manifest regression: PASS at 12 selected
+- P0 manifest regression: PASS at 12 historical candidate records
 - P1/P2 manifest/file/dimension/SHA/binding/quality audit: PASS
 - Full Bloomfall audit: PASS
 - Web tests: PASS
@@ -187,14 +192,14 @@ PASS. The standalone gallery rendered all five sequences with zero broken images
 - production art activation = 0
 - production Atlas changes = 0
 
-## 29. Owner decisions
+## 29. Owner decision record
 
-No unresolved P1/P2 execution defect remains. Owner review is limited to accepting or requesting art-direction changes to the fourteen selected candidates. The rejected Mender attempt is already resolved and retained only as evidence.
+No visual-approval decision remains pending for this package. It was retired unapproved; any future adaptive art requires a new commission grounded in current live-resolved art. The rejected Mender attempt remains only as historical evidence.
 
 ## 30. Final decision
 
-`BLOOMFALL_ADAPTIVE_P1P2_READY_FOR_OWNER_REVIEW`
+`BLOOMFALL_ADAPTIVE_P1P2_SUPERSEDED_UNAPPROVED`
 
 ## 31. Next recommendation
 
-If the owner approves this package, proceed with **PROMPT D — BLOOMFALL REMAINING ROUTE AUTHORING & SYSTEM-AWARE TRAVEL LOGIC**. It should review remaining route candidates against Prompt A, classify permanent/conditional/dynamic paths, author only defensible permanent routes, document runtime requirements for conditional/dynamic routes, and leave production untouched until owner review. Prompt D is not executed here.
+This historical next-phase recommendation is obsolete. Do not use this package as an approval or continuity premise.
