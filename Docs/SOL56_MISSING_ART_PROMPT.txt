@@ -1,0 +1,213 @@
+SOL 5.6 — THE CATCH-UP RUN: EVERY EMPTY ART SLOT IN THE CODEX
+Date issued: 2026-08-31
+Inventory source: scripts/audit-codex-art-coverage.ts — 56 empty slots, resolved by
+the same function the site renders with. Re-run it yourself before starting and
+after finishing; your count must go 56 → 0.
+Deliverables ledger: Docs/SOL56_MISSING_ART_LEDGER.md, your usual format
+(per-asset prompt blocks, dimensions, SHA-256 manifest, QA record).
+
+Already covered elsewhere — do NOT redo: talents (8/8), trades (9/9, your run),
+factions (35/35 branding), characters (31/31), rules, themes, threads,
+companion missions, and the 27 seat-keeper portraits (SOL56_TRADE_ART_PROMPT.txt,
+its own run). This run is only the 56 below.
+
+==============================================================================
+STANDING DIRECTIONS (unchanged, load-bearing)
+==============================================================================
+
+- 1672x941 RGB24 PNG, wide cinematic 16:9, center-safe for the directory-card
+  crop (~564x941) and responsive crops. Drop-in path per subject:
+  apps/web/private/codex-art/<directory>/<slug>.png (directory given per block).
+- Mature AAA grounded cinematic photorealism, hard-lived production design.
+  Palette law as always: cool overcast charcoal / dirty green / wet grey /
+  muted rust / storm blue / bone; one restrained motivated warm practical.
+  Cyan only as contained technology; white-gold only as contained willing light.
+- NO text, letters, numbers, readable papers, logos, insignia, UI, watermarks.
+- THE DOSSIER IS THE SOURCE OF TRUTH. Before generating each subject, read its
+  codex entry and contradict nothing it says. The one-line notes below are
+  orientation, not the brief.
+- Match each shelf's existing plates: ten timeline plates, six flag plates,
+  ten item plates, thirty-nine region plates and fifty-five system plates
+  already set their shelves' visual language. Yours must sit beside them
+  without a seam.
+- This world's dark material runs at full weight. The subjects include a
+  surgical vision, a drowned filtration arm, casualty shelters and a lifesteal
+  predator: render them with the restraint of good cinema, not the softness of
+  a lesser rating.
+- No people unless the dossier itself stages them (the recruitment camp does).
+
+==============================================================================
+CREATURES — 2 · private/codex-art/creatures/
+==============================================================================
+
+shrieker-bat — colony bats of Draw Nine, moved in when the pumps stopped.
+Harmless alone; the image is the COLONY: a ceiling of them in a dead pump
+gallery, one beam of intruding light, the half-second before the panic.
+
+the-hollow-wing-creature — Draw Nine's resident: a lifesteal predator that
+drains blood and Essence together. Anatomy per its dossier, exactly. Show it
+hunting ground, not gore — the dry husk of the gallery it has already fed on.
+
+==============================================================================
+TIMELINE EVENTS — 11 · private/codex-art/timeline/
+==============================================================================
+Match the ten existing archive plates' documentary language.
+
+a-ledger-with-two-owners — two inventory chains claiming one strategic
+  material: twin freight manifest stations, identical crates, two chains of
+  custody physically colliding in one Southreach yard.
+black-tide-at-blackweir — the downstream surge against the harvest works:
+  black water at the filtration arms, crews and marsh moving as one system.
+menders-work — M-17's technically successful repair: the restored system
+  humming, and everything about the frame saying it should not be.
+reserve-twelve — the salvage cordon around the vault: contract crews waiting,
+  seals intact, arithmetic visibly wrong in the stacked evidence of it.
+root-of-the-bargain — the marsh exchange: offered goods at the waterline,
+  something coordinated watching from the reeds, nobody armed.
+the-bellwether-event — Warden teams on migration ground, an Aberrant-scale
+  disturbance on the horizon changing which way every herd faces.
+the-bloomfall — the catastrophe itself, twenty years back: the Southreach
+  stack letting go, energized Essence rolling out over the district. The
+  region's founding image; treat it like the historical mural it is.
+the-last-safe-reading — one intact telemetry station, every neighbouring
+  gauge already lying, the moment the numbers were still true.
+the-purge-window — the forecast purge: evacuation and containment postures
+  in the same street, the window between them closing.
+the-route-that-moves — the temporary corridor: orchard organisms mid-march,
+  marsh water standing open, a convoy threading what will not exist tomorrow.
+three-failure-reports — three incompatible first-failure accounts: one
+  incident, three vantage compositions in one frame's architecture (no split
+  panels — stage it as three witness positions around one machine).
+
+==============================================================================
+STORY FLAGS — 11 · private/codex-art/flags/
+==============================================================================
+Flags are moments the world remembers. Match the six existing flag plates.
+
+blackweir-arm-sacrificed — the consumed filtration arm: one limb of the works
+  deliberately drowned, the rest alive because of it.
+cairnwood-approach-lost — the surveyed route abandoned: markers standing in
+  ground now owned by displaced herds and what follows them.
+carries-nag — the player wears Tino's watch. NAG has canonical object design
+  (your own nag.png): same watch, now on a strap over a field jacket cuff,
+  lock-picks folded, eyebrow-projection dark. Continuity with your plate is
+  the whole assignment.
+has-the-tino-file — the first verified facts: a thin sealed folder changing
+  hands at Rook's desk lamp, contents never shown.
+heartfen-channel-open — the marsh holding a route open: water standing aside
+  where water does not, reeds bowed in agreement.
+reserve-twelve-sealed — the vault closed under authority: containment seals
+  over salvage stencils (BLANK), the argument settled in hardware.
+splicefield-feeder-live — the old reserve feed reconnected: dead grid
+  carrying load again, conductive growth brightening along the line.
+the-first-vision — the player's first episode: restraints, one surgical
+  light, a room with two empty beds. Full weight, clinical, no gore — the
+  emptiness of the second bed is the image.
+the-last-safe-reading-recovered — the telemetry pulled out in time: a data
+  core leaving a sector already flickering into restart.
+the-search-was-loud — six weeks on a built-to-be-run route: a cold trail
+  camp, searchers' litter, and the watching positions above it they missed.
+walked-the-east-road — Kestrel's last scouts on the trail east, and behind
+  them the wall those scouts are no longer on.
+
+==============================================================================
+ITEMS — 6 · private/codex-art/items/
+==============================================================================
+Material studies, matching the ten existing item plates.
+
+blackweir-resin — dense dark resin where marsh organisms concentrate
+  contamination: cut block, tar-deep, faint wrong sheen.
+capacitor-tissue — organic tissue holding a charge: lab tray, disturbing,
+  alive-adjacent, cyan strictly contained within it.
+gridcore-alloy — salvaged strategic conductor: machined billet, Southreach
+  provenance in the wear, beautiful the way weapons-grade things are.
+quietwater-culture — the living culture: a glass vessel of layered still
+  water and bloom, the calmest object the Reach produces.
+reserve-glass — containment glass transformed: a graded pane with depth it
+  should not have, handled with tools not hands.
+sinkroot-fiber — the filtration root fiber: coiled harvest, wet-strong, and
+  the cut end that says what harvesting it costs the marsh.
+
+==============================================================================
+REGIONS — 18 · private/codex-art/regions/
+==============================================================================
+Environment key art, matching the thirty-nine standing region plates.
+
+ashline-exchange — the freight interchange that became an evacuation choke:
+  converging rail and road scar tissue, still a junction, still remembering.
+blackweir — the living filtration works at full scale: marsh and machinery
+  as one organism, harvest platforms on black water.
+crown-break — the Shattercore's great rupture venting Blackbloom: the
+  region's wound, monumental and slow.
+drowned-intake — the marine intake the marsh ate: half-sunk concrete throats,
+  shallow-draft passage into the dark.
+glassroot-observatory — Meridian's field post: instruments grown over at the
+  edges, rigor holding on inside the wire.
+grand-rift — red forest breaking into canyon country: the northwest crack,
+  poisonous depths under weather.
+high-cliffs — the northern heights over Grand Lake: enormous waterfalls
+  feeding the lowlands, scale beyond building.
+long-graze — migration country mid-reshape: adapted herds moving, predators
+  pacing them, ground that shows both their passages.
+magic-torn-wasteland — the end-game northeast where physical law fails:
+  weather in the wrong order, gravity negotiable, terrain mid-argument.
+  Spectacle plate — go as big as the palette law allows.
+redline-shelter-six — the sealed emergency shelter: door markings worn
+  (BLANK), the record of survival and casualty in the approach litter.
+reedless-mile — the open reach where growth fails: bare water and mud in a
+  green world, routes visibly refusing to stay ordinary.
+reserve-vault-twelve — the sealed storage level: strategic stacks in
+  darkness, ledger-versus-contents wrongness staged in the count of things.
+riverlands — Martino's central watershed: broad braided floodplains,
+  buildable and green, corridors running to every horizon. A flagship plate.
+splicefield-substation — the grid yard as ecology: transformers and
+  conductive organisms indistinguishable at dusk, one live line.
+stormglass-recruitment-camp — the Cartel intake under Red Forest canopy:
+  Wendy's table at center, wardrobe pod right, queue posts. You authored the
+  scene in SEQ-000 — contradict nothing you wrote. People allowed: queue
+  figures anonymous, no faces foregrounded.
+the-desert — the southwestern arid region: tributary-fed oasis corridors,
+  fertile lines through hard country, compact wagons distant.
+the-red-forest — the vast red woodland: dense canopy running into rift
+  country, the recruitment world's own tree line.
+walking-orchard — the migrating agricultural block: rooted giants mid-cycle,
+  the furrows of where the field was last season.
+
+==============================================================================
+SYSTEMS — 8 · private/codex-art/systems/
+==============================================================================
+System key art, matching the fifty-five standing system plates. All eight are
+Bloomfall Reach systems; keep the Reach's visual signature consistent across
+them, and check the bloomfall review packages for any owner-approved
+candidates before generating fresh — approval outranks regeneration.
+
+aberrant-escalation — the regional-threat ladder: one silhouette changing a
+  whole map's posture; the map shows what the party knows, not what is true.
+adaptive-mutation — the signature rule: wounded, escaped, healed WORSE — one
+  creature staged across its own before-and-after without split panels.
+blackbloom-exposure — environmental contamination as lived texture: dosim
+  badges (BLANK), stained ground lines, adaptation at the edges.
+bloomfall-environmental-hazards — the hazard sheet as one composite ground:
+  saturation shimmer, unstable footing, storm light incoming.
+bloomfall-travel — four route classes in one country: the maintained road,
+  the known detour, the negotiated water, the ground nobody signs for.
+bloomstorms — the five-stage storm mid-arc: contaminated weather you can
+  read, third stage on the horizon line.
+essence-saturation — the four field bands made visible: Residual to
+  Bloomstorm as a gradient across one valley.
+marsh-absorption — the marsh doing its work: binding, moving, sacrificing —
+  the same intelligence root-of-the-bargain negotiates with, seen at
+  landscape scale.
+
+==============================================================================
+QA GATES (your ledger must attest each)
+==============================================================================
+
+1. audit-codex-art-coverage.ts run before and after: 56 → 0.
+2. Every asset 1672x941 RGB24 PNG, full-res and center-crop reviewed.
+3. Zero readable text anywhere; BLANK means blank.
+4. Each shelf's new plates sit seamlessly beside its existing ones.
+5. Dossiers read for every subject; no contradiction introduced. carries-nag
+   matches your canonical NAG design; stormglass-recruitment-camp matches
+   your own SEQ-000 authorship.
+6. No StoryEntry, database, taxonomy, or production-state changes.
