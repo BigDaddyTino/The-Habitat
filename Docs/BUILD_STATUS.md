@@ -881,4 +881,4 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Removed an initial upright cyan shape that could read as an unsupported portal or Veil Anchor, leaving only the low waterline shimmer and no people, bodies, gore, readable text, numeral, logo, insignia, explicit creature anatomy, Soul Forge, or altered-ground claim
 - [x] Registered Draw Nine as standalone region key art without inventing an accent or full branding identity, and added resolver coverage for the dossier and place-thumbnail surfaces
 - [x] Reviewed the full final plus 564 x 941 and 1122 x 941 center crops; final SHA-256 is `4ba717c4d6708d129c040b8c1a5243e84484a9e2cf55cc18c7b42852c16f3b1a`
-- [ ] The compiled resolver change still requires the normal reviewed web build/deploy restart before the image becomes visible on the production dossier and region-directory surfaces
+- [x] Passed the 6/6 read-only release audit and production build, switched HabitatWeb from `.next-20260831-142014` to healthy release `.next-20260831-201524`, and published the image to the production dossier and region-directory surfaces
