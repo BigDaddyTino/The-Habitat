@@ -1,6 +1,6 @@
 # Codex Region and POI Art
 
-The Codex has an original cinematic environment painting for every canonical region and point of interest. The production registry is [`apps/web/lib/region-branding.ts`](../apps/web/lib/region-branding.ts); its test requires all 14 files to be 1600 × 900 JPEGs.
+The Codex serves its registered original cinematic environment paintings through the authenticated private art route. The production registry is [`apps/web/lib/region-branding.ts`](../apps/web/lib/region-branding.ts); its tests verify that every registered asset exists and resolves without requiring a place to have a settled accent or full branding package.
 
 ## Shared art direction
 
@@ -15,6 +15,7 @@ All images were made with Codex's built-in image generation mode using this shar
 | `the-starting-island` | Aerial tropical commercial island battlefield: damaged market, active quarry, smoke columns, fires, and vivid green fissures cutting through roads and jungle. | `private/codex-art/regions/the-starting-island.jpg` |
 | `the-ocean` | Violent storm crossing with civilian evacuation boats and modern patrol craft, the burning island behind, harbor lights ahead, and a subtle unnatural green presence beneath the waves. | `private/codex-art/regions/the-ocean.jpg` |
 | `the-peninsula` | The only two established arrivals in one coastal panorama: Port Arcadia's working modern docks and a nearby storm beach where defenders wash ashore; the unknown inland remains obscured by rain and haze. | `private/codex-art/regions/the-peninsula.jpg` |
+| `draw-nine` | A legendary exterior threshold: an unsealed black hard-rock adit beneath a skeletal abandoned loading gantry, with wet rails, failed drainage, dead pumps, Peninsula scrub reclaiming the haul road, two grey Warden recovery stakes, a subtle old stain, ordinary bats, and only a low flooded-Essence shimmer inside. The Hollow Wing remains unseen. | `private/codex-art/regions/draw-nine.png` |
 | `blackreef-harbour` | Fishing and military piers under emergency evacuation, with too few boats, wet nets, ammunition cases, fuel drums, and civilians moving through practical floodlights. | `private/codex-art/regions/blackreef-harbour.jpg` |
 | `fort-tempest` | Modern coastal artillery battery above a strategic sea channel, radar and arcane targeting hardware integrated into reinforced concrete positions under an approaching storm. | `private/codex-art/regions/fort-tempest.jpg` |
 | `forward-camp-kestrel` | Improvised forward operating camp of field medics, engineers, generators, tarps, utility vehicles, antennas, and supply lanes pressed against a dangerous front. | `private/codex-art/regions/forward-camp-kestrel.jpg` |

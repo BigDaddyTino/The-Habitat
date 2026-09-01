@@ -7,6 +7,7 @@ test("place thumbnails use every registered image before falling back to a map p
   assert.equal(getPlaceKeyart("port-arcadia", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/port-arcadia.jpg");
   assert.equal(getPlaceKeyart("the-docks", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/the-docks.png");
   assert.equal(getPlaceKeyart("death-canyon", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/death-canyon.png");
+  assert.equal(getPlaceKeyart("draw-nine", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/draw-nine.png");
   assert.equal(getPlaceKeyart("grand-lake", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/grand-lake.png");
   assert.equal(getPlaceKeyart("the-floating-city", {}, { HABITAT_ENVIRONMENT: "development" }), "/codex-art/regions/the-floating-city.jpg");
   assert.equal(getPlaceKeyart("not-illustrated", {}, { HABITAT_ENVIRONMENT: "development" }), null);

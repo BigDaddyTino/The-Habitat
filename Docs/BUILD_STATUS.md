@@ -863,3 +863,22 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Generated, full-resolution reviewed, center-crop tested, and published Wendy’s 1672 × 941 RGB24 portrait at `apps/web/private/codex-art/characters/wendy.png` (SHA-256 `3f9d8e11099339ba4e16475e7e2b46865bcf90af36efc476c33d93bd54d77f7d`); the private convention-path resolver serves it without a public asset or restart
 - [x] Passed 31 focused art/race/talent tests, strict web TypeScript, focused ESLint, three seed JSON parses, diff checks, live revision/link/root verification, and the final guarded no-op preview
 - [ ] Exact Eight Trees starting allotments, starting skills/cybernetics, dialogue variants, Blue Spiral organization, pod engineering, camp Atlas placement/fate, and Wendy’s later Red Forest scene remain explicit owner questions
+
+## 2026-08-31 - Nine Trades art run
+
+- [x] Generated all nine no-people profession plates and all twenty-seven named regional seat-keeper portraits as 1672 x 941 RGB24 PNGs; all nine reserved unnamed seats remained deliberately undepicted
+- [x] Preserved every load-bearing kind and identity lock, including the nonhumanoid Tally, figureless Ledger of Brine, ordinary Heron Speaker, dual-station Ansel organism, fully human Chartered keepers, non-elf Returnee, understated Risen tradesman, and the specified mixed human roster
+- [x] Checked Mara Quill against her live CANON v7 CHARACTER dossier before replacing her convention-path portrait; the other twenty-six keeper images remain dormant visual proposals pending authored dossiers
+- [x] Inspected every full-resolution final and rendered both 564 x 941 and 1122 x 941 center crops; verified exact dimensions, RGB24 encoding, selected-file SHA-256 hashes, no readable text, and the complete filename set in Docs/SOL56_TRADE_ART_LEDGER.md
+- [x] Verified all nine trade plates and all twenty-seven keeper portraits resolve through the existing authenticated private convention paths; focused profession, character-art, and privacy tests passed 23 of 23
+- [x] Preserved the publication boundary: trade plates appear on the next authenticated professions-page reload, while no StoryEntry, database, taxonomy, route, application-code, credential, infrastructure, or production-state change was made
+- [ ] Owner art-direction review and the twenty-six missing keeper dossiers remain future gates; dormant portraits are not represented as live Codex entries
+
+## 2026-08-31 - Draw Nine legendary site art
+
+- [x] Checked the live CANON v3 `draw-nine` site before generation and preserved its exact Peninsula parentage, abandoned Aegis draw, unsealed adit, flooded hard-rock workings, haul-road approach, Warden recovery marker, and unresolved surface-ground effects
+- [x] Generated and selected a 1672 x 941 RGB24 cinematic PNG centered on the unsealed adit, ruined loading gantry, wet rails, jungle reclamation, two grey recovery stakes, subtle road stain, ordinary bats, and a low flooded-Essence reflection; the Hollow Wing remains implied rather than revealed
+- [x] Removed an initial upright cyan shape that could read as an unsupported portal or Veil Anchor, leaving only the low waterline shimmer and no people, bodies, gore, readable text, numeral, logo, insignia, explicit creature anatomy, Soul Forge, or altered-ground claim
+- [x] Registered Draw Nine as standalone region key art without inventing an accent or full branding identity, and added resolver coverage for the dossier and place-thumbnail surfaces
+- [x] Reviewed the full final plus 564 x 941 and 1122 x 941 center crops; final SHA-256 is `4ba717c4d6708d129c040b8c1a5243e84484a9e2cf55cc18c7b42852c16f3b1a`
+- [ ] The compiled resolver change still requires the normal reviewed web build/deploy restart before the image becomes visible on the production dossier and region-directory surfaces

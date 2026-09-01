@@ -5,6 +5,7 @@ export type RegionBranding = {
 
 const standaloneRegionKeyart = {
   "death-canyon": "/codex-art/regions/death-canyon.png",
+  "draw-nine": "/codex-art/regions/draw-nine.png",
   "grand-lake": "/codex-art/regions/grand-lake.png",
   "the-docks": "/codex-art/regions/the-docks.png",
   "the-floating-city": "/codex-art/regions/the-floating-city.jpg",

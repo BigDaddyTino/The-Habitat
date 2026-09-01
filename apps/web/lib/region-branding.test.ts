@@ -77,6 +77,7 @@ test("an existing place image resolves even before the place receives full brand
   for (const [slug, expected] of [
     ["the-docks", "/codex-art/regions/the-docks.png"],
     ["death-canyon", "/codex-art/regions/death-canyon.png"],
+    ["draw-nine", "/codex-art/regions/draw-nine.png"],
     ["grand-lake", "/codex-art/regions/grand-lake.png"],
     ["the-floating-city", "/codex-art/regions/the-floating-city.jpg"],
   ] as const) {

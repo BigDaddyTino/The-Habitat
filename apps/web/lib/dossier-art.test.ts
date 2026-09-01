@@ -40,9 +40,9 @@ for (const [kind, directory] of conventionKinds) {
 }
 
 test("a place with approved art but no settled accent still wears it", () => {
-  // The exact three that branding hid: artwork and identity are separate
+  // Artwork and identity are separate
   // concerns, and the dossier used to ask branding for the picture.
-  for (const slug of ["grand-lake", "death-canyon", "the-floating-city"]) {
+  for (const slug of ["grand-lake", "death-canyon", "draw-nine", "the-floating-city"]) {
     const art = getDossierArt("REGION", slug, {});
     assert.ok(art, `region ${slug} has a plate on disk that the dossier does not show`);
     assert.ok(codexArtFileForUrl(art.src), `region ${slug} points at ${art.src}, which is not on disk`);
