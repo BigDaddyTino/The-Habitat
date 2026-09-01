@@ -33,10 +33,13 @@ marsh keeping its word, the quietwater reliquary, a dead grid waking —
 give it real, unashamed glory. And know this for every bright being this
 world ever puts in front of your lens, on this run or any after: the
 angelic register — the white-gold, the willing light, the beings who wear
-it — is GORGEOUS. Radiant, sensual, magnetic; super hot is the owner's own
-word. Bright does not mean chaste and holy does not mean plain: when
-something luminous steps into frame, the viewer should feel lit up and a
-little weak. Beauty at full weight, exactly like the dark.
+it — is GORGEOUS, and the R rating covers the light exactly as it covers
+the dark. Radiant, sensual, super sexy — the owner's own words. Desire is
+as legitimate a register for the luminous as dread is for the drowned:
+bare radiant skin, want in the frame, beauty that makes the viewer feel
+lit up and a little weak — all of it in bounds when the subject carries
+it. Bright does not mean chaste, holy does not mean plain, and the light
+is never the tame half of this world.
 
 Craft law, absolute as ever:
 - 1672x941 RGB24 PNG, wide cinematic 16:9, center-safe for the ~564x941
@@ -380,6 +383,8 @@ QA GATES (ledger must attest)
    two beds — shot as cinema, not softened and not gratuitous filler:
    every hard image is one the dossier itself demands.
 6b. The bright plates carry theirs: radiance rendered gloriously where
-   earned, and any luminous or angelic presence rendered gorgeous —
-   never muted into tastefulness, never dimmed to match the dark half.
+   earned, and any luminous or angelic presence rendered gorgeous — the
+   R rating applies to the light as fully as to the dark, sensuality and
+   desire included — never muted into tastefulness, never dimmed to
+   match the dark half.
 7. No StoryEntry, database, taxonomy, or production-state changes.
