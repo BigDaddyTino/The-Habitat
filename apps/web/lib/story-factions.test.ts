@@ -89,7 +89,7 @@ test("every power in the table has art to show", () => {
 });
 
 test("the sheet carries a banner and a placeholder strength, and refuses a row without them", () => {
-  const sheet = { scope: null, parent: null, independent: false, power: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] };
+  const sheet = { scope: null, parent: null, independent: false, power: null, seat: null, faith: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] };
   assert.equal(factionMetaSchema.safeParse(sheet).success, true);
   assert.equal(factionMetaSchema.safeParse({ ...sheet, parent: "national-defense-directorate", power: 40 }).success, true);
   assert.equal(factionMetaSchema.safeParse({ ...sheet, power: -1 }).success, false, "strength is never negative");

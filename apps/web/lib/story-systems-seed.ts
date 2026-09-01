@@ -407,17 +407,17 @@ For writers: weather is pacing. A storm is cover for one side and catastrophe fo
   {
     slug: "the-sun-and-moon",
     title: "The Sun & Moon",
-    summary: "The day-night cycle: forty-five minutes of daylight, fifteen of night — and a sky that sometimes does something it shouldn't.",
-    body: `The clock of the world, inside [[environment]]: a full day runs one real hour — forty-five minutes of daylight, fifteen of night. Night is a different game: darker work, different creatures, different rules for what moves. The cycle runs everywhere at once and never pauses for a cutscene.
+    summary: "The day-night cycle: a ninety-six-minute day in four quarters — morning, noon, evening, and a twenty-four-minute night — and a sky that sometimes does something it shouldn't.",
+    body: `The clock of the world, inside [[environment]]: a full day runs ninety-six real minutes — one in-game hour to every four real minutes. The day walks four quarters of six in-game hours each: morning from four, noon from ten, evening from four in the afternoon, and night from ten until four in the morning — eighteen hours of daylight, six of dark, twenty-four real minutes of night. Night is a different game: darker work, different creatures, different rules for what moves. The cycle runs everywhere at once and never pauses for a cutscene.
 
 Hanging off the cycle are the celestial events — [[the-blood-moon]] by night and [[the-solar-eclipse]] by day — scheduled world moments the whole server experiences together, each with its own dossier.
 
-For writers: the short night is scarcity — fifteen minutes is a raid window, not an evening, so night content must earn its darkness fast. Write scenes that want a time of day and say so. And keep the sky's stranger moments inside the event subsystems; the ordinary cycle stays ordinary, which is what makes the exceptions land.`,
+For writers: the short night is scarcity — twenty-four real minutes is a raid, not an evening, so night content must earn its darkness fast. The quarters give scenes a vocabulary: a morning departure, a noon siege, an evening market, and whatever the six dark hours are for. Write scenes that want a time of day and say so. And keep the sky's stranger moments inside the event subsystems; the ordinary cycle stays ordinary, which is what makes the exceptions land.`,
     meta: meta({
       category: "world simulation",
       parent: "environment",
-      pillars: ["Forty-five minutes of day, fifteen of night", "Night is a different game", "The cycle never pauses"],
-      openQuestions: ["Do interiors and dungeons obey the surface clock?", "Is the fifteen-minute night global, or does latitude bend it?"],
+      pillars: ["A ninety-six-minute day in four six-hour quarters; night gets twenty-four real minutes", "Night is a different game", "The cycle never pauses"],
+      openQuestions: ["Do interiors and dungeons obey the surface clock?", "Is the twenty-four-minute night global, or does latitude bend it?"],
     }),
   },
   {
@@ -438,9 +438,9 @@ For writers: the blood moon is a pressure vessel, not a lore dump. What it actua
     slug: "the-solar-eclipse",
     title: "The Solar Eclipse",
     summary: "A day event: night's rules arrive in the middle of the day, with none of night's warning.",
-    body: `The rarer sibling of [[the-blood-moon]], inside [[the-sun-and-moon]]: the sun goes dark mid-cycle and, for minutes, the day runs on night's rules — night creatures surface into daylight positions, work parties are caught in the open far from walls, and the careful arithmetic of the forty-five-minute day breaks down exactly when everyone trusted it.
+    body: `The rarer sibling of [[the-blood-moon]], inside [[the-sun-and-moon]]: the sun goes dark mid-cycle and, for minutes, the day runs on night's rules — night creatures surface into daylight positions, work parties are caught in the open far from walls, and the careful arithmetic of the ninety-six-minute day breaks down exactly when everyone trusted it.
 
-For writers: the eclipse is the ambush the sky writes. Its power is that daylight is where the game keeps its promises — supply runs, harvests, sieges are all planned around the safe forty-five — so the eclipse betrays plans, not just people. Best used sparingly and scheduled with intent: an eclipse over a battle already going wrong is a scene nobody forgets. Cause stays unexplained, per canon.`,
+For writers: the eclipse is the ambush the sky writes. Its power is that daylight is where the game keeps its promises — supply runs, harvests, sieges are all planned around the long safe daylight — so the eclipse betrays plans, not just people. Best used sparingly and scheduled with intent: an eclipse over a battle already going wrong is a scene nobody forgets. Cause stays unexplained, per canon.`,
     meta: meta({
       category: "world simulation",
       parent: "the-sun-and-moon",

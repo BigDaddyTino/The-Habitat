@@ -41,7 +41,7 @@ const trainerSlugs: Record<string, string | null> = {
   "the Kestrel Medic": "the-kestrel-medic",
   "ACA — slot reserved": null,
   "the Bureau Examiner": null,
-  "the Resident — an Echo, in a Core": null,
+  "the Resident — an Echo, in a Core": "brother-aster",
   "the Infuser-Tech": "the-infuser-tech",
   "the Phase-Five": null,
   "the Skinner of the Red Forest": null,

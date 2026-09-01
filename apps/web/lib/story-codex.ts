@@ -389,6 +389,9 @@ export async function getStoryEntry(slug: string) {
     // An exact match against a real race is a link either way, so the race's
     // dossier finally lists the people who are one.
     if (referencesSlug(meta.species)) add("is one of this species");
+    // A faction's faith, same slug-or-prose law as species: an exact match
+    // against a faith entry puts the power on that faith's own dossier.
+    if (referencesSlug(meta.faith)) add("keeps this faith");
     if (Array.isArray(meta.leaders) && meta.leaders.some(referencesSlug)) add("is led by this character");
     if (Array.isArray(meta.biomes) && meta.biomes.some(referencesSlug)) add("lives in this region");
     if (Array.isArray(meta.where) && meta.where.some(referencesSlug)) add("happened here");
@@ -1338,7 +1341,7 @@ export async function getStoryNeedsWork() {
     if (meta) {
       // `companion` is a slug on a mission and a capability object on a
       // character; slugOf ignores the object, so one line serves both.
-      for (const value of [meta.home, meta.seat, meta.parent, meta.origin, meta.companion, meta.species]) { const slug = slugOf(value); if (slug) targets.push(slug); }
+      for (const value of [meta.home, meta.seat, meta.parent, meta.origin, meta.companion, meta.species, meta.faith]) { const slug = slugOf(value); if (slug) targets.push(slug); }
       // The string-list fields. `factions` is object rows on a character but
       // plain slugs on a thread; slugOf skips the objects, so listing it here
       // only picks up the thread shape.
@@ -1457,6 +1460,9 @@ export async function getStoryNeedsWork() {
       // an orphaned race member is.
       check("answers to", meta.parent);
       check("seat", meta.seat);
+      // Faith is slug-or-prose like species: only a slug-shaped value that
+      // resolves nowhere is a break; prose is a writer's note by design.
+      checkIfSlugShaped("faith", meta.faith);
       for (const leader of Array.isArray(meta.leaders) ? meta.leaders : []) check("leader", leader);
       for (const row of rows(meta.relations)) check("relation", row.faction);
     }

@@ -117,6 +117,8 @@ export const factionMetaSchema = z.object({
   // armies — and that reckoning is not built yet. Nothing computes from it.
   power: z.number().int().min(0).max(1_000_000).nullable(),
   seat: metaText(64),
+  // Slug-or-prose like `species`: an exact faith-entry slug links both ways.
+  faith: metaText(64),
   leaders: metaLines(20, 64),
   relations: z.array(z.object({
     faction: metaSlug,

@@ -335,6 +335,7 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
   const [parent, setParent] = useState(source.independent === true ? standsAlone : text(source.parent));
   const [power, setPower] = useState(typeof source.power === "number" ? String(source.power) : "");
   const [seat, setSeat] = useState(text(source.seat));
+  const [faith, setFaith] = useState(text(source.faith));
   const [leaders, setLeaders] = useState(asArray(source.leaders).map(text));
   const [relations, setRelations] = useState(asArray(source.relations).map((row) => ({
     faction: text(record(row).faction),
@@ -355,6 +356,7 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
     independent: parent === standsAlone,
     power: Number.isInteger(strength) && strength >= 0 ? strength : null,
     seat: orNull(seat),
+    faith: orNull(faith),
     leaders: leaders.filter(Boolean),
     relations: relations
       .filter((row) => row.faction.trim())
@@ -386,6 +388,8 @@ export function FactionSheet({ entryId, entrySlug, version, meta, factions, regi
         <label>Strength<input inputMode="numeric" min={0} onChange={(event) => setPower(event.target.value)} placeholder="—" type="number" value={power} />
         <small className="sheet-hint">A placeholder set by hand. Strength is meant to be counted from land, cities, wealth, population, and armies, and that reckoning is not built yet.</small></label>
         <label>Seat of power<select onChange={(event) => setSeat(event.target.value)} value={seat}><option value="">Not decided</option>{regions.map((region) => <option key={region.slug} value={region.slug}>{region.title}</option>)}</select></label>
+        <label>Faith<input maxLength={64} onChange={(event) => setFaith(event.target.value)} placeholder="the-ossuary-rites, or prose" type="text" value={faith} />
+        <small className="sheet-hint">Slug-or-prose like species: an exact faith-entry slug links both ways; empty means secular or undeclared, which is itself information.</small></label>
         <label>Game tag<input maxLength={120} onChange={(event) => setGameTag(event.target.value)} placeholder="Faction.Stormglass" type="text" value={gameTag} /></label>
       </div>
 

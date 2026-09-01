@@ -1035,7 +1035,7 @@ export async function createEntry(formData: FormData) {
   const factionMeta: StoryFactionMeta | null = parsed.data.kind === "FACTION"
     // Born a banner, never born independent: standing outside every sphere is
     // a claim about the world, and the create panel has not asked it yet.
-    ? { scope: null, parent: oneSlug(formData, "parent"), independent: false, power: null, seat: oneSlug(formData, "seat"), leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] }
+    ? { scope: null, parent: oneSlug(formData, "parent"), independent: false, power: null, seat: oneSlug(formData, "seat"), faith: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] }
     : null;
 
   const itemMeta: StoryItemMeta | null = parsed.data.kind === "ITEM"

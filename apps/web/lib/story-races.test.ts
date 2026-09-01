@@ -124,7 +124,7 @@ test("a character's people is a real edge, in both directions", () => {
   assert.match(codex, /if \(referencesSlug\(meta\.species\)\) add\("is one of this species"\)/, "a species must list the people who are one");
   // And the outbound half, so a character whose only tie is their people is
   // not reported as unconnected.
-  assert.match(codex, /meta\.origin, meta\.companion, meta\.species\]/, "species must count as an outbound reference");
+  assert.match(codex, /meta\.origin, meta\.companion, meta\.species, meta\.faith\]/, "species and faith must count as outbound references");
 });
 
 test("the races shelf is watched by the needs-work dashboard like every other kind", () => {

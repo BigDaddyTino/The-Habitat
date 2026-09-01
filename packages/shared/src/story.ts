@@ -884,6 +884,10 @@ export type StoryFactionMeta = {
    *  the data, so the shelf cannot infer this — it is a world fact a writer
    *  sets, and it is never true at the same time as `parent`. */
   independent: boolean;
+  /** The faith this power keeps — slug-or-prose like `species` and `home`:
+   *  an exact faith-entry slug links both ways; prose is a writer's note.
+   *  Null means secular or undeclared, which is itself information. */
+  faith: string | null;
   /** PLACEHOLDER. Strength is meant to be counted from what a faction
    *  physically holds — territory, cities, wealth, population, armies —
    *  and that reckoning is not built. Until it is, this is a number a
@@ -994,8 +998,11 @@ export function storyPlaceRoot(slug: string, places: StoryPlaceLink[], isRoot: (
   return null;
 }
 
-/** The taxonomy law as a picker — never free text. */
-export const storyCreatureCategories = ["natural", "magical", "monstrosity", "abomination", "supernatural"] as const;
+/** The taxonomy law as a picker — never free text. "machine" (owner ruling
+ *  2026-09-01) sits BESIDE the taxonomy of monsters rather than inside it:
+ *  the locked rule classifies the living, and a machine has no soul, no
+ *  phase, and no place in a Forge — the taxonomy rule's prose is untouched. */
+export const storyCreatureCategories = ["natural", "magical", "monstrosity", "abomination", "supernatural", "machine"] as const;
 
 /**
  * The races library is a two-rung tree, the same law regions and systems

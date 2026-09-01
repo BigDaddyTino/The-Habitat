@@ -32,7 +32,7 @@ const blank: Record<string, Record<string, unknown>> = {
 background: null, professions: [], skills: [], cybernetics: [],
 storyRole: null, involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [] },
   REGION: { type: null, settlementTier: null, parent: null, biome: null, control: [], population: null, connections: [], status: null, veilAnchorTier: null, soulForge: null, gameTag: null, openQuestions: [] },
-  FACTION: { scope: null, parent: null, independent: false, power: null, seat: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] },
+  FACTION: { scope: null, parent: null, independent: false, power: null, seat: null, faith: null, leaders: [], relations: [], goals: [], gameTag: null, openQuestions: [] },
   CREATURE: { category: null, parent: null, biomes: [], threat: null, harvest: null, gameId: null, openQuestions: [] },
   ITEM: { category: null, rarity: null, origin: null, gameId: null, openQuestions: [] },
   EVENT: { when: null, timelineYearsAgo: null, where: [], involved: [], outcome: null, openQuestions: [] },

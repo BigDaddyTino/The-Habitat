@@ -8,7 +8,8 @@ export const factionSheetSeeds = [
   {
     slug: "aegis-extraction-consortium",
     meta: {
-      scope: "Corporate magical-extraction empire", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Corporate magical-extraction empire", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "concordance-of-natural-casters", stance: "enemy", notes: "Born casters are people to the Concordance and supply to Aegis; the conflict is existential." },
         { faction: "church-of-the-first-gift", stance: "enemy", notes: "The Church calls the harvest economy desecration and shelters what Aegis means to acquire." },
@@ -22,7 +23,8 @@ export const factionSheetSeeds = [
   {
     slug: "the-ashen-court",
     meta: {
-      scope: "Supernatural court of demon nobility", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Supernatural court of demon nobility", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "the-riftbound-legion", stance: "ally", notes: "The Legion is the Court's organized military instrument, not an equal banner." }],
       goals: ["Exploit battlefield rifts as doors for incursions.", "Keep the Court's hierarchy, etiquette, and ultimate price opaque."],
       gameTag: null,
@@ -32,7 +34,8 @@ export const factionSheetSeeds = [
   {
     slug: "the-choir-below",
     meta: {
-      scope: "Subterranean supernatural intelligence", parent: null, independent: true, power: null, seat: null, leaders: [],
+      scope: "Subterranean supernatural intelligence", parent: null, independent: true, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "the-ashen-court", stance: "rival", notes: "The Court forces doors; the Choir works beneath politics as a door in its own right." }],
       goals: ["Steer surface politics through dreams, cults, and possession.", "Keep its nature and purpose hidden behind human intermediaries."],
       gameTag: null,
@@ -42,7 +45,8 @@ export const factionSheetSeeds = [
   {
     slug: "church-of-the-first-gift",
     meta: {
-      scope: "Religious power devoted to freely gifted magic", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Religious power devoted to freely gifted magic", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "sanctuary-of-living-beasts", stance: "ally", notes: "The Sanctuary is the Church's rescue network and its unresolved doctrinal challenge." },
         { faction: "aegis-extraction-consortium", stance: "enemy", notes: "The Church names extraction desecration; Aegis industrializes it." },
@@ -55,7 +59,8 @@ export const factionSheetSeeds = [
   {
     slug: "concordance-of-natural-casters",
     meta: {
-      scope: "Hidden survival network for people born with magic", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Hidden survival network for people born with magic", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "liberation-of-the-gifted", stance: "ally", notes: "Same safehouses and funerals, divided over whether the system can be changed or must be burned down." },
         { faction: "aegis-extraction-consortium", stance: "enemy", notes: "Aegis treats the people the Concordance hides as harvestable supply." },
@@ -68,7 +73,8 @@ export const factionSheetSeeds = [
   {
     slug: "crimson-choir",
     meta: {
-      scope: "Independent blood-magic cabal", parent: null, independent: true, power: null, seat: null, leaders: [],
+      scope: "Independent blood-magic cabal", parent: null, independent: true, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "ossuary-covenant", stance: "rival", notes: "Both work in death's economy, but sacrifice and licensed necromancy are incompatible systems of value." }],
       goals: ["Turn sacrifice into enforceable supernatural transactions.", "Collect its debts while remaining misfiled by every major power."],
       gameTag: null,
@@ -78,7 +84,8 @@ export const factionSheetSeeds = [
   {
     slug: "floating-city-council",
     meta: {
-      scope: "Ruling bloc of the floating metropolis", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Ruling bloc of the floating metropolis", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "skybridge-transit-authority", stance: "ally", notes: "The Council rules the city; the Authority controls who and what can reach it." }],
       goals: ["Keep the city aloft and its reserve arithmetic credible.", "Control sky access while preserving the hierarchy built above the ground."],
       gameTag: null,
@@ -88,7 +95,8 @@ export const factionSheetSeeds = [
   {
     slug: "national-defense-directorate",
     meta: {
-      scope: "State military and security apparatus", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "State military and security apparatus", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl's private war on Ignit left the Directorate defending a state whose authority had already been bypassed." }],
       goals: ["Hold the peninsula and preserve a credible chain of command.", "Control Essence, infusion, quarantine, and the evidence those systems produce."],
       gameTag: null,
@@ -98,7 +106,8 @@ export const factionSheetSeeds = [
   {
     slug: "the-old-hunger",
     meta: {
-      scope: "Ancient supernatural appetite with mortal orbiters", parent: null, independent: true, power: null, seat: null, leaders: [],
+      scope: "Ancient supernatural appetite with mortal orbiters", parent: null, independent: true, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [{ faction: "the-ashen-court", stance: "rival", notes: "Even the Court reroutes around places where the Hunger's pattern is visible." }],
       goals: ["Feed and wake — an observed pattern, not a confirmed plan.", "Remain unknowable except through the people and powers drawn into its orbit."],
       gameTag: null,
@@ -108,7 +117,8 @@ export const factionSheetSeeds = [
   {
     slug: "ossuary-covenant",
     meta: {
-      scope: "Necromantic order and corpse-economy civilization", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Necromantic order and corpse-economy civilization", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "bone-market-families", stance: "ally", notes: "The Families supply corpses, relics, and discretion; the Covenant sets prices, licences, and archival access." },
         { faction: "crimson-choir", stance: "rival", notes: "The Choir's sacrificial bargains sit outside the Covenant's licensed economy of the dead." },
@@ -121,7 +131,8 @@ export const factionSheetSeeds = [
   {
     slug: "the-pale-embassy",
     meta: {
-      scope: "Supernatural diplomatic mission", parent: null, independent: true, power: null, seat: null, leaders: [], relations: [],
+      scope: "Supernatural diplomatic mission", parent: null, independent: true, power: null, seat: null,
+    faith: null, leaders: [], relations: [],
       goals: ["Make exact bargains and enforce the immunity of its envoys.", "Keep the identity and interests of the represented sovereign expensive to learn."],
       gameTag: null,
       openQuestions: ["What does the Embassy represent?", "What is the price embedded in its bargains?", "Why do people who learn the answer choose silence?"],
@@ -130,7 +141,8 @@ export const factionSheetSeeds = [
   {
     slug: "stormglass-cartel",
     meta: {
-      scope: "Criminal maritime cartel and artifact-trade power", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Criminal maritime cartel and artifact-trade power", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "tropic-pearl-trade-house", stance: "enemy", notes: "Pearl destroyed Ignit and the Cartel's position there; the employer relationship begins in the wreckage." },
         { faction: "black-tithe-syndicate", stance: "rival", notes: "An ugly competitor and occasional subcontractor that still depends on Stormglass lanes." },
@@ -143,7 +155,8 @@ export const factionSheetSeeds = [
   {
     slug: "tropic-pearl-trade-house",
     meta: {
-      scope: "Commercial and maritime trade bloc", parent: null, independent: false, power: null, seat: null, leaders: [],
+      scope: "Commercial and maritime trade bloc", parent: null, independent: false, power: null, seat: null,
+    faith: null, leaders: [],
       relations: [
         { faction: "stormglass-cartel", stance: "enemy", notes: "Pearl's strike broke Ignit and the Cartel operation there; the consequences are still active." },
         { faction: "iron-saints-pmc", stance: "ally", notes: "The Saints are Pearl's longest and largest retainer, contractually aligned rather than sworn." },

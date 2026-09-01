@@ -245,6 +245,7 @@ export const compactSeed = {
     independent: false,
     power: null,
     seat: null,
+    faith: null,
     leaders: [],
     relations: [],
     goals: [],
