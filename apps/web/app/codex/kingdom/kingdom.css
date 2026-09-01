@@ -1,0 +1,100 @@
+/* Kingdom Management — the Holding Ground page. Codex palette; scannable
+   cards; the perk/price and holds/contests/influences colors carry meaning. */
+
+.km-shell { display: flex; flex-direction: column; gap: 2.5rem; }
+
+.km-hero .km-lede { font-size: 1.12rem; max-width: 46rem; line-height: 1.6; }
+.km-quickstart {
+  list-style: none; padding: 0; margin: 1.2rem 0 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .6rem .9rem;
+}
+.km-quickstart li {
+  background: color-mix(in srgb, var(--codex-panel, #1c2226) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--codex-brass, #8a7a55) 45%, transparent);
+  border-radius: .5rem; padding: .6rem .8rem; font-size: .93rem; line-height: 1.45;
+}
+
+.km-section h2 { margin-bottom: .35rem; }
+.km-note { color: var(--codex-dim, #a8a294); font-size: .93rem; max-width: 52rem; }
+
+/* The Ladder */
+.km-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr)); gap: .8rem; margin-top: .8rem; }
+.km-rung {
+  position: relative; background: var(--codex-panel, #1c2226);
+  border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1rem .8rem;
+}
+.km-rung-number {
+  position: absolute; top: .6rem; right: .8rem;
+  font-family: var(--font-mono, monospace); font-size: .8rem; color: var(--codex-brass, #8a7a55);
+}
+.km-rung h3 { margin: 0 0 .2rem; font-size: 1.05rem; }
+.km-rung .km-holds { margin: 0; font-size: .9rem; }
+.km-rung .km-verbs { margin: .35rem 0 0; font-size: .82rem; color: var(--codex-dim, #a8a294); }
+.km-rung .km-from { margin: .45rem 0 0; font-size: .8rem; color: var(--codex-gold, #d9ab48); }
+
+/* Verbs */
+.km-verbs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .8rem; margin-top: .8rem; }
+.km-verb { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1rem; }
+.km-verb h3 { margin: 0 0 .25rem; }
+.km-verb p { margin: .25rem 0; font-size: .92rem; line-height: 1.45; }
+.km-price-line { color: var(--codex-gold, #d9ab48); font-size: .84rem !important; }
+
+/* Three-column explainers */
+.km-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .9rem; margin-top: .8rem; }
+.km-cols article { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1.05rem; }
+.km-cols h3 { margin: 0 0 .4rem; font-size: 1rem; }
+.km-cols ul { margin: 0; padding-left: 1.1rem; font-size: .92rem; line-height: 1.5; }
+.km-cols p { margin: 0; font-size: .92rem; line-height: 1.55; }
+
+/* Trees */
+.km-trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .7rem; margin-top: .8rem; }
+.km-tree { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .75rem .9rem; }
+.km-tree h3 { margin: 0 0 .2rem; color: var(--codex-gold, #d9ab48); font-size: 1rem; }
+.km-tree p { margin: 0; font-size: .86rem; color: var(--codex-dim, #a8a294); }
+
+/* Faiths — the perk/price pair is the whole point */
+.km-faiths { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .8rem; margin-top: .8rem; }
+.km-faith { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .85rem 1rem; }
+.km-faith h3 { margin: 0 0 .4rem; font-size: 1rem; }
+.km-faith p { margin: .3rem 0; font-size: .89rem; line-height: 1.45; }
+.km-perk { color: #8fb488; }
+.km-cost { color: #c98a7a; }
+
+/* The territory board */
+.km-tier { margin-top: 1.4rem; }
+.km-tier h3 { margin: 0 0 .15rem; }
+.km-tier-note { margin: 0 0 .7rem; color: var(--codex-dim, #a8a294); font-size: .9rem; }
+.km-power-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: .8rem; }
+.km-power { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .85rem 1rem; }
+.km-power-great { border-color: color-mix(in srgb, var(--codex-gold, #d9ab48) 55%, #2a3236); }
+.km-power header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem .7rem; margin-bottom: .45rem; }
+.km-power header a { font-weight: 700; font-size: 1.02rem; }
+.km-tier-badge {
+  font-family: var(--font-mono, monospace); font-size: .68rem; letter-spacing: .06em;
+  color: var(--codex-gold, #d9ab48); border: 1px solid color-mix(in srgb, var(--codex-gold, #d9ab48) 45%, transparent);
+  border-radius: .3rem; padding: .05rem .45rem; text-transform: uppercase;
+}
+.km-power-free .km-tier-badge { color: #8fb488; border-color: color-mix(in srgb, #8fb488 45%, transparent); }
+.km-power-institution .km-tier-badge { color: #8fa8c0; border-color: color-mix(in srgb, #8fa8c0 45%, transparent); }
+.km-power-shadow .km-tier-badge { color: #a98fd0; border-color: color-mix(in srgb, #a98fd0 45%, transparent); }
+.km-wings, .km-faith-line { margin: .2rem 0; font-size: .82rem; color: var(--codex-dim, #a8a294); }
+.km-none { margin: .3rem 0 0; font-size: .82rem; color: var(--codex-dim, #a8a294); font-style: italic; }
+.km-chips { list-style: none; display: flex; flex-wrap: wrap; gap: .35rem; padding: 0; margin: .5rem 0 0; }
+.km-chip {
+  display: inline-flex; align-items: baseline; gap: .35rem;
+  font-size: .8rem; border-radius: .35rem; padding: .18rem .5rem;
+  border: 1px solid #2a3236; background: color-mix(in srgb, var(--codex-panel, #1c2226) 60%, transparent);
+  text-decoration: none;
+}
+.km-chip-kind { font-family: var(--font-mono, monospace); font-size: .64rem; text-transform: uppercase; letter-spacing: .05em; }
+.km-holds .km-chip-kind, .km-chip.km-holds .km-chip-kind { color: var(--codex-gold, #d9ab48); }
+.km-chip.km-holds { border-color: color-mix(in srgb, var(--codex-gold, #d9ab48) 50%, #2a3236); }
+.km-chip.km-contests { border-color: color-mix(in srgb, #c98a7a 55%, #2a3236); }
+.km-chip.km-contests .km-chip-kind { color: #c98a7a; }
+.km-chip.km-influences .km-chip-kind { color: #8fa8c0; }
+
+.km-footer { border-top: 1px solid var(--codex-brass, #8a7a55); padding-top: 1rem; font-size: .9rem; }
+
+@media (max-width: 640px) {
+  .km-rungs, .km-verbs-grid, .km-cols, .km-trees, .km-faiths, .km-power-grid { grid-template-columns: 1fr; }
+}
