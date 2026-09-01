@@ -41,15 +41,23 @@ lit up and a little weak — all of it in bounds when the subject carries
 it. Bright does not mean chaste, holy does not mean plain, and the light
 is never the tame half of this world.
 
+Five plates below are marked RADIANT — the light's own slots in this run,
+where you break the overcast wide open. None of the fifty-six stages an
+angelic BEING; when those subjects arrive in a later run, this law is
+already their brief.
+
 Craft law, absolute as ever:
 - 1672x941 RGB24 PNG, wide cinematic 16:9, center-safe for the ~564x941
   directory crop. Drop-in: apps/web/private/codex-art/<dir>/<slug>.png.
 - AAA grounded cinematic photorealism. Real lenses, real weather, real wear.
   Palette: cool overcast charcoal / dirty green / wet grey / muted rust /
   storm blue / bone; one motivated warm practical per frame where earned.
-  Cyan only as contained technology. White-gold only as contained willing
-  light. Blackbloom's violet where the Reach demands it, always sickly,
-  never neon.
+  Cyan only as contained technology. White-gold only as willing light —
+  and on the plates the light law claims, willing light and the sun itself
+  ARE the motivated practical and may own the whole frame. Blackbloom's
+  violet where the Reach demands it, always sickly, never neon. The gloom
+  is the world's default, not its ceiling: when a plate below is marked
+  radiant, break the overcast wide open.
 - NO text ever: letters, numbers, readable pages, stencils, insignia —
   everything that would read, reads BLANK.
 - THE DOSSIER IS SCRIPTURE. Read each entry before shooting it; the lines
@@ -188,21 +196,27 @@ leaning in ground reclaimed by displaced herds — and pressed into the mud
 between hoofprints, the other prints, the ones that explain why the herds
 moved. Nobody is coming back for the markers.
 
-heartfen-channel-open — THE MARSH KEEPS ITS WORD. A channel of open water
-through dense wetland that should have closed days ago: water standing
-aside, reeds bowed in one direction like a held breath. Beautiful and
-uncanny in equal measure — a promise being kept by something without a
-face.
+heartfen-channel-open — THE MARSH KEEPS ITS WORD · RADIANT. A channel of
+open water through dense wetland that should have closed days ago: water
+standing aside, reeds bowed in one direction like a held breath — and
+down the channel's whole length, morning light lying on the water like a
+laid table. Grace, made of landscape: something without a face is keeping
+a promise, and keeping it BEAUTIFULLY. The uncanny and the luminous in
+one frame, neither winning.
 
 reserve-twelve-sealed — SETTLED IN HARDWARE. The vault door after the
 ruling: containment seals welded over salvage stencils (BLANK), a
 contractor's crowbar left where it was set down mid-argument. Paper lost;
 steel won.
 
-splicefield-feeder-live — THE DEAD LINE WAKES. An old reserve feed carrying
-load again at night: one transmission run brightening across a decommissioned
-sector, conductive growth flaring along the cable path like a vein filling,
-and every dark window suddenly having something to be dark in front of.
+splicefield-feeder-live — THE DEAD LINE WAKES · RADIANT. An old reserve
+feed carrying load again at night: one transmission run igniting across a
+decommissioned sector, conductive growth flaring along the cable path like
+a vein filling with light — shoot it as a RESURRECTION, jubilant and
+slightly frightening at once, the single bright line writing itself across
+miles of dark and every window on the route lighting one by one behind it.
+The grid remembers being alive. Let the picture celebrate before it
+worries.
 
 the-last-safe-reading-recovered — OUT BEFORE THE OVERWRITE. A data core in a
 courier's cradle, leaving a sector that is visibly restarting behind it —
@@ -229,9 +243,12 @@ gridcore-alloy — a machined billet of strategic conductor on a scarred
 bench: weapons-grade beauty, salvage provenance in every tool mark, the
 kind of object men have already died over and will again.
 
-quietwater-culture — the counterpoint plate: a sealed glass vessel of
+quietwater-culture — THE RELIQUARY · RADIANT. A sealed glass vessel of
 layered still water, bloom, and slow sediment — the calmest living thing
-the Reach produces, lit like a reliquary.
+the Reach produces — lit like the sacred object it functionally is: one
+shaft of clean light through the vessel, the layers glowing like a saint's
+jar, the bench around it dim in deference. In a world of poisoned water,
+this is the holy relic. Shoot the reverence.
 
 reserve-glass — a graded pane with depth behind its surface that the room's
 geometry cannot explain, held in a padded jig, photographed slightly off
@@ -247,40 +264,69 @@ REGIONS — 18 · regions/ · the world itself
 Environment key art. Thirty-nine standing plates set the scale; these are
 the missing countries. Every one is a place a player will someday stand.
 
-riverlands — THE FLAGSHIP. Martino's central watershed from height at
-golden-grey hour: braided rivers running to every horizon, floodplains
-green and buildable, corridor after corridor of possibility. The one plate
-in this run allowed to feel like hope.
+riverlands — THE FLAGSHIP · RADIANT. Martino's central watershed from
+height at the moment dawn actually wins: the overcast BROKEN, sun pouring
+through the tear, every braided river running molten gold to every
+horizon, floodplains so green they look edible, mist burning off the
+water in bright sheets. This is the land the whole war is secretly about
+— shoot it like something you could fall in love with, because that is
+canonically what everyone did. The one plate in the run that is pure,
+unguarded glory.
 
-the-red-forest — the vast red woodland: canopy like a held fire, the
-Cartel's recruitment world underneath it, depth on depth of crimson dark.
+the-red-forest — THE CRIMSON CATHEDRAL. Inside the vast red woodland,
+looking up: sun coming through a hundred metres of layered scarlet canopy
+the way light comes through stained glass, columns of trunks like a nave,
+the forest floor in deep red twilight — and small on that floor, one
+Cartel recruitment truck with its lamp on, a pew in a church it does not
+understand. Beauty first; menace arrives on the second look.
 
 magic-torn-wasteland — THE END-GAME COUNTRY. Physical law failing in open
 country: rain falling in two directions, terrain shelved at impossible
 angles, a horizon that curves wrong, gravity-shed debris orbiting a low
 hill. Spectacle plate — full commitment, palette law holding it together.
 
-grand-rift — red forest tearing open into canyon country: the northwest
-crack, strata like a wound's layers, poisonous depths breathing haze.
+grand-rift — WHERE THE FOREST POURS IN. The northwest crack from the rim:
+red canopy CASCADING over the edge like a slow waterfall of fire, roots
+gripping the strata down the wound's layered walls, and far below the
+green-black haze of depths that breathe on a rhythm nothing surface-born
+keeps. Two worlds meeting at a cliff, and the forest is winning the
+argument an inch a year.
 
-high-cliffs — the northern heights over Grand Lake: waterfalls at a scale
-that makes the lowland towns make sense, spray-light, birds beneath the
-viewer.
+high-cliffs — THE SUBLIME PLATE · RADIANT. The northern heights over Grand
+Lake: waterfalls at a scale that rearranges the viewer's sense of what
+water is, morning sun turning the spray into standing curtains of light,
+a double rainbow rooted in the gorge, birds wheeling BENEATH the camera.
+Shoot it from the cliff lip, toes-over-the-edge vertigo — awe as a
+physical sensation. The lowland towns exist because of this water; make
+the picture explain that without a single roof in frame.
 
-the-desert — the southwestern arid country: tributary-fed oasis corridors
-threading hard land, a compact caravan distant on the fertile line, heat
-standing over everything that is not water.
+the-desert — THE EMERALD THREAD. The southwestern hard country from
+height at late sun: one tributary-fed corridor running through it like a
+vein of live jade — palms, fields, standing water throwing gold — and
+either side of that thread, the tan-and-bone immensity that kills the
+unprepared. A compact caravan on the fertile line, indigo dots in the
+green. The desert's whole politics in one contrast: everything alive is
+in the thread, and everyone knows it.
 
-long-graze — migration country: adapted herds and the predators pacing
-them written into the same grass, both passages readable, the Bellwether's
-country before the event.
+long-graze — THE COUNTRY THAT REWRITES ITSELF. Migration grassland where
+the ecology is a sentence being edited: adapted herds and the predators
+pacing them written into the same grass as two readable passages — and
+crossing both, older and wider than either, a third track the herds
+refuse to cross. The Bellwether's country before the event, already
+taking dictation.
 
-walking-orchard — rooted giants mid-migration: an agricultural block that
-walks, last season's furrows abandoned behind it, soil still falling from
-lifted root masses the size of houses.
+walking-orchard — THE HARVEST THAT LEFT. Rooted giants mid-migration: an
+agricultural block that walks, soil still raining from lifted root masses
+the size of houses — and the detail that makes the plate: the trees are
+STILL BEARING, ripe fruit bright in the moving crowns, harvest ladders
+abandoned against trunks that did not wait. Somewhere behind, last
+season's empty furrows. Wonder and loss in the same slow stride.
 
-blackweir — the living filtration works entire: marsh and machinery as one
-organism across black water, harvest platforms strung with work light.
+blackweir — THE WORKS THAT BREATHE. The living filtration zone entire:
+marsh and machinery grown into one organism across black water, harvest
+platforms strung with work light — and the whole composition riding a
+visible breath, water level mid-exhale along every stanchion's stain
+line. Industry and ecology in an embrace neither could survive leaving.
 
 drowned-intake — half-sunk concrete intake throats swallowed by marsh,
 shallow-draft passage into the dark of them, water glass-still at the
@@ -293,9 +339,12 @@ splicefield-substation — the grid yard as ecology at dusk: transformers
 and conductive organisms grown indistinguishable, one live line humming
 across the composition.
 
-glassroot-observatory — Meridian's field post: instruments holding rigor
-inside the wire while the Reach grows over the fence line, lamplight
-against adapted green.
+glassroot-observatory — RIGOR INSIDE THE WIRE. Meridian's field post at
+dusk: one lit desk of disciplined work inside the fence, and along the
+fence line the Reach quietly making its counter-argument — growth over
+the wire, and one claimed instrument the vegetation has grown INTO and
+visibly improved, its readings now better than its untouched twin's.
+The joke the scientists don't laugh at anymore, staged in hardware.
 
 reedless-mile — the open reach where growth refuses: bare water and mud in
 a fertile world, a marked route (BLANK posts) visibly not going where it
