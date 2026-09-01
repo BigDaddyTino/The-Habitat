@@ -60,7 +60,7 @@ async function main() {
     const afterStale = await db.storyEntry.findUniqueOrThrow({ where: { id: entry.id }, select: { title: true } });
     check(afterStale.title !== "TMPCRUD Stale Write", `EDIT    a stale version is refused rather than clobbering (status ${stale.status})`);
 
-    const sheet = { fullName: "TMPCRUD", aliases: [], pronouns: null, sex: null, species: "human", age: null, appearance: null, voice: null, magic: { origin: null, schools: [], corruptionPhase: null, notes: null }, factions: [], home: null, status: { known: null, actual: null }, relationships: [], storyRole: null, involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [] };
+    const sheet = { fullName: "TMPCRUD", aliases: [], pronouns: null, sex: null, species: "human", age: null, appearance: null, voice: null, magic: { origin: null, schools: [], corruptionPhase: null, notes: null }, factions: [], home: null, status: { known: null, actual: null }, relationships: [], background: null, professions: [], skills: [], cybernetics: [], storyRole: null, involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [] };
     await post(`/codex/bible/tmpcrud-person`, "updateEntryMeta", [["entryId", entry.id], ["version", String(entry.version)], ["metaJson", JSON.stringify(sheet)]]);
     entry = await db.storyEntry.findUniqueOrThrow({ where: { id: entry.id }, select: { id: true, title: true, summary: true, body: true, version: true, meta: true, status: true } });
     check((entry.meta as Record<string, unknown>)?.species === "human", "SHEET   a module sheet saves what the form composed");
@@ -138,7 +138,14 @@ async function main() {
     check((await db.storyRevision.count({ where: { entityId: entry.id } })) > 0, "        and leaves its history intact");
 
     // ---- admin: season content create -> update -> remove -------------------
-    const season = await db.season.findFirst({ select: { id: true, slug: true, status: true } });
+    // Structural edits are only legal on a season that has not started (and
+    // whose dates have not effectively started it) — probing a running or
+    // chronicled season reports the guard as a failure, which it is not.
+    const season = await db.season.findFirst({
+      where: { status: { notIn: ["ACTIVE", "COMPLETED"] }, endsAt: { gt: new Date() }, startsAt: { gt: new Date() } },
+      select: { id: true, slug: true, status: true },
+    });
+    if (!season) console.log("skip  CREATE  season quest probe — no structurally-editable season exists to probe against");
     if (season) {
       await post(`/admin/seasons/${season.slug}`, "createSeasonQuest", [["seasonId", season.id], ["name", "TMPCRUD Quest"], ["description", "A probe quest for the audit."], ["scope", "PERSONAL"], ["gameType", ""], ["ruleType", "JOIN_COUNT"], ["threshold", "3"], ["xpReward", "50"], ["sortOrder", "99"]]);
       const quest = await db.seasonQuestDefinition.findFirst({ where: { seasonId: season.id, name: "TMPCRUD Quest" }, select: { id: true, threshold: true } });
