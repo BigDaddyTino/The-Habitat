@@ -1,0 +1,118 @@
+SOL 5.6 — THE RIVERLANDS RUN
+The hope, the crown, and the machines · ~80 plates · issued 2026-09-01
+
+Inventory: scripts/audit-codex-art-coverage.ts — run it before you start and
+after you finish. The ledger it prints is the truth of what is owed; as of
+issue it says EIGHTY, and 80 → 0 is the only acceptable arithmetic.
+Per-plate director's notes: Docs/art/SOL56_RIVERLANDS_ART_PROMPT.md — every
+slot has a block: target path, the shot, and the canon locks it must hold.
+Reconcile that brief against the audit first; the audit wins.
+Ledger owed: Docs/art/SOL56_RIVERLANDS_ART_LEDGER.md, your usual discipline —
+per-asset prompt blocks, dimensions, SHA-256 manifest, QA record.
+
+Already at full coverage — touch nothing: talents, trades, factions, flags,
+events, items, companion missions, and every previously delivered plate.
+
+------------------------------------------------------------------------------
+THE COMMISSION
+------------------------------------------------------------------------------
+
+The catch-up run shot the world's missing memories. THIS run shoots the
+world's beating heart: the one country where dawn still wins, the machinery
+of crowns, the faiths people actually kneel to, the soulless things that
+stand on walls, and the people holding a lit fuse with perfect manners.
+You are not decorating dossiers — you are shooting the film stills of a
+world that actually happened, and this is its most alive chapter.
+
+This is an R-rated world and these plates are R-rated pictures, in BOTH of
+its registers, at full weight, no apology:
+
+THE DARK AT FULL WEIGHT. Where a subject carries dread, shoot the dread —
+the Collector's unhurried tread, the stopped cars at Deadhaul, the fen past
+the last levee, the tannin water where the dead trade keeps its books.
+Blood where blood was spilled, menace where the dossier carries menace.
+Shoot it the way a great cinematographer shoots a war, a haunting, a debt
+coming due: total commitment.
+
+AND THE LIGHT AT FULL WEIGHT — this run is the light's FLAGSHIP campaign.
+The Riverlands are the RADIANT half of the world made ground: white-gold
+dawn over braided water, the country worth fighting FOR. Where a subject
+earns radiance, break the overcast wide open and give it real, unashamed
+glory. And the standing law holds for every luminous being and bright
+subject this world ever puts in front of your lens: the angelic register is
+GORGEOUS — radiant, sensual, super sexy, the owner's own words. Desire is
+as legitimate a register for the luminous as dread is for the drowned.
+Bright does not mean chaste, holy does not mean plain, and the light is
+never the tame half of this world. The women of this run — the Judge, the
+Factor, the Widow, the Captain — are drawn attractive, striking, at full
+presence; stated looks in their blocks are locks.
+
+The ONLY limits, and they are the only three: no explicit sexual acts
+(R, not X); no harm-to-children imagery; no real-world hate iconography.
+Nothing else in this brief is softened, and you add no softening of your
+own. If a generation tool refuses a plate, LOG the refusal in the ledger
+and write the full spec for the final render — never quietly tame the shot.
+
+Craft law, absolute as ever:
+- REGION / SYSTEM / THREAD plates: 1672x941 RGB24 PNG, wide cinematic 16:9,
+  key subject center-safe for the ~564x941 directory crop.
+  CHARACTER portraits: match the delivered trainer-portrait set exactly.
+  CREATURE plates: match the standing creature-dossier set.
+  Drop-in: apps/web/private/codex-art/<dir>/<slug>.png — the brief names
+  every path.
+- AAA grounded cinematic photorealism. Real lenses, real weather, real wear.
+  THE PER-LEG PALETTES in the brief are law — five river legs, five color
+  identities, so eighty water plates never blur into one river. White-gold
+  dawn and living river green own the radiant plates at full luminous
+  weight; storm blue, wet grey, charcoal, bone, and rust hold the edges.
+  NO Blackbloom violet anywhere in the Riverlands. Cyan only as contained
+  technology on Stormgate hardware.
+- NO text ever: letters, numbers, readable pages, ledgers, stencils,
+  insignia, price lists — everything that would read, reads BLANK.
+- THE DOSSIER IS SCRIPTURE. Every plate's entry is live in the codex — read
+  it before shooting. The brief's blocks are the director's notes; the
+  dossier is the screenplay; where they disagree, the dossier wins and the
+  discrepancy goes in the ledger.
+- Each shelf has standing plates. Yours must hang beside them like they
+  were shot on the same production.
+
+Story locks that override everything (the brief carries the full list):
+- Commander Alder Wade is ALIVE. No fallen statue, no funeral, no
+  assassination imagery anywhere in the run. The statue appears only
+  shrouded, uncrated, or under construction.
+- The First Weir's true bottom is never shown; its darkness continues past
+  every light source.
+- The Outfall's Anchor is DORMANT — no activation, no Breach, no glow the
+  fen didn't bring.
+- Deadhaul's stopped cars are never shown open or unloaded; no
+  falls-swifts in that sky.
+- The Machines have NO faces that emote — zero anthropomorphism; menace
+  from purpose, not expression. The Collector is never hurried.
+- Brother Aster is already delivered and is never a figure. The crossroads
+  bargain is never depicted. Species locks on every portrait are locks.
+
+Shooting order doctrine:
+1. The five LEG plates first (arcadia-gate, cliffgate, riftgate, sandgate,
+   stormgate) — they set each leg's palette; then heartland, the flagship
+   city plate of the whole world.
+2. Each leg's children against their leg plate for continuity — forts,
+   towns, villages, outposts, charters.
+3. first-weir and the-outfall — the two doors, one drowned, one dormant.
+4. the-waterworks system plate, then the six FAITH plates (systems/) —
+   diegetic devotion, no floating deities; banking is the horror on the
+   Communion plate.
+5. The MACHINES (creatures/) — the shelf plate then the seven patterns.
+6. The PEOPLE (characters/) — eight portraits; the trainer-set conventions,
+   the standing depiction laws, and every stated look a lock.
+7. The remaining CREATURES (creatures/) — the seven riverlands species.
+8. threads/the-fuse-at-heartland last — the shrouded statue at dawn, the
+   city pretending not to watch itself. Nothing has happened yet.
+   Everything is about to. Close the run on it.
+
+Gate 6b stands from the catch-up run: bright plates pass at FULL radiant
+weight — any plate dimmed, hedged, or graded down to sit beside the dark
+shelf fails QA and reshoots. The Riverlands plates are the reference
+radiance for every run after this one. Make the directory crop of
+`heartland` alone worth the whole commission.
+
+80 → 0. Go.

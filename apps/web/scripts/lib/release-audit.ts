@@ -12,7 +12,7 @@ import { getDossierArt } from "../../lib/dossier-art";
 import { getRegionKeyart } from "../../lib/region-branding";
 import { metaSchemasByKind, serverOwnedMetaKeys } from "../../lib/story-meta-schemas";
 import { illustratedCharacterSlugs } from "../../lib/character-keyart";
-import { resolveStoryAtlasArt } from "../../lib/story-atlas-art";
+import { newestRegisteredStoryAtlasArtVersion, resolveStoryAtlasArt } from "../../lib/story-atlas-art";
 import { buildAtlasIntegrityAudit, createFilesystemAtlasArtworkInspector } from "./atlas-integrity";
 import { loadAtlasAuditSource } from "./atlas-integrity-db";
 import { auditGeographicHierarchy, type GeographicEntry } from "./geographic-hierarchy";
@@ -280,6 +280,25 @@ export async function runReleaseAudit({ honourWaivers = true }: { honourWaivers?
   }
   resolved += maps.length;
   images.notes.push(`${resolved} referenced assets resolved on disk, ${maps.length} atlas scenes decoded`);
+
+  // The map never goes backwards. Every scene row must serve the NEWEST
+  // registered art for its slug — the 2026-08-27 regression (a superseded
+  // world map quietly served after cutover) becomes release-blocking instead
+  // of silent, and no waiver applies: a reverted map is never an accepted
+  // defect. Newest is defined by lib/story-atlas-art.ts, the same registry
+  // the resolver serves from.
+  let regressed = 0;
+  for (const map of maps) {
+    const newest = newestRegisteredStoryAtlasArtVersion(map.slug);
+    if (!newest) { images.failures.push(`atlas scene ${map.slug} has no registered art at all`); regressed += 1; continue; }
+    const rowNumber = Number.parseInt(map.artVersion.replace(/^v/, ""), 10);
+    const newestNumber = Number.parseInt(newest.replace(/^v/, ""), 10);
+    if (!Number.isInteger(rowNumber) || rowNumber < newestNumber) {
+      regressed += 1;
+      images.failures.push(`atlas scene ${map.slug} serves ${map.artVersion} while ${newest} is registered — the map went backwards, or the row was never advanced (see lib/story-atlas-art.ts)`);
+    }
+  }
+  images.notes.push(`${maps.length - regressed}/${maps.length} atlas scenes serve their newest registered art`);
 
   // Coverage, reported and never failed. An entry without a picture is a
   // commission nobody has placed yet, not a defect — but it is the one number

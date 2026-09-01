@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import test from "node:test";
 import type { StoryAtlasFeature, StoryAtlasProjection } from "@habitat/shared";
 import { buildAtlasCanonicalTopologyTrace } from "../scripts/lib/atlas-canonical-topology";
 import { buildStoryAtlasV2Projection } from "./story-atlas-v2-projection";
+import { newestRegisteredStoryAtlasArtVersion } from "./story-atlas-art";
 
 function feature(areaId: string, slug: string, title = slug): StoryAtlasFeature {
   return { placementId: areaId, source: "ENTRY", entryId: `entry:${slug}`, nodeId: null, slug, title, summary: `${title} summary`, body: null, status: "CANON", layer: "REGION", geometry: { type: "POLYGON", coordinates: [[[0, 0], [10, 0], [10, 10], [0, 0]]] }, label: null, minZoom: 0, maxZoom: null, priority: 1, childMap: null, place: null, quests: [] };
@@ -33,4 +36,29 @@ test("V2 projection assembles locked geography while preserving canonical points
   assert.deepEqual(projection.points[0]?.childMap, point.childMap);
   assert.equal(projection.questNodes[0]?.placementId, "quest:1");
   assert.ok(projection.regions.every((region) => region.geometry.type === "POLYGON" && region.bounds.length === 4 && region.labelAnchor.length === 2));
+});
+
+test("the newest-map law: the registry knows each scene's newest art, and nothing can quietly serve less", () => {
+  // The 2026-08-27 regression, held shut from three sides. Side one: the
+  // registry's own idea of "newest" is correct (candidates flagged
+  // developmentOnly never count in production).
+  assert.equal(newestRegisteredStoryAtlasArtVersion("martino-world", {}), "v3");
+  assert.equal(newestRegisteredStoryAtlasArtVersion("martino-bloomfall-reach", {}), "v3");
+  assert.equal(newestRegisteredStoryAtlasArtVersion("martino-port-arcadia", {}), "v2");
+  assert.equal(newestRegisteredStoryAtlasArtVersion("martino-starting-island", {}), "v1");
+  assert.equal(newestRegisteredStoryAtlasArtVersion("no-such-scene", {}), null);
+
+  // Side two: the calibration seed can never downgrade a row on re-apply —
+  // artVersion is a create-only field there, and only the activation scripts
+  // move it afterwards.
+  const seed = readFileSync(join(process.cwd(), "scripts/seed-story-atlas.ts"), "utf8");
+  const updateBlock = seed.slice(seed.indexOf("const mapData = {"), seed.indexOf("db.storyMap.upsert"));
+  assert.ok(!updateBlock.includes("artVersion"), "the seed's shared update payload must not carry artVersion — a re-apply would revert the map");
+  assert.match(seed, /create: \{ slug: seed\.slug, artVersion: seed\.artVersion/, "creation still seeds the starting version");
+
+  // Side three: the release audit refuses a row that fell behind the registry,
+  // with no waiver honoured — a reverted map is never an accepted defect.
+  const audit = readFileSync(join(process.cwd(), "scripts/lib/release-audit.ts"), "utf8");
+  assert.ok(audit.includes("newestRegisteredStoryAtlasArtVersion"), "the release audit must compare every scene row against the registry's newest");
+  assert.ok(audit.includes("the map went backwards"), "and fail with the failure it is guarding against");
 });

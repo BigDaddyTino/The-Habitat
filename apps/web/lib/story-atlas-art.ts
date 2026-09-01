@@ -22,6 +22,25 @@ export function storyAtlasArtRegistered(slug: string, artVersion: string, enviro
   return Boolean(art && (!art.developmentOnly || environment.HABITAT_ENVIRONMENT === "development"));
 }
 
+/**
+ * The highest registered art version for a scene, honouring the same
+ * development gate the resolver uses. The release audit compares every
+ * StoryMap row against this so a map can never silently go backwards —
+ * the failure mode of 2026-08-27 (code pinned to a superseded version) and
+ * the one the atlas seed used to be able to cause on a re-apply.
+ */
+export function newestRegisteredStoryAtlasArtVersion(slug: string, environment: Readonly<Record<string, string | undefined>> = process.env) {
+  let newest: number | null = null;
+  for (const [key, art] of atlasFiles) {
+    const [artSlug, version] = key.split(":");
+    if (artSlug !== slug) continue;
+    if (art.developmentOnly && environment.HABITAT_ENVIRONMENT !== "development") continue;
+    const number = Number.parseInt((version ?? "").replace(/^v/, ""), 10);
+    if (Number.isInteger(number) && (newest === null || number > newest)) newest = number;
+  }
+  return newest === null ? null : `v${newest}`;
+}
+
 export function resolveStoryAtlasArt(slug: string, versionFile: string) {
   const match = /^(v[0-9]+)\.png$/.exec(versionFile);
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || !match) return null;

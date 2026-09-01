@@ -240,11 +240,16 @@ async function main() {
     const parent = seed.parent ? await db.storyMap.findUnique({ where: { slug: seed.parent }, select: { id: true } }) : null;
     if (seed.parent && !parent) throw new Error(`Missing parent map ${seed.parent} for ${seed.slug}`);
     const existingMap = await db.storyMap.findUnique({ where: { slug: seed.slug }, select: { id: true } });
+    // The art version belongs to the ROW, never to this seed: the seeds here
+    // carry the versions of the day they were written (v1/v2), and letting the
+    // upsert's update path write them back is exactly how a re-apply once
+    // reverted the world map to superseded art. Creation seeds the starting
+    // version; after that, only the activation scripts move it, and the
+    // release audit refuses any row that falls behind the registry.
     const mapData = {
       title: seed.title,
       parentMapId: parent?.id ?? null,
       ownerEntryId: owner?.id ?? null,
-      artVersion: seed.artVersion,
       imageWidth,
       imageHeight,
       coordinateWidth,
@@ -260,7 +265,7 @@ async function main() {
     const map = await db.storyMap.upsert({
       where: { slug: seed.slug },
       update: mapData,
-      create: { slug: seed.slug, ...mapData, createdByUserId: author.id },
+      create: { slug: seed.slug, artVersion: seed.artVersion, ...mapData, createdByUserId: author.id },
     });
     await db.storyRevision.create({
       data: {
@@ -269,7 +274,7 @@ async function main() {
         action: existingMap ? "UPDATED" : "CREATED",
         actorUserId: author.id,
         summary: `${existingMap ? "Calibrated" : "Created"} authoritative atlas scene "${seed.title}"`,
-        after: { slug: seed.slug, artVersion: seed.artVersion, parent: seed.parent ?? null, owner: seed.owner ?? null, maxZoom: seed.maxZoom },
+        after: { slug: seed.slug, artVersion: map.artVersion, parent: seed.parent ?? null, owner: seed.owner ?? null, maxZoom: seed.maxZoom },
       },
     });
 
