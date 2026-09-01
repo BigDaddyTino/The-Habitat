@@ -67,7 +67,7 @@ export function StoryWarden({ arcId, nodeId, available, guide = false }: { arcId
       <div className="warden-log" ref={logRef}>
         {!available ? (
           // Writers see the Warden, not the plumbing; the setup an admin needs
-          // is in .env.example and Docs/STORY_CODEX.md.
+          // is in .env.example and Docs/codex/STORY_CODEX.md.
           <p className="warden-idle">He is not on duty yet. An administrator has to wake him before he will answer.</p>
         ) : state.turns.length === 0 ? (
           <p className="warden-idle">He has read this arc and the whole bible. Ask what is already true, whether your idea contradicts something, or why a branch on this board is flagged.</p>

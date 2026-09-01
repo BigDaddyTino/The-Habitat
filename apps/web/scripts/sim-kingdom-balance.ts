@@ -194,7 +194,7 @@ function main() {
   say(`## D · Court Day, absence, and leveling pace (420 days)`);
   experimentD(200, 420);
 
-  const doc = path.resolve(process.cwd(), "..", "..", "Docs", "MARTINO_KM_SIM_RESULTS.md");
+  const doc = path.resolve(process.cwd(), "..", "..", "Docs", "sims", "MARTINO_KM_SIM_RESULTS.md");
   fs.writeFileSync(doc, out.join("\n") + "\n", "utf8");
   console.log(`\nwritten: ${doc}`);
 }

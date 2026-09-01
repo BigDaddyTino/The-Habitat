@@ -18,7 +18,7 @@ import { metaSchemasByKind } from "../lib/story-meta-schemas";
  *     exist with nothing linking into it.
  *  4. Which of them has no key art, and where does the file go?
  *
- * Question four writes `Docs/MARTINO_CHARACTER_BIBLE_ART.md` — the art
+ * Question four writes `Docs/art/MARTINO_CHARACTER_BIBLE_ART.md` — the art
  * manifest — so an empty slot is a recorded, addressed placeholder rather than
  * a blank space somebody notices later.
  *
@@ -168,7 +168,7 @@ after dropping files in and the list shortens.
 
 **${total} slots open.** Accepted extensions: \`png\`, \`jpg\`, \`jpeg\`, \`webp\`.
 Art direction for all of them is \`the-look-of-the-world\` plus
-\`Docs/BLOOMFALL_REACH_VISUAL_BIBLE.md\`: near-future fusion worn casually, no
+\`Docs/bloomfall/BLOOMFALL_REACH_VISUAL_BIBLE.md\`: near-future fusion worn casually, no
 fantasy register, no UI, no text in frame.
 
 ${groups.filter((group) => group.wanted.length).map((group) => `## ${group.kind} — ${group.wanted.length} open\n\n| Entry | Slug | File to drop | What it is |\n| --- | --- | --- | --- |\n${group.lines.join("\n")}`).join("\n\n")}
@@ -182,12 +182,12 @@ ${groups.filter((group) => group.wanted.length).map((group) => `## ${group.kind}
 - **Species are load-bearing.** A portrait's species comes from the character's sheet and its people's dossier, never from fantasy defaults — a Returnee is NOT an elf (canon says so in as many words), a Latent looks entirely human because that is the whole species, a Chartered is a purpose-built human silhouette, and nothing grows pointed ears, glowing eyes, or a mutation the sheet does not name.
 - **Women look good.** Female characters are drawn attractive — striking faces, flattering builds, presence the camera likes. Owner's standing direction.
 `;
-    const path = join(process.cwd(), "..", "..", "Docs", "MARTINO_CHARACTER_BIBLE_ART.md");
+    const path = join(process.cwd(), "..", "..", "Docs", "art", "MARTINO_CHARACTER_BIBLE_ART.md");
     writeFileSync(path, manifest, "utf8");
-    console.log(`   wrote Docs/MARTINO_CHARACTER_BIBLE_ART.md — ${total} open slots`);
+    console.log(`   wrote Docs/art/MARTINO_CHARACTER_BIBLE_ART.md — ${total} open slots`);
   } else {
     for (const { kind, slug } of needsArt) console.log(`   ${artSlot(kind, slug)}`);
-    console.log("\n   (--write-art-manifest records these in Docs/MARTINO_CHARACTER_BIBLE_ART.md)");
+    console.log("\n   (--write-art-manifest records these in Docs/art/MARTINO_CHARACTER_BIBLE_ART.md)");
   }
 
   console.log("\n" + "=".repeat(70));

@@ -380,7 +380,7 @@ say("=".repeat(78));
 say(`${TRIALS} trials per duel · seeded 20260831 · rerun reproduces exactly.`);
 
 if (writeReport) {
-  const path = join(process.cwd(), "..", "..", "Docs", "MARTINO_SIM_RESULTS.md");
+  const path = join(process.cwd(), "..", "..", "Docs", "sims", "MARTINO_SIM_RESULTS.md");
   writeFileSync(path, `# The Eight Trees — balance campaign\n\nRun ${new Date().toISOString().slice(0, 10)} by \`scripts/sim-talent-balance.ts\`. Seeded and reproducible.\n\n\`\`\`\n${lines.join("\n")}\n\`\`\`\n`, "utf8");
-  console.log("\nwrote Docs/MARTINO_SIM_RESULTS.md");
+  console.log("\nwrote Docs/sims/MARTINO_SIM_RESULTS.md");
 }
