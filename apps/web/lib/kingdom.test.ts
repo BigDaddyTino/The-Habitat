@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { courtDay, faiths, groundVerbs, holdingRungs, realmTrees, siegeLaw, standingLaws } from "./kingdom";
+import { courtDay, faiths, groundVerbs, holdingRungs, realmTrees, riverlandsPlots, siegeLaw, standingLaws } from "./kingdom";
 
 test("five rungs of holding, each adding verbs and none retiring the ones below", () => {
   assert.deepEqual(holdingRungs.map((rung) => rung.name), ["Homestead", "Outpost", "Town", "City", "Kingdom"]);
   for (const rung of holdingRungs) assert.ok(rung.verbs.length >= 3, `${rung.name} adds too few verbs`);
-  assert.equal(holdingRungs.filter((rung) => rung.teaches).length, 3, "the Riverlands' Three Charters teach rungs one through three");
+  assert.equal(riverlandsPlots.length, 3, "the Riverlands holds three plots: the Charters");
+  assert.deepEqual(riverlandsPlots.map((plot) => plot.slug), ["first-charter", "second-charter", "third-charter"]);
+  for (const rung of holdingRungs) assert.doesNotMatch(rung.how, /charter/i, "charters are plots, not rungs of the ladder");
 });
 
 test("four ways to get ground, six realm trees, five faiths and the secular crown", () => {

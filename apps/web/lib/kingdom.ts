@@ -10,12 +10,12 @@
  * design — it is the same law laid out to be read.
  */
 
-export type HoldingRung = { name: string; holds: string; how: string; verbs: string[]; teaches?: string };
+export type HoldingRung = { name: string; holds: string; how: string; verbs: string[] };
 
 export const holdingRungs: HoldingRung[] = [
-  { name: "Homestead", holds: "A parcel and a roof.", how: "Buy a charter parcel, drain it, build on it.", verbs: ["build", "farm", "fence", "hire hands"], teaches: "The Riverlands' first charter" },
-  { name: "Outpost", holds: "A fortified point with a job.", how: "Hold a road or a crossing.", verbs: ["garrison", "patrols", "supply", "a signal plan"], teaches: "The Riverlands' second charter" },
-  { name: "Town", holds: "A population that is not yours.", how: "Grow one, or take one.", verbs: ["districts", "trades", "law", "admission policy"], teaches: "The Riverlands' third charter" },
+  { name: "Homestead", holds: "A parcel and a roof.", how: "Buy a plot, drain it, build on it.", verbs: ["build", "farm", "fence", "hire hands"] },
+  { name: "Outpost", holds: "A fortified point with a job.", how: "Hold a road or a crossing.", verbs: ["garrison", "patrols", "supply", "a signal plan"] },
+  { name: "Town", holds: "A population that is not yours.", how: "Grow one, or take one.", verbs: ["districts", "trades", "law", "admission policy"] },
   { name: "City", holds: "Districts, wharves, politics.", how: "Seized, granted, or founded — rarely built from mud.", verbs: ["grand projects", "real armies", "factions inside your own walls"] },
   { name: "Kingdom", holds: "Multiple holdings and vassals.", how: "The endgame of holding ground.", verbs: ["doctrine", "diplomacy", "war", "succession", "a seat at the world's table"] },
 ];
@@ -23,10 +23,28 @@ export const holdingRungs: HoldingRung[] = [
 export type GroundVerb = { name: string; costs: string; gets: string; notes: string };
 
 export const groundVerbs: GroundVerb[] = [
-  { name: "Buy", costs: "Coin, and patience.", gets: "An escrowed charter parcel, region by region.", notes: "Rare on purpose: the world is owned." },
+  { name: "Buy", costs: "Coin, and patience.", gets: "One of a region's few pre-defined plots: ground you can buy outright and build your own buildings on.", notes: "Not every region has one, and the ones that do have a handful. Rare on purpose: the world is owned. The Riverlands holds three, in courthouse escrow: the Charters." },
   { name: "Seize", costs: "Blood, supply, consequences.", gets: "Any unshielded holding, by siege or coup.", notes: "Inside a faction the leader decides who keeps what you took, even if you took it." },
   { name: "Earn", costs: "Service and obligation.", gets: "A granted fief from your faction, a ruler, or the Heartland courthouse.", notes: "Grants come with the obligations grants exist for." },
   { name: "Found", costs: "Everything, slowly.", gets: "Ground that is yours alone.", notes: "Nobody holds paper over you; nobody owes you help." },
+];
+
+/**
+ * Custom building happens on plots: a few pre-defined parcels in certain
+ * regions that can be bought outright and built on. The Riverlands' three
+ * are the Charters — old land charters in courthouse escrow, released by
+ * campaign progress, each a different building lesson. They are plots, not
+ * rungs of the ladder: the first is a homestead, the second an economy, the
+ * third a defence, and none of them is a town.
+ */
+export type Plot = { slug: string; name: string; where: string; what: string; teaches: string; unlock: string };
+
+export const plotsLaw = "Certain regions hold a few specific plots of land you can buy and build your own buildings on. Not every region has one; the ones that do have a handful, pre-defined, and the world already owns the rest.";
+
+export const riverlandsPlots: Plot[] = [
+  { slug: "first-charter", name: "First Charter", where: "A bankside plot below Heartland.", what: "The homestead ground: drain it, build on it, a roof and a fence.", teaches: "Building. The first lesson every Riverland landholder learns: the ground is drained before it is built.", unlock: "Held in courthouse escrow by the Judge of Heartland; released by campaign progress." },
+  { slug: "second-charter", name: "Second Charter", where: "A confluence island with wharf rights.", what: "Floods in the old pattern; needs levees, drainage and pilings before it holds serious building.", teaches: "Economy. Wharf rights, the Waterworks at commercial scale, the money side of holding ground.", unlock: "Held in courthouse escrow; released by campaign progress after the first." },
+  { slug: "third-charter", name: "Third Charter", where: "A ruined watch-fort on Riftgate, with a flooded ditch and a wall worth keeping.", what: "A defensible ruin with the Bone Market for a neighbour.", teaches: "Defence. Garrison, walls, a signal plan, and who your neighbours are.", unlock: "Held in courthouse escrow; released last." },
 ];
 
 export const sacredLaw = "Nothing is unseizable, nothing is cheap, and some things are unkeepable. A seized sacred site never becomes a normal holding: it generates grievance until you return it, gift it, or win its people.";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPrismaClient } from "@habitat/db/client";
 import { FieldCard } from "@/components/field-card";
 import { requireRole } from "@/lib/authorization";
-import { courtDay, faithLaw, faiths, groundVerbs, holdingRungs, kingdomLevel, machines, realmTrees, realmTreesLaw, sacredLaw, siegeLaw, standingLaws, succession, syndicate } from "@/lib/kingdom";
+import { courtDay, faithLaw, faiths, groundVerbs, holdingRungs, kingdomLevel, machines, plotsLaw, realmTrees, realmTreesLaw, riverlandsPlots, sacredLaw, siegeLaw, standingLaws, succession, syndicate } from "@/lib/kingdom";
 import { storyReadRole } from "@/lib/story-codex";
 import "../play.css";
 import "./kingdom.css";
@@ -109,19 +109,19 @@ export default async function KingdomPage() {
       </div>
 
       <div className="play-jump">
-        <a href="#ladder">The ladder</a><a href="#ground">Getting ground</a><a href="#level">Kingdom Level</a><a href="#trees">Realm trees</a><a href="#faith">Faith</a><a href="#siege">Sieges</a><a href="#court">Court Day</a><a href="#board">The world board</a><a href="#laws">Standing laws</a>
+        <a href="#ladder">The ladder</a><a href="#plots">Plots</a><a href="#ground">Getting ground</a><a href="#level">Kingdom Level</a><a href="#trees">Realm trees</a><a href="#faith">Faith</a><a href="#siege">Sieges</a><a href="#court">Court Day</a><a href="#board">The world board</a><a href="#laws">Standing laws</a>
         <Link href="/codex/bible/kingdom-management">Kingdom Management (canon)</Link>
       </div>
 
       {/* ------------------------------------------------------------ ladder */}
       <section className="play-law" id="ladder">
         <h2>The ladder: five rungs, each adds verbs</h2>
-        <p className="play-lede">None retires the ones below. The Riverlands&apos; Three Charters teach the first three; the top two are seized, granted or founded, rarely built from mud.</p>
+        <p className="play-lede">None retires the ones below. The bottom rung starts on a bought plot; the top two are seized, granted or founded, rarely built from mud.</p>
         <div className="field-grid is-row">
           {holdingRungs.map((rung, index) => (
             <FieldCard
               accent={index === holdingRungs.length - 1}
-              eyebrow={rung.teaches ? `Rung ${index + 1} · ${rung.teaches}` : `Rung ${index + 1}`}
+              eyebrow={`Rung ${index + 1}`}
               fields={[
                 { label: "Holds", value: rung.holds },
                 { label: "How", value: rung.how, tone: "muted" },
@@ -133,6 +133,29 @@ export default async function KingdomPage() {
             />
           ))}
         </div>
+      </section>
+
+      {/* ------------------------------------------------------------- plots */}
+      <section className="play-law" id="plots">
+        <h2>Plots: where you build your own buildings</h2>
+        <p className="play-lede">{plotsLaw} <b>The Riverlands holds three: the Charters</b> — old land charters in courthouse escrow, released by campaign progress, each a different lesson. They are plots, not rungs of the ladder.</p>
+        <div className="field-grid is-wide">
+          {riverlandsPlots.map((plot, index) => (
+            <FieldCard
+              eyebrow="Riverlands · courthouse escrow"
+              fields={[
+                { label: "Where", value: plot.where },
+                { label: "What", value: plot.what, tone: "muted" },
+                { label: "Teaches", value: plot.teaches, tone: "good" },
+                { label: "Unlock", value: plot.unlock, tone: "bad" },
+              ]}
+              key={plot.slug}
+              name={<Link href={`/codex/bible/${plot.slug}`}>{plot.name}</Link>}
+              step={index + 1}
+            />
+          ))}
+        </div>
+        <p className="km-foot"><b>Other regions:</b> their plots are drawn where their writing is. A region with no plot is a region where you hold ground by seizing, earning or founding it, not by buying.</p>
       </section>
 
       {/* ------------------------------------------------------------ ground */}
