@@ -1,6 +1,6 @@
 # Build Status
 
-Last updated: 2026-08-31
+Last updated: 2026-09-02
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
 
@@ -941,6 +941,15 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Art slots by the drop-in convention for talent icons, spell icons, skill plates and backdrops; brief in `Docs/art/SOL56_TALENT_BACKDROP_AND_ICON_PROMPT.txt`; `scripts/list-art-slots.ts` prints every required filename with its four brief lines
 - [x] Typecheck clean, 535 of 535 tests pass (three new suites), lint clean; screenshot-verified on a local dev server at 1440 and 390 wide including hover and popout states (`scripts/shot-codex-pages.ts` now accepts `SHOT_SITE=http://localhost:<port>`)
 - [ ] Not committed, not built, not deployed - the owner reviews the cards first; no StoryEntry or database change was made (canon dossiers untouched; the pages are a layout over them)
+
+## 2026-09-02 - SOL 5.6 talent grounds and icon delivery
+
+- [x] Generated and installed the complete 586-file commission: 8 talent backdrops, 450 talent icons, 20 skill plates, and 108 spell icons; `list-art-slots.ts --missing` reports `586 delivered · 0 open · 586 slots`
+- [x] Reconciled the brief's 394-talent headline with the authoritative registry: 394 ordinary nodes plus 56 corrupted phases (seven for each of eight classes) produces the delivered 450 talent icons
+- [x] Normalized and decoded every installed final to the exact publication contract: 1672 × 941 backdrops, 256 × 256 talent/spell icons, and 512 × 512 skill plates, all PNG, sRGB, RGB24, 8-bit `uchar`, three channels, and no alpha; Conduit's retained 1671 × 941 source was normalized to the required backdrop width
+- [x] Reviewed full/display-size contact sheets for every family and the current calculator backdrop wash; targeted redraws removed face-like forms, text/glyph-like markings, edge-margin failures, and an ambiguous phase-seven subject, while rejected and moderation-refused attempts remain disclosed without being treated as accepted artwork
+- [x] Reconciled accepted generated-source IDs and source/final hashes, sizes, metadata, and superseded/refused attempt notes into `Docs/art/SOL56_TALENT_BACKDROP_LEDGER.md`, `Docs/art/SOL56_ICON_LEDGER.md`, and the retained machine manifests
+- [x] Strict art regression passes all four contracts: exact generated inventory, private-resolver round trip/non-empty files, exact decoded format/dimensions, and no duplicate SHA-256 within a family; the associated web validation also passes strict typecheck, focused ESLint, and 544 of 544 tests
 
 ## 2026-09-02 - Play rulings: cells, Noon, Temporal, History, the allotment
 
