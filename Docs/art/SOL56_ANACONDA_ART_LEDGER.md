@@ -113,7 +113,7 @@ declined the subject — the row records the refusal and retains the full spec, 
   used a separate generation/edit call. The controlling prompt set is the issued commission at
   `Docs/art/SOL56_ANACONDA_ART_PROMPT.txt`; execution prompts expanded its per-plate constraints
   without changing the subjects or visual laws.
-- Machine provenance: `tmp/sol56-anaconda/manifest.json`. It records all 37 generated attempts,
+- Machine provenance: `tmp/sol56-anaconda/manifest.json`. It records all 35 generated attempts,
   accepted and superseded source IDs, raw/final SHA-256 values, byte counts, metadata, dispositions,
   and QA notes. Raw generated sources are preserved under `tmp/sol56-anaconda/raw/` and at the
   recorded Codex generated-image root.
@@ -121,9 +121,9 @@ declined the subject — the row records the refusal and retains the full spec, 
   alpha removal, sRGB conversion, and non-palette 8-bit RGB PNG encoding. No generative content was
   silently repaired by scripted paint-over.
 - Retained visual QA: `tmp/sol56-anaconda/qa/wide-finals-contact.png`,
-  `wide-center-crops.png`, `elias-centered-1122x941.png`, and tile sheets at exact 256px, 96px, and
-  the live 44px size. The closest pair under a coarse 64-bit average-hash comparison still differs
-  by eight bits; all cryptographic hashes are unique.
+  `wide-center-crops.png`, `elias-centered-1122x941.png`, `tiles-256-contact.png`,
+  `tiles-96-contact.png`, and `tiles-44-contact.png`. The closest pair under a coarse 64-bit
+  average-hash comparison still differs by eight bits; all cryptographic hashes are unique.
 
 ## Validation record
 
