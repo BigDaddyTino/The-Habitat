@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 /**
@@ -32,6 +32,15 @@ export const codexArtKinds = {
   trades: "trades",
   // The Eight Trees as people: one key-art plate per class, worn by /codex/classes.
   classes: "classes",
+  // Behind each class's tree in the calculator: a class-specific scene the
+  // constellation lines are drawn over. private/codex-art/talent-backdrops/<class>.png
+  "talent-backdrops": "talent-backdrops",
+  // One icon per talent node, flat-named <class>-<node-id>.png so a directory
+  // listing resolves all ~400 at once. private/codex-art/talent-icons/
+  "talent-icons": "talent-icons",
+  // One plate per skill (20) and one icon per licensed spell (108).
+  skills: "skills",
+  spells: "spells",
   // The dossier art that used to sit in public/images. Each one is a
   // directory under private/codex-art named for the shelf it serves.
   characters: "characters",
@@ -103,6 +112,22 @@ export function findCodexArt(kind: CodexArtKind, slug: string): string | null {
     }
   }
   return null;
+}
+
+/**
+ * Every slug with art in a directory, resolved with one readdir — for the
+ * surfaces that wear hundreds of small images (talent icons, spell icons)
+ * where an existsSync per slug would be hundreds of stats per request.
+ */
+export function listCodexArt(kind: CodexArtKind): Map<string, string> {
+  const found = new Map<string, string>();
+  const directory = directoryFor(kind);
+  if (!existsSync(directory)) return found;
+  for (const file of readdirSync(directory)) {
+    const match = /^([a-z0-9]+(?:-[a-z0-9]+)*).(png|jpg|jpeg|webp)$/.exec(file);
+    if (match && !found.has(match[1])) found.set(match[1], `/codex-art/${codexArtKinds[kind]}/${file}`);
+  }
+  return found;
 }
 
 /** Where to drop the art, shown verbatim on the empty slot. */

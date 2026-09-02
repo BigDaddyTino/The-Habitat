@@ -891,3 +891,53 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Added convention-path region discovery so new region plates resolve without requiring an invented branding/accent registration; focused Codex art, dossier, privacy, derivative, and region tests pass 22 of 22
 - [x] Marked the retired Bloomfall adaptive P0 and P1/P2 review packages, reports, package readmes, index entry, and every displayed candidate as SUPERSEDED / UNAPPROVED HISTORICAL evidence; only current live-resolved Bloomfall art is authoritative
 - [x] Preserved scope: no StoryEntry, database, taxonomy, credential, infrastructure, service, or production-state mutation was made
+
+## 2026-09-01 - SOL 5.6 Riverlands art run
+
+- [x] Reconciled the live Codex-art audit against the issued brief before production: the audit required exactly 80 plates, the brief contained 79 asset blocks, and the omitted CANON `velvet-reach` slot was recovered from its live dossier
+- [x] Generated and installed the exact 49 REGION, 7 SYSTEM, 15 CREATURE, 8 CHARACTER, and 1 THREAD allowlist in the required order, publishing `the-fuse-at-heartland` last; no previously delivered plate was replaced
+- [x] Preserved all overriding story laws, including living Alder Wade, the fully shrouded standing statue, unseen First Weir bottom, dormant Outfall Anchor, closed Deadhaul cars, non-emotive faceless Machines, unhurried Collector, and no depicted Old Roads bargain
+- [x] Recomputed all 80 installed-file SHA-256 hashes and passed the exact format gate at 80/80: 1672 x 941 PNG, sRGB, 8-bit RGB24, three channels, and no alpha
+- [x] Reviewed every full frame and exact 564 x 941 center crop plus all eight 1122 x 941 character crops; strict reshoots corrected pseudo-writing, identity overlap, and every named story element that initially fell outside the protected crop
+- [x] Recorded the reconciliation, canonical per-asset prompt blocks, retained source paths, superseded attempts, normalization disclosures, final hash manifest, and QA evidence in `Docs/art/SOL56_RIVERLANDS_ART_LEDGER.md`
+- [x] Passed the final coverage audit at exactly 0 empty slots and the focused Codex-art privacy/dossier/region resolver suite at 16 of 16
+- [x] Preserved scope: no StoryEntry, database, taxonomy, application-code, credential, infrastructure, service, public-asset, or production-state mutation was made
+
+## 2026-09-01 - Codex creature child-thumbnail parity
+
+- [x] Traced the remaining family-page placeholders to a resolver mismatch rather than missing art: dossier pages and directory cards used the shared convention-aware resolver, while `Children of ...` thumbnails still used a legacy creature map plus a Bloomfall-only fallback
+- [x] Routed child thumbnails through the same `getDossierArt("CREATURE", slug, meta)` result as their dossiers and forwarded each child's metadata, restoring all 21 affected current entries: 7 Machines, 8 Beasts (including Shrieker Bat), 5 Humanoids, and the Hollow Wing creature
+- [x] Added exhaustive regression coverage for every formerly missing slug plus a source-contract guard that keeps family thumbnails on the shared resolver
+- [x] Audited the other current Codex art surfaces and found no equivalent resolver mismatch across 106 regions, 35 factions, companion mission chains, or ordinary directory cards
+- [x] Passed 32 of 32 focused resolver/privacy/race tests, strict web TypeScript, and focused ESLint
+- [x] Verified the public authenticated release: every repaired row now emits its private thumbnail URL without a placeholder; all 21 assets resolve, including the below-fold lazy-loaded image checked directly, and no deploy or service restart was required
+
+## 2026-09-01 - SOL 5.6 Eight as People class-art run
+
+- [x] Generated and installed one action-led class embodiment for each exact Eight Trees slug: Bastion, Spector, Conduit, Surger, Archon, Procurator, Cypherist, and Maverick; these are representative class bodies rather than new named canon characters
+- [x] Preserved the load-bearing class arguments and mutual-exclusion locks, including Deep Pool Conduit, phase-two Surger, a consenting anatomically correct Hypogriff for Archon, an inert half-open frame for Cypherist, and exactly one pistol plus one ember hand for Maverick
+- [x] Published all eight through the existing authenticated private convention path as exact 1672 x 941 sRGB RGB24 PNGs; the class shelf and dossiers resolve them on reload without a build, deploy, service restart, public asset, or fallback registration
+- [x] Reviewed every final at full width, the exact 706 x 941 shelf crop, a 752 x 941 dossier-center crop, and a stacked 1672 x 557 banner simulation; heads, working hands, defining gear, and class-owned color remain readable in both required crops
+- [x] Added exact inventory, resolver, and image-metadata regression coverage; the focused class-art suite passes 2 of 2
+- [x] Authenticated live QA passes on the shelf and Conduit dossier at 1500 x 900, 720 x 900, and 390 x 844: all eight native images load, no fallback paths or horizontal overflow appear, and browser warnings/errors are zero
+- [x] Recorded source provenance, accepted and superseded attempts, normalization and side-field disclosures, hashes, crop contracts, canon gates, and QA evidence in `Docs/art/SOL56_CLASS_ART_LEDGER.md`
+- [x] Preserved scope: no StoryEntry, database, taxonomy, credential, infrastructure, application-runtime, service, or production-state mutation was made
+
+## 2026-09-01 - Amanda key-art photoreal remaster
+
+- [x] Remade Amanda's existing key art as an identity-preserving photoreal remaster while retaining her exact approved face, pose, armor, tail, Peninsula sunset, teal infrastructure, phoenix-fire silhouette, and public-form Lizzarnix canon locks
+- [x] Replaced the previous 493 KB 4:2:0 JPEG at the existing authenticated path with a 1672 x 941 sRGB RGB24 progressive quality-97 4:4:4 JPEG; final SHA-256 is `06112dbdc3c8c67ec657e904307056c3fe7a05916e13d5151861af59cc842ca0`
+- [x] Reviewed the full remaster, directory crop, dossier crop, and face-detail comparison; skin, scales, hair, leather, metal, smoke, flame, gold eyes, hands, and tail remain clean and readable without text, watermark, anatomy drift, or ending-tier true-form additions
+- [x] Passed 23 of 23 focused character-art, derivative, privacy, and dossier tests plus diff checks; the private derivative route invalidated the old image by source size/mtime without a build, deploy, or restart
+- [x] Authenticated live QA passed on `/codex/bible/amanda`, `/codex/library/characters`, and `/codex/library/companion-missions`, including 1500 x 900, 720 x 900, and 390 x 844 dossier views; no horizontal overflow or browser warnings/errors appeared, and anonymous direct art access still returns 404
+- [x] Recorded the accepted prompt, original/source/final hashes, encoding disclosure, crop evidence, and live verification in `Docs/art/AMANDA_KEYART_REMASTER_LEDGER.md`
+
+## 2026-09-02 - Play section rework: talents, spells, skills, character as readable cards
+
+- [x] Owner rulings: every talent node reads like a Final Fantasy XIV action tooltip (labeled Type / Cost / Cooldown / Range / Duration / Effect / Notes), numbers everywhere with hand-written ones tagged `untested`, the tree shape (core + five branches, weaves, choice nodes, capstones, corrupted ladder) unchanged; the constellation path lines stay and a class backdrop image goes under them
+- [x] Wrote the law in `Docs/codex/ABILITY_CARD_STYLE.md` and the shared `AbilityCard` type; rewrote all 394 nodes plus 56 corrupted phases into `lib/talent-cards/<class>.ts`, with every sim number from `lib/talent-effects.ts` stated verbatim (test-enforced) and the old one-liners kept as flavor
+- [x] Wrote the 108 licensed spells as cards (`lib/spellbook.ts`: pillar, licence, tier, cast, damage type, effect, overcharge failure) and the 20 skills / 60 techniques (`lib/skills.ts`), 36 techniques linked to the talent node they share numbers with; `lib/spell-unlocks.ts` derives which nodes open which spells (First Ward → Seal, War Licence → a choice of eight, etc.) and the test holds unresolved links at zero
+- [x] Rebuilt the calculator as icon tiles with type chips, a hover card and a docked popout on the same card data, and a backdrop slot (`private/codex-art/talent-backdrops/<class>.png`, the constellation chart standing in); rebuilt `/codex/classes/<slug>` as a job guide (at a glance, builds, every node as a card by branch, spells reached, shared techniques, teachers, corrupted branch); added `/codex/spells` (filter by pillar, tier, class), `/codex/skills`, and the `/codex/character` hub (species caps, backgrounds, origins, class tiles, attributes, the ten ledgers); Play nav now Character · Classes · Talents · Spells · Skills · Trades · Kingdom
+- [x] Art slots by the drop-in convention for talent icons, spell icons, skill plates and backdrops; brief in `Docs/art/SOL56_TALENT_BACKDROP_AND_ICON_PROMPT.txt`; `scripts/list-art-slots.ts` prints every required filename with its four brief lines
+- [x] Typecheck clean, 535 of 535 tests pass (three new suites), lint clean; screenshot-verified on a local dev server at 1440 and 390 wide including hover and popout states (`scripts/shot-codex-pages.ts` now accepts `SHOT_SITE=http://localhost:<port>`)
+- [ ] Not committed, not built, not deployed - the owner reviews the cards first; no StoryEntry or database change was made (canon dossiers untouched; the pages are a layout over them)

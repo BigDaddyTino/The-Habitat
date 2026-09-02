@@ -1,0 +1,133 @@
+SOL 5.6 — THE TREES' GROUND, AND THE SMALL PICTURES
+Talent backdrops (8) · talent icons (394) · skill plates (20) · spell icons (108)
+Issued 2026-09-02 · owner ruling: the constellation lines stay; a picture goes under them
+
+Drop-in paths (the filename is the wiring; nothing else to register):
+
+  apps/web/private/codex-art/talent-backdrops/<class>.png        8 files
+  apps/web/private/codex-art/talent-icons/<class>-<node-id>.png  394 files
+  apps/web/private/codex-art/skills/<skill-slug>.png             20 files
+  apps/web/private/codex-art/spells/<spell-id>.png               108 files
+
+Ledgers owed: Docs/art/SOL56_TALENT_BACKDROP_LEDGER.md and
+Docs/art/SOL56_ICON_LEDGER.md, the usual discipline (one line per file,
+hash, accepted/superseded attempts).
+
+------------------------------------------------------------------------------
+PART ONE — THE BACKDROPS (8)
+------------------------------------------------------------------------------
+
+WHAT THEY ARE
+The talent calculator (/codex/talents) draws each class's tree as icon tiles
+in six columns, and when a node is inspected it draws the road to it as
+constellation lines — brass dashes, cyan-white junction stars. Those lines
+are the existing constellation grammar and they STAY. This run puts a scene
+behind them. The page lays a dark wash (78–94% black-green) over the image
+so the tiles read; design for that wash, not against it.
+
+FORMAT
+- Landscape 1672x941 PNG, house convention, RGB24, no alpha.
+- The board is wide and can scroll; the image is cover-fit and centred.
+  Keep the subject in the middle 60% horizontally and clear of the top
+  80px (the branch headers sit there).
+- One image per class. No text, no glyphs, no insignia.
+
+THE STYLE — A PLACE, NOT A PERSON
+The class plates (SOL56_CLASS_ART) already gave each class a body. The
+backdrop is the GROUND that class stands on: an environment at night or
+dusk, near-future military-industrial, the codex dark palette (charcoal,
+wet grey, bone, muted rust, storm blue) with the class's ONE owned colour
+as the single light source. Almost no figures; if a silhouette appears it
+is small, unlit, and unreadable as a face. Depth of field deep, lens wide,
+horizon low. Under the wash the image should read as texture and one
+motivated glow, the way a star chart reads over a dark sky.
+
+THE EIGHT GROUNDS
+1. bastion — THE GATE: a breached gatehouse at night, sandbagged doorway,
+   a Containment ward across it as a faint plane of light; brass glow
+   from a burning barrel behind the line. Plates and shotgun shells on the
+   ground; nobody standing in it.
+2. spector — THE LONG EYE: a rooftop at 3am over a wet city; a rifle's
+   bipod at the parapet edge, scope caps open, a single distant window
+   lit cold grey-blue across the gap. The whole city is the sight picture.
+3. conduit — THE LANTERN: a siege trench at dusk, a caster's ward-line
+   glowing lantern-gold along the parapet, pale light venting from a rig
+   left on a crate; artillery haze on the horizon, no shells in flight.
+4. surger — THE PULSE: a dosing bench in a corrugated shelter, red rig
+   telltales, a heartbeat-trace line scratched into the wall, harvested
+   material in jars; everything wet, everything red-lit from one source.
+5. archon — THE CHORUS: a high roost at dusk — perches, a saddle rack, a
+   drone charging cradle, a covered shape that could be a raised body;
+   green-gold canopy light through a broken roof; thermals rising.
+6. procurator — THE LEDGER: a map table in a command tent, ledger-white
+   lamp on the sand table, tokens on a grid, a horn hanging from the pole,
+   the tent flap open on a column of lights on a road below.
+7. cypherist — THE CIRCUIT: a field bench under a tarp — an exoframe
+   half-open on its stand, capacitor cells racked and glowing contained
+   cyan, a turret's tripod, cables into a cracked grid junction.
+8. maverick — THE CROSSED IRONS: a dusty street at the hour a duel gets
+   called — one lit doorway, ember-orange, two lines of boot prints in the
+   dust meeting at ten paces; a holster on a post, a stormglass round on
+   the ground catching the light.
+
+------------------------------------------------------------------------------
+PART TWO — THE ICONS (394 talent · 108 spell) AND PLATES (20 skill)
+------------------------------------------------------------------------------
+
+WHAT THEY ARE
+Small square pictures the way a WoW or FF14 action icon works: one object,
+one gesture, or one effect, legible at 34px on the tree and at 40px on a
+card. The page shows a two-letter glyph until each file lands, so deliver
+in batches by class; nothing breaks while the set is partial.
+
+FORMAT
+- 256x256 PNG, RGB24, square, no alpha, no border (the page draws the
+  frame). Centre the subject; leave a 10% margin.
+- Filenames EXACTLY as listed by the generator below. A misnamed file is
+  simply invisible.
+
+THE STYLE — ONE SET, FOUR FAMILIES
+- Ground: the codex dark (near-black charcoal-green vignette). Subject lit
+  by one source. Painterly-real, not flat vector: these sit beside
+  photoreal plates and must not read as clip art.
+- TALENT icons use the class's owned colour as the light (Bastion brass,
+  Spector grey-blue, Conduit gold, Surger red, Archon green-gold,
+  Procurator ledger-white, Cypherist cyan, Maverick ember). Passive nodes:
+  an object at rest. Active nodes: a gesture or impact, motion blur
+  allowed. Spell-unlock nodes: the effect itself, with Essence cyan-white
+  in it. Choice nodes: the object split or doubled. Capstones: the same
+  grammar with a thin brass ring inside the margin — the ONLY decoration
+  allowed in the set. Corrupted branch (7 per class, ids corrupt-1..7):
+  the class's object with violet veining; the seventh is the object gone.
+- SPELL icons use the pillar's colour: Thermodynamics warm white-gold,
+  Kinetics steel, Structure slate with a cyan seam, Biologics wet red-
+  brown, Cognition pale violet-grey, Resonance deep cyan. Licensed: the
+  effect small. Certified: the effect large. Master: the effect and its
+  cost in one frame (Sublimation is steam inside a sealed helmet).
+- SKILL plates are 512x512, same style, one tool or one hand doing the
+  skill's thing (Marksmanship: a thumb on a scope turret; Negotiation: two
+  cups, one moved). The skill page shows them at 96px.
+
+HARD PROHIBITIONS
+- No text, numerals, letters, runes or fake script. No faces. No logos.
+- No fantasy gloss: no glowing swords, no spellbooks, no wizard hands.
+  Magic is infrastructure — rigs, wards, cells, doses, veining.
+- No two icons in a class that differ only by colour. If two nodes are
+  the same idea at different strengths (Adjust / Battle Form), change the
+  object, not the tint.
+
+THE LIST
+Run, from apps/web:
+
+  npx tsx scripts/list-art-slots.ts
+
+It prints every required filename with the node's name, its type, its
+flavor line and its effect line — the brief per icon is those four lines.
+Read the effect line before drawing; it is what the icon must mean.
+
+SELF-QA BEFORE YOU REPORT DONE
+- View every icon at 34px. If it does not read, redraw it.
+- All eight classes' icons side by side: one set, one light grammar.
+- Backdrops viewed WITH the page wash (open /codex/talents): tiles legible,
+  the road lines visible over the picture, the picture still a place.
+- Zero text anywhere.

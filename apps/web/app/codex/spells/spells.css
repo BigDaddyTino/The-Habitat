@@ -1,0 +1,20 @@
+/* The spellbook: filters on top, one section per pillar, cards in a wide grid. */
+.spellbook { display: grid; gap: 4px; }
+.spellbook-filters { display: grid; grid-template-columns: repeat(3, minmax(140px, 1fr)) minmax(200px, 2fr) auto; gap: 10px; align-items: end; border: 1px solid var(--line); padding: 12px 14px; margin-bottom: 16px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
+.spellbook-filters label { display: grid; gap: 4px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.spellbook-filters select, .spellbook-filters input { border: 1px solid var(--line); background: rgba(12, 16, 13, .6); color: var(--ink); font: inherit; font-size: 12px; padding: 7px 9px; }
+.spellbook-filters select:focus, .spellbook-filters input:focus { outline: 0; border-color: var(--brass); }
+.spellbook-count { font-family: var(--font-mono); font-size: 11px; color: var(--brass); padding-bottom: 8px; white-space: nowrap; }
+.spellbook-pillar > h2 small { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .6px; color: var(--muted); margin-left: 8px; text-transform: none; }
+.spellbook-overcharge { margin: 0; font-size: 11.5px; color: #dc9f91; line-height: 1.45; border-left: 2px solid rgba(205, 86, 80, .6); padding-left: 8px; }
+.spellbook-overcharge b { color: var(--danger); font-family: var(--font-mono); font-size: 9px; letter-spacing: .8px; text-transform: uppercase; margin-right: 4px; }
+.spellbook-via { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.spellbook-via b { color: var(--brass); font-family: var(--font-mono); font-size: 9px; letter-spacing: .8px; text-transform: uppercase; margin-right: 4px; }
+.spellbook-via a { color: var(--ink); text-decoration: none; }
+.spellbook-via a:hover { color: var(--paper); text-decoration: underline; }
+.spellbook-via.is-licence-only { opacity: .75; }
+.spellbook-counter { margin: 12px 0 0; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.spellbook-counter b { color: var(--paper); }
+.spellbook-empty { color: var(--muted); font-size: 13px; }
+.spellbook-entry { scroll-margin-top: 90px; }
+@media (max-width: 900px) { .spellbook-filters { grid-template-columns: 1fr 1fr; } .spellbook-count { grid-column: 1 / -1; } }

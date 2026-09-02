@@ -10,7 +10,7 @@ import { getPrismaClient } from "@habitat/db/client";
  * cookie on the public https host, navigate, capture full-page at desktop
  * and mobile widths. The session is deleted on exit.
  *
- *   SHOT_DIR=<dir> [SHOT_PATHS=/codex/kingdom,/codex/talents] pnpm exec tsx scripts/shot-codex-pages.ts
+ *   SHOT_DIR=<dir> [SHOT_PATHS=/codex/kingdom,/codex/talents] [SHOT_SITE=http://localhost:3111] pnpm exec tsx scripts/shot-codex-pages.ts
  */
 
 const db = getPrismaClient();
@@ -50,7 +50,14 @@ async function main() {
     await send("Network.enable");
     await send("Page.enable");
     const host = new URL(SITE).hostname;
+    // Auth.js only prefixes the cookie on https; a local http dev server
+    // (SHOT_SITE=http://localhost:3111) reads the bare name, insecure.
+    // Chrome treats localhost as a secure context, so the prefixed cookie is
+    // sent there too; setting both covers whichever name Auth.js derives
+    // from AUTH_URL.
+    const secure = new URL(SITE).protocol === "https:";
     const set = await send("Network.setCookie", { name: "__Secure-authjs.session-token", value: token, domain: host, path: "/", secure: true, httpOnly: true, sameSite: "Lax" });
+    if (!secure) await send("Network.setCookie", { name: "authjs.session-token", value: token, domain: host, path: "/", secure: false, httpOnly: true, sameSite: "Lax" });
     console.log("cookie set:", JSON.stringify(set));
     for (const path of PATHS) {
       for (const [label, width, height] of [["desktop", 1440, 1000], ["mobile", 390, 844]] as const) {

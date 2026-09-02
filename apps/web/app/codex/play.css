@@ -1,0 +1,72 @@
+/* The Play section's shared grammar: the ability card (FF14-style labeled
+   fields) and the page furniture the character, classes, spells and skills
+   pages all use. Dark codex palette; brass for names, the kind colour for
+   the Type chip, green for the Effect row because that is the arithmetic. */
+
+.play-shell { --play-spell: #7fc7d0; --play-active: #e0a458; --play-passive: #9fb59a; --play-choice: #e0705f; --play-capstone: var(--brass); --play-unlock: #c9b8e8; --play-corrupt: #b98fd6; }
+
+.play-hero { margin-bottom: 22px; }
+.play-hero h1 { margin: 2px 0 8px; }
+.play-hero > p:last-child { max-width: 780px; color: var(--muted); }
+.play-hero b { color: var(--paper); }
+
+/* "In gamer terms" — the one-line translation at the top of each section. */
+.play-gamer { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; border: 1px solid rgba(198, 151, 76, .45); border-left: 3px solid var(--brass); padding: 10px 14px; margin: 0 0 16px; background: rgba(198, 151, 76, .06); font-size: 13px; color: var(--ink); }
+.play-gamer > b { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); padding-top: 3px; white-space: nowrap; }
+.play-gamer b b { color: var(--paper); }
+
+.play-law { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 18px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
+.play-law > h2 { margin: 0 0 4px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.play-law > h2 a { color: inherit; text-decoration: none; }
+.play-law > p.play-lede { margin: 0 0 12px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
+.play-law > p.play-lede b { color: var(--paper); }
+
+.play-jump { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 18px; }
+.play-jump a { padding: 6px 12px; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); color: var(--muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .8px; text-transform: uppercase; text-decoration: none; }
+.play-jump a:hover { color: var(--paper); border-color: var(--brass); }
+
+/* -- The ability card ---------------------------------------------------- */
+.ability-card { position: relative; border: 1px solid var(--line); background: rgba(27, 34, 29, .6); padding: 10px 12px; display: grid; gap: 8px; font-size: 12px; }
+.ability-card.is-compact { border: 0; background: none; padding: 0; }
+.ability-head { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; align-items: center; }
+.ability-icon { width: 40px; height: 40px; object-fit: cover; border: 1px solid var(--line); background: #0d110e; }
+.ability-icon.is-glyph { display: grid; place-items: center; font-family: var(--font-mono); font-size: 12px; letter-spacing: .5px; color: var(--brass); background: radial-gradient(circle at 50% 40%, rgba(198, 151, 76, .18), rgba(12, 16, 13, .9) 70%); }
+.ability-eyebrow { display: block; font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.ability-name { display: block; color: var(--paper); font-size: 14px; line-height: 1.2; }
+
+.ability-fields { margin: 0; display: grid; grid-template-columns: 74px 1fr; gap: 4px 10px; align-items: baseline; }
+.ability-fields dt { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.ability-fields dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.ability-fields dd.ability-effect { color: #dfe8d6; line-height: 1.5; padding: 5px 8px; background: rgba(12, 16, 13, .55); border-left: 2px solid var(--canon, #8fbf8a); }
+.ability-fields dd.ability-notes { color: var(--muted); line-height: 1.45; font-size: 11.5px; }
+.ability-kind { display: inline-block; padding: 1px 7px; border: 1px solid; border-radius: 3px; font-family: var(--font-mono); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; }
+.ability-kind.is-kind-passive { color: var(--play-passive); border-color: rgba(159, 181, 154, .55); }
+.ability-kind.is-kind-active { color: var(--play-active); border-color: rgba(224, 164, 88, .6); }
+.ability-kind.is-kind-spell { color: var(--play-spell); border-color: rgba(127, 199, 208, .6); }
+.ability-kind.is-kind-choice { color: var(--play-choice); border-color: rgba(224, 112, 95, .6); }
+.ability-kind.is-kind-capstone { color: var(--play-capstone); border-color: rgba(198, 151, 76, .7); }
+.ability-kind.is-kind-unlock { color: var(--play-unlock); border-color: rgba(201, 184, 232, .55); }
+.ability-kind.is-kind-corrupted { color: var(--play-corrupt); border-color: rgba(185, 143, 214, .6); }
+.ability-card.is-kind-capstone { border-color: rgba(198, 151, 76, .5); }
+.ability-card.is-kind-choice { border-color: rgba(224, 112, 95, .45); }
+.ability-card.is-kind-corrupted { border-color: rgba(125, 62, 160, .45); background: rgba(125, 62, 160, .07); }
+.ability-flavor { margin: 0; font-family: var(--font-display), Georgia, serif; font-style: italic; font-size: 12.5px; color: var(--paper); opacity: .85; line-height: 1.45; }
+.ability-untested { align-self: start; justify-self: end; font-family: var(--font-mono); font-size: 8px; letter-spacing: .6px; text-transform: uppercase; color: var(--ember); border: 1px dashed rgba(220, 107, 50, .5); padding: 1px 5px; }
+.ability-card.is-compact .ability-untested { justify-self: start; }
+
+/* Grids of cards */
+.ability-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.ability-grid.is-wide { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
+
+/* Legend for the kind chips */
+.play-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0 0 14px; font-size: 11.5px; color: var(--muted); }
+.play-legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* Art slot note, the drop-in convention printed on the page */
+.play-artslot { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); opacity: .8; }
+.play-artslot code { font-size: 9.5px; color: var(--paper); }
+
+@media (max-width: 720px) {
+  .play-gamer { grid-template-columns: 1fr; }
+  .ability-fields { grid-template-columns: 64px 1fr; }
+}

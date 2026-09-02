@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, Share2 } from "lucide-react";
-import { corruptedEffects, describeEffects, effectsForNode } from "@/lib/talent-effects";
+import { AbilityCardView, initials } from "@/components/ability-card";
+import { abilityKindLabel } from "@/lib/ability-cards";
+import { cardForCorruptedPhase, cardForNode } from "@/lib/talent-cards";
 import { talentClasses, talentPointsAtLevel, type TalentClass, type TalentNode } from "@/lib/talent-trees";
 
 /**
@@ -15,6 +17,13 @@ import { talentClasses, talentPointsAtLevel, type TalentClass, type TalentNode }
  * weaves are bridges (owning either end opens the other), fork pairs lock
  * each other for good, and the corrupted branch costs nothing — it lights
  * from the corruption phase slider, because that price was paid elsewhere.
+ *
+ * Reading it (owner ruling 2026-09-02): every node is an icon tile — name,
+ * cost, type chip — and hovering one opens its ability card, the labeled
+ * FF14-style block from lib/talent-cards. Clicking docks the same card with
+ * the road there and the buy button. The constellation path lines stay,
+ * drawn over a class-specific backdrop image (private/codex-art/
+ * talent-backdrops/<class>.png; the constellation chart stands in).
  */
 
 type BuildState = { classSlug: string; level: number; phase: number; owned: string[] };
@@ -46,12 +55,26 @@ function indexClass(tree: TalentClass) {
   return byId;
 }
 
-export function TalentCalculator({ constellationArt = {} }: { constellationArt?: Record<string, string | null> }) {
+type Art = Record<string, string | null>;
+
+export function TalentCalculator({
+  constellationArt = {},
+  backdrops = {},
+  icons = {},
+}: {
+  constellationArt?: Art;
+  /** Class slug → the image behind the tree. */
+  backdrops?: Art;
+  /** `<class>-<node id>` → icon URL, for the nodes that have one. */
+  icons?: Record<string, string>;
+}) {
   const [state, setState] = useState<BuildState>(defaultState);
   const [copied, setCopied] = useState(false);
   // The inspected node: clicking opens the popout with the real numbers;
   // buying happens from inside it, so nobody spends blind.
   const [inspected, setInspected] = useState<{ node: TalentNode; corrupt?: false } | { phase: number; name: string; desc: string; corrupt: true } | null>(null);
+  // The hovered node: its card floats beside the tile until the pointer leaves.
+  const [hover, setHover] = useState<{ id: string; corruptPhase?: number; x: number; y: number; flip: boolean } | null>(null);
 
   // A shared link restores the whole build. The hash keeps the page static;
   // the restore is deferred a frame so hydration completes on the default
@@ -69,12 +92,13 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
   }, [state]);
   // Escape closes the popout, same as clicking outside it.
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setInspected(null); };
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") { setInspected(null); setHover(null); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
+  const boardRef = useRef<HTMLDivElement | null>(null);
   // The traced path: constellation lines drawn over the tree while a node is
   // inspected — the road from the branch mouth down to it, its weave bridge,
   // and the fork it would kill.
@@ -240,10 +264,35 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
     }
   };
 
+  // The hover card sits to the right of the tile, or the left when the tile
+  // is in the board's right half, so it never leaves the board.
+  const showHover = (event: { currentTarget: HTMLElement }, id: string, corruptPhase?: number) => {
+    const board = boardRef.current;
+    if (!board) return;
+    const boardRect = board.getBoundingClientRect();
+    const tile = event.currentTarget.getBoundingClientRect();
+    const flip = tile.left - boardRect.left > boardRect.width / 2;
+    setHover({
+      id,
+      corruptPhase,
+      x: (flip ? tile.left : tile.right) - boardRect.left + board.scrollLeft,
+      y: tile.top - boardRect.top + board.scrollTop,
+      flip,
+    });
+  };
+
+  const iconFor = (nodeId: string) => icons[`${tree.slug}-${nodeId}`] ?? null;
+
   const spells = [...owned].map((id) => byId.get(id)).filter((entry) => entry?.node.spell).map((entry) => entry?.node);
   const trainers = [...owned].map((id) => byId.get(id)).filter((entry) => entry?.node.ceiling).map((entry) => entry?.node);
   const activeCorrupted = tree.corrupted.nodes.filter((node) => node.phase <= state.phase && node.phase < 7);
   const terminal = state.phase >= 7;
+  const backdrop = backdrops[tree.slug] ?? constellationArt[tree.slug] ?? null;
+  const hasBackdrop = Boolean(backdrops[tree.slug]);
+
+  const hoverNode = hover && hover.corruptPhase === undefined ? byId.get(hover.id)?.node ?? null : null;
+  const hoverCorrupt = hover && hover.corruptPhase !== undefined ? tree.corrupted.nodes.find((node) => node.phase === hover.corruptPhase) ?? null : null;
+  const hoverCard = hoverNode ? cardForNode(tree.slug, hoverNode.id) : hoverCorrupt ? cardForCorruptedPhase(tree.slug, hoverCorrupt.phase) : null;
 
   return (
     <div className="talent-calculator">
@@ -253,7 +302,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
             aria-selected={entry.slug === tree.slug}
             className={entry.slug === tree.slug ? "is-active" : undefined}
             key={entry.slug}
-            onClick={() => setState({ classSlug: entry.slug, level: state.level, phase: state.phase, owned: [] })}
+            onClick={() => { setState({ classSlug: entry.slug, level: state.level, phase: state.phase, owned: [] }); setInspected(null); setHover(null); }}
             role="tab"
             type="button"
           >{entry.name}</button>
@@ -277,16 +326,27 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
 
       <div className="talent-constellation-note">
         <b>{tree.constellation}</b> — {tree.constellationNote}
-        {constellationArt[tree.slug]
+        {hasBackdrop
           ? null
-          : <span className="talent-artslot">constellation art slot — Sol · <code>private/codex-art/talents/{tree.slug}.png</code></span>}
+          : <span className="talent-artslot">backdrop slot — Sol · <code>private/codex-art/talent-backdrops/{tree.slug}.png</code>{constellationArt[tree.slug] ? " · chart standing in" : ""}</span>}
       </div>
-      {constellationArt[tree.slug] ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img alt={`${tree.name} constellation — ${tree.constellation}`} className="talent-constellation-art" src={constellationArt[tree.slug] ?? undefined} />
-      ) : null}
 
-      <div className={`talent-board${inspectedNode ? " is-inspecting" : ""}`}>
+      <div className="talent-legend">
+        <span><i className="talent-kind is-kind-passive">Passive</i> always on</span>
+        <span><i className="talent-kind is-kind-active">Active</i> has a cooldown</span>
+        <span><i className="talent-kind is-kind-spell">Spell</i> opens a licensed spell</span>
+        <span><i className="talent-kind is-kind-choice">Choice</i> locks its partner for good</span>
+        <span><i className="talent-kind is-kind-capstone">Capstone</i> a teacher must open it</span>
+        <span><i className="talent-kind is-kind-unlock">Unlock</i> opens a system or slot</span>
+        <span className="talent-legend-hint">Hover a node for its card · click to take it</span>
+      </div>
+
+      <div
+        className={`talent-board${inspectedNode ? " is-inspecting" : ""}${backdrop ? " has-backdrop" : ""}`}
+        onMouseLeave={() => setHover(null)}
+        ref={boardRef}
+        style={backdrop ? { backgroundImage: `url("${backdrop}")` } : undefined}
+      >
         <div className="talent-grid" ref={gridRef}>
           {trace.lines.length || trace.dots.length ? (
             <svg aria-hidden className="talent-pathlines">
@@ -315,24 +375,34 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                     : inspectedNode?.weave === node.id ? " is-weave-far"
                     : inspectedNode?.fork === node.id ? " is-fork-far"
                     : "";
+                  const card = cardForNode(tree.slug, node.id);
+                  const icon = iconFor(node.id);
+                  const kind = card?.kind ?? "Passive";
                   return (
                     <button
+                      aria-label={`${node.name}, ${node.cost} points, ${abilityKindLabel[kind]}`}
                       className={`talent-node ${state1}${node.fork ? " is-fork" : ""}${traceClass}`}
                       data-node-id={node.id}
                       key={node.id}
-                      onClick={() => setInspected({ node })}
-                      title={locked ? `Locked — you took ${byId.get(node.fork ?? "")?.node.name ?? "the other fork"}` : node.desc}
+                      onBlur={() => setHover(null)}
+                      onClick={() => { setInspected({ node }); setHover(null); }}
+                      onFocus={(event) => showHover(event, node.id)}
+                      onMouseEnter={(event) => showHover(event, node.id)}
                       type="button"
                     >
-                      <span className="talent-cost">{node.cost}</span>
-                      <b>{node.name}</b>
-                      <small>{node.desc}</small>
-                      <span className="talent-chips">
-                        {node.spell ? <i className="chip-spell">{node.spell}</i> : null}
-                        {node.ceiling ? <i className="chip-ceiling">Ceiling · {node.ceiling}</i> : null}
-                        {node.weave ? <i className="chip-weave">Weave ↔ {byId.get(node.weave)?.node.name ?? node.weave}</i> : null}
-                        {node.fork ? <i className="chip-fork">Fork — locks {byId.get(node.fork)?.node.name ?? node.fork}</i> : null}
+                      {icon
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img alt="" className="talent-icon" src={icon} />
+                        : <span aria-hidden="true" className="talent-icon is-glyph">{initials(node.name)}</span>}
+                      <span className="talent-node-copy">
+                        <b>{node.name}</b>
+                        <span className="talent-chips">
+                          <i className={`talent-kind is-kind-${kind.toLowerCase()}`}>{kind}</i>
+                          {node.weave ? <i className="chip-weave" title={`Weave — owning ${byId.get(node.weave)?.node.name ?? node.weave} also opens this`}>↔</i> : null}
+                          {node.fork ? <i className="chip-fork" title={`Choice — locks ${byId.get(node.fork)?.node.name ?? node.fork}`}>⟂</i> : null}
+                        </span>
                       </span>
+                      <span className="talent-cost">{node.cost}</span>
                     </button>
                   );
                 })}
@@ -351,17 +421,38 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                 <button
                   className={`talent-node is-corrupt${lit ? " is-lit" : ""}${node.phase === 7 ? " is-terminal" : ""}`}
                   key={node.name}
-                  onClick={() => setInspected({ phase: node.phase, name: node.name, desc: node.desc, corrupt: true })}
+                  onBlur={() => setHover(null)}
+                  onClick={() => { setInspected({ phase: node.phase, name: node.name, desc: node.desc, corrupt: true }); setHover(null); }}
+                  onFocus={(event) => showHover(event, `corrupt-${node.phase}`, node.phase)}
+                  onMouseEnter={(event) => showHover(event, `corrupt-${node.phase}`, node.phase)}
                   type="button"
                 >
-                  <span className="talent-cost">P{node.phase}</span>
-                  <b>{node.name}</b>
-                  <small>{node.desc}</small>
+                  <span aria-hidden="true" className="talent-icon is-glyph is-corrupt-glyph">{node.phase}</span>
+                  <span className="talent-node-copy">
+                    <b>{node.name}</b>
+                    <span className="talent-chips"><i className="talent-kind is-kind-corrupted">Phase {node.phase}</i></span>
+                  </span>
                 </button>
               );
             })}
           </div>
         </div>
+
+        {hover && hoverCard && (hoverNode || hoverCorrupt) ? (
+          <div
+            className={`talent-tooltip${hover.flip ? " is-flipped" : ""}`}
+            style={{ top: hover.y, left: hover.flip ? undefined : hover.x + 10, right: hover.flip ? `calc(100% - ${hover.x - 10}px)` : undefined }}
+          >
+            <AbilityCardView
+              card={hoverCard}
+              cost={hoverNode?.cost}
+              eyebrow={hoverNode ? tree.branches.find((branch) => branch.nodes.includes(hoverNode))?.name : `${tree.corrupted.title} · lights at phase ${hoverCorrupt?.phase}`}
+              flavor={hoverNode?.desc ?? hoverCorrupt?.desc}
+              icon={hoverNode ? iconFor(hoverNode.id) : null}
+              name={hoverNode?.name ?? hoverCorrupt?.name}
+            />
+          </div>
+        ) : null}
       </div>
 
       <aside className="talent-summary">
@@ -372,7 +463,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
         </div>
         {remaining > 0 && spent > 0 ? <p className="talent-hint">Spare points rank up unlocked abilities (I–III) — the long-game sink.</p> : null}
         {trainers.length ? <div className="talent-list"><h4>Trainers to find</h4><ul>{trainers.map((node) => <li key={node?.id}><b>{node?.name}</b> — {node?.ceiling}</li>)}</ul></div> : null}
-        {spells.length ? <div className="talent-list"><h4>Abilities from the pool</h4><ul>{spells.map((node) => <li key={node?.id}><b>{node?.name}</b> — {node?.spell}</li>)}</ul></div> : null}
+        {spells.length ? <div className="talent-list"><h4>Spells this build opens</h4><ul>{spells.map((node) => <li key={node?.id}><b>{node?.name}</b> — {node?.spell}</li>)}</ul></div> : null}
         {activeCorrupted.length ? <div className="talent-list is-corrupt-list"><h4>Lit by the ladder</h4><ul>{activeCorrupted.map((node) => <li key={node.name}><b>{node.name}</b></li>)}</ul></div> : null}
         {terminal ? <p className="talent-terminal">Phase 7. An abomination stands where this build stood. The campaign continues with what is left.</p> : null}
         <p className="talent-plays"><b>How it plays:</b> {tree.plays}</p>
@@ -382,8 +473,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
         <div aria-modal="true" className={`talent-popout-backdrop${inspected.corrupt ? "" : " is-docked"}`} onClick={() => setInspected(null)} role="dialog">
           <div className="talent-popout" onClick={(event) => event.stopPropagation()}>
             {inspected.corrupt ? (() => {
-              const effect = corruptedEffects[tree.slug]?.[inspected.phase];
-              const lines = effect ? describeEffects(effect) : [];
+              const card = cardForCorruptedPhase(tree.slug, inspected.phase);
               const lit = inspected.phase <= state.phase;
               return (
                 <>
@@ -391,15 +481,11 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                     <b>{inspected.name}</b>
                     <span>{tree.corrupted.title} · phase {inspected.phase} · costs no points, ever</span>
                   </header>
-                  <p className="talent-popout-desc">{inspected.desc}</p>
+                  {card ? <AbilityCardView card={card} compact flavor={inspected.desc} /> : <p className="talent-popout-desc">{inspected.desc}</p>}
                   {inspected.phase === 7 ? (
                     <p className="talent-popout-terminal">The hard end. An abomination stands where you stood, and the campaign continues with what is left. Nothing here is a power — it is what the seventh phase is.</p>
                   ) : (
-                    <>
-                      <h4>What actually changes</h4>
-                      <ul>{lines.map((line) => <li key={line}>{line}</li>)}</ul>
-                      <p className="talent-popout-note">Free — this node lights when phase {inspected.phase} does, and never goes out. The price was paid on the ladder: the phase&apos;s own attribute trades still apply, the tells still show, and the doors still close.</p>
-                    </>
+                    <p className="talent-popout-note">Free — this node lights when phase {inspected.phase} does, and never goes out. The price was paid on the ladder: the phase&apos;s own attribute trades still apply, the tells still show, and the doors still close.</p>
                   )}
                   <footer>
                     <span className={lit ? "is-lit-tag" : undefined}>{lit ? `Lit — you are phase ${state.phase}` : `Dark — lights at phase ${inspected.phase}`}</span>
@@ -409,9 +495,7 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
               );
             })() : (() => {
               const node = inspected.node;
-              const effect = effectsForNode(tree.slug, node.id);
-              const lines = effect ? describeEffects(effect) : [];
-              const simBacked = effect ? Object.keys(effect).some((key) => key !== "world") : false;
+              const card = cardForNode(tree.slug, node.id);
               const isOwned = owned.has(node.id);
               const locked = forkLocked(node);
               const openable = !locked && unlockable(node.id, owned);
@@ -424,16 +508,12 @@ export function TalentCalculator({ constellationArt = {} }: { constellationArt?:
                     <b>{node.name}</b>
                     <span>{node.cost} point{node.cost === 1 ? "" : "s"}</span>
                   </header>
-                  <p className="talent-popout-desc">{node.desc}</p>
-                  <h4>What actually changes</h4>
-                  {lines.length
-                    ? <ul>{lines.map((line) => <li key={line}>{line}</li>)}</ul>
-                    : <p className="talent-popout-note">A narrative node: its effect happens in scenes — a door it opens, a person it changes, a thing the world starts doing — not in combat arithmetic. The simulations carry no number for it yet.</p>}
-                  {node.spell ? <p className="talent-popout-tag is-spell">Unlocks abilities from the six schools&apos; 108 — {node.spell}</p> : null}
-                  {node.ceiling ? <p className="talent-popout-tag is-ceiling">Ceiling: the points aren&apos;t enough — find {node.ceiling}, and pay the favour.</p> : null}
+                  {card
+                    ? <AbilityCardView card={card} compact flavor={node.desc} />
+                    : <p className="talent-popout-desc">{node.desc}</p>}
+                  {node.ceiling ? <p className="talent-popout-tag is-ceiling">Capstone: the points aren&apos;t enough — find {node.ceiling}, and pay the favour.</p> : null}
                   {node.weave ? <p className="talent-popout-tag is-weave">Weave: bridges to {byId.get(node.weave)?.node.name ?? node.weave} — buying either end links both paths.</p> : null}
-                  {node.fork ? <p className="talent-popout-tag is-fork-tag">Fork: taking this locks {byId.get(node.fork)?.node.name ?? node.fork} for good. No respec exists in the world.</p> : null}
-                  {lines.length && simBacked ? <p className="talent-popout-note">Combat numbers are the same ones the balance simulations run on — first-pass weights, tuned by the campaign.</p> : null}
+                  {node.fork ? <p className="talent-popout-tag is-fork-tag">Choice: taking this locks {byId.get(node.fork)?.node.name ?? node.fork} for good. No respec exists in the world.</p> : null}
                   {isOwned ? (
                     <p className="talent-popout-path"><b>On the tree:</b> yours — its road is lit behind this card.</p>
                   ) : unwalked.length ? (
