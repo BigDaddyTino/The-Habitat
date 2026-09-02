@@ -545,6 +545,8 @@ model User {
   storyNodesUpdated              StoryNode[]                    @relation("StoryNodeEditor")
   storyNodeLocks                 StoryNode[]                    @relation("StoryNodeLock")
   storyEdges                     StoryEdge[]                    @relation("StoryEdgeCreator")
+  storyLinesCreated              StoryLine[]                    @relation("StoryLineCreator")
+  storyLinesUpdated              StoryLine[]                    @relation("StoryLineEditor")
   storyEntriesCreated            StoryEntry[]                   @relation("StoryEntryCreator")
   storyEntriesUpdated            StoryEntry[]                   @relation("StoryEntryEditor")
   storyEntryLocks                StoryEntry[]                   @relation("StoryEntryLock")
@@ -2198,6 +2200,7 @@ model StoryNode {
   continuesIn       StoryArc?               @relation("StoryContinuation", fields: [continuesInArcId], references: [id], onDelete: SetNull)
   outgoingEdges     StoryEdge[]             @relation("StoryEdgeFrom")
   incomingEdges     StoryEdge[]             @relation("StoryEdgeTo")
+  lines             StoryLine[]
   entryLinks        StoryEntryLink[]
   comments          StoryComment[]
   presence          StoryPresence[]
@@ -2233,6 +2236,9 @@ model StoryEdge {
   /// What choosing this branch does, as free-text lines the game interprets.
   effects         String[]    @default([])
   position        Int         @default(0)
+  /// Only meaningful on a labelled edge out of a CHOICE node: whether the
+  /// option text is a spoken player line the voice pipeline should render.
+  voiced          Boolean     @default(false)
   status          StoryStatus @default(PROPOSED)
   createdByUserId String      @db.Uuid
   createdAt       DateTime    @default(now())
@@ -2275,6 +2281,8 @@ model StoryEntry {
   nodeLinks            StoryEntryLink[]
   comments             StoryComment[]
   speakerOf            StoryNode[]            @relation("StoryNodeSpeaker")
+  spokenLines          StoryLine[]            @relation("StoryLineSpeaker")
+  heardLines           StoryLine[]            @relation("StoryLineListener")
   regionOf             StoryArc[]             @relation("StoryArcRegion")
   companionOf          StoryArc[]             @relation("StoryArcCompanion")
   factionOf            StoryArc[]             @relation("StoryArcFaction")
@@ -2689,4 +2697,56 @@ model StoryRelease {
   cutBy           User     @relation("StoryReleaseCutBy", fields: [cutByUserId], references: [id], onDelete: Restrict)
 
   @@index([cutAt(sort: Desc)])
+}
+
+/// One spoken line inside a node: the addressable unit the voice pipeline
+/// renders one WAV for and the game importer turns into one dialogue node.
+/// Prose in `StoryNode.body` stays the reading surface; lines are the
+/// structured record beside it (codex export contract v5, 2026-09-02).
+///
+/// `number` is the frozen export identity inside the node: the two digits at
+/// the end of `<arcSlug>/<nodeKey>/<nn>`. It is minted once, never reused, and
+/// never renumbered. Deleting a line retires its number (`retiredAt`), so an
+/// asset built from `.../03` can never later mean a different sentence.
+/// `order` is the display and playback order and moves freely.
+///
+/// Exactly one of `speakerEntryId` (a CHARACTER bible entry) and `speakerRole`
+/// (a free role such as radio, stormglass-guard, player, unattributed) is set;
+/// the migration CHECKs it. The listener may be either, or neither.
+model StoryLine {
+  id               String      @id @default(uuid()) @db.Uuid
+  nodeId           String      @db.Uuid
+  number           Int
+  order            Int         @default(0)
+  speakerEntryId   String?     @db.Uuid
+  speakerRole      String?     @db.VarChar(64)
+  listenerEntryId  String?     @db.Uuid
+  listenerRole     String?     @db.VarChar(64)
+  /// The exact spoken words: plain text, one utterance, no markdown, no
+  /// [[slugs]], no stage direction, no line breaks (CHECKed).
+  text             String      @db.VarChar(1000)
+  /// Performance direction for the voice model, e.g. "tactical shout, not
+  /// narration". Empty string when there is none.
+  performance      String      @default("") @db.VarChar(200)
+  /// 1 flat/bored .. 10 full battlefield.
+  intensity        Int         @default(5)
+  /// Lower-case tags from the fixed list in packages/shared (dialogue-lines).
+  emotion          String[]    @default([])
+  locale           String      @default("en-US") @db.VarChar(16)
+  voiced           Boolean     @default(true)
+  /// A retired line keeps its number and leaves the export.
+  retiredAt        DateTime?
+  createdByUserId  String      @db.Uuid
+  updatedByUserId  String?     @db.Uuid
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  node             StoryNode   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  speaker          StoryEntry? @relation("StoryLineSpeaker", fields: [speakerEntryId], references: [id], onDelete: Restrict)
+  listener         StoryEntry? @relation("StoryLineListener", fields: [listenerEntryId], references: [id], onDelete: Restrict)
+  creator          User        @relation("StoryLineCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  editor           User?       @relation("StoryLineEditor", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([nodeId, number])
+  @@index([nodeId, retiredAt, order])
+  @@index([speakerEntryId])
 }

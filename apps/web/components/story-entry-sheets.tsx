@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyInvolvementKinds, storyInvolvementKindLabels, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
+import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyInvolvementKinds, storyInvolvementKindLabels, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, storyFaceRigs, storyVoiceConsentKinds, storyVoiceConsentKindLabels, storyVoiceStatuses, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -114,6 +114,23 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
   const [age, setAge] = useState(text(source.age));
   const [appearance, setAppearance] = useState(text(source.appearance));
   const [voice, setVoice] = useState(text(source.voice));
+  // The Voice tab (export v5): the structured profile a voice-design model
+  // works from. Prefilled from the prose voice note the first time.
+  const profileSource = record(source.voiceProfile);
+  const consentSource = record(profileSource.consent);
+  const [voiceSex, setVoiceSex] = useState(text(profileSource.sex) || text(source.sex));
+  const [voiceAgeRange, setVoiceAgeRange] = useState(text(profileSource.ageRange) || text(source.age));
+  const [voiceAccent, setVoiceAccent] = useState(text(profileSource.accent));
+  const [voiceTimbre, setVoiceTimbre] = useState(text(profileSource.timbre));
+  const [voicePace, setVoicePace] = useState(text(profileSource.pace));
+  const [voiceRegister, setVoiceRegister] = useState(text(profileSource.register));
+  const [voicePrompt, setVoicePrompt] = useState(text(profileSource.designPrompt) || text(source.voice));
+  const [consentKind, setConsentKind] = useState(text(consentSource.kind) || "SYNTHETIC_DESIGNED");
+  const [consentStatement, setConsentStatement] = useState(text(consentSource.statement));
+  const [consentSignedAt, setConsentSignedAt] = useState(text(consentSource.signedAt));
+  const [faceRig, setFaceRig] = useState(text(profileSource.faceRig) || "unknown");
+  const referenceClip = text(profileSource.referenceClipAssetId);
+  const voiceStatus = text(source.voiceStatus) || "NONE";
   const [origin, setOrigin] = useState(text(magic.origin));
   const [schools, setSchools] = useState(asArray(magic.schools).map(text).join("\n"));
   const [corruptionPhase, setCorruptionPhase] = useState(typeof magic.corruptionPhase === "number" ? String(magic.corruptionPhase) : "");
@@ -154,6 +171,23 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
     age: orNull(age),
     appearance: orNull(appearance),
     voice: orNull(voice),
+    voiceProfile: {
+      sex: orNull(voiceSex),
+      ageRange: orNull(voiceAgeRange),
+      accent: orNull(voiceAccent),
+      timbre: orNull(voiceTimbre),
+      pace: orNull(voicePace),
+      register: orNull(voiceRegister),
+      designPrompt: orNull(voicePrompt),
+      // Resolved by the exporter from the drop-in clip, never typed here.
+      referenceClipAssetId: orNull(referenceClip),
+      consent: {
+        kind: (storyVoiceConsentKinds as readonly string[]).includes(consentKind) ? (consentKind as StoryCharacterMeta["voiceProfile"] extends infer P ? P extends { consent: { kind: infer K } } ? K : never : never) : "SYNTHETIC_DESIGNED",
+        statement: consentKind === "SYNTHETIC_DESIGNED" ? null : orNull(consentStatement),
+        signedAt: consentKind === "SYNTHETIC_DESIGNED" ? null : orNull(consentSignedAt),
+      },
+      faceRig: (storyFaceRigs as readonly string[]).includes(faceRig) ? (faceRig as "metahuman" | "none" | "unknown") : "unknown",
+    },
     magic: {
       origin: (storyMagicOrigins as readonly string[]).includes(origin) ? (origin as StoryCharacterMeta["magic"]["origin"]) : null,
       schools: splitLines(schools),
@@ -207,6 +241,33 @@ export function CharacterSheet({ entryId, version, meta, factions, regions, char
       <label>Aliases — one per line<textarea onChange={(event) => setAliases(event.target.value)} rows={2} value={aliases} /></label>
       <label>Appearance<textarea maxLength={2000} onChange={(event) => setAppearance(event.target.value)} rows={2} value={appearance} /></label>
       <label>Voice — what their dialogue sounds like<textarea maxLength={2000} onChange={(event) => setVoice(event.target.value)} rows={3} value={voice} /></label>
+
+      {/* The Voice tab (export v5, A4): what a voice-design model works from.
+          Design prompt prefilled from the prose voice note; consent is never
+          assumed — recorded kinds need a statement and a date, and only the
+          owner may put one on file (the server refuses anyone else). */}
+      <fieldset className="sheet-voice">
+        <legend>Voice profile — for the voice pipeline <span className={`sheet-voice-status is-${voiceStatus.toLowerCase()}`} title="Set by the pipeline, not here">{voiceStatus}</span></legend>
+        <div className="sheet-grid">
+          <label>Sex<input maxLength={40} onChange={(event) => setVoiceSex(event.target.value)} type="text" value={voiceSex} /></label>
+          <label>Age range<input maxLength={40} onChange={(event) => setVoiceAgeRange(event.target.value)} placeholder="late thirties" type="text" value={voiceAgeRange} /></label>
+          <label>Accent<input maxLength={120} onChange={(event) => setVoiceAccent(event.target.value)} placeholder="coastal, clipped" type="text" value={voiceAccent} /></label>
+          <label>Timbre<input maxLength={120} onChange={(event) => setVoiceTimbre(event.target.value)} placeholder="gravel under the laugh" type="text" value={voiceTimbre} /></label>
+          <label>Pace<input maxLength={120} onChange={(event) => setVoicePace(event.target.value)} placeholder="fast, then dead stops" type="text" value={voicePace} /></label>
+          <label>Register<input maxLength={120} onChange={(event) => setVoiceRegister(event.target.value)} placeholder="tactical, profane, warm underneath" type="text" value={voiceRegister} /></label>
+        </div>
+        <label>Design prompt — one paragraph a voice model can work from<textarea maxLength={2000} onChange={(event) => setVoicePrompt(event.target.value)} rows={3} value={voicePrompt} /></label>
+        <div className="sheet-grid">
+          <label>Consent<select onChange={(event) => setConsentKind(event.target.value)} value={consentKind}>{storyVoiceConsentKinds.map((kind) => <option key={kind} value={kind}>{storyVoiceConsentKindLabels[kind]}</option>)}</select>
+            <small className="sheet-hint">Recorded kinds need a statement and a date, and only the owner can file them.</small></label>
+          <label>Face rig<select onChange={(event) => setFaceRig(event.target.value)} value={faceRig}>{storyFaceRigs.map((rig) => <option key={rig} value={rig}>{rig}</option>)}</select></label>
+          {consentKind !== "SYNTHETIC_DESIGNED" ? <>
+            <label>Consent statement<input maxLength={500} onChange={(event) => setConsentStatement(event.target.value)} type="text" value={consentStatement} /></label>
+            <label>Signed on<input maxLength={40} onChange={(event) => setConsentSignedAt(event.target.value)} placeholder="2026-09-02" type="text" value={consentSignedAt} /></label>
+          </> : null}
+        </div>
+        <p className="sheet-hint">Reference clip: {referenceClip ? <code>{referenceClip}</code> : <>none on file — drop <code>private/codex-art/voice-clips/&lt;slug&gt;.wav</code> (or .mp3/.ogg/.flac) and the next export attaches it.</>} Pipeline status is one of {storyVoiceStatuses.join(" / ")} and is written by the pipeline, never here.</p>
+      </fieldset>
       <label>Story role — why this character exists<textarea maxLength={500} onChange={(event) => setStoryRole(event.target.value)} rows={2} value={storyRole} /></label>
 
       {/* The character-bible ledgers. Free text, written the way the world

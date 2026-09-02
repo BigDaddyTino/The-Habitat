@@ -26,6 +26,7 @@ importer pays for.
 | v2 | The bundle itself: arcs, nodes, edges, entries, links, comments, revisions. |
 | v3 | The atlas — `maps`, `placements`, `nodePlacements` — so world-map topology travels with the story rather than staying web-only. |
 | v4 | Calibrated regional maps: per-map art version, image extent, and coordinate extent. |
+| v5 | Voiced dialogue (2026-09-02): every node MAY carry `lines[]` (DIALOGUE nodes MUST, empty only with `linesStatus: "NONE"`); CHOICE nodes carry `options[]`; CHARACTER entries carry `meta.voiceProfile` and `meta.voiceStatus`; `manifest.snapshot` names the snapshot the way the game side reads it and `manifest.dialogueLines` names the flattened `content/dialogue-lines.json` sidecar (its own contract, v1). Additive: nothing that existed in v4 changed shape, and the readers here accept v4 and v5 alike. Voice reference clips travel as `/audio/voice-clips/<slug>.<ext>` assets. |
 
 `manifest.storyRelease` was added inside v4 without a bump because it is
 optional and additive: its **absence** is meaningful, and means that bundle's

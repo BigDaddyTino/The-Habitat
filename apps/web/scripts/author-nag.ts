@@ -75,6 +75,7 @@ The tells are there for anyone who watches it long enough. It nags about everyth
     age: "Older than the war it ended up in. Given roughly a decade ago.",
     appearance: "A scuffed steel wristwatch on a band that has been re-stitched twice. The case unfolds picks; two leads spool from the crown; a palm-sized panel and a projected head, mostly eyebrows, sit above the wrist when it has something to say. The band is torn at one lug and has never been repaired.",
     voice: "Dry, formal with strangers, openly insubordinate with Tino, and increasingly fond of whoever is wearing it. Complains about its own hardware. Has never willingly answered a direct question about him.",
+    voiceProfile: null,
     magic: {
       // GIFTED, not infused, and the distinction is load-bearing. Infusion is
       // extracted magic and extraction kills the source, so an infused watch

@@ -28,7 +28,7 @@ const check = (ok: boolean, what: string) => results.push({ ok, what });
 
 /** A complete, schema-valid sheet per kind with every field at its empty value. */
 const blank: Record<string, Record<string, unknown>> = {
-  CHARACTER: { fullName: null, aliases: [], pronouns: null, sex: null, species: null, age: null, appearance: null, voice: null, magic: { origin: null, schools: [], corruptionPhase: null, notes: null }, factions: [], home: null, status: { known: null, actual: null }, relationships: [],
+  CHARACTER: { fullName: null, aliases: [], pronouns: null, sex: null, species: null, age: null, appearance: null, voice: null, voiceProfile: null, magic: { origin: null, schools: [], corruptionPhase: null, notes: null }, factions: [], home: null, status: { known: null, actual: null }, relationships: [],
 background: null, professions: [], skills: [], cybernetics: [],
 storyRole: null, involvement: [], gameId: null, model: null, companion: { capable: null, availability: null, status: null }, openQuestions: [] },
   REGION: { type: null, settlementTier: null, parent: null, biome: null, control: [], population: null, connections: [], status: null, veilAnchorTier: null, soulForge: null, gameTag: null, openQuestions: [] },

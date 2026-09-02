@@ -202,6 +202,10 @@ export function EdgeEditor({ edge, fromTitle, toTitle, canReview, nodes, flags =
       <label>Condition<textarea defaultValue={edge.condition ?? ""} key={`condition-${edge.id}-${edge.updatedAt.getTime()}`} maxLength={300} name="condition" placeholder="Optional requirement, flag, or designer note." rows={3} /></label>
       <label>Effects<textarea defaultValue={edge.effects.join("\n")} key={`effects-${edge.id}-${edge.updatedAt.getTime()}`} name="effects" placeholder="One per line: what choosing this does. The game interprets these." rows={2} /></label>
       <FlagHints flags={flags.filter((entry) => entry.kind === "FLAG")} />
+      {/* A labelled branch out of a CHOICE card is an option the player picks;
+          ticking this makes the option text a spoken player line for the voice
+          pipeline (export v5). Off by default: most options are read, not said. */}
+      <label className="story-check"><input defaultChecked={edge.voiced} key={`voiced-${edge.id}-${edge.updatedAt.getTime()}`} name="voiced" type="checkbox" /> Voiced — the player says this choice aloud</label>
       <StorySubmit pendingLabel="Saving…">Save branch</StorySubmit>
     </form>}
     <div className="story-inspector-meta">

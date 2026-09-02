@@ -137,6 +137,7 @@ const WENDY_META = characterMetaSchema.parse({
   },
   model: null,
   voice: "Economical short declaratives. Contempt is her throughput register, not cruelty. She never asks what the form already tells her, never explains the world to the audience, watches the queue constantly, and uses profanity only when the situation earns it. Exactly one earned beat softens: ‘Good. You listen.’",
+  voiceProfile: null,
   gameId: null,
   skills: [],
   status: {

@@ -81,7 +81,7 @@ const characterMeta = (input: {
   storyRole: string; involvement: Array<{ ref: string; kind: StoryInvolvementKind; how: string }>; model: string; questions?: string[];
 }) => ({
   fullName: input.fullName, aliases: input.aliases ?? [], pronouns: input.pronouns, sex: null, species: input.species ?? "Human", age: input.age,
-  appearance: input.appearance, voice: input.voice,
+  appearance: input.appearance, voice: input.voice, voiceProfile: null,
   magic: { origin: null, schools: [], corruptionPhase: null, notes: "Blackbloom exposure is environmental adaptation, not Seven-Phase Corruption." },
   factions: input.factions, home: input.home, status: { known: input.known, actual: input.actual }, relationships: input.relationships ?? [],
   // The four character-bible ledgers. Empty here: these are regional dossiers

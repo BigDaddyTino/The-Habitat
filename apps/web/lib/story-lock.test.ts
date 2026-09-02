@@ -41,6 +41,8 @@ const gatedActions = [
   "deleteEdge",
   "linkEntryToNode",
   "unlinkEntryFromNode",
+  // The spoken lines of a card are content like its body: frozen with the flow.
+  "saveNodeLines",
   "setStoryStatus",
   "canoniseArc",
   // Closing a board is the most final thing that can happen to one, so the
@@ -70,6 +72,9 @@ const ungatedActions = [
   "withdrawCanonPacket",
   "addComment",
   "resolveComment",
+  // Proposing lines from prose reads the card and writes nothing; the save
+  // that follows is the gated one.
+  "proposeNodeLines",
   "claimNodeLock",
   "releaseNodeLock",
   "claimEntryLock",

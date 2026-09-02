@@ -1,5 +1,7 @@
 import { z } from "zod";
 import {
+  storyFaceRigs,
+  storyVoiceConsentKinds,
   storyCanonPacketTargetKinds,
   storyCompanionMissionStatuses,
   storyControlKinds,
@@ -51,6 +53,26 @@ export const characterMetaSchema = z.object({
   age: metaText(80),
   appearance: metaText(2000),
   voice: metaText(2000),
+  // The structured voice profile (export v5): what a voice-design model works
+  // from. Required-but-nullable like every other ledger, backfilled in the
+  // same pass (scripts/backfill-voice-profiles.ts). `voiceStatus` is NOT here:
+  // the pipeline sets it, so it is server-owned and carried, never submitted.
+  voiceProfile: z.object({
+    sex: metaText(40),
+    ageRange: metaText(40),
+    accent: metaText(120),
+    timbre: metaText(120),
+    pace: metaText(120),
+    register: metaText(120),
+    designPrompt: metaText(2000),
+    referenceClipAssetId: metaText(200),
+    consent: z.object({
+      kind: z.enum(storyVoiceConsentKinds),
+      statement: metaText(500),
+      signedAt: metaText(40),
+    }),
+    faceRig: z.enum(storyFaceRigs),
+  }).nullable(),
   magic: z.object({
     origin: z.enum(storyMagicOrigins).nullable(),
     schools: metaLines(12, 80),
@@ -308,7 +330,13 @@ export const metaSchemasByKind: Partial<Record<(typeof storyEntryKinds)[number],
  * submitted payload, so a client cannot forge a publication it was not
  * granted — the sheet's copy is discarded either way.
  */
-export const serverOwnedMetaKeys = ["visualArt"] as const;
+export const serverOwnedMetaKeys = [
+  "visualArt",
+  // The voice pipeline's word on a character's voice (NONE / DESIGNED /
+  // APPROVED). Set by the pipeline, never by the sheet; the exporter reads
+  // NONE when it is absent.
+  "voiceStatus",
+] as const;
 
 /**
  * Returns `next` with the server-owned keys of `previous` restored.

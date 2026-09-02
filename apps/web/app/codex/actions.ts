@@ -4,6 +4,10 @@ import "@/lib/environment";
 import { randomUUID } from "node:crypto";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
+  dialogueEmotionTags,
+  dialogueTextProblem,
+  isDialogueLocale,
+  isDialogueRole,
   isValidStoryKey,
   parseStoryPlaceKind,
   slugifyStoryKey,
@@ -32,7 +36,8 @@ import {
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requireRole } from "@/lib/authorization";
+import { hasRole, requireRole } from "@/lib/authorization";
+import { speakerResolverFor, splitBodyIntoLines, type ProposedLine } from "@/lib/dialogue-split";
 import { carryServerOwnedMeta, metaSchemasByKind, metaSlug, threadMetaSchema } from "@/lib/story-meta-schemas";
 import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
@@ -666,8 +671,8 @@ export async function createEdge(input: { fromNodeId: string; toNodeId: string; 
 export async function updateEdge(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z
-    .object({ edgeId: z.string().uuid(), toNodeId: z.string().uuid().nullable(), label: optionalText(200), condition: optionalText(300), effects: effectsList })
-    .safeParse({ edgeId: formData.get("edgeId"), toNodeId: formData.get("toNodeId") || null, label: formData.get("label") ?? "", condition: formData.get("condition") ?? "", effects: formData.get("effects") ?? "" });
+    .object({ edgeId: z.string().uuid(), toNodeId: z.string().uuid().nullable(), label: optionalText(200), condition: optionalText(300), effects: effectsList, voiced: z.boolean() })
+    .safeParse({ edgeId: formData.get("edgeId"), toNodeId: formData.get("toNodeId") || null, label: formData.get("label") ?? "", condition: formData.get("condition") ?? "", effects: formData.get("effects") ?? "", voiced: formData.get("voiced") === "on" });
   if (!parsed.success) throw refusal("That transition is not valid.");
 
   const arcSlug = await db.$transaction(async (tx) => {
@@ -688,7 +693,10 @@ export async function updateEdge(formData: FormData) {
       targetTitle = target.title;
     }
 
-    await tx.storyEdge.update({ where: { id: edge.id }, data: { toNodeId, label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects } });
+    // A spoken option needs words to speak: an unlabelled edge is a
+    // continuation, never an option, so it cannot be voiced.
+    const voiced = parsed.data.label ? parsed.data.voiced : false;
+    await tx.storyEdge.update({ where: { id: edge.id }, data: { toNodeId, label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects, voiced } });
     await recordRevision(tx, {
       entityType: "EDGE",
       entityId: edge.id,
@@ -698,8 +706,8 @@ export async function updateEdge(formData: FormData) {
       summary: toNodeId !== edge.toNodeId
         ? `Moved the branch from "${edge.fromNode.title}" to lead to "${targetTitle}"`
         : `Relabelled the branch from "${edge.fromNode.title}" to "${edge.toNode.title}"`,
-      before: { label: edge.label, condition: edge.condition, effects: edge.effects, toNode: edge.toNode.title },
-      after: { label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects, toNode: targetTitle },
+      before: { label: edge.label, condition: edge.condition, effects: edge.effects, toNode: edge.toNode.title, voiced: edge.voiced },
+      after: { label: parsed.data.label, condition: parsed.data.condition, effects: parsed.data.effects, toNode: targetTitle, voiced },
     });
     return edge.arc.slug;
   });
@@ -1012,6 +1020,7 @@ export async function createEntry(formData: FormData) {
         age: null,
         appearance: null,
         voice: null,
+        voiceProfile: null,
         magic: { origin: null, schools: [], corruptionPhase: null, notes: null },
         factions: slugList(formData, "factions").map((faction) => ({ faction, role: null, standing: null })),
         home: oneSlug(formData, "home"),
@@ -1206,6 +1215,20 @@ export async function updateEntryMeta(formData: FormData) {
     if (!schema) throw refusal(`${entry.kind} entries do not have a sheet yet.`);
     const meta = schema.safeParse(raw);
     if (!meta.success) throw refusal("Some fields on that sheet are too long or the wrong shape. Nothing was saved.");
+    // Consent is never invented. A recorded voice needs a statement and a
+    // date, and only the owner may put one on file: anybody else's sheet save
+    // has to leave the stored consent exactly as it stands.
+    if (entry.kind === "CHARACTER") {
+      const submitted = (meta.data as { voiceProfile?: { consent?: { kind: string; statement: string | null; signedAt: string | null } } | null }).voiceProfile?.consent ?? null;
+      const storedMeta = typeof entry.meta === "object" && entry.meta !== null && !Array.isArray(entry.meta) ? entry.meta as Record<string, unknown> : {};
+      const storedProfile = typeof storedMeta.voiceProfile === "object" && storedMeta.voiceProfile !== null ? storedMeta.voiceProfile as { consent?: { kind: string; statement: string | null; signedAt: string | null } } : null;
+      const stored = storedProfile?.consent ?? null;
+      const changed = JSON.stringify(submitted) !== JSON.stringify(stored);
+      if (submitted && submitted.kind !== "SYNTHETIC_DESIGNED") {
+        if (!submitted.statement || !submitted.signedAt) throw refusal("A recorded voice needs a consent statement and the date it was signed.");
+        if (changed && !(await hasRole("ADMIN"))) throw refusal("Only the owner can put a recorded-voice consent on file.");
+      }
+    }
     // The sheet owns everything it can see; the publication marker underneath
     // it belongs to the release that wrote it. Without this the parse above
     // strips that marker and the entry's approved art goes dark.
@@ -1231,6 +1254,151 @@ export async function updateEntryMeta(formData: FormData) {
 
   refreshCodex();
   revalidatePath(`/codex/bible/${slug}`);
+}
+
+// ---------------------------------------------------------------------------
+// Lines — voiced dialogue (export contract v5)
+// ---------------------------------------------------------------------------
+
+/**
+ * One row of the Lines editor as the browser submits it. `id` is null for a
+ * row the writer just added; a stored row keeps its id, and its number.
+ */
+const lineRowSchema = z.object({
+  id: z.string().uuid().nullable(),
+  speakerEntryId: z.string().uuid().nullable(),
+  speakerRole: z.string().trim().max(64).nullable(),
+  listenerEntryId: z.string().uuid().nullable(),
+  listenerRole: z.string().trim().max(64).nullable(),
+  text: z.string().max(1000),
+  performance: z.string().trim().max(200),
+  intensity: z.coerce.number().int().min(1).max(10),
+  emotion: z.array(z.enum(dialogueEmotionTags)).max(dialogueEmotionTags.length),
+  locale: z.string().trim().max(16),
+  voiced: z.boolean(),
+});
+
+export type LineRowInput = z.infer<typeof lineRowSchema>;
+
+export type SaveNodeLinesResult = { ok: true; count: number } | { ok: false; problems: string[] };
+
+/**
+ * Saves a node's whole line list in one transaction. Rows keep their number
+ * for life: a stored row is updated in place, a new row is minted the next
+ * number after the highest ever used on the node, and a stored row missing
+ * from the submission is retired rather than deleted, so `<arc>/<node>/03`
+ * can never later mean a different sentence. `order` is simply the row's
+ * position in the list.
+ *
+ * Validation (A5) refuses the whole save: every row must have one speaker
+ * (a character or a role), single-line plain text with no markdown, links or
+ * "#", an intensity from 1 to 10, and a locale that looks like one.
+ */
+export async function saveNodeLines(input: { nodeId: string; rows: LineRowInput[] }): Promise<SaveNodeLinesResult> {
+  const user = await requireRole(storyReadRole);
+  const parsed = z.object({ nodeId: z.string().uuid(), rows: z.array(lineRowSchema).max(200) }).safeParse(input);
+  if (!parsed.success) return { ok: false, problems: ["The lines could not be read. Reload the page and try again."] };
+
+  const problems: string[] = [];
+  parsed.data.rows.forEach((row, index) => {
+    const at = `Line ${index + 1}`;
+    const text = row.text.trim();
+    const textProblem = dialogueTextProblem(text);
+    if (textProblem) problems.push(`${at}: the spoken text ${textProblem}.`);
+    if ((row.speakerEntryId === null) === (row.speakerRole === null || row.speakerRole === "")) problems.push(`${at}: pick one speaker — a character or a role, not both and not neither.`);
+    if (row.speakerRole && !isDialogueRole(row.speakerRole)) problems.push(`${at}: a role is lower-case words joined by hyphens, like stormglass-guard.`);
+    if (row.listenerEntryId && row.listenerRole) problems.push(`${at}: a line has at most one listener.`);
+    if (row.listenerRole && !isDialogueRole(row.listenerRole)) problems.push(`${at}: a listener role is lower-case words joined by hyphens.`);
+    if (!isDialogueLocale(row.locale)) problems.push(`${at}: the locale should look like en-US.`);
+  });
+  if (problems.length) return { ok: false, problems };
+
+  const arcSlug = await db.$transaction(async (tx) => {
+    const node = await tx.storyNode.findUnique({ where: { id: parsed.data.nodeId }, include: { arc: { select: { slug: true } }, lines: { select: { id: true, number: true, retiredAt: true, text: true } } } });
+    if (!node) throw refusal("That node no longer exists.");
+    await assertArcUnlocked(tx, node.arcId);
+
+    // Every speaker and listener is a CHARACTER from the bible.
+    const entryIds = [...new Set(parsed.data.rows.flatMap((row) => [row.speakerEntryId, row.listenerEntryId]).filter((id): id is string => Boolean(id)))];
+    if (entryIds.length) {
+      const characters = await tx.storyEntry.findMany({ where: { id: { in: entryIds }, kind: "CHARACTER" }, select: { id: true } });
+      if (characters.length !== entryIds.length) throw refusal("A speaker has to be a character from the bible.");
+    }
+
+    const stored = new Map(node.lines.map((line) => [line.id, line]));
+    for (const row of parsed.data.rows) {
+      if (row.id && !stored.has(row.id)) throw refusal("One of these lines belongs to a different card. Reload the page and try again.");
+    }
+    let nextNumber = node.lines.reduce((max, line) => Math.max(max, line.number), 0) + 1;
+    const now = new Date();
+    const keep = new Set<string>();
+    for (const [order, row] of parsed.data.rows.entries()) {
+      const data = {
+        order,
+        speakerEntryId: row.speakerEntryId,
+        speakerRole: row.speakerEntryId ? null : row.speakerRole,
+        listenerEntryId: row.listenerEntryId,
+        listenerRole: row.listenerEntryId ? null : (row.listenerRole || null),
+        text: row.text.trim(),
+        performance: row.performance,
+        intensity: row.intensity,
+        emotion: [...new Set(row.emotion)],
+        locale: row.locale,
+        voiced: row.voiced,
+        retiredAt: null,
+        updatedByUserId: user.id,
+      };
+      if (row.id) {
+        keep.add(row.id);
+        await tx.storyLine.update({ where: { id: row.id }, data });
+      } else {
+        const created = await tx.storyLine.create({ data: { ...data, nodeId: node.id, number: nextNumber, createdByUserId: user.id } });
+        nextNumber += 1;
+        keep.add(created.id);
+      }
+    }
+    for (const line of node.lines) {
+      if (!keep.has(line.id) && line.retiredAt === null) {
+        await tx.storyLine.update({ where: { id: line.id }, data: { retiredAt: now, updatedByUserId: user.id } });
+      }
+    }
+
+    await recordRevision(tx, {
+      entityType: "NODE",
+      entityId: node.id,
+      arcId: node.arcId,
+      action: "UPDATED",
+      actorUserId: user.id,
+      summary: `Set the lines of "${node.title}" (${parsed.data.rows.length})`,
+      before: { lines: node.lines.filter((line) => line.retiredAt === null).map((line) => line.text) },
+      after: { lines: parsed.data.rows.map((row) => row.text.trim()) },
+    });
+    return node.arc.slug;
+  });
+
+  refreshCodex(arcSlug);
+  return { ok: true, count: parsed.data.rows.length };
+}
+
+/**
+ * "Split body into lines": proposes rows from a node's prose for the writer
+ * to accept or edit. Reads only; nothing is written until the writer saves.
+ */
+export async function proposeNodeLines(input: { nodeId: string }): Promise<{ rows: ProposedLine[]; characters: Array<{ slug: string; id: string }> }> {
+  await requireRole(storyReadRole);
+  const parsed = z.object({ nodeId: z.string().uuid() }).safeParse(input);
+  if (!parsed.success) throw refusal("Invalid node.");
+  const node = await db.storyNode.findUnique({ where: { id: parsed.data.nodeId }, select: { body: true, speaker: { select: { slug: true, title: true } } } });
+  if (!node) throw refusal("That node no longer exists.");
+  const characters = await db.storyEntry.findMany({ where: { kind: "CHARACTER" }, select: { id: true, slug: true, title: true, meta: true } });
+  const resolver = speakerResolverFor(
+    characters.map((character) => {
+      const meta = typeof character.meta === "object" && character.meta !== null && !Array.isArray(character.meta) ? character.meta as Record<string, unknown> : {};
+      return { slug: character.slug, title: character.title, fullName: typeof meta.fullName === "string" ? meta.fullName : null, aliases: Array.isArray(meta.aliases) ? meta.aliases.filter((alias): alias is string => typeof alias === "string") : [] };
+    }),
+    node.speaker,
+  );
+  return { rows: splitBodyIntoLines(node.body ?? "", resolver), characters: characters.map((character) => ({ slug: character.slug, id: character.id })) };
 }
 
 export async function linkEntryToNode(formData: FormData) {

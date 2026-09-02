@@ -42,6 +42,8 @@ it that way.
 | Quest arc | `slug` | `arcs[].slug` |
 | Scene / step / beat | `arcSlug/nodeKey` | `arcs[].nodes[].key` |
 | Branch | `arcSlug/nodeKey#choiceKey` | `arcs[].nodes[].choices[].key` |
+| Spoken line | `arcSlug/nodeKey/nn` (two-digit line number, never renumbered — deleting retires it) | `nodes[].lines[].lineId` in `content/snapshot.json`, flattened in `content/dialogue-lines.json` |
+| Choice option (spoken) | `arcSlug/nodeKey/opt-edgeKey` | `nodes[].options[].lineId` |
 | Bible entry | `KIND:slug` | `bible[].kind` + `bible[].slug` |
 | Artwork | `logicalPath` | `manifest.assets[].logicalPath` |
 

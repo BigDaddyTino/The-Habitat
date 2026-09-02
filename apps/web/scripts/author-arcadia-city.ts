@@ -166,6 +166,7 @@ async function main() {
     // are an art-direction reference and are marked as one.
     appearance: "A distinguished senior man in his early sixties with a stern but tranquil expression. Extensive scarring and deformity, most severe on the left side, with a blinded, milky left eye. Strong jaw, deep-set eyes, weathered skin, a neatly trimmed grey-and-white beard. Formal chancellor's attire with subtle military decorations. ART REFERENCE ONLY, not in-world text: the imposing battle-hardened build of Conquest from Invincible crossed with the stoic visage of Marcus Aurelius.",
     voice: "Measured, unhurried, and exact. A man of the Arcadian gentility who treats composure as a form of respect and does not raise his voice to be obeyed.",
+    voiceProfile: null,
     magic: { origin: null, schools: [], corruptionPhase: null, notes: null },
     // Deliberately empty. The Arcadian Sovereign Guard exists as a
     // headquarters REGION and not as a FACTION entry, and a factions[] row

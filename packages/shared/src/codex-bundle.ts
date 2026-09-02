@@ -4,8 +4,24 @@
  * a canon-only game-build feed, while this bundle is the full writers' room
  * resource library (including non-canon work and its artwork).
  */
+import type { DialogueLineRecord, DialogueOptionRecord, StoryVoiceProfile, StoryVoiceStatus } from "./dialogue-lines";
 
-export const codexBundleContractVersion = 4 as const;
+/**
+ * v5 (2026-09-02) is additive: nodes MAY carry structured `lines` (DIALOGUE
+ * nodes MUST, empty only with `linesStatus: "NONE"`), CHOICE nodes carry
+ * `options`, CHARACTER entries carry `meta.voiceProfile` + `meta.voiceStatus`,
+ * and the manifest names a flattened `content/dialogue-lines.json` sidecar.
+ * Nothing that existed in v4 changes shape, so a v4 reader keeps working, and
+ * the readers here accept both versions.
+ */
+export const codexBundleContractVersion = 5 as const;
+
+/** Bundle contract versions the readers on this side still understand. */
+export const supportedCodexBundleContractVersions: readonly number[] = [4, 5];
+
+/** The flattened dialogue sidecar's own contract. */
+export const codexDialogueLinesContractVersion = 1 as const;
+
 
 export type CodexJsonValue =
   | null
@@ -62,9 +78,15 @@ export type CodexBundleStoryRelease = {
   cutAt: string;
 };
 
+/** The dialogue sidecar's descriptor in the manifest (v5). */
+export type CodexBundleDialogueLinesFile = CodexBundleFile & {
+  contractVersion: typeof codexDialogueLinesContractVersion;
+};
+
 export type CodexBundleManifest = {
   contract: "martino-codex-bundle";
-  contractVersion: typeof codexBundleContractVersion;
+  /** 4 on bundles published before 2026-09-02; 5 since. */
+  contractVersion: number;
   snapshotId: string;
   generatedAt: string;
   revisionCursor: string | null;
@@ -74,12 +96,16 @@ export type CodexBundleManifest = {
   counts: CodexBundleCounts;
   content: CodexBundleFile;
   compatibility: CodexBundleFile;
+  /** v5: the same file as `content`, named the way the game side reads it. */
+  snapshot?: CodexBundleFile;
+  /** v5: `content/dialogue-lines.json`, the flattened voiced-line view. */
+  dialogueLines?: CodexBundleDialogueLinesFile;
   assets: CodexBundleAsset[];
 };
 
 export type CodexBundlePointer = {
   contract: "martino-codex-pointer";
-  contractVersion: typeof codexBundleContractVersion;
+  contractVersion: number;
   snapshotId: string;
   generatedAt: string;
   manifestPath: string;
@@ -133,6 +159,13 @@ export type CodexSnapshotNode = {
   updatedBy: CodexWriterAttribution | null;
   createdAt: string;
   updatedAt: string;
+  /** v5: the node's spoken lines in order. Present on every node that has
+   *  any, and always on DIALOGUE nodes (empty with `linesStatus: "NONE"`). */
+  lines?: DialogueLineRecord[];
+  /** v5: only ever "NONE", and only on a DIALOGUE node with no lines yet. */
+  linesStatus?: "NONE";
+  /** v5: CHOICE nodes only — one option per labelled outgoing edge. */
+  options?: DialogueOptionRecord[];
 };
 
 export type CodexSnapshotEdge = {
@@ -145,6 +178,8 @@ export type CodexSnapshotEdge = {
   condition: string | null;
   effects: string[];
   position: number;
+  /** v5: whether a labelled option out of a CHOICE node is a spoken line. */
+  voiced?: boolean;
   status: string;
   createdBy: CodexWriterAttribution;
   createdAt: string;
@@ -253,6 +288,31 @@ export type CodexSnapshotMapNodePlacement = {
   updatedAt: string;
 };
 
+/**
+ * `content/dialogue-lines.json` (v5): every line in the snapshot, flattened
+ * with its arc and node, plus the voice profiles of everyone who speaks.
+ * Deterministic bytes for identical input: sorted by arc slug, then the
+ * node's canvas order (canvasY, canvasX, key), then line order.
+ */
+export type CodexDialogueLine = DialogueLineRecord & {
+  arcSlug: string;
+  nodeKey: string;
+  nodeKind: string;
+  nodeId: string;
+};
+
+export type MartinoCodexDialogueLines = {
+  contract: "martino-codex-dialogue-lines";
+  contractVersion: typeof codexDialogueLinesContractVersion;
+  snapshotId: string;
+  generatedAt: string;
+  sourceContentSha256: string;
+  speakers: Record<string, { title: string; voiceProfile: StoryVoiceProfile; voiceStatus: StoryVoiceStatus }>;
+  roles: Record<string, { title: string; voiceProfile: StoryVoiceProfile }>;
+  lines: CodexDialogueLine[];
+  counts: { lines: number; voiced: number; speakers: number; roles: number };
+};
+
 export type MartinoCodexSnapshot = {
   contract: "martino-codex-snapshot";
   contractVersion: typeof codexBundleContractVersion;
@@ -285,11 +345,15 @@ function isSha256(value: unknown): value is string {
   return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 }
 
+function isSupportedContractVersion(value: unknown): value is number {
+  return typeof value === "number" && supportedCodexBundleContractVersions.includes(value);
+}
+
 export function isCodexBundlePointer(value: unknown): value is CodexBundlePointer {
   if (!isRecord(value)) return false;
   return (
     value.contract === "martino-codex-pointer" &&
-    value.contractVersion === codexBundleContractVersion &&
+    isSupportedContractVersion(value.contractVersion) &&
     typeof value.snapshotId === "string" &&
     typeof value.generatedAt === "string" &&
     typeof value.manifestPath === "string" &&
@@ -300,9 +364,12 @@ export function isCodexBundlePointer(value: unknown): value is CodexBundlePointe
 
 export function isCodexBundleManifest(value: unknown): value is CodexBundleManifest {
   if (!isRecord(value) || !isRecord(value.content) || !isRecord(value.compatibility)) return false;
+  // A v5 manifest names the sidecar; a v4 one predates it. Either way the
+  // descriptor, when present, must be a real file descriptor.
+  if (value.dialogueLines !== undefined && !(isRecord(value.dialogueLines) && typeof value.dialogueLines.path === "string" && isSha256(value.dialogueLines.sha256))) return false;
   return (
     value.contract === "martino-codex-bundle" &&
-    value.contractVersion === codexBundleContractVersion &&
+    isSupportedContractVersion(value.contractVersion) &&
     typeof value.snapshotId === "string" &&
     typeof value.generatedAt === "string" &&
     (value.revisionCursor === null || typeof value.revisionCursor === "string") &&

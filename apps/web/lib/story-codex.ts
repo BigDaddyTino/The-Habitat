@@ -74,6 +74,25 @@ export type StoryBoardNode = {
   comments: Array<{ id: string; body: string; author: string; createdAt: Date }>;
   /** Non-null only while somebody else's courtesy lock is still live. */
   lockedBy: StoryWriter | null;
+  /** The node's spoken lines (export v5), live ones only, in order. */
+  lines: StoryBoardLine[];
+};
+
+export type StoryBoardLine = {
+  id: string;
+  /** The frozen export number: `<arc>/<node>/<nn>`. */
+  number: number;
+  order: number;
+  speaker: { id: string; slug: string; title: string } | null;
+  speakerRole: string | null;
+  listener: { id: string; slug: string; title: string } | null;
+  listenerRole: string | null;
+  text: string;
+  performance: string;
+  intensity: number;
+  emotion: string[];
+  locale: string;
+  voiced: boolean;
 };
 
 export type StoryBoardEdge = {
@@ -85,6 +104,8 @@ export type StoryBoardEdge = {
   condition: string | null;
   effects: string[];
   position: number;
+  /** A labelled option out of a CHOICE node that the player speaks aloud. */
+  voiced: boolean;
   status: StoryStatus;
   /** Edges carry no version column, so the editor keys its fields on this to
    *  pick up another writer's save on refresh instead of silently holding —
@@ -190,6 +211,11 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
         continuesIn: { select: { id: true, slug: true, title: true } },
         entryLinks: { include: { entry: { select: { id: true, slug: true, title: true, kind: true } } } },
         comments: { where: { resolvedAt: null }, include: { author: { select: writerSelect } }, orderBy: { createdAt: "asc" } },
+        lines: {
+          where: { retiredAt: null },
+          include: { speaker: { select: { id: true, slug: true, title: true } }, listener: { select: { id: true, slug: true, title: true } } },
+          orderBy: [{ order: "asc" }, { number: "asc" }],
+        },
       },
       orderBy: { createdAt: "asc" },
     }),
@@ -234,6 +260,21 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
     // An expired lock is no lock. Reading it as live would leave a node frozen
     // by whoever last closed their laptop on it.
     lockedBy: node.lockedBy && node.lockExpiresAt && node.lockExpiresAt > now ? toWriter(node.lockedBy) : null,
+    lines: node.lines.map((line) => ({
+      id: line.id,
+      number: line.number,
+      order: line.order,
+      speaker: line.speaker,
+      speakerRole: line.speakerRole,
+      listener: line.listener,
+      listenerRole: line.listenerRole,
+      text: line.text,
+      performance: line.performance,
+      intensity: line.intensity,
+      emotion: line.emotion,
+      locale: line.locale,
+      voiced: line.voiced,
+    })),
   }));
 
   const byId = new Map(boardNodes.map((node) => [node.id, node]));
@@ -269,6 +310,7 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
     edges: edges.filter((edge) => byId.has(edge.fromNodeId) && byId.has(edge.toNodeId)).map((edge) => ({
       id: edge.id,
       key: edge.key,
+      voiced: edge.voiced,
       fromNodeId: edge.fromNodeId,
       toNodeId: edge.toNodeId,
       label: edge.label,

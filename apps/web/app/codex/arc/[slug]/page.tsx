@@ -2,19 +2,21 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Archive, ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { isStoryFlowEditable, storyLockNotice } from "@habitat/shared";
-import { getCanonNavigator, getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { isStoryFlowEditable, storyArcCategoryLabels, storyLockNotice, storyStatusLabels } from "@habitat/shared";
+import { getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
-import { StoryFlow } from "@/components/story-flow";
-import { CanonNavigator } from "@/components/canon-navigator";
+import { StoryScript } from "@/components/story-script";
 import { RipplePanel } from "@/components/story-ripples";
 import { ArcFields } from "@/components/story-arc-form";
 import { archiveArc, canoniseArc, updateArc } from "@/app/codex/actions";
 
 /**
- * The arc page IS the story: one top-down tree, read top to bottom, walked
- * choice by choice, edited in place. The old whiteboard/reader split confused
- * everyone — including the owner — so there is exactly one view now.
+ * The arc page IS the story, read the way a player meets it: a numbered
+ * reading order down the left, the chosen card on the right with its prose,
+ * its spoken lines as fields, and the choices leading out of it — everything
+ * a writer fills in, in one place. The graph is one tab over. The arc's own
+ * settings and loose ends sit in a compact strip above, collapsed, so the
+ * story is the first thing on the screen rather than the last.
  */
 export default async function StoryArcPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ node?: string }> }) {
   const user = await requireRole(storyReadRole);
@@ -22,13 +24,12 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const [{ slug }, { node: initialNodeId }] = await Promise.all([params, searchParams]);
   const board = await getStoryBoard(slug);
   if (!board) notFound();
-  const [arcRefs, regions, characters, factions, allSystems, nav, web] = await Promise.all([
+  const [arcRefs, regions, characters, factions, allSystems, web] = await Promise.all([
     listStoryArcRefs(),
     listStoryEntries({ kind: "REGION" }),
     listStoryEntries({ kind: "CHARACTER" }),
     listStoryEntries({ kind: "FACTION" }),
     listStoryEntries({ kind: "SYSTEM" }),
-    getCanonNavigator(),
     getStoryRipples(),
   ]);
   // The other end of the release gate: each system's sheet names the arc that
@@ -41,30 +42,27 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const nodeTitles = new Map(board.nodes.map((node) => [node.id, node.title]));
   // One freeze for the whole flow: arc settings included, admins included.
   const canEditArc = isStoryFlowEditable(board.arc.locked !== null);
+  const lineTotal = board.nodes.reduce((sum, node) => sum + node.lines.length, 0);
+  const voicedTotal = board.nodes.reduce((sum, node) => sum + node.lines.filter((line) => line.voiced).length, 0);
 
   return (
-    // The board keeps its own full-height shell; the ripples panel sits below
-    // it as a sibling so a short screen scrolls to reach it rather than
-    // squeezing the flow canvas to make room.
     <>
-    <section className="codex-board-shell">
-      <header className="codex-board-head">
-        <div>
-          <Link className="codex-back" href="/codex/stories/canon"><ArrowLeft aria-hidden="true" size={13} /> Story navigator</Link>
+    <section className="codex-shell arc-shell">
+      <header className="arc-head">
+        <div className="arc-head-copy">
+          <Link className="codex-back" href="/codex/stories"><ArrowLeft aria-hidden="true" size={13} /> Stories</Link>
           <h1>{board.arc.title}</h1>
-          {board.arc.summary || board.arc.region || board.arc.hook ? (
-            <details className="codex-board-brief">
-              <summary>Story brief</summary>
-              {board.arc.summary ? <p>{board.arc.summary}</p> : null}
-              {board.arc.region || board.arc.hook ? (
-                <p className="codex-arc-pickup">
-                  <MapPin aria-hidden="true" size={12} />
-                  {board.arc.region ? <Link href={`/codex/bible/${board.arc.region.slug}`}>{board.arc.region.title}</Link> : "No pickup place yet"}
-                  {board.arc.hook ? <span> — {board.arc.hook}</span> : null}
-                </p>
-              ) : null}
-            </details>
-          ) : null}
+          <p className="arc-chips">
+            <span className={`arc-chip is-${board.arc.status.toLowerCase()}`}>{storyStatusLabels[board.arc.status]}</span>
+            <span className="arc-chip">{storyArcCategoryLabels[board.arc.category]}</span>
+            {board.arc.region ? <Link className="arc-chip" href={`/codex/bible/${board.arc.region.slug}`}><MapPin aria-hidden="true" size={11} /> {board.arc.region.title}</Link> : null}
+            {board.arc.companion ? <Link className="arc-chip" href={`/codex/bible/${board.arc.companion.slug}`}>{board.arc.companion.title}&apos;s story</Link> : null}
+            {board.arc.faction ? <Link className="arc-chip" href={`/codex/bible/${board.arc.faction.slug}`}>{board.arc.faction.title}</Link> : null}
+            <span className="arc-chip is-muted">{board.nodes.length} cards · {lineTotal} lines{lineTotal ? ` · ${voicedTotal} voiced` : ""}</span>
+            <span className="arc-chip is-muted" title="The export slug never changes — it is the identity the game matches this story's assets on.">slug <code>{board.arc.slug}</code></span>
+          </p>
+          {board.arc.summary ? <p className="arc-summary">{board.arc.summary}</p> : null}
+          {board.arc.hook ? <p className="arc-hook"><b>Hook</b> {board.arc.hook}</p> : null}
           {unlockedSystems.length > 0 ? (
             <p className="codex-arc-unlocks">
               <Cog aria-hidden="true" size={12} />
@@ -73,7 +71,7 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
             </p>
           ) : null}
         </div>
-        <div className="codex-board-aside">
+        <div className="arc-head-aside">
           {board.present.length > 0 ? (
             <div className="codex-presence">
               <p className="eyebrow">Here now</p>
@@ -98,9 +96,10 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
         <p className="codex-problems codex-arc-locked"><Lock aria-hidden="true" size={14} /> {storyLockNotice(board.arc.locked?.by ?? null)}</p>
       ) : null}
 
+      <div className="arc-strip">
       {canEditArc ? (
-        <details className="codex-problems codex-arc-settings">
-          <summary><Settings2 aria-hidden="true" size={14} /> Arc settings — what kind of story it is, where it is picked up, and how</summary>
+        <details className="codex-problems codex-arc-settings arc-strip-item">
+          <summary><Settings2 aria-hidden="true" size={14} /> Arc settings — title, kind of story, where it is picked up</summary>
           <form action={updateArc} className="story-form">
             <input name="arcId" type="hidden" value={board.arc.id} />
             <ArcFields
@@ -132,26 +131,21 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
       ) : null}
 
       {board.problems.length > 0 ? (
-        <details className="codex-problems">
-          <summary><TriangleAlert aria-hidden="true" size={14} /> {board.problems.length} loose end{board.problems.length === 1 ? "" : "s"} on this arc</summary>
+        <details className="codex-problems arc-strip-item">
+          <summary><TriangleAlert aria-hidden="true" size={14} /> {board.problems.length} loose end{board.problems.length === 1 ? "" : "s"}</summary>
           <ul>{board.problems.map((problem, index) => <li key={`${problem.kind}-${problem.nodeKey}-${index}`}>{problem.detail}</li>)}</ul>
         </details>
       ) : null}
-
-      <div className="canon-workspace">
-        <CanonNavigator currentArcSlug={slug} nav={nav} />
-        <div className="canon-workspace-main">
-          <StoryFlow
-            arcRefs={arcRefs}
-            assistantAvailable={isStoryAssistantAvailable()}
-            board={board}
-            canReview={canReview}
-            initialNodeId={initialNodeId ?? null}
-            viewerUserId={user.id}
-          />
-        </div>
       </div>
 
+      <StoryScript
+        arcRefs={arcRefs}
+        assistantAvailable={isStoryAssistantAvailable()}
+        board={board}
+        canReview={canReview}
+        initialNodeId={initialNodeId ?? null}
+        viewerUserId={user.id}
+      />
     </section>
     <RipplePanel arcSlug={slug} arcTitle={board.arc.title} web={web} />
     </>

@@ -29,3 +29,4 @@ export * from "./bloomfall-reach";
 export * from "./bloomfall-travel";
 export * from "./atlas-connection";
 export * from "./atlas-v2-projection";
+export * from "./dialogue-lines";

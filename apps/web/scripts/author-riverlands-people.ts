@@ -109,6 +109,7 @@ For writers: the Judge is the arc's hinge — she appoints the detective, and he
       appearance:
         "Small, immaculate, unhurried; robes cut plain, one pen. The stillness of someone who has decided that being unreadable is a public service.",
       voice: "Level, procedural, allergic to drama; the courtroom register never fully switches off.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [],
       home: "heartland",
@@ -147,6 +148,7 @@ For writers: Odu and her Watch are the units the player can inherit if the rulin
       appearance:
         "Tall, parade-straight, West-African looks; armor kept to working shine, never ceremony. Carries the muster ledger herself rather than delegate it.",
       voice: "Clipped, exact, drops rank the moment competence shows; her praise is a duty roster with your name in a better position.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [],
       home: "heartland",
@@ -187,6 +189,7 @@ For writers and artists: Aster has no body and is never depicted as a figure —
       appearance:
         "None. He is light held in a Core — a shift in the machine's glow that visitors learn to read as attention. Never depicted as a figure.",
       voice: "Kind, unhurried, arrives like remembered speech; slightly wrong in his tenses, as if 'now' were a courtesy.",
+      voiceProfile: null,
       magic: { origin: null, schools: [], corruptionPhase: null, notes: "An Echo in a Core is past the reach of the corruption ladder; the phase field is null the way NAG's is." },
       factions: [],
       home: "heartland",
@@ -228,6 +231,7 @@ For writers: Verne is the tour's economy teacher and the most dangerous kind of 
       appearance:
         "Polished and deliberate: tailored river-coat in Aegis grey, striking, unhurried; the kind of composure that makes a room reorganize itself.",
       voice: "Warm, exact, contractual; speaks in settlement terms and lets you discover the definitions later.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [
         { faction: "aegis-extraction-consortium", role: "ranking factor, Arcadia Gate", standing: "the Consortium's model officer; watched for bigger things" },
@@ -268,6 +272,7 @@ For writers: Kolm is the tour's defense lesson made flesh — a chokepoint with 
       appearance:
         "Built like the machinery: broad, still, chain-scarred hands; Holdfast wool and a brakeman's harness worn smooth. Northern-pale under permanent gorge-shadow.",
       voice: "Sparse, low, final; sentences arrive like counterweights — slowly, and then completely.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [
         { faction: "mountain-holdfasts", role: "brakemaster of Winchworks", standing: "hereditary office; the Holdfasts' voice on the river in all but title" },
@@ -306,6 +311,7 @@ For writers: Mora teaches the tour's gray-economy lesson, and she is the arc's m
       appearance:
         "Black crepe as uniform, silver-white hair dressed high, striking still; rings on both hands, each one an estate somebody settled. Beauty run to authority.",
       voice: "Velvet over iron; condolences so precise they double as appraisals.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [
         { faction: "bone-market-families", role: "keeper of Charnel Lock", standing: "the Families' voice on the leg; which Family holds her charter is deliberately unclear" },
@@ -344,6 +350,7 @@ For writers: Yusra teaches the tour's diplomacy and supply-line lesson, and she 
       appearance:
         "Small, sun-cured, desert-dark; indigo keeper-cloth, well-keys worn as jewelry, a stillness that reorganizes shouting rooms. Ages like the desert — slowly, and on her own terms.",
       voice: "Quiet, hospitable, arithmetic underneath; never raises her voice because she has never needed to.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [
         { faction: "desert-nomad-compact", role: "elder of the keeper clans; keeper of the Standing Camp", standing: "the Compact's anchor; her word waters or dries a route" },
@@ -382,6 +389,7 @@ For writers: Rew teaches the tour's intel-and-assay lesson, and he is the arc's 
       appearance:
         "Institute-immaculate against corridor weather: storm coat over academic grey, silver at the temples, a listener's tilt of the head that photographs as sincerity.",
       voice: "Warm, articulate, curatorial; answers every question except the one asked, and agrees it was excellent.",
+      voiceProfile: null,
       magic: cleanMagic,
       factions: [
         { faction: "meridian-arcane-institute", role: "Director, Regulator Station and the Stormgate charter", standing: "trusted with budgets his own researchers cannot see" },

@@ -715,6 +715,7 @@ function desiredWendy(current: EntryRow): DesiredEntry {
       },
       model: null,
       voice: "Economical short declaratives. Contempt is throughput rather than cruelty. She never explains the world to the audience, watches the queue constantly, uses profanity sparingly, and allows exactly one earned soft beat: ‘Good. You listen.’",
+      voiceProfile: null,
       gameId: null,
       skills: [],
       status: {
@@ -772,6 +773,7 @@ His later death remains the same fast, serious lesson. The Blue Spiral material 
     meta: carryServerOwnedMeta(current.meta, characterMetaSchema.parse({
       ...meta,
       voice: "Gallows humor under pressure: blunt, flirtatious when the moment permits, and briefly crude around the wardrobe pod. The humor never softens the danger or his later death.",
+      voiceProfile: null,
       status: {
         known: "dead — killed by the Hypogriff rider on the Shattermarket rooftops",
         actual: meta.status.actual,

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync } from "node:fs";
 import { mkdir, readdir, rename, stat } from "node:fs/promises";
 import path from "node:path";
 import type { CodexBundleAsset } from "@habitat/shared";
@@ -55,6 +55,12 @@ const codexRootImages = new Set([
 ]);
 
 const imageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+// Voice reference clips (v5): dropped at private/codex-art/voice-clips/<slug>.<ext>
+// and carried under /audio/, where a character sheet's referenceClipAssetId
+// points at them. Same content-addressed store, same hash-verified copy.
+const audioExtensions = new Set([".wav", ".mp3", ".ogg", ".flac"]);
+const assetExtensions = new Set([...imageExtensions, ...audioExtensions]);
+const voiceClipDirectory = "voice-clips";
 
 export type SourceAsset = {
   sourcePath: string;
@@ -94,10 +100,16 @@ export async function discoverCodexAssets(repositoryRoot: string): Promise<Sourc
   for (const file of await walk(mapsRoot)) {
     candidates.set(file, `/images/maps/${path.relative(mapsRoot, file).split(path.sep).join("/")}`);
   }
+  const clipsRoot = path.join(artRoot, voiceClipDirectory);
+  if (existsSync(clipsRoot)) {
+    for (const file of await walk(clipsRoot)) {
+      candidates.set(file, `/audio/${voiceClipDirectory}/${path.relative(clipsRoot, file).split(path.sep).join("/")}`);
+    }
+  }
 
   const assets = await Promise.all(
     [...candidates.entries()]
-      .filter(([filename]) => imageExtensions.has(path.extname(filename).toLowerCase()))
+      .filter(([filename]) => assetExtensions.has(path.extname(filename).toLowerCase()))
       // Ordered by the logical path, not by where the file happens to sit on
       // disk: the bundle's asset order is part of what an importer diffs, and
       // it must not shift because a shelf moved out of public/.
@@ -125,6 +137,14 @@ function mimeType(filename: string) {
       return "image/png";
     case ".webp":
       return "image/webp";
+    case ".wav":
+      return "audio/wav";
+    case ".mp3":
+      return "audio/mpeg";
+    case ".ogg":
+      return "audio/ogg";
+    case ".flac":
+      return "audio/flac";
     default:
       return "application/octet-stream";
   }

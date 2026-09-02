@@ -40,10 +40,24 @@ export async function readAndVerifyBundle(sourceRoot: string, verifyAssets = tru
   if (!(await fileMatches(resolveBundlePath(sourceRoot, manifestValue.compatibility.path), manifestValue.compatibility.sha256, manifestValue.compatibility.bytes))) {
     throw new Error("The canon compatibility export failed integrity verification.");
   }
+  // v5 names the same snapshot twice and adds the dialogue sidecar; both
+  // verify like any other file when present.
+  if (manifestValue.snapshot) {
+    assertBundleFile(manifestValue.snapshot, "snapshot descriptor");
+    if (!(await fileMatches(resolveBundlePath(sourceRoot, manifestValue.snapshot.path), manifestValue.snapshot.sha256, manifestValue.snapshot.bytes))) {
+      throw new Error("The snapshot descriptor failed integrity verification.");
+    }
+  }
+  if (manifestValue.dialogueLines) {
+    assertBundleFile(manifestValue.dialogueLines, "dialogue lines");
+    if (!(await fileMatches(resolveBundlePath(sourceRoot, manifestValue.dialogueLines.path), manifestValue.dialogueLines.sha256, manifestValue.dialogueLines.bytes))) {
+      throw new Error("The dialogue lines sidecar failed integrity verification.");
+    }
+  }
   if (verifyAssets) {
     for (const asset of manifestValue.assets) {
       assertBundleFile(asset, `asset ${asset.logicalPath}`);
-      if (!asset.logicalPath.startsWith("/images/")) throw new Error(`Unsafe Codex asset path: ${asset.logicalPath}`);
+      if (!asset.logicalPath.startsWith("/images/") && !asset.logicalPath.startsWith("/audio/")) throw new Error(`Unsafe Codex asset path: ${asset.logicalPath}`);
       if (!(await fileMatches(resolveBundlePath(sourceRoot, asset.path), asset.sha256, asset.bytes))) {
         throw new Error(`Codex asset failed integrity verification: ${asset.logicalPath}`);
       }
@@ -78,6 +92,8 @@ export async function mirrorCodexBundle(sourceRoot: string, mirrorRoot: string) 
     ...manifest,
     content: { ...manifest.content, path: `${localReleaseRelative}/content/snapshot.json` },
     compatibility: { ...manifest.compatibility, path: `${localReleaseRelative}/compatibility/canon-v1.json` },
+    ...(manifest.snapshot ? { snapshot: { ...manifest.snapshot, path: `${localReleaseRelative}/content/snapshot.json` } } : {}),
+    ...(manifest.dialogueLines ? { dialogueLines: { ...manifest.dialogueLines, path: `${localReleaseRelative}/content/dialogue-lines.json` } } : {}),
     assets: manifest.assets.map((asset) => ({
       ...asset,
       path: `${localReleaseRelative}${asset.logicalPath}`,
@@ -97,6 +113,13 @@ export async function mirrorCodexBundle(sourceRoot: string, mirrorRoot: string) 
       path.join(stagingPath, "compatibility", "canon-v1.json"),
       manifest.compatibility,
     );
+    if (manifest.dialogueLines) {
+      await copyVerified(
+        resolveBundlePath(sourceRoot, manifest.dialogueLines.path),
+        path.join(stagingPath, "content", "dialogue-lines.json"),
+        manifest.dialogueLines,
+      );
+    }
     for (const asset of manifest.assets) {
       const relativeAsset = asset.logicalPath.slice(1).split("/").join(path.sep);
       await copyVerified(resolveBundlePath(sourceRoot, asset.path), path.join(stagingPath, relativeAsset), asset);

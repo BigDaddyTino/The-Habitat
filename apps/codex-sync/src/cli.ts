@@ -2,7 +2,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { readImportConfig, readMirrorConfig, readPublisherConfig } from "./config";
 import { applyCodexImport, describeCodexImportDiff, planCodexImport, readImportLedger, rollbackCodexImport } from "./import";
 import { mirrorCodexBundle, readAndVerifyBundle } from "./mirror";
-import { codexPublishState, publishCodexBundle, publisherFingerprint } from "./publisher";
+import { codexDialogueReport, codexPublishState, publishCodexBundle, publisherFingerprint } from "./publisher";
 
 function log(message: string) {
   process.stdout.write(`[${new Date().toISOString()}] ${message}\n`);
@@ -56,9 +56,25 @@ async function main() {
     const result = await publishCodexBundle(config.repositoryRoot, config.syncRoot);
     log(
       result.changed
-        ? `Published ${result.snapshotId} with ${result.assets} Codex assets.`
+        ? `Published ${result.snapshotId} with ${result.assets} Codex assets and ${result.lines} dialogue lines.`
         : `Codex is current at ${result.snapshotId}; no release was created.`,
     );
+    for (const row of result.report) log(`  ${row}`);
+    return;
+  }
+  if (command === "lines") {
+    // The dialogue validation report (contract v5, E/F), without touching the
+    // share: what the next publish would carry, and anything that would stop
+    // it. Exit code 1 on any problem, so a script can gate on it.
+    const config = readPublisherConfig();
+    const { validation, counts } = await codexDialogueReport(config.repositoryRoot);
+    log(`dialogue  ${counts.lines} lines, ${counts.voiced} voiced, ${counts.speakers} speakers, ${counts.roles} roles`);
+    for (const row of validation.report) log(`  ${row}`);
+    if (validation.problems.length) {
+      log(`${validation.problems.length} problem(s) would stop a publish:`);
+      for (const problem of validation.problems) log(`  ! ${problem}`);
+      process.exitCode = 1;
+    } else log("VALID — every line is addressable, attributed, and hashed to its content.");
     return;
   }
   if (command === "mirror") {
@@ -90,7 +106,9 @@ async function main() {
     const onDrive = verified.manifest.storyRelease;
     log(`on drive  ${onDrive ? `${onDrive.name} ${onDrive.sha256.slice(0, 12)}…` : "pre-boundary bundle — canon payload was read live"}`);
 
+    log(`dialogue  ${state.lines.lines} lines, ${state.lines.voiced} voiced${state.dialogue.problems.length ? ` — ${state.dialogue.problems.length} validation problem(s)` : ""}`);
     const problems: string[] = [];
+    if (state.dialogue.problems.length) problems.push(`INVALID DIALOGUE — the publisher refuses to ship until these are fixed: ${state.dialogue.problems.slice(0, 5).join("; ")}${state.dialogue.problems.length > 5 ? "; …" : ""}`);
     if (state.stale) problems.push(`STALE — ${state.reason ?? "the drive does not match current canon"}. The publisher should have republished and has not; check codex-sync-logs.`);
     if (state.release && onDrive && onDrive.sha256 !== state.release.sha256) {
       problems.push(`BEHIND — a release (${state.release.name}) has been cut that the drive has not picked up.`);
@@ -153,7 +171,7 @@ async function main() {
       : `Imported ${result.record.snapshotId}. This is the first import here, so there is nothing earlier to roll back to.`);
     return;
   }
-  throw new Error("Usage: pnpm --filter @habitat/codex-sync <publish|mirror|verify|health|import> [--watch] [--apply] [--status] [--rollback [--to <snapshotId>]]");
+  throw new Error("Usage: pnpm --filter @habitat/codex-sync <publish|mirror|verify|health|lines|import> [--watch] [--apply] [--status] [--rollback [--to <snapshotId>]]");
 }
 
 main().catch((error: unknown) => {

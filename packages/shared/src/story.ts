@@ -1,3 +1,4 @@
+import type { StoryVoiceProfile } from "./dialogue-lines";
 /**
  * The Story Codex vocabulary, shared by the web editor and the canon export the
  * Martino Unreal project reads.
@@ -740,6 +741,8 @@ export type StoryCharacterMeta = {
   age: string | null;
   appearance: string | null;
   voice: string | null;
+  /// A structured profile a voice-design model can work from (export v5).
+  voiceProfile: StoryVoiceProfile | null;
   magic: {
     origin: (typeof storyMagicOrigins)[number] | null;
     schools: string[];

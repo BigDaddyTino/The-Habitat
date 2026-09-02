@@ -1,11 +1,15 @@
 import { getPrismaClient } from "@habitat/db/client";
 import {
   codexBundleContractVersion,
+  dialogueOptionLineId,
   isPublishedStoryMapArtVersion,
   type CodexJsonValue,
   type CodexWriterAttribution,
+  type DialogueLineRecord,
+  type DialogueOptionRecord,
   type MartinoCodexSnapshot,
 } from "@habitat/shared";
+import { dominantSpeaker, lineRecord } from "./dialogue";
 
 const writerSelect = { name: true, username: true } as const;
 
@@ -74,6 +78,14 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
     orderBy: [{ arcId: "asc" }, { fromNodeId: "asc" }, { position: "asc" }, { key: "asc" }],
     include: { creator: { select: writerSelect } },
   });
+  // Voiced dialogue (v5): live lines only. A retired line keeps its number
+  // in the database precisely so the number is never minted again; it has no
+  // business in the export.
+  const storedLines = await database.storyLine.findMany({
+    where: { retiredAt: null },
+    orderBy: [{ nodeId: "asc" }, { order: "asc" }, { number: "asc" }],
+    include: { speaker: { select: { slug: true } }, listener: { select: { slug: true } } },
+  });
   const entries = await database.storyEntry.findMany({
     orderBy: [{ kind: "asc" }, { slug: "asc" }],
     include: {
@@ -125,6 +137,42 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
   }
 
   const newestRevision = cursorAfter?.id ?? null;
+
+  // Lines and options hang off their node under the node's export identity.
+  const arcSlugById = new Map(arcs.map((arc) => [arc.id, arc.slug]));
+  const nodeKeyById = new Map(nodes.map((node) => [node.id, node.key]));
+  const linesByNode = new Map<string, DialogueLineRecord[]>();
+  for (const line of storedLines) {
+    const node = nodes.find((candidate) => candidate.id === line.nodeId);
+    if (!node) continue;
+    const record = lineRecord(arcSlugById.get(node.arcId) ?? node.arcId, node.key, {
+      number: line.number,
+      order: line.order,
+      speakerSlug: line.speaker?.slug ?? null,
+      speakerRole: line.speakerRole,
+      listenerSlug: line.listener?.slug ?? null,
+      listenerRole: line.listenerRole,
+      text: line.text,
+      performance: line.performance,
+      intensity: line.intensity,
+      emotion: line.emotion,
+      locale: line.locale,
+      voiced: line.voiced,
+    });
+    linesByNode.set(node.id, [...(linesByNode.get(node.id) ?? []), record]);
+  }
+  const optionsFor = (node: (typeof nodes)[number]): DialogueOptionRecord[] =>
+    edges
+      .filter((edge) => edge.fromNodeId === node.id && edge.label !== null)
+      .sort((left, right) => left.position - right.position)
+      .map((edge) => ({
+        edgeKey: edge.key,
+        toNodeKey: nodeKeyById.get(edge.toNodeId) ?? "",
+        text: edge.label ?? "",
+        voiced: edge.voiced,
+        lineId: dialogueOptionLineId(arcSlugById.get(node.arcId) ?? node.arcId, node.key, edge.key),
+      }));
+
   return {
         contract: "martino-codex-snapshot",
         contractVersion: codexBundleContractVersion,
@@ -156,29 +204,37 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
           createdAt: arc.createdAt.toISOString(),
           updatedAt: arc.updatedAt.toISOString(),
         })),
-        nodes: nodes.map((node) => ({
-          id: node.id,
-          arcId: node.arcId,
-          key: node.key,
-          kind: node.kind,
-          title: node.title,
-          summary: node.summary,
-          body: node.body,
-          status: node.status,
-          speakerSlug: node.speaker?.slug ?? null,
-          endingKind: node.endingKind,
-          completion: node.completion,
-          effects: node.effects,
-          rewards: node.rewards,
-          continuesInArcSlug: node.continuesIn?.slug ?? null,
-          canvasX: node.canvasX,
-          canvasY: node.canvasY,
-          version: node.version,
-          createdBy: writer(node.creator),
-          updatedBy: node.editor ? writer(node.editor) : null,
-          createdAt: node.createdAt.toISOString(),
-          updatedAt: node.updatedAt.toISOString(),
-        })),
+        nodes: nodes.map((node) => {
+          const lines = linesByNode.get(node.id) ?? [];
+          return {
+            id: node.id,
+            arcId: node.arcId,
+            key: node.key,
+            kind: node.kind,
+            title: node.title,
+            summary: node.summary,
+            body: node.body,
+            status: node.status,
+            // Per line since v5; the node reports its dominant speaker (B4),
+            // falling back to the stored attribution when no line names one.
+            speakerSlug: dominantSpeaker(lines) ?? node.speaker?.slug ?? null,
+            endingKind: node.endingKind,
+            completion: node.completion,
+            effects: node.effects,
+            rewards: node.rewards,
+            continuesInArcSlug: node.continuesIn?.slug ?? null,
+            canvasX: node.canvasX,
+            canvasY: node.canvasY,
+            version: node.version,
+            createdBy: writer(node.creator),
+            updatedBy: node.editor ? writer(node.editor) : null,
+            createdAt: node.createdAt.toISOString(),
+            updatedAt: node.updatedAt.toISOString(),
+            ...(lines.length > 0 || node.kind === "DIALOGUE" ? { lines } : {}),
+            ...(node.kind === "DIALOGUE" && lines.length === 0 ? { linesStatus: "NONE" as const } : {}),
+            ...(node.kind === "CHOICE" ? { options: optionsFor(node) } : {}),
+          };
+        }),
         edges: edges.map((edge) => ({
           id: edge.id,
           arcId: edge.arcId,
@@ -189,6 +245,7 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
           condition: edge.condition,
           effects: edge.effects,
           position: edge.position,
+          voiced: edge.voiced,
           status: edge.status,
           createdBy: writer(edge.creator),
           createdAt: edge.createdAt.toISOString(),
@@ -304,6 +361,9 @@ export async function codexDatabaseFingerprint() {
   const arcs = await database.storyArc.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const nodes = await database.storyNode.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const edges = await database.storyEdge.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
+  // Lines are their own table (v5); without this row a saved line would
+  // never republish, and the drive would quietly serve the old dialogue.
+  const lines = await database.storyLine.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const entries = await database.storyEntry.aggregate({ _count: { _all: true }, _max: { updatedAt: true } });
   const links = await database.storyEntryLink.aggregate({ _count: { _all: true }, _max: { createdAt: true } });
   const comments = await database.storyComment.aggregate({
@@ -325,6 +385,7 @@ export async function codexDatabaseFingerprint() {
     arcs: [arcs._count._all, arcs._max.updatedAt?.toISOString() ?? null],
     nodes: [nodes._count._all, nodes._max.updatedAt?.toISOString() ?? null],
     edges: [edges._count._all, edges._max.updatedAt?.toISOString() ?? null],
+    lines: [lines._count._all, lines._max.updatedAt?.toISOString() ?? null],
     entries: [entries._count._all, entries._max.updatedAt?.toISOString() ?? null],
     links: [links._count._all, links._max.createdAt?.toISOString() ?? null],
     comments: [comments._count._all, comments._max.createdAt?.toISOString() ?? null, comments._max.resolvedAt?.toISOString() ?? null],

@@ -46,6 +46,7 @@ Her whole story — the family she built with Tino, the night everything broke, 
       "Beautiful adult Lizzarnix passing as a red-haired lizardwoman sorceress: fine jewel-toned scales, golden eyes that catch light so intensely they seem almost luminous without actually glowing, and a long elegant scaled tail integrated naturally from her lower spine. Her attraction crosses species lines. Her scales flush red when Tino is mentioned; smoke rises from her hair when she is angry, and it ignites when she is furious.",
     voice:
       "Sharp, vulgar, funny, and faster than everyone else in the room. Flirts as easily as she threatens, often in the same sentence. Under the blade-work there are flashes of the woman who used to sing and dance — a genuine laugh that escapes before she can kill it.",
+    voiceProfile: null,
     magic: { origin: "born", schools: ["fire", "restoration", "gift"], corruptionPhase: null, notes: "Native Lizzarnix magic. Her kind gave magic through willing death and resurrection: the gift passed outward, while the giver returned from a scaled egg in the ashes. Amanda hides almost all of that power until [[the-empty-cribs]]." },
     factions: [],
     home: null,
