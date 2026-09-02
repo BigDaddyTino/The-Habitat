@@ -2,6 +2,7 @@ import Link from "next/link";
 import { SpellbookBrowser } from "@/components/spellbook-browser";
 import { requireRole } from "@/lib/authorization";
 import { listCodexArt } from "@/lib/codex-art";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { pillars, spells } from "@/lib/spellbook";
 import { unlockIndexForClient } from "@/lib/spell-unlocks";
 import { storyReadRole } from "@/lib/story-codex";
@@ -20,7 +21,7 @@ export const metadata = { title: "Spellbook | Story Codex" };
  */
 export default async function SpellbookPage() {
   await requireRole(storyReadRole);
-  const icons = Object.fromEntries(listCodexArt("spells"));
+  const icons = Object.fromEntries([...listCodexArt("spells")].map(([slug, url]) => [slug, codexArtSized(url, 96)]));
   return (
     <section className="page-shell codex-shell play-shell spells-shell">
       <header className="play-hero">

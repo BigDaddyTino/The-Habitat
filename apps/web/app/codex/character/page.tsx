@@ -3,6 +3,7 @@ import { requireRole } from "@/lib/authorization";
 import { attributeNames, attributes, backgrounds, creationRules, ledgers, levelLaw, origins, reservedBackgrounds, reservedSpecies, species, startingRungs } from "@/lib/character-sheet";
 import { classDossiers } from "@/lib/class-dossiers";
 import { findCodexArt } from "@/lib/codex-art";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { storyReadRole } from "@/lib/story-codex";
 import { talentClasses } from "@/lib/talent-trees";
 import "../play.css";
@@ -115,7 +116,8 @@ export default async function CharacterPage() {
         <p className="play-lede">Your talent tree: a core pillar, five branches, choice nodes, capstones a teacher must open, and a corrupted branch that lights for free. {levelLaw.talentPoints}</p>
         <div className="char-classes">
           {talentClasses.map((entry) => {
-            const art = findCodexArt("classes", entry.slug) ?? findCodexArt("talents", entry.slug);
+            const master = findCodexArt("classes", entry.slug) ?? findCodexArt("talents", entry.slug);
+            const art = master ? codexArtSized(master, 640) : null;
             const rungs = startingRungs(entry.slug);
             return (
               <Link className="char-class" href={`/codex/classes/${entry.slug}`} key={entry.slug}>

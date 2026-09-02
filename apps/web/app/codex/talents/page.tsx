@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TalentCalculator } from "@/components/talent-calculator";
 import { requireRole } from "@/lib/authorization";
 import { findCodexArt, listCodexArt } from "@/lib/codex-art";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { storyReadRole } from "@/lib/story-codex";
 import { talentClasses } from "@/lib/talent-trees";
 import "../play.css";
@@ -21,8 +22,11 @@ export default async function TalentCalculatorPage() {
   // one file per class; icons are one file per node, listed in a single
   // readdir because there are four hundred of them.
   const constellationArt = Object.fromEntries(talentClasses.map((entry) => [entry.slug, findCodexArt("talents", entry.slug)]));
-  const backdrops = Object.fromEntries(talentClasses.map((entry) => [entry.slug, findCodexArt("talent-backdrops", entry.slug)]));
-  const icons = Object.fromEntries(listCodexArt("talent-icons"));
+  // Served through the derivative route: icons at 96px (the tiles are 34px,
+  // the hover card 40px), backdrops at 1440 — Sol's masters run to 1254px
+  // squares and 1672px plates, which is 90MB of tree if served raw.
+  const backdrops = Object.fromEntries(talentClasses.map((entry) => { const url = findCodexArt("talent-backdrops", entry.slug); return [entry.slug, url ? codexArtSized(url, 1440) : null]; }));
+  const icons = Object.fromEntries([...listCodexArt("talent-icons")].map(([slug, url]) => [slug, codexArtSized(url, 96)]));
   return (
     <section className="page-shell codex-shell play-shell talent-shell">
       <header className="talent-hero play-hero">

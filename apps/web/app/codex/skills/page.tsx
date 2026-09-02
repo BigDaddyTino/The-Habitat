@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AbilityCardView } from "@/components/ability-card";
 import { requireRole } from "@/lib/authorization";
 import { listCodexArt } from "@/lib/codex-art";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { skillRanks, skillsByCategory } from "@/lib/skills";
 import { storyReadRole } from "@/lib/story-codex";
 import { talentClasses } from "@/lib/talent-trees";
@@ -20,7 +21,8 @@ const rankHow: Record<string, string> = { Practised: "self-taught, at Practised"
  */
 export default async function SkillsPage() {
   await requireRole(storyReadRole);
-  const art = listCodexArt("skills");
+  // Plates show at 96px; 320 covers a retina screen.
+  const art = new Map([...listCodexArt("skills")].map(([slug, url]) => [slug, codexArtSized(url, 320)]));
   const groups = skillsByCategory();
   const nodeName = (key: string) => {
     const [classSlug, nodeId] = key.split("/");

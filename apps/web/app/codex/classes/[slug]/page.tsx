@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { AbilityCardView } from "@/components/ability-card";
 import { requireRole } from "@/lib/authorization";
 import { findCodexArt, listCodexArt } from "@/lib/codex-art";
+import { codexArtSized } from "@/lib/codex-art-derivative";
 import { affinityLabel, getClassDossier, weaponFamilies } from "@/lib/class-dossiers";
 import { skills } from "@/lib/skills";
 import { spellsForClass } from "@/lib/spell-unlocks";
@@ -41,7 +42,8 @@ export default async function ClassGuidePage({ params }: { params: Promise<{ slu
   const keyArt = findCodexArt("classes", entry.slug);
   const constellation = findCodexArt("talents", entry.slug);
   const heroArt = keyArt ?? constellation;
-  const icons = listCodexArt("talent-icons");
+  // Icons at 96px through the derivative route; the cards show them at 40px.
+  const icons = new Map([...listCodexArt("talent-icons")].map(([slug, url]) => [slug, codexArtSized(url, 96)]));
   const [core, ...branches] = [...entry.branches].sort((a, b) => (b.core ? 1 : 0) - (a.core ? 1 : 0));
   const allNodes = entry.branches.flatMap((branch) => branch.nodes);
 
