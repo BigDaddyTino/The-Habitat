@@ -17,6 +17,16 @@ import { fileMatches } from "./integrity";
  */
 const codexArtDirectories = [
   ["characters", "characters/keyart"],
+  // The Play section's art: class plates, constellation charts, the scenes
+  // under the trees, and the small pictures (talent icons, skill plates,
+  // spell icons) that land by the drop-in convention. Same logical names.
+  ["classes", "classes"],
+  ["talents", "talents"],
+  ["talent-backdrops", "talent-backdrops"],
+  ["talent-icons", "talent-icons"],
+  ["skills", "skills"],
+  ["spells", "spells"],
+  ["trades", "trades"],
   ["companion-missions", "companion-missions"],
   ["creatures", "creatures/keyart"],
   ["factions", "factions/keyart"],
