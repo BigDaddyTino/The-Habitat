@@ -941,3 +941,12 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Art slots by the drop-in convention for talent icons, spell icons, skill plates and backdrops; brief in `Docs/art/SOL56_TALENT_BACKDROP_AND_ICON_PROMPT.txt`; `scripts/list-art-slots.ts` prints every required filename with its four brief lines
 - [x] Typecheck clean, 535 of 535 tests pass (three new suites), lint clean; screenshot-verified on a local dev server at 1440 and 390 wide including hover and popout states (`scripts/shot-codex-pages.ts` now accepts `SHOT_SITE=http://localhost:<port>`)
 - [ ] Not committed, not built, not deployed - the owner reviews the cards first; no StoryEntry or database change was made (canon dossiers untouched; the pages are a layout over them)
+
+## 2026-09-02 - Play rulings: cells, Noon, Temporal, History, the allotment
+
+- [x] Owner delegated four design calls surfaced by the card rewrite; each is recorded with its balance reasoning in `Docs/codex/PLAY_RULINGS_2026-09-02.md`
+- [x] Cypherist spell nodes cast through capacitor cells (a cell = 4 charges; no origin needed, no corruption phase advanced, reads as hardware on every instrument, ELECTRICAL vents every cell; Spell in a Can stays Licensed tier) - `lib/talent-cards/cypherist.ts`, style guide cost table
+- [x] Noon typed FIRE (1 Hit each 10s to every uncovered body, both sides); the four Temporal spells typed ARCANE as evidence (a day-long scar instruments flag), Rewind expels late arrivals for 1 ARCANE Hit - `lib/spellbook.ts`
+- [x] Fabrication's History is bench time (7 days at a Master's bench, one named piece per maker at a time) instead of a "once per season" cooldown - `lib/skills.ts`, style guide duration rule
+- [x] Per-class starting allotment ruled: nine rungs shaped 3 · 2 · 1 · 1 · 1 · 1 from the class's growth line, +2 player points capped at 4 at the desk, one reassignment, origin's rung on top, level 11-12; shown on `/codex/character` with a test pinning the shape, and written into the CANON `attributes` entry's open paragraph (version 3 → 4, open question retired) by the idempotent `scripts/author-attribute-allotment.ts`
+- [x] Landed the Sol session's corrupted-branch icon wiring and scrollport backdrop layer with its test; typecheck, lint and 540 of 540 tests pass; deployed and pushed
