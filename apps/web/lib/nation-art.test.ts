@@ -20,7 +20,7 @@ const plates = [
   { slug: "tree-faith", width: 1024, height: 1024 },
 ] as const;
 
-const artRoot = path.join(process.cwd(), "private", "codex-art", "kingdom");
+const artRoot = path.join(process.cwd(), "private", "codex-art", "nation");
 const expectedFilenames = plates.map(({ slug }) => `${slug}.png`).sort();
 
 function installedPngs() {
@@ -34,18 +34,18 @@ test("the Crown has exactly its twelve commissioned plates", () => {
 });
 
 test("every Crown plate round-trips through the private art resolver", () => {
-  const listed = listCodexArt("kingdom");
+  const listed = listCodexArt("nation");
   assert.equal(listed.size, 12);
 
   for (const { slug } of plates) {
     const filename = `${slug}.png`;
-    const url = `/codex-art/kingdom/${filename}`;
+    const url = `/codex-art/nation/${filename}`;
     const diskFile = path.join(artRoot, filename);
 
-    assert.equal(codexArtSlot("kingdom", slug), `private/codex-art/kingdom/${filename}`);
-    assert.equal(findCodexArt("kingdom", slug), url);
+    assert.equal(codexArtSlot("nation", slug), `private/codex-art/nation/${filename}`);
+    assert.equal(findCodexArt("nation", slug), url);
     assert.equal(listed.get(slug), url);
-    assert.equal(resolveCodexArtFile("kingdom", filename), diskFile);
+    assert.equal(resolveCodexArtFile("nation", filename), diskFile);
     assert.equal(codexArtFileForUrl(url), diskFile);
     assert.ok(existsSync(diskFile) && statSync(diskFile).size > 0);
   }
@@ -78,11 +78,11 @@ test("no Crown plate is a duplicate", () => {
 
 test("the Crown ledger has one reconciled delivery row per plate", () => {
   const ledger = readFileSync(
-    path.join(process.cwd(), "..", "..", "Docs", "art", "SOL56_KINGDOM_ART_LEDGER.md"),
+    path.join(process.cwd(), "..", "..", "Docs", "art", "SOL56_NATION_ART_LEDGER.md"),
     "utf8",
   );
   const rows = [...ledger.matchAll(
-    /^\| [^|]+ \| `apps\/web\/private\/codex-art\/kingdom\/([a-z0-9-]+)\.png` \| \*\*(delivered|revised)\*\* \| [\d,]+ \| `([a-f0-9]{64})` \|/gm,
+    /^\| [^|]+ \| `apps\/web\/private\/codex-art\/nation\/([a-z0-9-]+)\.png` \| \*\*(delivered|revised)\*\* \| [\d,]+ \| `([a-f0-9]{64})` \|/gm,
   )];
   const bySlug = new Map(rows.map((match) => [match[1], { status: match[2], hash: match[3] }]));
 
@@ -98,14 +98,16 @@ test("the Crown ledger has one reconciled delivery row per plate", () => {
   }
 });
 
-test("the Kingdom page keeps all three drop-in wiring paths", () => {
-  const page = readFileSync(path.join(process.cwd(), "app", "codex", "kingdom", "page.tsx"), "utf8");
-  const styles = readFileSync(path.join(process.cwd(), "app", "codex", "kingdom", "kingdom.css"), "utf8");
+test("the Nation page keeps all three drop-in wiring paths and the former route redirects", () => {
+  const page = readFileSync(path.join(process.cwd(), "app", "codex", "nation", "page.tsx"), "utf8");
+  const styles = readFileSync(path.join(process.cwd(), "app", "codex", "nation", "nation.css"), "utf8");
+  const legacyRoute = readFileSync(path.join(process.cwd(), "app", "codex", "kingdom", "page.tsx"), "utf8");
 
-  assert.match(page, /findCodexArt\("kingdom", slug\)/);
+  assert.match(page, /findCodexArt\("nation", slug\)/);
   assert.match(page, /slug="hero"/);
   assert.match(page, /slug=\{rankArtSlug\(rank\)\}/);
   assert.match(page, /slug=\{`tree-\$\{tree\.slug\}`\}/);
-  assert.match(styles, /\.km-tree > header \{[^}]*grid-template-columns: 64px 1fr;/);
-  assert.match(styles, /\.km-sigil \{[^}]*width: 64px; height: 64px;/);
+  assert.match(styles, /\.nm-tree > header \{[^}]*grid-template-columns: 64px 1fr;/);
+  assert.match(styles, /\.nm-sigil \{[^}]*width: 64px; height: 64px;/);
+  assert.match(legacyRoute, /permanentRedirect\("\/codex\/nation"\)/);
 });

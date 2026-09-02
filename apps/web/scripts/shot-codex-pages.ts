@@ -10,13 +10,13 @@ import { getPrismaClient } from "@habitat/db/client";
  * cookie on the public https host, navigate, capture full-page at desktop
  * and mobile widths. The session is deleted on exit.
  *
- *   SHOT_DIR=<dir> [SHOT_PATHS=/codex/kingdom,/codex/talents] [SHOT_SITE=http://localhost:3111] pnpm exec tsx scripts/shot-codex-pages.ts
+ *   SHOT_DIR=<dir> [SHOT_PATHS=/codex/nation,/codex/talents] [SHOT_SITE=http://localhost:3111] pnpm exec tsx scripts/shot-codex-pages.ts
  */
 
 const db = getPrismaClient();
 const OUT = process.env.SHOT_DIR!;
 const SITE = process.env.SHOT_SITE ?? "https://habitat.martinobear.com";
-const PATHS = (process.env.SHOT_PATHS ?? "/codex/kingdom,/codex/talents").split(",");
+const PATHS = (process.env.SHOT_PATHS ?? "/codex/nation,/codex/talents").split(",");
 const CHROME = "C:/Program Files/Google/Chrome/Application/chrome.exe";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

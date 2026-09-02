@@ -561,7 +561,7 @@ export const talentClasses: TalentClass[] = [
         n("tithe-and-wage", "Tithe & Wage", "People stay because staying pays.", 3),
         n("standing-court", "Standing Court", "Disputes end at your table, and loyalty compounds.", 3),
         n("charter", "Charter", "Your ground becomes a jurisdiction — with a signature that means something.", 4),
-        n("crown-without-a-name", "Crown Without a Name", "Kingdom management, end-game. Holding ground becomes ruling it.", 5, { ceiling: "reserved for the kingdom pass" }),
+        n("crown-without-a-name", "Crown Without a Name", "Nation management, end-game. Holding ground becomes ruling it.", 5, { ceiling: "reserved for the nation pass" }),
       ]},
     ],
     corrupted: {

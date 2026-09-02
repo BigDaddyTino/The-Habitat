@@ -184,7 +184,7 @@ export const itemMetaSchema = z.object({
 /**
  * The systems sheet (Codex_Module_Schema.md §3.8). The release fields are the
  * point: `unlockArc` names the quest arc that switches the system on for the
- * player, which is how "you are not managing a kingdom on day one" stays a
+ * player, which is how "you are not managing a nation on day one" stays a
  * fact the codex enforces rather than a note everybody has to remember.
  */
 export const systemMetaSchema = z.object({

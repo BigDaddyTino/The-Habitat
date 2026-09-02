@@ -1,15 +1,15 @@
-# Kingdom Management — sim findings (pass 1)
+# Nation Management — sim findings (pass 1)
 
-Seed 20260901 · model `apps/web/scripts/lib/kingdom-sim.ts` · runner `scripts/sim-kingdom-balance.ts`
-· raw log `Docs/MARTINO_KM_SIM_RESULTS.md` · spec: "Holding Ground" rev 8.
+Seed 20260901 · model `apps/web/scripts/lib/nation-sim.ts` · runner `scripts/sim-nation-balance.ts`
+· raw log `Docs/sims/MARTINO_NM_SIM_RESULTS.md` · spec: "Holding Ground" rev 8.
 
 Model scope: five Great Powers (equal-start normalized, shaped by axis identity),
 a 14-site neutral belt, four institution seats with an influence auction, a
 six-site Free Powers bloc that only defends (and answers as one), sacred sites
 with the unkeepable/grievance law, sieges as Forge clocks using the CANON
 reclamation curve (35 + 11.7/level), faith pressure + morale with the secular
-crown, Court Day every 30 world-days, kingdom XP with ceilings every third level,
-holdings capped by kingdom level. 420 world-days ≈ 28 real days of server time.
+crown, Court Day every 30 world-days, nation XP with ceilings every third level,
+holdings capped by nation level. 420 world-days ≈ 28 real days of server time.
 
 ## CONFIRMED — the design holds where it promised to
 
@@ -64,7 +64,7 @@ holdings capped by kingdom level. 420 world-days ≈ 28 real days of server time
    **Decide:** target pace — recommended half-life 12–18 world-months (roughly
    3–4 real weeks), with shrines, the Faith tree, and suppression as the
    accelerators that pull it faster.
-4. **Conquest XP dominates kingdom leveling.** The most aggressive power hit
+4. **Conquest XP dominates nation leveling.** The most aggressive power hit
    L7 while consolidators sat at L4 — levels are supposed to reward "doing
    more and growing more," not only taking more. **Decide:** governance XP
    weights (projects finished, Court Day handled, trade volume, ceilings) so a

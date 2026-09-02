@@ -1,8 +1,8 @@
 /**
- * The Kingdom Management design layer, the one appended to the
- * `kingdom-management` dossier under its own marker. Single source: the
- * integration script (`integrate-kingdom-design.ts`) and the ranks author
- * (`author-kingdom-ranks.ts`) both read it, so a rerun of either can never
+ * The Nation Management design layer, appended to its stable persisted
+ * dossier under its own marker. The integration script
+ * (`integrate-nation-design.ts`) and ranks author (`author-nation-ranks.ts`)
+ * both read it, so a rerun of either can never
  * resurrect an older wording.
  *
  * Owner rulings carried here: the Charters are the Riverlands' three plots,
@@ -13,23 +13,23 @@
 
 export const OLD_CROWN_MARKERS = ["## Designed — the crown, rung by rung"];
 
-export const KINGDOM_CROWN_LAYER = {
+export const NATION_CROWN_LAYER = {
   marker: "## Designed — the crown, rank by rank",
   body: `## Designed — the crown, rank by rank
 
 The full design is settled (the "Holding Ground" spec, owner-approved 2026-09-01; the Ranks, the level ledger and the realm perk nodes 2026-09-02). This is the gamer's version: what you get, and for what.
 
-**The Ranks of the Crown — the realm's level system.** Kingdom Level runs 1 to 15. Three levels make a rank; every third level is a **ceiling** no XP can pass, and the realm quests its proving to enter the next rank, the way trades prove their masters. A rank licenses a scale of holding and adds verbs; none retires the ones below.
+**The Ranks of the Crown — the realm's level system.** Nation Level runs 1 to 15. Three levels make a rank; every third level is a **ceiling** no XP can pass, and the realm quests its proving to enter the next rank, the way trades prove their masters. A rank licenses a scale of holding and adds verbs; none retires the ones below.
 
 - **I · Freeholder — the Freehold** (levels 1–3): a parcel and a roof. You get: build, farm, fence, hire hands. For: buying a plot — in the Riverlands, the [[first-charter]].
 - **II · Warden — the Ward** (levels 4–6): a fortified point with a job. You get: garrison, patrols, supply, a signal plan, and the Captain's seat. For: holding a road or crossing.
 - **III · Magistrate — the Township** (levels 7–9): a population that isn't yours. You get: districts, trades, law, admission policy, and the Chancellor's and the Broker's seats. For: growth.
 - **IV · Lord — the City** (levels 10–12): districts, wharves, politics. You get: grand projects, real armies, factions inside your own walls, and the Marshal's and the Envoy's seats.
-- **V · Crown — the Kingdom** (levels 13–15): multiple holdings and vassals. You get: doctrine, diplomacy, war, succession, the Spymaster's seat, and a seat at the world's table.
+- **V · Crown — the Nation** (levels 13–15): multiple holdings and vassals. You get: doctrine, diplomacy, war, succession, the Spymaster's seat, and a seat at the world's table.
 
-**The provings — four ceilings, at levels 3, 6, 9 and 12.** The quests are arcs and are not written yet; their shapes and their teachers are reserved. *The Held Night* (Freeholder → Warden): your ground is attacked in earnest and stands until morning with what you built, and the Heartland Watch has to see it. *The Second Core* (Warden → Magistrate): a second Forge answers to you and a population that isn't yours binds to it — the realm becomes a network, and a network can be cut. *The Doctrine Crisis* (Magistrate → Lord): a Court Day where your own people split down the middle; you write the doctrine that settles it, and live under what you wrote. *The Recognition* (Lord → Crown): the earn-the-seat quest — the world's powers acknowledge the crown, or are made to; taught by the Crown Without a Name, the kingdom pass's reserved ceiling teacher.
+**The provings — four ceilings, at levels 3, 6, 9 and 12.** The quests are arcs and are not written yet; their shapes and their teachers are reserved. *The Held Night* (Freeholder → Warden): your ground is attacked in earnest and stands until morning with what you built, and the Heartland Watch has to see it. *The Second Core* (Warden → Magistrate): a second Forge answers to you and a population that isn't yours binds to it — the realm becomes a network, and a network can be cut. *The Doctrine Crisis* (Magistrate → Lord): a Court Day where your own people split down the middle; you write the doctrine that settles it, and live under what you wrote. *The Recognition* (Lord → Crown): the earn-the-seat quest — the world's powers acknowledge the crown, or are made to; taught by the Crown Without a Name, the nation pass's reserved ceiling teacher.
 
-**The ledger — what every level grants.** 1 Deed in Hand · 2 Hands and Hearth · 3 The Fence Line · 4 Warden's Writ · 5 The Supply Line · 6 Two Roads · 7 Charter of Township · 8 The Levy · 9 Vassal's Oath · 10 Lord of the City · 11 The March · 12 Court of Peers · 13 The Crown · 14 Doctrine of the Realm · 15 The Long Reign. Every level extends the caps — holdings, muster, officer seats, vassals, project tiers — and grants one realm point; every proving grants two more. Court Day scales with the rank: a letter on the kitchen table at level 1, a hall from level 7. The realm earns XP from REAL work only: holdings prospering, projects finished, wars won, sieges stood, treaties signed, trade moved, Court Days handled. The curve is steep — each level costs more than half again the last. The Kingdom page carries the ledger's caps row by row, hand-set and marked untested until a sim measures them.
+**The ledger — what every level grants.** 1 Deed in Hand · 2 Hands and Hearth · 3 The Fence Line · 4 Warden's Writ · 5 The Supply Line · 6 Two Roads · 7 Charter of Township · 8 The Levy · 9 Vassal's Oath · 10 Lord of the City · 11 The March · 12 Court of Peers · 13 The Crown · 14 Doctrine of the Realm · 15 The Long Reign. Every level extends the caps — holdings, muster, officer seats, vassals, project tiers — and grants one realm point; every proving grants two more. Court Day scales with the rank: a letter on the kitchen table at level 1, a hall from level 7. The realm earns XP from REAL work only: holdings prospering, projects finished, wars won, sieges stood, treaties signed, trade moved, Court Days handled. The curve is steep — each level costs more than half again the last. The Nation page carries the ledger's caps row by row, hand-set and marked untested until a sim measures them.
 
 **The six court seats**, each tutored by a stop on the Heartland tour: the Captain (defences; the Heartland Watch), the Chancellor (the treasury; the Clearinghouse), the Broker (the gray economy; the Bone Market families), the Marshal (armies; the Regulator Station), the Envoy (diplomacy; the Standing Camp) and the Spymaster (intel; the Winchworks). A seat is real authority in its domain; a Syndicate's members hold them.
 
@@ -40,7 +40,7 @@ The full design is settled (the "Holding Ground" spec, owner-approved 2026-09-01
 - **Earn** — a granted fief, with the obligations grants exist for.
 - **Found** — start from nothing; slowest, and nobody holds paper over you.
 
-**The crown's six realm trees and their perk nodes** (your own kingdom only — join a faction and you live under THEIR doctrine). One realm point a level and two a proving, twenty-three by the cap, against seventy-eight points of nodes: nobody owns everything. Nodes cost one to three points; the deeper ones need a rank; the last node of every tree is its capstone, and Crown-only.
+**The crown's six realm trees and their perk nodes** (your own nation only — join a faction and you live under THEIR doctrine). One realm point a level and two a proving, twenty-three by the cap, against seventy-eight points of nodes: nobody owns everything. Nodes cost one to three points; the deeper ones need a rank; the last node of every tree is its capstone, and Crown-only.
 
 - **Might** (levies, garrisons, sieges): Muster Roll · Standing Watch · Siege Train · Iron Rations · Marching Orders · Banners Answer · capstone **Dominion** — the world's coalition instinct tolerates your lead a little longer before it turns.
 - **Coffers** (tariffs, routes, markets): Toll Bar · Honest Weights · Chartered Routes · The Factorage · Mercenary Paper · War Chest · capstone **The Mint** — your own coin, and tariffs that follow it to the world's table.

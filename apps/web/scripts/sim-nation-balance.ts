@@ -1,16 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
-import { computePoints, makeWorld, MACHINE_UPKEEP, reserveForDays, rng, runSiege, tick, type PowerId } from "./lib/kingdom-sim";
+import { computePoints, makeWorld, MACHINE_UPKEEP, reserveForDays, rng, runSiege, tick, type PowerId } from "./lib/nation-sim";
 
 /**
- * Kingdom Management balance sims — "Holding Ground" spec.
+ * Nation Management balance sims — "Holding Ground" spec.
  *
- *   pnpm --filter @habitat/web exec tsx scripts/sim-kingdom-balance.ts
+ *   pnpm --filter @habitat/web exec tsx scripts/sim-nation-balance.ts
  *
  * Reproducible: base seed 20260901. Comparisons reseed per row (common random
  * numbers — the lesson from the talent sims). Results are written to
- * Docs/MARTINO_KM_SIM_RESULTS.md; the hand-written findings live in
- * Docs/MARTINO_KM_SIM_FINDINGS.md.
+ * Docs/sims/MARTINO_NM_SIM_RESULTS.md; the hand-written findings live in
+ * Docs/sims/MARTINO_NM_SIM_FINDINGS.md.
  */
 
 const BASE_SEED = 20260901;
@@ -179,7 +179,7 @@ function experimentD(seeds: number, days: number) {
 }
 
 function main() {
-  say(`# Kingdom Management — sim results (seed ${BASE_SEED}, ${new Date().toISOString().slice(0, 10)})`);
+  say(`# Nation Management — sim results (seed ${BASE_SEED}, ${new Date().toISOString().slice(0, 10)})`);
   say(``);
   say(`## A · The race — equal start, 420 world-days, 48 seeds`);
   experimentA(true, 48, 420);
@@ -194,7 +194,7 @@ function main() {
   say(`## D · Court Day, absence, and leveling pace (420 days)`);
   experimentD(200, 420);
 
-  const doc = path.resolve(process.cwd(), "..", "..", "Docs", "sims", "MARTINO_KM_SIM_RESULTS.md");
+  const doc = path.resolve(process.cwd(), "..", "..", "Docs", "sims", "MARTINO_NM_SIM_RESULTS.md");
   fs.writeFileSync(doc, out.join("\n") + "\n", "utf8");
   console.log(`\nwritten: ${doc}`);
 }

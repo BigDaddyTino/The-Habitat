@@ -507,7 +507,7 @@ History as salvage.
 
 ## XI. The Faith Lane (systems/<slug>.png — system-plate convention)
 
-Added 2026-09-01 with the Kingdom integration. Style law: diegetic devotion,
+Added 2026-09-01 with the Nation integration. Style law: diegetic devotion,
 no glowing deities, no fantasy iconography — these are faiths people practice
 in a near-future war, and the plates show practice, not doctrine.
 

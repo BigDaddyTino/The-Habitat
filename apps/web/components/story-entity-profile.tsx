@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { Activity, ArrowRight, BookOpen, Boxes, CalendarClock, ChevronRight, CircleHelp, Compass, Crown, Flag, GitBranch, Handshake, History, Lightbulb, ListOrdered, MapPin, Network, Plus, Settings2, Shield, Sparkles, Swords, UserRound } from "lucide-react";
 import {
+  canonicalStoryEntryRouteSlug,
   isUnconfirmedThreadStatus,
   storyArcCategoryLabels,
   storyCompanionMissionStatusLabels,
@@ -79,7 +80,7 @@ function Fact({ label: name, value }: { label: string; value: unknown }) {
 }
 
 function LoreLink({ slug, children }: { slug: string; children: React.ReactNode }) {
-  return <Link href={`/codex/bible/${slug}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
+  return <Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(slug)}`}>{children}<ArrowRight aria-hidden="true" size={11} /></Link>;
 }
 
 export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOptions = [], containedPlaces = [], placeAncestry = [], arcsHere = [], companionArcs = [], factionArcs = [], factionFamily = null, addChildKind = "site", systemFamily = null, systemsHere = [], slugTitles = {}, arcTitles = {}, threadChildren = [], companionChain = null, raceFamily = null }: { entry: {
@@ -99,7 +100,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
     const entryTitle = slugTitles[slug];
-    if (entryTitle) return { title: entryTitle, href: `/codex/bible/${slug}` };
+    if (entryTitle) return { title: entryTitle, href: `/codex/bible/${canonicalStoryEntryRouteSlug(slug)}` };
     const arcTitle = arcTitles[slug];
     if (arcTitle) return { title: arcTitle, href: `/codex/arc/${slug}` };
     return null;

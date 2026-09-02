@@ -108,7 +108,7 @@ Write a refusal as [[true-death]] chosen. People opt out of the promise — the 
 
 **The reserve belongs to the Forge, not to you.** Everyone in a Forge's register draws on the same Essence, so in [[cooperative-play]] a party's deaths are one shared bill and a stranger's bad night spends your reserve. That is not an inconvenience bolted on for co-op. It is the reason a settlement cares who it binds, and it is [[the-power-balance]] in miniature.
 
-**What it must never do.** Never skip the corpse. Never reclaim somebody quietly — it is a spectacle with witnesses and lights dimming across the base. Never let a shortfall kill anyone; the punishment is levels and waiting, never permanence. Never reclaim anyone whose register holds no living Forge, however sympathetic the moment. And never let anyone — court, faction, player, or the whole reserve of a kingdom — overturn a do-not-reconstruct. There is no scene in which that works.`;
+**What it must never do.** Never skip the corpse. Never reclaim somebody quietly — it is a spectacle with witnesses and lights dimming across the base. Never let a shortfall kill anyone; the punishment is levels and waiting, never permanence. Never reclaim anyone whose register holds no living Forge, however sympathetic the moment. And never let anyone — court, faction, player, or the whole reserve of a nation — overturn a do-not-reconstruct. There is no scene in which that works.`;
 
 const systems: EntryEdit[] = [
   {

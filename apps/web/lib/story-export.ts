@@ -14,6 +14,7 @@ import {
   type StoryGraphEdge,
   type StoryGraphNode,
 } from "@habitat/shared";
+import { nationTerminologyStorageText, nationTerminologyStorageValue } from "@/lib/nation-terminology";
 
 const db = getPrismaClient();
 
@@ -135,28 +136,28 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
         .map((edge, index) => ({
           order: index,
           key: edge.key,
-          label: edge.label,
-          condition: edge.condition,
-          effects: edge.effects.length > 0 ? edge.effects : null,
+          label: edge.label ? nationTerminologyStorageText(edge.label) : null,
+          condition: edge.condition ? nationTerminologyStorageText(edge.condition) : null,
+          effects: edge.effects.length > 0 ? edge.effects.map(nationTerminologyStorageText) : null,
           toKey: keyById.get(edge.toNodeId) as string,
         }));
 
       return {
         key: node.key,
         kind: node.kind,
-        title: node.title,
-        summary: node.summary,
-        body: node.body,
+        title: nationTerminologyStorageText(node.title),
+        summary: node.summary ? nationTerminologyStorageText(node.summary) : null,
+        body: node.body ? nationTerminologyStorageText(node.body) : null,
         // A speaker that is not itself canon is withheld like any other
         // reference — the importer must never resolve an attribution against
         // a character the game does not have.
         speaker: node.speaker && node.speaker.status === exportableStoryStatus
-          ? { slug: node.speaker.slug, title: node.speaker.title }
+          ? { slug: node.speaker.slug, title: nationTerminologyStorageText(node.speaker.title) }
           : null,
         endingKind: node.endingKind,
-        completion: node.completion,
-        effects: node.effects.length > 0 ? node.effects : null,
-        rewards: node.rewards.length > 0 ? node.rewards : null,
+        completion: node.completion ? nationTerminologyStorageText(node.completion) : null,
+        effects: node.effects.length > 0 ? node.effects.map(nationTerminologyStorageText) : null,
+        rewards: node.rewards.length > 0 ? node.rewards.map(nationTerminologyStorageText) : null,
         // A continuation into an arc that is not itself canon is withheld —
         // the importer must never chain a quest into a story it cannot see.
         continuesInArcSlug: node.continuesIn && node.continuesIn.status === exportableStoryStatus ? node.continuesIn.slug : null,
@@ -169,7 +170,7 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
         // room must not export a reference nothing in the payload resolves.
         references: node.entryLinks
           .filter((link) => link.entry.status === exportableStoryStatus && !isDevelopmentOnlyStoryKind(link.entry.kind))
-          .map((link) => ({ kind: link.entry.kind, slug: link.entry.slug, title: link.entry.title })),
+          .map((link) => ({ kind: link.entry.kind, slug: link.entry.slug, title: nationTerminologyStorageText(link.entry.title) })),
       };
     });
 
@@ -184,24 +185,24 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     // rewrite out from under it.
     const graphNodesByAge: StoryGraphNode[] = [...arc.nodes]
       .sort((left, right) => left.createdAt.getTime() - right.createdAt.getTime() || (left.id < right.id ? -1 : 1))
-      .map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
+      .map((node) => ({ key: node.key, kind: node.kind, title: nationTerminologyStorageText(node.title) }));
 
     return {
       slug: arc.slug,
-      title: arc.title,
-      summary: arc.summary,
-      hook: arc.hook,
-      region: arc.region && arc.region.status === exportableStoryStatus ? { slug: arc.region.slug, title: arc.region.title } : null,
+      title: nationTerminologyStorageText(arc.title),
+      summary: arc.summary ? nationTerminologyStorageText(arc.summary) : null,
+      hook: arc.hook ? nationTerminologyStorageText(arc.hook) : null,
+      region: arc.region && arc.region.status === exportableStoryStatus ? { slug: arc.region.slug, title: nationTerminologyStorageText(arc.region.title) } : null,
       isMainline: arc.isMainline,
       // Additive to the v1 contract, and never a replacement: an importer that
       // only knows `isMainline` keeps reading exactly what it always read,
       // and the database CHECK guarantees the two can never disagree.
       category: arc.category,
       // Withheld like every other reference whose target is not itself canon.
-      companion: arc.companion && arc.companion.status === exportableStoryStatus ? { slug: arc.companion.slug, title: arc.companion.title } : null,
+      companion: arc.companion && arc.companion.status === exportableStoryStatus ? { slug: arc.companion.slug, title: nationTerminologyStorageText(arc.companion.title) } : null,
       // Withheld unless the faction is itself canon, same as every other
       // reference: the importer must never resolve a banner the game lacks.
-      faction: arc.faction && arc.faction.status === exportableStoryStatus ? { slug: arc.faction.slug, title: arc.faction.title } : null,
+      faction: arc.faction && arc.faction.status === exportableStoryStatus ? { slug: arc.faction.slug, title: nationTerminologyStorageText(arc.faction.title) } : null,
       entryNodeKeys: findStoryArcEntryNodeKeys(arc.slug, graphNodesByAge, graphEdges),
       nodes,
       // Reported, never enforced. The importer decides whether a story with
@@ -218,12 +219,12 @@ export async function buildStoryExport(): Promise<MartinoStoryExport> {
     bible: entries.map((entry) => ({
       kind: entry.kind,
       slug: entry.slug,
-      title: entry.title,
-      summary: entry.summary,
-      body: entry.body,
+      title: nationTerminologyStorageText(entry.title),
+      summary: entry.summary ? nationTerminologyStorageText(entry.summary) : null,
+      body: entry.body ? nationTerminologyStorageText(entry.body) : null,
       // Postgres NULL and JSON null both project to the contract's null; the
       // CHECK constraint guarantees anything else here is an object.
-      meta: (entry.meta as Record<string, unknown> | null) ?? null,
+      meta: entry.meta ? nationTerminologyStorageValue(entry.meta) as Record<string, unknown> : null,
     })),
   };
 }

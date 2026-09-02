@@ -471,7 +471,7 @@ export const nodeEffects: Record<string, NodeEffect> = {
   "procurator/tithe-and-wage": { world: ["Staying pays: +20% settler growth and a raised loyalty floor"] },
   "procurator/standing-court": { world: ["Disputes end at your table and rulings stick", "Loyalty compounds +10% a season"] },
   "procurator/charter": { world: ["Your ground becomes a jurisdiction — your signature carries law beyond it"] },
-  "procurator/crown-without-a-name": { world: ["Unlocks Kingdom management — holding ground becomes ruling it", "Vassals, levies, law, legacy"] },
+  "procurator/crown-without-a-name": { world: ["Unlocks Nation management — holding ground becomes ruling it", "Vassals, levies, law, legacy"] },
 
   "cypherist/bench-anywhere": { world: ["A working bench stood up on anything flat in 60 seconds", "Full crafting menu, anywhere"] },
   "cypherist/schematic-memory": { world: ["Anything you've taken apart is a known schematic — buildable from memory"] },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Compass, GitBranch, Inbox, Undo2, Waves } from "lucide-react";
-import { storyArcCategories, storyArcCategoryLabels, storyCanonPacketTargetLabels, type StoryArcCategory } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, storyArcCategories, storyArcCategoryLabels, storyCanonPacketTargetLabels, storyEntrySlugAliases, type StoryArcCategory } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { getCanonInbox, getCanonNavigator, getStoryRipples, listStoryArcs, listStoryEntries, storyReadRole, type StoryCanonPacketRow } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
@@ -33,7 +33,7 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
     listStoryEntries({}),
   ]);
 
-  const titleOf = new Map(allEntries.map((entry) => [entry.slug, entry.title]));
+  const titleOf = new Map(allEntries.flatMap((entry) => storyEntrySlugAliases(entry.slug).map((alias) => [alias, entry.title] as const)));
   const arcTitleOf = new Map(arcs.map((arc) => [arc.slug, arc.title]));
 
   // The bubbles in the navigator deep-link here with a filter. Anything the
@@ -151,11 +151,11 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
                       </p>
                     </header>
 
-                    <div className="canon-packet-body"><StoryProse body={packet.body} resolve={(slug) => (titleOf.has(slug) ? { href: `/codex/bible/${slug}`, title: titleOf.get(slug) as string } : null)} /></div>
+                    <div className="canon-packet-body"><StoryProse body={packet.body} resolve={(slug) => (titleOf.has(slug) ? { href: `/codex/bible/${canonicalStoryEntryRouteSlug(slug)}`, title: titleOf.get(slug) as string } : null)} /></div>
 
                     {packet.entries.length > 0 ? (
                       <p className="canon-packet-touches">
-                        {packet.entries.map((slug) => <Link href={`/codex/bible/${slug}`} key={slug}>{titleOf.get(slug) ?? slug.replaceAll("-", " ")}</Link>)}
+                        {packet.entries.map((slug) => <Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(slug)}`} key={slug}>{titleOf.get(slug) ?? slug.replaceAll("-", " ")}</Link>)}
                       </p>
                     ) : null}
 

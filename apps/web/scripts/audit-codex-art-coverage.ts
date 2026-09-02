@@ -12,7 +12,7 @@
 
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
-import { crownRanks, realmTrees } from "../lib/kingdom";
+import { crownRanks, realmTrees } from "../lib/nation";
 import { codexArtFileForUrl, findCodexArt } from "../lib/codex-art";
 import { dossierArtExpected, getDossierArt } from "../lib/dossier-art";
 import { getFactionBranding } from "../lib/faction-branding";
@@ -67,12 +67,12 @@ async function main() {
   }
   console.log(`  trades: ${professions.filter((t) => findCodexArt("trades", t.slug)).length}/${professions.length} trade plates present`);
   if (!findCodexArt("timeline", "timeline-archive-mural")) { totalMissing += 1; console.log("  timeline/timeline-archive-mural — EMPTY (the timeline page's own mural)"); }
-  // The Crown: the Kingdom page's hero, one plate per Rank and one sigil per realm tree (Docs/art/SOL56_KINGDOM_ART_PROMPT.txt).
-  const kingdomPlates = ["hero", ...crownRanks.map((rank) => `rank-${rank.numeral.toLowerCase()}-${rank.title.toLowerCase()}`), ...realmTrees.map((tree) => `tree-${tree.slug}`)];
-  for (const plate of kingdomPlates) {
-    if (!findCodexArt("kingdom", plate)) { totalMissing += 1; console.log(`  kingdom/${plate} — EMPTY`); }
+  // The Crown: the Nation page's hero, one plate per Rank and one sigil per realm tree (Docs/art/SOL56_NATION_ART_PROMPT.txt).
+  const nationPlates = ["hero", ...crownRanks.map((rank) => `rank-${rank.numeral.toLowerCase()}-${rank.title.toLowerCase()}`), ...realmTrees.map((tree) => `tree-${tree.slug}`)];
+  for (const plate of nationPlates) {
+    if (!findCodexArt("nation", plate)) { totalMissing += 1; console.log(`  nation/${plate} — EMPTY`); }
   }
-  console.log(`  kingdom: ${kingdomPlates.filter((plate) => findCodexArt("kingdom", plate)).length}/${kingdomPlates.length} crown plates present`);
+  console.log(`  nation: ${nationPlates.filter((plate) => findCodexArt("nation", plate)).length}/${nationPlates.length} crown plates present`);
 
   console.log(`\n${"=".repeat(70)}\n${totalMissing} empty slot(s) across the codex.`);
 }

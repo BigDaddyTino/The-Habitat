@@ -1,4 +1,4 @@
-import type { StorySystemMeta } from "@habitat/shared";
+import { NATION_MANAGEMENT_PERSISTED_SLUG, type StorySystemMeta } from "@habitat/shared";
 
 /**
  * The founding Systems shelf: every mechanic the game intends to ship, written
@@ -9,7 +9,7 @@ import type { StorySystemMeta } from "@habitat/shared";
  *
  * Act structure: the whole island chapter is the prologue, and Act I opens at
  * Port Arcadia on the peninsula. Release gates reflect the three arcs that
- * exist today. Kingdom management
+ * exist today. Nation management
  * deliberately has no arc yet — its open question points at the gap.
  */
 export type StorySystemSeed = {
@@ -314,20 +314,22 @@ For writers: management choices are moral instruments. Write shortages that forc
     }),
   },
   {
-    slug: "kingdom-management",
-    title: "Kingdom Management",
+    // Storage keeps the original key so existing Codex rows and wiki links
+    // remain connected; public routing canonicalises it to Nation Management.
+    slug: NATION_MANAGEMENT_PERSISTED_SLUG,
+    title: "Nation Management",
     summary: "The endgame of holding ground: multiple settlements, vassal relations, doctrine, and a seat at the war's table — long after day one.",
-    body: `Not a day-one verb — this entry is why the release gate exists. When the story finally hands the player region-scale authority, every earlier system becomes politics: a multi-settlement economy over [[outpost-and-city-management]], relations with the surviving powers as a peer on [[the-power-balance]], and doctrine — above all harvest policy at scale, which is [[the-harvest-economy]]'s question asked of the player with a whole population's weight behind the answer. Kingdoms also get noticed, and not only by the powers on the map.
+    body: `Not a day-one verb — this entry is why the release gate exists. When the story finally hands the player region-scale authority, every earlier system becomes politics: a multi-settlement economy over [[outpost-and-city-management]], relations with the surviving powers as a peer on [[the-power-balance]], and doctrine — above all harvest policy at scale, which is [[the-harvest-economy]]'s question asked of the player with a whole population's weight behind the answer. Nations also get noticed, and not only by the powers on the map.
 
-At this scale the [[the-soul-forge]] network *is* the kingdom: a crown is a set of Forges and the roads between them, subjects are people bound to machines you own, and vassalage is frequently just somebody else’s population binding to your Core. Doctrine follows — who may bind, what the reserve burns, whether reclamation is a right or a wage — and it is where harvest policy stops being an argument about creatures and becomes an argument about whose lives keep a nation permanent.
+At this scale the [[the-soul-forge]] network *is* the nation: a crown is a set of Forges and the roads between them, subjects are people bound to machines you own, and vassalage is frequently just somebody else’s population binding to your Core. Doctrine follows — who may bind, what the reserve burns, whether reclamation is a right or a wage — and it is where harvest policy stops being an argument about creatures and becomes an argument about whose lives keep a nation permanent.
 
 For writers: do not write toward this before the story grants it — the release plan on the Systems shelf is the check. Do plant its seeds early: charters, old claims, oaths sworn in the prologue that a crown would have to honor. The best endgame material is paid for in the prologue.`,
     meta: meta({
       category: "management",
       unlockStage: "Late game — well beyond the peninsula landing",
       dependsOn: ["outpost-and-city-management", "faction-membership", "the-power-balance"],
-      pillars: ["Authority arrives when the story grants it", "Harvest policy at scale is the endgame's moral core", "Kingdoms get noticed"],
-      openQuestions: ["Which arc actually grants the charter? It does not exist yet — link it here when it does.", "What does the thing beneath the war want with a kingdom?"],
+      pillars: ["Authority arrives when the story grants it", "Harvest policy at scale is the endgame's moral core", "Nations get noticed"],
+      openQuestions: ["Which arc actually grants the charter? It does not exist yet — link it here when it does.", "What does the thing beneath the war want with a nation?"],
     }),
   },
   {

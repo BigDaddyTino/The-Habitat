@@ -11,7 +11,7 @@ doc, it writes into these folders too.
 | --- | --- | --- |
 | **`codex/`** | The Story Codex's own manuals: how the writers' room works, sync, import, schemas, the character bible's process record | `codex/STORY_CODEX.md` |
 | **`art/`** | Everything Sol and image work: prompts, ledgers of delivered art, the drop runbook, style law, open-slot manifests | `art/SOL56_RIVERLANDS_ART_PROMPT.md` (current brief) · `art/CODEX_ART_DROP_RUNBOOK.md` (how to place art) |
-| **`sims/`** | Balance simulation findings and raw logs — talents and Kingdom Management | `sims/MARTINO_KM_SIM_FINDINGS.md` |
+| **`sims/`** | Balance simulation findings and raw logs — talents and Nation Management | `sims/MARTINO_NM_SIM_FINDINGS.md` |
 | **`bloomfall/`** | The complete Bloomfall Reach campaign record: canon architecture, visual passes, promotion/cutover reports | `bloomfall/BLOOMFALL_REACH_CANON_ARCHITECTURE.md` |
 | **`atlas/`** | Atlas contracts, plans, and release records | `atlas/ATLAS_2_CONTRACT.md` |
 | **`platform/`** | The Habitat itself: architecture, deployment (web/worker/game services), auth, security, operations, observability, old audits and plans | `platform/ARCHITECTURE.md` · `platform/WEB_DEPLOYMENT.md` |
@@ -38,13 +38,13 @@ falsifies history and breaks activation locks:
 
 - `audit-character-bible.ts --write-art-manifest` → `art/MARTINO_CHARACTER_BIBLE_ART.md`
 - `sim-talent-balance.ts` → `sims/MARTINO_SIM_RESULTS.md`
-- `sim-kingdom-balance.ts` → `sims/MARTINO_KM_SIM_RESULTS.md`
+- `sim-nation-balance.ts` → `sims/MARTINO_NM_SIM_RESULTS.md`
 
 ## Fastest answers
 
 - **"How do I place new art?"** → `art/CODEX_ART_DROP_RUNBOOK.md`
 - **"What art is still owed?"** → `art/SOL56_RIVERLANDS_ART_PROMPT.md` + run `audit-codex-art-coverage.ts`
 - **"How does the codex/release/export work?"** → `codex/STORY_CODEX.md`, `codex/CODEX_SYNC.md`
-- **"What did the Kingdom sims prove?"** → `sims/MARTINO_KM_SIM_FINDINGS.md`
+- **"What did the Nation sims prove?"** → `sims/MARTINO_NM_SIM_FINDINGS.md`
 - **"How do I deploy the web app?"** → `platform/WEB_DEPLOYMENT.md` (and `apps/web/scripts/deploy-web.ps1`)
 - **"What happened in Bloomfall and why?"** → `bloomfall/` in filename order

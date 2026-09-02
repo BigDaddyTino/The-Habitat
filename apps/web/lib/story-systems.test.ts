@@ -4,6 +4,7 @@ import { join } from "node:path";
 import test from "node:test";
 import {
   isValidStoryKey,
+  NATION_MANAGEMENT_PERSISTED_SLUG,
   storyEntryKinds,
   storyEntryKindLabels,
   storySystemCategories,
@@ -329,7 +330,7 @@ test("holding a Forge is written as how ground is held", () => {
   // whose defenders come back. Every system that governs ground has to know.
   const forge = bySlugBody("the-soul-forge");
   assert.match(forge, /owns who is allowed to be permanent|Forges are how ground is actually held/i);
-  for (const slug of ["outpost-and-city-management", "kingdom-management", "battle-management", "the-power-balance"]) {
+  for (const slug of ["outpost-and-city-management", NATION_MANAGEMENT_PERSISTED_SLUG, "battle-management", "the-power-balance"]) {
     assert.match(bySlugBody(slug), /\[\[the-soul-forge\]\]/, `${slug} must reckon with the Forge`);
   }
   // Taking a settlement means taking its Forge intact, not levelling it.
@@ -428,7 +429,7 @@ test("every kind with a sheet is born carrying it, however little of the form wa
   assert.doesNotMatch(createEntry, /const placeMeta[^=]*= place \|\| parent/, "a region created without a place kind must still get its sheet");
 
   // What the pickers do supply still has to reach the sheet.
-  assert.match(createEntry, /parent: systemParent\?\.success \? systemParent\.data : null/, "a filed system keeps its parent");
+  assert.match(createEntry, /parent: systemParent\?\.success \? persistedStoryEntrySlug\(systemParent\.data\) : null/, "a filed system keeps its storage-safe parent");
   assert.match(createEntry, /parent: raceParent\?\.success \? raceParent\.data : null/, "a filed creature keeps its race");
   assert.match(createEntry, /type: place\?\.type \?\? null/, "a placed region keeps the kind of place it is");
   assert.match(createEntry, /settlementTier: place\?\.settlementTier \?\? null/, "a settlement keeps its tier");

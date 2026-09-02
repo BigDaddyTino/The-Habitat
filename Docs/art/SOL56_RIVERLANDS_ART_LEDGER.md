@@ -3997,7 +3997,7 @@ Date: 2026-09-01
 Scope: exactly `the-waterworks.png`, `the-faith-lane.png`, `the-ossuary-rites.png`, and `the-old-roads.png`  
 Generator: built-in OpenAI image generation (`image_gen`)  
 Director source: `Docs/art/SOL56_RIVERLANDS_ART_PROMPT.md`  
-Live-dossier sources: `apps/web/scripts/author-riverlands-foundation.ts` and `apps/web/scripts/integrate-kingdom-design.ts`
+Live-dossier sources: `apps/web/scripts/author-riverlands-foundation.ts` and `apps/web/scripts/integrate-nation-design.ts`
 
 ## Acceptance contract and QA method
 
@@ -4572,4 +4572,3 @@ HARD LOCKS: statue remains fully opaque-shrouded head-to-base, standing, intact,
 - Full frame: PASS — radiant Heartland courthouse square, fully shrouded upright statue, secured sling, empty square, no Wade/crowd/ceremony/death implication, and five materially distinct unattended tool clusters.
 - Exact centered 564x941 crop: PASS — complete shrouded statue, sling, plinth, and all five clusters remain legible.
 - Text/palette/story locks: PASS — no readable or pseudo-writing, signs, plaques, insignia, logos, violet, cyan, exposed statue, violence, or aftermath.
-

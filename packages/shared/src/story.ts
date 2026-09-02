@@ -1074,13 +1074,39 @@ export const storySystemCategories = [
 export const storySystemStatuses = ["concept", "designed", "in-build", "playable", "live"] as const;
 
 /**
+ * Nation Management's public terminology and its two narrow compatibility
+ * seams. The original StoryEntry slug is already persisted and referenced by
+ * authored Codex prose, so storage keeps that key while every public route is
+ * canonicalised to `nation-management`. Likewise, existing faction metadata
+ * may still carry the former two-letter tag until the authoring migration is
+ * applied; readers accept it while every new write uses `NM`.
+ */
+export const NATION_MANAGEMENT_ROUTE_SLUG = "nation-management";
+export const NATION_MANAGEMENT_PERSISTED_SLUG = "kingdom-management";
+export const NATION_MANAGEMENT_GAME_TAG_PREFIX = "NM ·";
+export const LEGACY_NATION_MANAGEMENT_GAME_TAG_PREFIX = "KM ·";
+
+export function canonicalStoryEntryRouteSlug(slug: string): string {
+  return slug === NATION_MANAGEMENT_PERSISTED_SLUG ? NATION_MANAGEMENT_ROUTE_SLUG : slug;
+}
+
+export function persistedStoryEntrySlug(slug: string): string {
+  return slug === NATION_MANAGEMENT_ROUTE_SLUG ? NATION_MANAGEMENT_PERSISTED_SLUG : slug;
+}
+
+/** Both identities reserved for a StoryEntry at this compatibility seam. */
+export function storyEntrySlugAliases(slug: string): string[] {
+  return [...new Set([canonicalStoryEntryRouteSlug(slug), persistedStoryEntrySlug(slug)])];
+}
+
+/**
  * SYSTEM entries are the game's mechanics written down for the writers' room —
  * what the player can actually do, so quests are written toward systems that
  * exist instead of inventing verbs the game never ships.
  *
  * `unlockArc` is the release gate: the quest arc that switches this system on
- * for the player. Kingdom management is not a day-one verb — it arrives when
- * the story hands the player a kingdom, and this field is where that pacing
+ * for the player. Nation management is not a day-one verb — it arrives when
+ * the story hands the player a nation, and this field is where that pacing
  * lives. `unlockStage` carries the same intent as prose while the gating arc
  * does not exist yet to link.
  */

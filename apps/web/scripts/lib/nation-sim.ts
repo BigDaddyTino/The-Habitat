@@ -1,11 +1,11 @@
 /**
- * The Kingdom Management balance model — "Holding Ground" spec, sim pass 1.
+ * The Nation Management balance model — "Holding Ground" spec, sim pass 1.
  *
  * A deliberately small world-game: five Great Powers with equal starting
  * totals and different shapes, a neutral belt of claimable sites, institution
  * seats that auction influence, a Free Powers bloc that only defends, sacred
  * sites that can be held but never owned, sieges resolved as Forge clocks,
- * faith pressure and morale, monthly Court Day events, and kingdom XP with
+ * faith pressure and morale, monthly Court Day events, and nation XP with
  * ceiling gates.
  *
  * Everything is a knob on purpose; canon constants are marked CANON.
@@ -440,7 +440,7 @@ export function tick(world: World, rand: () => number, opts?: { convertRate?: nu
       });
       if (!candidates.length || p.coin < 220) continue;
       const target = candidates.sort((a, b) => b.tier - a.tier)[0]!;
-      // Armies scale with kingdom level (owner law: level extends army size).
+      // Armies scale with nation level (owner law: level extends army size).
       const army = Math.min(480, 120 + p.level * 40);
       p.coin -= 120;
       // Posture choice: the impatient and the poor storm; the patient and the rich wait out the clock.

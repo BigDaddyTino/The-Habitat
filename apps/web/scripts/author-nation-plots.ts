@@ -1,8 +1,9 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
+import { NATION_MANAGEMENT_PERSISTED_SLUG } from "@habitat/shared";
 
 /**
- * Untwists the charters in the `kingdom-management` dossier (owner, 2026-09-02):
+ * Untwists the charters in the Nation Management dossier (owner, 2026-09-02):
  * the Three Charters are the Riverlands' three purchasable, buildable plots,
  * not a mechanism every region shares and not rungs of the ladder. Two
  * sentences change, each matched verbatim; if either is missing nothing is
@@ -24,7 +25,7 @@ const edits: Array<{ from: string; to: string }> = [
 ];
 
 async function main() {
-  const entry = await db.storyEntry.findUniqueOrThrow({ where: { slug: "kingdom-management" }, select: { id: true, body: true, version: true } });
+  const entry = await db.storyEntry.findUniqueOrThrow({ where: { slug: NATION_MANAGEMENT_PERSISTED_SLUG }, select: { id: true, body: true, version: true } });
   let body = entry.body ?? "";
   let applied = 0;
   let already = 0;
@@ -34,7 +35,7 @@ async function main() {
     body = body.replace(edit.from, edit.to);
     applied += 1;
   }
-  console.log(`${write ? "WRITING" : "PREVIEW"} kingdom-management: ${applied} edit(s) to apply, ${already} already applied`);
+  console.log(`${write ? "WRITING" : "PREVIEW"} Nation Management: ${applied} edit(s) to apply, ${already} already applied`);
   for (const edit of edits) console.log(`  → ${edit.to}`);
   if (write && applied) {
     await db.storyEntry.update({ where: { id: entry.id }, data: { body, version: { increment: 1 } } });

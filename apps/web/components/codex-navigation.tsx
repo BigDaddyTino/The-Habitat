@@ -44,7 +44,7 @@ const items: NavItem[] = [
       { href: "/codex/spells", label: "Spells", icon: Sparkles },
       { href: "/codex/skills", label: "Skills", icon: Target },
       { href: "/codex/professions", label: "Trades", icon: Hammer },
-      { href: "/codex/kingdom", label: "Kingdom", icon: Crown },
+      { href: "/codex/nation", label: "Nation", icon: Crown },
     ],
   },
   {

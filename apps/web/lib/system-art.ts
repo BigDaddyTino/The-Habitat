@@ -1,3 +1,4 @@
+import { NATION_MANAGEMENT_PERSISTED_SLUG, NATION_MANAGEMENT_ROUTE_SLUG } from "@habitat/shared";
 import { codexArtSlot, findCodexArt } from "./codex-art";
 
 /**
@@ -6,9 +7,13 @@ import { codexArtSlot, findCodexArt } from "./codex-art";
  * rather than as static assets under public/.
  */
 export function getSystemArt(slug: string): string | null {
-  return findCodexArt("systems", slug);
+  return findCodexArt("systems", canonicalSystemArtSlug(slug));
 }
 
 export function systemArtSlot(slug: string) {
-  return codexArtSlot("systems", slug);
+  return codexArtSlot("systems", canonicalSystemArtSlug(slug));
+}
+
+function canonicalSystemArtSlug(slug: string) {
+  return slug === NATION_MANAGEMENT_PERSISTED_SLUG ? NATION_MANAGEMENT_ROUTE_SLUG : slug;
 }

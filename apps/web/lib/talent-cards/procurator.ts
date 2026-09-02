@@ -254,8 +254,8 @@ export const procuratorCards: Record<string, AbilityCard> = {
   },
   "crown-without-a-name": {
     kind: "Capstone",
-    effect: "Unlocks Kingdom management: holding ground becomes ruling it — vassals, levies, law, legacy.",
-    notes: "Reserved for the kingdom pass; no trainer is named yet, and points alone never open it. Needs Charter.",
+    effect: "Unlocks Nation management: holding ground becomes ruling it — vassals, levies, law, legacy.",
+    notes: "Reserved for the nation pass; no trainer is named yet, and points alone never open it. Needs Charter.",
   },
 
   // ------------------------------------------------------------ The Hungry Ledger (corrupted)

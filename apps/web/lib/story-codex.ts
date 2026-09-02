@@ -2,12 +2,15 @@ import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import {
   analyzeStoryGraph,
+  canonicalStoryEntryRouteSlug,
   findStoryArcEntryNodeKeys,
   groupStoryMissionChains,
   isStoryPresenceFresh,
+  persistedStoryEntrySlug,
   storyPlaceAncestry,
   storyPlaceDescendants,
   storyPresenceTtlMs,
+  storyEntrySlugAliases,
   type StoryArcCategory,
   type StoryCanonPacket,
   type StoryEntryKind,
@@ -20,6 +23,7 @@ import {
   type StoryStatus,
 } from "@habitat/shared";
 import { canonPacketSchema } from "@/lib/story-meta-schemas";
+import { legacyNationTerminologySearchText, nationTerminologyText, nationTerminologyValue } from "@/lib/nation-terminology";
 
 const db = getPrismaClient();
 
@@ -171,8 +175,8 @@ export async function listStoryArcs() {
   return arcs.map((arc) => ({
     id: arc.id,
     slug: arc.slug,
-    title: arc.title,
-    summary: arc.summary,
+    title: nationTerminologyText(arc.title),
+    summary: arc.summary ? nationTerminologyText(arc.summary) : null,
     isMainline: arc.isMainline,
     category: arc.category,
     regionEntryId: arc.regionEntryId,
@@ -239,24 +243,24 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
     id: node.id,
     key: node.key,
     kind: node.kind,
-    title: node.title,
-    summary: node.summary,
-    body: node.body,
+    title: nationTerminologyText(node.title),
+    summary: node.summary ? nationTerminologyText(node.summary) : null,
+    body: node.body ? nationTerminologyText(node.body) : null,
     status: node.status,
-    speaker: node.speaker,
+    speaker: node.speaker ? { ...node.speaker, slug: canonicalStoryEntryRouteSlug(node.speaker.slug), title: nationTerminologyText(node.speaker.title) } : null,
     endingKind: node.endingKind,
-    completion: node.completion,
-    effects: node.effects,
-    rewards: node.rewards,
-    continuesIn: node.continuesIn,
+    completion: node.completion ? nationTerminologyText(node.completion) : null,
+    effects: node.effects.map(nationTerminologyText),
+    rewards: node.rewards.map(nationTerminologyText),
+    continuesIn: node.continuesIn ? { ...node.continuesIn, title: nationTerminologyText(node.continuesIn.title) } : null,
     canvasX: node.canvasX,
     canvasY: node.canvasY,
     version: node.version,
     author: storyMemberName(node.creator),
     updatedAt: node.updatedAt,
     commentCount: node.comments.length,
-    references: node.entryLinks.map((link) => link.entry),
-    comments: node.comments.map((comment) => ({ id: comment.id, body: comment.body, author: storyMemberName(comment.author), createdAt: comment.createdAt })),
+    references: node.entryLinks.map((link) => ({ ...link.entry, slug: canonicalStoryEntryRouteSlug(link.entry.slug), title: nationTerminologyText(link.entry.title) })),
+    comments: node.comments.map((comment) => ({ id: comment.id, body: nationTerminologyText(comment.body), author: storyMemberName(comment.author), createdAt: comment.createdAt })),
     // An expired lock is no lock. Reading it as live would leave a node frozen
     // by whoever last closed their laptop on it.
     lockedBy: node.lockedBy && node.lockExpiresAt && node.lockExpiresAt > now ? toWriter(node.lockedBy) : null,
@@ -264,12 +268,12 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       id: line.id,
       number: line.number,
       order: line.order,
-      speaker: line.speaker,
-      speakerRole: line.speakerRole,
-      listener: line.listener,
-      listenerRole: line.listenerRole,
-      text: line.text,
-      performance: line.performance,
+      speaker: line.speaker ? { ...line.speaker, slug: canonicalStoryEntryRouteSlug(line.speaker.slug), title: nationTerminologyText(line.speaker.title) } : null,
+      speakerRole: line.speakerRole ? nationTerminologyText(line.speakerRole) : null,
+      listener: line.listener ? { ...line.listener, slug: canonicalStoryEntryRouteSlug(line.listener.slug), title: nationTerminologyText(line.listener.title) } : null,
+      listenerRole: line.listenerRole ? nationTerminologyText(line.listenerRole) : null,
+      text: nationTerminologyText(line.text),
+      performance: nationTerminologyText(line.performance),
       intensity: line.intensity,
       emotion: line.emotion,
       locale: line.locale,
@@ -289,12 +293,12 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
     arc: {
       id: arc.id,
       slug: arc.slug,
-      title: arc.title,
-      summary: arc.summary,
-      hook: arc.hook,
-      region: arc.region,
-      companion: arc.companion,
-      faction: arc.faction,
+      title: nationTerminologyText(arc.title),
+      summary: arc.summary ? nationTerminologyText(arc.summary) : null,
+      hook: arc.hook ? nationTerminologyText(arc.hook) : null,
+      region: arc.region ? { ...arc.region, slug: canonicalStoryEntryRouteSlug(arc.region.slug), title: nationTerminologyText(arc.region.title) } : null,
+      companion: arc.companion ? { ...arc.companion, slug: canonicalStoryEntryRouteSlug(arc.companion.slug), title: nationTerminologyText(arc.companion.title) } : null,
+      faction: arc.faction ? { ...arc.faction, slug: canonicalStoryEntryRouteSlug(arc.faction.slug), title: nationTerminologyText(arc.faction.title) } : null,
       isMainline: arc.isMainline,
       category: arc.category,
       status: arc.status,
@@ -313,14 +317,14 @@ export async function getStoryBoard(slug: string): Promise<StoryBoard | null> {
       voiced: edge.voiced,
       fromNodeId: edge.fromNodeId,
       toNodeId: edge.toNodeId,
-      label: edge.label,
-      condition: edge.condition,
-      effects: edge.effects,
+      label: edge.label ? nationTerminologyText(edge.label) : null,
+      condition: edge.condition ? nationTerminologyText(edge.condition) : null,
+      effects: edge.effects.map(nationTerminologyText),
       position: edge.position,
       status: edge.status,
       updatedAt: edge.updatedAt,
     })),
-    libraryEntries,
+    libraryEntries: libraryEntries.map((entry) => ({ ...entry, slug: canonicalStoryEntryRouteSlug(entry.slug), title: nationTerminologyText(entry.title) })),
     entryNodeKeys: findStoryArcEntryNodeKeys(arc.slug, graphNodes, graphEdges),
     problems: analyzeStoryGraph(graphNodes, graphEdges),
     present: presence
@@ -343,11 +347,12 @@ export async function listStoryArcRefs() {
 
 export async function listStoryEntries(options: { kind?: StoryEntryKind; search?: string } = {}) {
   const search = options.search?.trim();
+  const searchTerms = search ? [...new Set([search, legacyNationTerminologySearchText(search)])] : [];
   const entries = await db.storyEntry.findMany({
     where: {
       status: { in: workingStatuses },
       ...(options.kind ? { kind: options.kind } : {}),
-      ...(search ? { OR: [{ title: { contains: search, mode: "insensitive" } }, { summary: { contains: search, mode: "insensitive" } }, { body: { contains: search, mode: "insensitive" } }] } : {}),
+      ...(searchTerms.length ? { OR: searchTerms.flatMap((term) => [{ title: { contains: term, mode: "insensitive" as const } }, { summary: { contains: term, mode: "insensitive" as const } }, { body: { contains: term, mode: "insensitive" as const } }]) } : {}),
     },
     include: {
       creator: { select: writerSelect },
@@ -359,10 +364,10 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
   return entries.map((entry) => ({
     id: entry.id,
     kind: entry.kind,
-    slug: entry.slug,
-    title: entry.title,
-    summary: entry.summary,
-    meta: (entry.meta as Record<string, unknown> | null) ?? null,
+    slug: canonicalStoryEntryRouteSlug(entry.slug),
+    title: nationTerminologyText(entry.title),
+    summary: entry.summary ? nationTerminologyText(entry.summary) : null,
+    meta: entry.meta ? nationTerminologyValue(entry.meta) as Record<string, unknown> : null,
     status: entry.status,
     author: storyMemberName(entry.creator),
     appearanceCount: entry._count.nodeLinks,
@@ -372,8 +377,10 @@ export async function listStoryEntries(options: { kind?: StoryEntryKind; search?
 }
 
 export async function getStoryEntry(slug: string) {
-  const [entry, possibleConnections] = await Promise.all([db.storyEntry.findUnique({
-    where: { slug },
+  const storageSlug = persistedStoryEntrySlug(slug);
+  const lookupAliases = storyEntrySlugAliases(slug);
+  const [entry, possibleConnections] = await Promise.all([db.storyEntry.findFirst({
+    where: { slug: { in: lookupAliases } },
     include: {
       creator: { select: writerSelect },
       editor: { select: writerSelect },
@@ -396,8 +403,9 @@ export async function getStoryEntry(slug: string) {
       },
       comments: { include: { author: { select: writerSelect } }, orderBy: { createdAt: "asc" } },
     },
+    orderBy: { slug: "asc" },
   }), db.storyEntry.findMany({
-    where: { slug: { not: slug }, status: { in: workingStatuses } },
+    where: { slug: { notIn: lookupAliases }, status: { in: workingStatuses } },
     select: { id: true, slug: true, title: true, kind: true, meta: true },
     orderBy: [{ kind: "asc" }, { title: "asc" }],
   })]);
@@ -411,14 +419,14 @@ export async function getStoryEntry(slug: string) {
   const rows = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value)
     ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null)
     : [];
-  const referencesSlug = (value: unknown) => typeof value === "string" && value === slug;
+  const referencesSlug = (value: unknown) => typeof value === "string" && persistedStoryEntrySlug(value) === storageSlug;
 
   for (const candidate of possibleConnections) {
     const meta = candidate.meta as Record<string, unknown> | null;
     if (!meta) continue;
     const add = (relation: string) => {
       if (!connections.some((connection) => connection.slug === candidate.slug && connection.relation === relation)) {
-        connections.push({ slug: candidate.slug, title: candidate.title, kind: candidate.kind, relation });
+        connections.push({ slug: canonicalStoryEntryRouteSlug(candidate.slug), title: nationTerminologyText(candidate.title), kind: candidate.kind, relation });
       }
     };
     if (referencesSlug(meta.home)) add("calls this home");
@@ -583,11 +591,11 @@ export async function getStoryEntry(slug: string) {
     companionArcs,
     id: entry.id,
     kind: entry.kind,
-    slug: entry.slug,
-    title: entry.title,
-    summary: entry.summary,
-    body: entry.body,
-    meta: (entry.meta as Record<string, unknown> | null) ?? null,
+    slug: canonicalStoryEntryRouteSlug(entry.slug),
+    title: nationTerminologyText(entry.title),
+    summary: entry.summary ? nationTerminologyText(entry.summary) : null,
+    body: entry.body ? nationTerminologyText(entry.body) : null,
+    meta: entry.meta ? nationTerminologyValue(entry.meta) as Record<string, unknown> : null,
     status: entry.status,
     version: entry.version,
     author: storyMemberName(entry.creator),
@@ -598,7 +606,7 @@ export async function getStoryEntry(slug: string) {
     connections,
     comments: entry.comments.map((comment) => ({
       id: comment.id,
-      body: comment.body,
+      body: nationTerminologyText(comment.body),
       author: storyMemberName(comment.author),
       createdAt: comment.createdAt,
       resolvedAt: comment.resolvedAt,
@@ -646,7 +654,7 @@ function readCanonPackets(meta: unknown): StoryCanonPacket[] {
   const packets: StoryCanonPacket[] = [];
   for (const row of rows) {
     const parsed = canonPacketSchema.safeParse(row);
-    if (parsed.success) packets.push(parsed.data as StoryCanonPacket);
+    if (parsed.success) packets.push(nationTerminologyValue(parsed.data) as StoryCanonPacket);
   }
   return packets;
 }
@@ -670,7 +678,7 @@ export async function getCanonInbox(): Promise<{ packets: StoryCanonPacketRow[];
   for (const thread of threads) {
     const author = storyMemberName(thread.creator);
     for (const packet of readCanonPackets(thread.meta)) {
-      packets.push({ ...packet, thread: { slug: thread.slug, title: thread.title, entryId: thread.id, version: thread.version, author } });
+      packets.push({ ...packet, thread: { slug: canonicalStoryEntryRouteSlug(thread.slug), title: nationTerminologyText(thread.title), entryId: thread.id, version: thread.version, author } });
     }
   }
   // Newest push first: the inbox reads like an inbox.
@@ -872,7 +880,7 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
 
   const navArc = (arc: (typeof arcs)[number]): CanonNavArc => ({
     slug: arc.slug,
-    title: arc.title,
+    title: nationTerminologyText(arc.title),
     category: arc.category,
     status: arc.status,
     locked: arc.lockedAt !== null,
@@ -919,7 +927,7 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
     const here = arcsBySlug.get(region.slug) ?? [];
     built.set(region.slug, {
       slug: region.slug,
-      title: region.title,
+      title: nationTerminologyText(region.title),
       depth: depthOf.get(region.slug) ?? 0,
       sideQuests: here.filter((arc) => arc.category === "SIDE_QUEST").map(navArc),
       contracts: here.filter((arc) => arc.category === "CONTRACT").map(navArc),
@@ -997,14 +1005,14 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
       if (arc) claimed.add(arc.slug);
       return {
         order: typeof meta.order === "number" ? meta.order : null,
-        title: mission.title,
+        title: nationTerminologyText(mission.title),
         missionSlug: mission.slug,
         arc: arc ? navArc(arc) : null,
       };
     });
     return {
       slug,
-      title: characterBySlug.get(slug)?.title ?? slug.replaceAll("-", " "),
+      title: characterBySlug.get(slug)?.title ? nationTerminologyText(characterBySlug.get(slug)!.title) : slug.replaceAll("-", " "),
       chain,
       looseArcs: (arcsByCompanion.get(slug) ?? []).filter((arc) => !claimed.has(arc.slug)).map(navArc),
       pendingPackets: inbox.pending.companions[slug] ?? 0,
@@ -1074,10 +1082,10 @@ export async function getCanonNavigator(): Promise<StoryCanonNavigator> {
   const factions: CanonNavFaction[] = majors
     .map((major) => ({
       slug: major.slug,
-      title: major.title,
+      title: nationTerminologyText(major.title),
       ownArcs: ownByMajor.get(major.slug) ?? [],
       wings: [...(wingArcs.get(major.slug) ?? new Map<string, CanonNavArc[]>()).entries()]
-        .map(([slug, arcsFlown]) => ({ slug, title: factionBySlug.get(slug)?.title ?? slug.replaceAll("-", " "), arcs: arcsFlown }))
+        .map(([slug, arcsFlown]) => ({ slug, title: factionBySlug.get(slug)?.title ? nationTerminologyText(factionBySlug.get(slug)!.title) : slug.replaceAll("-", " "), arcs: arcsFlown }))
         .sort((left, right) => left.title.localeCompare(right.title)),
       pendingPackets: rolledBannerPackets(major.slug),
     }))
@@ -1347,12 +1355,15 @@ export async function getStoryNeedsWork() {
     db.storyArc.findMany({ where: { status: { in: workingStatuses } }, select: { slug: true, regionEntryId: true, companionEntryId: true, factionEntryId: true } }),
   ]);
 
-  const known = new Set([...entries.map((entry) => entry.slug), ...arcs.map((arc) => arc.slug)]);
+  const knownEntries = new Set(entries.map((entry) => entry.slug));
+  for (const entry of entries) {
+    for (const alias of storyEntrySlugAliases(entry.slug)) knownEntries.add(alias);
+  }
+  const known = new Set([...knownEntries, ...arcs.map((arc) => arc.slug)]);
   // The pools kept apart, for the fields that name ONE namespace. Merging them
   // is what hid six involvement rows pointing at canon EVENT entries: an event
   // slug is in `known`, so an arc-only field validated against it looked
   // resolved. A field that legitimately reaches either way still uses `known`.
-  const knownEntries = new Set(entries.map((entry) => entry.slug));
   const knownArcs = new Set(arcs.map((arc) => arc.slug));
   // Both ways an arc reaches into the bible: the place it is picked up, and
   // the companion whose story it is. A character whose only tie to the world
@@ -1430,8 +1441,8 @@ export async function getStoryNeedsWork() {
     }
 
     const meta = entry.meta as Record<string, unknown> | null;
-    const hasInbound = inbound.has(entry.slug) || entry._count.nodeLinks > 0 || entry._count.speakerOf > 0 || arcEntryIds.has(entry.id);
-    const hasOutbound = (outbound.get(entry.slug) ?? []).some((target) => known.has(target) && target !== entry.slug);
+    const hasInbound = storyEntrySlugAliases(entry.slug).some((alias) => inbound.has(alias)) || entry._count.nodeLinks > 0 || entry._count.speakerOf > 0 || arcEntryIds.has(entry.id);
+    const hasOutbound = (outbound.get(entry.slug) ?? []).some((target) => known.has(target) && persistedStoryEntrySlug(target) !== persistedStoryEntrySlug(entry.slug));
     // THEME and RULE are ambient law, and FLAG lives on the threads ledger —
     // being unreferenced is not a problem for them.
     if (!hasInbound && !hasOutbound && entry.kind !== "THEME" && entry.kind !== "RULE" && entry.kind !== "FLAG") {
@@ -1538,11 +1549,11 @@ export async function getStoryNeedsWork() {
   }
 
   return {
-    unresolvedLinks,
-    openQuestions,
-    missingMeta,
-    planned,
-    unconnected,
+    unresolvedLinks: unresolvedLinks.map((item) => ({ ...item, slug: canonicalStoryEntryRouteSlug(item.slug), title: nationTerminologyText(item.title), target: nationTerminologyText(item.target) })),
+    openQuestions: openQuestions.map((item) => ({ ...item, slug: canonicalStoryEntryRouteSlug(item.slug), title: nationTerminologyText(item.title), question: nationTerminologyText(item.question) })),
+    missingMeta: missingMeta.map((item) => ({ ...item, slug: canonicalStoryEntryRouteSlug(item.slug), title: nationTerminologyText(item.title) })),
+    planned: planned.map((item) => ({ ...item, slug: canonicalStoryEntryRouteSlug(item.slug), title: nationTerminologyText(item.title), target: nationTerminologyText(item.target) })),
+    unconnected: unconnected.map((item) => ({ ...item, slug: canonicalStoryEntryRouteSlug(item.slug), title: nationTerminologyText(item.title) })),
     total: unresolvedLinks.length + openQuestions.length + missingMeta.length + planned.length + unconnected.length,
   };
 }
@@ -1557,10 +1568,10 @@ export async function getStoryReviewQueue() {
   ]);
 
   return {
-    arcs: arcs.map((arc) => ({ id: arc.id, slug: arc.slug, title: arc.title, summary: arc.summary, author: storyMemberName(arc.creator), createdAt: arc.createdAt })),
-    nodes: nodes.map((node) => ({ id: node.id, key: node.key, title: node.title, summary: node.summary, kind: node.kind, arc: node.arc, author: storyMemberName(node.creator), createdAt: node.createdAt })),
-    edges: edges.map((edge) => ({ id: edge.id, label: edge.label, from: edge.fromNode.title, to: edge.toNode.title, arc: edge.arc, author: storyMemberName(edge.creator), createdAt: edge.createdAt })),
-    entries: entries.map((entry) => ({ id: entry.id, slug: entry.slug, kind: entry.kind, title: entry.title, summary: entry.summary, author: storyMemberName(entry.creator), createdAt: entry.createdAt })),
+    arcs: arcs.map((arc) => ({ id: arc.id, slug: arc.slug, title: nationTerminologyText(arc.title), summary: arc.summary ? nationTerminologyText(arc.summary) : null, author: storyMemberName(arc.creator), createdAt: arc.createdAt })),
+    nodes: nodes.map((node) => ({ id: node.id, key: node.key, title: nationTerminologyText(node.title), summary: node.summary ? nationTerminologyText(node.summary) : null, kind: node.kind, arc: { ...node.arc, title: nationTerminologyText(node.arc.title) }, author: storyMemberName(node.creator), createdAt: node.createdAt })),
+    edges: edges.map((edge) => ({ id: edge.id, label: edge.label ? nationTerminologyText(edge.label) : null, from: nationTerminologyText(edge.fromNode.title), to: nationTerminologyText(edge.toNode.title), arc: { ...edge.arc, title: nationTerminologyText(edge.arc.title) }, author: storyMemberName(edge.creator), createdAt: edge.createdAt })),
+    entries: entries.map((entry) => ({ id: entry.id, slug: canonicalStoryEntryRouteSlug(entry.slug), kind: entry.kind, title: nationTerminologyText(entry.title), summary: entry.summary ? nationTerminologyText(entry.summary) : null, author: storyMemberName(entry.creator), createdAt: entry.createdAt })),
     total: arcs.length + nodes.length + edges.length + entries.length,
   };
 }
@@ -1586,7 +1597,7 @@ export async function getStoryActivity(limit = 30, arcId?: string) {
     action: revision.action,
     /** For STATUS_CHANGED rows: the status the entity landed on. */
     statusTo: typeof revision.after === "object" && revision.after !== null && "status" in revision.after ? String((revision.after as { status: unknown }).status) : null,
-    summary: revision.summary,
+    summary: nationTerminologyText(revision.summary),
     actor: storyMemberName(revision.actor),
     createdAt: revision.createdAt,
   }));

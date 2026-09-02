@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Inbox } from "lucide-react";
-import { storyEntryKindLabels, storyNodeKindLabels } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, storyEntryKindLabels, storyNodeKindLabels } from "@habitat/shared";
 import { requireRole } from "@/lib/authorization";
 import { getStoryReviewQueue, storyReviewRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -60,7 +60,7 @@ export default async function CodexReviewPage() {
           ))}
           {queue.entries.map((entry) => (
             <article key={entry.id}>
-              <div><p className="eyebrow">{storyEntryKindLabels[entry.kind]} — {entry.author}</p><h2><Link href={`/codex/bible/${entry.slug}`}>{entry.title}</Link></h2>{entry.summary ? <p>{entry.summary}</p> : null}</div>
+              <div><p className="eyebrow">{storyEntryKindLabels[entry.kind]} — {entry.author}</p><h2><Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(entry.slug)}`}>{entry.title}</Link></h2>{entry.summary ? <p>{entry.summary}</p> : null}</div>
               <Decision entityId={entry.id} entityType="ENTRY" />
             </article>
           ))}

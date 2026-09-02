@@ -1,21 +1,21 @@
 /**
- * Holding Ground, as data the Kingdom page reads: the five Ranks of the
+ * Holding Ground, as data the Nation page reads: the five Ranks of the
  * Crown (the realm's level system, three levels a rank, a proving at every
  * ceiling), the fifteen-level ledger of perks and caps, the six court seats,
  * the four ways to get ground, the six realm trees with their perk nodes,
  * the five faiths and the secular crown with the sims' morale numbers, the
  * siege as a Forge clock with the measured storm/wait table, Court Day's
  * priced options, the soulless garrison, and the standing laws. Canon is
- * the `kingdom-management` and `the-faith-lane` dossiers (owner-approved
+ * the Nation Management and `the-faith-lane` dossiers (owner-approved
  * 2026-09-01; ranks, ledger and perk nodes 2026-09-02); the siege, court
- * and morale numbers are the kingdom balance campaign's
- * (Docs/sims/MARTINO_KM_SIM_FINDINGS.md, tuning pass). The ledger's caps
+ * and morale numbers are the nation balance campaign's
+ * (Docs/sims/MARTINO_NM_SIM_FINDINGS.md, tuning pass). The ledger's caps
  * are hand-set and marked so until a sim measures them.
  */
 
 /**
  * The Ranks of the Crown. The five names that used to be drawn as a ladder
- * of holdings are the realm's level system: Kingdom Level 1–15, three levels
+ * of holdings are the realm's level system: Nation Level 1–15, three levels
  * a rank, and every third level a ceiling that XP cannot pass, so the realm
  * proves its way into the next rank. Each rank licenses a scale of holding
  * and adds verbs; none retires the ones below.
@@ -36,10 +36,10 @@ export const crownRanks: CrownRank[] = [
   { numeral: "II", title: "Warden", realm: "The Ward", levels: [4, 6], holds: "A fortified point with a job.", how: "Hold a road or a crossing.", verbs: ["garrison", "patrols", "supply", "a signal plan"], seats: "The Captain." },
   { numeral: "III", title: "Magistrate", realm: "The Township", levels: [7, 9], holds: "A population that is not yours.", how: "Grow one, or take one.", verbs: ["districts", "trades", "law", "admission policy"], seats: "The Chancellor and the Broker." },
   { numeral: "IV", title: "Lord", realm: "The City", levels: [10, 12], holds: "Districts, wharves, politics.", how: "Seized, granted, or founded; rarely built from mud.", verbs: ["grand projects", "real armies", "factions inside your own walls"], seats: "The Marshal and the Envoy." },
-  { numeral: "V", title: "Crown", realm: "The Kingdom", levels: [13, 15], holds: "Multiple holdings and vassals.", how: "The world seats you; then you keep the chair.", verbs: ["doctrine", "diplomacy", "war", "succession", "a seat at the world's table"], seats: "The Spymaster; the court is whole." },
+  { numeral: "V", title: "Crown", realm: "The Nation", levels: [13, 15], holds: "Multiple holdings and vassals.", how: "The world seats you; then you keep the chair.", verbs: ["doctrine", "diplomacy", "war", "succession", "a seat at the world's table"], seats: "The Spymaster; the court is whole." },
 ];
 
-export const ranksLaw = "Kingdom Level runs 1 to 15. Three levels make a rank; every third level is a ceiling no XP can pass, and the realm quests its proving to enter the next rank, the way a trade proves a master. A rank licenses a scale of holding and adds verbs; none retires the ones below.";
+export const ranksLaw = "Nation Level runs 1 to 15. Three levels make a rank; every third level is a ceiling no XP can pass, and the realm quests its proving to enter the next rank, the way a trade proves a master. A rank licenses a scale of holding and adds verbs; none retires the ones below.";
 
 /**
  * The provings: the four ceilings, one at every third level. The quests
@@ -52,15 +52,15 @@ export const provings: Proving[] = [
   { afterLevel: 3, from: "Freeholder", to: "Warden", name: "The Held Night", shape: "Your ground is attacked in earnest and stands until morning with what you built: fence, hands, signal fire. Somebody with a garrison of their own has to see it.", teacher: "The Heartland Watch; its captain's respect is the recruitment mechanic." },
   { afterLevel: 6, from: "Warden", to: "Magistrate", name: "The Second Core", shape: "A second Forge answers to you and a population that is not yours binds to it. The realm becomes a network, and a network can be cut.", teacher: "The Forge's own Resident, wherever the second Core stands." },
   { afterLevel: 9, from: "Magistrate", to: "Lord", name: "The Doctrine Crisis", shape: "A Court Day where your own people split down the middle. You write the doctrine that settles it, and live under what you wrote.", teacher: "The Judge of Heartland's courthouse; fairness must be boring." },
-  { afterLevel: 12, from: "Lord", to: "Crown", name: "The Recognition", shape: "The earn-the-seat quest. The world's powers acknowledge the crown, or are made to. After it you are scored, courted and feared like any of them.", teacher: "The Crown Without a Name, the kingdom pass's reserved ceiling teacher." },
+  { afterLevel: 12, from: "Lord", to: "Crown", name: "The Recognition", shape: "The earn-the-seat quest. The world's powers acknowledge the crown, or are made to. After it you are scored, courted and feared like any of them.", teacher: "The Crown Without a Name, the nation pass's reserved ceiling teacher." },
 ];
 
 /**
- * The ledger: every Kingdom Level, its rank, the perk it grants and the caps
+ * The ledger: every Nation Level, its rank, the perk it grants and the caps
  * it extends. Caps are hand-set for the page and marked untested; the sims'
  * army scale and ceiling cadence are the shape they follow.
  */
-export type KingdomLevel = {
+export type NationLevel = {
   level: number;
   rank: string;
   perk: string;
@@ -68,7 +68,7 @@ export type KingdomLevel = {
   caps: { holdings: string; muster: string; seats: string; vassals: string };
 };
 
-export const kingdomLevels: KingdomLevel[] = [
+export const nationLevels: NationLevel[] = [
   { level: 1, rank: "I", perk: "Deed in Hand", grants: "The plot is yours: build, farm, fence. Court Day is a letter on the kitchen table. The first realm point.", caps: { holdings: "1", muster: "hands", seats: "—", vassals: "—" } },
   { level: 2, rank: "I", perk: "Hands and Hearth", grants: "More hands, a storehouse, wages paid from the box on the table.", caps: { holdings: "1", muster: "hands", seats: "—", vassals: "—" } },
   { level: 3, rank: "I", perk: "The Fence Line", grants: "Your hands take up arms as a militia; a signal fire on the roof. Ceiling: the Held Night.", caps: { holdings: "1", muster: "militia", seats: "—", vassals: "—" } },
@@ -86,13 +86,13 @@ export const kingdomLevels: KingdomLevel[] = [
   { level: 15, rank: "V", perk: "The Long Reign", grants: "The cap. Holdings are limited by officers, not numbers; the Mourning is written into the realm, so what you built outlives you.", caps: { holdings: "by officers", muster: "by officers", seats: "6", vassals: "by officers" } },
 ];
 
-export const kingdomLevel = {
+export const nationLevel = {
   xpFrom: ["holdings prospering, day by day", "projects finished", "wars won and sieges stood (the defender earns it too)", "treaties signed and trade moved", "Court Days handled"],
   extends: ["how many holdings you can hold", "how big your armies muster", "officer seats and vassal slots", "which project tiers open"],
   curve: "Each level costs 1.6× the last.",
   ceilings: "Every third level is a ceiling no XP can pass: the realm quests its proving, the way a trade proves a master.",
   firstCeiling: "In the campaign the first ceiling lands on day 99 to 144 of a world.",
-  teacher: "The Crown Without a Name, the kingdom pass's reserved ceiling teacher.",
+  teacher: "The Crown Without a Name, the nation pass's reserved ceiling teacher.",
   tallVsWide: "Governance XP is real work only, so a tall realm levels at the pace of a wide one: the five powers converge at level 5 over 420 days.",
   capsNote: "The caps on the ledger are hand-set and untested; the sims measured the ceiling cadence and the army scale, not these rows.",
 };
@@ -210,7 +210,7 @@ export const realmTrees: RealmTree[] = [
   ] },
 ];
 
-export const realmTreesLaw = "Your own kingdom only. The realm earns one realm point a level and two at every proving, twenty-three by the cap, against seventy-eight points of nodes: nobody owns everything. Join a faction instead and you live under their doctrine; their spec, your problem.";
+export const realmTreesLaw = "Your own nation only. The realm earns one realm point a level and two at every proving, twenty-three by the cap, against seventy-eight points of nodes: nobody owns everything. Join a faction instead and you live under their doctrine; their spec, your problem.";
 
 export const realmPoints = { perLevel: 1, perProving: 2, total: 23, onOffer: 78 };
 

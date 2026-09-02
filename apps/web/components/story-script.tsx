@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, ChevronDown, ChevronRight, CornerDownRight, GitBranch, Map as MapIcon, PenLine, Plus, ScrollText, Volume2, X } from "lucide-react";
-import { isStoryFlowEditable, storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, isStoryFlowEditable, persistedStoryEntrySlug, storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels } from "@habitat/shared";
 import { addBranch, createNode } from "@/app/codex/actions";
 import { StoryFlow } from "@/components/story-flow";
 import { StoryFlowLock } from "@/components/story-flow-lock";
@@ -92,8 +92,8 @@ export function StoryScript({ board, canReview, viewerUserId, arcRefs, assistant
   }, [board.edges]);
   const characters = useMemo(() => board.libraryEntries.filter((entry) => entry.kind === "CHARACTER").map((entry) => ({ id: entry.id, slug: entry.slug, title: entry.title })), [board.libraryEntries]);
   const resolveProse: ProseResolver = (slug) => {
-    const entry = board.libraryEntries.find((candidate) => candidate.slug === slug);
-    if (entry) return { title: entry.title, href: `/codex/bible/${slug}` };
+    const entry = board.libraryEntries.find((candidate) => persistedStoryEntrySlug(candidate.slug) === persistedStoryEntrySlug(slug));
+    if (entry) return { title: entry.title, href: `/codex/bible/${canonicalStoryEntryRouteSlug(slug)}` };
     const arc = arcRefs.find((candidate) => candidate.slug === slug);
     return arc ? { title: arc.title, href: `/codex/arc/${slug}` } : null;
   };

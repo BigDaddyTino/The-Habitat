@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
  * The labeled-field block for things that are not abilities: a rung of
  * holding, a way to get ground, a faith, a siege posture, a licence gate.
  * Same reading grammar as the ability card — a name, then label/value rows
- * in a fixed order — so the Kingdom and Trades pages read like the
+ * in a fixed order — so the Nation and Trades pages read like the
  * Character page. `tone` colours a row: good is green, bad is red.
  */
 export type Field = { label: string; value: ReactNode; tone?: "good" | "bad" | "muted" };

@@ -106,7 +106,7 @@ export const classDossiers: Record<string, ClassDossier> = {
   procurator: {
     slug: "procurator",
     hook: "Weak alone. Unbeatable in numbers.",
-    pitch: "The Procurator is the commander and the merchant: the fire plan, the supply line, and the wheel that every other class's fuel runs through. Sand Table Mind chooses the kill box, Clockwork Advance times it, Battery Voice ends it — and One More Crate means the party never runs dry. It is the Kingdom Management class, and the only one that masters two trades.",
+    pitch: "The Procurator is the commander and the merchant: the fire plan, the supply line, and the wheel that every other class's fuel runs through. Sand Table Mind chooses the kill box, Clockwork Advance times it, Battery Voice ends it — and One More Crate means the party never runs dry. It is the Nation Management class, and the only one that masters two trades.",
     weaponNote: "Crew-served, because a Procurator is never alone; a rifle and a sidearm for the day it is. The order wheel is the real weapon, and the Levy draws from the Procurator's own squad.",
     weapons: w(2, 0, 1, 1, 2, 3, 0, 1),
     builds: [
@@ -114,7 +114,7 @@ export const classDossiers: Record<string, ClassDossier> = {
       { name: "The supply line", line: "One More Crate, Cold Chain and The Order mean the party never runs dry and never stays dead." },
       { name: "The crown", line: "The Field or the Map: the class the realm is built for, and the Second Seal lets it master two trades." },
     ],
-    teachersNote: "The Kestrel Quartermaster, the Tempest Battery Officer and Jaro Fen hold the wheel's ceilings; the Pearl Factor teaches Cartel Terms; the kingdom pass's ceiling — the Crown Without a Name — is reserved.",
+    teachersNote: "The Kestrel Quartermaster, the Tempest Battery Officer and Jaro Fen hold the wheel's ceilings; the Pearl Factor teaches Cartel Terms; the nation pass's ceiling — the Crown Without a Name — is reserved.",
   },
   cypherist: {
     slug: "cypherist",

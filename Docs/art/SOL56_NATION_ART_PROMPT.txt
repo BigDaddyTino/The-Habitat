@@ -1,16 +1,16 @@
 SOL 5.6 — THE CROWN
-Kingdom page art for /codex/kingdom · 12 plates · issued 2026-09-02
+Nation page art for /codex/nation · 12 plates · issued 2026-09-02
 
-Drop-in: apps/web/private/codex-art/kingdom/<slug>.png — the page picks each
+Drop-in: apps/web/private/codex-art/nation/<slug>.png — the page picks each
 plate up on reload; until then the slot prints this path and a glyph stands
-in. Ledger owed: Docs/art/SOL56_KINGDOM_ART_LEDGER.md, the usual discipline
+in. Ledger owed: Docs/art/SOL56_NATION_ART_LEDGER.md, the usual discipline
 (one row per plate: delivered / refused-and-why / revised).
 
 ------------------------------------------------------------------------------
 THE COMMISSION
 ------------------------------------------------------------------------------
 
-Kingdom Management is the endgame: a live server that never pauses, a ruler
+Nation Management is the endgame: a live server that never pauses, a ruler
 who is always a person with eyes, never a god-view. The rule of the page is
 "the map is a table in your hall, your holdings run while you sleep, and the
 Forge is the settlement." Every plate here is a room the ruler stands in or a
@@ -50,7 +50,7 @@ faces. Brother Aster is never a figure — a Forge's light only.
 1. THE HERO
 ------------------------------------------------------------------------------
 
-kingdom/hero.png — THE MAP TABLE. A ruler's hall at the first lamp of the
+nation/hero.png — THE MAP TABLE. A ruler's hall at the first lamp of the
 evening. The whole floor of the frame is a MAP built as a table: relief cast
 in dark resin and brass, the river system of the Riverlands raised on it with
 the five great lock-gates as real levers set into the table's edge, one of
@@ -69,28 +69,28 @@ relief, not labels.
 2. THE FIVE RANKS — one climb, five landings
 ------------------------------------------------------------------------------
 
-kingdom/rank-i-freeholder.png — THE FREEHOLD. A bankside plot below Heartland
+nation/rank-i-freeholder.png — THE FREEHOLD. A bankside plot below Heartland
 at dusk, freshly DRAINED: the cut ditches still glistening, the levee new, a
 single timber-frame house half-roofed with a lamp already lit inside, a fence
 line half-driven, tools left where the light ran out. Three hired hands
 eating on a pallet of lumber. The river huge and calm behind. On the roof
-ridge, a signal fire laid but unlit. The first kingdom: a parcel and a roof.
+ridge, a signal fire laid but unlit. The first nation: a parcel and a roof.
 
-kingdom/rank-ii-warden.png — THE WARD. A fortified point with a job: a lock-
+nation/rank-ii-warden.png — THE WARD. A fortified point with a job: a lock-
 gate on a Riverlands leg with a squat blockhouse built onto its winch-house,
 a garrison of eight in mixed kit on the wall, a patrol boat tied below, a
 signal mast with a shuttered lamp. A barge queued at the lock paying its
 toll at a window. The gate's chains and counterweights the size of houses.
 Everything a little too small for the job it now has.
 
-kingdom/rank-iii-magistrate.png — THE TOWNSHIP. A river town from its own
+nation/rank-iii-magistrate.png — THE TOWNSHIP. A river town from its own
 main street at evening market: districts visible as a change of roofline,
 trade signs (BLANK), a courthouse porch with a magistrate's table set out
 under lamps and a queue of petitioners, a militia sergeant reading an
 admission list at the town gate to a family with a cart. A population that
 is not yours, and the paper that makes it stay.
 
-kingdom/rank-iv-lord.png — THE CITY. Wharves and districts under one lord:
+nation/rank-iv-lord.png — THE CITY. Wharves and districts under one lord:
 the camera on a balcony over a working harbor at lamp-lighting, cranes and
 warehouses, a grand project half-built (a stone aqueduct span, scaffolded)
 cutting the skyline, a real army's columns forming on a parade ground below
@@ -98,7 +98,7 @@ by torchlight, and in the foreground on the balcony rail, a quiet argument
 between two well-dressed factions of the city's own council. Factions inside
 your own walls.
 
-kingdom/rank-v-crown.png — THE KINGDOM. The hall from the hero plate, seen
+nation/rank-v-crown.png — THE NATION. The hall from the hero plate, seen
 from the doorway, at the moment of a Court Day: the map table crowded, six
 officers seated, a vassal kneeling — not in fealty, in fatigue, a muddy
 cloak — reporting, a banner of the realm hung BLANK behind the table, the
@@ -113,17 +113,17 @@ at the door, about to take it. A seat at the world's table.
 Each: one object on dark, lit from one side, brass rim optional, no text, no
 frame, no drop shadow. Must read at 64px.
 
-kingdom/tree-might.png — a muster roll: a brass drum of the levy's names,
+nation/tree-might.png — a muster roll: a brass drum of the levy's names,
 dented, with a rifle's sling looped through it. Color: rust red.
-kingdom/tree-coffers.png — a toll-bar's counterweight: lead, stamped, with a
+nation/tree-coffers.png — a toll-bar's counterweight: lead, stamped, with a
 ledger's ribbon tied to it. Color: ledger white.
-kingdom/tree-works.png — a lock-gate lever's brass handle, worn bright by
+nation/tree-works.png — a lock-gate lever's brass handle, worn bright by
 hands, on a slate of drainage plans. Color: brass.
-kingdom/tree-arcana.png — a Forge reserve gauge: a glass vial of Essence
+nation/tree-arcana.png — a Forge reserve gauge: a glass vial of Essence
 in a steel cradle, the level marked in days. Color: Forge blue-white.
-kingdom/tree-roots.png — a granary key and an admission ledger's stamp, on
+nation/tree-roots.png — a granary key and an admission ledger's stamp, on
 a fold of homespun. Color: moss green.
-kingdom/tree-faith.png — a small shrine box, open, holding five different
+nation/tree-faith.png — a small shrine box, open, holding five different
 tokens for five faiths and one empty slot. Color: bone.
 
 ------------------------------------------------------------------------------

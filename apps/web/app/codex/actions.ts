@@ -4,18 +4,21 @@ import "@/lib/environment";
 import { randomUUID } from "node:crypto";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import {
+  canonicalStoryEntryRouteSlug,
   dialogueEmotionTags,
   dialogueTextProblem,
   isDialogueLocale,
   isDialogueRole,
   isValidStoryKey,
   parseStoryPlaceKind,
+  persistedStoryEntrySlug,
   slugifyStoryKey,
   storyArcCategories,
   storyArcCategoryLabels,
   storyCanonPacketTargetKinds,
   storyEndingKinds,
   storyEntryKinds,
+  storyEntrySlugAliases,
   storyLockTtlMs,
   storyNodeKinds,
   storyStoryStages,
@@ -43,6 +46,7 @@ import { storyCollections } from "@/lib/story-library";
 import { storyMemberName, storyReadRole, storyReviewRole } from "@/lib/story-codex";
 import { askStoryAssistant } from "@/lib/story-assistant-service";
 import { refusal } from "@/lib/writer-refusal";
+import { nationTerminologyStorageText, nationTerminologyStorageValue, nationTerminologyText } from "@/lib/nation-terminology";
 
 const db = getPrismaClient();
 
@@ -114,6 +118,17 @@ function refreshCodex(arcSlug?: string | null) {
   if (arcSlug) revalidatePath(`/codex/arc/${arcSlug}`);
 }
 
+function storyEntryPath(slug: string) {
+  return `/codex/bible/${canonicalStoryEntryRouteSlug(slug)}`;
+}
+
+function revalidateStoryEntry(slug: string) {
+  const canonicalPath = storyEntryPath(slug);
+  revalidatePath(canonicalPath);
+  const persistedPath = `/codex/bible/${slug}`;
+  if (persistedPath !== canonicalPath) revalidatePath(persistedPath);
+}
+
 /**
  * An optional prose field: blank means "not written", and anything over the
  * column's width is a validation failure rather than a value quietly replaced
@@ -125,7 +140,7 @@ const optionalText = (max: number) =>
     .string()
     .trim()
     .max(max)
-    .transform((value) => (value.length > 0 ? value : null))
+    .transform((value) => (value.length > 0 ? nationTerminologyStorageText(value) : null))
     .nullable();
 
 /**
@@ -136,7 +151,7 @@ const optionalText = (max: number) =>
 const effectsList = z
   .string()
   .max(8000)
-  .transform((value) => value.split(/\r?\n/).map((line) => line.trim()).filter((line) => line.length > 0))
+  .transform((value) => value.split(/\r?\n/).map((line) => nationTerminologyStorageText(line.trim())).filter((line) => line.length > 0))
   .refine((lines) => lines.length <= 20, { message: "At most 20 effects on one card or branch." })
   .refine((lines) => lines.every((line) => line.length <= 300), { message: "Keep each effect under 300 characters." });
 
@@ -145,7 +160,7 @@ const effectsList = z
 // ---------------------------------------------------------------------------
 
 const arcSchema = z.object({
-  title: z.string().trim().min(1).max(120),
+  title: z.string().trim().min(1).max(120).transform(nationTerminologyText),
   summary: optionalText(500),
   hook: optionalText(500),
   regionEntryId: z.string().uuid().nullable(),
@@ -375,7 +390,7 @@ export async function updateArc(formData: FormData) {
 const createNodeSchema = z.object({
   arcId: z.string().uuid(),
   kind: z.enum(storyNodeKinds),
-  title: z.string().trim().min(1).max(160),
+  title: z.string().trim().min(1).max(160).transform(nationTerminologyText),
   summary: optionalText(500),
   canvasX: z.coerce.number().int().min(-100000).max(100000).nullable().catch(null),
   canvasY: z.coerce.number().int().min(-100000).max(100000).nullable().catch(null),
@@ -458,7 +473,7 @@ const updateNodeSchema = z.object({
   nodeId: z.string().uuid(),
   version: z.coerce.number().int().min(1),
   kind: z.enum(storyNodeKinds),
-  title: z.string().trim().min(1).max(160),
+  title: z.string().trim().min(1).max(160).transform(nationTerminologyText),
   summary: optionalText(500),
   body: optionalText(20000),
   speakerEntryId: z.string().uuid().nullable(),
@@ -877,14 +892,14 @@ const entrySchema = z.object({
 function slugList(formData: FormData, field: string, max = 30) {
   return [...new Set(formData.getAll(field).flatMap((value) => {
     const slug = metaSlug.safeParse(value);
-    return slug.success ? [slug.data] : [];
+    return slug.success ? [persistedStoryEntrySlug(slug.data)] : [];
   }))].slice(0, max);
 }
 
 /** One slug-shaped value from a picker, or null when nothing was chosen. */
 function oneSlug(formData: FormData, field: string) {
   const slug = metaSlug.safeParse(formData.get(field));
-  return slug.success ? slug.data : null;
+  return slug.success ? persistedStoryEntrySlug(slug.data) : null;
 }
 
 export async function createEntry(formData: FormData) {
@@ -892,8 +907,13 @@ export async function createEntry(formData: FormData) {
   const parsed = entrySchema.safeParse({ kind: formData.get("kind"), title: formData.get("title"), summary: formData.get("summary") ?? "", body: formData.get("body") ?? "" });
   if (!parsed.success) throw refusal("A bible entry needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
-  const slug = slugifyStoryKey(parsed.data.title);
-  if (!isValidStoryKey(slug)) throw refusal("That title needs at least one letter or number.");
+  const title = nationTerminologyText(parsed.data.title);
+  const summary = parsed.data.summary ? nationTerminologyStorageText(parsed.data.summary) : null;
+  const body = parsed.data.body ? nationTerminologyStorageText(parsed.data.body) : null;
+  const publicSlug = slugifyStoryKey(title);
+  if (!isValidStoryKey(publicSlug)) throw refusal("That title needs at least one letter or number.");
+  const slugAliases = storyEntrySlugAliases(publicSlug);
+  const slug = persistedStoryEntrySlug(publicSlug);
 
   // The slug is the key the canon export ships under, so it is frozen at
   // creation and a later rename never moves it. That makes a collision
@@ -902,11 +922,13 @@ export async function createEntry(formData: FormData) {
   // "Upper Westside" could not be created again because its key was still
   // held — reported only as "an entry with that name", a name that no longer
   // existed anywhere in the bible. Say which entry actually holds the key.
-  const existing = await db.storyEntry.findUnique({ where: { slug }, select: { title: true } });
+  const existing = await db.storyEntry.findFirst({ where: { slug: { in: slugAliases } }, select: { slug: true, title: true } });
   if (existing) {
-    throw refusal(existing.title === parsed.data.title
+    const existingTitle = nationTerminologyText(existing.title);
+    const existingRoute = canonicalStoryEntryRouteSlug(existing.slug);
+    throw refusal(existingTitle === title
       ? "The bible already has an entry with that name."
-      : `That name needs the key "${slug}", which is still held by "${existing.title}" — it was written under this name and renamed afterwards. Open /codex/bible/${slug} to rename it back, or give this one a different name.`);
+      : `That name needs the public key "${canonicalStoryEntryRouteSlug(publicSlug)}", which is still held by "${existingTitle}" — it was written under this name and renamed afterwards. Open /codex/bible/${existingRoute} to rename it back, or give this one a different name.`);
   }
 
   // A place is born already placed. Creating it loose and adopting it later
@@ -947,7 +969,7 @@ export async function createEntry(formData: FormData) {
   // no build status, and nothing for the needs-work checks to read.
   const systemParent = parsed.data.kind === "SYSTEM" ? metaSlug.safeParse(formData.get("parent")) : null;
   const systemMeta: StorySystemMeta | null = parsed.data.kind === "SYSTEM"
-    ? { category: null, buildStatus: "concept", parent: systemParent?.success ? systemParent.data : null, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
+    ? { category: null, buildStatus: "concept", parent: systemParent?.success ? persistedStoryEntrySlug(systemParent.data) : null, unlockArc: null, unlockStage: null, dependsOn: [], pillars: [], regionNotes: [], gameTag: null, openQuestions: [] }
     : null;
 
   // And the same for races: a creature is born inside the race it belongs to,
@@ -1060,9 +1082,9 @@ export async function createEntry(formData: FormData) {
       data: {
         kind: parsed.data.kind,
         slug,
-        title: parsed.data.title,
-        summary: parsed.data.summary,
-        body: parsed.data.body,
+        title,
+        summary,
+        body,
         status: creationStatus(),
         createdByUserId: user.id,
         ...(placeMeta ? { meta: placeMeta as Prisma.InputJsonValue }
@@ -1090,10 +1112,10 @@ export async function createEntry(formData: FormData) {
   });
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
   // `created` opens the editing workspace on arrival, so the writer keeps
   // filling the sheet in instead of landing on a page that looks finished.
-  redirect(`/codex/bible/${slug}?created=1`);
+  redirect(`${storyEntryPath(slug)}?created=1`);
 }
 
 export async function updateEntry(formData: FormData) {
@@ -1108,9 +1130,17 @@ export async function updateEntry(formData: FormData) {
   });
   if (!parsed.success) throw refusal("That edit needs a kind, a title of 120 characters or fewer, a summary under 500, and detail under 20,000.");
 
+  const title = nationTerminologyText(parsed.data.title);
+  const summary = parsed.data.summary ? nationTerminologyStorageText(parsed.data.summary) : null;
+  const body = parsed.data.body ? nationTerminologyStorageText(parsed.data.body) : null;
+
   const slug = await db.$transaction(async (tx) => {
     const entry = await tx.storyEntry.findUnique({ where: { id: parsed.data.entryId } });
     if (!entry) throw refusal("That entry no longer exists.");
+    const titleAliases = storyEntrySlugAliases(slugifyStoryKey(title));
+    if (titleAliases.length > 1 && !titleAliases.includes(entry.slug)) {
+      throw refusal(`"${title}" owns a reserved public route. Open that Nation Management entry instead of renaming this one over it.`);
+    }
 
     // A kind change must not orphan structural references that were validated
     // against the old kind at link time: a dialogue speaker has to stay a
@@ -1130,7 +1160,7 @@ export async function updateEntry(formData: FormData) {
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: parsed.data.version },
-      data: { kind: parsed.data.kind, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body, updatedByUserId: user.id, version: { increment: 1 }, lockedByUserId: null, lockExpiresAt: null },
+      data: { kind: parsed.data.kind, title, summary, body, updatedByUserId: user.id, version: { increment: 1 }, lockedByUserId: null, lockExpiresAt: null },
     });
     if (updated.count !== 1) throw refusal("Somebody saved this entry while you were writing. Reopen it to see their version before saving yours.");
 
@@ -1139,15 +1169,15 @@ export async function updateEntry(formData: FormData) {
       entityId: entry.id,
       action: "UPDATED",
       actorUserId: user.id,
-      summary: `Revised "${parsed.data.title}"`,
+      summary: `Revised "${title}"`,
       before: { kind: entry.kind, title: entry.title, summary: entry.summary, body: entry.body },
-      after: { kind: parsed.data.kind, title: parsed.data.title, summary: parsed.data.summary, body: parsed.data.body },
+      after: { kind: parsed.data.kind, title, summary, body },
     });
     return entry.slug;
   });
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
 }
 
 // Sheet validation lives in lib/story-meta-schemas.ts so the same schemas can
@@ -1232,7 +1262,7 @@ export async function updateEntryMeta(formData: FormData) {
     // The sheet owns everything it can see; the publication marker underneath
     // it belongs to the release that wrote it. Without this the parse above
     // strips that marker and the entry's approved art goes dark.
-    const stored = carryServerOwnedMeta(entry.meta, meta.data);
+    const stored = nationTerminologyStorageValue(carryServerOwnedMeta(entry.meta, meta.data));
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: parsed.data.version },
@@ -1253,7 +1283,7 @@ export async function updateEntryMeta(formData: FormData) {
   });
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
 }
 
 // ---------------------------------------------------------------------------
@@ -1267,11 +1297,11 @@ export async function updateEntryMeta(formData: FormData) {
 const lineRowSchema = z.object({
   id: z.string().uuid().nullable(),
   speakerEntryId: z.string().uuid().nullable(),
-  speakerRole: z.string().trim().max(64).nullable(),
+  speakerRole: z.string().trim().max(64).transform(nationTerminologyText).nullable(),
   listenerEntryId: z.string().uuid().nullable(),
-  listenerRole: z.string().trim().max(64).nullable(),
-  text: z.string().max(1000),
-  performance: z.string().trim().max(200),
+  listenerRole: z.string().trim().max(64).transform(nationTerminologyText).nullable(),
+  text: z.string().max(1000).transform(nationTerminologyText),
+  performance: z.string().trim().max(200).transform(nationTerminologyText),
   intensity: z.coerce.number().int().min(1).max(10),
   emotion: z.array(z.enum(dialogueEmotionTags)).max(dialogueEmotionTags.length),
   locale: z.string().trim().max(16),
@@ -1493,10 +1523,11 @@ async function withThreadPackets(
       arcs: changed.arcs ?? current.data.arcs,
     });
     if (!next.success) throw refusal("That could not be saved — some part of it is the wrong shape.");
+    const storedMeta = nationTerminologyStorageValue(carryServerOwnedMeta(entry.meta, next.data)) as StoryThreadMeta;
 
     const updated = await tx.storyEntry.updateMany({
       where: { id: entry.id, version: input.version },
-      data: { meta: carryServerOwnedMeta(entry.meta, next.data) as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
+      data: { meta: storedMeta as unknown as Prisma.InputJsonValue, updatedByUserId: input.actorUserId, version: { increment: 1 } },
     });
     if (updated.count !== 1) throw refusal("Somebody saved this thread while you were writing. Reopen it to see their version before saving yours.");
 
@@ -1507,7 +1538,7 @@ async function withThreadPackets(
       actorUserId: input.actorUserId,
       summary: input.summary,
       before: { canonPackets: current.data.canonPackets, arcs: current.data.arcs },
-      after: { canonPackets: next.data.canonPackets, arcs: next.data.arcs },
+      after: { canonPackets: storedMeta.canonPackets, arcs: storedMeta.arcs },
     });
     return entry.slug;
   });
@@ -1516,8 +1547,8 @@ async function withThreadPackets(
 const packetPushSchema = z.object({
   entryId: z.string().uuid(),
   version: z.coerce.number().int().min(1),
-  title: z.string().trim().min(1).max(120),
-  body: z.string().trim().min(1).max(8000),
+  title: z.string().trim().min(1).max(120).transform(nationTerminologyText),
+  body: z.string().trim().min(1).max(8000).transform(nationTerminologyStorageText),
   targetKind: z.enum(storyCanonPacketTargetKinds),
   targetRegion: metaSlug.nullable(),
   targetCompanion: metaSlug.nullable(),
@@ -1591,7 +1622,7 @@ export async function pushCanonPacket(formData: FormData) {
   );
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
 }
 
 /**
@@ -1630,7 +1661,7 @@ export async function markCanonPacketWoven(formData: FormData) {
   );
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
 }
 
 /** Takes a packet back out of the inbox. Pending only — woven is history. */
@@ -1651,7 +1682,7 @@ export async function withdrawCanonPacket(formData: FormData) {
   );
 
   refreshCodex();
-  revalidatePath(`/codex/bible/${slug}`);
+  revalidateStoryEntry(slug);
 }
 
 // ---------------------------------------------------------------------------
@@ -1852,7 +1883,7 @@ export async function canoniseArc(formData: FormData) {
 export async function addComment(formData: FormData) {
   const user = await requireRole(storyReadRole);
   const parsed = z
-    .object({ nodeId: z.string().uuid().nullable(), entryId: z.string().uuid().nullable(), body: z.string().trim().min(1).max(2000) })
+    .object({ nodeId: z.string().uuid().nullable(), entryId: z.string().uuid().nullable(), body: z.string().trim().min(1).max(2000).transform(nationTerminologyStorageText) })
     .safeParse({ nodeId: formData.get("nodeId") || null, entryId: formData.get("entryId") || null, body: formData.get("body") });
   if (!parsed.success) throw refusal("Write something first.");
   if (Boolean(parsed.data.nodeId) === Boolean(parsed.data.entryId)) throw refusal("A note belongs to one node or one entry.");
@@ -1876,7 +1907,7 @@ export async function addComment(formData: FormData) {
   // activity feed: revalidating the index alone left the writer looking at the
   // card or bible entry they had just posted to with nothing new on it.
   refreshCodex(target.arcSlug);
-  if (target.entrySlug) revalidatePath(`/codex/bible/${target.entrySlug}`);
+  if (target.entrySlug) revalidateStoryEntry(target.entrySlug);
 }
 
 export async function resolveComment(formData: FormData) {
@@ -1906,7 +1937,7 @@ export async function resolveComment(formData: FormData) {
   });
 
   refreshCodex(target.arcSlug);
-  if (target.entrySlug) revalidatePath(`/codex/bible/${target.entrySlug}`);
+  if (target.entrySlug) revalidateStoryEntry(target.entrySlug);
 }
 
 // ---------------------------------------------------------------------------

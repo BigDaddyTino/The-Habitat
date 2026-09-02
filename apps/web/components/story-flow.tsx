@@ -17,7 +17,7 @@ import {
 import { useCallback, useMemo, useRef, useState, useTransition, useEffect, type CSSProperties } from "react";
 import Link from "next/link";
 import { CornerDownRight, Flag, GitBranch, PenLine, RotateCcw, Settings2, Sparkles, Undo2, X } from "lucide-react";
-import { storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels, type StoryNodeKind } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, persistedStoryEntrySlug, storyEndingKindLabels, storyNodeKinds, storyNodeKindLabels, type StoryNodeKind } from "@habitat/shared";
 import { addBranch, createEdge, createNode } from "@/app/codex/actions";
 import { EdgeEditor, NodeEditor, type StoryArcRef } from "@/components/story-workbench";
 import { StoryFlowLock } from "@/components/story-flow-lock";
@@ -203,8 +203,8 @@ export function StoryFlow({ board, canReview, viewerUserId, arcRefs, assistantAv
   const locked = board.arc.locked;
   // Scene text cites the bible constantly; resolve those to real links.
   const resolveProse: ProseResolver = (slug) => {
-    const entry = board.libraryEntries.find((candidate) => candidate.slug === slug);
-    if (entry) return { title: entry.title, href: `/codex/bible/${slug}` };
+    const entry = board.libraryEntries.find((candidate) => persistedStoryEntrySlug(candidate.slug) === persistedStoryEntrySlug(slug));
+    if (entry) return { title: entry.title, href: `/codex/bible/${canonicalStoryEntryRouteSlug(slug)}` };
     const arc = arcRefs.find((candidate) => candidate.slug === slug);
     return arc ? { title: arc.title, href: `/codex/arc/${slug}` } : null;
   };

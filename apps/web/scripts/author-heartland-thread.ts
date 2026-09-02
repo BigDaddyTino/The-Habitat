@@ -1,6 +1,7 @@
 import "../lib/environment";
 import { createHash } from "node:crypto";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
+import { NATION_MANAGEMENT_PERSISTED_SLUG, NATION_MANAGEMENT_ROUTE_SLUG } from "@habitat/shared";
 import { threadMetaSchema } from "../lib/story-meta-schemas";
 
 /**
@@ -106,12 +107,12 @@ Each stop teaches exactly one verb and implicates exactly one faction, so learni
     title: "Owner ruling — the courthouse ruling, and the choice that ends the Standstill",
     targetKind: "campaign" as const,
     targetRegion: null,
-    entries: ["heartland", "kingdom-management", "faction-membership", "the-power-balance"],
+    entries: ["heartland", NATION_MANAGEMENT_PERSISTED_SLUG, "faction-membership", "the-power-balance"],
     body: `The arc ends at the courthouse, where the player passes ruling on the Commander's death — and the ruling is the first act of rulership. Owner ruling, 2026-09-01.
 
 The truth — *it was an accident* — is the one verdict nobody in the city will believe. A faction verdict is a lie that starts the war on the player's terms. Deciding what the truth is for is the design's whole thesis, and both roads must be real: the honest ruling and the useful lie each light the fuse, differently.
 
-Then the choice: **join one of the five factions, or start your own — with the Heartland Watch as your first units.** Either way the Standstill is over and the player did it. [[faction-membership]] and [[the-power-balance]] go live off this beat, and this arc is the answer to [[kingdom-management]]'s open question — it is the arc that grants the charter. Update that sheet's unlockArc, and retire its "which arc grants the charter" question, WHEN THE ARC EXISTS — not before.
+Then the choice: **join one of the five factions, or start your own — with the Heartland Watch as your first units.** Either way the Standstill is over and the player did it. [[faction-membership]] and [[the-power-balance]] go live off this beat, and this arc is the answer to [[${NATION_MANAGEMENT_PERSISTED_SLUG}]]'s open question — it is the arc that grants the charter. Update that sheet's unlockArc, and retire its "which arc grants the charter" question, WHEN THE ARC EXISTS — not before.
 
 Gating, owner's ruling: the campaign quest that brings the player to Heartland is not pushed yet, because the Peninsula is still being written. The fuse is built and waiting; nothing lights it until the road from the Peninsula reaches the city.`,
   },
@@ -135,7 +136,7 @@ const threadBody = `Heartland is a lit fuse, and the player is the spark. This t
 
 **The shape of the arc.** The mainline brings the player into a city that feels like it is about to explode: neutral for a generation under the Standstill, five factions holding five gate-legs, everyone polite, everyone counting exits. Then Commander Alder Wade dies — comedically, strangely, and by genuine accident — under his own pact-anniversary statue, and does not come back — he pulled his own schematic from the city's Forge years ago and told nobody — and the Judge names the newcomer with no wharf and no flag as detective. The investigation tours every faction and teaches every management verb on the way (one stop, one verb, one suspect), and it ends back at the courthouse with the player passing ruling: the unbelievable truth, or a useful lie. Then the choice that ends the Standstill — join a gate faction, or found something new with the Heartland Watch as first units.
 
-**What this arc is for.** It is the front door of holding ground: [[outpost-and-city-management]] taught in the streets, [[faction-membership]] and [[the-power-balance]] going live at the ruling, and [[kingdom-management]]'s charter granted here — this is the arc that sheet's open question is waiting to link. It is also the region's tutorial in the [[the-waterworks]]' vocabulary: storefronts, defenses, armies, and the three escrowed charters unlocking as the building ladder.
+**What this arc is for.** It is the front door of holding ground: [[outpost-and-city-management]] taught in the streets, [[faction-membership]] and [[the-power-balance]] going live at the ruling, and [[${NATION_MANAGEMENT_PERSISTED_SLUG}]]'s charter granted here — this is the arc that sheet's open question is waiting to link. It is also the region's tutorial in the [[the-waterworks]]' vocabulary: storefronts, defenses, armies, and the three escrowed charters unlocking as the building ladder.
 
 **Gating.** Owner's ruling: not pushed yet. The Peninsula is still being written, and the road that delivers the player to Heartland comes from there. The fuse waits.
 
@@ -181,7 +182,7 @@ async function main() {
     companionMissions: [],
     bosses: [],
     canonPackets: packets,
-    tags: ["riverlands", "heartland", "kingdom-management", "the-standstill"],
+    tags: ["riverlands", "heartland", NATION_MANAGEMENT_ROUTE_SLUG, "the-standstill"],
     openQuestions: [
       "Which mainline beat actually delivers the player to Heartland? Owned by whoever writes the Peninsula's exit.",
       "The comedic staging of the accident itself — beat by beat — is unwritten; the ruling fixes only the mechanism, the truth, and the five shaved invoices.",

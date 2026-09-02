@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Archive, ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { isStoryFlowEditable, storyArcCategoryLabels, storyLockNotice, storyStatusLabels } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, isStoryFlowEditable, storyArcCategoryLabels, storyLockNotice, storyStatusLabels } from "@habitat/shared";
 import { getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { StoryScript } from "@/components/story-script";
@@ -67,7 +67,7 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
             <p className="codex-arc-unlocks">
               <Cog aria-hidden="true" size={12} />
               <span>Completing this unlocks</span>
-              {unlockedSystems.map((system) => <Link href={`/codex/bible/${system.slug}`} key={system.id}>{system.title}</Link>)}
+              {unlockedSystems.map((system) => <Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(system.slug)}`} key={system.id}>{system.title}</Link>)}
             </p>
           ) : null}
         </div>

@@ -1,3 +1,5 @@
+import { NATION_MANAGEMENT_GAME_TAG_PREFIX } from "@habitat/shared";
+
 /**
  * The faith weave (owner order 2026-09-02: "weave and integrate the religions
  * into the world... do not unbalance the world"). Everything the pass writes,
@@ -242,7 +244,7 @@ Characters to write here: the Sexton who keeps a barracks ledger and knows which
       "Keep the platform ledger honest: who came back, how many times, and never why.",
       "Sit with the reclaimed in the first hour and ask nothing.",
     ],
-    gameTag: "KM · Institution · Faith (city-state)",
+    gameTag: `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Institution · Faith (city-state)`,
     openQuestions: [
       "Where ARE the dead between the falling and the platform? (Glimpse discipline — permanently open; the faith's discipline is not asking.)",
       "Will the Congregation ever ordain a machine? Brother Aster is the Forge and does not preach; the Sexton of Heartland has not asked him.",

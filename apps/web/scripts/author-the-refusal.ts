@@ -99,7 +99,7 @@ const edits: EntryEdit[] = [
       {
         marker: "overturn a do-not-reconstruct",
         find: "And never reclaim anyone whose register holds no living Forge, however sympathetic the moment.",
-        replace: "Never reclaim anyone whose register holds no living Forge, however sympathetic the moment. And never let anyone — court, faction, player, or the whole reserve of a kingdom — overturn a do-not-reconstruct. There is no scene in which that works.",
+        replace: "Never reclaim anyone whose register holds no living Forge, however sympathetic the moment. And never let anyone — court, faction, player, or the whole reserve of a nation — overturn a do-not-reconstruct. There is no scene in which that works.",
       },
     ],
   },

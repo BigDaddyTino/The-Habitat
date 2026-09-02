@@ -7,7 +7,7 @@ import { creatureMetaSchema } from "../lib/story-meta-schemas";
  *
  * This is a high-tech world: attack and defense drones, walkers, siege
  * platforms, and pursuit frames belong on the shelf beside the beasts. The
- * design law they all share comes from Kingdom Management's soulless-garrison
+ * design law they all share comes from Nation Management's soulless-garrison
  * ruling: a machine has no soul, so the Forge never held it — destroyed is
  * destroyed, replaced with coin and materials — and it SIPS Essence daily just
  * to run. Machines sit BESIDE the taxonomy of monsters, not inside it: the
@@ -41,7 +41,7 @@ const seeds: MachineSeed[] = [
       "The soulless shelf: war robotics of a high-tech world — drones, walkers, siege frames. No soul, no Forge, no reclamation; they sip Essence daily to run, and destroyed is destroyed.",
     body: `This is a high-tech world, and the shelf reflects it: beside the beasts and the peoples stand the Machines — the drones, walkers, siege platforms, and pursuit frames that every power fields and every foundry builds. They are not a people and not monsters. The taxonomy of monsters classifies the living; a machine stands beside that law, not inside it, because nothing about it is alive.
 
-One law binds the whole shelf, and it is the same law Kingdom Management runs on: **a machine has no soul, so a [[the-soul-forge]] never held it.** It cannot bind, cannot reclaim, and cannot come back — destroyed is destroyed, and replacement is a matter of coin, materials, and a bench, never Essence and grief. What a machine takes from the Essence economy instead is upkeep: a daily sip just to run, trivial for one unit, real for a standing army of them. The living garrison gulps from the reserve when it dies; the machine garrison sips from it every day it exists. Every quartermaster in the world knows both numbers.
+One law binds the whole shelf, and it is the same law Nation Management runs on: **a machine has no soul, so a [[the-soul-forge]] never held it.** It cannot bind, cannot reclaim, and cannot come back — destroyed is destroyed, and replacement is a matter of coin, materials, and a bench, never Essence and grief. What a machine takes from the Essence economy instead is upkeep: a daily sip just to run, trivial for one unit, real for a standing army of them. The living garrison gulps from the reserve when it dies; the machine garrison sips from it every day it exists. Every quartermaster in the world knows both numbers.
 
 The weave runs everywhere, because the world built these things and keeps building them. The [[cybernetic-ascendancy]] preaches the fusion the frames merely perform; [[helix-arcanobiotics]] and [[aegis-extraction-consortium]] field them by the yard; the [[drone-surveillance-bureau]]'s whole apparatus is this shelf with a filing system; [[iron-saints-pmc]] invoices maintain half the private frames on the peninsula; and the Floating City's manufactories set the patterns everyone else copies a generation late. On the ground: a Cypherist builds and runs frames from the bench, an Archon's Dronewright bonds with them, and a Procurator budgets their upkeep at realm scale.
 

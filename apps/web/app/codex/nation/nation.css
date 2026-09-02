@@ -1,0 +1,188 @@
+/* Nation Management: Holding Ground, in the codex's own dark grammar.
+   Same bones as the Character and Trades pages (square panels, mono
+   uppercase brass labels, labeled field cards) with the crown's own
+   furniture: a hero split copy/art, the Ranks drawn as a stair with a
+   proving gate between each landing, the level ledger as a table, and six
+   tree columns of perk nodes. Brass is the crown; canon-green is a perk;
+   danger-red is a price. */
+
+.nm-shell {
+  --nm-blue: #7fa4c4;
+  --nm-violet: #b98fd6;
+  --nm-might: #c9755a;
+  --nm-coffers: #d8d3c4;
+  --nm-works: var(--brass);
+  --nm-arcana: #8fc3d6;
+  --nm-roots: #9fbf8a;
+  --nm-faith: #cfc6b0;
+}
+
+/* -- Hero: copy beside the map table ---------------------------------- */
+.nm-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 22px; align-items: stretch; margin-bottom: 18px; }
+.nm-hero-copy h1 { margin: 2px 0 8px; }
+.nm-hero-copy > p:not(.eyebrow) { max-width: 640px; color: var(--muted); }
+.nm-hero-copy b { color: var(--paper); }
+.nm-hero-stats { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.nm-hero-stats li { display: grid; gap: 0; min-width: 84px; border: 1px solid var(--line); padding: 6px 10px; background: rgba(12, 16, 13, .5); }
+.nm-hero-stats b { font-family: var(--font-display), Georgia, serif; font-size: 20px; line-height: 1.1; color: var(--brass); }
+.nm-hero-stats span { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.nm-hero-art { position: relative; margin: 0; min-height: 220px; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 60%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .92) 70%); display: grid; place-items: center; overflow: hidden; }
+.nm-hero-art.has-art { background: #0d110e; }
+.nm-hero-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nm-hero-art .nm-glyph { font-family: var(--font-display), Georgia, serif; font-size: 72px; color: rgba(198, 151, 76, .6); }
+.nm-hero-art .play-artslot { position: absolute; left: 10px; right: 10px; bottom: 8px; }
+
+/* -- The Ranks as a stair --------------------------------------------- */
+.nm-stair { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: 1fr 44px 1fr 44px 1fr 44px 1fr 44px 1fr; gap: 8px; align-items: stretch; }
+.nm-rank { position: relative; display: grid; grid-template-rows: auto auto 1fr; gap: 8px; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); padding: 0 0 10px; }
+.nm-rank::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: rgba(198, 151, 76, .25); }
+.nm-rank.is-rank-ii::before { background: rgba(198, 151, 76, .4); }
+.nm-rank.is-rank-iii::before { background: rgba(198, 151, 76, .55); }
+.nm-rank.is-rank-iv::before { background: rgba(198, 151, 76, .75); }
+.nm-rank.is-crown { border-color: rgba(198, 151, 76, .6); background: rgba(198, 151, 76, .07); }
+.nm-rank.is-crown::before { background: var(--brass); }
+.nm-rank-art { position: relative; margin: 0; aspect-ratio: 3 / 2; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 50% 40%, rgba(198, 151, 76, .14), rgba(12, 16, 13, .95) 72%); display: grid; place-items: start center; padding-top: 18px; overflow: hidden; }
+.nm-rank-art.has-art { background: #0d110e; padding-top: 0; }
+.nm-rank-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nm-rank-art .nm-glyph { font-family: var(--font-display), Georgia, serif; font-size: 44px; color: rgba(198, 151, 76, .7); letter-spacing: 2px; }
+.nm-rank-art .play-artslot { position: absolute; left: 8px; right: 8px; bottom: 6px; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm-rank > header { display: grid; gap: 1px; padding: 0 12px; }
+.nm-rank > header i { font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); }
+.nm-rank > header b { font-family: var(--font-display), Georgia, serif; font-size: 20px; line-height: 1.1; color: var(--paper); }
+.nm-rank > header span { font-size: 11.5px; color: var(--muted); font-style: italic; }
+.nm-rank > dl { margin: 0; padding: 0 12px; display: grid; grid-template-columns: 58px 1fr; gap: 4px 8px; align-items: baseline; font-size: 12px; align-content: start; }
+.nm-rank > dl dt { font-family: var(--font-mono); font-size: 9px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.nm-rank > dl dd { margin: 0; color: var(--ink); line-height: 1.4; }
+.nm-rank > dl dd.is-muted { color: var(--muted); font-size: 11.5px; }
+.nm-rank > dl dd.is-good { color: #dfe8d6; padding: 3px 7px; background: rgba(12, 16, 13, .55); border-left: 2px solid var(--canon, #8fbf8a); }
+.nm-gate { display: grid; align-content: center; justify-items: center; gap: 4px; text-align: center; border: 1px dashed rgba(198, 151, 76, .55); padding: 8px 4px; background: rgba(198, 151, 76, .04); }
+.nm-gate i { font-style: normal; font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
+.nm-gate b { font-family: var(--font-display), Georgia, serif; font-size: 12px; line-height: 1.1; color: var(--brass); writing-mode: vertical-rl; transform: rotate(180deg); }
+.nm-gate span { font-family: var(--font-mono); font-size: 7.5px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
+
+/* -- The level ledger ------------------------------------------------- */
+.nm-ledger-law > h2 .field-tag { margin-left: 10px; vertical-align: middle; letter-spacing: .6px; }
+.nm-ledger-scroll { overflow-x: auto; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); margin-bottom: 12px; }
+.nm-ledger { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 760px; }
+.nm-ledger th { text-align: left; font-family: var(--font-mono); font-weight: 500; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.nm-ledger th.is-wide { width: 44%; }
+.nm-ledger td { padding: 7px 10px; border-bottom: 1px solid rgba(60, 70, 62, .35); vertical-align: top; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.4; }
+.nm-ledger tr.is-first td { border-top: 1px solid var(--line); }
+.nm-ledger tr.is-ceiling td { border-bottom: 0; }
+.nm-ledger td.nm-lv { font-family: var(--font-display), Georgia, serif; font-size: 16px; color: var(--brass); width: 34px; }
+.nm-ledger td.nm-rk { white-space: nowrap; }
+.nm-ledger td.nm-rk i { font-style: normal; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.nm-ledger td.nm-rk span { display: block; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--brass); }
+.nm-ledger td.nm-perk { color: var(--paper); font-weight: 600; white-space: nowrap; }
+.nm-ledger td.nm-grants { color: var(--muted); }
+.nm-ledger td.nm-pts { color: var(--canon, #8fbf8a); font-family: var(--font-mono); font-size: 11px; }
+.nm-ledger tr.nm-proving td { padding: 8px 10px 10px 44px; border-bottom: 1px solid rgba(198, 151, 76, .55); border-top: 1px dashed rgba(198, 151, 76, .45); background: rgba(198, 151, 76, .06); display: table-cell; }
+.nm-ledger tr.nm-proving i { display: block; font-style: normal; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.nm-ledger tr.nm-proving b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 15px; color: var(--brass); margin: 1px 0 2px; }
+.nm-ledger tr.nm-proving span { display: block; color: var(--ink); max-width: 760px; }
+.nm-ledger tr.nm-proving em { display: block; margin-top: 3px; font-style: normal; font-size: 11px; color: var(--muted); }
+
+/* -- The realm trees: six columns of nodes ---------------------------- */
+.nm-budget { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 12px; font-size: 11.5px; color: var(--muted); }
+.nm-budget span b { font-family: var(--font-display), Georgia, serif; font-size: 15px; color: var(--paper); margin-right: 4px; }
+.nm-budget span.is-offer b { color: var(--muted); }
+.nm-budget span.is-key { margin-left: auto; }
+.nm-budget span.is-key i, .nm-nodes em { font-style: normal; font-family: var(--font-mono); font-size: 8px; letter-spacing: .6px; text-transform: uppercase; padding: 1px 5px; border: 1px solid; margin-left: 6px; vertical-align: middle; }
+.nm-budget span.is-key i { margin: 0 4px 0 0; }
+.nm-budget span.is-key i.is-rank, .nm-nodes em.is-rank { color: var(--nm-blue); border-color: rgba(127, 164, 196, .55); }
+.nm-budget span.is-key i.is-cap, .nm-nodes em.is-cap { color: var(--brass); border-color: rgba(198, 151, 76, .65); }
+.nm-trees { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.nm-tree { border: 1px solid var(--line); background: rgba(12, 16, 13, .5); display: grid; grid-template-rows: auto 1fr auto; border-top: 2px solid var(--tree, var(--brass)); }
+.nm-tree.is-might { --tree: var(--nm-might); }
+.nm-tree.is-coffers { --tree: var(--nm-coffers); }
+.nm-tree.is-works { --tree: var(--nm-works); }
+.nm-tree.is-arcana { --tree: var(--nm-arcana); }
+.nm-tree.is-roots { --tree: var(--nm-roots); }
+.nm-tree.is-faith { --tree: var(--nm-faith); }
+.nm-tree > header { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.nm-tree > header b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 19px; line-height: 1.1; color: var(--tree, var(--paper)); }
+.nm-tree > header span { font-size: 11.5px; color: var(--muted); }
+.nm-sigil { position: relative; margin: 0; width: 64px; height: 64px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 45%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .95) 72%); display: grid; place-items: center; overflow: hidden; }
+.nm-sigil img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nm-sigil .nm-glyph { font-family: var(--font-display), Georgia, serif; font-size: 24px; color: var(--tree, var(--brass)); }
+.nm-sigil .play-artslot { display: none; }
+.nm-nodes { list-style: none; margin: 0; padding: 6px 0; display: grid; }
+.nm-nodes li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 6px 12px; border-bottom: 1px solid rgba(60, 70, 62, .3); align-items: start; }
+.nm-nodes li:last-child { border-bottom: 0; }
+.nm-nodes li.is-capstone { background: rgba(198, 151, 76, .07); border-top: 1px dashed rgba(198, 151, 76, .45); margin-top: 2px; }
+.nm-cost { font-style: normal; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--line); background: var(--night); font-family: var(--font-mono); font-size: 10px; color: var(--brass); margin-top: 1px; }
+.nm-nodes li.is-capstone .nm-cost { border-color: var(--brass); }
+.nm-nodes li > div { display: grid; gap: 1px; min-width: 0; }
+.nm-nodes li b { font-size: 12.5px; color: var(--paper); line-height: 1.25; }
+.nm-nodes li span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.nm-tree > p { margin: 0; padding: 8px 12px 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); font-style: italic; }
+
+/* -- Sub-headings inside a law panel ---------------------------------- */
+.nm-sub { margin: 16px 0 4px; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+.play-law > .nm-foot { border-top: 1px solid var(--line); margin: 12px 0 0; padding-top: 10px; font-size: 12px; color: var(--muted); }
+.play-law > .nm-foot b { color: var(--brass); }
+
+/* -- The territory board ---------------------------------------------- */
+.nm-board { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: rgba(12, 16, 13, .35); scroll-margin-top: 90px; }
+.nm-board > h2 { margin: 0 0 6px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.nm-board > p { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
+.nm-board > p b { color: var(--paper); }
+.nm-tier { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.nm-tier h3 { margin: 0 0 2px; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.nm-tier.is-free h3 { color: var(--canon); }
+.nm-tier.is-institution h3 { color: var(--nm-blue); }
+.nm-tier.is-shadow h3 { color: var(--nm-violet); }
+.nm-tier > p { margin: 0 0 10px; font-size: 11.5px; color: var(--muted); }
+.nm-powers { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.nm-power { border: 1px solid var(--line); padding: 10px 12px; background: rgba(27, 34, 29, .55); display: grid; gap: 6px; align-content: start; }
+.nm-power.is-great { border-top: 2px solid var(--brass); }
+.nm-power header { display: grid; gap: 2px; }
+.nm-power header a { color: var(--paper); font-size: 14px; font-weight: 700; text-decoration: none; }
+.nm-power header a:hover { color: var(--brass); }
+.nm-power header i { font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); }
+.nm-tier.is-free .nm-power header i { color: var(--canon); }
+.nm-tier.is-institution .nm-power header i { color: var(--nm-blue); }
+.nm-tier.is-shadow .nm-power header i { color: var(--nm-violet); }
+.nm-power p { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.45; }
+.nm-power p b { color: var(--ink); font-weight: 600; }
+.nm-power p a { color: var(--ink); }
+.nm-power p.is-empty { font-style: italic; }
+.nm-chips { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.nm-chips a { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); background: rgba(12, 16, 13, .55); color: var(--ink); font-size: 11px; text-decoration: none; }
+.nm-chips a::before { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; margin-right: 5px; }
+.nm-chips a.is-holds { border-color: rgba(198, 151, 76, .6); }
+.nm-chips a.is-holds::before { content: "holds"; color: var(--brass); }
+.nm-chips a.is-contests { border-color: rgba(200, 90, 80, .55); }
+.nm-chips a.is-contests::before { content: "contests"; color: var(--danger); }
+.nm-chips a.is-influences::before { content: "influences"; color: var(--nm-blue); }
+.nm-chips a:hover { border-color: var(--paper); }
+
+/* -- Laws and the footer ---------------------------------------------- */
+.nm-laws { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+.nm-shell > .nm-foot { border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--muted); }
+.nm-shell > .nm-foot a { color: var(--ink); }
+.nm-shell .field-fields dt:empty { display: none; }
+.nm-shell .field-fields dt:empty + dd { grid-column: 2; }
+
+/* -- Responsive ------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .nm-stair { grid-template-columns: 1fr 1fr 1fr; }
+  .nm-gate { grid-column: span 3; padding: 6px 10px; grid-auto-flow: column; justify-content: start; gap: 12px; }
+  .nm-gate i, .nm-gate b, .nm-gate span { writing-mode: horizontal-tb; transform: none; }
+  .nm-trees { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .nm-hero { grid-template-columns: 1fr; }
+  .nm-hero-art { min-height: 160px; }
+}
+@media (max-width: 720px) {
+  .nm-stair { grid-template-columns: 1fr; }
+  .nm-gate { grid-column: auto; }
+  .nm-trees { grid-template-columns: 1fr; }
+  .nm-budget span.is-key { margin-left: 0; }
+}
+
+/* -- Faith cards: who keeps it, where it is kept ---------------------- */
+.nm-keepers a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted rgba(214, 195, 151, .45); }
+.nm-keepers a:hover { color: var(--brass); border-bottom-color: var(--brass); }
+.nm-keepers.is-empty { font-style: italic; color: var(--muted); }

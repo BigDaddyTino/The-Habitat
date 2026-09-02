@@ -41,7 +41,7 @@ The Shattercore shows what humanity broke. The Mutation Belt shows what the Blac
 ### Canonical operator architecture: `MULTI_AGENCY_STRATEGIC_FACILITY`
 
 - The state owned the strategic reserve and grid asset.
-- **Aegis Extraction Consortium** held the industrial operating contract: intake, refining, storage logistics, and saleable output. This fits its existing position as the peninsula's dominant buyer/refiner without making the entire site a private kingdom.
+- **Aegis Extraction Consortium** held the industrial operating contract: intake, refining, storage logistics, and saleable output. This fits its existing position as the peninsula's dominant buyer/refiner without making the entire site a private nation.
 - **National Defense Directorate** controlled strategic-reserve security, emergency authority, restricted zones, and classified inventories.
 - **Meridian Arcane Institute** certified containment models, staffed an on-site research/assay wing, and published the respectable safety case. It did not run the plant.
 - A civilian grid administration bought and dispatched power but does not need to become a faction record unless later stories require it.

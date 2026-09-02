@@ -14,7 +14,8 @@ import {
   type StoryAssistantRoom,
 } from "@habitat/shared";
 import { storyCanonPacketTargetLabels } from "@habitat/shared";
-import { analyzeStoryGraph, type StoryGraphEdge, type StoryGraphNode } from "@habitat/shared";
+import { analyzeStoryGraph, canonicalStoryEntryRouteSlug, type StoryGraphEdge, type StoryGraphNode } from "@habitat/shared";
+import { nationTerminologyText, nationTerminologyValue } from "@/lib/nation-terminology";
 
 const db = getPrismaClient();
 
@@ -110,7 +111,7 @@ async function buildAssistantRoom(userId: string): Promise<StoryAssistantRoom> {
       })),
     unfiledArcs: nav.unfiled.map((arc) => arc.title).slice(0, 20),
     reviewQueue: queued,
-    recentlyByThem: mine.map((revision) => revision.summary),
+    recentlyByThem: mine.map((revision) => nationTerminologyText(revision.summary)),
   };
 }
 
@@ -144,7 +145,11 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
 
   const assistantEntries: StoryAssistantEntry[] = entries.map((entry) => ({
     ...entry,
-    meta: (entry.meta as Record<string, unknown> | null) ?? null,
+    slug: canonicalStoryEntryRouteSlug(entry.slug),
+    title: nationTerminologyText(entry.title),
+    summary: entry.summary ? nationTerminologyText(entry.summary) : null,
+    body: entry.body ? nationTerminologyText(entry.body) : null,
+    meta: entry.meta ? nationTerminologyValue(entry.meta) as Record<string, unknown> : null,
   }));
 
   if (!arc) {
@@ -155,20 +160,25 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
   const nodes: StoryAssistantNode[] = arc.nodes.map((node) => ({
     key: node.key,
     kind: node.kind,
-    title: node.title,
+    title: nationTerminologyText(node.title),
     status: node.status,
-    summary: node.summary,
-    body: node.body,
-    speaker: node.speaker?.title ?? null,
+    summary: node.summary ? nationTerminologyText(node.summary) : null,
+    body: node.body ? nationTerminologyText(node.body) : null,
+    speaker: node.speaker?.title ? nationTerminologyText(node.speaker.title) : null,
     endingKind: node.endingKind,
-    completion: node.completion,
-    effects: node.effects,
-    rewards: node.rewards,
-    continuesIn: node.continuesIn?.title ?? null,
+    completion: node.completion ? nationTerminologyText(node.completion) : null,
+    effects: node.effects.map(nationTerminologyText),
+    rewards: node.rewards.map(nationTerminologyText),
+    continuesIn: node.continuesIn?.title ? nationTerminologyText(node.continuesIn.title) : null,
     choices: arc.edges
       .filter((edge) => edge.fromNodeId === node.id && keyById.has(edge.toNodeId))
-      .map((edge) => ({ label: edge.label, condition: edge.condition, toKey: keyById.get(edge.toNodeId) as string, effects: edge.effects })),
-    references: node.entryLinks.map((linked) => linked.entry.title),
+      .map((edge) => ({
+        label: edge.label ? nationTerminologyText(edge.label) : null,
+        condition: edge.condition ? nationTerminologyText(edge.condition) : null,
+        toKey: keyById.get(edge.toNodeId) as string,
+        effects: edge.effects.map(nationTerminologyText),
+      })),
+    references: node.entryLinks.map((linked) => nationTerminologyText(linked.entry.title)),
   }));
 
   const graphNodes: StoryGraphNode[] = nodes.map((node) => ({ key: node.key, kind: node.kind, title: node.title }));
@@ -177,11 +187,11 @@ export async function buildAssistantContext(arcId: string | null, nodeId: string
   const graphEdges: StoryGraphEdge[] = arc.edges.flatMap((edge) => {
     const fromKey = keyById.get(edge.fromNodeId);
     const toKey = keyById.get(edge.toNodeId);
-    return fromKey && toKey ? [{ fromKey, toKey, label: edge.label, hasConsequence: edge.effects.length > 0 }] : [];
+    return fromKey && toKey ? [{ fromKey, toKey, label: edge.label ? nationTerminologyText(edge.label) : null, hasConsequence: edge.effects.length > 0 }] : [];
   });
 
   return {
-    arc: { slug: arc.slug, title: arc.title, summary: arc.summary, isMainline: arc.isMainline, status: arc.status },
+    arc: { slug: arc.slug, title: nationTerminologyText(arc.title), summary: arc.summary ? nationTerminologyText(arc.summary) : null, isMainline: arc.isMainline, status: arc.status },
     nodes,
     entries: assistantEntries,
     problems: analyzeStoryGraph(graphNodes, graphEdges),

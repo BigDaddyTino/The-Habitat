@@ -4,7 +4,7 @@ One image per game system, named by the system's codex slug:
 
     images/systems/<slug>.png     (or .jpg / .webp)
 
-Examples: `kingdom-management.png`, `the-corruption-system.jpg`.
+Examples: `nation-management.png`, `the-corruption-system.jpg`.
 
 Drop a file here, reload the page, and it appears — the art is read off disk
 per request through /codex-art rather than served from the static build index,

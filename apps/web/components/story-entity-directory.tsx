@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { ArrowRight, Boxes, CalendarClock, Cog, Compass, GitBranch, Handshake, MapPin, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
-import { storyCompanionMissionStatusLabels, storyStoryStageLabels, type StoryCompanionMissionStatus, type StoryStoryStage } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, storyCompanionMissionStatusLabels, storyStoryStageLabels, type StoryCompanionMissionStatus, type StoryStoryStage } from "@habitat/shared";
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryWarden } from "@/components/story-warden";
@@ -242,24 +242,24 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
       </div>
 
       {releasePlanActive ? <section className="system-release-plan">
-        <div className="section-heading"><div><p className="eyebrow"><CalendarClock aria-hidden="true" size={12} /> The release plan</p><h2>When the story hands each system to the player</h2></div><p>Set on each system’s sheet — link the quest arc that unlocks it, or leave a stage note until that arc exists. Kingdom management is not a day-one verb; this page is where that pacing stays honest.</p></div>
+        <div className="section-heading"><div><p className="eyebrow"><CalendarClock aria-hidden="true" size={12} /> The release plan</p><h2>When the story hands each system to the player</h2></div><p>Set on each system’s sheet — link the quest arc that unlocks it, or leave a stage note until that arc exists. Nation management is not a day-one verb; this page is where that pacing stays honest.</p></div>
         <div className="system-release-rail">
           {releaseDayOne.length > 0 ? <article className="system-release-group is-dayone">
             <p className="eyebrow"><Sparkles aria-hidden="true" size={11} /> From the first session</p>
-            <ul>{releaseDayOne.map((system) => <li key={system.id}><Link href={`/codex/bible/${system.slug}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+            <ul>{releaseDayOne.map((system) => <li key={system.id}><Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(system.slug)}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
           </article> : null}
           {releaseArcGroups.map((group) => <article className="system-release-group is-arc" key={group.slug}>
             <p className="eyebrow"><GitBranch aria-hidden="true" size={11} /> Unlocked by {group.linked ? <Link href={`/codex/arc/${group.slug}`}>{group.title}</Link> : <s title="This arc no longer exists — repoint the sheet">{group.title}</s>}</p>
-            <ul>{group.systems.map((system) => <li key={system.id}><Link href={`/codex/bible/${system.slug}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+            <ul>{group.systems.map((system) => <li key={system.id}><Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(system.slug)}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
           </article>)}
           {[...releaseByStage.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([stage, systems]) => <article className="system-release-group is-stage" key={stage}>
             <p className="eyebrow"><CalendarClock aria-hidden="true" size={11} /> {stage}</p>
-            <ul>{systems.map((system) => <li key={system.id}><Link href={`/codex/bible/${system.slug}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+            <ul>{systems.map((system) => <li key={system.id}><Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(system.slug)}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
           </article>)}
           {releaseUnscheduled.length > 0 ? <article className="system-release-group is-unscheduled">
             <p className="eyebrow"><MapPin aria-hidden="true" size={11} /> Not scheduled yet</p>
             <p className="story-inspector-hint">Open each sheet and set the arc or stage that unlocks it, so nobody writes toward it too early.</p>
-            <ul>{releaseUnscheduled.map((system) => <li key={system.id}><Link href={`/codex/bible/${system.slug}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
+            <ul>{releaseUnscheduled.map((system) => <li key={system.id}><Link href={`/codex/bible/${canonicalStoryEntryRouteSlug(system.slug)}`}>{system.title}<ArrowRight aria-hidden="true" size={11} /></Link></li>)}</ul>
           </article> : null}
         </div>
       </section> : null}
@@ -454,7 +454,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
             // A child in a flattened tree needs to look like one, or the
             // grid reads as a flat list that happens to be oddly sorted.
             className={`entity-card${(isRacesLibrary || isSystemsLibrary || isFactionsLibrary) && systemParentOf(entry) ? " entity-card-nested" : ""}${factionBrand ? " entity-card-faction" : ""}${regionBrand ? " entity-card-region" : ""}${characterFactionBrands.length ? " entity-card-character-affiliated" : ""}`}
-            href={`/codex/bible/${entry.slug}`}
+            href={`/codex/bible/${canonicalStoryEntryRouteSlug(entry.slug)}`}
             key={entry.id}
             style={activeBrand ? { "--entity-accent": activeBrand.accent } as React.CSSProperties : undefined}
           >

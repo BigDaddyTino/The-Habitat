@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
-import { canonicalBloomfallReachSlug, storyEntryKindLabels, type StoryCanonPacket } from "@habitat/shared";
+import { canonicalBloomfallReachSlug, canonicalStoryEntryRouteSlug, persistedStoryEntrySlug, storyEntryKindLabels, storyEntrySlugAliases, type StoryCanonPacket } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -21,9 +21,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const user = await requireRole(storyReadRole);
   const canReview = await hasRole("ADMIN");
   const [{ slug }, { created }] = await Promise.all([params, searchParams]);
-  const canonicalSlug = canonicalBloomfallReachSlug(slug);
-  if (canonicalSlug !== slug) redirect(`/codex/bible/${canonicalSlug}`);
-  const entry = await getStoryEntry(slug);
+  const canonicalSlug = canonicalStoryEntryRouteSlug(canonicalBloomfallReachSlug(slug));
+  if (canonicalSlug !== slug) permanentRedirect(`/codex/bible/${canonicalSlug}`);
+  const entry = await getStoryEntry(persistedStoryEntrySlug(canonicalSlug));
   if (!entry) notFound();
   const atlasLocations = entry.kind === "REGION" ? await getStoryAtlasLocationsForEntry(entry.id) : [];
 
@@ -221,7 +221,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         containedPlaces={containedPlaces}
         entry={entry}
         arcTitles={Object.fromEntries(allArcs.map((option) => [option.slug, option.title]))}
-        slugTitles={Object.fromEntries(everyEntry.map((option) => [option.slug, option.title]))}
+        slugTitles={Object.fromEntries(everyEntry.flatMap((option) => storyEntrySlugAliases(option.slug).map((alias) => [alias, option.title])))}
         systemFamily={systemFamily}
         systemsHere={systemsHere}
         threadChildren={threadChildren}

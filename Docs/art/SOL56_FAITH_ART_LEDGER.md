@@ -53,7 +53,7 @@ The Grand Advocate is an unnamed reserved seat, not a fifth commissioned plate. 
 
 ## Validation record
 
-- `pnpm --filter @habitat/web exec tsx --test lib/faith-art.test.ts lib/faction-branding.test.ts lib/dossier-art.test.ts lib/kingdom-art.test.ts`: **23/23 pass** — exact files and formats, private resolver round trips, surface wiring, unique hashes, four reconciled ledger rows, reserved-seat behavior, and the prior Crown gate.
+- `pnpm --filter @habitat/web exec tsx --test lib/faith-art.test.ts lib/faction-branding.test.ts lib/dossier-art.test.ts lib/nation-art.test.ts`: **23/23 pass** — exact files and formats, private resolver round trips, surface wiring, unique hashes, four reconciled ledger rows, reserved-seat behavior, and the prior Crown gate.
 - Focused ESLint over the nine touched TypeScript/TSX files: **PASS**, no warning or error.
 - `pnpm --filter @habitat/web exec tsx scripts/audit-codex-art-coverage.ts`: **42/42 eligible characters**, with one explicitly reserved portraitless seat; **36/37 factions**, with only the separately out-of-scope Radiant Path empty; **1 empty slot** overall.
 - Independent full-resolution and display-crop review: **PASS — 4/4**, including exact 706x941 portrait crops and the exact 32px emblem.

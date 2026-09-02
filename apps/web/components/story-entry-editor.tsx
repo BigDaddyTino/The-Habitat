@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Lock } from "lucide-react";
-import { storyEntryKindLabels, storyEntryKinds, storyHeartbeatMs, type StoryEntryKind } from "@habitat/shared";
+import { canonicalStoryEntryRouteSlug, storyEntryKindLabels, storyEntryKinds, storyHeartbeatMs, type StoryEntryKind } from "@habitat/shared";
 import { claimEntryLock, releaseEntryLock, updateEntry } from "@/app/codex/actions";
 
 export function StoryEntryEditor({ entry, viewerUserId }: {
@@ -61,10 +61,9 @@ export function StoryEntryEditor({ entry, viewerUserId }: {
       <input name="entryId" type="hidden" value={entry.id} /><input name="version" type="hidden" value={entry.version} />
       <label>Kind<select defaultValue={entry.kind} key={`kind-${entry.version}`} name="kind">{storyEntryKinds.map((option) => <option key={option} value={option}>{storyEntryKindLabels[option]}</option>)}</select></label>
       <label>Title<input defaultValue={entry.title} key={`title-${entry.version}`} maxLength={120} name="title" required type="text" /></label>
-      {/* The key is set when the entry is written and never moves again — the
-          game reads canon by it. Renaming without knowing that leaves the entry
-          squatting its old key, and the old name then cannot be reused. */}
-      <p className="story-inspector-hint">Key <code>{entry.slug}</code> — set when this was written, and a rename leaves it here. Nothing else can be created under the name it was born with.</p>
+      {/* The public key is stable even when storage needs a compatibility alias.
+          Writers author the public form; the server normalizes storage on save. */}
+      <p className="story-inspector-hint">Public key / route <code>{canonicalStoryEntryRouteSlug(entry.slug)}</code> — set when this was written, and a rename leaves the public address here. Reserved compatibility aliases cannot be reused.</p>
       <label>Summary<textarea defaultValue={entry.summary ?? ""} key={`summary-${entry.version}`} maxLength={500} name="summary" rows={2} /></label>
       <label>Detail<textarea defaultValue={entry.body ?? ""} key={`body-${entry.version}`} maxLength={20000} name="body" rows={16} /></label>
       <button className="save-server" type="submit">Save entry</button>

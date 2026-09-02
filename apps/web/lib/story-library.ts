@@ -87,7 +87,7 @@ export const storyCollections = {
     title: "What the player can actually do",
     description: "The mechanics the game will ship — and when the story hands each one to the player. Write quests toward these systems, not toward verbs that do not exist.",
     hero: "/images/story-codex-archive.webp",
-    placeholder: "Kingdom Management",
+    placeholder: "Nation Management",
     summaryPlaceholder: "What does this system let the player do, in one line?",
   },
   "companion-missions": {

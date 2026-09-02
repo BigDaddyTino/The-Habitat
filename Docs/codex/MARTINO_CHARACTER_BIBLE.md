@@ -39,7 +39,7 @@ because each of them closes a door that would otherwise look open.
 | Near-future naming everywhere | No fantasy register in the career area. Engineering, not smithing; Chemistry, not alchemy; Background, not class; Species, not race; Kit, not gear. |
 | The sheet is diegetic | No numbers on screen, ever. Eleven in-world surfaces replace every menu, and a medic's note replaces a stat block. |
 | Adaptive Mutation is Bloomfall's alone | It is the *first instance* of the region-signature rule, not a world-wide system. Every other region gets its own slot. |
-| Faction reputation is deferred | Standing-with-companions is designed; faction reputation and alignment wait for the kingdom-management pass. |
+| Faction reputation is deferred | Standing-with-companions is designed; faction reputation and alignment wait for the Nation Management pass. |
 | Chemistry and Refining stay apart | Different institutions, and merging them would put the setting's two sharpest moral ceilings on one sheet. |
 | The player never fails a dose check | Companions do. The player always chooses, which is what makes the choice mean anything. |
 | Corruption pays as well as charges | Phase 2 pays Conductivity, 4 pays Acuity, 6 pays Resilience. The ladder is the fastest progression path in the game. |
@@ -102,7 +102,7 @@ untouched.
 - **Region layouts.** Regions received connections and characters only. No
   region was laid out, because the pass is about the player and the codex is
   still growing.
-- **Faction reputation and alignment.** Deferred to kingdom management. Nothing
+- **Faction reputation and alignment.** Deferred to Nation Management. Nothing
   in this pass writes to `reputation` or `faction-membership`.
 - **The Veil.** Untouched by request.
 

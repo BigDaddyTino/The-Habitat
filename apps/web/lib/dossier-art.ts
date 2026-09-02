@@ -5,7 +5,7 @@ import { codexArtSlot, findCodexArt, type CodexArtKind } from "./codex-art";
 import { getCreatureKeyart } from "./creature-keyart";
 import { getEventArt } from "./event-art";
 import { getRegionBranding, getRegionKeyart } from "./region-branding";
-import { getSystemArt } from "./system-art";
+import { getSystemArt, systemArtSlot } from "./system-art";
 
 /**
  * The one place that decides which picture a codex entry wears.
@@ -87,6 +87,7 @@ export function dossierArtExpected(kind: string, slug: string, meta: unknown): b
 
 export function dossierArtSlot(kind: string, slug: string, meta?: unknown): string | null {
   if (!dossierArtExpected(kind, slug, meta)) return null;
+  if (kind === "SYSTEM") return systemArtSlot(slug);
   const directory = artSlotDirectory[kind as keyof typeof artSlotDirectory];
   return directory ? codexArtSlot(directory, slug) : null;
 }

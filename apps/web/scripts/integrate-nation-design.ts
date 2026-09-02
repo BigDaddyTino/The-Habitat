@@ -1,25 +1,26 @@
 import "../lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
+import { LEGACY_NATION_MANAGEMENT_GAME_TAG_PREFIX, NATION_MANAGEMENT_GAME_TAG_PREFIX, NATION_MANAGEMENT_PERSISTED_SLUG } from "@habitat/shared";
 import { systemMetaSchema } from "../lib/story-meta-schemas";
-import { KINGDOM_CROWN_LAYER } from "./lib/kingdom-crown-layer";
+import { NATION_CROWN_LAYER } from "./lib/nation-crown-layer";
 
 /**
- * Kingdom Management — codex integration ("Holding Ground" rev 12, owner-approved).
+ * Nation Management — codex integration ("Holding Ground" rev 12, owner-approved).
  *
  * What lands, per the spec's own §16 and the owner's order to make it readable
  * and usable for a gamer — what you get, and for what:
  *
  *   1. Appended design layers (own markers, everything above untouched) on
- *      kingdom-management, outpost-and-city-management, the-power-balance,
+ *      Nation Management, outpost-and-city-management, the-power-balance,
  *      faction-membership, and a siege addendum on battle-management.
  *   2. The faith lane: SYSTEM `the-faith-lane` + five faith entries, each with
  *      its perk and its price.
  *   3. Faction sheets: the new `faith` field backfilled on all 34 rows (only
  *      the canon-obvious five get a faith; null = secular/undeclared), and the
- *      KM tier recorded in `gameTag` (never overwriting a hand-set tag).
+ *      NM tier recorded in `gameTag` (never overwriting a hand-set tag).
  *   4. buildStatus concept -> designed on the four designed systems.
  *
- *   pnpm --filter @habitat/web exec tsx scripts/integrate-kingdom-design.ts [--apply]
+ *   pnpm --filter @habitat/web exec tsx scripts/integrate-nation-design.ts [--apply]
  */
 
 const db = getPrismaClient();
@@ -27,7 +28,7 @@ const db = getPrismaClient();
 // ── 1. Appended layers ───────────────────────────────────────────────────────
 
 const LAYERS: Record<string, { marker: string; body: string }> = {
-  "kingdom-management": KINGDOM_CROWN_LAYER,
+  [NATION_MANAGEMENT_PERSISTED_SLUG]: NATION_CROWN_LAYER,
   "outpost-and-city-management": {
     marker: "## Designed — running held ground",
     body: `## Designed — running held ground
@@ -69,7 +70,7 @@ Settled design ("Holding Ground", 2026-09-01). The balance is now a scoreboard w
 
 **The rules of the race:** claimable places are pre-defined per region, and faction-held ones are contested from the world's first day; story-critical ground is hard-shielded until its arc resolves; a runaway leader draws a coalition (the sims hold the spread at 1.3x with about eight lead changes a world because of it); late-game wars swallow institution seats too; and the player's crown joins the board by RECOGNITION — a threshold the whole server sees crossed.
 
-**Where you read it:** in the world, on map tables; out of it, on the Kingdom page's territory atlas — territories, resources, who holds what, and the five shapes diverging from their equal start.`,
+**Where you read it:** in the world, on map tables; out of it, on the Nation page's territory atlas — territories, resources, who holds what, and the five shapes diverging from their equal start.`,
   },
   "faction-membership": {
     marker: "## Designed — joining, and what it costs",
@@ -80,14 +81,14 @@ Settled design ("Holding Ground", 2026-09-01), in plain terms.
 - **Joining is wholesale.** Swear to a power and you take on their beliefs — doctrine, faith, harvest policy, all of it. Your realm trees are THEIRS; your say in them is the influence game, played in service, standing, and grudge.
 - **The fief law is Bannerlord's** (owner ruling): take a fort under a banner and the LEADER decides who gets it. Winning fiefs inside a faction is politics with a body count attached.
 - **What you get:** supply lines, safehouses, reclamation rights at member rates, intelligence, guns that show up when called — the power's whole apparatus, priced in duties and exclusivity.
-- **Striking out instead** means every belief is your own decision and every consequence has your name on it — see [[kingdom-management]] for what founding costs and buys.
+- **Striking out instead** means every belief is your own decision and every consequence has your name on it — see [[${NATION_MANAGEMENT_PERSISTED_SLUG}]] for what founding costs and buys.
 - **Exit stays writable:** desertion, excommunication, bought freedom, burned bridges. A power that cannot be left is a prison, not a faction, and the codex writes factions.`,
   },
   "battle-management": {
     marker: "## The siege addendum — storm, wait, and the soulless wall",
     body: `## The siege addendum — storm, wait, and the soulless wall
 
-Kingdom Management's siege rules land on this system ("Holding Ground", 2026-09-01), and the sims wrote the doctrine.
+Nation Management's siege rules land on this system ("Holding Ground", 2026-09-01), and the sims wrote the doctrine.
 
 - **Every siege is still about the Forge — and the reserve is sized in DAYS.** A defender's clock is how long the Core can pay full casualties: shallow clocks on outposts, deep clocks on capitals.
 - **The attacker chooses a posture.** **STORM** hits hard and fast, bleeds hard, and a site that falls with its reserve alive falls BURNED. **WAIT** blockades the clock for the intact prize — slower, cheaper in blood, dearer in supply.
@@ -185,7 +186,7 @@ For writers: the Communion recruits at the moment of desperation and is genuinel
   },
 ];
 
-// ── 3. Faction backfill: faith + KM tier gameTags ────────────────────────────
+// ── 3. Faction backfill: faith + NM tier gameTags ────────────────────────────
 
 const FACTION_FAITH: Record<string, string> = {
   "church-of-the-first-gift": "the-first-gift",
@@ -195,45 +196,45 @@ const FACTION_FAITH: Record<string, string> = {
   "crimson-choir": "the-crimson-communion",
 };
 
-const KM_TIER: Record<string, string> = {
-  "national-defense-directorate": "KM · Great Power — Military Might",
-  "aegis-extraction-consortium": "KM · Great Power — Industry & Magic",
-  "tropic-pearl-trade-house": "KM · Great Power — Wealth (trade)",
-  "floating-city-council": "KM · Great Power — Technology",
-  "ossuary-covenant": "KM · Great Power — The Dead",
-  "the-free-peoples-compact": "KM · Free Power (bloc head)",
-  "verdant-marsh-clans": "KM · Free — feeds the Compact",
-  "mountain-holdfasts": "KM · Free — feeds the Compact",
-  "desert-nomad-compact": "KM · Free — feeds the Compact",
-  "free-islander-league": "KM · Free — feeds the Compact",
-  "drifter-renegade-camps": "KM · Free — feeds the Compact",
-  "concordance-of-natural-casters": "KM · Free Power",
-  "liberation-of-the-gifted": "KM · Free — feeds the Concordance",
-  "peninsula-expeditionary-army": "KM · feeds NDD (state organ)",
-  "peninsula-coast-guard-authority": "KM · feeds NDD (state organ)",
-  "abomination-containment-authority": "KM · feeds NDD (state organ)",
-  "drone-surveillance-bureau": "KM · feeds NDD (state organ)",
-  "wardens-monster-hunter-guild": "KM · feeds NDD (state organ)",
-  "helix-arcanobiotics": "KM · feeds Aegis",
-  "meridian-arcane-institute": "KM · feeds Aegis",
-  "foundry-workers-union": "KM · feeds Aegis",
-  "cybernetic-ascendancy": "KM · feeds Aegis",
-  "iron-saints-pmc": "KM · feeds Tropic Pearl",
-  "skybridge-transit-authority": "KM · feeds the Floating City",
-  "bone-market-families": "KM · feeds the Ossuary Covenant",
-  "stormglass-cartel": "KM · Institution (city-state)",
-  "black-tithe-syndicate": "KM · feeds Stormglass (institution wing)",
-  "church-of-the-first-gift": "KM · Institution · Faith (city-state)",
-  "sanctuary-of-living-beasts": "KM · feeds the Church (institution wing)",
-  "crimson-choir": "KM · Shadow Power · Faith",
-  "the-ashen-court": "KM · Shadow Power",
-  "the-riftbound-legion": "KM · feeds the Ashen Court (Shadow)",
-  "the-pale-embassy": "KM · Shadow Power",
-  "the-choir-below": "KM · Shadow Power",
-  "the-old-hunger": "KM · Shadow Power",
+const NM_TIER: Record<string, string> = {
+  "national-defense-directorate": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Great Power — Military Might`,
+  "aegis-extraction-consortium": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Great Power — Industry & Magic`,
+  "tropic-pearl-trade-house": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Great Power — Wealth (trade)`,
+  "floating-city-council": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Great Power — Technology`,
+  "ossuary-covenant": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Great Power — The Dead`,
+  "the-free-peoples-compact": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free Power (bloc head)`,
+  "verdant-marsh-clans": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Compact`,
+  "mountain-holdfasts": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Compact`,
+  "desert-nomad-compact": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Compact`,
+  "free-islander-league": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Compact`,
+  "drifter-renegade-camps": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Compact`,
+  "concordance-of-natural-casters": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free Power`,
+  "liberation-of-the-gifted": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Free — feeds the Concordance`,
+  "peninsula-expeditionary-army": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds NDD (state organ)`,
+  "peninsula-coast-guard-authority": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds NDD (state organ)`,
+  "abomination-containment-authority": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds NDD (state organ)`,
+  "drone-surveillance-bureau": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds NDD (state organ)`,
+  "wardens-monster-hunter-guild": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds NDD (state organ)`,
+  "helix-arcanobiotics": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Aegis`,
+  "meridian-arcane-institute": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Aegis`,
+  "foundry-workers-union": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Aegis`,
+  "cybernetic-ascendancy": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Aegis`,
+  "iron-saints-pmc": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Tropic Pearl`,
+  "skybridge-transit-authority": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds the Floating City`,
+  "bone-market-families": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds the Ossuary Covenant`,
+  "stormglass-cartel": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Institution (city-state)`,
+  "black-tithe-syndicate": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds Stormglass (institution wing)`,
+  "church-of-the-first-gift": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Institution · Faith (city-state)`,
+  "sanctuary-of-living-beasts": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds the Church (institution wing)`,
+  "crimson-choir": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Shadow Power · Faith`,
+  "the-ashen-court": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Shadow Power`,
+  "the-riftbound-legion": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} feeds the Ashen Court (Shadow)`,
+  "the-pale-embassy": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Shadow Power`,
+  "the-choir-below": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Shadow Power`,
+  "the-old-hunger": `${NATION_MANAGEMENT_GAME_TAG_PREFIX} Shadow Power`,
 };
 
-const DESIGNED_SYSTEMS = ["kingdom-management", "outpost-and-city-management", "the-power-balance", "faction-membership"];
+const DESIGNED_SYSTEMS = [NATION_MANAGEMENT_PERSISTED_SLUG, "outpost-and-city-management", "the-power-balance", "faction-membership"];
 
 async function main() {
   const apply = process.argv.includes("--apply");
@@ -275,7 +276,7 @@ async function main() {
         } });
         await db.storyRevision.create({ data: {
           entityType: "ENTRY", entityId: created.id, action: "CREATED", actorUserId: actor.id,
-          summary: `Kingdom integration: filed ${faith.title} on the faith lane`,
+          summary: `Nation integration: filed ${faith.title} on the faith lane`,
         } });
       }
     } else if (current.body !== faith.body) {
@@ -306,7 +307,7 @@ async function main() {
         } });
         await db.storyRevision.create({ data: {
           entityType: "ENTRY", entityId: entry.id, action: "UPDATED", actorUserId: actor.id,
-          summary: `Kingdom integration: appended the design layer (own marker; no prior words changed).`,
+          summary: `Nation integration: appended the design layer (own marker; no prior words changed).`,
         } });
       }
     } else if (DESIGNED_SYSTEMS.includes(slug)) {
@@ -318,12 +319,12 @@ async function main() {
     }
   }
 
-  // 3. Faction backfill: faith key on every row; KM tier into gameTag when unset.
+  // 3. Faction backfill: faith key on every row; NM tier into gameTag when unset.
   const factions = await db.storyEntry.findMany({ where: { kind: "FACTION" }, select: { id: true, slug: true, meta: true } });
   for (const faction of factions) {
     const meta = (faction.meta ?? {}) as Record<string, unknown>;
     const assignedFaith = FACTION_FAITH[faction.slug] ?? null;
-    const tier = KM_TIER[faction.slug] ?? null;
+    const tier = NM_TIER[faction.slug] ?? null;
     const changes: string[] = [];
     const next: Record<string, unknown> = { ...meta };
     if (!("faith" in meta) || (assignedFaith && meta.faith !== assignedFaith)) {
@@ -332,9 +333,9 @@ async function main() {
       changes.push("faith");
     }
     if (tier && (meta.gameTag === null || meta.gameTag === undefined)) { next.gameTag = tier; changes.push("gameTag"); }
-    else if (tier && meta.gameTag && meta.gameTag !== tier && typeof meta.gameTag === "string" && !meta.gameTag.startsWith("KM ·")) {
+    else if (tier && meta.gameTag && meta.gameTag !== tier && typeof meta.gameTag === "string" && !meta.gameTag.startsWith(NATION_MANAGEMENT_GAME_TAG_PREFIX) && !meta.gameTag.startsWith(LEGACY_NATION_MANAGEMENT_GAME_TAG_PREFIX)) {
       plan.push(`SKIP gameTag on ${faction.slug} (hand-set: "${meta.gameTag}")`);
-    } else if (tier && meta.gameTag !== tier && typeof meta.gameTag === "string" && meta.gameTag.startsWith("KM ·")) {
+    } else if (tier && meta.gameTag !== tier && typeof meta.gameTag === "string" && (meta.gameTag.startsWith(NATION_MANAGEMENT_GAME_TAG_PREFIX) || meta.gameTag.startsWith(LEGACY_NATION_MANAGEMENT_GAME_TAG_PREFIX))) {
       next.gameTag = tier; changes.push("gameTag");
     }
     if (!changes.length) continue;

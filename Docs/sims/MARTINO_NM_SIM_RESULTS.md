@@ -1,4 +1,4 @@
-# Kingdom Management — sim results (seed 20260901, 2026-09-01)
+# Nation Management — sim results (seed 20260901, 2026-09-01)
 
 ## A · The race — equal start, 420 world-days, 48 seeds
   coalition=ON  | winrates: ndd 58% · aegis 13% · pearl 6% · floating 2% · ossuary 21%

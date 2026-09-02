@@ -118,7 +118,7 @@ test("the Lizzarnix deepen existing magic law without creating a fourth origin",
   assert.match(String(amandaSeed.meta.appearance), /scaled tail.*lower spine/i);
   assert.match(lizzarnixSeed.body, /ash became egg, egg became life/i);
   assert.match(lizzarnixSeed.body, /It is not a fourth origin/i);
-  assert.match(lizzarnixSeed.meta.harvest ?? "", /eggs.*above kingdoms/i);
+  assert.match(lizzarnixSeed.meta.harvest ?? "", /eggs.*above nations/i);
 
   assert.deepEqual(lizzarnixLorePatches.map((patch) => patch.slug), [
     "the-three-origins-of-magic",

@@ -58,6 +58,8 @@
     "geography:repair": "tsx scripts/repair-geographic-hierarchy.ts",
     "geography:verify": "tsx scripts/repair-geographic-hierarchy.ts",
     "lint": "eslint .",
+    "nation:terminology:apply": "tsx scripts/migrate-nation-terminology.ts --apply --confirm=NATION_TERMINOLOGY",
+    "nation:terminology:preview": "tsx scripts/migrate-nation-terminology.ts",
     "start": "next start",
     "test": "tsx --test lib/*.test.ts",
     "titles:normalize": "tsx scripts/normalize-titles.ts",

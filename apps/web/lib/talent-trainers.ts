@@ -37,7 +37,7 @@ export const trainerSlugs: Record<string, string | null> = {
   "the Kestrel Quartermaster": "the-kestrel-quartermaster",
   "Jaro Fen": "jaro-fen",
   "the Pearl Factor": null,
-  "reserved for the kingdom pass": null,
+  "reserved for the nation pass": null,
   "the Kestrel Mechanic": "the-kestrel-mechanic",
   "the Foundry-Master": "the-foundry-master",
   "NAG — yes, the watch": "nag",

@@ -1,5 +1,6 @@
 import "../lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
+import { NATION_MANAGEMENT_PERSISTED_SLUG } from "@habitat/shared";
 import { regionMetaSchema, systemMetaSchema } from "../lib/story-meta-schemas";
 
 /**
@@ -94,7 +95,7 @@ The city keeps a public [[the-soul-forge]], active and open to any citizen the W
 
 In courthouse escrow sit three land charters older than the Standstill — [[first-charter]], [[second-charter]], [[third-charter]] — the only ground in the Riverlands that can be bought outright and built on. The Judge's office holds the deeds and has never released one.
 
-For writers: Heartland is where holding ground is learned — [[outpost-and-city-management]] taught in the streets, [[kingdom-management]]'s charter granted here when the arc that grants it is finally written. The fuse is the city's whole character: write the counting-down politeness, the exits everyone has mapped, the five wharves pretending not to watch each other. Do not spend the fuse early, and do not write the Standstill breaking — that belongs to the campaign arc alone.`,
+For writers: Heartland is where holding ground is learned — [[outpost-and-city-management]] taught in the streets, [[${NATION_MANAGEMENT_PERSISTED_SLUG}]]'s charter granted here when the arc that grants it is finally written. The fuse is the city's whole character: write the counting-down politeness, the exits everyone has mapped, the five wharves pretending not to watch each other. Do not spend the fuse early, and do not write the Standstill breaking — that belongs to the campaign arc alone.`,
     meta: {
       type: "settlement",
       settlementTier: "city",
@@ -1268,7 +1269,7 @@ For writers: the Mooring is where the leg's crews are trapped together while the
     title: "First Charter",
     summary:
       "A bankside parcel on the safe floodplain — the first of the three escrowed land charters, and the first ground a player can ever own outright.",
-    body: `The First Charter is a stretch of good bank on the safe floodplain within a day of [[heartland]]: river frontage, dry ground behind a low rise, and a deed older than the Standstill sitting in courthouse escrow with the other two. Like all three charters it predates every claim on the river — the [[kingdom-management]] shelf's oldest advice is that the best endgame material is paid for early, in charters and old claims, and these are those.
+    body: `The First Charter is a stretch of good bank on the safe floodplain within a day of [[heartland]]: river frontage, dry ground behind a low rise, and a deed older than the Standstill sitting in courthouse escrow with the other two. Like all three charters it predates every claim on the river — the [[${NATION_MANAGEMENT_PERSISTED_SLUG}]] shelf's oldest advice is that the best endgame material is paid for early, in charters and old claims, and these are those.
 
 The ground itself is modest on purpose: a homestead's worth of floodplain, needing draining before building the way all riverland ground does — the first lever of [[the-waterworks]] a new landholder ever pulls. What it becomes is the holder's decision entirely.
 
