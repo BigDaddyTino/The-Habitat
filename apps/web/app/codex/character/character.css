@@ -65,3 +65,10 @@
   .char-ledgers { grid-template-columns: 1fr 1fr; }
   .char-canon { float: none; display: block; margin-top: 4px; }
 }
+
+/* Starting rungs on the class tiles, and the creation rule under them */
+.char-class-rungs { display: flex; flex-wrap: wrap; gap: 3px 8px; margin-top: 4px; font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+.char-class-rungs .is-primary { color: var(--brass); }
+.char-class-rungs .is-secondary { color: var(--paper); }
+.char-creation { margin-top: 12px; border: 1px solid rgba(198, 151, 76, .45); border-left: 3px solid var(--brass); padding: 10px 14px; background: rgba(198, 151, 76, .06); font-size: 12.5px; color: var(--ink); line-height: 1.55; }
+.char-creation b { color: var(--paper); }

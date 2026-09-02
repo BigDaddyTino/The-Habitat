@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/authorization";
-import { attributeNames, attributes, backgrounds, ledgers, levelLaw, origins, reservedBackgrounds, reservedSpecies, species } from "@/lib/character-sheet";
+import { attributeNames, attributes, backgrounds, creationRules, ledgers, levelLaw, origins, reservedBackgrounds, reservedSpecies, species, startingRungs } from "@/lib/character-sheet";
 import { classDossiers } from "@/lib/class-dossiers";
 import { findCodexArt } from "@/lib/codex-art";
 import { storyReadRole } from "@/lib/story-codex";
@@ -116,6 +116,7 @@ export default async function CharacterPage() {
         <div className="char-classes">
           {talentClasses.map((entry) => {
             const art = findCodexArt("classes", entry.slug) ?? findCodexArt("talents", entry.slug);
+            const rungs = startingRungs(entry.slug);
             return (
               <Link className="char-class" href={`/codex/classes/${entry.slug}`} key={entry.slug}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -124,10 +125,18 @@ export default async function CharacterPage() {
                   <i>{entry.archetype}</i>
                   <b>{entry.name}</b>
                   <small>{classDossiers[entry.slug]?.hook}</small>
+                  {rungs ? (
+                    <em className="char-class-rungs">
+                      {attributeNames.map((name) => <span className={rungs[name] === 3 ? "is-primary" : rungs[name] === 2 ? "is-secondary" : undefined} key={name}>{abbreviations[name]} {rungs[name]}</span>)}
+                    </em>
+                  ) : null}
                 </span>
               </Link>
             );
           })}
+        </div>
+        <div className="char-creation">
+          <b>Signing the file.</b> Nine rungs from your class, shaped <b>3 · 2 · 1 · 1 · 1 · 1</b>: the primary is what the class drives first, the secondary what it drives second, and nobody starts at 0 in anything. You place <b>{creationRules.freePoints} more</b> where species caps allow (nothing above {creationRules.deskCap} at the desk unless a species says so) and may move <b>{creationRules.reassign}</b> point between class-allotted attributes. Origin adds its rung on top: None a Composure, Born a Conductivity, Gifted whatever the giver chose, Infused nothing but the Tremor. A recruit signs at <b>level 11 or 12</b> and quotes at about 165 Essence.
         </div>
       </section>
 

@@ -14,10 +14,10 @@ for writing one.
 | Field | Rule |
 | --- | --- |
 | **Type** | `Passive`, `Active`, `Spell`, `Choice`, `Capstone`, `Unlock`, `Corrupted`. A node that opens a spell is `Spell`. A fork half is `Choice`. A ceiling is `Capstone`. Anything that opens a system, slot or surface (a second augment slot, outpost management, a bench) is `Unlock`. Everything else is `Passive` or `Active`. |
-| **Cost** | Only for resources beyond talent points. Spells: `2 pool · 1 charge` (Licensed), `4 pool · 2 charges` (Certified), `8 pool · 4 charges` (Master). Actives that spend something: `1 breach charge`, `1 stormglass round`, `1 dose`. Omit when free. |
+| **Cost** | Only for resources beyond talent points. Spells: `2 pool · 1 charge` (Licensed), `4 pool · 2 charges` (Certified), `8 pool · 4 charges` (Master). Hardware casts (the Cypherist's spell nodes, Shield Pylon, Spell in a Can) pay in capacitor cells — a cell is 4 charges — written `2 cell charges (or 4 pool · 2 charges)` / `1 cell (4 charges)`; a cell-cast advances no corruption phase and reads as hardware on every instrument. Actives that spend something: `1 breach charge`, `1 stormglass round`, `1 dose`. Omit when free. |
 | **Cooldown** | Every `Active` carries one. Use `8s`, `20s`, `45s`, `90s`, `Once per fight`, `Once per day`, `15 min`. Passives never carry one. |
 | **Range** | `Self`, `Melee`, `5m`, `10m`, `25m`, `Rifle range`, `Line of sight`, `Any range`. Every Active and Spell carries one. |
-| **Duration** | `Instant`, `5s`, `30s`, `1 hour`, `While channelled`, `Until moved`, `Until you go Down`. Only when something lasts. |
+| **Duration** | `Instant`, `5s`, `30s`, `1 hour`, `While channelled`, `Until moved`, `Until you go Down`. Only when something lasts. Crafting capstones (Fabrication's History) use it for **bench time** — `7 days at a Master's bench` — and never carry a cooldown. |
 | **Effect** | The whole point. Present tense, second person, one or two sentences, numbers in them. Starts with the verb or the number. No metaphor, no adjective that is not a measurement. |
 | **Notes** | Stacking, interactions, what turns it off, which fork it locks, which node it links to. Plain words. Optional. |
 | **untested** | `true` when a number was written by hand and the balance campaign has never measured it. The page prints a small tag. |

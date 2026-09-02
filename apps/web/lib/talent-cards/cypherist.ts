@@ -147,7 +147,7 @@ export const cypheristCards: Record<string, AbilityCard> = {
   },
   "shield-pylon": {
     kind: "Spell",
-    cost: "1 capacitor cell",
+    cost: "1 cell (4 charges)",
     range: "5m",
     duration: "While the cell holds (about 60s)",
     effect: "Unlocks Seal (Containment, Licensed) as hardware: a pylon wards one door, window or breach, and no body or round crosses it while the cell holds. Allies within 10m take −12% damage.",
@@ -191,10 +191,10 @@ export const cypheristCards: Record<string, AbilityCard> = {
   },
   "handshake": {
     kind: "Spell",
-    cost: "4 pool · 2 charges",
+    cost: "2 cell charges (or 4 pool · 2 charges)",
     range: "Melee",
     effect: "Unlocks Handshake (Technomantic, Certified): a machine you touch answers one question about the last person who gave it an order. Reading enemy hardware in the fight: 10% chance per attack to strip a plate or stagger.",
-    notes: "Licence: Drone Surveillance Bureau. A machine never given an order has nothing to say. Pushed, it tells you about the last person and then about everyone.",
+    notes: "Cast through a capacitor cell, so no origin is needed and no corruption phase advances: the charge never enters the body. A cell-cast reads as hardware on every instrument (suspicion with the Bureau and Aegis), and ELECTRICAL vents every cell on you. Licence: Drone Surveillance Bureau. Pushed, it tells you about the last person and then about everyone.",
   },
   "dead-mans-switch": {
     kind: "Active",
@@ -207,10 +207,10 @@ export const cypheristCards: Record<string, AbilityCard> = {
   },
   "testimony": {
     kind: "Capstone",
-    cost: "8 pool · 4 charges",
+    cost: "1 cell (4 charges) (or 8 pool · 4 charges)",
     range: "Melee",
     effect: "Unlocks Testimony (Technomantic, Master): a machine you touch gives everything it has ever been told, in order. Sees through 20% concealment; 10% chance per attack to strip a plate or stagger.",
-    notes: "Trainer: NAG — yes, the watch. Points alone never open it. Pushed, the testimony includes what it was told about you.",
+    notes: "Trainer: NAG — yes, the watch. Points alone never open it. A whole cell per cast, through hardware: no origin needed, no phase advanced, but the cast is on every instrument's record. Pushed, the testimony includes what it was told about you.",
   },
   "uplink": {
     kind: "Choice",
@@ -250,10 +250,10 @@ export const cypheristCards: Record<string, AbilityCard> = {
   },
   "interface": {
     kind: "Spell",
-    cost: "4 pool · 2 charges",
+    cost: "2 cell charges (or 4 pool · 2 charges)",
     range: "Melee",
     effect: "Unlocks Interface (Bionic, Certified): an implant answers to a body it was not built for, so any recovered augment fits any body. The fit holds: +1 Hit before Down.",
-    notes: "Weave: buying this or Hydraulic Answer links both branches. Aegis's lawyers are informed with every cast. ELECTRICAL vents Bionic work. Pushed, the implant answers to somebody else.",
+    notes: "Weave: buying this or Hydraulic Answer links both branches. Cast through a capacitor cell: no origin needed, no phase advanced, and Aegis's lawyers are informed with every cast. ELECTRICAL vents Bionic work and the cell alike. Pushed, the implant answers to somebody else.",
   },
   "second-skeleton": {
     kind: "Capstone",
@@ -268,7 +268,8 @@ export const cypheristCards: Record<string, AbilityCard> = {
   },
   "charge-packing": {
     kind: "Passive",
-    effect: "+6 maximum pool / charges: every capacitor cell holds more and does not leak inside the day.",
+    effect: "+6 maximum pool / charges: a cell you pack holds 6 charges instead of 4 and does not leak inside the day.",
+    notes: "A cell is 4 charges: one Master cast, two Certified, four Licensed. Loaded at a bench from 8 pool or one dose.",
   },
   "stormglass-loads": {
     kind: "Passive",
@@ -283,7 +284,7 @@ export const cypheristCards: Record<string, AbilityCard> = {
   "capacitor-array": {
     kind: "Unlock",
     effect: "Opens the battery bank: +10 maximum pool / charges, carried as cells beyond the two-cell reserve.",
-    notes: "Cells are loaded before a fight from a pool or a dose, spent once, and decay inside a day. ELECTRICAL vents cells.",
+    notes: "Cells are loaded before a fight from a pool or a dose, spent once, and decay inside a day. A body carries Conductivity-many cells before they leak; the array carries the rest. ELECTRICAL vents cells.",
   },
   "grid-tap": {
     kind: "Passive",
@@ -306,7 +307,7 @@ export const cypheristCards: Record<string, AbilityCard> = {
     cooldown: "20s",
     range: "10m",
     effect: "Packs one Licensed-tier spell from any caster at your bench into a cell that anyone can trigger once. Damage dealt +40%, action speed +8% (attacks, casts and swaps cycle faster).",
-    notes: "The can fires by any Trigger Craft trigger. It counts as a cast where it goes off: Dampening Coil doubles its cost, and ELECTRICAL vents it unfired.",
+    notes: "Licensed tier only: Certified and Master spells only run through cells on the Cypherist's own four nodes. The can fires by any Trigger Craft trigger and advances nobody's phase. It counts as a cast where it goes off: Dampening Coil doubles its cost, and ELECTRICAL vents it unfired.",
     untested: true,
   },
 

@@ -485,15 +485,16 @@ export const spells: Spell[] = [
     tier: "Master",
     cast: "Channelled",
     castTime: "While channelled",
+    damageType: "FIRE",
     flavor: "No shadow anywhere in the volume, so nothing Occlusive works and nothing hides.",
     card: {
       kind: "Spell",
       cost: COST.Master,
       range: "25m",
-      duration: "While channelled",
+      duration: "While channelled (30s at most)",
       effect:
-        "No shadow anywhere within 25m while you channel. Nothing Occlusive works in the volume (Dim, Fade, Shroud and Umbra end and cannot be cast), no concealment counts, and hit chance is +20% for everyone firing into it.",
-      notes: `${CH} Both sides lose their cover from sight; only Containment still hides a body.`,
+        "No shadow anywhere within 25m while you channel. Nothing Occlusive works in the volume (Dim, Fade, Shroud and Umbra end and cannot be cast), no concealment counts, and hit chance is +20% for everyone firing into it. Every body in the volume not under hard cover takes 1 FIRE Hit each 10s, ignoring half a plate; Burning does not apply.",
+      notes: `${CH} Both sides burn and both sides lose their cover from sight; only a Containment Seal keeps a body out of the light. The sun is not a searchlight.`,
       untested: true,
     },
     overcharge: "Noon leaves no cover for either side: your own squad's concealment is gone and every ward on them ends too.",
@@ -2301,6 +2302,7 @@ export const spells: Spell[] = [
     tier: "Licensed",
     cast: "Instant",
     castTime: "Instant",
+    damageType: "ARCANE",
     flavor: "Half a second returned.",
     card: {
       kind: "Spell",
@@ -2308,7 +2310,7 @@ export const spells: Spell[] = [
       range: "Self",
       effect:
         "Returns half a second: one shot, one step or one word you just made is unmade, and you take it again. It cannot unmake a Hit you took. Once every 10s.",
-      notes: "Nothing reliable counters Temporal, which is why the licence is provisional.",
+      notes: "Temporal deals no Hit; it deals evidence. Every cast leaves an ARCANE scar on the volume for a day: instruments flag it, a reader knows a spell happened here, and persistent damage keeps it. Nothing reliable counters Temporal, which is why the licence is provisional.",
       untested: true,
     },
     overcharge: "Steady the Hand takes the half second from your own future: your next action comes half a second late, and the enemy's first.",
@@ -2321,6 +2323,7 @@ export const spells: Spell[] = [
     tier: "Licensed",
     cast: "Instant",
     castTime: "Instant",
+    damageType: "ARCANE",
     flavor: "The last three seconds again, for you alone.",
     card: {
       kind: "Spell",
@@ -2328,6 +2331,7 @@ export const spells: Spell[] = [
       range: "Self",
       effect:
         "The last 3 seconds again, for you alone: you see once more what happened from where you stood — who fired, from where, what moved, what was said. Nobody else lives it again, and nothing changes.",
+      notes: "Temporal deals no Hit; it deals evidence. Every cast leaves an ARCANE scar on the volume for a day: instruments flag it, a reader knows a spell happened here, and persistent damage keeps it.",
       untested: true,
     },
     overcharge: "Second Look loops the 3 seconds again and again: you are Down for a minute, watching.",
@@ -2340,6 +2344,7 @@ export const spells: Spell[] = [
     tier: "Certified",
     cast: "Channelled",
     castTime: "1.5s channel",
+    damageType: "ARCANE",
     flavor: "A wound returned to the state it held seconds ago, because the tissue forgets.",
     card: {
       kind: "Spell",
@@ -2347,7 +2352,7 @@ export const spells: Spell[] = [
       range: "Melee",
       effect:
         "Returns one wound within 2m to the state it held 10 seconds ago, because the tissue forgets: a Hit taken in that window is gone, a Break is undone, a Dying clock that started then has not. Anything older than 10s stays.",
-      notes: `${CH} A plate lost in the window does not come back; tissue forgets, steel does not.`,
+      notes: `${CH} A plate lost in the window does not come back; tissue forgets, steel does not. Temporal deals no Hit; it deals evidence. Every cast leaves an ARCANE scar on the volume for a day: instruments flag it, a reader knows a spell happened here, and persistent damage keeps it.`,
       untested: true,
     },
     overcharge: "Recoil makes you forget along with the tissue: the last 10 seconds are gone from you as well, and so is what you learned in them.",
@@ -2360,14 +2365,15 @@ export const spells: Spell[] = [
     tier: "Master",
     cast: "Channelled",
     castTime: "3s channel",
+    damageType: "ARCANE",
     flavor: "A room, ten seconds. You remember. They do not.",
     card: {
       kind: "Spell",
       cost: COST.Master,
       range: "10m",
       effect:
-        "A room 10m across goes back 10 seconds: every body, wound, round and door in it is where and how it was. You remember; they do not. Anything that entered or left the room in that window is unmoved. Once per day.",
-      notes: `${CH} A Returnee in the room remembers too. Never licensed above corruption phase 1.`,
+        "A room 10m across goes back 10 seconds: every body, wound, round and door in it is where and how it was. You remember; they do not. Anyone who was not in the room 10 seconds ago is put back where they were, taking 1 ARCANE Hit on the way, plate ignored. Once per day.",
+      notes: `${CH} A Returnee in the room remembers too. Never licensed above corruption phase 1. Temporal deals no Hit; it deals evidence. Every cast leaves an ARCANE scar on the volume for a day: instruments flag it, a reader knows a spell happened here, and persistent damage keeps it.`,
       untested: true,
     },
     overcharge: "Rewind leaves you remembering ten seconds you did not have: the room stays as it is, and your memory of the next ten seconds is already wrong.",

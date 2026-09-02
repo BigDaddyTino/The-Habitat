@@ -82,5 +82,44 @@ export const ledgers: LedgerCard[] = [
 export const levelLaw = {
   talentPoints: "1 talent point per level; 5 at level 1 and at every 10th level. 144 by level 100. Every tree holds more than 144 points of nodes, so nobody owns everything.",
   attributes: "Your level is the sum of your six attribute rungs. A raw recruit is level 7 to 14; a developed character at level 30 averages rung 5.",
-  creation: "Your class sets the base attribute allotment; you place 2 more points where species caps allow, and may move 1 point from one class-allotted attribute to another. Species caps are hard.",
+  creation: "Every class starts from 9 rungs: 3 in its primary attribute, 2 in its secondary, 1 in each of the other four. You place 2 more where species caps allow (no attribute above 4 at the desk unless a species says so), and may move 1 point from one class-allotted attribute to another. Origin adds its rung on top: None a Composure, Born a Conductivity. A recruit signs the file at level 11 or 12.",
 };
+
+/**
+ * The per-class starting allotment (owner delegation, ruled 2026-09-02):
+ * nine rungs, shaped 3 · 2 · 1 · 1 · 1 · 1. The primary is the attribute the
+ * class's growth line drives first, the secondary the one it drives second,
+ * and nobody starts at 0 in anything — a recruit is a whole person before
+ * they are a build. 9 + the player's 2 + an origin rung lands at level 11–12,
+ * inside canon's 7–14 recruit band, and quotes at about 165 Essence.
+ */
+export type ClassAllotment = { classSlug: string; primary: AttributeName; secondary: AttributeName };
+
+export const classAllotments: ClassAllotment[] = [
+  { classSlug: "bastion", primary: "Conditioning", secondary: "Resilience" },
+  { classSlug: "spector", primary: "Coordination", secondary: "Acuity" },
+  { classSlug: "conduit", primary: "Conductivity", secondary: "Composure" },
+  { classSlug: "surger", primary: "Conditioning", secondary: "Conductivity" },
+  { classSlug: "archon", primary: "Acuity", secondary: "Composure" },
+  { classSlug: "procurator", primary: "Composure", secondary: "Acuity" },
+  { classSlug: "cypherist", primary: "Acuity", secondary: "Coordination" },
+  { classSlug: "maverick", primary: "Coordination", secondary: "Composure" },
+];
+
+export const creationRules = {
+  baseTotal: 9,
+  primaryRung: 3,
+  secondaryRung: 2,
+  otherRung: 1,
+  freePoints: 2,
+  deskCap: 4,
+  reassign: 1,
+  originRung: { None: "Composure", Born: "Conductivity", Gifted: "the giver's pillar decides", Infused: "none — the Tremor is the gift" } as Record<string, string>,
+};
+
+/** The six rungs a class signs the file with, before the player's points. */
+export function startingRungs(classSlug: string): Record<AttributeName, number> | null {
+  const allotment = classAllotments.find((entry) => entry.classSlug === classSlug);
+  if (!allotment) return null;
+  return Object.fromEntries(attributeNames.map((name) => [name, name === allotment.primary ? creationRules.primaryRung : name === allotment.secondary ? creationRules.secondaryRung : creationRules.otherRung])) as Record<AttributeName, number>;
+}

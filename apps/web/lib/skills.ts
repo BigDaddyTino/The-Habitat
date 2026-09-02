@@ -847,9 +847,9 @@ export const skills: Skill[] = [
         teacher: { text: "the Foundry-Master", slug: "the-foundry-master" },
         card: {
           kind: "Capstone",
-          cooldown: "Once per season",
+          duration: "7 days at a Master's bench",
           effect: "Makes a piece good enough to be named: it carries +1 plate slot or damage dealt +15%, and its name travels. Anyone who takes it off your body knows whose it was.",
-          notes: "A named piece is a reclamation target in its own right; the body stays where it fell with everything on it.",
+          notes: "Not a cooldown but bench time: seven days of work at a Master-rung workshop, with a Foundry-Master's signature at the end. One named piece per maker exists at a time; naming a second retires the first's name, and the world keeps the retired name as a story. A named piece is a reclamation target in its own right; the body stays where it fell with everything on it.",
           untested: true,
         },
       },
