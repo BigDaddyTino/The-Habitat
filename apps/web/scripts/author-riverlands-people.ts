@@ -55,7 +55,9 @@ His method is arithmetic worn as manners. Wade has kept the Standstill not by st
 
 He walks the five wharves every day, in strict rotation, never twice in the same order — so nobody can read a ranking into it. That is the most Wade thing he does, and the city knows it: the walk is the Standstill, performed daily, on foot, by an old man everyone pretends not to be reassured by. The pact's anniversary is coming, and the five factions are jointly commissioning a statue of him, splitting the cost five ways. He has asked them, in writing, not to. They are doing it anyway.
 
-For writers: Wade is alive, and every dossier keeps him that way — what ends him belongs to [[the-fuse-at-heartland]] and is spent nowhere else. Write him tired, precise, unhurried, and funnier than he lets anyone confirm. His fear is not dying; it is that the city believes the Standstill is him, and that the city might be right.`,
+Years ago — the file is dated and the date is nothing, an ordinary morning between two wharf walks — he walked down to the Forge hall himself and filed a do-not-reconstruct: his own hand, [[brother-aster]] as witness, his schematic withdrawn from the city's Core ([[reclamation]]). He told no one. The clerk who took it files by name and not by date, so it sits in the same folder as the letter asking the factions not to build the statue, and anyone who ever turns the two up together will read a warning into an old man's paperwork. There is nothing in it but the plain thing: Old Wade has been coming back for a very long time, he has had enough of it, and he would like the machine to let him stop. He is not unhappy. He walks the wharves every morning and means it. Both are true at once, and a writer who cannot hold both at once should not write him.
+
+For writers: Wade is alive, and every dossier keeps him that way — what ends him belongs to [[the-fuse-at-heartland]] and is spent nowhere else. Write him tired, precise, unhurried, and funnier than he lets anyone confirm. His fear is not dying — he settled that in writing years ago; it is that the city believes the Standstill is him, and that the city might be right.`,
     meta: {
       ...baseMeta,
       fullName: "Alder Wade",
@@ -72,11 +74,12 @@ For writers: Wade is alive, and every dossier keeps him that way — what ends h
       home: "heartland",
       status: {
         known: "Commander of Heartland; keeper of the Standstill.",
-        actual: "The pact's true foundation is his personal arithmetic: he keeps himself the cheapest option on all five factions' books.",
+        actual: "The pact's true foundation is his personal arithmetic: he keeps himself the cheapest option on all five factions' books. He has also, years ago and in his own hand, told the city's Forge not to rebuild him.",
       },
       relationships: [
         { character: "the-judge-of-heartland", who: "the Judge", type: "His counterweight: he keeps the peace cheap, she keeps it legal. They disagree in private so the city never sees it." },
         { character: "the-heartland-watch-captain", who: "the Watch captain", type: "His wall. He gives her fewer orders every year and she has noticed." },
+        { character: "brother-aster", who: "the Resident", type: "The only soul who knows what he filed at the Forge. Aster has never mentioned it and never will, and Wade has never thanked him for that." },
       ],
       storyRole: "The keeper of the Standstill and the center of gravity of the Heartland arc's opening state.",
       model: "Regional authority figure; non-companion.",
@@ -169,6 +172,8 @@ For writers: Odu and her Watch are the units the player can inherit if the rulin
 
 How long he has been in the Core is not known. Longer than the Forge hall's oldest ledger; longer, some argue, than the current building around it. What he was — monk, engineer, casualty, volunteer — he deflects with the same courteous maneuver every time: the question is interesting, and here is a better one, and an hour later the asker leaves knowing more about themselves than about him. What he knows about the machine he lives in he shares freely, which is its own quiet astonishment. What he knows about the older works beneath the city — the Forge hall's undercroft stair goes down to [[first-weir]] — he does not share, and the one subject on which Brother Aster goes silent is a fact every writer should hold like a lit match.
 
+He is also the city's witness. A do-not-reconstruct is taken by whoever keeps the machine ([[the-soul-forge]]), and in Heartland that is Aster — which means the Resident has sat with a great many people on the worst morning of their lives and taken down, in their own words, the reason they would like to stop. He does not repeat them. He does not counsel against them, ever; asked why not, he says the question is interesting, and then does not answer it.
+
 The character bible seats him as a ceiling teacher: Aster holds the Conduit ceiling *Call* — the discipline of reaching another mind — which he teaches, with unavoidable authority, as the thing he is. His standing lesson opens the same way for every student: "You are trying to speak at a distance. I am a distance. Speak."
 
 For writers and artists: Aster has no body and is never depicted as a figure — he is light held in a Core, per the standing art direction, and scenes with him are scenes with a room. Write him kind, unhurried, and very slightly wrong in his tenses, as a man for whom "now" is a courtesy he extends to visitors.`,
@@ -189,7 +194,9 @@ For writers and artists: Aster has no body and is never depicted as a figure —
         known: "The Resident: the teacher inside the Heartland Forge's Core.",
         actual: "A bound Echo who was never reclaimed and never faded. On the old works beneath the city, he is silent — and it reads as choice.",
       },
-      relationships: [],
+      relationships: [
+        { character: "alder-wade", who: "Commander Alder Wade", type: "He witnessed the Commander's refusal, and has never spoken of it to anyone — including the Commander." },
+      ],
       storyRole: "Ceiling teacher (Conduit — Call); the Forge tour stop that teaches 'the Forge is the settlement'; the city's quietest guardian.",
       model: "Trainer roster: the Resident. Depicted as a Core, never a figure.",
       openQuestions: [

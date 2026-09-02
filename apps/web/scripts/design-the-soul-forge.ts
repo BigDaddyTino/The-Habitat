@@ -53,9 +53,15 @@ A Forge holds four things: an **Echo register** — every Echo recorded in its C
 
 **One at a time.** A Core reconstructs one body at a time. A wiped squad comes back in the order it died, and in a lean settlement the order is the whole argument.
 
-**What an importer has to persist.** Per Forge: the place, the state, the owner, the access policy, the reserve, its grade, and the register. Per character: which Forges they are registered at, which one they return to, their level, their corruption phase, and the biological pattern their last binding recorded. Per death: where the body fell, what was on it, and when. None of that needs a subsystem the game does not already need for other reasons, which is a large part of why this system was the right one to design first.
+**A Forge also holds refusals.** Beside the register sits a much shorter list: the people who have told the machine not to build them. A **do-not-reconstruct** — a DNR, on every wharf in the world — is filed by the person themselves, at the Forge holding their Echo, and it does two things in the one act. It **withdraws their schematic**, so there is no pattern left to build a vessel to. And it stands as an instruction, so nobody who later controls that reserve can decide the settlement needs them back.
 
-**What it must never do.** It must never confirm or deny anything about [[tino]] — a Forge speaks only about Echoes in its own register, and that limit is load-bearing across the whole campaign ([[what-the-player-knows-about-tino]]). It must never auto-bind anyone anywhere. And it must never explain the gap between departure and return; that stays open, and stays deliberately unattached to [[the-veil]].`;
+It cannot be filed on anybody else's behalf. Not by a spouse, not by a commander, not by a court, not by a faction that owns the machine outright. A Forge takes a refusal only from the hand and the mouth of the person refusing, witnessed by whoever keeps the machine, and it does not ask why, and it does not argue, and there is no waiting period. Revoking one is the same act reversed: come back, bind again, hand the machine a pattern. **Re-binding revokes a DNR**, and the document says so on its own face, because the one thing this setting will not do is lock somebody inside their worst month.
+
+**A refusal never touches the register.** The Echo stays exactly where it was, lit in the Core, and the machine holds it as long as it holds anything — it simply has nothing to build. What that means for the person is a question canon keeps open and no writer may close casually, and [[brother-aster]] is the reason it is a question at all.
+
+**What an importer has to persist.** Per Forge: the place, the state, the owner, the access policy, the reserve, its grade, the register, and the refusals filed against it. Per character: which Forges they are registered at, which one they return to, their level, their corruption phase, and the biological pattern their last binding recorded. Per death: where the body fell, what was on it, and when. None of that needs a subsystem the game does not already need for other reasons, which is a large part of why this system was the right one to design first.
+
+**What it must never do.** It must never confirm or deny anything about [[tino]] — a Forge speaks only about Echoes in its own register, and that limit is load-bearing across the whole campaign ([[what-the-player-knows-about-tino]]). It must never auto-bind anyone anywhere. It must never take a refusal from anybody but the person refusing, and it must never be talked, bought or ordered out of one. And it must never explain the gap between departure and return; that stays open, and stays deliberately unattached to [[the-veil]].`;
 
 const bindingDesign = `
 
@@ -69,9 +75,11 @@ const bindingDesign = `
 
 **Binding costs nothing.** No Essence is spent recording an Echo; the whole expense is in the rebuilding. That is why a settlement will bind strangers it would never reclaim, and why access and reserve are two separate arguments with two different people.
 
+**One thing can take the blueprint back.** Nothing removes a Forge from your register but that Forge's destruction; that law stands. What a person can withdraw is the *pattern* — the biological blueprint the middle line of the readout recorded — by filing a do-not-reconstruct in person at the Forge that holds it ([[the-soul-forge]]). The Echo is untouched and the register does not shrink. There is simply nothing left to build to, which is why a refusal is [[reclamation]]'s problem and never this system's, and why binding again revokes it: binding writes a fresh pattern, and a machine with a pattern will build.
+
 **Numbers the build needs:** a register with no cap, one active return Forge the player chooses, and no cooldown. Nothing here is tuned. It is all structural, and it is all consequence.
 
-**What it must never do.** Never write an automatic re-binding on arrival anywhere. Never let a Forge report on an Echo it does not hold. And never call it a spawn point, in the interface or in the fiction.`;
+**What it must never do.** Never write an automatic re-binding on arrival anywhere — that would silently revoke somebody's refusal, which is the worst thing this system could ever do by accident. Never let a Forge report on an Echo it does not hold. And never call it a spawn point, in the interface or in the fiction.`;
 
 const reclamationDesign = `
 
@@ -87,6 +95,10 @@ In **nature-drawn** essence the same body costs **four times** as much, because 
 
 **And below the floor, the dead wait.** A Forge holding under 35 Essence cannot build any vessel at all — so it does not refuse, it **holds**. The Echo stays lit in the Core and the person is neither returned nor lost. A settlement in that state has its dead sitting in the machine with their names known, and getting them back is a hunt for Essence: which is [[gathering-and-harvest]], which is [[the-harvest-economy]], which is the exact pressure this system exists to create. Write it as people waiting, never as a queue on a status bar. How long anyone can be held is **not** answered here, and is the same gap [[the-soul-forge]] keeps open.
 
+**And the fourth outcome is a refusal.** A Forge with the reserve, the grade and the Echo will still not build a person who has filed a do-not-reconstruct ([[the-soul-forge]]). This is not a shortfall — nothing is owed and no amount of [[essence]] fixes it. It is not a hold — nobody is waiting. It is the one *no* in this system that money cannot move, and the machine delivers it the way it delivers everything, completely and only about itself: **there is no schematic on file; it was withdrawn.** By whom, when and why are not the Forge's to say. It will repeat that same sentence to a widow, a general and a king.
+
+Write a refusal as [[true-death]] chosen. People opt out of the promise — the very old, the very tired, the ones who have come back so many times they can feel what it cost, the ones who decided a life ought to have an end in it — and it is filed a great deal more often than any wharf admits and discussed a great deal less than it is filed. It is never written as a failure of nerve, a symptom, or a thing a good friend talks somebody out of. A person's own hand on their own end is the single authority this setting does not question, and a character who sneers at a DNR has just told the audience what they are.
+
 **What comes back, and what does not.**
 
 - **Your gear does not.** It is on the corpse where it fell. Reclamation moves a soul and never a bag.
@@ -96,7 +108,7 @@ In **nature-drawn** essence the same body costs **four times** as much, because 
 
 **The reserve belongs to the Forge, not to you.** Everyone in a Forge's register draws on the same Essence, so in [[cooperative-play]] a party's deaths are one shared bill and a stranger's bad night spends your reserve. That is not an inconvenience bolted on for co-op. It is the reason a settlement cares who it binds, and it is [[the-power-balance]] in miniature.
 
-**What it must never do.** Never skip the corpse. Never reclaim somebody quietly — it is a spectacle with witnesses and lights dimming across the base. Never let a shortfall kill anyone; the punishment is levels and waiting, never permanence. And never reclaim anyone whose register holds no living Forge, however sympathetic the moment.`;
+**What it must never do.** Never skip the corpse. Never reclaim somebody quietly — it is a spectacle with witnesses and lights dimming across the base. Never let a shortfall kill anyone; the punishment is levels and waiting, never permanence. Never reclaim anyone whose register holds no living Forge, however sympathetic the moment. And never let anyone — court, faction, player, or the whole reserve of a kingdom — overturn a do-not-reconstruct. There is no scene in which that works.`;
 
 const systems: EntryEdit[] = [
   {
@@ -111,6 +123,7 @@ const systems: EntryEdit[] = [
         "Who built the first Forges, and is that the same question as who built the Veil Anchors?",
         "What do the people who remember impossible places have in common?",
         "How long can a Forge hold a person it cannot afford to build, and does anything change while it does?",
+        "An Echo with no schematic is held forever and can never be built. Is a refused soul still in there — and is that what the Resident is?",
       ],
     },
   },
@@ -153,6 +166,16 @@ const ripples: EntryEdit[] = [
 
 **And reclamation prices all of it.** A rebuilt body is built to the pattern taken at that person's last binding ([[reclamation]]), so an injury taken after the binding is not rebuilt — which means a wound is kept by people who cannot afford [[essence]], cannot reach a working Forge, or bound again afterwards and made it permanent. That is not an escape hatch for the writers' room. It is the reason the scars in this world are unevenly distributed, and why a visible injury on somebody who obviously has money is a question worth a scene.`,
     note: "the wound economy the Forge design creates",
+    meta: {},
+  },
+  {
+    slug: "true-death",
+    append: `
+
+**And some of it is chosen.** True death is not only what happens to the unlucky. A person can file a **do-not-reconstruct** at the Forge holding their Echo — in person, in their own hand, witnessed by whoever keeps the machine — and withdraw the schematic it would have built them from ([[the-soul-forge]], [[reclamation]]). After that the law above runs exactly as written: nothing is built to receive them, they are gone for good, and the story treats it that way. The only difference is that they wrote it down first, and that the people who loved them get to read it.
+
+A refusal is not the trap this entry describes; it is that trap's mirror. Nobody stumbles into it, nobody can be argued out of it afterwards, and no reserve on earth reverses it. Heartland's Commander filed one — see [[alder-wade]] — and a whole arc turns on a city finding out too late that its most permanent man had quietly stopped being permanent ([[the-fuse-at-heartland]]).`,
+    note: "the second road to true death, and it is chosen",
     meta: {},
   },
 ];
@@ -227,6 +250,7 @@ const contentWords = (value: string) =>
 
 const DESIGN_MARKER = "\n\n---\n\n## Designed";
 const RIPPLE_MARKER = "\n\n**And reclamation prices all of it.**";
+const CHOSEN_MARKER = "\n\n**And some of it is chosen.**";
 
 async function editEntry(edit: EntryEdit, actorId: string, apply: boolean): Promise<number> {
   const entry = await db.storyEntry.findUnique({ where: { slug: edit.slug }, select: { id: true, body: true, meta: true } });
@@ -234,7 +258,7 @@ async function editEntry(edit: EntryEdit, actorId: string, apply: boolean): Prom
   // Idempotent: an appended layer is cut back off before being reapplied, so
   // re-running never stacks a second copy of itself.
   let base = (entry.body ?? "").trimEnd();
-  for (const marker of [DESIGN_MARKER, RIPPLE_MARKER]) {
+  for (const marker of [DESIGN_MARKER, RIPPLE_MARKER, CHOSEN_MARKER]) {
     if (base.includes(marker)) base = base.slice(0, base.indexOf(marker)).trimEnd();
   }
   const body = `${base}${edit.append}`;
