@@ -58,6 +58,9 @@ The Grand Advocate is an unnamed reserved seat, not a fifth commissioned plate. 
 - `pnpm --filter @habitat/web exec tsx scripts/audit-codex-art-coverage.ts`: **42/42 eligible characters**, with one explicitly reserved portraitless seat; **36/37 factions**, with only the separately out-of-scope Radiant Path empty; **1 empty slot** overall.
 - Independent full-resolution and display-crop review: **PASS — 4/4**, including exact 706x941 portrait crops and the exact 32px emblem.
 - Anonymous direct requests for the Congregation plate returned **HTTP 404** on both available loopback web listeners, preserving the private-art boundary.
+- `pnpm test`: **PASS**, including **569/569** web tests.
+- `pnpm typecheck`: **PASS** across the workspace.
+- `pnpm lint`: **PASS** with one pre-existing `@next/next/no-img-element` warning in `app/codex/classes/page.tsx` and no errors.
 
 ## Publication boundary
 
