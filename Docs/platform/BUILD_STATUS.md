@@ -959,3 +959,10 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Fabrication's History is bench time (7 days at a Master's bench, one named piece per maker at a time) instead of a "once per season" cooldown - `lib/skills.ts`, style guide duration rule
 - [x] Per-class starting allotment ruled: nine rungs shaped 3 · 2 · 1 · 1 · 1 · 1 from the class's growth line, +2 player points capped at 4 at the desk, one reassignment, origin's rung on top, level 11-12; shown on `/codex/character` with a test pinning the shape, and written into the CANON `attributes` entry's open paragraph (version 3 → 4, open question retired) by the idempotent `scripts/author-attribute-allotment.ts`
 - [x] Landed the Sol session's corrupted-branch icon wiring and scrollport backdrop layer with its test; typecheck, lint and 540 of 540 tests pass; deployed and pushed
+
+## 2026-09-02 - Kingdom and Trades pages in the Character page's grammar
+
+- [x] Both pages open with an "in gamer terms" line and put everything on labeled cards, the way the character section reads
+- [x] Trades: each trade is four rung columns - the gate as a labeled block (licence, issuer, price; illicit gates tagged), every blueprint as an ability card (new Blueprint kind), and the rung's standing party bonus stated from the sim weights (`lib/trade-cards.ts` over `lib/professions.ts`); seats and grounds as cards
+- [x] Kingdom: `lib/kingdom.ts` holds Holding Ground as data - rungs and the verbs each adds, the four ways to get ground, the Kingdom Level law (1.6x curve, ceilings every third level), six realm trees, faiths with the campaign's morale numbers, the siege as a Forge clock with the measured storm/wait table and the soulless garrison, Court Day's four priced options, Syndicate, Mourning, standing laws - rendered through the new `components/field-card.tsx`; the live world board is unchanged
+- [x] Typecheck, lint and 547 of 547 tests pass; screenshot-verified locally at desktop and mobile; deployed and pushed
