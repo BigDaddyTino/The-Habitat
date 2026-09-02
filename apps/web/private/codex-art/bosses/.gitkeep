@@ -1,0 +1,5 @@
+Named-fight art: arena, transformation and set-piece plates at 1672x941, and
+ability tiles at 256x256. Commission: Docs/art/SOL56_ANACONDA_ART_PROMPT.txt.
+
+The directory must exist even while empty — codex-art-privacy.test.ts asserts
+every registered art kind has a directory on disk.

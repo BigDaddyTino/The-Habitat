@@ -64,12 +64,46 @@ export type BloomfallFixedGuide = {
   drops: string;
 };
 
+/** One card of a fight that changes shape partway through. */
+export type BloomfallBossPhase = {
+  /** What the player is looking at, e.g. "Phase 1 — The Mire Stalker". */
+  name: string;
+  /** One paragraph on what this phase is doing to you. */
+  what: string;
+  abilities: readonly BloomfallAbility[];
+};
+
 export type BloomfallBossGuide = {
   kind: "BOSS";
+  /**
+   * ABERRANT is the default and is what every named threat here has been so
+   * far: a regional mini-boss, seeded off the ladder or authored as an
+   * exception to it.
+   *
+   * MYTHIC is the rung above. A Mythic is region-defining, unrepeatable, and
+   * load-bearing on a regional system — killing it changes how the region
+   * works, not just who is standing in it. There is one per region and the
+   * rest of those slots are reserved rather than empty. This is a designation
+   * in the same sense Aberrant is: an orthogonal tag, never a race, never a
+   * parent taxonomy, and never the locked `mythical` species shelf.
+   */
+  tier?: "ABERRANT" | "MYTHIC";
   summary: string;
   spawn: string;
   stats: string;
+  /**
+   * For a one-card fight, its kit. For a phased fight, the mechanics that run
+   * the whole encounter — the phases below carry their own strikes.
+   */
   abilities: readonly BloomfallAbility[];
+  /** Set only when the fight changes shape. An Aberrant is one card. */
+  phases?: readonly BloomfallBossPhase[];
+  /**
+   * What happens between the phases. Its own field rather than the tail of one
+   * phase and the head of the next, because both the dossier body and the boss
+   * page print it and neither should print it twice.
+   */
+  transition?: { name: string; what: string };
   drops: string;
 };
 
@@ -539,5 +573,58 @@ export const bloomfallCreatureFieldGuide: Readonly<Record<string, BloomfallCreat
     ],
     drops:
       "**Fault core** — the heart of a grid failure, still drawing. [[splicefield-substation]] crews pay anything and ask nothing. Killing it blacks out the sector it was holding together.",
+  },
+
+  "the-blackweir-anaconda": {
+    kind: "BOSS",
+    tier: "MYTHIC",
+    summary:
+      "The Reach's first Mythic, and the only one of these that answers you. [[elias-vey]] was a Southreach biologist with a filtration organism and no substrate to stabilize it, so he used himself, and he was awake for all of it. Twenty years later stretches of the [[blackweir]] weir run on his nervous system: when the weir closes a channel ahead of a surge that is him, and when it sacrifices a root field to save the beds below it that is him choosing which part of himself to spend. He does not think you are an enemy. He thinks you are foreign material in a working system.",
+    spawn:
+      "Authored, not seeded. No player action produces him and none ever could — he is the third exception to the 1% ladder rule, beside [[switchmother]] who was built by somebody else and [[the-last-shift]] which was a shift. He was already here. The bounty is posted at [[cairnwood-camp]] by three parties who want three different corpses, and it is standing.",
+    stats:
+      "Mythic scale, network-coupled. Prisma defense that re-rolls its hidden weakness every time you let him break contact, and effective health tied to whatever [[reactor-cycles]] is doing to the pylons above him.",
+    abilities: [
+      a("Foreign Material", "He reads you the way he reads contamination — repeat a dodge and he covers that side; heal on a tell and that attack becomes an interrupt; take to the water and the water is his."),
+      a("Prisma Re-Roll", "Carries the ladder's Advanced defense: all five damage types halved except one hidden weakness taking +25%. Let him disengage into deep water and the weakness moves. His own [[adaptive-mutation]] rule, compressed from a season into ninety seconds."),
+      a("Pylon Draw", "The standing Blackweir pylons feed him. They can be sabotaged, at the exact price of the containment they are performing."),
+      a("Reactor Weather", "The sector state is the arena. Purge floods the channels for him; Venting hides you both; Overflow closes his wounds as fast as you open them."),
+    ],
+    phases: [
+      {
+        name: "Phase 1 — The Mire Stalker",
+        what:
+          "Upright, heavily serpentine, still built on the frame of a person, wearing a Southreach research coat and harness fused into the hide at the shoulders. He fights by reach and ambush out of knee-deep channel water, and he talks the entire time — not taunts, corrections. *Stop disturbing the filtration network.* *You are introducing foreign material.* His attacks are precise because a scientist is running them and he is not angry.",
+        abilities: [
+          a("Lunge", "Explosive forward reach with slashing claws, from further away than the posture promised."),
+          a("Tail Whip", "A wide low arc through standing water that takes your footing before it takes your health."),
+          a("Acid Spit", "A corrosive stream that keeps working where it lands; the puddle is the real attack."),
+          a("Ambush Dive", "Enters black water and comes up underneath the target."),
+          a("Shedding Strike", "Sheds sheets of hide mid-swing, empowering the attack and closing what you just opened."),
+          a("Grab and Drag", "Takes hold and pulls the target into deeper water, where the fight is his."),
+        ],
+      },
+      {
+        name: "Phase 2 — The Blackweir Coil",
+        what:
+          "Forty to sixty metres of anaconda that is also civil engineering. Southreach identification plates set into the scales at angles that were correct when they were fitted to walls, laboratory armatures grown through the flanks, dim banded conduits down a spine that used to be a spine — and sections of him that simply do not end, because the weir and the animal stopped being separable long before you got here. He does not use abilities so much as use the room, and somewhere around the third sabotaged pylon you may notice you are winning this fight by doing his job badly.",
+        abilities: [
+          a("Devouring Surge", "A straight-line charge that takes the causeway with it."),
+          a("Coil Crush", "Wraps an area or a structure and closes; cover stops being cover."),
+          a("Toxic Flood", "Releases a wave of bile that fills the channels and lingers in them."),
+          a("Tail Tsunami", "Whips the length of the body across the arena and moves the water with it."),
+          a("Bile Eruption", "Geysers out of the bed under wherever you decided to stand still."),
+          a("Venomous Roar", "A cone of pressure through the plume that shocks, corrodes, and drops defenses."),
+          a("Submerged Stalk", "Disappears into the marsh entirely. Escaping and returning heals him a rung — his ladder, aimed at you."),
+        ],
+      },
+    ],
+    transition: {
+      name: "The transformation — about half",
+      what:
+        "You are winning. He is down past half, he has stopped closing, and for one clean second the fight looks finished. Then he stops moving entirely and the arms go into the torso. The legs fuse. The spine runs out past where a spine stops. The coat tears off him and goes down into the water and stays there, the last piece of Sublevel 4 anybody will ever recover, and every pylon over the channels comes up to full load at once. Then the camera pulls back far enough for the arithmetic to go wrong: the silhouette is already too long for the pose it started in, and it keeps going. The humanoid was never his form. It was the shape he had been holding — for twenty years, awake — because at some point he stopped being able to tell the difference between maintaining a human silhouette and remaining a person, and he was not willing to find out which one he had already lost. He lets go of it to kill you, and that is the most human thing he does in the entire fight.",
+    },
+    drops:
+      "**Blackweir Heart** — the filtration organ at the junction of body and network, and the weir's single largest sink; taking it is the harvest that ends [[blackweir]] as a containment structure. **Anaconda Hideplate** — reactor-resistant, Blackbloom-adaptive plate, and the one clean drop here. **Mutated Fang** — crafting stock for advanced weapons. **[[blackweir-resin]]** at a grade nobody has assayed before. Everything he is worth is something the marsh is currently using, and [[harvesting-consequences]] applies to all of it.",
   },
 };

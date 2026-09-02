@@ -1,0 +1,101 @@
+/* The Mythic dossier: a named fight read as one page, in the codex's dark
+   grammar but wearing Bloomfall's own register rather than the crown's brass.
+   Blackbloom violet is the thing itself; sick filtration green is the marsh;
+   danger-red is a price. Two phase blocks stacked, ability tiles in a grid
+   that survives having no art yet, and the reactor cycle as a seven-step
+   ladder you can read at a glance. */
+
+.mythic-boss {
+  --mb-violet: #b98fd6;
+  --mb-marsh: #8fbf9a;
+  --mb-plume: #6f8f9c;
+  --mb-warn: #c9755a;
+  --mb-ink: rgba(12, 16, 13, .5);
+}
+
+/* -- Hero -------------------------------------------------------------- */
+.mb-hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: 22px; align-items: stretch; margin-bottom: 18px; }
+.mb-hero-text h1 { margin: 2px 0 8px; }
+.mb-eyebrow { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--mb-violet); margin: 0; }
+.mb-tagline { color: var(--paper); max-width: 640px; margin: 0 0 10px; }
+.mb-summary { color: var(--muted); max-width: 660px; margin: 0 0 14px; }
+.mb-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.mb-links a { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; border: 1px solid var(--line); padding: 6px 11px; color: var(--paper); text-decoration: none; }
+.mb-links a:hover { border-color: var(--mb-violet); color: var(--mb-violet); }
+
+.mb-hero-art, .mb-panel-art, .mb-phase-art, .mb-transition-art {
+  position: relative; margin: 0; border: 1px solid var(--line); overflow: hidden;
+  background: radial-gradient(ellipse at 50% 60%, rgba(185, 143, 214, .16), rgba(12, 16, 13, .92) 70%);
+  display: grid; place-items: center;
+}
+.mb-hero-art { min-height: 260px; }
+.mb-panel-art, .mb-transition-art { min-height: 150px; margin-bottom: 10px; }
+.mb-phase-art { min-height: 200px; }
+.mb-hero-art.has-art, .mb-panel-art.has-art, .mb-phase-art.has-art, .mb-transition-art.has-art { background: #0d110e; }
+.mythic-boss figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mb-glyph { font-family: var(--font-display), Georgia, serif; font-size: 64px; color: rgba(185, 143, 214, .55); }
+.mythic-boss .play-artslot { position: absolute; left: 10px; right: 10px; bottom: 8px; }
+
+/* -- Panels ------------------------------------------------------------ */
+.mb-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 18px; align-items: start; }
+.mb-panel, .mb-strip, .mb-fight, .mb-phase { border: 1px solid var(--line); background: var(--mb-ink); padding: 14px 16px 16px; }
+.mb-strip, .mb-fight, .mb-phase { margin-bottom: 18px; }
+.mythic-boss h2 { font-size: 15px; margin: 0 0 10px; }
+.mythic-boss h3 { font-size: 12px; margin: 0 0 8px; font-family: var(--font-mono); letter-spacing: .9px; text-transform: uppercase; color: var(--mb-violet); }
+.mb-note { color: var(--muted); font-size: 12.5px; margin: 0 0 10px; }
+.mb-strip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.mb-strip-grid p { margin: 0; color: var(--muted); }
+.mb-strip-grid strong { color: var(--paper); }
+
+.mb-rows { margin: 0; display: grid; gap: 10px; }
+.mb-rows > div { display: grid; gap: 3px; border-left: 2px solid rgba(185, 143, 214, .35); padding-left: 10px; }
+.mb-rows dt { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .9px; text-transform: uppercase; color: var(--mb-marsh); }
+.mb-rows dt a { color: inherit; text-decoration: none; }
+.mb-rows dt a:hover { text-decoration: underline; }
+.mb-rows dd { margin: 0; color: var(--muted); font-size: 13px; }
+
+.mb-bullets { margin: 0; padding-left: 18px; display: grid; gap: 5px; color: var(--muted); font-size: 13px; }
+
+/* -- The reactor cycle as a ladder ------------------------------------- */
+.mb-cycle { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; counter-reset: mb-state; }
+.mb-cycle li { display: grid; grid-template-columns: minmax(120px, auto) 64px 1fr; gap: 10px; align-items: baseline; border-left: 3px solid var(--line); padding: 6px 0 6px 10px; }
+.mb-cycle-name { font-family: var(--font-mono); font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--paper); }
+.mb-cycle-band { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .9px; text-transform: uppercase; color: var(--muted); }
+.mb-cycle-effect { color: var(--muted); font-size: 12.5px; }
+.mb-cycle li[data-band="low"] { border-left-color: rgba(143, 191, 154, .5); }
+.mb-cycle li[data-band="moderate"] { border-left-color: rgba(111, 143, 156, .6); }
+.mb-cycle li[data-band="high"] { border-left-color: rgba(198, 151, 76, .6); }
+.mb-cycle li[data-band="severe"] { border-left-color: rgba(185, 143, 214, .75); }
+.mb-cycle li[data-band="extreme"] { border-left-color: rgba(201, 117, 90, .85); }
+.mb-cycle li[data-band="severe"] .mb-cycle-band { color: var(--mb-violet); }
+.mb-cycle li[data-band="extreme"] .mb-cycle-band { color: var(--mb-warn); }
+
+/* -- Phases and ability tiles ------------------------------------------ */
+.mb-phase-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, .8fr); gap: 18px; align-items: start; margin-bottom: 14px; }
+.mb-phase-head h2 { grid-column: 1 / -1; }
+.mb-phase-what { margin: 0; color: var(--muted); }
+.mb-phase-head > .mb-phase-art { grid-row: 2 / 4; grid-column: 2; }
+.mb-phase-head > .mb-phase-what { grid-column: 1; }
+
+.mb-abilities { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.mb-abilities-wide { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.mb-ability { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); background: rgba(12, 16, 13, .45); padding: 9px 11px; }
+.mb-ability-icon { width: 44px; height: 44px; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 55%, rgba(185, 143, 214, .2), rgba(12, 16, 13, .95) 70%); }
+.mb-ability-glyph { color: rgba(185, 143, 214, .6); font-size: 14px; }
+.mb-ability-body { display: grid; gap: 3px; }
+.mb-ability-body strong { font-family: var(--font-mono); font-size: 10px; letter-spacing: .9px; text-transform: uppercase; color: var(--paper); }
+.mb-ability-body span { color: var(--muted); font-size: 12.5px; }
+
+.mb-transition { margin-top: 14px; border: 1px solid var(--line); border-left: 3px solid rgba(185, 143, 214, .7); background: rgba(24, 18, 30, .4); padding: 12px 14px 14px; }
+.mb-transition p { color: var(--muted); margin: 0 0 10px; }
+
+@media (max-width: 860px) {
+  .mb-hero, .mb-phase-head { grid-template-columns: 1fr; }
+  .mb-phase-head > .mb-phase-art { grid-row: auto; grid-column: 1; }
+  .mb-cycle li { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* Inline codex references inside panel prose: readable as a link, never loud
+   enough to break a sentence apart. */
+.mythic-boss .codex-ref { color: var(--mb-marsh); text-decoration: none; border-bottom: 1px dotted rgba(143, 191, 154, .45); }
+.mythic-boss .codex-ref:hover { color: var(--mb-violet); border-bottom-color: rgba(185, 143, 214, .7); }

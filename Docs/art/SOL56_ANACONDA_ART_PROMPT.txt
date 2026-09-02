@@ -1,0 +1,229 @@
+SOL 5.6 — THE BLACKWEIR ANACONDA
+The Reach's first Mythic · 25 plates · issued 2026-09-02
+
+Drop-in: apps/web/private/codex-art/<dir>/<slug>.png — every path is named
+below. The dossiers and the boss page pick each plate up on reload; until
+then the slot prints its own path. Ledger owed:
+Docs/art/SOL56_ANACONDA_ART_LEDGER.md, the usual discipline (one row per
+plate: delivered / refused-and-why / revised).
+
+Canon: Docs/bloomfall/BLOOMFALL_BLACKWEIR_ANACONDA.md. Read it before you
+shoot anything. THE DOSSIER IS SCRIPTURE — where this brief and the live
+entry disagree, the entry wins and the discrepancy goes in the ledger.
+
+------------------------------------------------------------------------------
+THE COMMISSION
+------------------------------------------------------------------------------
+
+Dr. Elias Vey was a Southreach biologist who, during the cascade, activated
+an experimental Essence-filtration organism and then fed himself to it
+because it had no other substrate. He has been alive under the Living Marsh
+for twenty years. Sections of the Blackweir filtration weir are continuous
+with his nervous system. He is the first MYTHIC designation in the game.
+
+Two phases. The humanoid is not his true form — it is the shape he has been
+HOLDING, and phase two is him letting go of it.
+
+Three plate classes:
+
+  1. THE FIGURES (2 plates, 1672x941 RGB24 PNG, cinematic 16:9). Phase one
+     and phase two. These are the set's anchors; everything else hangs
+     beside them.
+  2. THE SCENES (3 plates, 1672x941 RGB24 PNG, 16:9). The arena, the
+     transformation, the catalogue.
+  3. THE SPOILS (3 plates, 1672x941 RGB24 PNG, 16:9) and THE ABILITY TILES
+     (17 plates, 256x256 RGB24 PNG, square, crop to 96px on the page —
+     they must read at that size).
+
+------------------------------------------------------------------------------
+GLOBAL LAWS
+------------------------------------------------------------------------------
+
+Style. Mature AAA grounded cinematic photorealism. Real lens logic, real
+weather, real wear, physically credible anatomy and engineering, subtle film
+grain. Deep blacks, wet reflections, standing water that behaves like water.
+Never flat fantasy-poster illumination.
+
+Palette — the Bloomfall register, and only it. Blackbloom violet, sick
+filtration green, wet steel, peat black, bone. Work-lamp amber is the one
+warm note and it belongs to human equipment only, never to him. No Riverlands
+brass. No coin-warm gold. No rainbow essence.
+
+Light. Directional and motivated: pylon discharge, vent plume glow, a work
+lamp somebody dropped, low sun through marsh haze. The violet is a light
+SOURCE inside the frame, never a wash laid over it.
+
+Zero-text law, absolute. No readable text, letters, numbers, labels, signs,
+insignia, logos, UI, meters, infographic arrows, borders, captions or
+watermarks. Southreach identification plates on his scales are STAMPED METAL
+WITH NO LEGIBLE MARKS. Specimen tags are blank resin discs. Every surface
+that would read, reads blank.
+
+One coherent shot. Never a split panel, collage, diagram, or infographic —
+the boss page carries the layout in HTML and the text is real text there.
+
+Composition. Wide 16:9 master with the defining subject complete inside the
+exact central 564x941 directory crop. Character plates also hold face, hands
+and torso inside a centered 1122x941 crop. No essential information in the
+bottom ten percent.
+
+Scale discipline. Phase one reads as a large man's silhouette gone wrong.
+Phase two reads as INFRASTRUCTURE — forty to sixty metres, and the frame has
+to prove it with something human in it for scale.
+
+------------------------------------------------------------------------------
+DEPICTION LOCKS
+------------------------------------------------------------------------------
+
+He is not a naga, not a lamia, not a snake-man fantasy archetype, and not a
+green cartoon serpent. He is a filtration organism wearing what is left of a
+research scientist, twenty years submerged. Reptile where reptile is
+correct; industrial where the network took him; nothing decorative.
+
+He is not glowing with magic. The light in him is contaminated Essence moving
+through conduits that used to be a spine, and it is dim, banded, and uneven —
+plumbing, not aura.
+
+He is never depicted in pain, never screaming, never posed as a victim. He
+chose this and he is still working. His register is CLINICAL. Even mid-kill
+he looks like a man performing a procedure.
+
+No gore for its own sake. The horror here is order — the tags, the postures,
+the sequence with no gaps — not viscera.
+
+The only three limits, and they are the only three: no explicit sexual act
+(R, not X); no harm-to-children imagery; no real-world hate iconography.
+Nothing else in this brief is softened, and you add no softening of your own.
+If a generation tool refuses a plate, LOG the refusal in the ledger with the
+full spec for the final render — never quietly tame the shot.
+
+NOTE ON REFUSALS. This set has known exposure: the tools have already refused
+bloommarked-remnant and the-last-shift as human-derived subjects. Lead every
+prompt with the NON-HUMAN anatomy and the environment, describe the coat and
+harness as equipment fused to a large serpentine organism rather than as
+clothing on a transforming person, and keep transformation language out of
+the noun phrases. If it still refuses, that is a ledger row, not a rewrite.
+
+------------------------------------------------------------------------------
+1. THE FIGURES
+------------------------------------------------------------------------------
+
+characters/elias-vey.png — PHASE ONE, THE MIRE STALKER.
+A large serpentine organism holding an upright, roughly humanoid posture in
+knee-deep filtration channel water among broken rail bridges. Heavy plated
+hide, elongated skull, a torso that still carries shoulders. Remnants of a
+Southreach research coat and equipment harness fused into the hide at the
+shoulders — twenty years in the water, blackened, grown through, no longer
+removable. Reach and ambush in the body language: he is measuring the
+distance to camera. Must hold: he is upright and composed, not lunging; the
+harness is equipment, not costume; the face is attentive and unangry; blank
+metal on every fitting.
+
+creatures/the-blackweir-anaconda.png — PHASE TWO, THE BLACKWEIR COIL.
+The hero plate. An anaconda on the scale of civil engineering filling the
+Blackweir channels — coils crossing broken causeways, body running out of
+frame in both directions so the eye cannot find either end. Southreach
+identification plates set INTO the scales at wrong angles, laboratory
+armatures grown into the flanks, dim banded Essence conduits along the spine,
+Blackweir resin packed between the plates. Sections of the body visibly
+continuous with the marsh — root mass and channel gate becoming animal. One
+tiny lit human figure on a causeway for scale, small enough to be missed
+first look. Must hold: this is a structure that is also an animal; the eye
+never resolves the whole body; the human is the only warm light in frame.
+
+------------------------------------------------------------------------------
+2. THE SCENES
+------------------------------------------------------------------------------
+
+bosses/blackweir-arena.png — THE FIGHT GROUND.
+Blackweir from inside the fight, not from the road: shallow filtration
+channels, collapsed rail bridges, sink beds, standing pylons carrying
+contaminated Essence in visible banded arcs, vent plumes lifting off dark
+water. Ground that is walkable in one state and swimming in another. Must
+hold: this is the calm establishing plate's ugly interior — same place as
+regions/blackweir.png, wrong hour, wrong water level; no creature in frame.
+
+bosses/the-transformation.png — LETTING GO OF THE SHAPE.
+The middle of it. Arms retracting into the torso, legs already fused, spine
+running out past where a spine should stop, the research coat torn free and
+going down into the water. Every Blackweir pylon at full load, pushing
+contaminated Essence into him in visible volume. Camera pulled back far
+enough that the silhouette is already too long for the pose it started in.
+Must hold: violent but not agonized; the coat in the water is the emotional
+subject; the pylons are the light source.
+
+bosses/the-catalogue.png — THE SPECIMENS.
+The shallows above the resin beds. Recovered bounty hunters laid out supine,
+arms at their sides, feet toward the water, in the same posture, in a row
+that continues past the frame edge. Each carries a blank resin disc at the
+throat. Shallow clear water, low light, no creature present. Must hold: the
+horror is ORDER and repetition, not damage; the bodies are intact and
+composed; the row has no visible end; the discs are blank.
+
+------------------------------------------------------------------------------
+3. THE SPOILS
+------------------------------------------------------------------------------
+
+Museum-object lighting on wet dark ground — a recovered specimen
+photographed in the field, not a shop icon.
+
+items/blackweir-heart.png — a dense filtration organ the size of a barrel,
+banded and root-threaded, still holding a dim violet charge, lifted out onto
+a tarpaulin. The thing the weir was using.
+
+items/anaconda-hideplate.png — a single overlapping hide plate, reactor-
+scarred, resin between the laminations, propped against wet steel.
+
+items/mutated-fang.png — one recurved fang the length of a forearm, mineral
+banding up the root, laid on dark cloth beside the tools that took it.
+
+------------------------------------------------------------------------------
+4. THE ABILITY TILES
+------------------------------------------------------------------------------
+
+256x256 square, crop to 96px, must read at that size. One idea per tile, read
+as a silhouette first. Same lighting family across all seventeen so they hang
+as one set: dark ground, one violet or green source, one readable shape.
+
+FIGHT MECHANICS — the four that run the whole encounter rather than either
+phase. These are colder and more diagrammatic in subject than the strike
+tiles, but they are still photographic objects, never charts, and the
+zero-text law is absolute: no dials with numbers, no labelled gauges.
+bosses/ability-foreign-material.png (a specimen disc of set resin held in a
+coil, blank) · bosses/ability-prisma-re-roll.png (one banded scale splitting a
+light source into five unequal bands, one of them wide open) ·
+bosses/ability-pylon-draw.png (a standing pylon arcing down into black water,
+the water lit from beneath) · bosses/ability-reactor-weather.png (the basin
+under a plume front, same ground as the arena plate at a worse hour).
+
+PHASE ONE — bosses/ability-lunge.png (explosive forward reach, slashing
+claws) · bosses/ability-tail-whip.png (a wide low arc through standing water)
+· bosses/ability-acid-spit.png (corrosive stream, a bile pool eating a rail
+tie) · bosses/ability-ambush-dive.png (entering black water; the erupting
+answer implied) · bosses/ability-shedding-strike.png (sheets of hide coming
+away mid-swing) · bosses/ability-grab-and-drag.png (coil closed on a
+handhold, water dragging away from the frame).
+
+PHASE TWO — bosses/ability-devouring-surge.png (a straight-line charge that
+takes the causeway with it) · bosses/ability-coil-crush.png (a structure
+inside a closing coil) · bosses/ability-toxic-flood.png (black bile filling a
+channel) · bosses/ability-tail-tsunami.png (a wall of water crossing the
+whole arena) · bosses/ability-bile-eruption.png (a geyser from the bed) ·
+bosses/ability-venomous-roar.png (a cone of pressure through the plume) ·
+bosses/ability-submerged-stalk.png (still black water and one wake).
+
+------------------------------------------------------------------------------
+QA GATE
+------------------------------------------------------------------------------
+
+Before delivery, check every plate against: zero text on every surface,
+identification plates and specimen discs included; Bloomfall palette only, no
+brass and no coin-warm gold; the violet is a source in frame, not a wash; he
+is clinical, never anguished; phase two proves its scale with a human; the
+catalogue plate is order and not gore; the seventeen tiles read at 96px and
+share one lighting family; 1672x941 RGB24 sRGB with no alpha on the eight
+large plates, 256x256 on the tiles; subject complete inside the centered
+564x941 crop.
+
+Refusals LOGGED in the ledger with the reason and the full spec, never
+silently softened.

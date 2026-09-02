@@ -18,6 +18,8 @@ import { dossierArtExpected, getDossierArt } from "../lib/dossier-art";
 import { getFactionBranding } from "../lib/faction-branding";
 import { professions } from "../lib/professions";
 import { talentClasses } from "../lib/talent-trees";
+import { bloomfallCreatureFieldGuide } from "../lib/bloomfall-creature-field-guide";
+import { mythicAbilitySlug, mythicDossiers, mythicSlugs } from "../lib/mythic-dossier";
 
 const db = getPrismaClient();
 
@@ -73,6 +75,19 @@ async function main() {
     if (!findCodexArt("nation", plate)) { totalMissing += 1; console.log(`  nation/${plate} — EMPTY`); }
   }
   console.log(`  nation: ${nationPlates.filter((plate) => findCodexArt("nation", plate)).length}/${nationPlates.length} crown plates present`);
+  // The Mythic dossiers: each named fight's own scene plates plus one tile per
+  // ability, on both phases (Docs/art/SOL56_ANACONDA_ART_PROMPT.txt). The
+  // creature and character heroes are counted with their shelves, not here.
+  const bossPlates = mythicSlugs.flatMap((slug) => {
+    const dossier = mythicDossiers[slug]!;
+    const guide = bloomfallCreatureFieldGuide[slug];
+    const abilities = guide && guide.kind === "BOSS" ? [...guide.abilities, ...(guide.phases ?? []).flatMap((phase) => phase.abilities)] : [];
+    return [dossier.arenaArtSlug, dossier.transitionArtSlug, dossier.catalogueArtSlug, ...abilities.map((ability) => mythicAbilitySlug(ability.name))];
+  });
+  for (const plate of bossPlates) {
+    if (!findCodexArt("bosses", plate)) { totalMissing += 1; console.log(`  bosses/${plate} — EMPTY`); }
+  }
+  console.log(`  bosses: ${bossPlates.filter((plate) => findCodexArt("bosses", plate)).length}/${bossPlates.length} mythic plates present`);
 
   console.log(`\n${"=".repeat(70)}\n${totalMissing} empty slot(s) across the codex.`);
 }

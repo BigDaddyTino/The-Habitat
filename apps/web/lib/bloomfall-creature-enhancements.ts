@@ -389,7 +389,31 @@ function renderFixed(guide: BloomfallFixedGuide) {
 }
 
 function renderBoss(guide: BloomfallBossGuide) {
-  return `${guide.summary}\n\n## Why farm it\n\n${guide.drops}\n\n## Mini-boss\n\n**Spawn.** ${guide.spawn}\n\n**Stats.** ${guide.stats}\n\n**Abilities.**\n\n${abilityList(guide.abilities)}`;
+  // Both branches below leave the un-tiered, un-phased body byte-identical to
+  // what it has always been. That matters: the promotion gate fingerprints
+  // generated bodies, and a cosmetic renderer change that rewrites seven
+  // existing dossiers is a migration nobody asked for.
+  const heading = guide.tier === "MYTHIC" ? "Mythic bounty" : "Mini-boss";
+  const kit = guide.phases ? "How the fight works" : "Abilities";
+  const cards = (guide.phases ?? []).map((phase) =>
+    [`### ${phase.name}`, phase.what, "**Abilities.**", abilityList(phase.abilities)].join("\n\n"),
+  );
+  // The transition goes between the phases, not after them — it is the moment
+  // the first card stops being true.
+  const phases = guide.transition && cards.length > 1
+    ? [cards[0]!, [`### ${guide.transition.name}`, guide.transition.what].join("\n\n"), ...cards.slice(1)]
+    : cards;
+  return [
+    guide.summary,
+    "## Why farm it",
+    guide.drops,
+    `## ${heading}`,
+    `**Spawn.** ${guide.spawn}`,
+    `**Stats.** ${guide.stats}`,
+    `**${kit}.**`,
+    abilityList(guide.abilities),
+    ...phases,
+  ].join("\n\n");
 }
 
 /**

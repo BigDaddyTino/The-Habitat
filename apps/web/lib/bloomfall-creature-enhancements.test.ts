@@ -7,6 +7,7 @@ import {
   bloomfallCreatureNewImageCount,
   bloomfallMutationCards,
   renderBloomfallCreatureEnhancement,
+  renderBloomfallCreatureGuide,
 } from "./bloomfall-creature-enhancements";
 import { bloomfallCreatureFieldGuide } from "./bloomfall-creature-field-guide";
 import { bloomfallDamageTypes, bloomfallMutationLadder, bloomfallMutationRungs } from "./bloomfall-adaptive-ladder";
@@ -62,12 +63,14 @@ test("the ladder is one system: four climbable rungs plus the Aberrant seed", ()
 
 test("every dossier has field-guide copy of the right shape, and nothing else does", () => {
   // The guide also covers the three named Aberrants that a surviving Advanced
-  // can seed. They have a dossier and a boss card but no design-spec record.
-  const seededAberrants = ["the-braid", "the-groundfault", "the-slow-hill"];
-  assert.deepEqual(Object.keys(bloomfallCreatureFieldGuide).sort(), [...Object.keys(expectedStates), ...seededAberrants].sort());
-  for (const slug of seededAberrants) assert.equal(bloomfallCreatureFieldGuide[slug]!.kind, "BOSS", `${slug} must be a boss card`);
+  // can seed, plus the Reach's Mythic. They have a dossier and a boss card but
+  // no design-spec record — the panel keys off the field guide, not the
+  // enhancement manifest, precisely so they render.
+  const cardOnlyBosses = ["the-blackweir-anaconda", "the-braid", "the-groundfault", "the-slow-hill"];
+  assert.deepEqual(Object.keys(bloomfallCreatureFieldGuide).sort(), [...Object.keys(expectedStates), ...cardOnlyBosses].sort());
+  for (const slug of cardOnlyBosses) assert.equal(bloomfallCreatureFieldGuide[slug]!.kind, "BOSS", `${slug} must be a boss card`);
   const byKind = (kind: string) => Object.entries(bloomfallCreatureFieldGuide).filter(([, guide]) => guide.kind === kind).map(([slug]) => slug).sort();
-  const bossSlugsWithSeeded = [...bossSlugs, "the-braid", "the-groundfault", "the-slow-hill"].sort();
+  const bossSlugsWithSeeded = [...bossSlugs, ...cardOnlyBosses].sort();
   assert.deepEqual(byKind("ADAPTIVE"), adaptiveSlugs);
   assert.deepEqual(byKind("FIXED"), fixedSlugs);
   assert.deepEqual(byKind("BOSS"), bossSlugsWithSeeded);
@@ -161,5 +164,48 @@ test("the approved image workload is exact and reuses final V3 heroes", () => {
   assert.deepEqual(
     bloomfallCreatureEnhancements.filter((entry) => entry.image.existingV3AssetId === entry.slug).map((entry) => entry.slug).sort(),
     ["switchmother", "the-bellwether"],
+  );
+});
+
+test("MYTHIC is a designation above Aberrant, and it changes nothing below it", () => {
+  const mythic = bloomfallCreatureFieldGuide["the-blackweir-anaconda"]!;
+  assert.equal(mythic.kind, "BOSS");
+  if (mythic.kind !== "BOSS") return;
+  assert.equal(mythic.tier, "MYTHIC");
+
+  // One Mythic in the Reach. The rest of the per-region slots are reserved,
+  // not empty, and a second one here would be a design decision, not a typo.
+  const mythics = Object.entries(bloomfallCreatureFieldGuide)
+    .filter(([, guide]) => guide.kind === "BOSS" && guide.tier === "MYTHIC")
+    .map(([slug]) => slug);
+  assert.deepEqual(mythics, ["the-blackweir-anaconda"]);
+
+  // A Mythic fights in phases and prints them; an Aberrant stays one card.
+  const body = renderBloomfallCreatureGuide(mythic);
+  const blocks = storyProseBlocks(body);
+  const headings = blocks.flatMap((block) => (block.kind === "heading" && block.level === 2 ? [block.text] : []));
+  const phaseHeadings = blocks.flatMap((block) => (block.kind === "heading" && block.level === 3 ? [block.text] : []));
+  assert.deepEqual(headings, ["Why farm it", "Mythic bounty"]);
+  // The transition prints BETWEEN the phases, and only from its own field —
+  // the page renders the same string, and a fight that narrates its own
+  // transformation twice is what having two copies of it looks like.
+  assert.deepEqual(phaseHeadings, ["Phase 1 — The Mire Stalker", "The transformation — about half", "Phase 2 — The Blackweir Coil"]);
+  assert.equal(mythic.phases?.length, 2);
+  assert.ok(mythic.transition, "a two-phase Mythic needs the moment between them");
+  assert.ok(!mythic.phases?.[1]?.what.includes("arms retract"), "phase two must not re-narrate the transition");
+  for (const phase of mythic.phases ?? []) {
+    assert.ok(phase.abilities.length >= 3, `${phase.name} lists fewer than three abilities`);
+  }
+
+  // The un-tiered path is byte-identical to what it has always rendered. The
+  // promotion gate fingerprints these bodies; a cosmetic renderer change that
+  // silently rewrites seven live dossiers is a migration nobody asked for.
+  const aberrant = bloomfallCreatureFieldGuide["old-drowner"]!;
+  assert.equal(aberrant.kind, "BOSS");
+  if (aberrant.kind !== "BOSS") return;
+  assert.equal(aberrant.tier, undefined);
+  assert.equal(
+    renderBloomfallCreatureGuide(aberrant),
+    `${aberrant.summary}\n\n## Why farm it\n\n${aberrant.drops}\n\n## Mini-boss\n\n**Spawn.** ${aberrant.spawn}\n\n**Stats.** ${aberrant.stats}\n\n**Abilities.**\n\n${aberrant.abilities.map((item) => `- **${item.name}.** ${item.effect.charAt(0).toUpperCase() + item.effect.slice(1)}`).join("\n")}`,
   );
 });

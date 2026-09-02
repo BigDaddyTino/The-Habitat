@@ -44,6 +44,12 @@ export const codexArtKinds = {
   // One plate per skill (20) and one icon per licensed spell (108).
   skills: "skills",
   spells: "spells",
+  // The named-fight surfaces: arena, transformation and set-piece plates that
+  // belong to an encounter rather than to a dossier, plus its ability tiles at
+  // 256px. The creature and character dossiers keep their own convention
+  // paths; this directory is what a boss page wears that a shelf has no slot
+  // for. private/codex-art/bosses/<slug>.png
+  bosses: "bosses",
   // The dossier art that used to sit in public/images. Each one is a
   // directory under private/codex-art named for the shelf it serves.
   characters: "characters",
