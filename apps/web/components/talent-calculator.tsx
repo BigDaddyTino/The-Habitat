@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, Share2 } from "lucide-react";
 import { AbilityCardView, initials } from "@/components/ability-card";
 import { abilityKindLabel } from "@/lib/ability-cards";
+import { spellsForNode } from "@/lib/spell-unlocks";
 import { cardForCorruptedPhase, cardForNode } from "@/lib/talent-cards";
 import { talentClasses, talentPointsAtLevel, type TalentClass, type TalentNode } from "@/lib/talent-trees";
 
@@ -283,7 +284,12 @@ export function TalentCalculator({
 
   const iconFor = (nodeId: string) => icons[`${tree.slug}-${nodeId}`] ?? null;
 
-  const spells = [...owned].map((id) => byId.get(id)).filter((entry) => entry?.node.spell).map((entry) => entry?.node);
+  // The spells a build opens, by name — resolved through the same map the
+  // Spellbook uses, so a choice node lists every option it could pick.
+  const spells = [...owned].map((id) => byId.get(id)?.node).filter((node): node is TalentNode => Boolean(node?.spell)).map((node) => {
+    const opened = spellsForNode(tree.slug, node.id);
+    return { node, names: opened.map((spell) => `${spell.name} (${spell.licence}, ${spell.tier})`) };
+  });
   const trainers = [...owned].map((id) => byId.get(id)).filter((entry) => entry?.node.ceiling).map((entry) => entry?.node);
   const activeCorrupted = tree.corrupted.nodes.filter((node) => node.phase <= state.phase && node.phase < 7);
   const terminal = state.phase >= 7;
@@ -463,7 +469,7 @@ export function TalentCalculator({
         </div>
         {remaining > 0 && spent > 0 ? <p className="talent-hint">Spare points rank up unlocked abilities (I–III) — the long-game sink.</p> : null}
         {trainers.length ? <div className="talent-list"><h4>Trainers to find</h4><ul>{trainers.map((node) => <li key={node?.id}><b>{node?.name}</b> — {node?.ceiling}</li>)}</ul></div> : null}
-        {spells.length ? <div className="talent-list"><h4>Spells this build opens</h4><ul>{spells.map((node) => <li key={node?.id}><b>{node?.name}</b> — {node?.spell}</li>)}</ul></div> : null}
+        {spells.length ? <div className="talent-list"><h4>Spells this build opens</h4><ul>{spells.map(({ node, names }) => <li key={node.id}><b>{node.name}</b> — {names.length ? names.join(" · ") : node.spell}</li>)}</ul></div> : null}
         {activeCorrupted.length ? <div className="talent-list is-corrupt-list"><h4>Lit by the ladder</h4><ul>{activeCorrupted.map((node) => <li key={node.name}><b>{node.name}</b></li>)}</ul></div> : null}
         {terminal ? <p className="talent-terminal">Phase 7. An abomination stands where this build stood. The campaign continues with what is left.</p> : null}
         <p className="talent-plays"><b>How it plays:</b> {tree.plays}</p>
