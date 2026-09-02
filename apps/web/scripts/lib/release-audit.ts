@@ -133,8 +133,17 @@ export async function runReleaseAudit({ honourWaivers = true }: { honourWaivers?
   const [entries, arcs, nodes, edges, maps] = await Promise.all([
     db.storyEntry.findMany({ where: { status: { in: [...workingStatuses] } }, select: { id: true, slug: true, kind: true, title: true, status: true, meta: true }, orderBy: [{ kind: "asc" }, { slug: "asc" }] }),
     db.storyArc.findMany({ where: { status: { in: [...workingStatuses] } }, select: { id: true, slug: true, title: true }, orderBy: { slug: "asc" } }),
-    db.storyNode.findMany({ select: { arcId: true, key: true, kind: true, title: true } }),
-    db.storyEdge.findMany({ select: { arcId: true, label: true, fromNode: { select: { key: true } }, toNode: { select: { key: true } }, effects: true } }),
+    // Filtered exactly like the boards themselves (getStoryBoard uses the same
+    // three statuses). The GRAPH check asks whether a board can be played, and
+    // a board is what a writer sees — an ARCHIVED scene is one they took off
+    // it. Reading every node regardless of status meant a deliberately retired
+    // beat, whose edges retireEdge had deleted along with it, came back as
+    // ISOLATED and blocked a release nobody could fix without un-retiring it.
+    db.storyNode.findMany({ where: { status: { in: [...workingStatuses] } }, select: { arcId: true, key: true, kind: true, title: true } }),
+    db.storyEdge.findMany({
+      where: { status: { in: [...workingStatuses] }, fromNode: { status: { in: [...workingStatuses] } }, toNode: { status: { in: [...workingStatuses] } } },
+      select: { arcId: true, label: true, fromNode: { select: { key: true } }, toNode: { select: { key: true } }, effects: true },
+    }),
     db.storyMap.findMany({ select: { slug: true, artVersion: true }, orderBy: { slug: "asc" } }),
   ]);
   const knownEntries = new Set(entries.map((entry) => entry.slug));
