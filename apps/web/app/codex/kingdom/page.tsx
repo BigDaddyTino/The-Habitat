@@ -1,53 +1,24 @@
 import Link from "next/link";
 import { getPrismaClient } from "@habitat/db/client";
+import { FieldCard } from "@/components/field-card";
 import { requireRole } from "@/lib/authorization";
+import { courtDay, faithLaw, faiths, groundVerbs, holdingRungs, kingdomLevel, machines, realmTrees, realmTreesLaw, sacredLaw, siegeLaw, standingLaws, succession, syndicate } from "@/lib/kingdom";
 import { storyReadRole } from "@/lib/story-codex";
+import "../play.css";
 import "./kingdom.css";
 
 export const metadata = { title: "Kingdom Management | Story Codex" };
 export const dynamic = "force-dynamic";
 
 /**
- * The Kingdom page: the whole Holding Ground design on one surface — what you
- * get, and for what — plus the live territory board read from the region
- * sheets' control rows. Same grammar as the Trades page: square panels, mono
- * labels, the ladder as a track. Nothing here writes to the database.
+ * The Kingdom page, laid out the way the Character page is: what holding
+ * ground is in one line, then every rung, verb, tree, faith, siege posture
+ * and Court Day option as a labeled card with the balance campaign's
+ * numbers on it, and the live territory board read from the region sheets'
+ * control rows. Data: `lib/kingdom.ts`. Nothing here writes to the database.
  */
 
 const db = getPrismaClient();
-
-const RUNGS = [
-  { name: "Homestead", holds: "A parcel and a roof", from: "buy a charter parcel" },
-  { name: "Outpost", holds: "A fortified point with a job", from: "hold a road or crossing" },
-  { name: "Town", holds: "A population that isn't yours", from: "grow, or take one" },
-  { name: "City", holds: "Districts, wharves, politics", from: "the big leagues" },
-  { name: "Kingdom", holds: "Holdings and vassals", from: "the endgame of holding ground" },
-];
-
-const VERBS = [
-  { name: "Buy", cost: "coin, and patience", gets: "Escrowed charter parcels, region by region. Rare, because the world is owned." },
-  { name: "Seize", cost: "blood, supply, consequences", gets: "Any unshielded holding. Inside a faction the leader decides who keeps what you took." },
-  { name: "Earn", cost: "service and obligation", gets: "A granted fief from your faction, a ruler, or the Heartland courthouse." },
-  { name: "Found", cost: "everything, slowly", gets: "Ground that is yours alone. Nobody holds paper over you; nobody owes you help." },
-];
-
-const TREES = [
-  { name: "Might", buys: "Levies, garrisons, sieges" },
-  { name: "Coffers", buys: "Tariffs, routes, markets" },
-  { name: "Works", buys: "Machinery, infrastructure, bought additions" },
-  { name: "Arcana", buys: "Forge efficiency, reserves, licensed casting" },
-  { name: "Roots", buys: "People, land, food, loyalty" },
-  { name: "Faith", buys: "Adoption, spread, tolerance; belief as a build" },
-];
-
-const FAITHS = [
-  { slug: "the-first-gift", name: "The First Gift", perk: "The given magic thrives: gifted casters, creature pacts, the beast trade, Sanctuary aid.", price: "Your own law restricts the harvest. Essence costs climb; the extraction powers treat you as an obstacle." },
-  { slug: "the-ossuary-rites", name: "The Ossuary Rites", perk: "The dead work: lawful necromantic labor and garrison; funerals feed the realm.", price: "The living hesitate. Growth and immigration suffer; the First Gift's faithful call your workforce blasphemy." },
-  { slug: "the-forgefaith", name: "The Forgefaith", perk: "Reclamation as devotion: cheaper reclamations, faster binding, glad congregations.", price: "Dependence. A holding without a Forge bleeds morale, and losing a Core is a military and spiritual disaster." },
-  { slug: "the-old-roads", name: "The Old Roads", perk: "The customs hold: truce grounds, safe crossings, hospitality bless everything you move.", price: "The customs bind you. Honor every truce and guest-right, even for enemies, or the crossroads remember." },
-  { slug: "the-crimson-communion", name: "The Crimson Communion", perk: "Blood pays now: immediate, potent war and ritual power on Choir credit.", price: "The debt compounds; every decent power suppresses you; the Choir always collects." },
-  { slug: "the-faith-lane", name: "Secular", perk: "No faith's price binds you; no customs constrain your wars; doctrine entirely yours.", price: "Faith-heavy populations are harder to please. Morale bleeds in proportion to their devotion." },
-];
 
 type TierKey = "great" | "free" | "institution" | "shadow" | "wing";
 
@@ -67,15 +38,8 @@ const holdOrder: Record<string, number> = { holds: 0, contests: 1, influences: 2
 export default async function KingdomPage() {
   await requireRole(storyReadRole);
 
-  const factions = await db.storyEntry.findMany({
-    where: { kind: "FACTION" },
-    select: { slug: true, title: true, meta: true },
-    orderBy: { title: "asc" },
-  });
-  const regions = await db.storyEntry.findMany({
-    where: { kind: "REGION", status: "CANON" },
-    select: { slug: true, title: true, meta: true },
-  });
+  const factions = await db.storyEntry.findMany({ where: { kind: "FACTION" }, select: { slug: true, title: true, meta: true }, orderBy: { title: "asc" } });
+  const regions = await db.storyEntry.findMany({ where: { kind: "REGION", status: "CANON" }, select: { slug: true, title: true, meta: true } });
 
   // The territory board: every control row on every region sheet, grouped by
   // the faction that holds, contests, or influences the place.
@@ -88,7 +52,6 @@ export default async function KingdomPage() {
       holdings.set(row.faction, list);
     }
   }
-
   const byTier = new Map<TierKey, typeof factions>([["great", []], ["free", []], ["institution", []], ["shadow", []], ["wing", []]]);
   const childrenOf = new Map<string, string[]>();
   for (const faction of factions) {
@@ -97,19 +60,15 @@ export default async function KingdomPage() {
     const parent = typeof meta.parent === "string" ? meta.parent : null;
     if (parent) childrenOf.set(parent, [...(childrenOf.get(parent) ?? []), faction.title]);
   }
-
   const chips = (slug: string) => {
     const list = (holdings.get(slug) ?? []).sort((a, b) => (holdOrder[a.kind] ?? 3) - (holdOrder[b.kind] ?? 3) || a.title.localeCompare(b.title));
     if (!list.length) return <p className="is-empty">No ground on the written map yet; the unwritten regions are where this power lives.</p>;
     return (
       <ul className="km-chips">
-        {list.map((place) => (
-          <li key={`${slug}-${place.slug}`}><Link className={`is-${place.kind}`} href={`/codex/bible/${place.slug}`}>{place.title}</Link></li>
-        ))}
+        {list.map((place) => <li key={`${slug}-${place.slug}`}><Link className={`is-${place.kind}`} href={`/codex/bible/${place.slug}`}>{place.title}</Link></li>)}
       </ul>
     );
   };
-
   const tier = (key: TierKey, heading: string, note: string) => {
     const rows = byTier.get(key)!;
     if (!rows.length) return null;
@@ -124,10 +83,7 @@ export default async function KingdomPage() {
             const faith = typeof meta.faith === "string" ? meta.faith : null;
             return (
               <article className={`km-power is-${key}`} key={faction.slug}>
-                <header>
-                  <Link href={`/codex/bible/${faction.slug}`}>{faction.title}</Link>
-                  <i>{tierOf(meta.gameTag).label}</i>
-                </header>
+                <header><Link href={`/codex/bible/${faction.slug}`}>{faction.title}</Link><i>{tierOf(meta.gameTag).label}</i></header>
                 {wings.length ? <p><b>Wings:</b> {wings.join(" · ")}</p> : null}
                 {faith ? <p><b>Faith:</b> <Link href={`/codex/bible/${faith}`}>{faith.replace(/^the-/, "").replaceAll("-", " ")}</Link></p> : null}
                 {chips(faction.slug)}
@@ -140,158 +96,193 @@ export default async function KingdomPage() {
   };
 
   return (
-    <section className="page-shell codex-shell km-shell">
-      <header className="km-hero">
+    <section className="page-shell codex-shell play-shell km-shell">
+      <header className="play-hero">
         <p className="eyebrow">Holding Ground</p>
         <h1>Kingdom Management</h1>
-        <p>
-          Bannerlord&apos;s lord-on-horseback, Crusader Kings&apos; map of powers, Civilization&apos;s growing settlements,
-          on a live server that never pauses. You rule from inside your own eyes: the map is a table in your hall,
-          your holdings run while you sleep, and <b>the Forge is the settlement</b>.
-        </p>
+        <p>Bannerlord&apos;s lord on horseback, Crusader Kings&apos; map of powers, Civilization&apos;s growing settlements, on a live server that never pauses. You rule from inside your own eyes: the map is a table in your hall, your holdings run while you sleep, and <b>the Forge is the settlement</b>.</p>
       </header>
 
-      <section className="km-law">
-        <h2>How holding ground works</h2>
-        <div className="km-quick">
-          <div><b>Start small</b><span>Buy a parcel, drain it, build on it. That is rung one of five.</span></div>
-          <div><b>Grow by doing</b><span>Your kingdom levels on real work, and the level extends every cap.</span></div>
-          <div><b>Every choice prices itself</b><span>Faiths, walls, and wars all show you the bill up front.</span></div>
-          <div><b>The world fights back</b><span>Five Great Powers race from an equal start, and your crown can earn a seat at that table.</span></div>
-        </div>
-      </section>
+      <div className="play-gamer">
+        <b>In gamer terms</b>
+        <span>Late game. Climb <b>five rungs</b> of holding from a homestead to a crown; get ground by <b>buying, seizing, earning or founding</b> it; level your realm on real work with a <b>1.6× curve and a quest ceiling every third level</b>; spec <b>six realm trees</b>; pick a <b>faith</b> that pays and costs; fight sieges as <b>Forge clocks</b> (storm or wait); hold <b>Court Day</b> monthly; run it with friends as a <b>Syndicate</b>; and when you die for good, your heir holds it or it fractures.</span>
+      </div>
 
-      <section className="km-law">
-        <h2>The Ladder: five rungs, each adds verbs</h2>
-        <p className="km-lede">None retires the ones below. The Riverlands&apos; Three Charters teach rungs one through three; the top rungs are seized, granted, or founded, rarely built from mud.</p>
-        <div className="km-track">
-          {RUNGS.map((rung, index) => (
-            <div key={rung.name} style={{ display: "contents" }}>
-              {index > 0 ? <div className="km-gate" aria-hidden="true">›</div> : null}
-              <div className={`km-rung${index === RUNGS.length - 1 ? " is-crown" : ""}`}>
-                <i>{index + 1}</i>
-                <b>{rung.name}</b>
-                <span>{rung.holds}</span>
-                <em>{rung.from}</em>
-              </div>
-            </div>
+      <div className="play-jump">
+        <a href="#ladder">The ladder</a><a href="#ground">Getting ground</a><a href="#level">Kingdom Level</a><a href="#trees">Realm trees</a><a href="#faith">Faith</a><a href="#siege">Sieges</a><a href="#court">Court Day</a><a href="#board">The world board</a><a href="#laws">Standing laws</a>
+        <Link href="/codex/bible/kingdom-management">Kingdom Management (canon)</Link>
+      </div>
+
+      {/* ------------------------------------------------------------ ladder */}
+      <section className="play-law" id="ladder">
+        <h2>The ladder: five rungs, each adds verbs</h2>
+        <p className="play-lede">None retires the ones below. The Riverlands&apos; Three Charters teach the first three; the top two are seized, granted or founded, rarely built from mud.</p>
+        <div className="field-grid is-row">
+          {holdingRungs.map((rung, index) => (
+            <FieldCard
+              accent={index === holdingRungs.length - 1}
+              eyebrow={rung.teaches ? `Rung ${index + 1} · ${rung.teaches}` : `Rung ${index + 1}`}
+              fields={[
+                { label: "Holds", value: rung.holds },
+                { label: "How", value: rung.how, tone: "muted" },
+                { label: "Unlocks", value: rung.verbs.join(" · "), tone: "good" },
+              ]}
+              key={rung.name}
+              name={rung.name}
+              step={index + 1}
+            />
           ))}
         </div>
-        <p className="km-foot"><b>Verbs by rung:</b> build, farm, fence → garrison, patrol, supply → districts, trades, law, admission → projects, armies, factions in your walls → doctrine, diplomacy, war, succession.</p>
       </section>
 
-      <section className="km-law">
+      {/* ------------------------------------------------------------ ground */}
+      <section className="play-law" id="ground">
         <h2>Getting ground: four verbs, four prices</h2>
-        <div className="km-tiles">
-          {VERBS.map((verb) => (
-            <div className="km-tile is-price" key={verb.name}>
-              <b>{verb.name}</b>
-              <i>costs {verb.cost}</i>
-              <span>{verb.gets}</span>
-            </div>
+        <div className="field-grid">
+          {groundVerbs.map((verb) => (
+            <FieldCard
+              fields={[
+                { label: "Costs", value: verb.costs, tone: "bad" },
+                { label: "Gets", value: verb.gets, tone: "good" },
+                { label: "Notes", value: verb.notes, tone: "muted" },
+              ]}
+              key={verb.name}
+              name={verb.name}
+            />
           ))}
         </div>
-        <p className="km-foot" style={{ marginTop: 12 }}><b>Seizing the sacred:</b> nothing is unseizable, nothing is cheap, and some things are unkeepable. A seized sacred site never becomes a normal holding; it generates grievance until you return it, gift it, or win its people.</p>
+        <p className="km-foot"><b>Seizing the sacred:</b> {sacredLaw}</p>
       </section>
 
-      <section className="km-law">
+      {/* ------------------------------------------------------------- level */}
+      <section className="play-law" id="level">
         <h2>Your Kingdom Level: do more, grow more, reach further</h2>
-        <div className="km-cols">
-          <div className="km-col">
-            <h3>XP comes from real work only</h3>
-            <ul>
-              <li>Holdings prospering, day by day</li>
-              <li>Projects finished · wars won · sieges stood</li>
-              <li>Treaties signed · trade moved · Court Days handled</li>
-            </ul>
-          </div>
-          <div className="km-col">
-            <h3>The level extends every cap</h3>
-            <ul>
-              <li>How many holdings you can hold</li>
-              <li>How big your armies muster</li>
-              <li>Officer seats · vassal slots · project tiers</li>
-            </ul>
-          </div>
-          <div className="km-col">
-            <h3>Ceilings: the crown&apos;s provings</h3>
-            <ul>
-              <li>Each level costs more than half again the last</li>
-              <li>Every third level is a ceiling <b>only a quest breaks</b></li>
-              <li>The rulers&apos; ceiling teacher: the Crown Without a Name</li>
-            </ul>
-          </div>
+        <div className="field-grid">
+          <FieldCard eyebrow="XP comes from real work only" fields={kingdomLevel.xpFrom.map((line, index) => ({ label: index === 0 ? "Earned by" : "", value: line }))} name="What levels the realm" />
+          <FieldCard eyebrow="Every cap grows with the level" fields={kingdomLevel.extends.map((line, index) => ({ label: index === 0 ? "Extends" : "", value: line }))} name="What the level buys" />
+          <FieldCard
+            accent
+            eyebrow="The curve and the ceilings"
+            fields={[
+              { label: "Curve", value: kingdomLevel.curve },
+              { label: "Ceilings", value: kingdomLevel.ceilings, tone: "bad" },
+              { label: "First one", value: kingdomLevel.firstCeiling, tone: "muted" },
+              { label: "Teacher", value: kingdomLevel.teacher },
+              { label: "Tall or wide", value: kingdomLevel.tallVsWide, tone: "good" },
+            ]}
+            name="The crown's provings"
+          />
         </div>
       </section>
 
-      <section className="km-law">
-        <h2>The crown&apos;s six talent trees</h2>
-        <p className="km-lede">Rule your own kingdom and every level grants realm points to spec it your way. Join a faction instead and you live under <b>their</b> doctrine: their spec, your problem.</p>
-        <div className="km-tiles">
-          {TREES.map((tree) => (
-            <div className="km-tile" key={tree.name}>
-              <b>{tree.name}</b>
-              <i>realm tree</i>
-              <span>{tree.buys}</span>
-            </div>
+      {/* ------------------------------------------------------------- trees */}
+      <section className="play-law" id="trees">
+        <h2>The crown&apos;s six realm trees</h2>
+        <p className="play-lede">{realmTreesLaw}</p>
+        <div className="field-grid is-row">
+          {realmTrees.map((tree) => (
+            <FieldCard eyebrow="Realm tree" fields={[{ label: "Buys", value: tree.buys, tone: "good" }, { label: "Notes", value: tree.note, tone: "muted" }]} key={tree.name} name={tree.name} />
           ))}
         </div>
       </section>
 
-      <section className="km-law">
+      {/* ------------------------------------------------------------- faith */}
+      <section className="play-law" id="faith">
         <h2>Faith: every belief has a perk and a price</h2>
-        <p className="km-lede">Faith is <b>read</b>: the rites you keep and the faith your realm adopts move prices, access, and quests everywhere. Populations can be reshaped over time, at cost, and noticed.</p>
-        <div className="km-faiths">
-          {FAITHS.map((faith) => (
-            <article className="km-faith" key={faith.slug}>
-              <h3><Link href={`/codex/bible/${faith.slug}`}>{faith.name}</Link></h3>
-              <p className="is-perk"><b>Perk</b>{faith.perk}</p>
-              <p className="is-price"><b>Price</b>{faith.price}</p>
-            </article>
+        <p className="play-lede">{faithLaw.read} <b>{faithLaw.conversion}</b> {faithLaw.reshaping}</p>
+        <div className="field-grid is-wide">
+          {faiths.map((faith) => (
+            <FieldCard
+              eyebrow={faith.secular ? "The secular crown" : "Faith"}
+              fields={[
+                { label: "Perk", value: faith.perk, tone: "good" },
+                { label: "Price", value: faith.price, tone: "bad" },
+                { label: "Morale", value: faith.morale, tone: "muted" },
+              ]}
+              key={faith.slug}
+              name={<Link href={`/codex/bible/${faith.slug}`}>{faith.name}</Link>}
+            />
           ))}
         </div>
       </section>
 
-      <section className="km-board">
-        <h2>The World Game: who holds what, right now</h2>
-        <p>
-          Live from the codex&apos;s own region sheets. Every Great Power starts a world at the <b>same total points</b>;
-          shapes differ, totals don&apos;t, and everything after the first day is play. Story-critical ground never flips until its
-          arc resolves. Your crown joins this board when the world recognizes it.
-        </p>
+      {/* ------------------------------------------------------------- siege */}
+      <section className="play-law" id="siege">
+        <h2>Sieges: the Forge clock</h2>
+        <p className="play-lede">{siegeLaw.clock} <b>{siegeLaw.intact}</b></p>
+        <div className="field-grid is-wide">
+          {siegeLaw.postures.map((posture) => (
+            <FieldCard
+              eyebrow="Attacker's posture"
+              fields={[
+                { label: "How", value: posture.how },
+                { label: "Measured", value: posture.table, tone: "good" },
+                { label: "Doctrine", value: posture.doctrine },
+                { label: "Risk", value: posture.risk, tone: "bad" },
+              ]}
+              key={posture.name}
+              name={posture.name}
+            />
+          ))}
+          <FieldCard
+            eyebrow="Defender's tip"
+            fields={[{ label: "Law", value: siegeLaw.garrisonTip, tone: "bad" }]}
+            name="A fortress of veterans"
+          />
+          <FieldCard
+            eyebrow="The soulless garrison"
+            fields={[
+              { label: "Law", value: machines.law },
+              { label: "Hybrid", value: machines.hybrid, tone: "good" },
+              { label: "Insurance", value: machines.insurance, tone: "muted" },
+              { label: "Pure", value: machines.pure, tone: "bad" },
+              { label: "Vanity", value: machines.vanity, tone: "muted" },
+            ]}
+            name={<Link href="/codex/bible/machines">Machines on the wall</Link>}
+          />
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------- court */}
+      <section className="play-law" id="court">
+        <h2>Court Day: the first of every month</h2>
+        <p className="play-lede">{courtDay.when} Four ways to handle it, priced by the campaign over fourteen months of rule.</p>
+        <div className="field-grid is-row">
+          {courtDay.options.map((option, index) => (
+            <FieldCard
+              accent={index === 0}
+              fields={[
+                { label: "What", value: option.what },
+                { label: "Worth", value: option.value, tone: index === courtDay.options.length - 1 ? "bad" : "good" },
+                { label: "Notes", value: option.note, tone: "muted" },
+              ]}
+              key={option.name}
+              name={option.name}
+              price={index === courtDay.options.length - 1}
+              step={index + 1}
+            />
+          ))}
+        </div>
+        <div className="field-grid" style={{ marginTop: 10 }}>
+          <FieldCard eyebrow="The multiplayer crown" fields={[{ label: "Leader", value: syndicate.leader }, { label: "Members", value: syndicate.members }, { label: "Shared", value: syndicate.shared, tone: "good" }, { label: "Servers", value: syndicate.servers, tone: "muted" }]} name="The Syndicate" />
+          <FieldCard eyebrow="Succession" fields={[{ label: "Trigger", value: succession.trigger, tone: "bad" }, { label: "Heir", value: succession.heir }, { label: "After", value: succession.after, tone: "muted" }, { label: "Law", value: succession.law }]} name="The Mourning" />
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------- board */}
+      <section className="km-board" id="board">
+        <h2>The world game: who holds what, right now</h2>
+        <p>Live from the codex&apos;s own region sheets. Every Great Power starts a world at the <b>same total points</b>; shapes differ, totals don&apos;t, and everything after the first day is play. Story-critical ground never flips until its arc resolves. Your crown joins this board when the world recognises it.</p>
         {tier("great", "The Great Powers: racing for dominance", "Five banners, five axis identities, one scoreboard. Their wings feed their totals.")}
         {tier("free", "The Free Powers: their land, their law", "Scored but not racing. Power without ambition, and the whole bloc answers an attack on any of it.")}
-        {tier("institution", "The Institutions: the world's city-states", "Independent seats the powers court and buy influence from. Conquerable, but they serve whatever is in their best interest at the time, and late-game wars swallow seats too.")}
+        {tier("institution", "The Institutions: the world's city-states", "Independent seats the powers court and buy influence from. They endure the early game and become prizes in the late one.")}
         {tier("shadow", "The Shadow Powers: a different game", "Never scored. The board measures the war it can see.")}
       </section>
 
-      <section className="km-law">
-        <h2>The rhythm of rule</h2>
-        <div className="km-rhythm">
-          <div className="km-col">
-            <h3>Court Day: the first of every month</h3>
-            <p>The court convenes with a real docket: petitions, windfalls, disasters, absurdities. Attend and rule; skip and doctrine auto-decides; be away and a governor rules in your name, with the Court Record waiting for your return. <b>A present ruler clears roughly double what auto-doctrine does. A poor governor does worse than no governor at all.</b></p>
-          </div>
-          <div className="km-col">
-            <h3>The Syndicate: the multiplayer crown</h3>
-            <p>The leader decides; members hold the officer seats with real authority in their domains. The realm&apos;s level, ceilings, and trees are everyone&apos;s work, and servers can carry several Syndicates vying with each other and the NPC powers alike.</p>
-          </div>
-          <div className="km-col">
-            <h3>The Mourning: succession</h3>
-            <p>A ruler&apos;s true death starts a live succession crisis. Your named heir holds the realm or it fractures, decided by what you actually built. What survives persists as an NPC power the next run meets. <b>The realm remembers you; it does not belong to you.</b></p>
-          </div>
-        </div>
-      </section>
-
-      <section className="km-law">
-        <h2>The soulless garrison</h2>
-        <p className="km-machines">
-          Machines defend too, and their economics mirror the living wall&apos;s. A living garrison costs nothing until it dies,
-          then gulps the Forge reserve at reclamation prices. A machine (<Link href="/codex/bible/machines">the Machines shelf</Link>)
-          has no soul: <b>destroyed is destroyed</b>, replaced with coin and materials, and it sips Essence daily just to run.
-          Hybrid walls hold a day or two less than pure living ones and end the siege with the Forge still breathing.
-          A pure-machine wall gives a besieger no clock to wait out at all: storming is the only road in.
-        </p>
+      {/* -------------------------------------------------------------- laws */}
+      <section className="play-law" id="laws">
+        <h2>Standing laws</h2>
+        <ul className="km-laws">{standingLaws.map((law) => <li key={law}>{law}</li>)}</ul>
       </section>
 
       <p className="km-foot">

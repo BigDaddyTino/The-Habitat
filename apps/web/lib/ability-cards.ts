@@ -29,7 +29,9 @@ export type AbilityKind =
   /** Opens a system, slot, or surface rather than a stat. */
   | "Unlock"
   /** Lit by corruption phase; costs no points. */
-  | "Corrupted";
+  | "Corrupted"
+  /** A trade's blueprint: a thing a rung lets you make or do. */
+  | "Blueprint";
 
 export type AbilityCard = {
   kind: AbilityKind;
@@ -57,6 +59,7 @@ export const abilityKindLabel: Record<AbilityKind, string> = {
   Capstone: "Capstone · trainer",
   Unlock: "Unlock",
   Corrupted: "Corrupted · free",
+  Blueprint: "Blueprint",
 };
 
 /** Field order as the card prints it. */

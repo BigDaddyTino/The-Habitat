@@ -47,6 +47,7 @@
 .ability-kind.is-kind-capstone { color: var(--play-capstone); border-color: rgba(198, 151, 76, .7); }
 .ability-kind.is-kind-unlock { color: var(--play-unlock); border-color: rgba(201, 184, 232, .55); }
 .ability-kind.is-kind-corrupted { color: var(--play-corrupt); border-color: rgba(185, 143, 214, .6); }
+.ability-kind.is-kind-blueprint { color: #a8c48a; border-color: rgba(168, 196, 138, .55); }
 .ability-card.is-kind-capstone { border-color: rgba(198, 151, 76, .5); }
 .ability-card.is-kind-choice { border-color: rgba(224, 112, 95, .45); }
 .ability-card.is-kind-corrupted { border-color: rgba(125, 62, 160, .45); background: rgba(125, 62, 160, .07); }
@@ -70,3 +71,27 @@
   .play-gamer { grid-template-columns: 1fr; }
   .ability-fields { grid-template-columns: 64px 1fr; }
 }
+
+/* -- The field card: labeled fields for things that are not abilities ---
+   (a rung of holding, a way to get ground, a faith, a siege posture). */
+.field-card { border: 1px solid var(--line); background: rgba(27, 34, 29, .6); padding: 10px 12px; display: grid; gap: 7px; font-size: 12px; align-content: start; position: relative; }
+.field-card.is-accent { border-color: rgba(198, 151, 76, .55); }
+.field-card.is-price { border-color: rgba(200, 90, 80, .45); }
+.field-card.is-reserved { border-style: dashed; opacity: .85; }
+.field-head { display: grid; gap: 1px; }
+.field-eyebrow { font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.field-name { color: var(--paper); font-size: 14px; line-height: 1.2; }
+.field-name a { color: inherit; text-decoration: none; }
+.field-name a:hover { color: var(--brass); }
+.field-fields { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: 4px 10px; align-items: baseline; }
+.field-fields dt { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.field-fields dd { margin: 0; color: var(--ink); line-height: 1.45; font-variant-numeric: tabular-nums; }
+.field-fields dd.is-good { color: #dfe8d6; padding: 4px 8px; background: rgba(12, 16, 13, .55); border-left: 2px solid var(--canon, #8fbf8a); }
+.field-fields dd.is-bad { color: #e8d6d3; padding: 4px 8px; background: rgba(12, 16, 13, .55); border-left: 2px solid var(--danger); }
+.field-fields dd.is-muted { color: var(--muted); font-size: 11.5px; }
+.field-card.has-step .field-head { padding-left: 22px; }
+.field-step { position: absolute; top: -1px; left: -1px; width: 18px; height: 18px; display: grid; place-items: center; background: var(--night); border: 1px solid var(--line); font-family: var(--font-mono); font-size: 9px; color: var(--muted); }
+.field-tag { font-family: var(--font-mono); font-size: 8px; letter-spacing: .6px; text-transform: uppercase; color: var(--ember); border: 1px dashed rgba(220, 107, 50, .5); padding: 1px 5px; justify-self: start; }
+.field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+.field-grid.is-wide { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.field-grid.is-row { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }

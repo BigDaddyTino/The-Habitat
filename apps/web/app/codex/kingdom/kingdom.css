@@ -115,3 +115,11 @@
   .km-quick, .km-cols, .km-rhythm { grid-template-columns: 1fr; }
   .km-gate { display: none; }
 }
+
+/* -- 2026-09-02: the card layout ------------------------------------ */
+.km-laws { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+.km-board { scroll-margin-top: 90px; }
+.km-shell .km-foot { font-size: 12px; color: var(--muted); }
+.km-shell .km-foot b { color: var(--brass); }
+.km-shell .field-fields dt:empty { display: none; }
+.km-shell .field-fields dt:empty + dd { grid-column: 2; }
