@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
   BookMarked, BookOpen, Castle, ChevronDown, Cog, Crown, GitBranch, Hammer, History,
-  Library, Lightbulb, Map, MapPinned, Shield, Swords, UsersRound, Waypoints,
+  Library, Lightbulb, Map, MapPinned, Shield, Sword, Swords, UsersRound, Waypoints,
 } from "lucide-react";
 
 /**
@@ -38,6 +38,7 @@ const items: NavItem[] = [
     label: "Play",
     icon: Swords,
     links: [
+      { href: "/codex/classes", label: "Classes", icon: Sword },
       { href: "/codex/talents", label: "Talents", icon: Waypoints },
       { href: "/codex/professions", label: "Trades", icon: Hammer },
       { href: "/codex/kingdom", label: "Kingdom", icon: Crown },

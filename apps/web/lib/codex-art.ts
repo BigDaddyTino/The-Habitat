@@ -30,6 +30,8 @@ export const codexArtKinds = {
   talents: "talents",
   // The Nine Trades: one plate per profession, worn by /codex/professions.
   trades: "trades",
+  // The Eight Trees as people: one key-art plate per class, worn by /codex/classes.
+  classes: "classes",
   // The dossier art that used to sit in public/images. Each one is a
   // directory under private/codex-art named for the shelf it serves.
   characters: "characters",

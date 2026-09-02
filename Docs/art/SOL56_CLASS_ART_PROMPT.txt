@@ -1,0 +1,80 @@
+SOL 5.6 — THE EIGHT AS PEOPLE
+Class key art for /codex/classes · 8 plates · issued 2026-09-01
+
+Drop-in: apps/web/private/codex-art/classes/<slug>.png — the shelf and each
+dossier pick a plate up on reload; until then the class's own constellation
+chart stands in and the slot prints this path.
+Ledger owed: Docs/art/SOL56_CLASS_ART_LEDGER.md, the usual discipline.
+
+------------------------------------------------------------------------------
+THE COMMISSION
+------------------------------------------------------------------------------
+
+The talents page already has each class as a star chart. This run gives each
+one a BODY: one figure, one moment, the class's whole argument in a single
+frame the way a fighting game's character select sells a fighter. These are
+the eight faces of the game's build system; a player should be able to pick
+their class from these plates without reading a word.
+
+Format: 1672x941 RGB24 PNG, cinematic 16:9. Two crops must both read: the
+dossier hero (right-hand panel, roughly the center 45% of the width at full
+height) and the shelf card (a 3:4 portrait crop centered at 30% height). Put
+the figure's head and hands inside that portrait window; let the world spill
+into the side fields.
+
+Style: the standing character-portrait law — mature AAA grounded cinematic
+photorealism, real lenses, real wear, species and looks as locks — but with
+MOTION: these are action stills, not portraits. The R rating at full weight
+in both registers, per the standing law; women striking, stated looks locks.
+Zero text anywhere; all insignia blank. No fantasy-gloss armor: near-future
+military-industrial kit, magic as infrastructure.
+
+Craft law for the set: one palette family across all eight (the codex dark —
+charcoal, wet grey, bone, muted rust, storm blue) so they hang as a set, each
+with ONE motivated color the class owns: Bastion brass, Spector cold
+grey-blue, Conduit lantern-gold, Surger red, Archon green-gold, Procurator
+ledger-white, Cypherist contained cyan, Maverick ember.
+
+------------------------------------------------------------------------------
+THE EIGHT
+------------------------------------------------------------------------------
+
+classes/bastion.png — THE DOORWAY. A plated soldier filling a breached
+doorway from the inside, shotgun low, a Seal ward standing in the frame like
+heat-shimmer with weight. Behind, the squad moving inside the ward. The wall
+that answers back.
+
+classes/spector.png — ONE ROUND. A marksman prone on a wet rooftop at night,
+eye still to the glass a half-second after the shot, the city not yet aware.
+The suppressed carbine beside them like a second opinion. Nobody was there.
+
+classes/conduit.png — THE LANTERN. A caster mid-cast in a siege line, pool
+light pouring from the hands, artillery-precise: a grid square burning
+behind them and not one ally touched. A sidearm holstered and forgotten.
+
+classes/surger.png — THE ENGINE. An infused berserker mid-swing, rig on the
+back running hot, veins lit under the skin at the phase-two edge, blade
+wet. Damage as fuel, visibly. The one plate allowed to look like it enjoys
+this.
+
+classes/archon.png — THE CHORUS. A beastmaster on a war mount at altitude —
+the Unridden's sheet silhouette exactly for a hypogriff if the mount is one
+— with a flock of bonded shapes rising around them. More of you than the
+fight started with.
+
+classes/procurator.png — THE SAND TABLE. A commander at a field map table
+under a tarp, hand on the radial order wheel's physical analogue, three
+squads' worth of people looking at them. Weak alone, unbeatable in numbers
+— shoot the numbers.
+
+classes/cypherist.png — BENCH ANYWHERE. A tech in a half-open warframe at a
+field bench, drones lifting off the table, cyan contained to the tool
+lights. The remote war: one eye on the frame, one on the feed.
+
+classes/maverick.png — TWIN IRONS. A gunslinger at the moment of the draw
+in a Southside street, two pistols or pistol and ember-hand (Iron & Ember —
+show the spell-hand lit), coat moving, the crowd already stepped back. Loud,
+fast, seen.
+
+Gate 6b stands: bright plates at full weight where the class earns it —
+the Conduit's lantern and the Maverick's ember own their frames.
