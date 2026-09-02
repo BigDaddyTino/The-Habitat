@@ -49,6 +49,40 @@ test("a place with approved art but no settled accent still wears it", () => {
   }
 });
 
+test("creature child thumbnails can reuse every convention plate their dossiers wear", () => {
+  // These were valid dossier heroes but false placeholders in the parent
+  // species' Children list because that surface bypassed this resolver.
+  const formerlyMissing = [
+    "armistice-frame",
+    "bureau-stork",
+    "carriers",
+    "chaff-wasp",
+    "chartered",
+    "collector-pattern",
+    "falls-swift",
+    "glasspike",
+    "jackknife",
+    "millstone",
+    "palisade-frame",
+    "reedjack",
+    "returnees",
+    "salt-ibis",
+    "shrieker-bat",
+    "the-hollow-wing-creature",
+    "the-latent",
+    "the-unregistered",
+    "tollgull",
+    "towback",
+    "boneback-sturgeon",
+  ] as const;
+
+  for (const slug of formerlyMissing) {
+    const art = getDossierArt("CREATURE", slug, {});
+    assert.ok(art, `${slug} has a convention plate but no shared dossier/thumbnail art`);
+    assert.ok(codexArtFileForUrl(art.src), `${slug} resolves to missing art at ${art.src}`);
+  }
+});
+
 test("every kind that can wear art offers the path that would fill it", () => {
   for (const kind of artSlotKinds) {
     const slot = dossierArtSlot(kind, "some-entry");

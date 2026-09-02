@@ -71,6 +71,19 @@ test("the races landing page shows parent cards only", () => {
   assert.match(directory, /See its children/);
 });
 
+test("race-child thumbnails use the same art resolver as their dossiers", () => {
+  // Shrieker Bat and all seven Machine patterns already had dossier heroes,
+  // but this child list once used a smaller hand map and showed sparkles.
+  const profile = readFileSync(join(process.cwd(), "components/story-entity-profile.tsx"), "utf8");
+  assert.match(profile, /const memberArt = getDossierArt\("CREATURE", member\.slug, member\.meta\)\?\.src \?\? null;/);
+  assert.doesNotMatch(profile, /const memberArt = getCreatureKeyart\(/, "child thumbnails must not restore the obsolete partial map");
+
+  // Publication-aware art (notably Bloomfall V3) needs the child's own meta,
+  // so the projection must not replace it with an empty object.
+  const dossierPage = readFileSync(join(process.cwd(), "app/codex/bible/[slug]/page.tsx"), "utf8");
+  assert.match(dossierPage, /summary: member\.summary,\s+meta: member\.meta,\s+category:/);
+});
+
 test("every assignment names a race that exists, and a real category", () => {
   const races = new Set([...raceSeeds.map((seed) => seed.slug), ...existingRaceSheets.map((row) => row.slug)]);
   for (const row of raceAssignments) {

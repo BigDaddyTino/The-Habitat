@@ -24,13 +24,11 @@ import {
 } from "@habitat/shared";
 import { codexArtSized, codexArtSrcSet } from "@/lib/codex-art-derivative";
 import { dossierArtSlot, getDossierArt } from "@/lib/dossier-art";
-import { getCreatureKeyart } from "@/lib/creature-keyart";
 import { timelineEraLabel } from "@/lib/story-timeline";
 import { getFactionBranding } from "@/lib/faction-branding";
 import { getRegionBranding } from "@/lib/region-branding";
 import { getPlaceKeyart } from "@/lib/place-art";
 import { modelPreview } from "@/lib/story-library";
-import { bloomfallCreatureArtUrl, getBloomfallCreatureHeroArt } from "@/lib/bloomfall-creature-art";
 import { bloomfallCreatureFieldGuide } from "@/lib/bloomfall-creature-field-guide";
 import { StoryProse, StoryProseLine, type ProseResolver } from "@/components/story-prose";
 import { BloomfallAdaptiveMutationPanel } from "@/components/bloomfall-adaptive-mutation-panel";
@@ -96,7 +94,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   lastEditor: string | null;
   appearances: Appearance[];
   connections: Connection[];
-}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }>; /** A companion's own quests, derived from the arcs filed to them. */ companionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }>; /** A faction's own quests plus the ones its wings fly, `via` naming the wing. */ factionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean; via: { slug: string; title: string } | null }>; /** The power above this one and the wings beneath it, derived from their own sheets. */ factionFamily?: { banner: { slug: string; title: string } | null; wings: Array<{ slug: string; title: string; summary: string | null; scope: string | null; power: number | null }>; power: { own: number | null; fromWings: number | null } } | null; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; category: string | null }> } | null }) {
+}; existingArcSlugs?: string[]; factionOptions?: Array<{ slug: string; title: string }>; containedPlaces?: ContainedPlace[]; placeAncestry?: Array<{ slug: string; title: string }>; arcsHere?: Array<{ slug: string; title: string; isMainline: boolean; category: StoryArcCategory; hook: string | null; where: { slug: string; title: string } | null }>; /** A companion's own quests, derived from the arcs filed to them. */ companionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean }>; /** A faction's own quests plus the ones its wings fly, `via` naming the wing. */ factionArcs?: Array<{ slug: string; title: string; category: StoryArcCategory; hook: string | null; summary: string | null; locked: boolean; via: { slug: string; title: string } | null }>; /** The power above this one and the wings beneath it, derived from their own sheets. */ factionFamily?: { banner: { slug: string; title: string } | null; wings: Array<{ slug: string; title: string; summary: string | null; scope: string | null; power: number | null }>; power: { own: number | null; fromWings: number | null } } | null; addChildKind?: string; systemFamily?: { ancestry: Array<{ slug: string; title: string }>; children: Array<{ slug: string; title: string; summary: string | null }>; regionNotes: Array<{ slug: string; title: string | null; note: string }> } | null; systemsHere?: Array<{ slug: string; title: string; note: string }>; /** slug -> title, so facts read as names rather than keys. */ slugTitles?: Record<string, string>; /** slug -> title for arcs, which bodies cite as often as entries. */ arcTitles?: Record<string, string>; /** Threads that grew out of this one — derived from their parent field. */ threadChildren?: Array<{ slug: string; title: string; summary: string | null }>; /** The companion mission chain this page belongs to: a character's own arc, or the chain around one mission. */ companionChain?: { companion: { slug: string; title: string } | null; missions: ChainMission[] } | null; /** The race this creature sits in, and everything filed under it. */ raceFamily?: { race: { slug: string; title: string } | null; members: Array<{ slug: string; title: string; summary: string | null; meta: Record<string, unknown> | null; category: string | null }> } | null }) {
   // Entries resolve to the bible, arcs to their board, and anything nobody has
   // written yet renders as a visible todo rather than disappearing.
   const resolveProse: ProseResolver = (slug) => {
@@ -420,11 +418,10 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           {raceFamily && (isRace || raceFamily.members.length > 0) ? <div className="entity-contained-places entity-race-members">
             <p className="eyebrow"><Network aria-hidden="true" size={12} /> Children of {entry.title}</p>
             {raceFamily.members.length ? <ul>{raceFamily.members.map((member) => {
-              // The old illustrated races have their own key art; a Bloomfall
-              // species wears the plate from its own dossier instead of the
-              // empty-slot sparkle.
-              const memberPlate = getBloomfallCreatureHeroArt(member.slug);
-              const memberArt = getCreatureKeyart(member.slug) ?? (memberPlate ? bloomfallCreatureArtUrl(memberPlate) : null);
+              // A child thumbnail must read the same resolver as its dossier.
+              // The old hand map and Bloomfall-only fallback missed every
+              // convention-drop plate (including Shriekers and the Machines).
+              const memberArt = getDossierArt("CREATURE", member.slug, member.meta)?.src ?? null;
               const isAberrant = bloomfallCreatureFieldGuide[member.slug]?.kind === "BOSS";
               return <li className={isAberrant ? "is-aberrant" : undefined} key={member.slug}>
                 {memberArt ? <img alt="" src={codexArtSized(memberArt, 320)} /> : <span className="region-place-fallback"><Sparkles aria-hidden="true" size={18} /></span>}

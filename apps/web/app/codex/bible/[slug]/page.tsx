@@ -118,6 +118,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
               slug: member.slug,
               title: member.title,
               summary: member.summary,
+              meta: member.meta,
               category: typeof member.meta?.category === "string" ? (member.meta.category as string) : null,
             }))
             .sort((a, b) => a.title.localeCompare(b.title)),

@@ -67,3 +67,6 @@ apps/web/scripts/tmp/
 apps/web/private/codex-art-cache/
 
 .codex-tmp-*
+
+# Art-run scratch (sources, QA crops, one-off installers) — kept on disk, never committed
+/tmp/
