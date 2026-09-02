@@ -7,7 +7,7 @@ param(
   [string] $HealthPath = "/chronicle",
   [int] $HealthAttempts = 20,
   # Ship past a failing release audit. For a hotfix whose whole point is to
-  # repair the data the audit is complaining about — never as a way of not
+  # repair the data the audit is complaining about - never as a way of not
   # reading it. What was skipped is printed and repeated at the end.
   [switch] $SkipAudit
 )
@@ -27,7 +27,7 @@ $ErrorActionPreference = "Stop"
 
   Here each deploy builds into its own `.next-<stamp>` while the current
   release keeps serving. Only when that build has produced a BUILD_ID does the
-  service switch to it — one restart, seconds rather than the length of a
+  service switch to it - one restart, seconds rather than the length of a
   build. If the new release does not answer a health check, the service is put
   back on the previous directory, which is still on disk untouched.
 
@@ -73,6 +73,22 @@ function Set-DistDir([string] $xmlPath, [string] $value) {
   }
   $node.SetAttribute("value", $value)
   $xml.Save($xmlPath)
+}
+
+function Restart-HabitatWeb() {
+  # Restart-Service throws when the stop takes longer than the service
+  # controller's default wait, even though WinSW does finish stopping a few
+  # seconds later and starts the new release. That threw once (2026-09-02)
+  # after the switch and skipped the health check and the prune, with the
+  # new release already serving. Stop, wait up to 90s for Stopped, then
+  # start - and let Test-Health be the judge, not the stop's timing.
+  $service = Get-Service HabitatWeb
+  if ($service.Status -ne "Stopped") {
+    try { Stop-Service HabitatWeb -Force -ErrorAction Stop } catch { Write-Warning "Stop-Service reported: $($_.Exception.Message) - waiting for the service to settle." }
+    try { $service.WaitForStatus("Stopped", [TimeSpan]::FromSeconds(90)) } catch { Write-Warning "HabitatWeb did not report Stopped within 90s; starting anyway and letting the health check decide." }
+  }
+  Start-Service HabitatWeb -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 2
 }
 
 function Test-Health([int] $attempts) {
@@ -159,12 +175,12 @@ if ($buildExit -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $releasePath "B
 
 Write-Output "Switching HabitatWeb to $releaseDist"
 Set-DistDir $serviceXml $releaseDist
-Restart-Service HabitatWeb
+Restart-HabitatWeb
 
 if (-not (Test-Health $HealthAttempts)) {
   Write-Warning "$releaseDist did not answer $HealthPath with 200. Rolling back to $previousDist."
   Set-DistDir $serviceXml $previousDist
-  Restart-Service HabitatWeb
+  Restart-HabitatWeb
   if (Test-Health $HealthAttempts) { Write-Warning "Rolled back. $previousDist is serving again; $releaseDist is kept on disk for inspection." }
   else { Write-Error "Rollback to $previousDist also failed its health check. HabitatWeb needs hands." }
   exit 1
