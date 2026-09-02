@@ -249,7 +249,7 @@ export default async function ClassGuidePage({ params }: { params: Promise<{ slu
           {entry.corrupted.nodes.map((node) => {
             const card = cardForCorruptedPhase(entry.slug, node.phase);
             return card ? (
-              <AbilityCardView card={card} eyebrow={`Lights at phase ${node.phase}`} flavor={node.desc} key={node.name} name={node.name} />
+              <AbilityCardView card={card} eyebrow={`Lights at phase ${node.phase}`} flavor={node.desc} icon={icons.get(`${entry.slug}-corrupt-${node.phase}`) ?? null} key={node.name} name={node.name} />
             ) : (
               <div className={`cls-corrupt-node${node.phase >= 7 ? " is-terminal" : ""}`} key={node.name}><i>phase {node.phase}</i><b>{node.name}</b><small>{node.desc}</small></div>
             );

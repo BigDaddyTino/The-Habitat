@@ -178,10 +178,14 @@
 /* The backdrop: the class scene under the constellation lines. A dark
    wash keeps the tiles legible; inspecting deepens it so the road is the light. */
 .talent-board { position: relative; }
-.talent-board.has-backdrop { background-size: cover; background-position: center; background-repeat: no-repeat; }
-.talent-board.has-backdrop::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6, 9, 7, .42), rgba(6, 9, 7, .55) 55%, rgba(6, 9, 7, .78)); pointer-events: none; }
-.talent-board.has-backdrop > :not(.talent-tooltip) { position: relative; }
-.talent-board.has-backdrop.is-inspecting::before { background: rgba(3, 5, 4, .88); }
+.talent-board.has-backdrop {
+  --talent-backdrop-wash: linear-gradient(180deg, rgba(6, 9, 7, .42), rgba(6, 9, 7, .55) 55%, rgba(6, 9, 7, .78));
+  background-image: var(--talent-backdrop-wash), var(--talent-backdrop);
+  background-size: 100% 100%, cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.talent-board.has-backdrop.is-inspecting { --talent-backdrop-wash: linear-gradient(rgba(3, 5, 4, .88), rgba(3, 5, 4, .88)); }
 .talent-board.has-backdrop .talent-node { background: rgba(17, 22, 18, .93); border-color: rgba(54, 65, 57, .9); }
 .talent-board.has-backdrop .talent-branch h3 { text-shadow: 0 2px 8px rgba(0, 0, 0, .9); }
 .talent-board.has-backdrop .talent-corrupted { background: rgba(6, 9, 7, .55); padding: 12px; margin-top: 12px; }

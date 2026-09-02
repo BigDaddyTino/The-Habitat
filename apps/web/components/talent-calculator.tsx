@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Check, RotateCcw, Share2 } from "lucide-react";
 import { AbilityCardView, initials } from "@/components/ability-card";
 import { abilityKindLabel } from "@/lib/ability-cards";
@@ -351,7 +351,7 @@ export function TalentCalculator({
         className={`talent-board${inspectedNode ? " is-inspecting" : ""}${backdrop ? " has-backdrop" : ""}`}
         onMouseLeave={() => setHover(null)}
         ref={boardRef}
-        style={backdrop ? { backgroundImage: `url("${backdrop}")` } : undefined}
+        style={backdrop ? ({ "--talent-backdrop": `url("${backdrop}")` } as CSSProperties) : undefined}
       >
         <div className="talent-grid" ref={gridRef}>
           {trace.lines.length || trace.dots.length ? (
@@ -423,6 +423,7 @@ export function TalentCalculator({
           <div className="talent-corrupted-row">
             {tree.corrupted.nodes.map((node) => {
               const lit = node.phase <= state.phase;
+              const icon = iconFor(`corrupt-${node.phase}`);
               return (
                 <button
                   className={`talent-node is-corrupt${lit ? " is-lit" : ""}${node.phase === 7 ? " is-terminal" : ""}`}
@@ -433,7 +434,10 @@ export function TalentCalculator({
                   onMouseEnter={(event) => showHover(event, `corrupt-${node.phase}`, node.phase)}
                   type="button"
                 >
-                  <span aria-hidden="true" className="talent-icon is-glyph is-corrupt-glyph">{node.phase}</span>
+                  {icon
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img alt="" className="talent-icon" src={icon} />
+                    : <span aria-hidden="true" className="talent-icon is-glyph is-corrupt-glyph">{node.phase}</span>}
                   <span className="talent-node-copy">
                     <b>{node.name}</b>
                     <span className="talent-chips"><i className="talent-kind is-kind-corrupted">Phase {node.phase}</i></span>
@@ -454,7 +458,7 @@ export function TalentCalculator({
               cost={hoverNode?.cost}
               eyebrow={hoverNode ? tree.branches.find((branch) => branch.nodes.includes(hoverNode))?.name : `${tree.corrupted.title} · lights at phase ${hoverCorrupt?.phase}`}
               flavor={hoverNode?.desc ?? hoverCorrupt?.desc}
-              icon={hoverNode ? iconFor(hoverNode.id) : null}
+              icon={hoverNode ? iconFor(hoverNode.id) : hoverCorrupt ? iconFor(`corrupt-${hoverCorrupt.phase}`) : null}
               name={hoverNode?.name ?? hoverCorrupt?.name}
             />
           </div>
