@@ -48,27 +48,49 @@ const CAPTIVITY = "the-captivity-arc";
 const SOUTHREACH = "the-southreach-record";
 const TRUE_DEATH = "the-danger-of-true-death";
 
-const coldOpenBody = `The blackout breaks into tracer fire. You are face-down behind shattered masonry in a tropical market street that has been converted, violently and recently, into a battlefield: storefronts burning, awnings shredded, civilian cars abandoned mid-flight, and arcane scarring on the walls that no explosive ever left. Somewhere close, a soldier is vomiting. Somewhere closer, Tino is arguing with [[steve]] — the Blue Spiral guard who rode the pod in with you, and who has been on this island for exactly as long as you have.
+const coldOpenBody = `Control arrives mid-stride, with no fade and no prompt, at a full sprint down a market street that has been converted, violently and recently, into a battlefield: storefronts burning, awnings shredded, civilian cars abandoned mid-flight, arcane scarring on the walls that no explosive ever left. Concrete barriers both sides. Rain. Pearl armor closing the north end behind you, and somewhere down the lane ahead the last transport's tail lights, a soldier waving from the tailgate. Tino is five metres ahead and not waiting.
 
-TINO: "Hey. Eyes up. Eyes the fuck up."
+The tutorial is the run. Nothing announces that control has passed to you — the game simply stops taking it, and the only thing it asks first is that you keep up.
 
-Steve fires over cover. STEVE: "Pearl's pushing the east street!" TINO: "Then let 'em. We're getting boxed in."
+Somewhere behind you, [[steve]] — the Blue Spiral guard who rode the pod in with you, and who has been on this island for exactly as long as you have — is shouting over the barriers. STEVE: "Pearl's pushing the east street!" TINO: "Then let 'em. We're getting boxed in."
 
-The radio answers with a voice already halfway to panic. RADIO: "Stormglass Actual, this is Red Three. We have movement under the streets. Repeat — under the fucking streets." The transmission ends in screaming and static.
+The radio, flat with fatigue. RADIO: "Market transport, Stormglass Actual. You are rolling at two minutes. Anybody not on the tailgate is walking."
 
-Tino looks at you. TINO: "You still with me?"
+TINO, not looking back: "Truck's at the end of this. Two minutes was a minute ago."
 
-You don't answer with words. You answer by looking up. That is the whole tutorial: the war teaches, and it does not pause.
+You don't answer with words. You answer by keeping up. That is the whole tutorial: the war teaches, and it does not pause.
 
-The comet you watched arrive on the broadcast has not landed yet. The report was live, and you are inside the minute before it comes down.`;
+Then the lane bends, the tail lights go around it, and the sky changes its mind.`;
+
+const fallBackBody = `The sky is getting worse in a way that has nothing to do with weather. The Stormglass emergency signal is still sounding — it has been sounding since before you had control — and the radio channels are talking over each other like drowning men sharing one rope.
+
+The transport is gone. It rolled at two minutes, on schedule, the way Stormglass Actual said it would, with the strike still in the air; the lane where its tail lights were is a crater's worth of nothing and a line of everything it could not carry. Nobody on the radio is asking whether you made it. The radio has moved on.
+
+RADIO: "Kestrel, market transport. We are rolling, we are full, we are gone. Anyone behind us is on their own road."
+
+TINO: "Kestrel's still standing." He looks toward a shattered vehicle checkpoint. TINO: "We need wheels."
+
+The route there shows you the size of the collapse: wounded soldiers, dead armor, abandoned equipment, civilians being herded toward the docks, officers burning documents, and one soldier refusing — flatly, finally — to leave a wounded friend. The island is not losing. The island has lost, and is now deciding how much it will cost.`;
+
+const itJustKeptGoingBody = `The opening cinematic. Rating R, about three and a half minutes of narration and a fourteen-second run, and then the game.
+
+It is not a broadcast. Nobody reports this war to an audience. It is [[tino]] talking to you — the new guy, still under from the injection at Wendy's desk — explaining the world while there is still time, in fifteen sections, each a single held image that animates into the next. Rain from the first frame. One low motif that never swells and drops out entirely at the thirteenth section.
+
+**What he tells you, in order.** The world did not end; it just kept going, twenty years from the one you know, where magic is a budget line. The three ways to hold it: born with it and therefore valuable to everyone who comes to the door; taken, by extraction that kills the source and takes a little less of you home every dose; given, freely, by something nobody remembers, which is what a whole church is built on ([[the-three-origins-of-magic]]). The harvest the world runs on, farmed and stockpiled and cross-bred and prayed to and moved. The bill, in seven phases, from a tremor to a containment crew deciding whether to help or burn ([[the-seven-phases-of-corruption]]); he runs a rig, don't ask. Thirty-five powers on one strip of land, every one of them the good guys, and things under the ground with titles. Stormglass, the slow rock magic, and who runs the lanes it moves through ([[stormglass]]). The [[stormglass-cartel]]: not an army, smugglers who got rich enough to buy one; you work for them, and so does he, still, technically. Pearl, who does not invade but acquires, and to whom an island is a deposit ([[tropic-pearl-trade-house]]). [[the-starting-island]]: tourists, fishermen, one market street, one quarry, and under the quarry the seam that is the whole war. The war itself, every street changed hands twice, losing slow — then the third thing, and losing fast ([[something-under-the-war]]). Craters that don't go cold. Red Three calling in movement under the streets, and then Red Three not calling.
+
+**Why we are running.** Red Three was ours, so we went back for them: that is not a rule, it is just what you do. We found them, all of them, Pearl's too. And with the north end closing behind us the order came down — island defense line broken, fall back to [[forward-camp-kestrel]], last transport leaves the market in two minutes, do not use the eastern bridge, something is on the bridge. Two minutes. Both armies shooting across the only road south, and the truck at the far end of it. So. You still with me? Good. Eyes up. Eyes the fuck up.
+
+**The run.** On that line the last still becomes the street, first person, already sprinting: Tino three metres ahead, the downed walker he put down still smoking, Pearl strikes hammering the buildings behind you. He shouts the three things he has time to shout — the north end is gone and the truck is past that street so we go through; head down, ass moving, don't stop, don't think, don't sightsee; get shot and he is not carrying you. Fourteen seconds. The lane opens into the gauntlet, barriers both sides, the transport's tail lights far down it through the rain, a soldier waving from the tailgate. No fade. Gameplay takes control mid-run, still running.
+
+**Locks.** The narration is owner-locked verbatim (the lines below are that script, kept here so the voice pipeline can address them); the identity reference for Tino's one appearance is his turnaround; the player is never shown except as gloved hands and a rifle, and never at all in the run. Deliberately not revealed anywhere in it: who fired the Strike, what is under the war, Tino's corruption phase, and who the old givers were. The mural and the hand in the crater are glimpses only.`;
 
 const theStrikeBody = `The squad advances twenty meters through a scripted combat lane — friendlies shooting, dragging wounded, reloading, shouting orders that already sound like obituaries. Then the sky changes. Every sound drops into one low-frequency pressure tone, the kind you feel in your teeth before you hear it.
 
 Tino looks up. TINO: "Oh, shit."
 
-This is the thing the correspondent's camera tilted up into. [[the-strike]] is not artillery. It is a spell — something cast, at a scale nothing in this war is supposed to be able to cast, from somewhere east along the coast where [[tropic-pearl-trade-house]] keeps its casters — and it comes in across the battlefield rather than down onto it, and it lands like the fist of something that was never asked for permission. Glass bows inward before it breaks. Streetlights die. Gravity forgets itself in glittering arcane particles. Bodies and debris cross your vision and then you are airborne, thrown through your own cover, and the world collapses into tinnitus and a single held breath of black.`;
+The tail lights at the end of the lane are the last thing you see before it comes down. [[the-strike]] is not artillery. It is a spell — something cast, at a scale nothing in this war is supposed to be able to cast, from somewhere east along the coast where [[tropic-pearl-trade-house]] keeps its casters — and it comes in across the battlefield rather than down onto it, and it lands like the fist of something that was never asked for permission. Glass bows inward before it breaks. Streetlights die. Gravity forgets itself in glittering arcane particles. Bodies and debris cross your vision and then you are airborne, thrown through your own cover, and the world collapses into tinnitus and a single held breath of black.`;
 
-const wheelsBody = `The one usable truck is locked, and its crew will not be needing it. Tino tries the door with the weary optimism of a man who has never once been lucky.
+const wheelsBody = `The transport left without you. This truck did not leave at all: it is locked, and its crew will not be needing it. Tino tries the door with the weary optimism of a man who has never once been lucky.
 
 TINO: "Locked." He surveys the incoming battle. "Naturally."
 
@@ -263,7 +285,9 @@ const RESPEAK: Array<{ arc: string; node: string; number: number; speaker: LineS
 
 /** Lines that are not speech (titles, a repeated cue) or that moved to a new card. */
 const RETIRE: Array<{ arc: string; node: string; numbers: number[]; because: string }> = [
-  { arc: ISLAND, node: "live-from-the-island", numbers: [4], because: "the same utterance is cold-open/01; the beat only says the prologue resumes there" },
+  { arc: ISLAND, node: "live-from-the-island", numbers: [1, 2, 3, 4], because: "the broadcast is cut from the opening; the beat is archived" },
+  { arc: ISLAND, node: "cold-open", numbers: [1, 4, 5], because: "said in the cinematic now (Eyes the fuck up; You still with me?), and Red Three stopped calling before the game began" },
+  { arc: ISLAND, node: "fall-back-to-kestrel", numbers: [1, 2], because: "the retreat order and the bridge warning are given in the cinematic, before control" },
   { arc: ISLAND, node: "seq-000", numbers: [5, 11], because: "a screen title and a cinematic title, not speech" },
   { arc: ISLAND, node: "where-is-your-partner", numbers: [2, 3, 4, 5, 6], because: "moved to out-of-time, after the player answers the guard" },
   { arc: ISLAND, node: "where-are-you-bound", numbers: [2, 3, 4], because: "moved to bound-nowhere, the answer that earns them" },
@@ -278,6 +302,39 @@ const RETEXT: Array<{ arc: string; node: string; number: number; text: string }>
 
 /** Lines on the new and reshaped cards. */
 const LINES: Array<{ arc: string; node: string; lines: LineSpec[] }> = [
+  // The opening cinematic's narration, verbatim from the owner-locked script
+  // (Cinematics/LOCK/Opening_Cinematic/OPENING_CINEMATIC_SCRIPT_v001.md), one
+  // line per section, plus the radio and the three shouts of the run.
+  { arc: ISLAND, node: "it-just-kept-going", lines: [
+    line(1, c("tino"), "Everybody wants to know how the world ended. It didn't. That's the fucked-up part. It just kept going.", { performance: "V.O., start on black, rain; a beat after 'ended'", intensity: 3, emotion: ["dry", "calm"] }),
+    line(2, c("tino"), "Twenty years from the world you know. Magic was never a secret. Never new. Nobody here gasps when a soldier throws lightning — it's Tuesday. Wards next to security cameras. Rifles that hold a spell. Mage units on the payroll. It's not a fantasy. It's a budget line.", { performance: "V.O., dry, clipped, explaining the world to the new guy", intensity: 3, emotion: ["dry"] }),
+    line(3, c("tino"), "Three ways to hold magic. One: you're born with it. Rare. Rare enough that being born special is a life sentence to being valuable. Somebody's always coming to the door. Governments. Corporations. Churches. Guys like me.", { performance: "V.O.; a beat before 'Guys like me'", intensity: 3, emotion: ["dry", "sad"] }),
+    line(4, c("tino"), "Two: you take it. Science figured out how to pull magic out of something and pump it into somebody. Works great. Two problems. It wears off. And extraction kills the source. Every dose is a life. Then you need another one. And another. And every time, a little less of you comes home.", { performance: "V.O.; a beat before 'And every time'", intensity: 4, emotion: ["dry", "sad"] }),
+    line(5, c("tino"), "Three: something gives it to you. Freely. Rarest thing on this earth — there's a whole church built on it. Old walls say that's how it all started. As a gift. Nobody remembers from who. Figures.", { performance: "V.O.; quiet; a beat before 'Figures'", intensity: 3, emotion: ["calm", "dry"] }),
+    line(6, c("tino"), "So the whole world runs on a harvest. Corporations farm it. Governments stockpile it. Labs cross-breed it and call whatever crawls out 'product'. Cults pray to it. Criminals move it. That's my department. We'll get to that.", { performance: "V.O.; a beat before 'That's my department'", intensity: 3, emotion: ["dry", "contempt"] }),
+    line(7, c("tino"), "And the bill comes due in phases. Seven of 'em. First it's a tremor. Then it's a look people give you. At the end there's a thing standing where a person was, and a containment crew deciding whether to help it or burn the evidence. Every one of those used to be somebody. I've known a few. I run a rig. Don't ask.", { performance: "V.O.; goes quiet on 'I've known a few'; a beat before 'I run a rig'", intensity: 4, emotion: ["sad", "dry"] }),
+    line(8, c("tino"), "The Peninsula. Thirty-five powers on one strip of land, and every single one of 'em is sure it's the good guys. State armies. Corporate armies. Churches. Cults. Mountain towns that shoot surveyors on sight. And things under the ground with titles. Later.", { performance: "V.O.; a beat before 'Later'", intensity: 3, emotion: ["dry"] }),
+    line(9, c("tino"), "This is stormglass. Magic the ground makes on its own — nature-drawn, in a rock. Weaker than the soul stuff. Takes a lot more of it. But it's slow. It eats you slow. Guess who runs the lanes it moves through.", { performance: "V.O.; a beat before 'Guess who'", intensity: 3, emotion: ["dry"] }),
+    line(10, c("tino"), "The Stormglass Cartel. We're not an army. We're smugglers who got rich enough to buy one. Illegal sea lanes, artifacts, crystal ammo, and every hard case on the peninsula who'll fight for pay and a boat ride home. You work for us. So do I. Still. Technically.", { performance: "V.O.; a beat before 'You work for us'", intensity: 3, emotion: ["dry", "amused"] }),
+    line(11, c("tino"), "Pearl. The Tropic Pearl Trade House. Old merchant families, new wars. They don't invade. They acquire. Hire the army, sign the paper, watch it from the veranda, bill the survivors. Their contractors are pros. Their riders come out of the old world with machine guns bolted on. And to them an island's not a flag. It's a deposit.", { performance: "V.O.; a beat before 'And to them'", intensity: 4, emotion: ["contempt", "dry"] }),
+    line(12, c("tino"), "Ignit Island. Tourists, fishermen, one market street, one quarry. And under the quarry, the biggest stormglass seam anybody ever found, with an Essence relay bolted on top. Pearl wanted the deposit. We were already standing on it. That's the whole war. Everything else is paperwork.", { performance: "V.O.; a beat before 'That's the whole war'", intensity: 3, emotion: ["dry"] }),
+    line(13, c("tino"), "Six weeks ago that was a market. Pearl landed on the beach with an army and a receipt. We dug in with what we had. Every street changed hands twice. Every roof, three times. We were losing slow. Then the third thing showed up. And we started losing fast.", { performance: "V.O.; a beat before 'We were losing slow'", intensity: 4, emotion: ["dry", "afraid"] }),
+    line(14, c("tino"), "Craters that don't go cold. Smoke that moves against the wind. Dead men who don't stay down. Red Three called it in — 'movement under the streets.' Then Red Three stopped calling.", { performance: "V.O.; music out, rain only; a beat before 'Then Red Three stopped calling'", intensity: 4, emotion: ["afraid", "calm"] }),
+    line(15, c("tino"), "Red Three was ours. So we went back for them. That's not a rule. Nobody wrote it down. It's just what you do.", { performance: "V.O.; a beat before 'It's just what you do'", intensity: 4, emotion: ["protective", "calm"] }),
+    line(16, c("tino"), "We found them. All of them. Pearl's too — that walker I put down is still smoking.", { performance: "V.O. over the held street; rain, radio crackle under; a beat after 'We found them'", intensity: 4, emotion: ["sad", "dry"] }),
+    line(17, r("radio"), "All Stormglass personnel: island defense line is broken. Fall back to Kestrel. Last transport leaves the market in two minutes. Do not use the eastern bridge. Something is on the bridge.", { performance: "Stormglass Actual, tired, flat", intensity: 5, emotion: ["command", "neutral"] }),
+    line(18, c("tino"), "Two minutes. Pearl armor closing the north end behind us. Both armies shooting across the only road south. And the truck at the far end of it. So. You still with me? Good. Eyes up. Eyes the fuck up.", { performance: "V.O., speeding up for the first time; beats before 'So', after 'with me?', after 'Eyes up'", intensity: 6, emotion: ["urgent", "command"] }),
+    line(19, c("tino"), "North end's gone! Truck's past that street, so we go through!", { performance: "in-scene, the run; glancing back at a sprint, gravelly", intensity: 8, emotion: ["urgent", "command"] }),
+    line(20, c("tino"), "Head down, ass moving! Don't stop, don't think, don't fuckin' sightsee!", { performance: "in-scene, over his shoulder, hurdling rubble", intensity: 9, emotion: ["urgent", "command"] }),
+    line(21, c("tino"), "Get shot and I'm not carrying you!", { performance: "in-scene, one glance back, lead opening to five metres", intensity: 8, emotion: ["urgent", "dry"] }),
+  ] },
+  { arc: ISLAND, node: "cold-open", lines: [
+    line(6, r("radio"), "Market transport, Stormglass Actual. You are rolling at two minutes. Anybody not on the tailgate is walking.", { performance: "flat with fatigue", intensity: 5, emotion: ["command", "neutral"] }),
+    line(7, c("tino"), "Truck's at the end of this. Two minutes was a minute ago.", { performance: "not looking back, at a sprint", intensity: 7, emotion: ["urgent", "dry"] }),
+  ] },
+  { arc: ISLAND, node: "fall-back-to-kestrel", lines: [
+    line(5, r("radio"), "Kestrel, market transport. We are rolling, we are full, we are gone. Anyone behind us is on their own road.", { performance: "the transport's driver, already moving on", intensity: 5, emotion: ["neutral", "urgent"] }),
+  ] },
   { arc: ISLAND, node: "out-of-time", lines: [
     line(1, c("the-kestrel-commander"), "You came from the east road?", { performance: "reads your face like a casualty list", intensity: 4, emotion: ["dry"] }),
     line(2, c("the-kestrel-commander"), "Fuck.", { performance: "flat; the answer landed", intensity: 5, emotion: ["sad", "dry"] }),
@@ -327,7 +384,9 @@ const LINES: Array<{ arc: string; node: string; lines: LineSpec[] }> = [
 // ── Bible references per scene (the exact set) ─────────────────────────────
 
 const LINKS: Array<{ arc: string; node: string; slugs: string[] }> = [
-  { arc: ISLAND, node: "cold-open", slugs: ["tino", "steve", "stormglass-cartel", "tropic-pearl-trade-house", "the-starting-island", "something-under-the-war", "the-strike"] },
+  { arc: ISLAND, node: "it-just-kept-going", slugs: ["tino", "stormglass-cartel", "tropic-pearl-trade-house", "the-starting-island", "the-three-origins-of-magic", "the-seven-phases-of-corruption", "stormglass", "something-under-the-war", "forward-camp-kestrel", "hippogriff", "the-harvest-economy"] },
+  { arc: ISLAND, node: "cold-open", slugs: ["tino", "steve", "stormglass-cartel", "tropic-pearl-trade-house", "the-starting-island", "the-strike"] },
+  { arc: ISLAND, node: "fall-back-to-kestrel", slugs: ["forward-camp-kestrel", "tino", "stormglass-cartel", "something-under-the-war"] },
   { arc: ISLAND, node: "the-strike", slugs: ["the-strike", "tino", "tropic-pearl-trade-house"] },
   { arc: ISLAND, node: "where-is-your-partner", slugs: ["forward-camp-kestrel", "tino"] },
   { arc: ISLAND, node: "your-partner-answer", slugs: ["forward-camp-kestrel", "tino"] },
@@ -393,7 +452,15 @@ async function main() {
   };
 
   // ── The prologue ────────────────────────────────────────────────────────
-  await writer.node(ISLAND, await keep(ISLAND, "cold-open", { key: "cold-open", kind: "SCENE", title: "Eyes The Fuck Up", summary: "No menu. No mercy. You blink back in from a dead broadcast and you are already crouched in a war you are losing — inside the minute before the strike you just watched arrive.", body: coldOpenBody }));
+  // The opening: enlistment -> the cinematic -> control mid-run. The news
+  // broadcast is cut (owner, 2026-09-02); its beat is archived below.
+  await writer.node(ISLAND, { key: "it-just-kept-going", kind: "BEAT", title: "It Just Kept Going", summary: "The opening cinematic: Tino narrates the world, the war and why we are running, fifteen held images and one fourteen-second run, ending on \"Eyes the fuck up\" and a handoff mid-sprint.", body: itJustKeptGoingBody, speakerSlug: "tino", ...(await near(ISLAND, "seq-000", 300, 40)) });
+  await writer.retireEdge(ISLAND, "seq-000", "live-from-the-island", null, "the broadcast beat is cut; the enlistment hands to the cinematic");
+  await writer.retireEdge(ISLAND, "live-from-the-island", "cold-open", null, "the broadcast beat is cut; the cinematic hands to the run");
+  await writer.edge(ISLAND, { from: "seq-000", to: "it-just-kept-going" });
+  await writer.edge(ISLAND, { from: "it-just-kept-going", to: "cold-open" });
+  await writer.node(ISLAND, await keep(ISLAND, "cold-open", { key: "cold-open", kind: "SCENE", title: "Keep Up", summary: "No menu. No mercy. Control arrives mid-sprint behind Tino, with the retreat order already given, the transport already rolling, and Pearl closing the north end behind you.", body: coldOpenBody }));
+  await writer.node(ISLAND, await keep(ISLAND, "fall-back-to-kestrel", { key: "fall-back-to-kestrel", kind: "BEAT", title: "The Transport Is Gone", summary: "The last truck out rolled on schedule while the strike was still in the air. The war stops being a fight and becomes a flood, and everyone in it is suddenly cargo or current.", body: fallBackBody }));
   await writer.node(ISLAND, await keep(ISLAND, "the-strike", { key: "the-strike", kind: "BEAT", title: "The Sky Changes Its Mind", summary: "The squad moves. The sky falls. The player is not expected to win this battle — they are expected to survive being wrong about what a battle is.", body: theStrikeBody }));
   await writer.node(ISLAND, await keep(ISLAND, "wheels", { key: "wheels", kind: "SCENE", title: "Good News. Today You Learn.", summary: "One locked truck, three tools, and the rudest wristwatch on the island — on Tino's wrist, where it stays until the band gives.", body: wheelsBody }));
 
@@ -491,6 +558,47 @@ It is the closest he comes to a joke, and he watches to see whether you take it 
   // ── References ────────────────────────────────────────────────────────────
   for (const entry of LINKS) await writer.links(entry.arc, entry.node, entry.slugs);
 
+  // ── The cut broadcast ────────────────────────────────────────────────────
+  // The beat leaves the working board and the export (ARCHIVED is outside
+  // workingStatuses); its lines are retired above. The correspondent who
+  // existed only to die on his own feed goes with it, as a reserved slot.
+  const cutChanges: string[] = [];
+  {
+    const arcId = await writer.arcId(ISLAND);
+    const beat = await db.storyNode.findUnique({ where: { arcId_key: { arcId, key: "live-from-the-island" } }, select: { id: true, status: true, title: true } });
+    if (beat && beat.status !== "ARCHIVED") {
+      cutChanges.push(`archive ${ISLAND}/live-from-the-island`);
+      if (apply) {
+        await db.storyNode.update({ where: { id: beat.id }, data: { status: "ARCHIVED", updatedByUserId: actor.id, version: { increment: 1 } } });
+        await db.storyRevision.create({ data: { entityType: "NODE", entityId: beat.id, arcId, action: "STATUS_CHANGED", actorUserId: actor.id, summary: `Archived "${beat.title}" — the news broadcast is cut from the opening; the cinematic hands straight to the run.`, before: { status: beat.status }, after: { status: "ARCHIVED" } } });
+      }
+    }
+    const seq = await db.storyNode.findUnique({ where: { arcId_key: { arcId, key: "seq-000" } }, select: { id: true, body: true } });
+    const from = "He laughs. Cut to the opening cinematic “It Just Kept Going.” Its final movement is the existing live-from-the-island beat; the camera remains first person and gameplay takes control mid-gauntlet.";
+    const to = "He laughs. Cut to the opening cinematic “It Just Kept Going”: Tino narrates the world, the war and why we are running, fifteen held images ending on “Eyes the fuck up.” Its final movement is a first-person run down the market street, and gameplay takes control mid-gauntlet, still running.";
+    if (seq && !seq.body?.includes(to)) {
+      if (!seq.body?.includes(from)) cutChanges.push(`SEQ-000 handoff sentence not found verbatim; left as is`);
+      else {
+        cutChanges.push(`seq-000: the handoff sentence names the cinematic, not the broadcast`);
+        if (apply) {
+          await db.storyNode.update({ where: { id: seq.id }, data: { body: seq.body.replace(from, to), updatedByUserId: actor.id, version: { increment: 1 } } });
+          await db.storyRevision.create({ data: { entityType: "NODE", entityId: seq.id, arcId, action: "UPDATED", actorUserId: actor.id, summary: "SEQ-000 hands to the cinematic, not the cut broadcast beat." } });
+        }
+      }
+    }
+    const correspondent = await db.storyEntry.findUnique({ where: { slug: "the-war-correspondent" }, select: { id: true, status: true, body: true, meta: true } });
+    if (correspondent && correspondent.status !== "ARCHIVED") {
+      cutChanges.push("archive CHARACTER the-war-correspondent (reserved slot; his scene is cut)");
+      if (apply) {
+        const meta = (typeof correspondent.meta === "object" && correspondent.meta !== null && !Array.isArray(correspondent.meta) ? correspondent.meta : {}) as Record<string, unknown>;
+        const status = (typeof meta.status === "object" && meta.status !== null ? meta.status : {}) as Record<string, unknown>;
+        const body = `${(correspondent.body ?? "").trimEnd()}\n\n## Cut from the opening (2026-09-02)\n\nThe news broadcast is no longer part of the opening. The game goes from Wendy's desk to the cinematic "It Just Kept Going" — Tino talking to the new guy, not a reporter talking to an audience — and hands control to the player mid-run. This character therefore has no scene. The slot is kept, archived, for whoever writes the peninsula's first press power; the register (official language read by a man who has stopped believing it) is still worth having somewhere.`;
+        await db.storyEntry.update({ where: { id: correspondent.id }, data: { status: "ARCHIVED", body, meta: { ...meta, involvement: [], status: { ...status, known: "Cut from the opening (2026-09-02). Reserved slot: the broadcast beat he died in no longer exists." } } as never, updatedByUserId: actor.id, version: { increment: 1 } } });
+        await db.storyRevision.create({ data: { entityType: "ENTRY", entityId: correspondent.id, action: "STATUS_CHANGED", actorUserId: actor.id, summary: "Archived the War Correspondent — the broadcast is cut from the opening; the slot is reserved.", before: { status: correspondent.status }, after: { status: "ARCHIVED" } } });
+      }
+    }
+  }
+
   // ── Lines ─────────────────────────────────────────────────────────────────
   const nodeId = async (arc: string, key: string) => {
     const arcId = await writer.arcId(arc);
@@ -575,6 +683,8 @@ It is the closest he comes to a joke, and he watches to see whether you take it 
   for (const change of lineChanges) console.log(`  ${change}`);
   console.log(`\nArcs (${arcChanges.length})`);
   for (const change of arcChanges) console.log(`  ${change}`);
+  console.log(`\nThe cut broadcast (${cutChanges.length})`);
+  for (const change of cutChanges) console.log(`  ${change}`);
 }
 
 main().catch((error) => { console.error(error); process.exit(1); }).finally(() => db.$disconnect());
