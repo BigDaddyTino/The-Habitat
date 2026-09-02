@@ -3,7 +3,7 @@ import { readdirSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { codexArtFileForUrl } from "./codex-art";
-import { artSlotKinds, dossierArtSlot, getDossierArt } from "./dossier-art";
+import { artSlotKinds, dossierArtExpected, dossierArtSlot, getDossierArt } from "./dossier-art";
 
 /**
  * The regression these tests exist for: six kinds had finished artwork in
@@ -90,6 +90,21 @@ test("every kind that can wear art offers the path that would fill it", () => {
     assert.match(slot, /^private\/codex-art\/[a-z-]+\/some-entry\.png$/);
   }
   assert.equal(dossierArtSlot("ARC", "some-arc"), null, "kinds with no art shelf must not invent one");
+});
+
+test("an unnamed reserved character seat is not reported as an owed portrait", () => {
+  const reservedSeat = {
+    fullName: null,
+    appearance: null,
+    model: "The reserved-leader pattern: seat exists, first writer names it.",
+  };
+
+  assert.equal(dossierArtExpected("CHARACTER", "the-grand-advocate", reservedSeat), false);
+  assert.equal(dossierArtSlot("CHARACTER", "the-grand-advocate", reservedSeat), null);
+  assert.equal(dossierArtExpected("CHARACTER", "the-grand-advocate", { ...reservedSeat, appearance: "decided", model: "copy changed" }), false);
+  assert.equal(getDossierArt("CHARACTER", "the-grand-advocate", { ...reservedSeat, appearance: "decided", model: "copy changed" }), null);
+  assert.equal(dossierArtExpected("CHARACTER", "the-grand-advocate", { ...reservedSeat, fullName: "A named person" }), true);
+  assert.equal(dossierArtSlot("CHARACTER", "the-grand-advocate", { ...reservedSeat, fullName: "A named person" }), "private/codex-art/characters/the-grand-advocate.png");
 });
 
 test("owner-approved Bloomfall plates still outrank everything below them", () => {

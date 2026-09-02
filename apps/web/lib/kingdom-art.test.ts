@@ -64,6 +64,7 @@ test("every Crown final satisfies its exact RGB24 PNG contract", async () => {
     assert.equal(metadata.depth, "uchar", `${slug} does not use 8-bit channels`);
     assert.equal(metadata.space, "srgb", `${slug} is not sRGB`);
     assert.equal(metadata.hasAlpha, false, `${slug} unexpectedly has alpha`);
+    assert.equal(metadata.isPalette, false, `${slug} is unexpectedly palette-indexed`);
   }
 });
 

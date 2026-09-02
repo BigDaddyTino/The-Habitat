@@ -33,6 +33,7 @@ const factionAccents = {
   "stormglass-cartel": "#438ee8",
   "the-ashen-court": "#b8323f",
   "the-choir-below": "#4bb4be",
+  "the-congregation-of-the-bound": "#a8bdc5",
   "the-free-peoples-compact": "#7c9a52",
   "the-old-hunger": "#9f2737",
   "the-pale-embassy": "#d9c7a1",
@@ -42,13 +43,18 @@ const factionAccents = {
   "wardens-monster-hunter-guild": "#d4913f",
 } as const satisfies Record<string, string>;
 
+// The original faction shelf shipped as JPG key art. New drop-in commissions
+// may use the standing PNG contract without forcing every older plate through
+// a lossy transcode.
+const pngFactionKeyart = new Set<string>(["the-congregation-of-the-bound"]);
+
 export function getFactionBranding(slug: string): FactionBranding | null {
   const accent = factionAccents[slug as keyof typeof factionAccents];
   if (!accent) return null;
 
   return {
     accent,
-    keyart: `/codex-art/factions/${slug}.jpg`,
+    keyart: `/codex-art/factions/${slug}.${pngFactionKeyart.has(slug) ? "png" : "jpg"}`,
     logo: `/codex-art/faction-logos/${slug}.png`,
   };
 }

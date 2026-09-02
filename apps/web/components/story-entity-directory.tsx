@@ -415,7 +415,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           // card offers the path that would make one — not just for systems,
           // which is all this used to do.
           const art = getDossierArt(entry.kind, entry.slug, entry.meta);
-          const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug);
+          const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug, entry.meta);
           const factionBrand = entry.kind === "FACTION" ? getFactionBranding(entry.slug) : null;
           const regionBrand = entry.kind === "REGION" ? getRegionBranding(entry.slug) : null;
           const characterFactionBrands = entry.kind === "CHARACTER"

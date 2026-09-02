@@ -3,8 +3,8 @@ import test from "node:test";
 import { codexArtFileForUrl } from "./codex-art";
 import { brandedFactionCount, brandedFactionSlugs, getFactionBranding } from "./faction-branding";
 
-test("every branded faction has its paired optimized key art and transparent logo", () => {
-  assert.equal(brandedFactionCount, 35);
+test("every branded faction has its paired optimized key art and logo", () => {
+  assert.equal(brandedFactionCount, 36);
 
   for (const slug of brandedFactionSlugs) {
     const brand = getFactionBranding(slug);

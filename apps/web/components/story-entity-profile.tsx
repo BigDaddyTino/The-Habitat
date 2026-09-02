@@ -144,7 +144,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   // ternary and again over there, and six kinds' artwork went unrendered in
   // both. Faction branding stays below: its hero is two elements, not one.
   const art = getDossierArt(entry.kind, entry.slug, meta);
-  const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug);
+  const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug, meta);
   const artSlotIcon = artSlotIcons[entry.kind] ?? <Sparkles aria-hidden="true" size={30} />;
   const characterAffiliations = isCharacter
     ? rows(meta.factions).flatMap((membership) => {

@@ -67,7 +67,26 @@ const artSlotDirectory = {
   THREAD: "threads",
 } as const satisfies Record<string, CodexArtKind>;
 
-export function dossierArtSlot(kind: string, slug: string): string | null {
+/**
+ * Reserved, unnamed character seats are real story records but not casting
+ * briefs. They become portrait-eligible only once a writer gives the seat a
+ * person: until then the honest visual state is deliberately blank, not an
+ * "owed" art path.
+ */
+const reservedPortraitSlugs = new Set<string>(["the-grand-advocate"]);
+
+export function dossierArtExpected(kind: string, slug: string, meta: unknown): boolean {
+  if (!(kind in artSlotDirectory)) return false;
+  if (kind !== "CHARACTER" || !reservedPortraitSlugs.has(slug)) return true;
+
+  const character = meta && typeof meta === "object" && !Array.isArray(meta)
+    ? meta as Record<string, unknown>
+    : {};
+  return typeof character.fullName === "string" && character.fullName.trim().length > 0;
+}
+
+export function dossierArtSlot(kind: string, slug: string, meta?: unknown): string | null {
+  if (!dossierArtExpected(kind, slug, meta)) return null;
   const directory = artSlotDirectory[kind as keyof typeof artSlotDirectory];
   return directory ? codexArtSlot(directory, slug) : null;
 }
@@ -81,6 +100,8 @@ export function dossierArtSlot(kind: string, slug: string): string | null {
  * resolver, then the drop-in convention.
  */
 export function getDossierArt(kind: string, slug: string, meta: unknown): DossierArt | null {
+  if (!dossierArtExpected(kind, slug, meta)) return null;
+
   const plate = getBloomfallCreatureHeroArt(slug);
   if (plate) {
     return { src: bloomfallCreatureArtUrl(plate), alt: "creature key art", caption: "Bloomfall creature · owner-approved key art" };

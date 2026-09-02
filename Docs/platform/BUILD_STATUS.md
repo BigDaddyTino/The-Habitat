@@ -977,3 +977,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Full repository tests pass, including 554/554 web tests; workspace typecheck and lint pass, with one pre-existing class-page image warning and no lint errors
 - [x] Recorded the one-row-per-plate delivery/revision record, accepted generated-source IDs and hashes, normalization, retained evidence, and honest browser boundary in `Docs/art/SOL56_KINGDOM_ART_LEDGER.md`; the available local browser had no member session and correctly redirected to sign-in, so authenticated live-page QA is not claimed
 - [x] Preserved scope: no StoryEntry, database row, public asset, credential, infrastructure address, server control, deploy, or production service was changed
+
+## 2026-09-02 - SOL 5.6 The Faiths, Kept art delivery
+
+- [x] Generated and installed the exact four-file commission: the Congregation's First Hour faction plate and Ledger-and-Bell emblem, plus portraits of Sexton Edda Brook and Anouk Sarr; the six existing Faith Lane plates were not regenerated or changed
+- [x] Preserved every visual and story lock: Brother Aster remains figureless Core light, the Forge remains physical infrastructure, the faith reads as a working hall and ledger, Anouk remains a host rather than clergy, and no text, marked insignia, cross, halo, glowing altar, fantasy-church iconography, or saint lighting appears
+- [x] Superseded the emblem's clock-like fastened first pass and proved the flat revision at exactly 32px; superseded Anouk's separate-vessel first pass and made exactly two riders drink from one shared bucket with both weapons slung
+- [x] Decoded all four finals at the exact contracts — three 1672x941 plates and one 1024x1024 emblem, all opaque non-palette sRGB RGB24 PNGs with unique SHA-256 hashes — and independently reviewed both 706x941 portrait crops, the faction display crop, and the 32px emblem
+- [x] Registered the new PNG faction identity and strengthened coverage to require both faction files on disk; all 42/42 portrait-eligible characters and 36/37 factions now wear art, with the unnamed Grand Advocate explicitly reserved without a portrait and only the separately out-of-scope Radiant Path still empty
+- [x] Enforced the Grand Advocate lock at resolution, UI-slot, and audit time until a nonblank `fullName` is authored; appearance or model-copy changes alone cannot cast the seat
+- [x] Passed 23/23 focused art/resolver tests, scoped ESLint, the live Codex-art coverage audit, diff checks, and anonymous private-route checks; full-frame and crop QA plus exact prompts, sources, hashes, normalization, and revision evidence are reconciled in `Docs/art/SOL56_FAITH_ART_LEDGER.md` and retained local manifests
+- [x] Preserved scope: no StoryEntry, database row, seed prose, Faith Lane plate, public asset, credential, infrastructure address, server control, deploy, or production service was changed

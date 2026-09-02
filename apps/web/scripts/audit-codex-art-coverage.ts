@@ -13,8 +13,8 @@
 import "../lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
 import { crownRanks, realmTrees } from "../lib/kingdom";
-import { findCodexArt } from "../lib/codex-art";
-import { getDossierArt } from "../lib/dossier-art";
+import { codexArtFileForUrl, findCodexArt } from "../lib/codex-art";
+import { dossierArtExpected, getDossierArt } from "../lib/dossier-art";
 import { getFactionBranding } from "../lib/faction-branding";
 import { professions } from "../lib/professions";
 import { talentClasses } from "../lib/talent-trees";
@@ -37,11 +37,16 @@ async function main() {
   for (const [kind, list] of [...byKind.entries()].sort()) {
     // Factions wear branding (keyart + logo) through their own resolver,
     // deliberately outside getDossierArt — count them by that truth.
-    const wears = (entry: (typeof entries)[number]) =>
-      entry.kind === "FACTION" ? Boolean(getFactionBranding(entry.slug)) : Boolean(getDossierArt(entry.kind, entry.slug, entry.meta));
-    const missing = list.filter((entry) => !wears(entry));
-    const worn = list.length - missing.length;
-    console.log(`\n${kind} — ${worn}/${list.length} wear art${missing.length ? `, ${missing.length} empty:` : ""}`);
+    const wears = (entry: (typeof entries)[number]) => {
+      if (entry.kind !== "FACTION") return Boolean(getDossierArt(entry.kind, entry.slug, entry.meta));
+      const brand = getFactionBranding(entry.slug);
+      return Boolean(brand && codexArtFileForUrl(brand.keyart) && codexArtFileForUrl(brand.logo));
+    };
+    const eligible = list.filter((entry) => entry.kind === "FACTION" || dossierArtExpected(entry.kind, entry.slug, entry.meta));
+    const missing = eligible.filter((entry) => !wears(entry));
+    const worn = eligible.length - missing.length;
+    const reserved = list.length - eligible.length;
+    console.log(`\n${kind} — ${worn}/${eligible.length} eligible wear art${reserved ? ` · ${reserved} reserved without portrait` : ""}${missing.length ? `, ${missing.length} empty:` : ""}`);
     for (const entry of missing) {
       totalMissing += 1;
       const meta = (entry.meta ?? {}) as Record<string, unknown>;
