@@ -1,71 +1,129 @@
-/* Kingdom Management - Holding Ground, in the codex's own dark grammar.
-   Same bones as the Trades page: square panels, mono uppercase brass labels,
-   the ladder drawn as a track with gates. Brass is the crown; canon-green is a
-   perk; danger-red is a price. */
+/* Kingdom Management: Holding Ground, in the codex's own dark grammar.
+   Same bones as the Character and Trades pages (square panels, mono
+   uppercase brass labels, labeled field cards) with the crown's own
+   furniture: a hero split copy/art, the Ranks drawn as a stair with a
+   proving gate between each landing, the level ledger as a table, and six
+   tree columns of perk nodes. Brass is the crown; canon-green is a perk;
+   danger-red is a price. */
 
-.km-shell { --km-blue: #7fa4c4; --km-violet: #b98fd6; }
+.km-shell {
+  --km-blue: #7fa4c4;
+  --km-violet: #b98fd6;
+  --km-might: #c9755a;
+  --km-coffers: #d8d3c4;
+  --km-works: var(--brass);
+  --km-arcana: #8fc3d6;
+  --km-roots: #9fbf8a;
+  --km-faith: #cfc6b0;
+}
 
-/* -- Hero ------------------------------------------------------------- */
-.km-hero { margin-bottom: 22px; }
-.km-hero h1 { margin: 2px 0 8px; }
-.km-hero > p { max-width: 760px; color: var(--muted); }
-.km-hero > p b { color: var(--paper); }
+/* -- Hero: copy beside the map table ---------------------------------- */
+.km-hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 22px; align-items: stretch; margin-bottom: 18px; }
+.km-hero-copy h1 { margin: 2px 0 8px; }
+.km-hero-copy > p:not(.eyebrow) { max-width: 640px; color: var(--muted); }
+.km-hero-copy b { color: var(--paper); }
+.km-hero-stats { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.km-hero-stats li { display: grid; gap: 0; min-width: 84px; border: 1px solid var(--line); padding: 6px 10px; background: rgba(12, 16, 13, .5); }
+.km-hero-stats b { font-family: var(--font-display), Georgia, serif; font-size: 20px; line-height: 1.1; color: var(--brass); }
+.km-hero-stats span { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.km-hero-art { position: relative; margin: 0; min-height: 220px; border: 1px solid var(--line); background: radial-gradient(ellipse at 50% 60%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .92) 70%); display: grid; place-items: center; overflow: hidden; }
+.km-hero-art.has-art { background: #0d110e; }
+.km-hero-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.km-hero-art .km-glyph { font-family: var(--font-display), Georgia, serif; font-size: 72px; color: rgba(198, 151, 76, .6); }
+.km-hero-art .play-artslot { position: absolute; left: 10px; right: 10px; bottom: 8px; }
 
-/* -- The law panels (the Trades "law" grammar) ------------------------ */
-.km-law { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
-.km-law > h2 { margin: 0 0 4px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
-.km-law > p.km-lede { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
-.km-law > p.km-lede b { color: var(--paper); }
+/* -- The Ranks as a stair --------------------------------------------- */
+.km-stair { list-style: none; margin: 0 0 12px; padding: 0; display: grid; grid-template-columns: 1fr 44px 1fr 44px 1fr 44px 1fr 44px 1fr; gap: 8px; align-items: stretch; }
+.km-rank { position: relative; display: grid; grid-template-rows: auto auto 1fr; gap: 8px; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); padding: 0 0 10px; }
+.km-rank::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: rgba(198, 151, 76, .25); }
+.km-rank.is-rank-ii::before { background: rgba(198, 151, 76, .4); }
+.km-rank.is-rank-iii::before { background: rgba(198, 151, 76, .55); }
+.km-rank.is-rank-iv::before { background: rgba(198, 151, 76, .75); }
+.km-rank.is-crown { border-color: rgba(198, 151, 76, .6); background: rgba(198, 151, 76, .07); }
+.km-rank.is-crown::before { background: var(--brass); }
+.km-rank-art { position: relative; margin: 0; aspect-ratio: 3 / 2; border-bottom: 1px solid var(--line); background: radial-gradient(circle at 50% 40%, rgba(198, 151, 76, .14), rgba(12, 16, 13, .95) 72%); display: grid; place-items: start center; padding-top: 18px; overflow: hidden; }
+.km-rank-art.has-art { background: #0d110e; padding-top: 0; }
+.km-rank-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.km-rank-art .km-glyph { font-family: var(--font-display), Georgia, serif; font-size: 44px; color: rgba(198, 151, 76, .7); letter-spacing: 2px; }
+.km-rank-art .play-artslot { position: absolute; left: 8px; right: 8px; bottom: 6px; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km-rank > header { display: grid; gap: 1px; padding: 0 12px; }
+.km-rank > header i { font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); }
+.km-rank > header b { font-family: var(--font-display), Georgia, serif; font-size: 20px; line-height: 1.1; color: var(--paper); }
+.km-rank > header span { font-size: 11.5px; color: var(--muted); font-style: italic; }
+.km-rank > dl { margin: 0; padding: 0 12px; display: grid; grid-template-columns: 58px 1fr; gap: 4px 8px; align-items: baseline; font-size: 12px; align-content: start; }
+.km-rank > dl dt { font-family: var(--font-mono); font-size: 9px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.km-rank > dl dd { margin: 0; color: var(--ink); line-height: 1.4; }
+.km-rank > dl dd.is-muted { color: var(--muted); font-size: 11.5px; }
+.km-rank > dl dd.is-good { color: #dfe8d6; padding: 3px 7px; background: rgba(12, 16, 13, .55); border-left: 2px solid var(--canon, #8fbf8a); }
+.km-gate { display: grid; align-content: center; justify-items: center; gap: 4px; text-align: center; border: 1px dashed rgba(198, 151, 76, .55); padding: 8px 4px; background: rgba(198, 151, 76, .04); }
+.km-gate i { font-style: normal; font-family: var(--font-mono); font-size: 7.5px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
+.km-gate b { font-family: var(--font-display), Georgia, serif; font-size: 12px; line-height: 1.1; color: var(--brass); writing-mode: vertical-rl; transform: rotate(180deg); }
+.km-gate span { font-family: var(--font-mono); font-size: 7.5px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); }
 
-.km-quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.km-quick div { border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); }
-.km-quick b { display: block; color: var(--paper); font-size: 13px; margin-bottom: 2px; }
-.km-quick span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+/* -- The level ledger ------------------------------------------------- */
+.km-ledger-law > h2 .field-tag { margin-left: 10px; vertical-align: middle; letter-spacing: .6px; }
+.km-ledger-scroll { overflow-x: auto; border: 1px solid var(--line); background: rgba(12, 16, 13, .5); margin-bottom: 12px; }
+.km-ledger { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 760px; }
+.km-ledger th { text-align: left; font-family: var(--font-mono); font-weight: 500; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--brass); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.km-ledger th.is-wide { width: 44%; }
+.km-ledger td { padding: 7px 10px; border-bottom: 1px solid rgba(60, 70, 62, .35); vertical-align: top; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.4; }
+.km-ledger tr.is-first td { border-top: 1px solid var(--line); }
+.km-ledger tr.is-ceiling td { border-bottom: 0; }
+.km-ledger td.km-lv { font-family: var(--font-display), Georgia, serif; font-size: 16px; color: var(--brass); width: 34px; }
+.km-ledger td.km-rk { white-space: nowrap; }
+.km-ledger td.km-rk i { font-style: normal; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.km-ledger td.km-rk span { display: block; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--brass); }
+.km-ledger td.km-perk { color: var(--paper); font-weight: 600; white-space: nowrap; }
+.km-ledger td.km-grants { color: var(--muted); }
+.km-ledger td.km-pts { color: var(--canon, #8fbf8a); font-family: var(--font-mono); font-size: 11px; }
+.km-ledger tr.km-proving td { padding: 8px 10px 10px 44px; border-bottom: 1px solid rgba(198, 151, 76, .55); border-top: 1px dashed rgba(198, 151, 76, .45); background: rgba(198, 151, 76, .06); display: table-cell; }
+.km-ledger tr.km-proving i { display: block; font-style: normal; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); }
+.km-ledger tr.km-proving b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 15px; color: var(--brass); margin: 1px 0 2px; }
+.km-ledger tr.km-proving span { display: block; color: var(--ink); max-width: 760px; }
+.km-ledger tr.km-proving em { display: block; margin-top: 3px; font-style: normal; font-size: 11px; color: var(--muted); }
 
-/* -- The Ladder as a track -------------------------------------------- */
-.km-track { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-bottom: 12px; }
-.km-rung { flex: 1 1 150px; border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); position: relative; }
-.km-rung i { position: absolute; top: 8px; right: 10px; font-style: normal; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
-.km-rung b { display: block; color: var(--paper); font-size: 14px; }
-.km-rung span { display: block; font-size: 11.5px; color: var(--muted); }
-.km-rung em { display: block; margin-top: 6px; font-style: normal; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); }
-.km-rung.is-crown { border-color: var(--brass); background: rgba(198, 151, 76, .1); }
-.km-gate { flex: 0 1 44px; display: grid; place-content: center; text-align: center; border: 1px dashed rgba(198, 151, 76, .55); padding: 6px; font-family: var(--font-mono); font-size: 14px; color: var(--brass); }
-.km-law > p.km-foot { margin: 0; font-size: 12px; color: var(--muted); }
-.km-law > p.km-foot b { color: var(--brass); }
+/* -- The realm trees: six columns of nodes ---------------------------- */
+.km-budget { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 12px; font-size: 11.5px; color: var(--muted); }
+.km-budget span b { font-family: var(--font-display), Georgia, serif; font-size: 15px; color: var(--paper); margin-right: 4px; }
+.km-budget span.is-offer b { color: var(--muted); }
+.km-budget span.is-key { margin-left: auto; }
+.km-budget span.is-key i, .km-nodes em { font-style: normal; font-family: var(--font-mono); font-size: 8px; letter-spacing: .6px; text-transform: uppercase; padding: 1px 5px; border: 1px solid; margin-left: 6px; vertical-align: middle; }
+.km-budget span.is-key i { margin: 0 4px 0 0; }
+.km-budget span.is-key i.is-rank, .km-nodes em.is-rank { color: var(--km-blue); border-color: rgba(127, 164, 196, .55); }
+.km-budget span.is-key i.is-cap, .km-nodes em.is-cap { color: var(--brass); border-color: rgba(198, 151, 76, .65); }
+.km-trees { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.km-tree { border: 1px solid var(--line); background: rgba(12, 16, 13, .5); display: grid; grid-template-rows: auto 1fr auto; border-top: 2px solid var(--tree, var(--brass)); }
+.km-tree.is-might { --tree: var(--km-might); }
+.km-tree.is-coffers { --tree: var(--km-coffers); }
+.km-tree.is-works { --tree: var(--km-works); }
+.km-tree.is-arcana { --tree: var(--km-arcana); }
+.km-tree.is-roots { --tree: var(--km-roots); }
+.km-tree.is-faith { --tree: var(--km-faith); }
+.km-tree > header { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.km-tree > header b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 19px; line-height: 1.1; color: var(--tree, var(--paper)); }
+.km-tree > header span { font-size: 11.5px; color: var(--muted); }
+.km-sigil { position: relative; margin: 0; width: 56px; height: 56px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 45%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .95) 72%); display: grid; place-items: center; overflow: hidden; }
+.km-sigil img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.km-sigil .km-glyph { font-family: var(--font-display), Georgia, serif; font-size: 24px; color: var(--tree, var(--brass)); }
+.km-sigil .play-artslot { display: none; }
+.km-nodes { list-style: none; margin: 0; padding: 6px 0; display: grid; }
+.km-nodes li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 6px 12px; border-bottom: 1px solid rgba(60, 70, 62, .3); align-items: start; }
+.km-nodes li:last-child { border-bottom: 0; }
+.km-nodes li.is-capstone { background: rgba(198, 151, 76, .07); border-top: 1px dashed rgba(198, 151, 76, .45); margin-top: 2px; }
+.km-cost { font-style: normal; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--line); background: var(--night); font-family: var(--font-mono); font-size: 10px; color: var(--brass); margin-top: 1px; }
+.km-nodes li.is-capstone .km-cost { border-color: var(--brass); }
+.km-nodes li > div { display: grid; gap: 1px; min-width: 0; }
+.km-nodes li b { font-size: 12.5px; color: var(--paper); line-height: 1.25; }
+.km-nodes li span { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.km-tree > p { margin: 0; padding: 8px 12px 10px; border-top: 1px solid var(--line); font-size: 11px; color: var(--muted); font-style: italic; }
 
-/* -- Verbs, trees: the ground tiles ----------------------------------- */
-.km-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
-.km-tile { border: 1px solid var(--line); padding: 9px 11px; background: rgba(27, 34, 29, .55); }
-.km-tile b { display: block; color: var(--paper); font-size: 13px; }
-.km-tile i { display: block; font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); margin: 1px 0 3px; }
-.km-tile span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
-.km-tile.is-price i { color: var(--danger); }
-
-/* -- Level / ceilings: three columns inside a law panel --------------- */
-.km-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.km-col { border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); }
-.km-col h3 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
-.km-col ul { margin: 0; padding-left: 16px; display: grid; gap: 3px; font-size: 12px; color: var(--muted); line-height: 1.45; }
-.km-col li b { color: var(--ink); }
-.km-col p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
-.km-col p b { color: var(--paper); }
-
-/* -- Faiths: perk and price as gates ---------------------------------- */
-.km-faiths { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
-.km-faith { border: 1px solid var(--line); padding: 12px 14px; background: rgba(12, 16, 13, .35); display: grid; gap: 8px; align-content: start; }
-.km-faith h3 { margin: 0; font-size: 15px; }
-.km-faith h3 a { color: var(--paper); text-decoration: none; }
-.km-faith h3 a:hover { color: var(--brass); }
-.km-faith p { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.5; border-left: 2px solid var(--line); padding: 4px 0 4px 9px; }
-.km-faith p b { display: block; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 2px; }
-.km-faith .is-perk { border-left-color: var(--canon); }
-.km-faith .is-perk b { color: var(--canon); }
-.km-faith .is-price { border-left-color: var(--danger); }
-.km-faith .is-price b { color: var(--danger); }
+/* -- Sub-headings inside a law panel ---------------------------------- */
+.km-sub { margin: 16px 0 4px; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); font-weight: 600; }
+.play-law > .km-foot { border-top: 1px solid var(--line); margin: 12px 0 0; padding-top: 10px; font-size: 12px; color: var(--muted); }
+.play-law > .km-foot b { color: var(--brass); }
 
 /* -- The territory board ---------------------------------------------- */
-.km-board { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: rgba(12, 16, 13, .35); }
+.km-board { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: rgba(12, 16, 13, .35); scroll-margin-top: 90px; }
 .km-board > h2 { margin: 0 0 6px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
 .km-board > p { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
 .km-board > p b { color: var(--paper); }
@@ -99,27 +157,27 @@
 .km-chips a.is-influences::before { content: "influences"; color: var(--km-blue); }
 .km-chips a:hover { border-color: var(--paper); }
 
-/* -- Rhythm of rule + machines ---------------------------------------- */
-.km-rhythm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.km-machines { border-left: 2px solid var(--brass); padding: 4px 0 4px 12px; margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.55; max-width: 900px; }
-.km-machines b { color: var(--paper); }
-.km-machines a { color: var(--paper); }
-
-.km-foot { border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--muted); }
-.km-foot a { color: var(--ink); }
-
-@media (max-width: 900px) {
-  .km-quick, .km-cols, .km-rhythm { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 600px) {
-  .km-quick, .km-cols, .km-rhythm { grid-template-columns: 1fr; }
-  .km-gate { display: none; }
-}
-
-/* -- 2026-09-02: the card layout ------------------------------------ */
+/* -- Laws and the footer ---------------------------------------------- */
 .km-laws { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
-.km-board { scroll-margin-top: 90px; }
-.km-shell .km-foot { font-size: 12px; color: var(--muted); }
-.km-shell .km-foot b { color: var(--brass); }
+.km-shell > .km-foot { border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--muted); }
+.km-shell > .km-foot a { color: var(--ink); }
 .km-shell .field-fields dt:empty { display: none; }
 .km-shell .field-fields dt:empty + dd { grid-column: 2; }
+
+/* -- Responsive ------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .km-stair { grid-template-columns: 1fr 1fr 1fr; }
+  .km-gate { grid-column: span 3; padding: 6px 10px; grid-auto-flow: column; justify-content: start; gap: 12px; }
+  .km-gate i, .km-gate b, .km-gate span { writing-mode: horizontal-tb; transform: none; }
+  .km-trees { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 900px) {
+  .km-hero { grid-template-columns: 1fr; }
+  .km-hero-art { min-height: 160px; }
+}
+@media (max-width: 720px) {
+  .km-stair { grid-template-columns: 1fr; }
+  .km-gate { grid-column: auto; }
+  .km-trees { grid-template-columns: 1fr; }
+  .km-budget span.is-key { margin-left: 0; }
+}

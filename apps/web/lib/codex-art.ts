@@ -32,6 +32,9 @@ export const codexArtKinds = {
   trades: "trades",
   // The Eight Trees as people: one key-art plate per class, worn by /codex/classes.
   classes: "classes",
+  // The Crown: the Kingdom page hero, one plate per Rank of the Crown and one
+  // sigil per realm tree. private/codex-art/kingdom/<slug>.png
+  kingdom: "kingdom",
   // Behind each class's tree in the calculator: a class-specific scene the
   // constellation lines are drawn over. private/codex-art/talent-backdrops/<class>.png
   "talent-backdrops": "talent-backdrops",

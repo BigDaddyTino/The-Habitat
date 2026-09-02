@@ -1,0 +1,136 @@
+SOL 5.6 — THE CROWN
+Kingdom page art for /codex/kingdom · 12 plates · issued 2026-09-02
+
+Drop-in: apps/web/private/codex-art/kingdom/<slug>.png — the page picks each
+plate up on reload; until then the slot prints this path and a glyph stands
+in. Ledger owed: Docs/art/SOL56_KINGDOM_ART_LEDGER.md, the usual discipline
+(one row per plate: delivered / refused-and-why / revised).
+
+------------------------------------------------------------------------------
+THE COMMISSION
+------------------------------------------------------------------------------
+
+Kingdom Management is the endgame: a live server that never pauses, a ruler
+who is always a person with eyes, never a god-view. The rule of the page is
+"the map is a table in your hall, your holdings run while you sleep, and the
+Forge is the settlement." Every plate here is a room the ruler stands in or a
+thing on the ruler's table, never a satellite view, never a strategy-game HUD.
+
+Three plate classes:
+
+  1. THE HERO (1 plate, 1672x941 RGB24 PNG, cinematic 16:9). The map table.
+  2. THE FIVE RANKS (5 plates, 1200x800 RGB24 PNG, 3:2). One holding per rank,
+     ascending from a drained riverbank plot to a throne room, so the five
+     hang as a stair. Same hour of day across all five (late evening, the
+     first lamps lit) so the set reads as one climb.
+  3. THE SIX SIGILS (6 plates, 1024x1024 RGB24 PNG, square). Realm-tree
+     emblems: a physical object, not a logo. Lit on dark. One owned color
+     each. These crop to 64px on the page and must read at that size.
+
+Style: the standing codex law — mature AAA grounded cinematic photorealism,
+real lenses, real wear, near-future military-industrial kit, magic as
+infrastructure. Zero text anywhere, every banner and seal BLANK. No fantasy
+gloss: no gilt thrones, no velvet, no heraldic lions. Power in this world
+looks like a working hall: ledgers, lock-gate levers, a Forge's light through
+a door, officers who have not slept. The R rating at full weight per the
+standing law where a plate calls for it (the Held Night, the Doctrine
+Crisis); women striking, stated looks are locks.
+
+Palette family for the set: the codex dark — charcoal, wet grey, bone, muted
+rust, storm blue — with BRASS as the crown's owned color, used sparingly and
+only on what the ruler touches: the table's edge, a seal, a lever handle, the
+rim of the map. Brass earns its place; it is never wallpaper.
+
+Story locks (hard): Commander Alder Wade is ALIVE, no statue, no fallen
+statue. The First Weir's bottom is never shown. The Outfall's Anchor is
+dormant. No crossroads depicted. Machines with zero anthropomorphism in their
+faces. Brother Aster is never a figure — a Forge's light only.
+
+------------------------------------------------------------------------------
+1. THE HERO
+------------------------------------------------------------------------------
+
+kingdom/hero.png — THE MAP TABLE. A ruler's hall at the first lamp of the
+evening. The whole floor of the frame is a MAP built as a table: relief cast
+in dark resin and brass, the river system of the Riverlands raised on it with
+the five great lock-gates as real levers set into the table's edge, one of
+them mid-pull under a gloved hand. Tokens on the map are not chess pieces:
+they are stamped brass slugs, lead weights, a folded letter under a stone, a
+cup of cold tea on a province. Around the table, cut by the frame, the court:
+a Captain with a rifle slung and mud on the boots, a Chancellor with three
+ledgers open, an Envoy in travelling clothes who has just arrived. The ruler
+is us — the camera is the ruler's eyes at standing height, a hand in frame,
+the map close. Through an open doorway at the back of the hall, the blue-
+white light of a Forge chamber, steady. Rain on the high windows. No throne
+in the frame; the table IS the throne. Zero text on the map; provinces are
+relief, not labels.
+
+------------------------------------------------------------------------------
+2. THE FIVE RANKS — one climb, five landings
+------------------------------------------------------------------------------
+
+kingdom/rank-i-freeholder.png — THE FREEHOLD. A bankside plot below Heartland
+at dusk, freshly DRAINED: the cut ditches still glistening, the levee new, a
+single timber-frame house half-roofed with a lamp already lit inside, a fence
+line half-driven, tools left where the light ran out. Three hired hands
+eating on a pallet of lumber. The river huge and calm behind. On the roof
+ridge, a signal fire laid but unlit. The first kingdom: a parcel and a roof.
+
+kingdom/rank-ii-warden.png — THE WARD. A fortified point with a job: a lock-
+gate on a Riverlands leg with a squat blockhouse built onto its winch-house,
+a garrison of eight in mixed kit on the wall, a patrol boat tied below, a
+signal mast with a shuttered lamp. A barge queued at the lock paying its
+toll at a window. The gate's chains and counterweights the size of houses.
+Everything a little too small for the job it now has.
+
+kingdom/rank-iii-magistrate.png — THE TOWNSHIP. A river town from its own
+main street at evening market: districts visible as a change of roofline,
+trade signs (BLANK), a courthouse porch with a magistrate's table set out
+under lamps and a queue of petitioners, a militia sergeant reading an
+admission list at the town gate to a family with a cart. A population that
+is not yours, and the paper that makes it stay.
+
+kingdom/rank-iv-lord.png — THE CITY. Wharves and districts under one lord:
+the camera on a balcony over a working harbor at lamp-lighting, cranes and
+warehouses, a grand project half-built (a stone aqueduct span, scaffolded)
+cutting the skyline, a real army's columns forming on a parade ground below
+by torchlight, and in the foreground on the balcony rail, a quiet argument
+between two well-dressed factions of the city's own council. Factions inside
+your own walls.
+
+kingdom/rank-v-crown.png — THE KINGDOM. The hall from the hero plate, seen
+from the doorway, at the moment of a Court Day: the map table crowded, six
+officers seated, a vassal kneeling — not in fealty, in fatigue, a muddy
+cloak — reporting, a banner of the realm hung BLANK behind the table, the
+Forge light from the side door laid across the floor like a second carpet.
+The ruler's chair is a plain one at the table's head, empty; we are standing
+at the door, about to take it. A seat at the world's table.
+
+------------------------------------------------------------------------------
+3. THE SIX SIGILS — objects, not logos
+------------------------------------------------------------------------------
+
+Each: one object on dark, lit from one side, brass rim optional, no text, no
+frame, no drop shadow. Must read at 64px.
+
+kingdom/tree-might.png — a muster roll: a brass drum of the levy's names,
+dented, with a rifle's sling looped through it. Color: rust red.
+kingdom/tree-coffers.png — a toll-bar's counterweight: lead, stamped, with a
+ledger's ribbon tied to it. Color: ledger white.
+kingdom/tree-works.png — a lock-gate lever's brass handle, worn bright by
+hands, on a slate of drainage plans. Color: brass.
+kingdom/tree-arcana.png — a Forge reserve gauge: a glass vial of Essence
+in a steel cradle, the level marked in days. Color: Forge blue-white.
+kingdom/tree-roots.png — a granary key and an admission ledger's stamp, on
+a fold of homespun. Color: moss green.
+kingdom/tree-faith.png — a small shrine box, open, holding five different
+tokens for five faiths and one empty slot. Color: bone.
+
+------------------------------------------------------------------------------
+QA GATE
+------------------------------------------------------------------------------
+
+Before delivery, check every plate against: zero text; no god-view; no throne
+gloss; the ruler is a person at standing height; Forge light steady, never
+dramatic; brass only where a hand goes. Refusals LOGGED in the ledger with
+the reason, never silently softened.

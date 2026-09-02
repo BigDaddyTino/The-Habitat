@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getPrismaClient } from "@habitat/db/client";
 import { FieldCard } from "@/components/field-card";
 import { requireRole } from "@/lib/authorization";
-import { courtDay, faithLaw, faiths, groundVerbs, holdingRungs, kingdomLevel, machines, plotsLaw, realmTrees, realmTreesLaw, riverlandsPlots, sacredLaw, siegeLaw, standingLaws, succession, syndicate } from "@/lib/kingdom";
+import { codexArtSlot, findCodexArt } from "@/lib/codex-art";
+import { courtDay, courtSeats, crownRanks, faithLaw, faiths, groundVerbs, kingdomLevel, kingdomLevels, machines, plotsLaw, provings, ranksLaw, realmPoints, realmTrees, realmTreesLaw, riverlandsPlots, sacredLaw, siegeLaw, standingLaws, succession, syndicate } from "@/lib/kingdom";
 import { storyReadRole } from "@/lib/story-codex";
 import "../play.css";
 import "./kingdom.css";
@@ -11,11 +12,14 @@ export const metadata = { title: "Kingdom Management | Story Codex" };
 export const dynamic = "force-dynamic";
 
 /**
- * The Kingdom page, laid out the way the Character page is: what holding
- * ground is in one line, then every rung, verb, tree, faith, siege posture
- * and Court Day option as a labeled card with the balance campaign's
- * numbers on it, and the live territory board read from the region sheets'
- * control rows. Data: `lib/kingdom.ts`. Nothing here writes to the database.
+ * The Kingdom page: the crown read top to bottom the way a ruler climbs it.
+ * The hall (hero), the Ranks of the Crown drawn as a stair with a proving
+ * gate between each landing, the fifteen-level ledger of perks and caps,
+ * the six court seats, the six realm trees with their perk nodes, then the
+ * ground itself (verbs and plots), faith, the siege clock, the rhythm of
+ * rule, the live territory board and the standing laws. Data:
+ * `lib/kingdom.ts`. Art: private/codex-art/kingdom/<slug>.png, picked up on
+ * reload. Nothing here writes to the database.
  */
 
 const db = getPrismaClient();
@@ -34,6 +38,22 @@ function tierOf(gameTag: unknown): { key: TierKey; label: string } {
 }
 
 const holdOrder: Record<string, number> = { holds: 0, contests: 1, influences: 2 };
+
+const rankArtSlug = (rank: { numeral: string; title: string }) => `rank-${rank.numeral.toLowerCase()}-${rank.title.toLowerCase()}`;
+
+function Art({ slug, className, glyph }: { slug: string; className: string; glyph: string }) {
+  const url = findCodexArt("kingdom", slug);
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <figure className={`${className} has-art`}><img alt="" src={url} /></figure>;
+  }
+  return (
+    <figure className={className}>
+      <span aria-hidden="true" className="km-glyph">{glyph}</span>
+      <figcaption className="play-artslot">art slot — Sol · <code>{codexArtSlot("kingdom", slug)}</code></figcaption>
+    </figure>
+  );
+}
 
 export default async function KingdomPage() {
   await requireRole(storyReadRole);
@@ -95,67 +115,173 @@ export default async function KingdomPage() {
     );
   };
 
+  const provingAfter = new Map(provings.map((proving) => [proving.afterLevel, proving]));
+  const nodeCount = realmTrees.reduce((sum, tree) => sum + tree.nodes.length, 0);
+
   return (
     <section className="page-shell codex-shell play-shell km-shell">
-      <header className="play-hero">
-        <p className="eyebrow">Holding Ground</p>
-        <h1>Kingdom Management</h1>
-        <p>Bannerlord&apos;s lord on horseback, Crusader Kings&apos; map of powers, Civilization&apos;s growing settlements, on a live server that never pauses. You rule from inside your own eyes: the map is a table in your hall, your holdings run while you sleep, and <b>the Forge is the settlement</b>.</p>
+      {/* -------------------------------------------------------------- hero */}
+      <header className="km-hero">
+        <div className="km-hero-copy">
+          <p className="eyebrow">Holding Ground</p>
+          <h1>Kingdom Management</h1>
+          <p>Bannerlord&apos;s lord on horseback, Crusader Kings&apos; map of powers, Civilization&apos;s growing settlements, on a live server that never pauses. You rule from inside your own eyes: <b>the map is a table in your hall</b>, your holdings run while you sleep, and <b>the Forge is the settlement</b>.</p>
+          <ul className="km-hero-stats">
+            <li><b>{crownRanks.length}</b><span>Ranks of the Crown</span></li>
+            <li><b>{kingdomLevels.length}</b><span>Kingdom Levels</span></li>
+            <li><b>{provings.length}</b><span>provings</span></li>
+            <li><b>{realmTrees.length}</b><span>realm trees</span></li>
+            <li><b>{nodeCount}</b><span>perk nodes</span></li>
+            <li><b>{courtSeats.length}</b><span>court seats</span></li>
+          </ul>
+        </div>
+        <Art className="km-hero-art" glyph="♛" slug="hero" />
       </header>
 
       <div className="play-gamer">
         <b>In gamer terms</b>
-        <span>Late game. Climb <b>five rungs</b> of holding from a homestead to a crown; get ground by <b>buying, seizing, earning or founding</b> it; level your realm on real work with a <b>1.6× curve and a quest ceiling every third level</b>; spec <b>six realm trees</b>; pick a <b>faith</b> that pays and costs; fight sieges as <b>Forge clocks</b> (storm or wait); hold <b>Court Day</b> monthly; run it with friends as a <b>Syndicate</b>; and when you die for good, your heir holds it or it fractures.</span>
+        <span>Late game. Your realm has a <b>Kingdom Level, 1 to 15</b>; every three levels is a <b>Rank</b> (Freeholder → Warden → Magistrate → Lord → Crown) and every rank-up is a <b>proving quest</b>, not an XP bar. Each level grants a perk and extends your caps; each level and proving gives <b>realm points</b> to spend on <b>six talent trees</b>. Get ground by <b>buying, seizing, earning or founding</b> it; pick a <b>faith</b> that pays and costs; fight sieges as <b>Forge clocks</b>; hold <b>Court Day</b> monthly; run it with friends as a <b>Syndicate</b>; and when you die for good, your heir holds it or it fractures.</span>
       </div>
 
       <div className="play-jump">
-        <a href="#ladder">The ladder</a><a href="#plots">Plots</a><a href="#ground">Getting ground</a><a href="#level">Kingdom Level</a><a href="#trees">Realm trees</a><a href="#faith">Faith</a><a href="#siege">Sieges</a><a href="#court">Court Day</a><a href="#board">The world board</a><a href="#laws">Standing laws</a>
+        <a href="#ranks">The Ranks</a><a href="#ledger">Level ledger</a><a href="#court">The court</a><a href="#trees">Realm trees</a><a href="#ground">Ground &amp; plots</a><a href="#faith">Faith</a><a href="#siege">Sieges</a><a href="#rhythm">Court Day</a><a href="#board">The world board</a><a href="#laws">Standing laws</a>
         <Link href="/codex/bible/kingdom-management">Kingdom Management (canon)</Link>
       </div>
 
-      {/* ------------------------------------------------------------ ladder */}
-      <section className="play-law" id="ladder">
-        <h2>The ladder: five rungs, each adds verbs</h2>
-        <p className="play-lede">None retires the ones below. The bottom rung starts on a bought plot; the top two are seized, granted or founded, rarely built from mud.</p>
+      {/* ------------------------------------------------------------- ranks */}
+      <section className="play-law km-ranks" id="ranks">
+        <h2>The Ranks of the Crown: five ranks, fifteen levels</h2>
+        <p className="play-lede">{ranksLaw}</p>
+        <ol className="km-stair">
+          {crownRanks.map((rank, index) => {
+            const proving = provingAfter.get(rank.levels[1]);
+            return [
+              <li className={`km-rank is-rank-${rank.numeral.toLowerCase()}${index === crownRanks.length - 1 ? " is-crown" : ""}`} key={rank.title}>
+                <Art className="km-rank-art" glyph={rank.numeral} slug={rankArtSlug(rank)} />
+                <header>
+                  <i>Rank {rank.numeral} · Levels {rank.levels[0]}–{rank.levels[1]}</i>
+                  <b>{rank.title}</b>
+                  <span>{rank.realm}</span>
+                </header>
+                <dl>
+                  <dt>Holds</dt><dd>{rank.holds}</dd>
+                  <dt>How</dt><dd className="is-muted">{rank.how}</dd>
+                  <dt>Unlocks</dt><dd className="is-good">{rank.verbs.join(" · ")}</dd>
+                  <dt>Court</dt><dd className="is-muted">{rank.seats}</dd>
+                </dl>
+              </li>,
+              proving ? (
+                <li className="km-gate" key={proving.name}>
+                  <i>Ceiling · level {proving.afterLevel}</i>
+                  <b>{proving.name}</b>
+                  <span>{proving.from} → {proving.to}</span>
+                </li>
+              ) : null,
+            ];
+          })}
+        </ol>
+        <p className="km-foot"><b>The climb:</b> {kingdomLevel.curve} {kingdomLevel.ceilings} {kingdomLevel.firstCeiling} <b>Tall or wide:</b> {kingdomLevel.tallVsWide}</p>
+      </section>
+
+      {/* ------------------------------------------------------------ ledger */}
+      <section className="play-law km-ledger-law" id="ledger">
+        <h2>The ledger: what every level grants <span className="field-tag" title="Hand-set caps the balance sims have not measured yet">untested caps</span></h2>
+        <p className="play-lede">XP comes from real work only: {kingdomLevel.xpFrom.join("; ")}. Every level grants a perk, extends the caps, and pays <b>{realmPoints.perLevel} realm point</b>; every proving pays <b>{realmPoints.perProving} more</b>.</p>
+        <div className="km-ledger-scroll">
+          <table className="km-ledger">
+            <thead>
+              <tr><th>Lv</th><th>Rank</th><th>Perk</th><th className="is-wide">Grants</th><th>Holdings</th><th>Muster</th><th>Seats</th><th>Vassals</th><th>Pts</th></tr>
+            </thead>
+            <tbody>
+              {kingdomLevels.map((row) => {
+                const proving = provingAfter.get(row.level);
+                const rank = crownRanks.find((candidate) => candidate.numeral === row.rank)!;
+                return [
+                  <tr className={`is-rank-${row.rank.toLowerCase()}${proving ? " is-ceiling" : ""}${row.level === rank.levels[0] ? " is-first" : ""}`} key={row.level}>
+                    <td className="km-lv">{row.level}</td>
+                    <td className="km-rk"><i>{row.rank}</i>{row.level === rank.levels[0] ? <span>{rank.title}</span> : null}</td>
+                    <td className="km-perk">{row.perk}</td>
+                    <td className="km-grants">{row.grants}</td>
+                    <td>{row.caps.holdings}</td>
+                    <td>{row.caps.muster}</td>
+                    <td>{row.caps.seats}</td>
+                    <td>{row.caps.vassals}</td>
+                    <td className="km-pts">+{realmPoints.perLevel}</td>
+                  </tr>,
+                  proving ? (
+                    <tr className="km-proving" key={`proving-${row.level}`}>
+                      <td colSpan={9}>
+                        <i>Proving · {proving.from} → {proving.to}</i>
+                        <b>{proving.name}</b>
+                        <span>{proving.shape}</span>
+                        <em>Teacher: {proving.teacher} · pays +{realmPoints.perProving} realm points</em>
+                      </td>
+                    </tr>
+                  ) : null,
+                ];
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="km-foot"><b>Caps:</b> {kingdomLevel.capsNote} <b>Teacher:</b> {kingdomLevel.teacher}</p>
+      </section>
+
+      {/* ------------------------------------------------------------- court */}
+      <section className="play-law" id="court">
+        <h2>The court: six seats, each with a tutor</h2>
+        <p className="play-lede">A seat is real authority in its domain, and a Syndicate&apos;s members hold them. Every seat is taught by one stop on the Heartland investigation, the tour that is the management tutorial.</p>
         <div className="field-grid is-row">
-          {holdingRungs.map((rung, index) => (
+          {courtSeats.map((seat, index) => (
             <FieldCard
-              accent={index === holdingRungs.length - 1}
-              eyebrow={`Rung ${index + 1}`}
+              eyebrow={`Opens at ${seat.opens}`}
               fields={[
-                { label: "Holds", value: rung.holds },
-                { label: "How", value: rung.how, tone: "muted" },
-                { label: "Unlocks", value: rung.verbs.join(" · "), tone: "good" },
+                { label: "Domain", value: seat.domain },
+                { label: "Tutor", value: seat.tutor, tone: "muted" },
               ]}
-              key={rung.name}
-              name={rung.name}
+              key={seat.name}
+              name={seat.name}
               step={index + 1}
             />
           ))}
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- plots */}
-      <section className="play-law" id="plots">
-        <h2>Plots: where you build your own buildings</h2>
-        <p className="play-lede">{plotsLaw} <b>The Riverlands holds three: the Charters</b> — old land charters in courthouse escrow, released by campaign progress, each a different lesson. They are plots, not rungs of the ladder.</p>
-        <div className="field-grid is-wide">
-          {riverlandsPlots.map((plot, index) => (
-            <FieldCard
-              eyebrow="Riverlands · courthouse escrow"
-              fields={[
-                { label: "Where", value: plot.where },
-                { label: "What", value: plot.what, tone: "muted" },
-                { label: "Teaches", value: plot.teaches, tone: "good" },
-                { label: "Unlock", value: plot.unlock, tone: "bad" },
-              ]}
-              key={plot.slug}
-              name={<Link href={`/codex/bible/${plot.slug}`}>{plot.name}</Link>}
-              step={index + 1}
-            />
+      {/* ------------------------------------------------------------- trees */}
+      <section className="play-law km-trees-law" id="trees">
+        <h2>The crown&apos;s six realm trees: {nodeCount} perk nodes</h2>
+        <p className="play-lede">{realmTreesLaw}</p>
+        <div className="km-budget">
+          <span><b>{realmPoints.perLevel}</b> point a level</span>
+          <span><b>{realmPoints.perProving}</b> a proving</span>
+          <span><b>{realmPoints.total}</b> by the cap</span>
+          <span className="is-offer"><b>{realmPoints.onOffer}</b> on offer</span>
+          <span className="is-key"><i className="is-rank">Rank III</i> needs the rank · <i className="is-cap">capstone</i> Crown only</span>
+        </div>
+        <div className="km-trees">
+          {realmTrees.map((tree) => (
+            <article className={`km-tree is-${tree.slug}`} key={tree.slug}>
+              <header>
+                <Art className="km-sigil" glyph={tree.name.slice(0, 1)} slug={`tree-${tree.slug}`} />
+                <div>
+                  <b>{tree.name}</b>
+                  <span>{tree.buys}</span>
+                </div>
+              </header>
+              <ol className="km-nodes">
+                {tree.nodes.map((node) => (
+                  <li className={node.capstone ? "is-capstone" : undefined} key={node.id}>
+                    <i className="km-cost" title={`${node.cost} realm ${node.cost === 1 ? "point" : "points"}`}>{node.cost}</i>
+                    <div>
+                      <b>{node.name}{node.capstone ? <em className="is-cap">capstone</em> : node.rank ? <em className="is-rank">Rank {node.rank}</em> : null}</b>
+                      <span>{node.desc}</span>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <p>{tree.note}</p>
+            </article>
           ))}
         </div>
-        <p className="km-foot"><b>Other regions:</b> their plots are drawn where their writing is. A region with no plot is a region where you hold ground by seizing, earning or founding it, not by buying.</p>
       </section>
 
       {/* ------------------------------------------------------------ ground */}
@@ -175,38 +301,25 @@ export default async function KingdomPage() {
           ))}
         </div>
         <p className="km-foot"><b>Seizing the sacred:</b> {sacredLaw}</p>
-      </section>
-
-      {/* ------------------------------------------------------------- level */}
-      <section className="play-law" id="level">
-        <h2>Your Kingdom Level: do more, grow more, reach further</h2>
-        <div className="field-grid">
-          <FieldCard eyebrow="XP comes from real work only" fields={kingdomLevel.xpFrom.map((line, index) => ({ label: index === 0 ? "Earned by" : "", value: line }))} name="What levels the realm" />
-          <FieldCard eyebrow="Every cap grows with the level" fields={kingdomLevel.extends.map((line, index) => ({ label: index === 0 ? "Extends" : "", value: line }))} name="What the level buys" />
-          <FieldCard
-            accent
-            eyebrow="The curve and the ceilings"
-            fields={[
-              { label: "Curve", value: kingdomLevel.curve },
-              { label: "Ceilings", value: kingdomLevel.ceilings, tone: "bad" },
-              { label: "First one", value: kingdomLevel.firstCeiling, tone: "muted" },
-              { label: "Teacher", value: kingdomLevel.teacher },
-              { label: "Tall or wide", value: kingdomLevel.tallVsWide, tone: "good" },
-            ]}
-            name="The crown's provings"
-          />
-        </div>
-      </section>
-
-      {/* ------------------------------------------------------------- trees */}
-      <section className="play-law" id="trees">
-        <h2>The crown&apos;s six realm trees</h2>
-        <p className="play-lede">{realmTreesLaw}</p>
-        <div className="field-grid is-row">
-          {realmTrees.map((tree) => (
-            <FieldCard eyebrow="Realm tree" fields={[{ label: "Buys", value: tree.buys, tone: "good" }, { label: "Notes", value: tree.note, tone: "muted" }]} key={tree.name} name={tree.name} />
+        <h3 className="km-sub">Plots: where you build your own buildings</h3>
+        <p className="play-lede">{plotsLaw} <b>The Riverlands holds three: the Charters</b>, old land charters in courthouse escrow, released by campaign progress, each a different lesson. They are plots, not ranks.</p>
+        <div className="field-grid is-wide">
+          {riverlandsPlots.map((plot, index) => (
+            <FieldCard
+              eyebrow="Riverlands · courthouse escrow"
+              fields={[
+                { label: "Where", value: plot.where },
+                { label: "What", value: plot.what, tone: "muted" },
+                { label: "Teaches", value: plot.teaches, tone: "good" },
+                { label: "Unlock", value: plot.unlock, tone: "bad" },
+              ]}
+              key={plot.slug}
+              name={<Link href={`/codex/bible/${plot.slug}`}>{plot.name}</Link>}
+              step={index + 1}
+            />
           ))}
         </div>
+        <p className="km-foot"><b>Other regions:</b> their plots are drawn where their writing is. A region with no plot is a region where you hold ground by seizing, earning or founding it, not by buying.</p>
       </section>
 
       {/* ------------------------------------------------------------- faith */}
@@ -266,10 +379,10 @@ export default async function KingdomPage() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- court */}
-      <section className="play-law" id="court">
-        <h2>Court Day: the first of every month</h2>
-        <p className="play-lede">{courtDay.when} Four ways to handle it, priced by the campaign over fourteen months of rule.</p>
+      {/* ------------------------------------------------------------ rhythm */}
+      <section className="play-law" id="rhythm">
+        <h2>The rhythm of rule: Court Day, the Syndicate, the Mourning</h2>
+        <p className="play-lede">{courtDay.when} Four ways to handle it, priced by the campaign over fourteen months of rule. The docket grows with the rank: a letter on the kitchen table at level 1, a hall from level 7.</p>
         <div className="field-grid is-row">
           {courtDay.options.map((option, index) => (
             <FieldCard

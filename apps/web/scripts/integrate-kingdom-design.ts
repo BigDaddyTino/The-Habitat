@@ -1,6 +1,7 @@
 import "../lib/environment";
 import { getPrismaClient, type Prisma } from "@habitat/db/client";
 import { systemMetaSchema } from "../lib/story-meta-schemas";
+import { KINGDOM_CROWN_LAYER } from "./lib/kingdom-crown-layer";
 
 /**
  * Kingdom Management — codex integration ("Holding Ground" rev 12, owner-approved).
@@ -26,43 +27,7 @@ const db = getPrismaClient();
 // ── 1. Appended layers ───────────────────────────────────────────────────────
 
 const LAYERS: Record<string, { marker: string; body: string }> = {
-  "kingdom-management": {
-    marker: "## Designed — the crown, rung by rung",
-    body: `## Designed — the crown, rung by rung
-
-The full design is settled (the "Holding Ground" spec, owner-approved 2026-09-01). This is the gamer's version: what you get, and for what.
-
-**The Ladder — five rungs, each adds verbs, none retires the ones below.**
-
-- **Homestead** — a parcel and a roof. You get: build, farm, fence, hire hands. For: buying a charter parcel.
-- **Outpost** — a fortified point with a job. You get: garrison, patrols, supply, a signal plan. For: holding a road or crossing.
-- **Town** — a population that isn't yours. You get: districts, trades, law, admission policy. For: growth.
-- **City** — districts, wharves, politics. You get: grand projects, real armies, factions inside your own walls.
-- **Kingdom** — multiple holdings and vassals. You get: doctrine, diplomacy, war, a seat at the world's table.
-
-**Getting ground — four verbs.**
-
-- **Buy** — escrowed charter parcels, region by region; rare on purpose, because the world is owned.
-- **Seize** — siege or coup. Inside a faction the Bannerlord law holds: even if YOU take the fort, the leader decides who gets it.
-- **Earn** — a granted fief, with the obligations grants exist for.
-- **Found** — start from nothing; slowest, and nobody holds paper over you.
-
-**The Kingdom Level — do more, grow more, reach further.**
-
-- The realm earns XP from REAL work only: holdings prospering, projects finished, wars won, sieges stood, treaties signed, trade moved, Court Days handled.
-- The level extends your caps: how many holdings, how big your armies, how many officer seats, how many vassals, what project tiers.
-- The curve is steep — each level costs more than half again the last — and every third level is a **ceiling** no XP can pass: the realm must quest its proving, the way trades prove their masters. The kingdom pass's reserved ceiling teacher is the Crown Without a Name.
-
-**The crown's six talent trees** (your own kingdom only — join a faction and you live under THEIR doctrine): **Might** (levies, garrisons, sieges) · **Coffers** (tariffs, routes, markets) · **Works** (machinery, infrastructure, bought additions) · **Arcana** (Forge efficiency, reserves, licensed casting) · **Roots** (people, land, food, loyalty) · **Faith** (adoption, spread, tolerance, and the deep end of your faith's perk).
-
-**Court Day — the first of every month.** The court convenes with a real docket: petitions, windfalls, disasters, omens, absurdities. Attend and rule; skip and doctrine auto-decides; be away and a governor rules in your name — and the Court Record is waiting when you return. The sims priced attendance plainly: a present ruler clears roughly double what auto-doctrine does, a good governor sits between, and a poor governor is WORSE than no governor, because doctrine does not improvise.
-
-**The Syndicate** — the multiplayer crown: the leader decides, members hold the officer seats with real authority in their domains, and the realm's level, ceilings, and trees are everyone's work. Servers can carry several Syndicates vying with each other and the NPC powers alike.
-
-**Succession — the Mourning.** A ruler's true death starts a live succession crisis: the heir you named holds the realm or it fractures, decided by what you actually built — officers, treasury, doctrine, faith. What survives persists as an NPC power the next run meets, wearing your old name. The realm remembers you; it does not belong to you.
-
-**Standing laws:** every competing Great Power starts a world at the SAME total points and diverges only by play; story-critical ground never flips until its arc resolves; your crown joins the scoreboard when the world recognizes it; sacred sites can be held but never owned — grievance runs until you return them, gift them, or win their people; and the soulless garrison ([[machines]]) trades the Forge clock for a daily Essence sip. See [[the-power-balance]] for the world game and [[the-faith-lane]] for what belief buys.`,
-  },
+  "kingdom-management": KINGDOM_CROWN_LAYER,
   "outpost-and-city-management": {
     marker: "## Designed — running held ground",
     body: `## Designed — running held ground
