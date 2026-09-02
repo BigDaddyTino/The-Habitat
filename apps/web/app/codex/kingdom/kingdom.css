@@ -1,100 +1,117 @@
-/* Kingdom Management — the Holding Ground page. Codex palette; scannable
-   cards; the perk/price and holds/contests/influences colors carry meaning. */
+/* Kingdom Management - Holding Ground, in the codex's own dark grammar.
+   Same bones as the Trades page: square panels, mono uppercase brass labels,
+   the ladder drawn as a track with gates. Brass is the crown; canon-green is a
+   perk; danger-red is a price. */
 
-.km-shell { display: flex; flex-direction: column; gap: 2.5rem; }
+.km-shell { --km-blue: #7fa4c4; --km-violet: #b98fd6; }
 
-.km-hero .km-lede { font-size: 1.12rem; max-width: 46rem; line-height: 1.6; }
-.km-quickstart {
-  list-style: none; padding: 0; margin: 1.2rem 0 0;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .6rem .9rem;
+/* -- Hero ------------------------------------------------------------- */
+.km-hero { margin-bottom: 22px; }
+.km-hero h1 { margin: 2px 0 8px; }
+.km-hero > p { max-width: 760px; color: var(--muted); }
+.km-hero > p b { color: var(--paper); }
+
+/* -- The law panels (the Trades "law" grammar) ------------------------ */
+.km-law { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: linear-gradient(160deg, rgba(27, 34, 29, .9), rgba(17, 22, 18, .94)); }
+.km-law > h2 { margin: 0 0 4px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.km-law > p.km-lede { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
+.km-law > p.km-lede b { color: var(--paper); }
+
+.km-quick { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.km-quick div { border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); }
+.km-quick b { display: block; color: var(--paper); font-size: 13px; margin-bottom: 2px; }
+.km-quick span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+
+/* -- The Ladder as a track -------------------------------------------- */
+.km-track { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+.km-rung { flex: 1 1 150px; border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); position: relative; }
+.km-rung i { position: absolute; top: 8px; right: 10px; font-style: normal; font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.km-rung b { display: block; color: var(--paper); font-size: 14px; }
+.km-rung span { display: block; font-size: 11.5px; color: var(--muted); }
+.km-rung em { display: block; margin-top: 6px; font-style: normal; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); }
+.km-rung.is-crown { border-color: var(--brass); background: rgba(198, 151, 76, .1); }
+.km-gate { flex: 0 1 44px; display: grid; place-content: center; text-align: center; border: 1px dashed rgba(198, 151, 76, .55); padding: 6px; font-family: var(--font-mono); font-size: 14px; color: var(--brass); }
+.km-law > p.km-foot { margin: 0; font-size: 12px; color: var(--muted); }
+.km-law > p.km-foot b { color: var(--brass); }
+
+/* -- Verbs, trees: the ground tiles ----------------------------------- */
+.km-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.km-tile { border: 1px solid var(--line); padding: 9px 11px; background: rgba(27, 34, 29, .55); }
+.km-tile b { display: block; color: var(--paper); font-size: 13px; }
+.km-tile i { display: block; font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); margin: 1px 0 3px; }
+.km-tile span { font-size: 11.5px; color: var(--muted); line-height: 1.45; }
+.km-tile.is-price i { color: var(--danger); }
+
+/* -- Level / ceilings: three columns inside a law panel --------------- */
+.km-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.km-col { border: 1px solid var(--line); padding: 10px 12px; background: rgba(12, 16, 13, .5); }
+.km-col h3 { margin: 0 0 6px; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.km-col ul { margin: 0; padding-left: 16px; display: grid; gap: 3px; font-size: 12px; color: var(--muted); line-height: 1.45; }
+.km-col li b { color: var(--ink); }
+.km-col p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+.km-col p b { color: var(--paper); }
+
+/* -- Faiths: perk and price as gates ---------------------------------- */
+.km-faiths { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.km-faith { border: 1px solid var(--line); padding: 12px 14px; background: rgba(12, 16, 13, .35); display: grid; gap: 8px; align-content: start; }
+.km-faith h3 { margin: 0; font-size: 15px; }
+.km-faith h3 a { color: var(--paper); text-decoration: none; }
+.km-faith h3 a:hover { color: var(--brass); }
+.km-faith p { margin: 0; font-size: 11.5px; color: var(--muted); line-height: 1.5; border-left: 2px solid var(--line); padding: 4px 0 4px 9px; }
+.km-faith p b { display: block; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 2px; }
+.km-faith .is-perk { border-left-color: var(--canon); }
+.km-faith .is-perk b { color: var(--canon); }
+.km-faith .is-price { border-left-color: var(--danger); }
+.km-faith .is-price b { color: var(--danger); }
+
+/* -- The territory board ---------------------------------------------- */
+.km-board { border: 1px solid var(--line); padding: 16px 18px; margin-bottom: 22px; background: rgba(12, 16, 13, .35); }
+.km-board > h2 { margin: 0 0 6px; font-size: 12px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.km-board > p { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); max-width: 820px; }
+.km-board > p b { color: var(--paper); }
+.km-tier { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.km-tier h3 { margin: 0 0 2px; font-size: 10.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--brass); }
+.km-tier.is-free h3 { color: var(--canon); }
+.km-tier.is-institution h3 { color: var(--km-blue); }
+.km-tier.is-shadow h3 { color: var(--km-violet); }
+.km-tier > p { margin: 0 0 10px; font-size: 11.5px; color: var(--muted); }
+.km-powers { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.km-power { border: 1px solid var(--line); padding: 10px 12px; background: rgba(27, 34, 29, .55); display: grid; gap: 6px; align-content: start; }
+.km-power.is-great { border-top: 2px solid var(--brass); }
+.km-power header { display: grid; gap: 2px; }
+.km-power header a { color: var(--paper); font-size: 14px; font-weight: 700; text-decoration: none; }
+.km-power header a:hover { color: var(--brass); }
+.km-power header i { font-style: normal; font-family: var(--font-mono); font-size: 9px; letter-spacing: .5px; text-transform: uppercase; color: var(--brass); }
+.km-tier.is-free .km-power header i { color: var(--canon); }
+.km-tier.is-institution .km-power header i { color: var(--km-blue); }
+.km-tier.is-shadow .km-power header i { color: var(--km-violet); }
+.km-power p { margin: 0; font-size: 11px; color: var(--muted); line-height: 1.45; }
+.km-power p b { color: var(--ink); font-weight: 600; }
+.km-power p a { color: var(--ink); }
+.km-power p.is-empty { font-style: italic; }
+.km-chips { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.km-chips a { display: inline-block; padding: 2px 7px; border: 1px solid var(--line); background: rgba(12, 16, 13, .55); color: var(--ink); font-size: 11px; text-decoration: none; }
+.km-chips a::before { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: .5px; text-transform: uppercase; margin-right: 5px; }
+.km-chips a.is-holds { border-color: rgba(198, 151, 76, .6); }
+.km-chips a.is-holds::before { content: "holds"; color: var(--brass); }
+.km-chips a.is-contests { border-color: rgba(200, 90, 80, .55); }
+.km-chips a.is-contests::before { content: "contests"; color: var(--danger); }
+.km-chips a.is-influences::before { content: "influences"; color: var(--km-blue); }
+.km-chips a:hover { border-color: var(--paper); }
+
+/* -- Rhythm of rule + machines ---------------------------------------- */
+.km-rhythm { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.km-machines { border-left: 2px solid var(--brass); padding: 4px 0 4px 12px; margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.55; max-width: 900px; }
+.km-machines b { color: var(--paper); }
+.km-machines a { color: var(--paper); }
+
+.km-foot { border-top: 1px solid var(--line); padding-top: 12px; font-size: 12px; color: var(--muted); }
+.km-foot a { color: var(--ink); }
+
+@media (max-width: 900px) {
+  .km-quick, .km-cols, .km-rhythm { grid-template-columns: 1fr 1fr; }
 }
-.km-quickstart li {
-  background: color-mix(in srgb, var(--codex-panel, #1c2226) 92%, transparent);
-  border: 1px solid color-mix(in srgb, var(--codex-brass, #8a7a55) 45%, transparent);
-  border-radius: .5rem; padding: .6rem .8rem; font-size: .93rem; line-height: 1.45;
-}
-
-.km-section h2 { margin-bottom: .35rem; }
-.km-note { color: var(--codex-dim, #a8a294); font-size: .93rem; max-width: 52rem; }
-
-/* The Ladder */
-.km-rungs { display: grid; grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr)); gap: .8rem; margin-top: .8rem; }
-.km-rung {
-  position: relative; background: var(--codex-panel, #1c2226);
-  border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1rem .8rem;
-}
-.km-rung-number {
-  position: absolute; top: .6rem; right: .8rem;
-  font-family: var(--font-mono, monospace); font-size: .8rem; color: var(--codex-brass, #8a7a55);
-}
-.km-rung h3 { margin: 0 0 .2rem; font-size: 1.05rem; }
-.km-rung .km-holds { margin: 0; font-size: .9rem; }
-.km-rung .km-verbs { margin: .35rem 0 0; font-size: .82rem; color: var(--codex-dim, #a8a294); }
-.km-rung .km-from { margin: .45rem 0 0; font-size: .8rem; color: var(--codex-gold, #d9ab48); }
-
-/* Verbs */
-.km-verbs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .8rem; margin-top: .8rem; }
-.km-verb { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1rem; }
-.km-verb h3 { margin: 0 0 .25rem; }
-.km-verb p { margin: .25rem 0; font-size: .92rem; line-height: 1.45; }
-.km-price-line { color: var(--codex-gold, #d9ab48); font-size: .84rem !important; }
-
-/* Three-column explainers */
-.km-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: .9rem; margin-top: .8rem; }
-.km-cols article { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .9rem 1.05rem; }
-.km-cols h3 { margin: 0 0 .4rem; font-size: 1rem; }
-.km-cols ul { margin: 0; padding-left: 1.1rem; font-size: .92rem; line-height: 1.5; }
-.km-cols p { margin: 0; font-size: .92rem; line-height: 1.55; }
-
-/* Trees */
-.km-trees { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .7rem; margin-top: .8rem; }
-.km-tree { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .75rem .9rem; }
-.km-tree h3 { margin: 0 0 .2rem; color: var(--codex-gold, #d9ab48); font-size: 1rem; }
-.km-tree p { margin: 0; font-size: .86rem; color: var(--codex-dim, #a8a294); }
-
-/* Faiths — the perk/price pair is the whole point */
-.km-faiths { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: .8rem; margin-top: .8rem; }
-.km-faith { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .85rem 1rem; }
-.km-faith h3 { margin: 0 0 .4rem; font-size: 1rem; }
-.km-faith p { margin: .3rem 0; font-size: .89rem; line-height: 1.45; }
-.km-perk { color: #8fb488; }
-.km-cost { color: #c98a7a; }
-
-/* The territory board */
-.km-tier { margin-top: 1.4rem; }
-.km-tier h3 { margin: 0 0 .15rem; }
-.km-tier-note { margin: 0 0 .7rem; color: var(--codex-dim, #a8a294); font-size: .9rem; }
-.km-power-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: .8rem; }
-.km-power { background: var(--codex-panel, #1c2226); border: 1px solid #2a3236; border-radius: .6rem; padding: .85rem 1rem; }
-.km-power-great { border-color: color-mix(in srgb, var(--codex-gold, #d9ab48) 55%, #2a3236); }
-.km-power header { display: flex; flex-wrap: wrap; align-items: baseline; gap: .4rem .7rem; margin-bottom: .45rem; }
-.km-power header a { font-weight: 700; font-size: 1.02rem; }
-.km-tier-badge {
-  font-family: var(--font-mono, monospace); font-size: .68rem; letter-spacing: .06em;
-  color: var(--codex-gold, #d9ab48); border: 1px solid color-mix(in srgb, var(--codex-gold, #d9ab48) 45%, transparent);
-  border-radius: .3rem; padding: .05rem .45rem; text-transform: uppercase;
-}
-.km-power-free .km-tier-badge { color: #8fb488; border-color: color-mix(in srgb, #8fb488 45%, transparent); }
-.km-power-institution .km-tier-badge { color: #8fa8c0; border-color: color-mix(in srgb, #8fa8c0 45%, transparent); }
-.km-power-shadow .km-tier-badge { color: #a98fd0; border-color: color-mix(in srgb, #a98fd0 45%, transparent); }
-.km-wings, .km-faith-line { margin: .2rem 0; font-size: .82rem; color: var(--codex-dim, #a8a294); }
-.km-none { margin: .3rem 0 0; font-size: .82rem; color: var(--codex-dim, #a8a294); font-style: italic; }
-.km-chips { list-style: none; display: flex; flex-wrap: wrap; gap: .35rem; padding: 0; margin: .5rem 0 0; }
-.km-chip {
-  display: inline-flex; align-items: baseline; gap: .35rem;
-  font-size: .8rem; border-radius: .35rem; padding: .18rem .5rem;
-  border: 1px solid #2a3236; background: color-mix(in srgb, var(--codex-panel, #1c2226) 60%, transparent);
-  text-decoration: none;
-}
-.km-chip-kind { font-family: var(--font-mono, monospace); font-size: .64rem; text-transform: uppercase; letter-spacing: .05em; }
-.km-holds .km-chip-kind, .km-chip.km-holds .km-chip-kind { color: var(--codex-gold, #d9ab48); }
-.km-chip.km-holds { border-color: color-mix(in srgb, var(--codex-gold, #d9ab48) 50%, #2a3236); }
-.km-chip.km-contests { border-color: color-mix(in srgb, #c98a7a 55%, #2a3236); }
-.km-chip.km-contests .km-chip-kind { color: #c98a7a; }
-.km-chip.km-influences .km-chip-kind { color: #8fa8c0; }
-
-.km-footer { border-top: 1px solid var(--codex-brass, #8a7a55); padding-top: 1rem; font-size: .9rem; }
-
-@media (max-width: 640px) {
-  .km-rungs, .km-verbs-grid, .km-cols, .km-trees, .km-faiths, .km-power-grid { grid-template-columns: 1fr; }
+@media (max-width: 600px) {
+  .km-quick, .km-cols, .km-rhythm { grid-template-columns: 1fr; }
+  .km-gate { display: none; }
 }
