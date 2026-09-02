@@ -115,6 +115,20 @@ export default async function KingdomPage() {
     );
   };
 
+  // Faith, as the world keeps it: who wears each faith (the faction sheets'
+  // faith field) and where it is visibly practised (the faith entries' region
+  // notes), both read live so the weave shows up here the day it is written.
+  const faithEntries = await db.storyEntry.findMany({ where: { kind: "SYSTEM", slug: { in: faiths.map((faith) => faith.slug) } }, select: { slug: true, meta: true } });
+  const regionTitle = new Map(regions.map((region) => [region.slug, region.title]));
+  const keptBy = new Map<string, Array<{ slug: string; title: string }>>();
+  for (const faction of factions) {
+    const faith = (faction.meta as Record<string, unknown>).faith;
+    if (typeof faith !== "string") continue;
+    keptBy.set(faith, [...(keptBy.get(faith) ?? []), { slug: faction.slug, title: faction.title }]);
+  }
+  const groundOf = new Map(faithEntries.map((entry) => [entry.slug, (((entry.meta as Record<string, unknown>).regionNotes ?? []) as Array<{ region: string; note: string }>)]));
+  const secularCount = factions.filter((faction) => typeof (faction.meta as Record<string, unknown>).faith !== "string").length;
+
   const provingAfter = new Map(provings.map((proving) => [proving.afterLevel, proving]));
   const nodeCount = realmTrees.reduce((sum, tree) => sum + tree.nodes.length, 0);
 
@@ -125,7 +139,7 @@ export default async function KingdomPage() {
         <div className="km-hero-copy">
           <p className="eyebrow">Holding Ground</p>
           <h1>Kingdom Management</h1>
-          <p>Bannerlord&apos;s lord on horseback, Crusader Kings&apos; map of powers, Civilization&apos;s growing settlements, on a live server that never pauses. You rule from inside your own eyes: <b>the map is a table in your hall</b>, your holdings run while you sleep, and <b>the Forge is the settlement</b>.</p>
+          <p>Hold ground on a world that never pauses. A Soul Forge is the settlement and its reserve is the siege clock; the lock-gates tax the roads; the powers race on a scoreboard your crown can join; and every faith you adopt pays and costs. You rule from inside your own eyes: <b>the map is a table in your hall</b>, your holdings run while you sleep, and <b>the Forge is the settlement</b>.</p>
           <ul className="km-hero-stats">
             <li><b>{crownRanks.length}</b><span>Ranks of the Crown</span></li>
             <li><b>{kingdomLevels.length}</b><span>Kingdom Levels</span></li>
@@ -327,18 +341,35 @@ export default async function KingdomPage() {
         <h2>Faith: every belief has a perk and a price</h2>
         <p className="play-lede">{faithLaw.read} <b>{faithLaw.conversion}</b> {faithLaw.reshaping}</p>
         <div className="field-grid is-wide">
-          {faiths.map((faith) => (
-            <FieldCard
-              eyebrow={faith.secular ? "The secular crown" : "Faith"}
-              fields={[
-                { label: "Perk", value: faith.perk, tone: "good" },
-                { label: "Price", value: faith.price, tone: "bad" },
-                { label: "Morale", value: faith.morale, tone: "muted" },
-              ]}
-              key={faith.slug}
-              name={<Link href={`/codex/bible/${faith.slug}`}>{faith.name}</Link>}
-            />
-          ))}
+          {faiths.map((faith) => {
+            const keepers = keptBy.get(faith.slug) ?? [];
+            const ground = groundOf.get(faith.slug) ?? [];
+            return (
+              <FieldCard
+                eyebrow={faith.secular ? "The secular crown" : "Faith"}
+                fields={[
+                  { label: "Perk", value: faith.perk, tone: "good" },
+                  { label: "Price", value: faith.price, tone: "bad" },
+                  { label: "Morale", value: faith.morale, tone: "muted" },
+                  {
+                    label: "Kept by",
+                    value: faith.secular
+                      ? <span className="km-keepers">{secularCount} of {factions.length} powers on the roster declare no faith; three of the five Great Powers among them.</span>
+                      : keepers.length
+                        ? <span className="km-keepers">{keepers.map((keeper, index) => <span key={keeper.slug}>{index ? " · " : ""}<Link href={`/codex/bible/${keeper.slug}`}>{keeper.title}</Link></span>)}</span>
+                        : <span className="km-keepers is-empty">No power on the roster keeps it yet.</span>,
+                  },
+                  ...(ground.length ? [{
+                    label: "Ground",
+                    value: <span className="km-keepers">{ground.map((row, index) => <span key={row.region} title={row.note}>{index ? " · " : ""}<Link href={`/codex/bible/${row.region}`}>{regionTitle.get(row.region) ?? row.region}</Link></span>)}</span>,
+                    tone: "muted" as const,
+                  }] : []),
+                ]}
+                key={faith.slug}
+                name={<Link href={`/codex/bible/${faith.slug}`}>{faith.name}</Link>}
+              />
+            );
+          })}
         </div>
       </section>
 

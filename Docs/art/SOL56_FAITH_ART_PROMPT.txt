@@ -1,0 +1,68 @@
+SOL 5.6 — THE FAITHS, KEPT
+Art for the faith weave · 4 plates · issued 2026-09-02
+
+The six Faith Lane plates (the lane + five faiths) are already commissioned in
+Docs/art/SOL56_RIVERLANDS_ART_PROMPT.md §XI ("banking is the horror") — do
+not redo them. This brief covers only what the weave added: one faction, two
+people. The Grand Advocate is a reserved seat with no name and gets NO
+portrait until a writer names them.
+
+Drop-in paths (the coverage audit lists these as owed):
+  apps/web/private/codex-art/factions/the-congregation-of-the-bound.png
+  apps/web/private/codex-art/faction-logos/the-congregation-of-the-bound.png
+  apps/web/private/codex-art/characters/the-sexton-of-heartland.png
+  apps/web/private/codex-art/characters/the-wellkeeper-of-honest-well.png
+Ledger owed: Docs/art/SOL56_FAITH_ART_LEDGER.md.
+
+Style: the standing codex law — mature AAA grounded cinematic photorealism,
+real lenses, real wear, near-future military-industrial kit, magic as
+infrastructure; zero text, all insignia blank; women striking, stated looks
+are locks. Story locks: Brother Aster is NEVER a figure (Core light only);
+the Forge is a pedestal in rings and cabling, never a glowing altar; no
+crosses, no halos, no fantasy-church iconography anywhere. A faith in this
+world looks like a working hall with a ledger.
+
+------------------------------------------------------------------------------
+factions/the-congregation-of-the-bound.png — THE FIRST HOUR
+------------------------------------------------------------------------------
+1672x941 16:9. A Forge hall at night, industrial: the pedestal in its
+containment rings, the Core's blue-white light steady (never flaring), the
+cabling bolted to old stone. On the platform, a reclaimed body sitting up in
+the first hour — a soldier in a fresh-issue undershirt, disoriented, alive.
+Beside them on a plain stool, a Sexton: dark plain coat, a ledger-clip at the
+belt, one hand flat on the platform's edge, not on the person, saying
+nothing. Behind, the queue: a dozen people on benches under one work lamp,
+waiting their turn with the patience of a parish. On the wall, a ledger board
+of tally marks with NO legible text. Menace absent; this is the gentlest
+plate in the codex and the most unsettling for it.
+
+------------------------------------------------------------------------------
+faction-logos/the-congregation-of-the-bound.png — THE LEDGER AND THE BELL
+------------------------------------------------------------------------------
+1024x1024, flat emblem on transparent or dark. A containment ring (the Forge's
+rings, seen edge-on as a circle) with a single tally-stroke through it, and a
+small bell hung from the ring's lower edge. Steel and bone-white, one line of
+Core blue. No text. Must read at 32px.
+
+------------------------------------------------------------------------------
+characters/the-sexton-of-heartland.png — SEXTON EDDA BROOK
+------------------------------------------------------------------------------
+Portrait law (1672x941 or 3:4 per the character-bible brief). Fifties, broad,
+grey-cropped, a river-worker's forearms under the Sexton's plain dark coat,
+the ledger-clip at her belt worn like a key. She sits on the stool beside the
+Heartland platform; the Resident's Core light (NO figure, ever — a steady
+blue-white from the rings behind her) lays across one side of her face. In
+her lap, a closed folder she is not opening. Expression: dry, exact, the
+patience of someone who counts deaths for a living and is not tired of the
+living. Locks: she is not soft, not saintly, not lit like a saint.
+
+------------------------------------------------------------------------------
+characters/the-wellkeeper-of-honest-well.png — ANOUK SARR
+------------------------------------------------------------------------------
+Portrait law. Sixties, lean, sun-dark, indigo keeper-cloth like the Standing
+Camp clans', a coil of well-rope over one shoulder, mending in her hands,
+eyes down. Behind her at noon: the Honest Well's stone lip and, out of focus,
+two feuding clans' riders drinking from the same bucket in silence, weapons
+slung. The desert white with heat, the indigo the only saturated color.
+Locks: she is a host, not a priest — nothing ceremonial on her; the rope is
+the only ornament and it is not for water.

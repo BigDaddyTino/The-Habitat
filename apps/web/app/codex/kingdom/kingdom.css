@@ -99,10 +99,10 @@
 .km-tree.is-arcana { --tree: var(--km-arcana); }
 .km-tree.is-roots { --tree: var(--km-roots); }
 .km-tree.is-faith { --tree: var(--km-faith); }
-.km-tree > header { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.km-tree > header { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); }
 .km-tree > header b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 19px; line-height: 1.1; color: var(--tree, var(--paper)); }
 .km-tree > header span { font-size: 11.5px; color: var(--muted); }
-.km-sigil { position: relative; margin: 0; width: 56px; height: 56px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 45%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .95) 72%); display: grid; place-items: center; overflow: hidden; }
+.km-sigil { position: relative; margin: 0; width: 64px; height: 64px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 45%, rgba(198, 151, 76, .16), rgba(12, 16, 13, .95) 72%); display: grid; place-items: center; overflow: hidden; }
 .km-sigil img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .km-sigil .km-glyph { font-family: var(--font-display), Georgia, serif; font-size: 24px; color: var(--tree, var(--brass)); }
 .km-sigil .play-artslot { display: none; }
@@ -181,3 +181,8 @@
   .km-trees { grid-template-columns: 1fr; }
   .km-budget span.is-key { margin-left: 0; }
 }
+
+/* -- Faith cards: who keeps it, where it is kept ---------------------- */
+.km-keepers a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted rgba(214, 195, 151, .45); }
+.km-keepers a:hover { color: var(--brass); border-bottom-color: var(--brass); }
+.km-keepers.is-empty { font-style: italic; color: var(--muted); }
