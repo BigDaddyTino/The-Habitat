@@ -8,13 +8,17 @@ code change and no rebuild.
 Canon: `Docs/codex/RADIANT_PATH_INTEGRATION.md`. Runbook:
 `Docs/art/CODEX_ART_DROP_RUNBOOK.md`.
 
-**Two hard wiring notes for whoever files the delivery:**
+**Three hard wiring notes for whoever files the delivery:**
 
 1. **Faction key art and logos need a code change and art first.** Adding a
    slug to `factionAccents` / `pngFactionKeyart` in `lib/faction-branding.ts`
    **before** both files are on disk fails the release audit and blocks
    deploys. Art first, accent second, never the reverse.
-2. Everything else is drop-in. Filename is the entry slug, exactly.
+2. **The Arcadian Devil also needs art first and code second.** Its older race
+   plate is explicitly pinned in `lib/creature-keyart.ts`, so after the new
+   `creatures/arcadian-devil.png` is on disk, repoint that entry to the new
+   creature path or the dossier will continue to wear the superseded image.
+3. Everything else is drop-in. Filename is the entry slug, exactly.
 
 ---
 
@@ -118,11 +122,17 @@ is not going to discuss. **No legible writing on the page in front of him.**
 
 **3 · `wren-salloway.png` — Wren Salloway, the Almoner.** She/her, human,
 forties. Immaculate and entirely unshowy: a good coat kept well, good gloves, a
-document case held as though it weighs nothing. **Drawn attractive and genuinely
-warm** — she is the most reassuring person in any room, and nothing anywhere on
-her indicates the blood-magic cabal she actually works for. No occult marks, no
-red, no ornament. The horror of this portrait is that there is nothing wrong
-with it.
+document case held as though it weighs nothing. **She is the deliberately sexy
+adult character in this set: strikingly beautiful, confidently curvaceous, with
+an exceptionally appealing hourglass figure clearly readable through an elegant,
+close-tailored but fully clothed coat.** Frame her from head to mid-thigh so the
+silhouette reads naturally. Her appeal comes from adult presence, proportion,
+posture and quiet confidence — no nudity, lingerie, fetishwear, pin-up pose or
+performative seduction. She is also genuinely warm: the most reassuring person
+in any room, and nothing anywhere on her indicates the blood-magic cabal she
+actually works for. No occult marks, no red, no ornament. Keep the natural room
+light required by this brief; do not turn the portrait into studio glamour. The
+horror of this portrait is that there is nothing wrong with it.
 
 **4 · `imogen-roe.png` — Sexton Imogen Roe.** She/her, human, sixties. A working
 sexton's habit, mended more than once, with a chapel's worth of candle smoke in

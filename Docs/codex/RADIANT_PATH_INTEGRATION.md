@@ -2222,3 +2222,126 @@ held back until Ryan approves the female form.
 does to somebody who tries to leave is canon's law about prisons pointed at a
 movement, and the first writer of that beat owns it. It should be the last
 thing written in the arc.
+
+---
+
+## 39 · THE HOLD — an owner correction, 2026-09-03
+
+The build shipped with the wrong death rule, taken straight from `reclamation`,
+which stated it as a law for everybody:
+
+> "If there is not enough, the Forge builds what it can afford — and the
+> shortfall is paid out of the person… **Nobody dies permanently; they come
+> back less.**"
+
+Tino's ruling: **that is the player's rule and nobody else's.** When the Essence
+runs out, people die. The player loses levels and stats instead, because the
+player is special — and *"fort captures and what not will take forever if the
+NPCs never died completely."* Then, on the hold: **the corpses stay on the
+field.** Flesh and bone, in the open, the whole time.
+
+### The corrected system
+
+| | reserve covers it | reserve short | never paid |
+| --- | --- | --- | --- |
+| **Everybody** | comes back whole | **held** — Echo lit, name known, **body still on the ground** | dead, and buried |
+| **The player** | comes back whole | **built underbuilt** — levels and stats | — |
+
+The hold is not a mercy and it is not a timer. It is a queue.
+
+### The keeper — the second ruling, and the best one
+
+*"That is also why the Forge keeper is so important, because some have learned
+how to manipulate the system and put others ahead of someone else."*
+
+One body at a time, sequenced by whoever holds Logistics at master rung, or by
+whichever Sexton keeps the hall. When the reserve covers everybody, the order
+is a formality. **When it does not, the order is who lives.**
+
+And the corruption never looks like corruption. Nobody refuses anybody — a
+refusal is visible and gets answered. They sequence. A name up, a name back one
+more day, a body held while the reserve goes on somebody brought in later; each
+decision defensible alone, none of them written down as what it was, done for
+money, for family, for the commander who asked, for the faction that pays the
+stipends, and sometimes for something the keeper would call mercy and defend to
+your face.
+
+**This is now the most common corruption in the setting**, and it is why an
+honest keeper is worth more than an honest general.
+
+### What it did to the Peninsula act — all of it for the better
+
+The engine got worse for the people in it, which is what it should have been.
+
+- **The Path does not hollow its people out. It buries other people's.**
+  Devotion spends a shared reserve; the reserve does not refill before the next
+  person needs it; and the ones who die on an empty one never chose any of it.
+  **The movement is filling the graveyard it holds its services in.**
+- **Ivo Crane is not diminished. He is owed for.** Eleven deaths in a district
+  that cannot afford four, and **he has never once been the one held** — because
+  Wren Salloway pays, and a keeper who is paid sequences. **The Choir has been
+  buying his place in the queue since the second passage.** He does not know. It
+  is in the ledger and no line of dialogue says it.
+- **Corrin Ade's grievance is sharper.** The count was never the finding. **The
+  order was.** He watched a queue get bought for eleven years.
+- **Imogen Roe gets the second half of her office.** Thirty years, offered money
+  for it, asked for it as a favour, screamed at for it — and the order in her
+  book has never once been anything but the order they came in.
+- **The stone field is three kinds now**, and the third is most of it: the
+  unbound, the Unregistered, and **everybody whose hold was never paid.** Section
+  29's "correction" was itself wrong and this replaces it.
+- **The platform ledger stops being a damage report and becomes an order of
+  service.** Read beside a list of who pays the stipends, it is how a keeper
+  gets found out.
+
+### NAG — planted, not written
+
+*"It has something to do with NAG… the player gets NAG and can't take it off
+from the very start, before he can die in the checkpoint system. NAG is some
+form of ancient artifact, and when Amanda poured some magic in it, it
+reawakened. We can weave that in somewhere later on."*
+
+So it is **planted and owned, and nothing explains it.** NAG's dossier keeps its
+in-world account exactly as written — pre-war consumer tech, mass-produced,
+worth nothing, and then Amanda gave it something — because that is what
+everybody believes. Two open questions carry the truth:
+
+> *What NAG actually IS. The casing is pre-war consumer tech and the thing
+> inside it is not, and Amanda's gift did not create that — it woke it up.
+> Owner-known, deliberately unwritten, and no scene may explain it before the
+> arc that owns it exists.*
+>
+> *Whether the reason a Soul Forge will build one person underbuilt when it
+> holds everybody else is sitting on that person's wrist. Nobody in the world
+> has connected the two. Neither does the codex, yet.*
+
+`reclamation` places the two facts adjacent, in one sentence, and explicitly
+does not join them. The dossier already had the groundwork: NAG's magic was
+**given**, not extracted — the only magic in the world that cost nobody — and
+it goes silent around Amanda, for months, and will not say why.
+
+### The tell that says the ruling was right
+
+`the-kestrel-quartermaster`'s dossier already reads: *"A shortfall on the island
+killed somebody, and the entry she wrote covered it."*
+
+Under the old rule a shortfall could not kill anybody. **The fiction had been
+assuming this rule before the system dossier stated it**, and that dossier now
+needs no change at all.
+
+### What was rewritten
+
+`scripts/author-the-hold.ts` — anchored, asserted, idempotent (a `sentinel`
+guards the one insert whose replacement carries its own anchor).
+
+**System:** `reclamation` (eight passages) · `attributes` (the rung cost is the
+player's exception).
+**Peninsula:** `the-radiant-path` · `ivo-crane` · `corrin-ade` · `imogen-roe` ·
+`the-marker` · `the-stone-field` · `the-platform-ledger`.
+**Board:** `the-lamplight-road/the-thin-reserve`, rewritten whole, plus three
+new scene links.
+**Planted:** `nag`.
+
+A sweep for every surviving statement of the old rule — *come back less, nobody
+dies permanently, want of money, paid out of the person* — returns **one** hit,
+in `reclamation`, where it is now correctly the player's.
