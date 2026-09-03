@@ -239,6 +239,39 @@ Residual / Active / Surge / Bloomstorm — never a fifth persistent band.
 
 ---
 
+## 9a. How the encounter starts
+
+**He is always there. He does not spawn.** He is under Blackweir at every hour of every day, and
+no player action creates him — that is what "authored, not seeded" means, and it is the whole
+difference between him and the five Aberrants the ladder can seed at 1%.
+
+What the player controls is **whether he comes up**, and the trigger is the thing he is about:
+you surface him by being the contamination.
+
+| Interference | What it is |
+|---|---|
+| Working the resin beds | Harvesting [[blackweir-resin]] — the licensed activity the whole zone exists for |
+| Cutting filtration roots | Taking [[sinkroot-fiber]] out of the barrier |
+| Lifting a specimen | Removing anything he has catalogued |
+| Dropping a pylon | Sabotaging the supply that is also the containment |
+
+Enough of that in one visit and the water opens. **This is why every name in the Wardens' column
+is a harvester** — nobody on that list went looking for him, and that is the point of the list.
+
+`reactor-cycles` sets the terms. A Dormant Interval keeps him deep and hard to draw; a Purge
+brings him up already anchored and drawing. See §9 for the full state table.
+
+**He does not reset, and there is no successor.** Break contact and he goes under and heals a
+rung, and whatever you left him at is what meets you next time. That is canon's standing rule for
+named threats — *"named threats retreat when wounded rather than despawning, do not casually
+respawn, and a successor is a separate authored outcome rather than the same creature returning
+unexplained"* — and there is no authored successor here. Kill him and Blackweir has no keeper,
+permanently.
+
+The bounty at Cairnwood does not summon him. It tells you where to go and pays if you finish it.
+
+---
+
 ## 10. Phase 1 — Dr. Vey, the Mire Stalker
 
 Heavily serpentine, still recognisably built on a person. He wears what is left of a Southreach
