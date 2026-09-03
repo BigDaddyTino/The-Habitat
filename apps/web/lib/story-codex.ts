@@ -1,5 +1,6 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
+import type { AtlasArc, AtlasCompanion, AtlasEdge, AtlasJoin, AtlasNode, CampaignAtlas } from "@/lib/campaign-atlas";
 import {
   analyzeStoryGraph,
   canonicalStoryEntryRouteSlug,
@@ -1640,4 +1641,171 @@ export async function listEntryContributions(entrySlug: string) {
     contributor: storyMemberName(row.contributor),
     submittedAt: row.submittedAt.toISOString().slice(0, 10),
   }));
+}
+
+/**
+ * The campaign atlas: every mainline card as one continuous graph, plus each
+ * side board, contract and companion chain hung off the card it reaches.
+ *
+ * Derived, like every other projection here — the shapes and the layout maths
+ * live in lib/campaign-atlas.ts, which is pure and tested. Three kinds of join
+ * are collected and kept apart deliberately: a structural `continuesIn`, a
+ * flag set in one board and read in another, and — where neither exists
+ * between two consecutive chapters — an `implied` gap, which the map draws as
+ * a hole rather than a line.
+ */
+export async function getCampaignAtlas(): Promise<CampaignAtlas> {
+  const [arcRows, web] = await Promise.all([
+    db.storyArc.findMany({
+      where: { status: { in: workingStatuses } },
+      select: {
+        id: true, slug: true, title: true, category: true, isMainline: true, position: true,
+        status: true, lockedAt: true, summary: true, hook: true,
+        region: { select: { slug: true, title: true } },
+        _count: { select: { nodes: { where: { status: { in: workingStatuses } } } } },
+      },
+      orderBy: [{ isMainline: "desc" }, { position: "asc" }, { title: "asc" }],
+    }),
+    getStoryRipples(),
+  ]);
+
+  const asArc = (row: (typeof arcRows)[number]): AtlasArc => ({
+    slug: row.slug, title: row.title, category: row.category, isMainline: row.isMainline,
+    position: row.position, status: row.status, locked: row.lockedAt !== null,
+    summary: row.summary, hook: row.hook, nodeCount: row._count.nodes, region: row.region,
+  });
+  const spine = arcRows.filter((row) => row.isMainline).map(asArc);
+  const spineSlugs = new Set(spine.map((arc) => arc.slug));
+  const spineIds = arcRows.filter((row) => row.isMainline).map((row) => row.id);
+
+  const [nodeRows, edgeRows] = await Promise.all([
+    db.storyNode.findMany({
+      where: { arcId: { in: spineIds }, status: { in: workingStatuses } },
+      select: {
+        id: true, key: true, kind: true, title: true, endingKind: true,
+        arc: { select: { slug: true } },
+        _count: { select: { lines: { where: { retiredAt: null } } } },
+      },
+      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    }),
+    db.storyEdge.findMany({
+      where: { arcId: { in: spineIds }, status: { in: workingStatuses } },
+      select: { id: true, label: true, condition: true, fromNodeId: true, toNodeId: true, position: true },
+      orderBy: { position: "asc" },
+    }),
+  ]);
+
+  const nodeIds = new Set(nodeRows.map((row) => row.id));
+  const edges: AtlasEdge[] = edgeRows
+    .filter((row) => nodeIds.has(row.fromNodeId) && nodeIds.has(row.toNodeId))
+    .map((row) => ({ id: row.id, from: row.fromNodeId, to: row.toNodeId, label: row.label, condition: row.condition }));
+  const hasIncoming = new Set(edges.map((edge) => edge.to));
+  const hasOutgoing = new Set(edges.map((edge) => edge.from));
+  const nodes: AtlasNode[] = nodeRows.map((row) => ({
+    id: row.id, key: row.key, kind: row.kind, title: row.title, arcSlug: row.arc.slug,
+    endingKind: row.endingKind, lines: row._count.lines,
+    entry: !hasIncoming.has(row.id), terminal: !hasOutgoing.has(row.id),
+  }));
+
+  // --- the joins ----------------------------------------------------------
+  const joins: AtlasJoin[] = [];
+  const seen = new Set<string>();
+  const add = (join: AtlasJoin) => {
+    const key = `${join.kind}:${join.fromArc}:${join.fromNode ?? ""}:${join.toArc}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    joins.push(join);
+  };
+  for (const chain of web.chains) {
+    add({ kind: "handoff", fromArc: chain.from.arcSlug, fromNode: chain.from.nodeId, toArc: chain.to.arcSlug, toNode: null, label: chain.from.nodeTitle });
+  }
+  for (const ripple of web.ripples) {
+    add({ kind: "flag", fromArc: ripple.from.arcSlug, fromNode: ripple.from.nodeId, toArc: ripple.to.arcSlug, toNode: ripple.to.nodeId, label: ripple.flagTitle });
+  }
+  // Consecutive chapters that nothing joins. Reported as a gap and never drawn
+  // as a road: a map that stitches its own holes shut is worse than no map.
+  const joinedPairs = new Set(joins.map((join) => `${join.fromArc}>${join.toArc}`));
+  for (let index = 0; index < spine.length - 1; index += 1) {
+    const from = spine[index]!;
+    const to = spine[index + 1]!;
+    if (joinedPairs.has(`${from.slug}>${to.slug}`)) continue;
+    // Two chapters branching from the same parent are siblings, not a gap.
+    const sharesAParent = joins.some((join) => join.toArc === from.slug && joins.some((other) => other.toArc === to.slug && other.fromArc === join.fromArc));
+    if (sharesAParent) continue;
+    add({ kind: "implied", fromArc: from.slug, fromNode: null, toArc: to.slug, toNode: null, label: "nothing connects these yet" });
+  }
+
+  // --- what spiders off it ------------------------------------------------
+  // A board reaches the campaign if a join touches it, directly or through
+  // another board that does. Walked rather than assumed, so a cluster like
+  // the Bloomfall boards arrives whole or not at all.
+  const neighbours = new Map<string, Set<string>>();
+  for (const join of joins) {
+    if (join.kind === "implied") continue;
+    neighbours.set(join.fromArc, (neighbours.get(join.fromArc) ?? new Set<string>()).add(join.toArc));
+    neighbours.set(join.toArc, (neighbours.get(join.toArc) ?? new Set<string>()).add(join.fromArc));
+  }
+  const reached = new Set(spineSlugs);
+  const frontier = [...spineSlugs];
+  while (frontier.length > 0) {
+    const slug = frontier.shift() as string;
+    for (const next of neighbours.get(slug) ?? []) {
+      if (reached.has(next)) continue;
+      reached.add(next);
+      frontier.push(next);
+    }
+  }
+  const side = arcRows.filter((row) => !row.isMainline && reached.has(row.slug)).map(asArc);
+  const orphans = arcRows.filter((row) => !row.isMainline && !reached.has(row.slug)).map(asArc);
+
+  // --- the companion chains -----------------------------------------------
+  // A recruitable companion named on a mainline card is a chain hanging off
+  // that card. Amanda's nine missions are entries rather than boards, so this
+  // is the only way they reach the map at all.
+  const [companionLinks, missionRows] = await Promise.all([
+    db.storyEntryLink.findMany({
+      where: { node: { arcId: { in: spineIds }, status: { in: workingStatuses } } },
+      select: {
+        node: { select: { id: true, title: true, createdAt: true, arc: { select: { slug: true, title: true, position: true } } } },
+        entry: { select: { slug: true, title: true, kind: true, meta: true } },
+      },
+    }),
+    db.storyEntry.findMany({
+      where: { kind: "COMPANION_MISSION", status: { in: workingStatuses } },
+      select: { slug: true, title: true, meta: true },
+    }),
+  ]);
+  const companions: AtlasCompanion[] = [];
+  const claimed = new Set<string>();
+  // Earliest chapter first, then the order the cards were written, so the
+  // chain anchors at the first place the campaign says their name rather than
+  // at whichever link the database happened to return first.
+  const orderedLinks = [...companionLinks].sort((left, right) =>
+    left.node.arc.position - right.node.arc.position || left.node.createdAt.getTime() - right.node.createdAt.getTime());
+  for (const link of orderedLinks) {
+    if (link.entry.kind !== "CHARACTER" || claimed.has(link.entry.slug)) continue;
+    const meta = (link.entry.meta ?? {}) as Record<string, unknown>;
+    const companion = (meta.companion ?? {}) as Record<string, unknown>;
+    if (companion.capable !== true) continue;
+    const namedOn = orderedLinks
+      .filter((row) => row.entry.slug === link.entry.slug)
+      .map((row) => ({ arcSlug: row.node.arc.slug, arcTitle: row.node.arc.title, nodeId: row.node.id, nodeTitle: row.node.title }));
+    const missions = missionRows
+      .filter((row) => ((row.meta ?? {}) as Record<string, unknown>).companion === link.entry.slug)
+      .map((row) => {
+        const missionMeta = (row.meta ?? {}) as Record<string, unknown>;
+        return {
+          slug: row.slug,
+          title: row.title,
+          order: typeof missionMeta.order === "number" ? missionMeta.order : null,
+          stage: typeof missionMeta.stage === "string" ? missionMeta.stage : null,
+        };
+      })
+      .sort((left, right) => (left.order ?? 99) - (right.order ?? 99) || left.title.localeCompare(right.title));
+    if (missions.length === 0) continue;
+    claimed.add(link.entry.slug);
+    companions.push({ slug: link.entry.slug, title: link.entry.title, atArc: link.node.arc.slug, atNode: link.node.id, namedOn, missions });
+  }
+
+  return { spine, nodes, edges, side, joins, companions, orphans };
 }

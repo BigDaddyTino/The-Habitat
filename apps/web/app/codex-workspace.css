@@ -386,3 +386,110 @@
 .faction-wing-list li a>.faction-emblem{width:38px;height:38px}
 .character-profile-affiliations>a>.faction-emblem{width:52px;height:52px;--faction-accent:var(--affiliation-accent,#9a7940)}
 @media(max-width:520px){.faction-banner-identity>.faction-emblem{width:62px;height:62px}.faction-independent-copy>.faction-emblem{width:52px;height:52px}}
+
+/* ── The campaign map ───────────────────────────────────────────────────────
+   One canvas holding the whole main campaign scene by scene, with everything
+   that spiders off it. The canvas is tall on purpose and pans; the counts and
+   the tables around it are the parts that have to read on a phone. */
+.codex-atlas-shell .page-intro{max-width:820px}
+.atlas-main{display:grid;gap:16px}
+
+/* Flex rather than grid on purpose: a fixed column count needs a media query
+   per breakpoint and still guesses wrong inside a sidebar layout, and a stray
+   grid-template elsewhere silently collapses it to one column. Equal cells
+   that wrap when they run out of room need neither. */
+.atlas-counts{display:flex;flex-wrap:wrap;gap:1px;border:1px solid #3e463e;background:#3e463e}
+.atlas-counts>div{flex:1 1 128px;display:grid;gap:4px;padding:13px 14px;background:#141a14;text-align:left}
+.atlas-counts b{color:#ead9b0;font:600 22px/1 var(--font-serif)}
+.atlas-counts span{color:#8b968b;font:8px var(--font-mono);letter-spacing:.09em;text-transform:uppercase}
+.atlas-counts>div.is-gap{background:#1d1414}
+.atlas-counts>div.is-gap b{color:#e39a9a}
+
+.atlas-gaps{border:1px solid #6c3b3d;border-left:3px solid #a2494a;padding:16px 18px;background:linear-gradient(100deg,rgba(120,50,52,.16),#131612)}
+.atlas-gaps .eyebrow{display:flex;align-items:center;gap:6px;margin:0;color:#dd9a9a}
+.atlas-gaps>p{margin:9px 0 0;color:#a9a89c;font-size:11.5px;line-height:1.7}
+.atlas-gaps ul{display:grid;gap:6px;margin:12px 0 0;padding:0;list-style:none}
+.atlas-gaps li{display:flex;flex-wrap:wrap;align-items:center;gap:9px;border:1px solid #4a3730;padding:7px 10px;background:#171412}
+.atlas-gaps li a{color:#e0c896;font-size:12px;text-decoration:none}
+.atlas-gaps li a:hover{text-decoration:underline}
+.atlas-gaps li i{color:#a2494a;font-style:normal}
+
+.atlas-canvas{position:relative;height:min(76dvh,880px);border:1px solid #3e463e;background:radial-gradient(circle at 22% 8%,rgba(198,151,76,.06),transparent 42%),#0e120f}
+.atlas-canvas .react-flow__controls{border:1px solid #3e463e;background:#141a14}
+.atlas-canvas .react-flow__controls button{border-bottom:1px solid #2b322b;background:#141a14;fill:#c3b183}
+.atlas-canvas .react-flow__controls button:hover{background:#1d251d}
+.atlas-canvas .react-flow__minimap{border:1px solid #3e463e;background:#0d110e}
+.atlas-handle{width:5px;height:5px;border:0;background:#5d6a58}
+
+.atlas-card{display:grid;gap:4px;width:236px;border:1px solid #414a40;border-left:3px solid var(--kind-accent,#6f7a68);padding:9px 11px;background:linear-gradient(160deg,#1a211a,#121711);color:inherit;text-decoration:none;transition:.16s ease}
+.atlas-card:hover{border-color:#9a7940;border-left-color:#c6974c;transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,0,0,.4)}
+.atlas-card.is-entry{border-left-color:#8fbf8a}
+.atlas-card.is-ending{border-left-color:#c6974c;background:linear-gradient(160deg,#221c12,#141610)}
+.atlas-card-kicker{display:flex;align-items:center;gap:6px;color:#8e9a8b;font:7.5px var(--font-mono);letter-spacing:.09em;text-transform:uppercase}
+.atlas-card-kicker i{color:#c6974c;font-style:normal;font-weight:700}
+.atlas-card-kicker em{margin-left:auto;color:#7e8a7c;font-style:normal}
+.atlas-card strong{color:#e8dcbc;font:600 12.5px/1.3 var(--font-serif)}
+.atlas-card-arc{color:#79856f;font:7.5px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.atlas-card.kind-choice{--kind-accent:#b98a4e}
+.atlas-card.kind-quest_start{--kind-accent:#8fbf8a}
+.atlas-card.kind-quest_step{--kind-accent:#7b93b8}
+.atlas-card.kind-condition{--kind-accent:#8f7fae}
+.atlas-card.kind-dialogue{--kind-accent:#a8a06a}
+
+.atlas-side{display:grid;gap:5px;width:290px;border:1px solid #40504f;border-top:2px solid #5f7f9c;padding:11px 13px;background:linear-gradient(160deg,#151d20,#111517);color:inherit;text-decoration:none;transition:.16s ease}
+.atlas-side:hover{border-color:#7fa6c4;transform:translateY(-1px)}
+.atlas-side.is-locked{opacity:.72}
+.atlas-side-kicker{display:flex;align-items:center;gap:5px;color:#8fb0c8;font:7.5px var(--font-mono);letter-spacing:.09em;text-transform:uppercase}
+.atlas-side strong{color:#dfe6ea;font:600 13.5px/1.25 var(--font-serif)}
+.atlas-side small{display:-webkit-box;overflow:hidden;color:#93a1a8;font-size:10px;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.atlas-side-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#7f8d94;font:7.5px var(--font-mono);text-transform:uppercase}
+.atlas-side-foot i,.atlas-side-foot em{display:inline-flex;align-items:center;gap:4px;font-style:normal}
+.atlas-side-why{color:#68757c;font:7px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.atlas-side.category-contract{border-top-color:#b98a4e}
+.atlas-side.category-world_event{border-top-color:#a2494a}
+.atlas-side.category-faction_quest{border-top-color:#8f7fae}
+
+.atlas-chain{display:grid;gap:6px;width:300px;border:1px solid #4a4359;border-right:2px solid #8f7fae;padding:12px 14px;background:linear-gradient(200deg,#1a1723,#121116)}
+.atlas-chain-kicker{display:flex;align-items:center;gap:5px;color:#b3a3cf;font:7.5px var(--font-mono);letter-spacing:.09em;text-transform:uppercase}
+.atlas-chain-name{color:#e6ddf4;font:600 15px var(--font-serif);text-decoration:none}
+.atlas-chain-name:hover{text-decoration:underline}
+.atlas-chain ol{display:grid;gap:2px;margin:2px 0 0;padding:0;list-style:none;counter-reset:none}
+.atlas-chain li a{display:grid;grid-template-columns:16px minmax(0,1fr) auto;align-items:baseline;gap:7px;padding:3px 4px;color:#b6aec6;font-size:10.5px;text-decoration:none}
+.atlas-chain li a:hover{background:#221e2c;color:#e6ddf4}
+.atlas-chain li i{color:#8f7fae;font-style:normal;font-weight:700}
+.atlas-chain li em{color:#7c7490;font:7px var(--font-mono);font-style:normal;text-transform:uppercase}
+.atlas-chain-foot{margin-top:3px;border-top:1px solid #332e3f;padding-top:7px;color:#7c7490;font-size:9px;line-height:1.5}
+
+.atlas-legend{display:flex;flex-wrap:wrap;gap:7px 18px;margin:0;border:1px solid #3e463e;border-top:0;padding:11px 14px;background:#12170f;list-style:none}
+.atlas-legend li{display:flex;align-items:center;gap:7px;color:#93a08f;font-size:10px}
+.atlas-legend .swatch{display:block;width:22px;height:0;border-top:3px solid #6f7a68}
+.atlas-legend .swatch.is-handoff{border-top-color:#c6974c}
+.atlas-legend .swatch.is-flag{border-top:2px dashed #7f9bb8}
+.atlas-legend .swatch.is-implied{border-top:2px dashed #a2494a}
+.atlas-legend .swatch.is-chain{border-top:2px dashed #8f7fae}
+
+.atlas-tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.atlas-tables>section{border:1px solid #3e463e;padding:16px 18px;background:#141a14}
+.atlas-tables .eyebrow{display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.atlas-list{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.atlas-list li{border-top:1px solid #2d342d;padding-top:9px}
+.atlas-list li:first-child{border-top:0;padding-top:0}
+.atlas-list li>a{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;color:#dcc58d;text-decoration:none}
+.atlas-list li>a:hover strong{text-decoration:underline}
+.atlas-list li strong{font:600 13px var(--font-serif)}
+.atlas-list li i{color:#7f8a7f;font:7.5px var(--font-mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase}
+.atlas-list li p{margin:4px 0 0;color:#98a297;font-size:10.5px;line-height:1.6}
+.atlas-list li p a{color:#c5a85f}
+.atlas-orphans{border-color:#5d4436!important}
+
+@media(max-width:640px){.atlas-canvas{height:64dvh}.atlas-legend{gap:6px 12px}}
+
+/* Chapter banners across the top of each lane, so the map names its own
+   chapters without a separate key. Sized to the lane the layout measured. */
+.atlas-lane{display:grid;gap:3px;box-sizing:border-box;border:1px solid #6a5a33;border-bottom:2px solid #c6974c;padding:11px 15px;background:linear-gradient(180deg,#23200f,#151810);color:inherit;text-decoration:none}
+.atlas-lane:hover{border-color:#c6974c;background:linear-gradient(180deg,#2b2612,#181c12)}
+.atlas-lane.is-locked{opacity:.75}
+.atlas-lane-kicker{display:flex;align-items:center;gap:5px;color:#b2953f;font:7.5px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.atlas-lane strong{color:#f0dfb4;font:600 17px/1.15 var(--font-serif)}
+.atlas-lane-foot{display:inline-flex;align-items:center;gap:5px;color:#8b9385;font:7.5px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+
