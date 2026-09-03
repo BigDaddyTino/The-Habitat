@@ -147,11 +147,17 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
   const art = getDossierArt(entry.kind, entry.slug, meta);
   const artSlot = art ? null : dossierArtSlot(entry.kind, entry.slug, meta);
   const artSlotIcon = artSlotIcons[entry.kind] ?? <Sparkles aria-hidden="true" size={30} />;
+  // A character's affiliations used to be dropped entirely when the faction
+  // had no branding yet, so a dossier could name a faction on its sheet and
+  // show nothing on the page — which is exactly what happened to the whole
+  // Peninsula cast. Branding is now optional: the chip renders either way and
+  // the emblem slot is filled, because a grid with a fixed leading column
+  // shifts every following child when its first one is missing.
   const characterAffiliations = isCharacter
     ? rows(meta.factions).flatMap((membership) => {
         const slug = label(membership.faction);
         const brand = slug ? getFactionBranding(slug) : null;
-        if (!slug || !brand) return [];
+        if (!slug) return [];
         return [{
           brand,
           role: label(membership.role),
@@ -271,8 +277,10 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
           <h1>{entry.title}</h1>
           <p className="entity-profile-summary">{entry.summary ? <StoryProseLine resolve={resolveProse} text={entry.summary} /> : "This entry still needs its one-line pitch."}</p>
           {characterAffiliations.length ? <div className="character-profile-affiliations" aria-label="Faction affiliations">
-            {characterAffiliations.map(({ brand, role, slug, standing, title }) => <Link href={`/codex/bible/${slug}`} key={slug} style={{ "--affiliation-accent": brand.accent } as React.CSSProperties}>
-              <img alt="" src={codexArtSized(brand.logo, 320)} />
+            {characterAffiliations.map(({ brand, role, slug, standing, title }) => <Link href={`/codex/bible/${slug}`} key={slug} style={brand ? { "--affiliation-accent": brand.accent } as React.CSSProperties : undefined}>
+              {brand
+                ? <img alt="" src={codexArtSized(brand.logo, 320)} />
+                : <span className="faction-emblem is-pending" title="Key art has not been delivered for this faction yet"><Shield aria-hidden="true" size={22} /></span>}
               <span><small>Faction affiliation</small><strong>{title}</strong>{role || standing ? <em>{[role, standing].filter(Boolean).join(" · ")}</em> : null}</span>
               <ArrowRight aria-hidden="true" size={12} />
             </Link>)}

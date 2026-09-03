@@ -1,6 +1,6 @@
 const creatureKeyart = {
   abominations: "/codex-art/races/abominations.png",
-  "arcadian-devil": "/codex-art/races/arcadian-devil.png",
+  "arcadian-devil": "/codex-art/creatures/arcadian-devil.png",
   beasts: "/codex-art/races/beasts.png",
   hippogriff: "/codex-art/races/hippogriff.png",
   human: "/codex-art/races/human.png",

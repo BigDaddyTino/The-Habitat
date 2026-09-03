@@ -1009,3 +1009,15 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Passed 582/582 web tests, workspace typecheck across seven projects, workspace lint with zero errors and one pre-existing class-page image warning, the full production build, diff checks, and an anonymous 404 privacy probe
 - [x] Used the owner's authenticated Chrome session to load all 25 production private-art endpoints at their exact native dimensions and visually verify the Phase Two hero with zero browser warnings/errors; the running production build still returns 404 for the authored boss dossier, so page-level desktop/mobile QA is not claimed before a future deploy
 - [x] Preserved scope: no StoryEntry, authoring database row, frozen game release, public asset, credential, infrastructure address, server-control surface, deployment, or production service was changed
+
+## 2026-09-03 - SOL 5.6 The Lamplight Road art delivery
+
+- [x] Generated, revised, and installed the exact 28-plate commission: eight character portraits, two faction key-art plates, two transparent faction emblems, one item, one rule plate, two creatures, and twelve regions
+- [x] Made Wren Salloway the deliberately sexy adult character requested for the set: a striking, clearly curvaceous woman in her forties whose hourglass figure reads through a close-tailored closed coat, with full clothing, credible anatomy, natural posture and light, and no pin-up or fetish treatment
+- [x] Preserved every story and visual lock, including trustworthy Ilse, exactly two inked Corrin fingers, inviting Radiants, quiet Arcadian power, constructive Forge anatomy, an entirely unseen Lamplighter, a fast two-pincered Arcadian Devil, unexplained Ash Ground geometry, unreadable ledgers and markers, and the deliberately undrawn Dam
+- [x] Decoded all 28 finals at the exact contracts: 26 opaque 1672x941 sRGB RGB24 PNGs and two 1024x1024 sRGB RGBA PNG emblems with meaningful alpha; all 28 final SHA-256 hashes are unique
+- [x] Reviewed every full frame and exact 564x941 center crop, all eight 1122x941 and 706x941 character crops, and both emblems on light/dark grounds at 104px, 48px, and 32px; targeted revisions corrected every substantive visual miss
+- [x] Registered the two new PNG faction pairs and repointed the Arcadian Devil from its superseded race plate to the new creature plate after all corresponding private files were installed
+- [x] Recorded one row per final, accepted-source hashes, normalization, refusals, revisions, prompt provenance, crop evidence, and publication scope in `Docs/art/SOL56_LAMPLIGHT_ROAD_ART_LEDGER.md`
+- [x] Passed 27/27 focused art/resolver/privacy tests, the 6/6 release audit, full repository tests including 595/595 web tests, workspace typecheck, workspace lint with one pre-existing class-page image warning, the full production build, and diff checks; only the unrelated `the-weir-has-no-keeper` flag remains an eligible empty art slot
+- [x] Preserved scope: no StoryEntry, database row, seed prose, public asset, credential, infrastructure address, server-control surface, deployment, or production service was changed

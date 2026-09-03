@@ -30,3 +30,7 @@ test("every illustrated creature has project-local key art", () => {
 test("unknown creatures fall back to their model or placeholder", () => {
   assert.equal(getCreatureKeyart("not-yet-illustrated"), null);
 });
+
+test("the Arcadian Devil uses its commissioned creature plate", () => {
+  assert.equal(getCreatureKeyart("arcadian-devil"), "/codex-art/creatures/arcadian-devil.png");
+});

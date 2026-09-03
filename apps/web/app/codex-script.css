@@ -3,7 +3,11 @@
    choices leading out of it. Same tokens as the rest of the codex; the kind
    accents come from codex.css (.kind-*). */
 
-.arc-shell { --proposed: #7b93b8; --canon: #8fbf8a; }
+/* A board is a workspace and wants the full width, but it was running its
+   heading, chips and summary hard against the left edge of the glass while
+   every other codex surface sits inside page-shell's 20px gutter. Width kept,
+   gutter added. */
+.arc-shell { --proposed: #7b93b8; --canon: #8fbf8a; padding-inline: 20px; }
 
 /* -- Head ------------------------------------------------------------- */
 .arc-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: start; margin-bottom: 12px; }
@@ -30,7 +34,12 @@ a.arc-chip:hover { border-color: var(--brass); color: var(--paper); }
 .script-tabs > button.is-active { border-color: var(--line); background: rgba(27, 34, 29, .8); color: var(--paper); box-shadow: inset 0 2px 0 var(--brass); }
 .script-tabs > button:hover { color: var(--paper); }
 .script-tabs-meta { margin-left: 10px; font-size: 11.5px; color: var(--muted); }
-.script-tabs .flow-lock { margin-left: auto; }
+/* The lock control is shared with the flow canvas, where its form is absolutely
+   positioned over the graph. In the script tab row it has to sit in the flow of
+   the row instead — left absolute it escaped to the nearest positioned ancestor
+   and landed on top of the navigator. */
+.script-tabs .flow-lock-form { position: static; margin-left: auto; }
+.script-tabs .flow-lock { margin-left: 0; }
 .script-map { min-height: 640px; height: calc(100dvh - 260px); }
 .script-map .story-flow { height: 100%; }
 
@@ -158,8 +167,15 @@ a.arc-chip:hover { border-color: var(--brass); color: var(--paper); }
   .story-line { grid-template-columns: 30px minmax(0, 1fr); }
   .story-line-rail.is-end { grid-column: 1 / -1; grid-auto-flow: column; justify-content: start; }
   .story-line-row, .story-line-row:last-of-type { grid-template-columns: 1fr; }
-  .script-choice-row { grid-template-columns: 22px 1fr; }
+  /* Five columns will not fit a phone, and collapsing to two was not enough:
+     the arrow is hidden but the target and the edit button still flow into the
+     next implicit cells, which puts a card title into the 22px index column
+     one word per line with the button on top of it. Give everything after the
+     label its own row in the text column. */
+  .script-choice-row { grid-template-columns: 22px minmax(0, 1fr); }
   .script-choice-arrow { display: none; }
+  .script-choice-row > .script-choice-target { grid-column: 2; justify-self: start; text-align: left; }
+  .script-choice-row > .script-btn { grid-column: 2; justify-self: start; }
 }
 
 /* Fixes after the first render: the codex shell lays out nav elements as a
@@ -174,3 +190,12 @@ a.arc-chip:hover { border-color: var(--brass); color: var(--paper); }
 .script-btn.is-on { border-color: var(--brass); color: var(--paper); background: rgba(198, 151, 76, .1); }
 .story-lines-head { align-items: center; }
 .story-lines-tools { flex-wrap: nowrap; }
+
+/* The canon navigator on a board. The breakpoint that swaps the sidebar for
+   its collapsed drawer already lives in codex.css at 960px and drives
+   .canon-workspace, .canon-nav-desktop and .canon-nav-mobile together — so
+   this must not add a second one, or between the two widths the full sidebar
+   stacks above the board instead of collapsing. .canon-workspace-main already
+   carries min-width:0, which is what lets the dense script column shrink
+   instead of pushing the page into a horizontal scroll. */
+.arc-workspace{margin-top:14px}

@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { Archive, ArrowLeft, Cog, Lock, MapPin, Settings2, TriangleAlert } from "lucide-react";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { canonicalStoryEntryRouteSlug, isStoryFlowEditable, storyArcCategoryLabels, storyLockNotice, storyStatusLabels } from "@habitat/shared";
-import { getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getCanonNavigator, getStoryBoard, getStoryRipples, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { StoryScript } from "@/components/story-script";
 import { RipplePanel } from "@/components/story-ripples";
+import { CanonNavigator } from "@/components/canon-navigator";
 import { ArcFields } from "@/components/story-arc-form";
 import { archiveArc, canoniseArc, updateArc } from "@/app/codex/actions";
 
@@ -24,13 +25,14 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
   const [{ slug }, { node: initialNodeId }] = await Promise.all([params, searchParams]);
   const board = await getStoryBoard(slug);
   if (!board) notFound();
-  const [arcRefs, regions, characters, factions, allSystems, web] = await Promise.all([
+  const [arcRefs, regions, characters, factions, allSystems, web, nav] = await Promise.all([
     listStoryArcRefs(),
     listStoryEntries({ kind: "REGION" }),
     listStoryEntries({ kind: "CHARACTER" }),
     listStoryEntries({ kind: "FACTION" }),
     listStoryEntries({ kind: "SYSTEM" }),
     getStoryRipples(),
+    getCanonNavigator(),
   ]);
   // The other end of the release gate: each system's sheet names the arc that
   // unlocks it, and the arc page answers "what does finishing this hand the
@@ -92,6 +94,16 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
         </div>
       </header>
 
+      {/* The navigator down the left, on every board — which is what its own
+          docblock always said it did, and what `currentArcSlug` exists for. It
+          was only ever mounted on the two /codex/stories surfaces, so a writer
+          who opened a board lost the map of the story they were inside.
+          Server-rendered with no client JavaScript, so it costs nothing on the
+          page writers keep open all day. */}
+      <div className="canon-workspace arc-workspace">
+        <CanonNavigator currentArcSlug={slug} nav={nav} />
+        <div className="canon-workspace-main">
+
       {!canEditArc ? (
         <p className="codex-problems codex-arc-locked"><Lock aria-hidden="true" size={14} /> {storyLockNotice(board.arc.locked?.by ?? null)}</p>
       ) : null}
@@ -146,6 +158,8 @@ export default async function StoryArcPage({ params, searchParams }: { params: P
         initialNodeId={initialNodeId ?? null}
         viewerUserId={user.id}
       />
+        </div>
+      </div>
     </section>
     <RipplePanel arcSlug={slug} arcTitle={board.arc.title} web={web} />
     </>

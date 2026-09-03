@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
-import { ArrowRight, Boxes, CalendarClock, Cog, Compass, GitBranch, Handshake, MapPin, Plus, Search, Sparkles, UserRoundSearch } from "lucide-react";
+import { ArrowRight, Boxes, CalendarClock, Cog, Compass, GitBranch, Handshake, MapPin, Plus, Search, Shield, Sparkles, UserRoundSearch } from "lucide-react";
 import { canonicalStoryEntryRouteSlug, storyCompanionMissionStatusLabels, storyStoryStageLabels, type StoryCompanionMissionStatus, type StoryStoryStage } from "@habitat/shared";
 import { createEntry } from "@/app/codex/actions";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -23,6 +23,25 @@ import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, story
  */
 const regionArtSizes = "(max-width: 900px) 100vw, 44vw";
 const regionArtWidths = [640, 960, 1440] as const;
+
+/**
+ * The logo slot on every faction surface, filled whether or not the faction
+ * has branding yet.
+ *
+ * Each of these cards is a grid with a fixed leading column for the emblem, so
+ * an emblem that is conditionally rendered does not leave a gap — it shifts
+ * every following child one column left. That is what put the Nation-State of
+ * Arcadia's name and its whole summary inside a 62px column with the arrow
+ * floating in the middle of the card. The regions atlas already had the right
+ * answer (`region-place-fallback`); the faction surfaces did not.
+ *
+ * A slot that is always occupied also reads honestly: art is pending, not
+ * missing, and the card looks deliberate until it lands.
+ */
+function FactionEmblem({ logo, size = 62 }: { logo: string | null; size?: number }) {
+  if (logo) return <span className="faction-emblem"><img alt="" src={codexArtSized(logo, 320)} /></span>;
+  return <span className="faction-emblem is-pending" title="Key art has not been delivered for this faction yet"><Shield aria-hidden="true" size={Math.round(size * 0.42)} /></span>;
+}
 
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
@@ -366,7 +385,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                   {brand ? <img alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
                   <span className="faction-banner-shade" />
                   <span className="faction-banner-identity">
-                    {brand ? <span className="faction-banner-logo"><img alt="" src={codexArtSized(brand.logo, 320)} /></span> : null}
+                    <FactionEmblem logo={brand?.logo ?? null} size={78} />
                     <span><small>{[meta.scope, meta.seat].filter(Boolean).join(" · ") || "Major power"}</small><strong>{entry.title}</strong><em>{wings.length} wing{wings.length === 1 ? "" : "s"} beneath this banner</em></span>
                   </span>
                 </Link>
@@ -376,7 +395,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                     <p className="eyebrow">Inside its sphere</p>
                     {wings.length ? <ul>{wings.map((wing) => {
                       const wingBrand = getFactionBranding(wing.slug);
-                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}>{wingBrand ? <img alt="" src={codexArtSized(wingBrand.logo, 320)} /> : null}<span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
+                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}><FactionEmblem logo={wingBrand?.logo ?? null} size={38} /><span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
                     })}</ul> : <p className="story-inspector-hint">No wings are filed beneath this power.</p>}
                   </div>
                   <Link className="faction-banner-open" href={`/codex/bible/${entry.slug}`}>Open full dossier <ArrowRight aria-hidden="true" size={12} /></Link>
@@ -398,7 +417,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                 {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
                 <span className="faction-independent-shade" />
                 <span className="faction-independent-copy">
-                  {brand ? <span className="faction-independent-logo"><img alt="" src={codexArtSized(brand.logo, 320)} /></span> : null}
+                  <FactionEmblem logo={brand?.logo ?? null} size={62} />
                   <span><small>Independent power</small><strong>{entry.title}</strong><em>{entry.summary ? plainStoryProse(entry.summary) : "Open dossier"}</em></span>
                   <ArrowRight aria-hidden="true" size={13} />
                 </span>

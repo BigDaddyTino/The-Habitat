@@ -35,8 +35,10 @@ const factionAccents = {
   "the-choir-below": "#4bb4be",
   "the-congregation-of-the-bound": "#a8bdc5",
   "the-free-peoples-compact": "#7c9a52",
+  "the-nation-state-of-arcadia": "#bfa779",
   "the-old-hunger": "#9f2737",
   "the-pale-embassy": "#d9c7a1",
+  "the-radiant-path": "#d6ae55",
   "the-riftbound-legion": "#c72f3e",
   "tropic-pearl-trade-house": "#e4c675",
   "verdant-marsh-clans": "#54b878",
@@ -46,7 +48,11 @@ const factionAccents = {
 // The original faction shelf shipped as JPG key art. New drop-in commissions
 // may use the standing PNG contract without forcing every older plate through
 // a lossy transcode.
-const pngFactionKeyart = new Set<string>(["the-congregation-of-the-bound"]);
+const pngFactionKeyart = new Set<string>([
+  "the-congregation-of-the-bound",
+  "the-nation-state-of-arcadia",
+  "the-radiant-path",
+]);
 
 export function getFactionBranding(slug: string): FactionBranding | null {
   const accent = factionAccents[slug as keyof typeof factionAccents];
