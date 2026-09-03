@@ -1611,3 +1611,33 @@ export async function getStoryCursor() {
   const newest = await db.storyRevision.findFirst({ orderBy: [{ createdAt: "desc" }, { id: "desc" }], select: { id: true, createdAt: true } });
   return newest ? `${newest.createdAt.getTime()}:${newest.id}` : "";
 }
+
+/**
+ * A dossier's contributor originals — the gold-bordered cards at the foot of
+ * the page (see components/contributor-card.tsx).
+ *
+ * Deliberately a separate query rather than an include on `getStoryEntry`:
+ * the whole point of this material is that it lives outside the entry row and
+ * outside anything the outbound bundle maps, so nothing that walks a
+ * StoryEntry ever picks it up by accident.
+ */
+export async function listEntryContributions(entrySlug: string) {
+  const rows = await db.storyEntryContribution.findMany({
+    where: { entry: { slug: { in: storyEntrySlugAliases(entrySlug) } } },
+    orderBy: { position: "asc" },
+    select: {
+      id: true,
+      label: true,
+      body: true,
+      submittedAt: true,
+      contributor: { select: writerSelect },
+    },
+  });
+  return rows.map((row) => ({
+    id: row.id,
+    label: row.label,
+    body: row.body,
+    contributor: storyMemberName(row.contributor),
+    submittedAt: row.submittedAt.toISOString().slice(0, 10),
+  }));
+}

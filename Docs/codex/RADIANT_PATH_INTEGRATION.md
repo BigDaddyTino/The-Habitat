@@ -2097,3 +2097,128 @@ without waiting on art.
 9. **The arc.** `the-lamplight-road`, Movement I first — the city is written
    before the road, because the duel decides what kind of crowd walks it.
 10. Art briefs, then art, then accents. **Never accents first.**
+
+---
+
+## 38 · BUILT — 2026-09-03
+
+Approved with *"sounds good get to it"*, which took the three blocking
+questions in section 36 as recommended:
+
+| # | question | ruling taken |
+| --- | --- | --- |
+| 1 | The scar ruling | **Yes.** `what-the-forge-rebuilds` is written and CANON. |
+| 2 | Ryan's monster | **Proposal, not edit.** The Dam is a marked layer appended to `arcadian-devil` with his own sentence quoted back at him, under a word-level loss check. His prose is untouched and the layer says in its first line that it is not canon until he says so. |
+| 3 | Vasque lives | **She lives.** Kane does not have to spare her and does, in front of the chamber, on purpose. |
+
+### The scripts
+
+Three authoring scripts, all preview-by-default, all idempotent, all verified
+by re-running them after the apply and getting `unchanged`:
+
+| script | what it wrote |
+| --- | --- |
+| `scripts/author-contributions.ts` | Schlotzsky's original, captured out of the live dossier byte for byte and checksummed against a copy in the script before anything was allowed to overwrite it. **Run before the rewrite, not after.** |
+| `scripts/author-radiant-path.ts` | 2 factions, 1 rule, 1 creature, 1 item, 12 places, 2 appended layers, 4 sets of control rows. |
+| `scripts/author-peninsula-cast.ts` | 8 new characters, `the-asis-officer` promoted out of her placeholder name, 1 appended layer on the Chancellor. |
+| `scripts/author-lamplight-road.ts` | The arc: 36 scenes, 49 routes, 34 spoken lines, 34 sets of scene links. |
+
+### What is in the database now
+
+**Factions.** `the-nation-state-of-arcadia` (new, `KM · Institution
+(city-state)`, holds Port Arcadia, Kane as its leader) · `the-radiant-path`
+(rewritten whole: 3,473 → 7,938 characters, `KM · feeds the Crimson Choir
+(Shadow)`, parent `crimson-choir`, three leaders, six relations, four goals,
+and the closing *Where they stand on the Drain* paragraph every other faction
+carries).
+
+**Rule.** `what-the-forge-rebuilds`.
+
+**Creature.** `the-lamplighter` — and **no link, in either direction, between
+it and anything Ilse Vetch has ever said.** Its deposition quote sits in an
+Exclusion Area quarantine record and the codex never once connects them.
+
+**Item.** `the-platform-ledger`.
+
+**Places.** `the-green`, plus `the-lamp-chapel` · `the-drawn-shutter` ·
+`the-quiet-office` · `the-accreditation-hall` · `the-lower-gate` · `lamplight`
+· `the-stone-field` · `the-ash-ground` · `the-burned-wagon` · `the-last-water`
+· `the-quiet-altar`.
+
+**People.** `ilse-vetch` · `corrin-ade` · `wren-salloway` · `imogen-roe` ·
+`del-anwar` · `ivo-crane` · `the-marker` · `ottoline-vasque`, each with a
+written `voiceProfile` from section 30 — and `the-asis-officer` promoted from
+PROPOSED to CANON as **Inspector Cassia Merrow**, keeping her slug, her
+Interrogation ceiling and her favourite word.
+
+**Layers, appended without touching a word above them.** `arcadian-devil` (the
+Dam, as a proposal) · `the-peninsula` (the green and the road inland) ·
+`abraham-islay-kane` (his role in the act). All three reported **0 author words
+lost**.
+
+### The correction the build forced
+
+Section 22 had the Marker burying "the ones no Forge would spend a reserve on."
+Canon does not allow that — a short reserve is paid out of the person, so
+nobody stays dead for want of money. The stone field is **the unbound and the
+Unregistered**, and nothing else, and the Marker is Unregistered herself. That
+is now what the entries say, and it is a better field than the one the plan
+described.
+
+### The contributor card
+
+`StoryEntryContribution`, migration `20260903120000_add_entry_contributions`.
+Rendered by `components/contributor-card.tsx` at the foot of the dossier in a
+gold-bordered card with a soft outer glow, credited **Schlotzsky**, dated, and
+verbatim.
+
+Three things make the never-exported half real rather than a promise:
+
+1. It is a separate table, and `apps/codex-sync/src/snapshot.ts`'s entry mapper
+   is an explicit column allowlist that cannot name it.
+2. `lib/contributor-originals.test.ts` reads the exporter's source and fails on
+   the diff that would cause a leak — a `...entry` spread, a new mapped column,
+   or any mention of the table.
+3. `getStoryEntry` does not carry it. The card has its own query
+   (`listEntryContributions`), so nothing that walks an entry picks it up.
+
+**The law this establishes:** when a member writes something we build on, their
+original stays on the page, under their name, whole — and the codex the game
+reads never carries it. Same treatment, every time, for every contributor.
+
+### Verification
+
+| check | result |
+| --- | --- |
+| Release audit | **PASS 6/6** (metadata, namespaces, art privacy, images, geography, graph) |
+| World connections | **PASS 40/40** readable from both ends |
+| Story meta | **PASS** — 0 dropped keys, 0 dangling references, 0 unwritten links |
+| Web test suite | **586 passing**, including 4 new contributor-guarantee tests |
+| Typecheck | clean, web and codex-sync |
+| Lint | 0 errors (1 pre-existing `<img>` warning on the classes page) |
+| Deploy | `.next-20260903-160908`, health check green |
+| Idempotency | all three authoring scripts re-run to `unchanged` |
+
+**One pre-existing failure, not from this pass:** `audit-codex-surfaces.ts`
+reports a missing *canon navigator* on all **15** arc boards, including the
+fourteen that predate this work. `CanonNavigator` is mounted only on
+`/codex/stories/campaign` and `/codex/stories/canon` and never has been on
+`/codex/arc/[slug]`. Left alone deliberately — it is a UI decision nobody has
+made, and fixing it here would hide it.
+
+### Art
+
+**28 slots, all live and rendering their own path.** Brief:
+`Docs/art/SOL56_LAMPLIGHT_ROAD_PROMPT.md`.
+
+Faction key art and logos still need `factionAccents` / `pngFactionKeyart`
+wiring **after** the files land — an accent without both files on disk fails
+the release audit and blocks deploys. `creatures/the-dam.png` is deliberately
+held back until Ryan approves the female form.
+
+### Still open, by design
+
+`what-del-does` is written as a scene and **its answer is not**. What the Path
+does to somebody who tries to leave is canon's law about prisons pointed at a
+movement, and the first writer of that beat owns it. It should be the last
+thing written in the arc.

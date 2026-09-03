@@ -3,11 +3,12 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowLeft, Check, Pencil } from "lucide-react";
 import { canonicalBloomfallReachSlug, canonicalStoryEntryRouteSlug, persistedStoryEntrySlug, storyEntryKindLabels, storyEntrySlugAliases, type StoryCanonPacket } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
-import { getStoryEntry, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
+import { getStoryEntry, listEntryContributions, listStoryArcRefs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { StoryEntryEditor } from "@/components/story-entry-editor";
 import { CharacterSheet, CompanionMissionSheet, CreatureSheet, EventSheet, FactionSheet, ItemSheet, MetaView, RegionSheet, SystemSheet, ThreadSheet } from "@/components/story-entry-sheets";
 import { StoryEntityProfile } from "@/components/story-entity-profile";
+import { ContributorCards } from "@/components/contributor-card";
 import { StoryArchiveEntryButton } from "@/components/story-archive-entry-button";
 import { StoryWarden } from "@/components/story-warden";
 import { CanonPacketPanel } from "@/components/canon-packet-panel";
@@ -26,6 +27,10 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   const entry = await getStoryEntry(persistedStoryEntrySlug(canonicalSlug));
   if (!entry) notFound();
   const atlasLocations = entry.kind === "REGION" ? await getStoryAtlasLocationsForEntry(entry.id) : [];
+  // Contributor originals, kept whole under their own name at the foot of the
+  // page. Website only — the outbound bundle's entry mapper is an allowlist of
+  // StoryEntry columns and structurally cannot reach this table.
+  const contributions = await listEntryContributions(entry.slug);
 
   const sheetKinds = ["CHARACTER", "FACTION", "REGION", "CREATURE", "ITEM", "EVENT", "SYSTEM", "THREAD", "COMPANION_MISSION"] as const;
   const needsPickers = (sheetKinds as readonly string[]).includes(entry.kind);
@@ -237,6 +242,9 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
         const copy = location.kind === "OWNED_SCENE" ? "Explore region" : location.sceneSlug === "martino-world" ? "View in world" : "View in Atlas";
         return <span key={`${location.kind}:${location.sceneSlug}`}><Link href={`/codex/map${query}${hash}`}>{copy}</Link></span>;
       })}</nav> : null}
+
+      <ContributorCards contributions={contributions} />
+
 
       <div className="codex-entry-grid codex-entry-workspace-grid">
         <div className="codex-entry-main">

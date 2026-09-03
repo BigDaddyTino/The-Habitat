@@ -251,6 +251,11 @@ export async function buildCodexSnapshot(generatedAt = new Date(), attempt = 0):
           createdAt: edge.createdAt.toISOString(),
           updatedAt: edge.updatedAt.toISOString(),
         })),
+        // An explicit allowlist of StoryEntry columns, and that is the whole
+        // guarantee behind contributor originals: `StoryEntryContribution` is
+        // a separate table, this mapper cannot name it, and so a member's own
+        // submission — website-only by house law — structurally cannot reach a
+        // game build. Never widen this to a spread.
         entries: entries.map((entry) => ({
           id: entry.id,
           kind: entry.kind,

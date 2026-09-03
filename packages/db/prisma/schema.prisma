@@ -550,6 +550,8 @@ model User {
   storyEntriesCreated            StoryEntry[]                   @relation("StoryEntryCreator")
   storyEntriesUpdated            StoryEntry[]                   @relation("StoryEntryEditor")
   storyEntryLocks                StoryEntry[]                   @relation("StoryEntryLock")
+  storyContributions             StoryEntryContribution[]       @relation("StoryContributionAuthor")
+  storyContributionsFiled        StoryEntryContribution[]       @relation("StoryContributionCreator")
   storyRevisions                 StoryRevision[]                @relation("StoryRevisionActor")
   storyComments                  StoryComment[]                 @relation("StoryCommentAuthor")
   storyCommentsResolved          StoryComment[]                 @relation("StoryCommentResolver")
@@ -2290,9 +2292,48 @@ model StoryEntry {
   mapPlacements        StoryMapPlacement[]
   worldConnectionsFrom StoryWorldConnection[] @relation("StoryWorldConnectionFrom")
   worldConnectionsTo   StoryWorldConnection[] @relation("StoryWorldConnectionTo")
+  contributions        StoryEntryContribution[]
 
   @@index([kind, status, title])
   @@index([status, updatedAt])
+}
+
+/// A contributor's original submission, kept whole, under their own name.
+///
+/// When a member writes something the codex then builds on, the rewrite
+/// replaces `StoryEntry.body` and their words would otherwise be gone. This
+/// table keeps the original verbatim and the dossier renders it at the foot of
+/// the page in a gold-bordered card credited to them.
+///
+/// **It is never exported.** The guarantee is structural rather than a filter:
+/// the outbound bundle's entry mapper in apps/codex-sync/src/snapshot.ts is an
+/// explicit allowlist of StoryEntry columns, so a separate table cannot reach
+/// it. Storing this in `body` or `meta` would ship it to the game; a table
+/// cannot. scripts/audit-contributions.ts asserts that again against a built
+/// snapshot.
+model StoryEntryContribution {
+  id                 String     @id @default(uuid()) @db.Uuid
+  entryId            String     @db.Uuid
+  contributorUserId  String     @db.Uuid
+  /// What this submission was, in the contributor's frame — "Original faction
+  /// dossier", "Original character brief". Shown as the card's subtitle.
+  label              String     @db.VarChar(160)
+  /// The submission exactly as written. Never edited, never tidied, never
+  /// spell-checked. A correction to a contributor's own words is a new row.
+  body               String     @db.Text
+  /// Display order when one entry carries more than one submission.
+  position           Int        @default(0)
+  /// When they wrote it, which is usually not when this row was created.
+  submittedAt        DateTime
+  createdByUserId    String     @db.Uuid
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  entry              StoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  contributor        User       @relation("StoryContributionAuthor", fields: [contributorUserId], references: [id], onDelete: Restrict)
+  creator            User       @relation("StoryContributionCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, position])
+  @@index([contributorUserId])
 }
 
 /// One zoomable illustrated atlas scene. A world map can own child region or

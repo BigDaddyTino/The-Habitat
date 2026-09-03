@@ -353,3 +353,21 @@
 .entity-race-members li.is-aberrant a i{color:#ff9b3d;font-weight:700}
 .entity-race-members li.is-aberrant:hover{box-shadow:0 0 0 1px rgba(255,155,61,.55),0 0 26px rgba(255,140,45,.34)}
 @media (prefers-reduced-motion:no-preference){.entity-race-members li.is-aberrant{transition:box-shadow .25s ease}}
+
+/* Contributor originals — the gold card at the foot of a dossier.
+   A member's own words, kept whole under their name, on the website only.
+   The glow is deliberate: this is the one block on the page that is somebody
+   else's, and it should look like it was framed rather than filed. */
+.contributor-cards{display:grid;gap:16px;margin:22px 0}
+.contributor-card{position:relative;border:1px solid #b9913f;border-radius:2px;padding:28px 30px;background:linear-gradient(180deg,#191710,#12140f);box-shadow:0 0 0 1px rgba(212,171,88,.28),0 0 26px rgba(199,157,74,.16),inset 0 1px 0 rgba(233,201,127,.14)}
+.contributor-card::before{content:"";position:absolute;inset:5px;border:1px solid rgba(200,160,80,.22);pointer-events:none}
+.contributor-card>header{border-bottom:1px solid rgba(185,145,63,.34);padding-bottom:14px}
+.contributor-eyebrow{display:flex;align-items:center;gap:7px;margin:0;color:#dcb976;font:9px var(--font-mono);letter-spacing:.16em;text-transform:uppercase}
+.contributor-card h2{margin:8px 0 0;color:#f0dcae;font-size:19px;letter-spacing:.01em}
+.contributor-label{margin:6px 0 0;color:#9a8f6f;font:9px var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.contributor-body{margin-top:18px;color:#c3bda8;font-size:13px;line-height:1.82}
+.contributor-body .prose-heading{margin:20px 0 8px;color:#e2caa0;font-size:13px}
+.contributor-body p+p{margin-top:13px}
+.contributor-body .prose-list{display:grid;gap:7px;margin:12px 0 0;padding-left:18px}
+.contributor-card>footer{margin-top:20px;border-top:1px solid rgba(185,145,63,.24);padding-top:13px;color:#8b8266;font-size:10px;line-height:1.7}
+@media(max-width:760px){.contributor-card{padding:22px 18px}}
