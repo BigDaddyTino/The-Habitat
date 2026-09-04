@@ -55,9 +55,9 @@ const unbound = {
   summary: "The party reached Port Arcadia still bound to a Soul Forge at the bottom of the sea. Until they bind again, one death ends everything.",
   body: `Set on [[binding-in-arcadia]] at landfall, by either road — the storm beach or the military docks. It is true of every party that reaches the mainland, because [[forward-camp-kestrel]]'s Forge went down with the island and nothing has replaced it yet.
 
-**What it is for.** [[the-danger-of-true-death]] is the same walk told from the rule's side, and this is the state that starts it. An Echo with nowhere to answer is a feeling before it is a fact; the fact arrives when somebody in [[port-arcadia]] says it plainly. The mainline's search for the city's [[the-soul-forge]] is where the party actually does something about it, and both quests end at the same machine.
+**What it is for.** [[the-danger-of-true-death]] is the same walk told from the rule's side, and this is the state that starts it. An Echo with nowhere to answer is a feeling before it is a fact; the fact arrives when somebody in [[port-arcadia]] says it plainly. The mainline's search for the city's Forge is where the party actually does something about it, and both quests end at the same machine ([[the-soul-forge]]).
 
-**Answered in:** the binding itself. This is the only flag in the campaign that is meant to stop being true, and the window it holds open is the only stretch of the game where [[true-death]] is on the table for everyone at once.
+**Answered in:** the binding itself. This is a window rather than a standing state — it is planted in order to be cancelled, and Binding in Arcadia ends by cancelling it. While it holds, a single death ends the run for whoever it happens to ([[true-death]]).
 
 **Writers:** do not let the game bind the party automatically to spare them the walk. The window is the point.`,
 };
@@ -83,18 +83,35 @@ async function main() {
     condition: `${unbound.slug} — the party landed still bound to a Forge at the bottom of the sea`,
   });
 
-  // The same check `author-lamplight-flags` makes, for the same reason.
-  const arc = await db.storyArc.findUnique({ where: { slug: "binding-in-arcadia" }, select: { id: true } });
-  if (!arc) throw new Error("binding-in-arcadia is not open.");
+  // The same check `author-lamplight-flags` makes, for the same reason — a flag
+  // with no site is a promise nobody can reach — but asked the way
+  // `scanStoryFlagSites` asks it, because a guard that reads the board
+  // differently from the scanner is a guard that passes the wrong runs.
+  //
+  // The scanner's definition, exactly: a flag is **set** where its slug is in a
+  // node's effects or an edge's effects, and **checked** where its slug is in an
+  // edge's *condition*. Nothing else counts, prose least of all. Keeping the two
+  // lists apart is the point — merging them into one haystack and sorting by
+  // line prefix, which is what this did first, lets one badly-worded effect
+  // line answer its own promise.
+  //
+  // Only after a write, because this run is what creates both sites: a first
+  // dry run has nothing to verify yet, and says so rather than passing quietly.
   if (apply) {
+    const boards = ["binding-in-arcadia", "the-danger-of-true-death"];
     const [nodes, edges] = await Promise.all([
-      db.storyNode.findMany({ where: { arc: { slug: { in: ["binding-in-arcadia", "the-danger-of-true-death"] } } }, select: { effects: true } }),
-      db.storyEdge.findMany({ where: { arc: { slug: { in: ["binding-in-arcadia", "the-danger-of-true-death"] } } }, select: { condition: true, effects: true } }),
+      db.storyNode.findMany({ where: { arc: { slug: { in: boards } } }, select: { effects: true } }),
+      db.storyEdge.findMany({ where: { arc: { slug: { in: boards } } }, select: { condition: true, effects: true } }),
     ]);
-    const haystack = [...nodes.flatMap((node) => node.effects), ...edges.flatMap((edge) => [...edge.effects, edge.condition ?? ""])].join("\n");
-    const planted = haystack.includes(`set flag: ${unbound.slug}`);
-    const answered = new RegExp(`(^|[^a-z0-9-])${unbound.slug}([^a-z0-9-]|$)`, "m").test(haystack.split("\n").filter((line) => !line.startsWith("set flag:")).join("\n"));
-    if (!planted || !answered) throw new Error(`${unbound.slug} is ${planted ? "planted but never read" : "read but never planted"}.`);
+    const touches = (text: string | null) => text !== null && new RegExp(`(^|[^a-z0-9-])${unbound.slug}([^a-z0-9-]|$)`).test(text);
+    const planted = [...nodes.flatMap((node) => node.effects), ...edges.flatMap((edge) => edge.effects)].some(touches);
+    const answered = edges.some((edge) => touches(edge.condition));
+    if (!planted || !answered) {
+      const fault = planted ? "planted but never read" : answered ? "read but never planted" : "neither planted nor read";
+      throw new Error(`${unbound.slug} is ${fault}.`);
+    }
+  } else {
+    console.log(`\nThe site check runs on --apply: this run is what writes both halves of ${unbound.slug}.`);
   }
 
   writer.report(apply ? "The campaign's undeclared joins — APPLYING" : "The campaign's undeclared joins — dry run");
