@@ -15,7 +15,7 @@ import { isStoryAssistantAvailable } from "@/lib/story-assistant-service";
 import { listStoryArcRefs, listStoryEntries } from "@/lib/story-codex";
 import { plainStoryProse } from "@/lib/story-prose";
 import { storyPlaceDescendants, storyPlaceKinds, storyPlaceRoot, type StoryPlaceLink } from "@habitat/shared";
-import { modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
+import { isTopLevelRegion, modelGalleryImages, modelPreview, placeKindLabel, placeTypeOrder, storyCollections, type StoryCollectionSlug } from "@/lib/story-library";
 
 /**
  * The atlas card's art column is fluid; the entity cards below it are pinned
@@ -200,12 +200,22 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
   // top-level regions as large cards, with every other place filed inside the
   // one that contains it (meta.parent — stored once, grouped here). Falls back
   // to the flat grid for search results, and until a top-level region exists.
-  const topRegions = collection.kind === "REGION" && !search ? entries.filter((entry) => asRecord(entry.meta).type === "region") : [];
-  const atlasActive = topRegions.length > 0;
   const parentSlugOf = (entry: (typeof entries)[number]) => {
     const value = asRecord(entry.meta).parent;
     return typeof value === "string" && value.trim() ? value.trim() : null;
   };
+  // A top-level region is one with NOTHING ABOVE IT — the same law the races,
+  // systems and factions shelves already run on. Being typed `region` is not
+  // enough: The Green is a region and it is *inside* the Peninsula, and while
+  // this filtered on type alone it got a world-region card of its own beside
+  // its own parent. Worse than a stray card, it stole the Peninsula's places:
+  // `storyPlaceRoot` resolves to the nearest ancestor in `topSlugs`, so
+  // Lamplight, the Ash Ground, the Burned Wagon, the Last Water and the Quiet
+  // Altar all filed under The Green and vanished from the Peninsula entirely.
+  const topRegions = collection.kind === "REGION" && !search
+    ? entries.filter((entry) => isTopLevelRegion(asRecord(entry.meta)))
+    : [];
+  const atlasActive = topRegions.length > 0;
   const placeLinks: StoryPlaceLink[] = entries.map((entry) => ({ slug: entry.slug, parent: parentSlugOf(entry) }));
   const topSlugs = new Set(topRegions.map((region) => region.slug));
   const isTop = (slug: string) => topSlugs.has(slug);

@@ -163,6 +163,28 @@ export type PlaceProjectionRow = {
   meta: Record<string, unknown> | null;
 };
 
+/**
+ * A world region: typed `region` AND with nothing above it.
+ *
+ * The second half is the whole rule, and leaving it out is not a cosmetic bug.
+ * The regions atlas gives every top-level region a card and then files each
+ * place under the nearest ancestor that has one — so a nested region counted
+ * as top-level does not merely gain a card it should not have, it TAKES its
+ * parent's places onto that card. The Green is inside the Peninsula, and while
+ * this was `type === "region"` alone it sat beside the Peninsula holding
+ * Lamplight, the Ash Ground, the Burned Wagon, the Last Water and the Quiet
+ * Altar, none of which appeared on the Peninsula at all.
+ *
+ * Same law as the races, systems and factions shelves: a thing with nobody
+ * above it is a root, and nothing else marks one.
+ */
+export function isTopLevelRegion(meta: Record<string, unknown> | null | undefined) {
+  const record = meta ?? {};
+  if (record.type !== "region") return false;
+  const parent = record.parent;
+  return !(typeof parent === "string" && parent.trim());
+}
+
 /** Direct children become dossier rows; every deeper descendant stays grouped
  * beneath its direct ancestor instead of becoming a flat sibling. */
 export function buildContainedPlaceProjection(parentSlug: string, regions: readonly PlaceProjectionRow[]) {
