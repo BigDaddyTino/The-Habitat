@@ -263,6 +263,23 @@ test("the factions board is derived from the sheets, not from the table beside i
   }
 });
 
+test("an independent power still lists whoever answers to it", () => {
+  // Answering to nobody and having nobody beneath you are two different facts.
+  // The Crimson Choir is independent and flies the Radiant Path, and while the
+  // independent card had no sphere list that wing rendered on no board at all
+  // — the shelf hides a wing, so the only card that could show it must.
+  const directory = readFileSync(join(process.cwd(), "components/story-entity-directory.tsx"), "utf8");
+  const independents = directory.slice(directory.indexOf('className="faction-independent-grid"'), directory.indexOf('className="entity-card-grid"'));
+  assert.ok(independents.includes("factionWings.get(entry.slug)"), "an independent card reads the same wing map the banners do");
+  assert.ok(independents.includes("faction-independent-wings"), "and renders them under its plate");
+  assert.ok(!independents.includes('<Link className="faction-independent-card"'), "the card cannot be one anchor, or a wing link would nest inside it");
+
+  // Both surfaces render the same row, so a wing can never look filed on one
+  // board and unfiled on the other.
+  assert.ok(directory.includes("function FactionWingRow("), "the wing row is written once");
+  assert.equal(directory.split("<FactionWingRow").length - 1, 2, "and used by both the banner cards and the independent cards");
+});
+
 test("a power that answers to nobody is one choice on the sheet, never two", () => {
   // Splitting this across two controls would let a writer file a power under a
   // banner and mark it independent in the same save; the schema refuses that,

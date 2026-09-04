@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { atlasHealth, layoutSpine, longestPathDepth, ATLAS_COL, ATLAS_ROW, type CampaignAtlas } from "./campaign-atlas";
+import { atlasHealth, clusterBoards, layoutSpine, longestPathDepth, ATLAS_COL, ATLAS_ROW, type CampaignAtlas } from "./campaign-atlas";
 
 const node = (id: string, arcSlug: string, extra: Partial<CampaignAtlas["nodes"][number]> = {}) => ({
   id, key: id, kind: "SCENE" as const, title: id, arcSlug,
@@ -127,7 +127,11 @@ test("health counts each join kind apart, because they mean different things", (
     edges: [],
     side: [],
     companions: [],
+    companionsWithoutChain: [],
     orphans: [],
+    orphanClusters: [],
+    danglingEndings: [],
+    planned: [],
     joins: [
       { kind: "handoff", fromArc: "one", fromNode: "a", toArc: "two", toNode: null, label: "x" },
       { kind: "flag", fromArc: "one", fromNode: "a", toArc: "two", toNode: null, label: "y" },
@@ -138,4 +142,28 @@ test("health counts each join kind apart, because they mean different things", (
   assert.equal(health.flagJoins, 1);
   assert.equal(health.gaps, 1);
   assert.deepEqual(health.gapLabels, ["two → three"]);
+});
+
+test("boards are clustered by what they reach, so seven wired together read as one problem", () => {
+  const arc = (slug: string) => ({ slug, title: slug, category: "SIDE_QUEST" as const, isMainline: false, position: 0, status: "CANON" as const, locked: false, summary: null, hook: null, nodeCount: 0, region: null });
+  const boards = [arc("a"), arc("b"), arc("c"), arc("lonely")];
+  const clusters = clusterBoards(boards, [
+    { kind: "flag", fromArc: "a", fromNode: null, toArc: "b", toNode: null, label: "x" },
+    { kind: "handoff", fromArc: "b", fromNode: null, toArc: "c", toNode: null, label: "y" },
+    // A join reaching outside the set must not drag anything in with it.
+    { kind: "flag", fromArc: "c", fromNode: null, toArc: "somewhere-else", toNode: null, label: "z" },
+  ]);
+  assert.equal(clusters.length, 2, "three wired boards and one on its own");
+  assert.deepEqual(clusters[0]!.map((board) => board.slug), ["a", "b", "c"], "biggest cluster first");
+  assert.deepEqual(clusters[1]!.map((board) => board.slug), ["lonely"]);
+});
+
+test("an implied gap never counts as a wire between two boards", () => {
+  const arc = (slug: string) => ({ slug, title: slug, category: "SIDE_QUEST" as const, isMainline: false, position: 0, status: "CANON" as const, locked: false, summary: null, hook: null, nodeCount: 0, region: null });
+  const clusters = clusterBoards([arc("a"), arc("b")], [
+    { kind: "implied", fromArc: "a", fromNode: null, toArc: "b", toNode: null, label: "gap" },
+  ]);
+  // The whole point of an implied join is that nothing connects them, so it
+  // must not be the thing that makes them look connected.
+  assert.equal(clusters.length, 2);
 });

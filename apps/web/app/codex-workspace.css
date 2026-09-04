@@ -111,13 +111,20 @@
 .region-atlas-unplaced li a:hover{color:#f1e3bd}
 .entity-contained-places{margin-top:22px;border-top:1px solid #363c35;padding-top:19px}
 .entity-contained-places ul{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 0;padding:0;list-style:none}
-.entity-contained-places li{display:grid;min-height:96px;grid-template-columns:112px minmax(0,1fr);overflow:hidden;border:1px solid #39413a;border-left:2px solid var(--entity-accent,#8f7139);background:#111611}.entity-contained-places li>img{width:100%;height:100%;min-height:96px;object-fit:cover}.entity-contained-places li>div{align-self:center;min-width:0;padding:11px 13px}
+.entity-contained-places li{position:relative;display:grid;min-height:96px;grid-template-columns:112px minmax(0,1fr);overflow:hidden;border:1px solid #39413a;border-left:2px solid var(--entity-accent,#8f7139);background:#111611;transition:border-color .16s ease,background .16s ease}
+/* The whole row is the target, not the title alone: these cards carry key art
+   and a summary, and both read as part of the link. The heading anchor is
+   stretched over the row, and the links that live inside the copy are lifted
+   back above it so they still answer. */
+.entity-contained-places li:hover{border-color:#5b6555;background:#161d16}
+.entity-contained-places li>div>a::after{content:"";position:absolute;inset:0}
+.entity-contained-places li p a,.entity-contained-places .place-destinations a{position:relative;z-index:1}.entity-contained-places li>img{width:100%;height:100%;min-height:96px;object-fit:cover}.entity-contained-places li>div{align-self:center;min-width:0;padding:11px 13px}
 .entity-contained-places li a{display:flex;align-items:center;gap:8px;color:#dcc58d;text-decoration:none}
 /* System children carry no key art, so the image column would swallow the
    title; their rows are a single column. */
 .entity-system-children li{min-height:0;grid-template-columns:minmax(0,1fr)}
-.entity-contained-places li a strong{flex:1;overflow:hidden;color:#e6d7b5;font:600 14px var(--font-serif);text-overflow:ellipsis;white-space:nowrap}
-.entity-contained-places li a i{color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.entity-contained-places li a strong{flex:1 1 auto;min-width:0;overflow:hidden;color:#e6d7b5;font:600 14px var(--font-serif);text-overflow:ellipsis;white-space:nowrap}
+.entity-contained-places li a i{overflow:hidden;flex:0 1 auto;min-width:0;max-width:48%;color:#818c82;font:normal 8px var(--font-mono);letter-spacing:.05em;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
 .entity-contained-places li a:hover strong{color:#f6ead0}
 .entity-contained-places li p{display:-webkit-box;overflow:hidden;margin:6px 0 0;color:#9ca69d;font-size:10px;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:2}
 @media(max-width:1050px){.region-atlas-card{grid-template-columns:minmax(0,1fr)}.region-atlas-head,.region-atlas-head-copy{min-height:300px}.region-atlas-places{border-top:1px solid #30372f;border-left:0}}
@@ -187,11 +194,17 @@
 .faction-banner-open{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:auto;color:var(--faction-accent,#b69a60);font:700 8px var(--font-mono);letter-spacing:.06em;text-decoration:none;text-transform:uppercase}
 .faction-banner-open:hover{color:#f0ddb0}
 .faction-independent-section{padding-top:3px}
-.faction-independent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.faction-independent-card{position:relative;display:block;min-height:190px;overflow:hidden;border:1px solid #3e463e;border-top:2px solid var(--faction-accent,#9a7940);color:inherit;text-decoration:none;background:#111612;transition:.2s ease}
+.faction-independent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:stretch}
+.faction-independent-card{display:flex;overflow:hidden;flex-direction:column;border:1px solid #3e463e;border-top:2px solid var(--faction-accent,#9a7940);color:inherit;background:#111612;transition:.2s ease}
 .faction-independent-card:hover{border-color:var(--faction-accent,#9a7940);transform:translateY(-2px);box-shadow:0 18px 36px color-mix(in srgb,var(--faction-accent,#9a7940) 16%,transparent)}
+/* An independent power that flies a wing gets the banner card's sphere list
+   under its plate, so the wing is reachable from the board rather than only
+   from the dossier. The anchor now covers the plate alone, because a link
+   inside a link is not markup a browser will honour. */
+.faction-independent-face{position:relative;display:block;min-height:190px;overflow:hidden;color:inherit;text-decoration:none}
+.faction-independent-wings{margin-top:0;border-top:1px solid #303830;padding:13px 16px 15px}
 .faction-independent-art{position:absolute;width:100%;height:100%;object-fit:cover;transition:transform .45s ease}
-.faction-independent-card:hover .faction-independent-art{transform:scale(1.03)}
+.faction-independent-face:hover .faction-independent-art{transform:scale(1.03)}
 .faction-independent-shade{position:absolute;inset:0;background:linear-gradient(90deg,#0a0e0be8 0%,#0a0e0bb8 58%,#0a0e0b40),linear-gradient(0deg,#0a0e0be8,transparent 56%)}
 .faction-independent-copy{position:absolute;right:18px;bottom:17px;left:18px;display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:end;gap:13px}
 .faction-independent-logo{display:grid;width:62px;height:62px;place-items:center;filter:drop-shadow(0 7px 12px #000c)}
@@ -493,3 +506,24 @@
 .atlas-lane strong{color:#f0dfb4;font:600 17px/1.15 var(--font-serif)}
 .atlas-lane-foot{display:inline-flex;align-items:center;gap:5px;color:#8b9385;font:7.5px var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
 
+
+/* The two campaign views point at each other: the chapter shape and the card
+   detail are the same story asked two different questions. */
+.atlas-crosslink{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin:14px 0 0!important;border-left:2px solid #8d713e;padding:8px 0 8px 12px}
+.atlas-crosslink>a{display:inline-flex;align-items:center;gap:6px;color:#dcc58d;font:600 12px var(--font-serif);text-decoration:none;white-space:nowrap}
+.atlas-crosslink>a:hover{text-decoration:underline}
+.atlas-crosslink>span{color:#8d968b;font-size:11px}
+
+/* A dangling ending: the board says this is an exit and nothing is past it. */
+.atlas-card.is-dangling{border-left-color:#a2494a;background:linear-gradient(160deg,#231617,#141011)}
+.atlas-card-warn{display:flex;align-items:center;gap:5px;color:#dd9a9a;font:7.5px var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+
+.atlas-lane-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px}
+.atlas-lane-foot>i,.atlas-lane-foot>em{display:inline-flex;align-items:center;gap:4px;font-style:normal}
+.atlas-lane-foot>i.is-missing{color:#c98080}
+
+.atlas-cluster+.atlas-cluster{margin-top:12px;border-top:1px solid #3a2f26;padding-top:12px}
+.atlas-cluster-head{margin:0 0 8px;color:#b58f60;font:7.5px var(--font-mono);letter-spacing:.09em;text-transform:uppercase}
+.atlas-note{margin:12px 0 0;border-top:1px solid #2d342d;padding-top:10px;color:#96a095;font-size:10.5px;line-height:1.65}
+.atlas-note b{color:#dcc58d}
+.atlas-note a{color:#c5a85f}

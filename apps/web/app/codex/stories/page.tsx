@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Compass, GitBranch, Inbox, Lightbulb, Plus, Scale, Send, Sprout, History } from "lucide-react";
+import { ArrowLeft, ArrowRight, Compass, GitBranch, Inbox, Lightbulb, Plus, Route, Scale, Send, Sprout, History } from "lucide-react";
 import { storyArcCategoryLabels, storyArcCategories, type StoryArcCategory } from "@habitat/shared";
 import { hasRole, requireRole } from "@/lib/authorization";
 import { getCanonInbox, getStoryReviewQueue, listStoryArcs, listStoryEntries, storyReadRole } from "@/lib/story-codex";
@@ -90,6 +90,7 @@ export default async function StoryHubPage() {
       </div>
 
       <div className="codex-quicklinks">
+        <Link className="codex-quicklink" href="/codex/stories/map"><Route aria-hidden={true} size={18} /><span><strong>The campaign map</strong><small>Every card of the main campaign on one canvas, with every branch, every flag join, and everything that spiders off it.</small></span></Link>
         <Link className="codex-quicklink" href="/codex/promises"><Sprout aria-hidden="true" size={18} /><span><strong>Story promises</strong><small>Every promise a scene plants and where the story answers it, derived from the boards themselves.</small></span></Link>
         <Link className="codex-quicklink" href="/codex/timeline"><History aria-hidden="true" size={18} /><span><strong>The timeline</strong><small>Ten thousand years of the long hunt on one golden line — and where the present sits on it.</small></span></Link>
         {inbox.pending.total > 0 ? <Link className="codex-quicklink" href="/codex/stories/canon#canon-inbox"><Send aria-hidden="true" size={18} /><span><strong>The canon inbox</strong><small>{`${inbox.pending.total} settled piece${inbox.pending.total === 1 ? "" : "s"} waiting to be woven into a story board.`}</small></span></Link> : null}

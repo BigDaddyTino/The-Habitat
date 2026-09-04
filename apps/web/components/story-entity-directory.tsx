@@ -46,6 +46,17 @@ function FactionEmblem({ logo, size = 62 }: { logo: string | null; size?: number
 const asRecord = (value: unknown): Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value) ? value as Record<string, unknown> : {};
 const asRecords = (value: unknown): Array<Record<string, unknown>> => Array.isArray(value) ? value.filter((row): row is Record<string, unknown> => typeof row === "object" && row !== null) : [];
 
+/**
+ * One row in a power's "inside its sphere" list. Shared by the banner cards
+ * and the independent cards, because answering to nobody is not the same as
+ * having nobody answering to you — the Crimson Choir stands outside every
+ * banner's sphere and still flies a wing inside its own.
+ */
+function FactionWingRow({ wing }: { wing: { slug: string; title: string; meta: unknown } }) {
+  const brand = getFactionBranding(wing.slug);
+  return <li><Link href={`/codex/bible/${wing.slug}`}><FactionEmblem logo={brand?.logo ?? null} size={38} /><span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
+}
+
 
 export async function StoryEntityDirectory({ collectionSlug, search, parent, placeKind }: {
   collectionSlug: StoryCollectionSlug;
@@ -393,10 +404,7 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
                   <p>{entry.summary ? plainStoryProse(entry.summary) : "This power still needs its one-line pitch."}</p>
                   <div className="faction-wing-list">
                     <p className="eyebrow">Inside its sphere</p>
-                    {wings.length ? <ul>{wings.map((wing) => {
-                      const wingBrand = getFactionBranding(wing.slug);
-                      return <li key={wing.id}><Link href={`/codex/bible/${wing.slug}`}><FactionEmblem logo={wingBrand?.logo ?? null} size={38} /><span><strong>{wing.title}</strong><small>{asRecord(wing.meta).scope as string || "Faction wing"}</small></span><ArrowRight aria-hidden="true" size={11} /></Link></li>;
-                    })}</ul> : <p className="story-inspector-hint">No wings are filed beneath this power.</p>}
+                    {wings.length ? <ul>{wings.map((wing) => <FactionWingRow key={wing.id} wing={wing} />)}</ul> : <p className="story-inspector-hint">No wings are filed beneath this power.</p>}
                   </div>
                   <Link className="faction-banner-open" href={`/codex/bible/${entry.slug}`}>Open full dossier <ArrowRight aria-hidden="true" size={12} /></Link>
                 </div>
@@ -413,15 +421,26 @@ export async function StoryEntityDirectory({ collectionSlug, search, parent, pla
           <div className="faction-independent-grid">
             {independentFactionEntries.map((entry) => {
               const brand = getFactionBranding(entry.slug);
-              return <Link className="faction-independent-card" href={`/codex/bible/${entry.slug}`} key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
-                {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
-                <span className="faction-independent-shade" />
-                <span className="faction-independent-copy">
-                  <FactionEmblem logo={brand?.logo ?? null} size={62} />
-                  <span><small>Independent power</small><strong>{entry.title}</strong><em>{entry.summary ? plainStoryProse(entry.summary) : "Open dossier"}</em></span>
-                  <ArrowRight aria-hidden="true" size={13} />
-                </span>
-              </Link>;
+              // Standing outside every banner's sphere says nothing about who
+              // stands inside this one. The Choir answers to nobody and still
+              // flies a wing beneath it, and a card that had nowhere to list
+              // one was the reason that wing appeared nowhere on the board.
+              const wings = [...(factionWings.get(entry.slug) ?? [])].sort((a, b) => a.title.localeCompare(b.title));
+              return <article className="faction-independent-card" key={entry.id} style={brand ? { "--faction-accent": brand.accent } as React.CSSProperties : undefined}>
+                <Link className="faction-independent-face" href={`/codex/bible/${entry.slug}`}>
+                  {brand ? <img className="faction-independent-art" alt={`${entry.title} faction key art`} src={codexArtSized(brand.keyart, 320)} /> : null}
+                  <span className="faction-independent-shade" />
+                  <span className="faction-independent-copy">
+                    <FactionEmblem logo={brand?.logo ?? null} size={62} />
+                    <span><small>Independent power</small><strong>{entry.title}</strong><em>{entry.summary ? plainStoryProse(entry.summary) : "Open dossier"}</em></span>
+                    <ArrowRight aria-hidden="true" size={13} />
+                  </span>
+                </Link>
+                {wings.length ? <div className="faction-wing-list faction-independent-wings">
+                  <p className="eyebrow">Inside its sphere</p>
+                  <ul>{wings.map((wing) => <FactionWingRow key={wing.id} wing={wing} />)}</ul>
+                </div> : null}
+              </article>;
             })}
           </div>
         </section>

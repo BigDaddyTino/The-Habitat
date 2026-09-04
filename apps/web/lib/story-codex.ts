@@ -1,6 +1,6 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
-import type { AtlasArc, AtlasCompanion, AtlasEdge, AtlasJoin, AtlasNode, CampaignAtlas } from "@/lib/campaign-atlas";
+import { clusterBoards, type AtlasArc, type AtlasCompanion, type AtlasEdge, type AtlasJoin, type AtlasNode, type CampaignAtlas } from "@/lib/campaign-atlas";
 import {
   analyzeStoryGraph,
   canonicalStoryEntryRouteSlug,
@@ -1807,5 +1807,48 @@ export async function getCampaignAtlas(): Promise<CampaignAtlas> {
     companions.push({ slug: link.entry.slug, title: link.entry.title, atArc: link.node.arc.slug, atNode: link.node.id, namedOn, missions });
   }
 
-  return { spine, nodes, edges, side, joins, companions, orphans };
+  // Recruitable characters with nothing written for them. A campaign map that
+  // shows one companion chain and stays quiet about the other six is telling
+  // half the truth about what the campaign still owes.
+  const chained = new Set(missionRows.map((row) => ((row.meta ?? {}) as Record<string, unknown>).companion).filter((slug): slug is string => typeof slug === "string"));
+  const recruitable = await db.storyEntry.findMany({
+    where: { kind: "CHARACTER", status: { in: workingStatuses } },
+    select: { slug: true, title: true, meta: true },
+    orderBy: { title: "asc" },
+  });
+  const companionsWithoutChain = recruitable
+    .filter((row) => ((row.meta ?? {}) as Record<string, unknown>).companion !== null
+      && (((row.meta ?? {}) as Record<string, unknown>).companion as Record<string, unknown> | undefined)?.capable === true
+      && !chained.has(row.slug))
+    .map((row) => ({ slug: row.slug, title: row.title }));
+
+  // An ENDING that stops. The chapter-level gap above catches two chapters
+  // nothing joins; this is the sharper one — a card the story is meant to
+  // leave by, in the middle of the campaign, with nothing after it.
+  const leaves = new Set(joins.filter((join) => join.fromNode).map((join) => join.fromNode as string));
+  const lastChapter = spine[spine.length - 1]?.slug ?? null;
+  const arcTitleOf = new Map(spine.map((arc) => [arc.slug, arc.title]));
+  const danglingEndings = nodes
+    .filter((node) => node.kind === "ENDING" && node.arcSlug !== lastChapter && !leaves.has(node.id))
+    .map((node) => ({ arcSlug: node.arcSlug, arcTitle: arcTitleOf.get(node.arcSlug) ?? node.arcSlug, nodeId: node.id, nodeTitle: node.title }));
+
+  // The forward edge: settled threads that have not become a board yet, so the
+  // map does not simply stop at the last card anybody happened to write.
+  const threads = await db.storyEntry.findMany({
+    where: { kind: "THREAD", status: { in: workingStatuses } },
+    select: { slug: true, title: true, summary: true, meta: true },
+    orderBy: { title: "asc" },
+  });
+  const planned = threads
+    .filter((row) => {
+      const meta = (row.meta ?? {}) as Record<string, unknown>;
+      const arcs = Array.isArray(meta.arcs) ? meta.arcs : [];
+      return meta.threadStatus === "approved" && arcs.length === 0;
+    })
+    .map((row) => ({ slug: row.slug, title: row.title, summary: row.summary }));
+
+  return {
+    spine, nodes, edges, side, joins, companions, companionsWithoutChain,
+    orphans, orphanClusters: clusterBoards(orphans, joins), danglingEndings, planned,
+  };
 }

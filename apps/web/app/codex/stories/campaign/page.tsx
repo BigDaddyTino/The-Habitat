@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, GitMerge, MapPinned } from "lucide-react";
+import { ArrowLeft, GitMerge, MapPinned, Route } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
 import { getCampaignFlow, getCanonNavigator, storyReadRole } from "@/lib/story-codex";
 import { StoryLiveSync } from "@/components/story-live-sync";
@@ -26,6 +26,10 @@ export default async function CampaignPage() {
         <p className="eyebrow"><MapPinned aria-hidden="true" size={12} /> Martino · the campaign</p>
         <h1>Every road through the war</h1>
         <p>Click a chapter to open its full playable flow. Gold lines are real handoffs between quest endings—not a planning sketch—so the campaign map and the game export stay in agreement.</p>
+        <p className="atlas-crosslink">
+          <Link href="/codex/stories/map"><Route aria-hidden="true" size={13} /> The campaign map</Link>
+          <span>Every card of every chapter on one canvas, with the branches, the flag joins and everything that spiders off it.</span>
+        </p>
       </div>
 
       <div className="canon-workspace">

@@ -21,7 +21,7 @@ import { ATLAS_COL, ATLAS_ROW, ATLAS_SIDE_GAP, layoutSpine, type AtlasArc, type 
  * that nothing actually connects. The map is allowed to be unflattering.
  */
 
-type SpineData = { node: AtlasNode; arc: AtlasArc; index: number };
+type SpineData = { node: AtlasNode; arc: AtlasArc; index: number; dangling: boolean };
 type SideData = { arc: AtlasArc; why: string };
 type CompanionData = { companion: AtlasCompanion };
 type LaneData = { arc: AtlasArc; index: number; width: number };
@@ -35,9 +35,9 @@ const stageLabel = (value: string | null) =>
   value && value in storyStoryStageLabels ? storyStoryStageLabels[value as StoryStoryStage] : value;
 
 function SpineCard({ data }: NodeProps<Node<SpineData, "card">>) {
-  const { node, arc, index } = data;
+  const { node, arc, index, dangling } = data;
   return (
-    <Link className={`atlas-card kind-${node.kind.toLowerCase()}${node.entry ? " is-entry" : ""}${node.kind === "ENDING" ? " is-ending" : ""}`} href={`/codex/arc/${arc.slug}?node=${node.id}`}>
+    <Link className={`atlas-card kind-${node.kind.toLowerCase()}${node.entry ? " is-entry" : ""}${node.kind === "ENDING" ? " is-ending" : ""}${dangling ? " is-dangling" : ""}`} href={`/codex/arc/${arc.slug}?node=${node.id}`}>
       <Handle className="atlas-handle" position={Position.Top} type="target" />
       <span className="atlas-card-kicker">
         <i>{index + 1}</i>
@@ -46,6 +46,7 @@ function SpineCard({ data }: NodeProps<Node<SpineData, "card">>) {
       </span>
       <strong>{node.title}</strong>
       <span className="atlas-card-arc">{arc.title}</span>
+      {dangling ? <span className="atlas-card-warn"><TriangleAlert aria-hidden="true" size={10} /> nothing leads out of this ending</span> : null}
       <Handle className="atlas-handle" position={Position.Bottom} type="source" />
     </Link>
   );
@@ -101,7 +102,10 @@ function LaneHeading({ data }: NodeProps<Node<LaneData, "lane">>) {
     <Link className={`atlas-lane${arc.locked ? " is-locked" : ""}`} href={`/codex/arc/${arc.slug}`} style={{ width }}>
       <span className="atlas-lane-kicker">Chapter {index + 1}{arc.locked ? <Lock aria-hidden="true" size={9} /> : null}</span>
       <strong>{arc.title}</strong>
-      <span className="atlas-lane-foot">{arc.nodeCount} card{arc.nodeCount === 1 ? "" : "s"} <ArrowRight aria-hidden="true" size={10} /></span>
+      <span className="atlas-lane-foot">
+        {arc.region ? <i><MapPin aria-hidden="true" size={9} /> {arc.region.title}</i> : <i className="is-missing"><TriangleAlert aria-hidden="true" size={9} /> no region</i>}
+        <em>{arc.nodeCount} card{arc.nodeCount === 1 ? "" : "s"} <ArrowRight aria-hidden="true" size={10} /></em>
+      </span>
     </Link>
   );
 }
@@ -118,6 +122,7 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
   const { placed, lanes, width, rows } = layoutSpine(atlas);
   const arcOf = new Map(atlas.spine.map((arc) => [arc.slug, arc]));
   const nodeById = new Map(atlas.nodes.map((node) => [node.id, node]));
+  const dangling = new Set(atlas.danglingEndings.map((ending) => ending.nodeId));
   const orderInArc = new Map<string, number>();
   for (const arc of atlas.spine) {
     atlas.nodes.filter((node) => node.arcSlug === arc.slug).forEach((node, index) => orderInArc.set(node.id, index));
@@ -142,7 +147,7 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
     width: 236,
     height: 78,
     position: placed.get(node.id) ?? { x: 0, y: 0 },
-    data: { node, arc: arcOf.get(node.arcSlug)!, index: orderInArc.get(node.id) ?? 0 },
+    data: { node, arc: arcOf.get(node.arcSlug)!, index: orderInArc.get(node.id) ?? 0, dangling: dangling.has(node.id) },
     draggable: false,
     selectable: false,
   }));

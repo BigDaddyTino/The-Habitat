@@ -94,6 +94,9 @@ export type AtlasCompanion = {
   missions: { slug: string; title: string; order: number | null; stage: string | null }[];
 };
 
+/** An ENDING in a chapter that is not the last one, with nothing after it. */
+export type DanglingEnding = { arcSlug: string; arcTitle: string; nodeId: string; nodeTitle: string };
+
 export type CampaignAtlas = {
   /** The mainline, in position order. */
   spine: AtlasArc[];
@@ -105,8 +108,30 @@ export type CampaignAtlas = {
   side: AtlasArc[];
   joins: AtlasJoin[];
   companions: AtlasCompanion[];
+  /**
+   * Recruitable characters with no mission chain written, so the map can say
+   * how many companions the campaign has rather than only how many have one.
+   */
+  companionsWithoutChain: { slug: string; title: string }[];
   /** Boards nothing connects to at all. Reported, never hidden. */
   orphans: AtlasArc[];
+  /**
+   * Orphans grouped by what they are wired to. Seven boards that all reach
+   * each other and nothing else is one problem; seven loose boards are seven.
+   * The map is more use if it says which.
+   */
+  orphanClusters: AtlasArc[][];
+  /**
+   * An ENDING that stops. The chapter-level gap catches two chapters nothing
+   * joins; this catches the sharper case — a card the story is supposed to
+   * leave by, in the middle of the campaign, with nothing leading out of it.
+   */
+  danglingEndings: DanglingEnding[];
+  /**
+   * Approved story threads that have not become a board yet: the campaign's
+   * forward edge, so the map does not simply stop at the last written card.
+   */
+  planned: { slug: string; title: string; summary: string | null }[];
 };
 
 // ---------------------------------------------------------------- the layout
@@ -236,6 +261,47 @@ export function atlasHealth(atlas: CampaignAtlas) {
     gapLabels: gaps.map((join) => `${join.fromArc} → ${join.toArc}`),
     sideBoards: atlas.side.length,
     companions: atlas.companions.length,
+    companionsWithoutChain: atlas.companionsWithoutChain.length,
     orphans: atlas.orphans.length,
+    orphanClusters: atlas.orphanClusters.length,
+    danglingEndings: atlas.danglingEndings.length,
+    planned: atlas.planned.length,
+    /** Everything the map is asking somebody to finish, as one number. */
+    loose: gaps.length + atlas.danglingEndings.length + atlas.orphans.length,
   };
+}
+
+/**
+ * Connected components over a set of boards, given the joins between them.
+ * Used to group orphans: boards that reach each other but not the campaign.
+ */
+export function clusterBoards(boards: readonly AtlasArc[], joins: readonly AtlasJoin[]): AtlasArc[][] {
+  const inSet = new Map(boards.map((arc) => [arc.slug, arc]));
+  const neighbours = new Map<string, Set<string>>();
+  for (const join of joins) {
+    if (join.kind === "implied") continue;
+    if (!inSet.has(join.fromArc) || !inSet.has(join.toArc)) continue;
+    neighbours.set(join.fromArc, (neighbours.get(join.fromArc) ?? new Set<string>()).add(join.toArc));
+    neighbours.set(join.toArc, (neighbours.get(join.toArc) ?? new Set<string>()).add(join.fromArc));
+  }
+  const seen = new Set<string>();
+  const clusters: AtlasArc[][] = [];
+  for (const arc of boards) {
+    if (seen.has(arc.slug)) continue;
+    const cluster: AtlasArc[] = [];
+    const frontier = [arc.slug];
+    seen.add(arc.slug);
+    while (frontier.length > 0) {
+      const slug = frontier.shift() as string;
+      const found = inSet.get(slug);
+      if (found) cluster.push(found);
+      for (const next of neighbours.get(slug) ?? []) {
+        if (seen.has(next)) continue;
+        seen.add(next);
+        frontier.push(next);
+      }
+    }
+    clusters.push(cluster.sort((left, right) => left.title.localeCompare(right.title)));
+  }
+  return clusters.sort((left, right) => right.length - left.length);
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, GitMerge, MapPinned, TriangleAlert, UsersRound } from "lucide-react";
+import { ArrowLeft, GitMerge, Layers, Lightbulb, MapPinned, TriangleAlert, UsersRound } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
 import { getCampaignAtlas, getCanonNavigator, storyReadRole } from "@/lib/story-codex";
 import { atlasHealth } from "@/lib/campaign-atlas";
@@ -39,6 +39,10 @@ export default async function CampaignMapPage() {
           is drawn by hand: the lines come from the same endings, flags and conditions the game export reads,
           so this map and the boards cannot disagree. <b>It also shows what is missing.</b>
         </p>
+        <p className="atlas-crosslink">
+          <Link href="/codex/stories/campaign"><Layers aria-hidden="true" size={13} /> The chapter view</Link>
+          <span>Six cards and the roads between them, when you want the shape rather than the detail.</span>
+        </p>
       </div>
 
       <div className="canon-workspace">
@@ -52,7 +56,9 @@ export default async function CampaignMapPage() {
             <div><b>{health.flagJoins}</b><span>flag joins</span></div>
             <div><b>{health.sideBoards}</b><span>boards off it</span></div>
             <div><b>{health.companions}</b><span>companion chains</span></div>
-            <div className={health.gaps > 0 ? "is-gap" : undefined}><b>{health.gaps}</b><span>unwired</span></div>
+            <div className={health.gaps > 0 ? "is-gap" : undefined}><b>{health.gaps}</b><span>unwired chapters</span></div>
+            <div className={health.danglingEndings > 0 ? "is-gap" : undefined}><b>{health.danglingEndings}</b><span>endings that stop</span></div>
+            <div className={health.orphans > 0 ? "is-gap" : undefined}><b>{health.orphans}</b><span>boards nothing reaches</span></div>
           </div>
 
           {health.gaps > 0 ? (
@@ -70,6 +76,24 @@ export default async function CampaignMapPage() {
                   <Link href={`/codex/arc/${to}`}>{titleOf(to ?? "")}</Link>
                 </li>;
               })}</ul>
+            </div>
+          ) : null}
+
+          {atlas.danglingEndings.length > 0 ? (
+            <div className="atlas-gaps">
+              <p className="eyebrow"><TriangleAlert aria-hidden="true" size={12} /> Endings that stop</p>
+              <p>
+                A card the story is meant to leave by, in the middle of the campaign, with nothing leading out of
+                it — no next chapter named, no flag anybody reads. Sharper than an unwired chapter, because the
+                board itself says this is an exit.
+              </p>
+              <ul>{atlas.danglingEndings.map((ending) => (
+                <li key={ending.nodeId}>
+                  <Link href={`/codex/arc/${ending.arcSlug}?node=${ending.nodeId}`}>{ending.nodeTitle}</Link>
+                  <i>in</i>
+                  <Link href={`/codex/arc/${ending.arcSlug}`}>{ending.arcTitle}</Link>
+                </li>
+              ))}</ul>
             </div>
           ) : null}
 
@@ -96,15 +120,46 @@ export default async function CampaignMapPage() {
                   <p>First named on <Link href={`/codex/arc/${companion.atArc}?node=${companion.atNode}`}>{companion.namedOn[0]?.nodeTitle ?? titleOf(companion.atArc)}</Link>{companion.namedOn.length > 1 ? `, and on ${companion.namedOn.length - 1} card${companion.namedOn.length === 2 ? "" : "s"} after it` : ""}. The chain runs on its own clock from wherever they actually join.</p>
                 </li>
               ))}</ul> : <p className="story-inspector-hint">No mainline card recruits anybody yet.</p>}
+              {atlas.companionsWithoutChain.length ? (
+                <p className="atlas-note">
+                  <b>{atlas.companionsWithoutChain.length} more</b> can join the party and have no missions written:{" "}
+                  {atlas.companionsWithoutChain.map((companion, index) => (
+                    <span key={companion.slug}>{index > 0 ? ", " : ""}<Link href={`/codex/bible/${companion.slug}`}>{companion.title}</Link></span>
+                  ))}.
+                </p>
+              ) : null}
             </section>
+
+            {atlas.planned.length ? (
+              <section>
+                <p className="eyebrow"><Lightbulb aria-hidden="true" size={12} /> What comes next · {atlas.planned.length}</p>
+                <p className="story-inspector-hint">Settled in the writers&apos; room and not a board yet. The campaign&apos;s forward edge — the map does not stop at the last card somebody happened to write.</p>
+                <ul className="atlas-list">{atlas.planned.map((thread) => (
+                  <li key={thread.slug}>
+                    <Link href={`/codex/bible/${thread.slug}`}><strong>{thread.title}</strong><i>approved thread</i></Link>
+                    {thread.summary ? <p>{thread.summary}</p> : null}
+                  </li>
+                ))}</ul>
+              </section>
+            ) : null}
 
             {atlas.orphans.length ? (
               <section className="atlas-orphans">
                 <p className="eyebrow"><TriangleAlert aria-hidden="true" size={12} /> Boards nothing reaches · {atlas.orphans.length}</p>
-                <p className="story-inspector-hint">Written, playable, and connected to nothing the campaign passes through. Set a flag in one and read it in another, or point an ending at it.</p>
-                <ul className="atlas-list">{atlas.orphans.map((arc) => (
-                  <li key={arc.slug}><Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{storyArcCategoryLabels[arc.category].toLowerCase()}</i></Link></li>
-                ))}</ul>
+                <p className="story-inspector-hint">
+                  Written, playable, and connected to nothing the campaign passes through. Grouped by what they
+                  are wired to each other — {atlas.orphanClusters.length === 1 ? "one cluster" : `${atlas.orphanClusters.length} clusters`}, because
+                  a set of boards that all reach each other and not the campaign is one problem, and loose boards are several.
+                  Set a flag in one and read it in another, or point an ending at it.
+                </p>
+                {atlas.orphanClusters.map((cluster, index) => (
+                  <div className="atlas-cluster" key={cluster[0]?.slug ?? index}>
+                    <p className="atlas-cluster-head">{cluster.length > 1 ? `${cluster.length} boards wired to each other` : "On its own"}</p>
+                    <ul className="atlas-list">{cluster.map((arc) => (
+                      <li key={arc.slug}><Link href={`/codex/arc/${arc.slug}`}><strong>{arc.title}</strong><i>{storyArcCategoryLabels[arc.category].toLowerCase()}</i></Link></li>
+                    ))}</ul>
+                  </div>
+                ))}
               </section>
             ) : null}
           </div>
