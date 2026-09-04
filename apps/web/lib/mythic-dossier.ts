@@ -2,7 +2,7 @@
  * The Mythic dossier: a named fight read as one page.
  *
  * The fight itself — summary, spawn, stats, phases, abilities, drops — is NOT
- * here. It lives in `bloomfall-creature-field-guide.ts`, because the Codex
+ * here. It lives in `mythic-field-guide.ts`, because the Codex
  * dossier and this page must never be able to disagree about what the thing
  * does. Same law as `bloomfallMutationCards()`: one source, two surfaces.
  *
@@ -15,8 +15,17 @@
 
 export type MythicPanelRow = { label: string; text: string };
 
-export type MythicReactorState = {
-  /** The canonical `reactor-cycles` state. Seven, and these are the seven. */
+/**
+ * One state of the regional hazard the fight runs inside — its weather.
+ *
+ * This was typed against Bloomfall's seven `reactor-cycles` states, because
+ * the first Mythic was Bloomfall's. The second is not: Death Canyon has no
+ * reactor, it has a heavy gas that pools by depth. So the axis is named for
+ * what it does rather than for the first region that had one, and each
+ * dossier says what its own track is called.
+ */
+export type MythicHazardState = {
+  /** The state's name in its own region's vocabulary. */
   state: string;
   /** Hazard read at a glance, low to extreme. */
   band: "low" | "moderate" | "high" | "severe" | "extreme";
@@ -34,7 +43,16 @@ export type MythicDossier = {
   eyebrow: string;
   /** The one line under the title. Never a summary — the field guide has that. */
   tagline: string;
-  /** Hero plates. `hero` is the creature dossier plate; the rest are this page's. */
+  /** The closing panel: what going costs, and the plate that proves it. */
+  catalogueTitle: string;
+  catalogueNote: string;
+  /**
+   * Plates that are not one of the three fixed slots below. Empty is fine —
+   * but a commissioned plate that is in neither list renders nowhere and just
+   * sits on disk, which is what happened to two of the Pale Mother's.
+   */
+  gallery: readonly { slug: string; caption: string }[];
+  /** Hero plates. The creature dossier carries its own; these are this page's. */
   arenaArtSlug: string;
   transitionArtSlug: string;
   catalogueArtSlug: string;
@@ -44,7 +62,9 @@ export type MythicDossier = {
    *  field-guide record, so the dossier body and this page cannot disagree. */
   transitionBeats: readonly string[];
   mechanics: readonly string[];
-  reactor: readonly MythicReactorState[];
+  /** What this region calls its hazard track, as the section heading. */
+  hazardTitle: string;
+  hazard: readonly MythicHazardState[];
   bounty: readonly { issuer: string; issuerSlug: string; wants: string }[];
   rewards: readonly { name: string; slug: string | null; what: string }[];
   /** The quest that hangs off it, by arc slug. */
@@ -64,6 +84,10 @@ export const mythicDossiers: Readonly<Record<string, MythicDossier>> = {
     regionLabel: "Bloomfall Reach · Living Marsh",
     eyebrow: "Mythic · Border bounty · Two phases",
     tagline: "Once a failed biocontainment experiment. Now the reason the Blackweir weir works, and the reason it will not once you are done.",
+    catalogueTitle: "Why anyone goes",
+    catalogueNote:
+      "The recovered hunters are laid out in the shallows above the resin beds — supine, arms at their sides, feet toward the water, each with a numbered resin disc at the throat. The numbers are sequential. They are past three hundred. There are no gaps.",
+    gallery: [],
     arenaArtSlug: "blackweir-arena",
     transitionArtSlug: "the-transformation",
     catalogueArtSlug: "the-catalogue",
@@ -93,7 +117,8 @@ export const mythicDossiers: Readonly<Record<string, MythicDossier>> = {
       "Ground you have already harvested has fewer safe zones, because you took them.",
       "Let it break contact and return and it comes back a rung higher — its own Adaptive Mutation, aimed the correct way for the first time.",
     ],
-    reactor: [
+    hazardTitle: "Reactor cycle — seven states",
+    hazard: [
       { state: "Dormant Interval", band: "low", effect: "Water at its lowest and most of the basin walkable. Also when it is hardest to find." },
       { state: "Stabilization", band: "low", effect: "Pylons take load. Ability tempo rises and it stops waiting for you." },
       { state: "Sector Restart", band: "moderate", effect: "Old gates cycle. The route you came in by stops existing behind you." },
@@ -115,6 +140,74 @@ export const mythicDossiers: Readonly<Record<string, MythicDossier>> = {
       { name: "Bounty standing", slug: null, what: "With whichever issuer you satisfied. You cannot satisfy more than one." },
     ],
     arcSlug: "the-blackweir-bounty",
+  },
+
+  "the-pale-mother": {
+    slug: "the-pale-mother",
+    // Nobody to name. She is not somebody who became something — the Anaconda
+    // is the region with a person inside it, and she is the region's dead
+    // fitted together by something that had an opinion about the fit.
+    personSlug: null,
+    region: "grand-rift",
+    regionLabel: "Grand Rift · Death Canyon",
+    eyebrow: "Mythic · Picket bounty · Two phases",
+    tagline: "She has never once defended herself. Every behaviour she has is defending the cage, and the cage has four hundred and eleven of them in it.",
+    catalogueTitle: "What the quiet is",
+    catalogueNote:
+      "They stop at the edge of the gas and wait. Not a retreat and not a lull — they can wait longer than you can stand there, and every account that has ever come back out of [[death-canyon]] leads with the waiting rather than the deaths.",
+    gallery: [
+      { slug: "the-vents", caption: "Four seconds of seeing. A lit vent throws a column of flame up through the gas, and for as long as it burns the floor is visible — which is the only time anybody ever finds out how many there are." },
+      { slug: "the-tally", caption: "Four hundred kilometres downriver, the bone-goods come off a barge at [[charnel-lock]] and the toll is always exactly correct. Nothing about this picture is wrong. That is the point of it." },
+    ],
+    arenaArtSlug: "death-canyon-arena",
+    transitionArtSlug: "the-cage-opens",
+    catalogueArtSlug: "the-quiet",
+    biome: [
+      { label: "Fitted, not grown", text: "Nine metres of bone, none of it hers. Every plate came off somebody and was seated, overlapped and keyed the way a wall is dry-stoned. The fit is the frightening part." },
+      { label: "The cage", text: "Where a spider carries a body she carries a ribbed hollow, closed and full. It is on screen for the whole first phase and it is moving. Almost nobody looks." },
+      { label: "Bone that will not settle", text: "The Ossuary Rites are an honest covenant and the one horror that trade has a word for is bone that goes on working after the rite. That word is undead, and Death Canyon is where it was coined." },
+      { label: "The gas is not hers", text: "Hunters swear she breathes it. She does not, and the canyon is exactly as poisonous the week after she dies. She is the loudest wrong answer anybody has offered about this place." },
+      { label: "Taken", text: "What the Brood takes is bone. A Soul Forge repairs that for anybody who can buy a body — which is the whole difference between a bad night for a bounty crew and a permanent one for a picket keeper." },
+    ],
+    arena: [
+      "A fissured chasm floor under violet gas that pools by depth and has a surface like water.",
+      "Fourteen vents that will light. The gas itself smothers; what burns is the fissure.",
+      "Blue-green light comes up out of the floor, so everything is lit from underneath.",
+      "Every vent she smothers is one you do not have when the cage opens.",
+    ],
+    transitionBeats: [
+      "She stops, and lowers, and the legs fold. There is nothing dramatic about it.",
+      "The cage opens on the underside the way a hand opens.",
+      "How you killed her decided this minutes ago: seams and carry unlatch it early, legs only leave the lid on.",
+      "The health bar was the cage the entire time, and the game never said so.",
+    ],
+    mechanics: [
+      "Bullets and blades do nothing to the Brood. Total immunity, never a reduction — a gate with a gap is not a gate.",
+      "Area damage kills them: magic, fire, an explosive, a lit vent. One tick, one death. The fight is coverage, not damage.",
+      "No health bar in phase two — a count, going down, starting at four hundred and eleven.",
+      "They do not make a sound, they block one. The canyon's hum goes out in the shape of them crossing it.",
+      "Her plates grow back between attempts. Her children do not, so whatever you burned stays burned and she gets more careful as she runs out.",
+    ],
+    hazardTitle: "Gas depth — three bands",
+    hazard: [
+      { state: "Clear shelf", band: "low", effect: "Broken shelves above the pool line. You can see, she is slow, and the Brood will not follow you onto it. Also no cover and nothing to burn." },
+      { state: "Working depth", band: "moderate", effect: "Gas at chest height over blue-green fissure light. The real arena, and all fourteen vents are in it." },
+      { state: "Working depth · Fissure Step", band: "high", effect: "She walks into the gas and you lose her completely. Not invisibility — the gas is opaque and she is patient. The tell she is coming back is the gas." },
+      { state: "The pool", band: "severe", effect: "Gas over your head in the deepest fractures. The existing environmental hazard at full strength, and she heals in it. Do not follow her in." },
+      { state: "The Quiet", band: "extreme", effect: "The hum stops in a patch and the patch widens. Nothing is visible and nothing is going to be. This is the only warning the Brood gives." },
+    ],
+    bounty: [
+      { issuer: "Bonefire Picket", issuerSlug: "bonefire-picket", wants: "It finished. The keepers took up a collection every year for nine years and nobody upriver has ever contributed a coin." },
+      { issuer: "Wenna Crake", issuerSlug: "wenna-crake", wants: "Nothing for herself. She wrote the notice, she keeps the beacon lit under it, and she will tell you what happened to the five of them if you sit down." },
+      { issuer: "Bone Market Families", issuerSlug: "bone-market-families", wants: "The brood-glass, quietly, at exactly the correct price — which tells them how many she had. They have never asked why the tally does not balance." },
+    ],
+    rewards: [
+      { name: "A Settled Plate", slug: "settled-plate", what: "The one bone on her that stopped working. Proof, to the trade that cares most, that settling is still possible." },
+      { name: "Brood-glass", slug: "brood-glass", what: "One bead per broodling the fire took, so your pouch is the count and the difference is what is still down there." },
+      { name: "Cage Rib", slug: "cage-rib", what: "One rib off the brood chamber. The fitted notches are on the inside, which is the part armourers stop talking about." },
+      { name: "The count", slug: "the-count-at-the-canyon", what: "Recorded at every ending, including the good one, where it is zero." },
+    ],
+    arcSlug: "the-pale-mother-bounty",
   },
 };
 

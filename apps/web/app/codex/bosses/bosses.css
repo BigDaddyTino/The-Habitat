@@ -23,7 +23,7 @@
 .mb-links a { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; border: 1px solid var(--line); padding: 6px 11px; color: var(--paper); text-decoration: none; }
 .mb-links a:hover { border-color: var(--mb-violet); color: var(--mb-violet); }
 
-.mb-hero-art, .mb-panel-art, .mb-phase-art, .mb-transition-art {
+.mb-hero-art, .mb-panel-art, .mb-phase-art, .mb-transition-art, .mb-gallery-art {
   position: relative; margin: 0; border: 1px solid var(--line); overflow: hidden;
   background: radial-gradient(ellipse at 50% 60%, rgba(185, 143, 214, .16), rgba(12, 16, 13, .92) 70%);
   display: grid; place-items: center;
@@ -31,7 +31,7 @@
 .mb-hero-art { min-height: 260px; }
 .mb-panel-art, .mb-transition-art { min-height: 150px; margin-bottom: 10px; }
 .mb-phase-art { min-height: 200px; }
-.mb-hero-art.has-art, .mb-panel-art.has-art, .mb-phase-art.has-art, .mb-transition-art.has-art { background: #0d110e; }
+.mb-hero-art.has-art, .mb-panel-art.has-art, .mb-phase-art.has-art, .mb-transition-art.has-art, .mb-gallery-art.has-art { background: #0d110e; }
 .mythic-boss figure img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mb-glyph { font-family: var(--font-display), Georgia, serif; font-size: 64px; color: rgba(185, 143, 214, .55); }
 .mythic-boss .play-artslot { position: absolute; left: 10px; right: 10px; bottom: 8px; }
@@ -99,3 +99,9 @@
    enough to break a sentence apart. */
 .mythic-boss .codex-ref { color: var(--mb-marsh); text-decoration: none; border-bottom: 1px dotted rgba(143, 191, 154, .45); }
 .mythic-boss .codex-ref:hover { color: var(--mb-violet); border-bottom-color: rgba(185, 143, 214, .7); }
+
+/* -- The gallery: plates that are not one of the three fixed slots ------ */
+.mb-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.mb-gallery-item { margin: 0; }
+.mb-gallery-art { min-height: 190px; margin-bottom: 8px; }
+.mb-gallery-item figcaption { color: var(--muted); font-size: 12.5px; line-height: 1.6; }

@@ -161,3 +161,63 @@ test("the permanent Pale Mother ledger reconciles every final in commission orde
     assert.equal(rows[index]?.[6], hash(file), `${plate.kind}/${plate.slug} has a stale ledger hash`);
   }
 });
+
+/**
+ * Every commissioned plate has somewhere to render.
+ *
+ * This is the check that was missing. The 22 plates were delivered, verified,
+ * hashed and ledgered — and sixteen of them rendered nowhere, because the boss
+ * page they belong to did not exist for this creature and two of the scene
+ * plates had no slot on it even once it did. The art gates all passed. The
+ * owner opened the codex and could not find her.
+ *
+ * A plate on disk that nothing references is not "delivered". It is lost.
+ */
+test("every Pale Mother plate is referenced by a surface that renders it", async () => {
+  const { mythicDossiers, mythicAbilitySlug } = await import("./mythic-dossier");
+  const { mythicFieldGuide } = await import("./mythic-field-guide");
+
+  const dossier = mythicDossiers["the-pale-mother"];
+  const guide = mythicFieldGuide["the-pale-mother"];
+  assert.ok(dossier, "the Pale Mother has no Mythic dossier — /codex/bosses/the-pale-mother 404s and 16 plates render nowhere");
+  assert.ok(guide && guide.kind === "BOSS", "the Pale Mother has no BOSS field-guide record — the boss page needs both or it 404s");
+
+  // Where each kind of plate is allowed to be claimed from.
+  const claimed = new Set<string>([
+    `bosses/${dossier.arenaArtSlug}.png`,
+    `bosses/${dossier.transitionArtSlug}.png`,
+    `bosses/${dossier.catalogueArtSlug}.png`,
+    ...dossier.gallery.map((plate) => `bosses/${plate.slug}.png`),
+    // The creature, character and item plates are picked up by their own
+    // dossiers from the entry slug, so those are claimed by existing.
+    "creatures/the-pale-mother.png",
+    "creatures/the-pale-brood.png",
+    "characters/wenna-crake.png",
+    "items/settled-plate.png",
+    "items/brood-glass.png",
+    "items/cage-rib.png",
+  ]);
+
+  const abilities = [...guide.abilities, ...(guide.phases ?? []).flatMap((phase) => phase.abilities)];
+  for (const ability of abilities) claimed.add(`bosses/${mythicAbilitySlug(ability.name)}.png`);
+
+  const orphans = commissionedPaths.filter((plate) => !claimed.has(plate));
+  assert.deepEqual(orphans, [], `commissioned plates that nothing renders: ${orphans.join(", ")}`);
+});
+
+test("the boss page's ability tiles and the fight record agree on names", async () => {
+  const { mythicAbilitySlug } = await import("./mythic-dossier");
+  const { mythicFieldGuide } = await import("./mythic-field-guide");
+  const guide = mythicFieldGuide["the-pale-mother"];
+  assert.ok(guide && guide.kind === "BOSS");
+
+  const abilities = [...guide.abilities, ...(guide.phases ?? []).flatMap((phase) => phase.abilities)];
+  const delivered = new Set(commissionedPaths.filter((plate) => plate.includes("/ability-")));
+
+  // An ability with no tile falls back to a glyph, which is by design and not
+  // a failure — but a tile with no ability is art nobody will ever see.
+  const tilesWithNoAbility = [...delivered].filter(
+    (plate) => !abilities.some((ability) => `bosses/${mythicAbilitySlug(ability.name)}.png` === plate),
+  );
+  assert.deepEqual(tilesWithNoAbility, [], `ability tiles that no ability claims: ${tilesWithNoAbility.join(", ")}`);
+});
