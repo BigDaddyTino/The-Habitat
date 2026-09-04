@@ -31,7 +31,10 @@ const items: NavItem[] = [
       { href: "/codex/library/regions", label: "Regions", icon: Map },
       { href: "/codex/library/species", label: "Species", icon: Castle },
       { href: "/codex/library/systems", label: "Systems", icon: Cog },
-      { href: "/codex/bosses/the-blackweir-anaconda", label: "Mythics", icon: Skull },
+      // The index, never one boss. This pointed at the Anaconda's page for as
+      // long as it was the only Mythic, and the day there were two, the menu
+      // item named for her kind could not reach the Pale Mother at all.
+      { href: "/codex/bosses", label: "Mythics", icon: Skull },
       { href: "/codex/bible", label: "All lore", icon: BookOpen },
     ],
   },

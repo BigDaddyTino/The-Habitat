@@ -87,6 +87,7 @@ export default async function MythicBossPage({ params }: { params: Promise<{ slu
           <p className="mb-tagline">{dossier.tagline}</p>
           <p className="mb-summary"><CodexProse text={guide.summary} /></p>
           <p className="mb-links">
+            <Link href="/codex/bosses">All Mythics</Link>
             <Link href={`/codex/bible/${slug}`}>Creature dossier</Link>
             {dossier.personSlug ? <Link href={`/codex/bible/${dossier.personSlug}`}>The person</Link> : null}
             <Link href={`/codex/arc/${dossier.arcSlug}`}>The bounty</Link>
