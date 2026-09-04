@@ -3,6 +3,7 @@ import { readImportConfig, readMirrorConfig, readPublisherConfig } from "./confi
 import { applyCodexImport, describeCodexImportDiff, planCodexImport, readImportLedger, rollbackCodexImport } from "./import";
 import { mirrorCodexBundle, readAndVerifyBundle } from "./mirror";
 import { codexDialogueReport, codexPublishState, publishCodexBundle, publisherFingerprint } from "./publisher";
+import { describeRetention } from "./retention";
 
 function log(message: string) {
   process.stdout.write(`[${new Date().toISOString()}] ${message}\n`);
@@ -15,13 +16,17 @@ async function watchPublisher() {
     try {
       const nextFingerprint = await publisherFingerprint(config.repositoryRoot);
       if (nextFingerprint !== fingerprint) {
-        const result = await publishCodexBundle(config.repositoryRoot, config.syncRoot);
+        const result = await publishCodexBundle(config.repositoryRoot, config.syncRoot, config);
         fingerprint = nextFingerprint;
         log(
           result.changed
             ? `Published ${result.snapshotId} with ${result.assets} Codex assets.`
             : `Codex is current at ${result.snapshotId}; no release was created.`,
         );
+        // Logged so a share quietly filling up is visible long before it is a
+        // problem — the last time it filled up, nothing said so anywhere.
+        const pruned = result.pruned && describeRetention(result.pruned);
+        if (pruned) log(pruned);
       }
     } catch (error) {
       log(`Publish failed; the last complete release remains active. ${error instanceof Error ? error.message : String(error)}`);
@@ -53,7 +58,7 @@ async function main() {
   if (command === "publish") {
     if (watch) return watchPublisher();
     const config = readPublisherConfig();
-    const result = await publishCodexBundle(config.repositoryRoot, config.syncRoot);
+    const result = await publishCodexBundle(config.repositoryRoot, config.syncRoot, config);
     log(
       result.changed
         ? `Published ${result.snapshotId} with ${result.assets} Codex assets and ${result.lines} dialogue lines.`

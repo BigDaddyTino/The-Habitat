@@ -29,6 +29,42 @@ function requirePath(name: string) {
   return path.resolve(value);
 }
 
+/**
+ * How many superseded releases stay on the share, and why there is a ceiling.
+ *
+ * A release materializes its assets as HARDLINKS into `blobs/`, so one kept
+ * release is one link on every blob it uses. NTFS caps a single file at 1024
+ * links, and when a blob reaches it every further publish fails — which is
+ * exactly how the share wedged on 2026-09-03 with 512 releases banked up.
+ *
+ * So retention is not housekeeping here, it is the thing that keeps publishing
+ * possible at all, and the maximum is deliberately far below 1024 rather than
+ * near it: the cap has to hold with room for a blob that appears more than
+ * once in a release, and for whatever a half-finished publish is holding.
+ *
+ * The releases are publisher-side rollback history. No consumer needs them:
+ * `mirror` and `import` both read only the release `current.json` names, and
+ * `planCodexImport` reads what this machine last imported out of its own local
+ * staging precisely because "the share has usually moved on".
+ */
+export const codexRetentionDefaults = { keepReleases: 30, minAgeMs: 15 * 60_000 } as const;
+
+function readRetention() {
+  const keepReleases = Number(process.env.HABITAT_CODEX_SYNC_KEEP_RELEASES ?? String(codexRetentionDefaults.keepReleases));
+  if (!Number.isSafeInteger(keepReleases) || keepReleases < 5 || keepReleases > 400) {
+    throw new Error("HABITAT_CODEX_SYNC_KEEP_RELEASES must be an integer from 5 through 400 — the ceiling is well under the NTFS 1024-hardlink cap on purpose.");
+  }
+  // Nothing is deleted until it has been superseded for this long. A consumer
+  // that read the pointer a moment before it moved may still be copying the
+  // release it named, and the share is reached over the network by a machine
+  // this process cannot see or coordinate with.
+  const minAgeMs = Number(process.env.HABITAT_CODEX_SYNC_RETENTION_MIN_AGE_MS ?? String(codexRetentionDefaults.minAgeMs));
+  if (!Number.isSafeInteger(minAgeMs) || minAgeMs < 60_000 || minAgeMs > 24 * 60 * 60_000) {
+    throw new Error("HABITAT_CODEX_SYNC_RETENTION_MIN_AGE_MS must be an integer from 60000 through 86400000.");
+  }
+  return { keepReleases, minAgeMs };
+}
+
 export function readPublisherConfig() {
   const pollIntervalMs = Number(process.env.HABITAT_CODEX_SYNC_INTERVAL_MS ?? "5000");
   if (!Number.isSafeInteger(pollIntervalMs) || pollIntervalMs < 1000 || pollIntervalMs > 300_000) {
@@ -38,6 +74,7 @@ export function readPublisherConfig() {
     repositoryRoot: findRepositoryRoot(),
     syncRoot: requirePath("HABITAT_CODEX_SYNC_ROOT"),
     pollIntervalMs,
+    ...readRetention(),
   };
 }
 

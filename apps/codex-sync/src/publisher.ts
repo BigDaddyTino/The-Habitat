@@ -9,10 +9,12 @@ import {
   type CodexBundlePointer,
 } from "@habitat/shared";
 import { assetStatFingerprint, discoverCodexAssets, storeCodexAssets } from "./assets";
+import { codexRetentionDefaults } from "./config";
 import { buildCanonCompatibilityExport } from "./compatibility";
 import { attachDialogue, buildDialogueLinesSidecar, validateDialogue, voiceClipsIn, type DialogueValidation } from "./dialogue";
 import { jsonBytes, replaceFileAtomically, sha256Bytes, writeFileDurably } from "./integrity";
 import { newestPublishedRelease } from "./release";
+import { pruneCodexShare, type RetentionReport } from "./retention";
 import { buildCodexSnapshot, codexDatabaseFingerprint } from "./snapshot";
 
 export type PublishResult = {
@@ -22,6 +24,8 @@ export type PublishResult = {
   assets: number;
   lines: number;
   report: string[];
+  /** What the retention sweep removed, or null if it could not run. */
+  pruned: RetentionReport | null;
 };
 
 async function readCurrentPointer(syncRoot: string) {
@@ -154,7 +158,11 @@ export async function codexDialogueReport(repositoryRoot: string) {
   return { validation: validateDialogue(snapshot, dialogue), counts: dialogue.counts };
 }
 
-export async function publishCodexBundle(repositoryRoot: string, syncRoot: string): Promise<PublishResult> {
+export async function publishCodexBundle(
+  repositoryRoot: string,
+  syncRoot: string,
+  retention: { keepReleases: number; minAgeMs: number } = codexRetentionDefaults,
+): Promise<PublishResult> {
   assertSafeSyncRoot(repositoryRoot, syncRoot);
   await mkdir(syncRoot, { recursive: true });
   const rootInfo = await stat(syncRoot);
@@ -185,7 +193,10 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
   const contentSha256 = sourceContentHash(snapshot, compatibility, assets, dialogue);
   const current = await readCurrentPointer(syncRoot);
   if (current?.sourceContentSha256 === contentSha256) {
-    return { changed: false, snapshotId: current.snapshotId, contentSha256, assets: assets.length, lines: dialogue.counts.lines, report: validation.report };
+    // Nothing to publish means no new release, so nothing has accumulated.
+    // The sweep runs where accumulation happens, not on every idle poll —
+    // this one fires every few seconds against a network share.
+    return { changed: false, snapshotId: current.snapshotId, contentSha256, assets: assets.length, lines: dialogue.counts.lines, report: validation.report, pruned: null };
   }
 
   const contentBytes = jsonBytes(snapshot);
@@ -196,6 +207,22 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
   const dialogueBytes = jsonBytes({ ...dialogue, snapshotId, generatedAt: generatedAt.toISOString(), sourceContentSha256: contentSha256 });
   const releaseRelative = `releases/${snapshotId}`;
   const releasePath = path.join(syncRoot, "releases", snapshotId);
+  // Make room BEFORE staging, not after publishing.
+  //
+  // Ordering is the whole point. Retention exists because kept releases are
+  // hardlinks and NTFS caps a blob at 1024 of them; if it only ran after a
+  // successful publish it would never run on a share that is already at the
+  // cap — which is the one state where it is needed, and the state the share
+  // was actually found in. Pruning first means the publish that needs the
+  // headroom is the publish that gets it.
+  //
+  // It never throws, so a share that will not tidy up still publishes.
+  const pruned = await pruneCodexShare(syncRoot, {
+    activeSnapshotId: current?.snapshotId ?? null,
+    keepReleases: retention.keepReleases,
+    minAgeMs: retention.minAgeMs,
+  }).catch(() => null);
+
   const stagingPath = path.join(syncRoot, ".staging", `publish-${snapshotId}-${randomBytes(4).toString("hex")}`);
   // Everything from here to the rename builds inside `.staging`, and a failure
   // anywhere in between used to leave that directory on the share forever.
@@ -278,7 +305,7 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
     sourceContentSha256: contentSha256,
   };
   await replaceFileAtomically(path.join(syncRoot, "current.json"), jsonBytes(pointer));
-  return { changed: true, snapshotId, contentSha256, assets: assets.length, lines: dialogue.counts.lines, report: validation.report };
+  return { changed: true, snapshotId, contentSha256, assets: assets.length, lines: dialogue.counts.lines, report: validation.report, pruned };
   } catch (error) {
     await rm(stagingPath, { recursive: true, force: true }).catch(() => {});
     throw error;
