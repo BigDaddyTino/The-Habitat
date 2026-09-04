@@ -231,6 +231,54 @@ export class BoardWriter {
   }
 
   /**
+   * Where an ENDING hands the story on, by arc slug.
+   *
+   * The narrow counterpart to `node()`: a card whose prose is already written
+   * and correct, and whose only fault is that the road out of it was never
+   * declared structurally. Kept separate precisely so a join can be added
+   * without a script restating a body it is not changing — retyping settled
+   * prose to set one column is how a rewrite gets in by accident.
+   *
+   * Only an ENDING may carry a continuation; the database CHECKs it, and so
+   * does this, because the failure is far more legible here.
+   */
+  async handoff(arcSlug: string, nodeKey: string, continuesInSlug: string) {
+    const arcId = await this.arcId(arcSlug);
+    const target = await this.arcId(continuesInSlug);
+    const node = await this.db.storyNode.findUnique({
+      where: { arcId_key: { arcId, key: nodeKey } },
+      select: { id: true, kind: true, title: true, continuesInArcId: true },
+    });
+    if (!node) throw new Error(`No card "${nodeKey}" on ${arcSlug}.`);
+    if (node.kind !== "ENDING") throw new Error(`"${nodeKey}" on ${arcSlug} is a ${node.kind}; only an ENDING continues into another arc.`);
+    if (node.continuesInArcId === target) { this.changes.push({ kind: "node", action: "unchanged", label: `${arcSlug}/${nodeKey}` }); return; }
+    this.changes.push({ kind: "node", action: "update", label: `${arcSlug}/${nodeKey}`, detail: `continues in ${continuesInSlug}` });
+    if (this.apply) {
+      await this.db.storyNode.update({ where: { id: node.id }, data: { continuesInArcId: target, updatedByUserId: this.actorUserId, version: { increment: 1 } } });
+      await this.revise("NODE", node.id, arcId, "UPDATED", `"${node.title}" now hands the story on to ${continuesInSlug}`);
+    }
+  }
+
+  /**
+   * Reconciles what a card does — the `effects` lines, in order.
+   *
+   * The same narrowness as `handoff`, for the same reason: a `set flag:` line
+   * is the only thing that makes the promise ledger and the campaign map see a
+   * card at all, and adding one should never mean rewriting the scene round it.
+   */
+  async effects(arcSlug: string, nodeKey: string, lines: readonly string[]) {
+    const arcId = await this.arcId(arcSlug);
+    const node = await this.db.storyNode.findUnique({ where: { arcId_key: { arcId, key: nodeKey } }, select: { id: true, title: true, effects: true } });
+    if (!node) throw new Error(`No card "${nodeKey}" on ${arcSlug}.`);
+    if (same(node.effects, lines)) { this.changes.push({ kind: "node", action: "unchanged", label: `${arcSlug}/${nodeKey} effects` }); return; }
+    this.changes.push({ kind: "node", action: "update", label: `${arcSlug}/${nodeKey} effects`, detail: lines.join(" · ") });
+    if (this.apply) {
+      await this.db.storyNode.update({ where: { id: node.id }, data: { effects: [...lines], updatedByUserId: this.actorUserId, version: { increment: 1 } } });
+      await this.revise("NODE", node.id, arcId, "UPDATED", `Rewrote what "${node.title}" does`);
+    }
+  }
+
+  /**
    * A FLAG entry: one name for one thing the story remembers.
    *
    * Flags are ordinary bible entries, which is what lets the promises ledger
