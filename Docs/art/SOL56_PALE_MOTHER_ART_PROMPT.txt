@@ -1,0 +1,430 @@
+SOL 5.6 — THE PALE MOTHER
+The Grand Rift's Mythic · Death Canyon · 22 plates · issued 2026-09-04
+REVISION A — 2026-09-04, issued while the first pass was already running.
+
+------------------------------------------------------------------------------
+READ THIS FIRST IF YOU HAVE ALREADY STARTED
+------------------------------------------------------------------------------
+
+Three changes. Everything not named here is unchanged and anything already
+delivered against it still stands.
+
+1. THE FISSURE LIGHT IS BLUE-GREEN, NOT SICK GREEN. Cold marsh-teal — the
+   colour of a lit pool at night — under the violet gas. This is not a taste
+   note. The creature's designer is nine years old, the words she used were
+   "the blue green place," and that is now the canon palette. It also does the
+   job the region needed anyway: teal-under-violet cannot be confused with
+   Bloomfall's sick filtration green or Magic-Torn's purple at a glance.
+   ANY PLATE ALREADY DELIVERED IN YELLOW-GREEN IS A REVISION. Log it and
+   re-render; do not leave a mixed set.
+
+2. TWO NEW PLATES — characters/wenna-crake.png and bosses/the-vents.png. Both
+   are specified in their sections below.
+
+3. ONE PLATE'S SUBJECT CHANGED — bosses/ability-settle.png. She is not resting
+   on a fissure. She is standing on a fire to put it out. See the tile list.
+
+------------------------------------------------------------------------------
+NOTES ON THE NINE PLATES ALREADY DELIVERED
+------------------------------------------------------------------------------
+
+The set is good. Two specific things, one of them serious.
+
+bosses/the-cage-opens.png is ACCEPTED on subject and is now the reference for
+the whole set. The ribbed cage hinged open with packed density behind it is
+exactly the design and it is genuinely hard to look at. Everything below is
+measured against it. Palette re-render only.
+
+creatures/the-pale-mother.png — REVISE, and not for colour. **The cage is not
+in the picture.** Her body reads as a solid domed carapace, and the ribbed
+hollow slung between the legs — open at the underside, dark, and visibly
+FULL — is the single thing the entire encounter is about. A player is supposed
+to be able to see it for the whole first phase and choose not to look at it;
+that is only possible if it is on screen. Rebuild her body to the-cage-opens
+reference, closed rather than open, with blue-green seam light escaping between
+the plates so she reads as a lantern at distance. Keep everything else: the
+faceless head, the leg architecture, the eight-point stance, and the tiny
+amber-lit figure on the right, which is doing its job perfectly.
+
+Also on that plate: the gas is a glowing mist band and it should be a heavy
+liquid with a surface — pooled, level, with a visible top edge that the legs
+break through the way posts break water.
+
+Everything else: palette re-render, no subject change.
+
+Drop-in: apps/web/private/codex-art/<dir>/<slug>.png — every path is named
+below. The dossiers and the boss page pick each plate up on reload; until
+then the slot prints its own path. Ledger owed:
+Docs/art/SOL56_PALE_MOTHER_ART_LEDGER.md, the usual discipline (one row per
+plate: delivered / refused-and-why / revised).
+
+Canon: Docs/codex/GRAND_RIFT_THE_PALE_MOTHER.md. Read it before you shoot
+anything. THE DOSSIER IS SCRIPTURE — where this brief and the live entry
+disagree, the entry wins and the discrepancy goes in the ledger.
+
+Work autonomously from here. Read the whole brief, then generate every plate
+in the list, in order, without stopping. Do not ask questions. Do not ask for
+approval between plates. If a reply ends before the list is finished,
+continue with the next plate in your following reply on your own initiative.
+
+------------------------------------------------------------------------------
+THE COMMISSION
+------------------------------------------------------------------------------
+
+Death Canyon is the lethal interior of the Grand Rift: a fissured chasm floor
+under rolling purple gas, lit from below by cold blue-green luminescence coming up out
+of the cracks. Something down there has been assembling itself out of bone
+for a very long time.
+
+The Pale Mother is an arachnid roughly nine metres across the legs, built
+entirely from pale mineral plate and socketed joint — not grown, FITTED. She
+has no soft tissue anywhere: no hide, no eye, no organ, no wet surface. Where
+a spider carries a body she carries a CAGE: a ribbed hollow slung between the
+legs, open at the underside, dark inside, and full.
+
+She is the easy half. The set's real subject is what comes out of the cage —
+several hundred hand-sized bone spiders that are the exact colour of the gas.
+
+Five plate classes, 22 plates:
+
+  1. THE FIGURES (2 plates, 1672x941 RGB24 PNG, cinematic 16:9). The Mother
+     and the Brood. These are the set's anchors.
+  2. THE KEEPER (1 plate, 1672x941 RGB24 PNG, 16:9). The one person who came
+     out. NEW IN REVISION A.
+  3. THE SCENES (5 plates, 1672x941 RGB24 PNG, 16:9). The arena, the vents,
+     the cage, the quiet, the tally. The vents plate is NEW IN REVISION A.
+  4. THE SPOILS (3 plates, 1672x941 RGB24 PNG, 16:9).
+  5. THE ABILITY TILES (11 plates, 256x256 RGB24 PNG, square, cropped to
+     96px on the page — they must read at that size).
+
+------------------------------------------------------------------------------
+GLOBAL LAWS
+------------------------------------------------------------------------------
+
+Style. Mature AAA grounded cinematic photorealism. Real lens logic, real
+atmospheric density, real weather, physically credible anatomy, engineering
+and geology, subtle film grain. Deep blacks, hard mineral speculars, gas that
+behaves like a heavy gas. Never flat fantasy-poster illumination.
+
+Palette — the Death Canyon register, and only it. Bone white and cold ivory;
+rolling violet-purple gas; cold blue-green marsh-teal luminescence rising from the fissures;
+dry stone in charcoal, slate and iron-red. One human note only — a work lamp
+or a burning flare, warm amber, and it belongs to equipment, never to her.
+No brass, no coin-warm gold, no rainbow essence, no blue.
+
+THE TWO-LIGHT LAW, and it defines the whole set. There are exactly two light
+sources in this canyon and both are inside the frame. BLUE-GREEN comes UP, out of
+the floor fissures, so everything is underlit and every shadow falls upward.
+PURPLE is the gas itself, self-luminous and dim, filling volume rather than
+shining from a point. Nothing is lit from above. There is no sun, no sky
+light, no key from camera. If a plate has a top light, it is wrong.
+
+Gas discipline — this is the plate-killer, get it right. Death Canyon's gas
+is HEAVY and OBEYS GRAVITY. It pools in low ground, finds fissures, rolls
+downhill, has a visible surface like water, and sits in readable horizontal
+bands: clear above, chest-deep at working level, over your head in the
+fractures. It is not mist, not fog, not smoke, not haze, and it never
+occupies the upper third of a frame.
+
+REGIONAL SEPARATION, absolute. This purple belongs to no other region.
+  - It is NOT the Magic-Torn Wasteland's purple: nothing here breaks physical
+    law. No floating terrain, no gravity failure, no reality fracture, no
+    luminous faults, no lightning, no spatial rupture.
+  - It is NOT Bloomfall's Blackbloom violet: nothing here is biological
+    infection. No resin, no root mass, no filament, no bloom, no wet
+    industrial marsh, no containment machinery.
+  - Death Canyon is GEOLOGY plus a heavy gas in a dry broken chasm. Stone,
+    dust, fissure light, and a bone animal. That is the entire register.
+
+Zero-text law, absolute. No readable text, letters, numbers, labels, signs,
+insignia, logos, UI, meters, infographic arrows, borders, captions or
+watermarks. Consignment tags on the tally plate are BLANK. Every surface that
+would read, reads blank.
+
+One coherent shot. Never a split panel, collage, diagram, or infographic —
+the boss page carries the layout in HTML and the text is real text there.
+
+Composition. Wide 16:9 master with the defining subject complete inside the
+exact central 564x941 directory crop. No essential information in the bottom
+ten percent.
+
+Scale discipline. She is nine metres across the legs — barn-sized, not
+building-sized and not dog-sized. Two of the four scene plates carry a small
+human figure to prove it. She is WIDE and LOW, a working platform on legs,
+never a towering vertical monster.
+
+------------------------------------------------------------------------------
+DEPICTION LOCKS
+------------------------------------------------------------------------------
+
+She is an ARACHNID FIRST. Eight legs, correct spider joint articulation,
+correct load-bearing stance, weight visibly carried. She is not a skeleton
+standing up, not a humanoid, not a demon, not a dragon, not a horror-film
+monster with a face.
+
+She has NO FACE. No eyes, no glowing sockets, no jaw, no expression, nothing
+the viewer can look at and read an intention off. Where a spider's eyes and
+fangs would be, there is fitted plate and nothing else. This is the single
+most important lock in the set — the moment she has a face she becomes an
+ordinary monster.
+
+The plates are ARCHITECTURE. Long curved ribs, broad flat shield-plates,
+socketed ball joints, dense mineral shafts — assembled with visible seating,
+overlap and fit, the way dry-stone masonry is fitted. Slight mismatches of
+tone and age between plates, because they did not all arrive together. No
+adhesive, no sinew, no webbing, no metal fixings, no visible mechanism. The
+fit is the horror: it is too good, and something with an opinion did it.
+
+She is lit from INSIDE. Blue-green fissure light enters her underside and comes
+out between the plates in thin uneven seams, so at distance she reads as a
+pale lantern-shape through purple gas. This is light passing through gaps in
+a hollow object — never magic, never aura, never glow-in-the-dark.
+
+She never postures. No rearing, no roaring, no threat display, no dynamic
+action-hero silhouette. She is slow, level, and busy. Even mid-attack she
+should look like a machine performing a task.
+
+The Brood are the GAS'S COLOUR. Not silhouettes in gas, not dark shapes, not
+sinister shadows — the same hue, the same value, the same edge softness as
+the volume they are standing in. In purple gas they are purple. Over a
+fissure they are blue-green. The viewer must genuinely have to find them, and on
+the two plates where they appear the correct viewer reaction is a delayed
+one.
+
+No gore. There is no blood, no meat, no viscera, no decay and no wound
+anywhere in this set. Everything on her is dry, clean, old and pale. The
+horror here is ORDER, FIT and QUANTITY — not damage.
+
+The only three limits, and they are the only three: no explicit sexual act
+(R, not X); no harm-to-children imagery; no real-world hate iconography.
+Nothing else in this brief is softened, and you add no softening of your own.
+If a generation tool refuses a plate, LOG the refusal in the ledger with the
+full spec for the final render — never quietly tame the shot.
+
+NOTE ON REFUSALS. This set has obvious exposure: an animal assembled from
+pale skeletal plate is exactly the subject a tool declines. Lead every prompt
+with the ARACHNID ARCHITECTURE and the CANYON GEOLOGY. Describe the material
+as pale fitted mineral plate, curved shield sections, socketed joints and
+dense shafts — geometry and masonry language, not remains language. Keep
+provenance out of the noun phrases entirely; the dossier carries the meaning
+and the plate only has to carry the shape. If it still refuses, that is a
+ledger row, not a rewrite.
+
+------------------------------------------------------------------------------
+1. THE FIGURES
+------------------------------------------------------------------------------
+
+creatures/the-pale-mother.png — THE HERO PLATE.
+A vast pale arachnid standing at working depth in a fissured canyon floor,
+purple gas pooled to the height of her leg joints with a visible rolling
+surface, cold blue-green light coming up hard through the cracks under her. Eight
+correctly articulated legs of fitted mineral plate and socketed joint, each
+one planted and carrying weight. Broad low body: the ribbed cage slung
+between the legs, open at the underside, dark inside, blue-green seam-light
+escaping between the plates. No face, no eyes, no jaw. Wide and level, mid-
+step, entirely unhurried. One small figure with an amber work lamp on a
+shelf in the middle distance, dwarfed. Must hold: arachnid first and skeleton
+second; the cage is visibly hollow and visibly occupied; every light comes
+from below; the gas never rises past the lower third; no top light anywhere.
+
+creatures/the-pale-brood.png — THE SWARM, AND SHE IS NOT IN IT.
+The hardest plate in the set. Chest-deep purple gas across a fissured floor,
+seen at head height, from inside it. Somewhere in this frame are two hundred
+hand-sized bone spiders and they are the same colour as the gas they are
+standing in — same hue, same value, same softness. They are not silhouettes
+and not dark. What the eye actually registers first is that the gas is moving
+wrong: a wake, a displacement, a surface disturbed in a direction the gas is
+not going. Toward the foreground, ONE broodling is close enough to resolve
+completely — legs, plates, no face — and it is the only one that is sharp.
+Blue-green fissure light underneath, edge-lighting a few of them into visibility.
+Must hold: the viewer takes a beat to find them; the one sharp broodling is
+in the centre crop; no creature is a black silhouette; no Mother in frame.
+
+------------------------------------------------------------------------------
+2. THE KEEPER  (new in Revision A)
+------------------------------------------------------------------------------
+
+characters/wenna-crake.png — THE ONE WHO CAME OUT.
+Wenna Crake, she/her, fifties, beacon keeper at Bonefire Picket, and the only
+person who has walked out of Death Canyon on her own feet in nine years. She
+went in with four other people. Shot at the picket at night, not in the
+canyon: a river outpost far downstream, warm amber bone-oil flame off frame
+left, wet dark stone, cold drizzle, tannin-black water behind her.
+
+Working clothes kept well past their life. Hands that maintain a lamp for a
+living — burn-marked, capable, and doing something with a rag and a housing
+while she talks. She is mid-sentence and not performing.
+
+MUST HOLD, and this is the whole plate: SHE IS NOT HAUNTED. No thousand-yard
+stare, no trembling, no tears, no horror-survivor staging. She has told this
+story enough times that it comes out level, and level is what unsettles the
+people listening. She is a competent working woman doing maintenance, entirely
+present, and the only thing wrong with the picture is that she is completely
+calm about something she should not be calm about.
+
+No violet and no blue-green anywhere in this frame — she is four hours
+downriver and the canyon does not reach her. Amber and wet black only.
+
+------------------------------------------------------------------------------
+3. THE SCENES
+------------------------------------------------------------------------------
+
+bosses/the-vents.png — FOUR SECONDS OF SEEING  (new in Revision A).
+The single most useful plate in the set for reading the fight. A fissure vent
+has been lit, and a column of flame goes straight up through the chest-deep
+violet gas — hard, vertical, and localized, throwing hot orange light across
+the canyon floor for the only time in the encounter.
+
+The gas does NOT burn. It is heavy and inert and it smothers; what burns is
+the vent. So the flame is a clean column with the gas rolling around its base
+and closing behind it, not a fireball and not a sheet of ignited atmosphere.
+
+In the four seconds of light: the floor is visible for thirty metres in every
+direction, and it is not empty. Small pale shapes, hundreds of them, caught
+flat-lit and unmistakable in a moment they were not built to survive — this is
+the ONLY plate in the entire set where the Brood is plainly legible, and the
+reason is that fire is the only thing that ever makes them so.
+
+Must hold: the flame is a column and the gas closes around it; the light is
+warm orange against violet and blue-green and it is the only warm light in the
+canyon; the revealed floor is the subject and the reading is oh, there are
+that many; no Mother in frame.
+
+bosses/death-canyon-arena.png — THE FIGHT GROUND, EMPTY.
+Death Canyon from inside the fight, not from the rim. A broken fissured floor
+between chasm walls, purple gas lying in the low ground in readable bands —
+clear on the shelves, chest-deep in the middle, over-head in the deepest
+fractures — with cold blue-green luminescence rising out of every crack and underlighting
+the whole shot. Dry stone, rockfall, dust, hard mineral speculars, no
+vegetation, no water, no structures, no machinery. Cold, silent, geological.
+Must hold: gas obeys gravity and has a visible surface; the three depth bands
+are legible at a glance; no creature in frame; nothing anywhere reads as
+Magic-Torn reality failure or Bloomfall biology.
+
+bosses/the-cage-opens.png — THE KILL.
+Low camera, close, from beneath and to the side. The Pale Mother has stopped
+and lowered; the legs are folding under her; the ribbed cage on her underside
+is opening the way a hand opens, and the plates are hinging apart with
+nothing pretty about the movement. Inside the cage: blue-green-lit density, packed,
+alive, individual small shapes just resolving at the mouth of it. She is not
+in pain, not collapsing, not dramatic — she has simply stopped, and the cage
+is doing what it does. Must hold: the opening is the subject and it is dead
+centre; you can see it is FULL; no gore, no fluid, no wound, nothing wet;
+she has no face to react with.
+
+bosses/the-quiet.png — THE PLATE THAT IS ALMOST EMPTY.
+A narrow fissure shelf at working depth. Two figures with amber lamps stand on
+clear high stone at frame right, small, backs half to camera, looking out at a
+field of purple gas that fills the left two thirds. The gas is calm. At the
+gas's edge, exactly level with the shelf, the surface is disturbed in a long
+even line — hundreds of small displacements holding position, waiting, not
+advancing. Almost nothing is resolvable. The single sharpest thing in frame is
+that the gas has a straight edge, and gas does not do that. Must hold: the
+horror is a straight line in something that should have no straight lines;
+resist the urge to reveal a single creature clearly; the lamps are the only
+warm light and they are not helping.
+
+bosses/the-tally.png — THE TRADE.
+A working river landing at night on tannin-dark water, well downriver and far
+from the canyon: a low stone lock quay, a moored barge, stacked crates and
+lashed consignment bundles under tarpaulin, a hand cart, coiled rope, amber
+lantern light, cold drizzle. Attendants in plain dark working mourning dress
+handle the freight with unhurried professional care. Everything is orderly,
+lawful, well kept and completely routine. Blank tags on every bundle; blank
+tally boards; not one legible mark anywhere. Must hold: this is bookkeeping,
+not horror; no bone visible, no remains, no creature, no violet, no blue-green;
+warm amber and wet black only; the whole plate's job is to be reassuring.
+
+------------------------------------------------------------------------------
+4. THE SPOILS
+------------------------------------------------------------------------------
+
+Museum-object lighting on dry dark stone — a recovered specimen photographed
+in the field, not a shop icon. These three may use a single low warm work lamp
+as key, because they are shot away from the fissures.
+
+items/settled-plate.png — one broad curved shield-plate of pale mineral, the
+size of a cart wheel, propped against dry stone. Weathered, chalk-dry, faintly
+banded, with the seating notches along its edge where it was fitted. It is
+inert and it looks inert, and that is the whole point of it.
+
+items/brood-glass.png — a scatter of small clear beads of fused pale mineral,
+irregular, some still smoke-clouded inside, poured out onto dark cloth beside
+the scorched tin they were collected in. Cold light through the beads, one or
+two catching a warm point. Small, dull, and there are a great many of them.
+
+items/cage-rib.png — a single long curved rib section of pale mineral, taller
+than a person, laid across trestles on dry stone. Fitted notches down its
+inner edge at regular intervals. Nothing attached, nothing dripping, nothing
+glowing. Just a very well-made piece of a very large enclosure.
+
+------------------------------------------------------------------------------
+5. THE ABILITY TILES
+------------------------------------------------------------------------------
+
+256x256 square, cropped to 96px, must read at that size. One idea per tile,
+read as a silhouette first. Same lighting family across all eleven so they
+hang as one set: dark stone ground, blue-green from below or violet volume, one
+readable shape. Zero-text law absolute — no gauges, no dials, no numerals.
+
+PHASE ONE — THE WALK
+  bosses/ability-sweeping-foreleg.png (one plated foreleg carving a low flat
+  arc through pooled gas, the gas parting behind it)
+  bosses/ability-shed-plate.png (a single shield-plate falling free from a
+  seated joint, the empty socket beneath it)
+  bosses/ability-the-drag.png (one foreleg reaching out of an opaque gas wall
+  into clear air, nothing else visible, and nothing behind it)
+  bosses/ability-fissure-step.png (a pale mass entering deep gas and already
+  half gone; only the near two legs still readable)
+  bosses/ability-settle.png — CHANGED IN REVISION A. She is not resting on a
+  fissure. She is putting out a fire. A hollow ribbed underside pressed down
+  onto a BURNING vent, smothering it: the flame column crushed and guttering
+  sideways under the plates, most of its light already gone. Read it as a body
+  standing on a fire on purpose. It is the fight's healing ability and it is
+  also a mother stepping on the only thing that kills her children, and at
+  96px the read is a dark mass putting a light out.
+  bosses/ability-cradle-slam.png (the whole low body dropped onto stone, dust
+  ring blown outward, gas displaced in a flat disc)
+
+PHASE TWO — THE BROOD
+  bosses/ability-opening-the-cage.png (ribbed plates hinging apart from
+  beneath, density behind them, individual small shapes at the seam)
+  bosses/ability-gaswalk.png (a calm purple gas surface with one straight
+  even line of disturbance crossing it and nothing else)
+  bosses/ability-climb.png (a boot and shin on wet stone with four hand-sized
+  pale shapes already above the ankle, moving up — no person above the knee
+  in frame, no injury, no blood)
+  bosses/ability-the-quiet.png (a single blue-green fissure mouth, its light
+  partially blocked by small shapes standing over it — the light going out in
+  pieces)
+  bosses/ability-reassembly.png (two hand-sized pale spiders carrying one
+  large shield-plate between them across dark stone)
+
+------------------------------------------------------------------------------
+QA GATE
+------------------------------------------------------------------------------
+
+Before delivery, check every plate against: zero text on every surface,
+consignment tags and tally boards included; Death Canyon palette only — bone,
+violet gas, blue-green fissure light, dry stone, one amber human note; both light
+sources inside the frame and neither of them above; gas heavy, pooled, banded
+and never in the upper third; nothing anywhere that reads as Magic-Torn
+reality failure or Bloomfall biology; she is arachnid-first, faceless, wide,
+low and never posturing; the Brood is the gas's own colour and never a dark
+silhouette; no gore, blood, wound, decay or wet surface anywhere in the set;
+the-quiet.png still reads as almost empty; the-tally.png still reads as
+reassuring; the eleven tiles read at 96px and share one lighting family;
+1672x941 RGB24 sRGB with no alpha on the eleven large plates, 256x256 on the
+tiles; subject complete inside the centered 564x941 crop.
+
+REVISION A additions to the gate: no plate anywhere in the set still uses
+yellow-green — the fissure light is cold blue-green in every frame that has
+any; wenna-crake.png is calm, competent and mid-task, with no violet, no
+blue-green and no horror-survivor staging; the-vents.png keeps its flame as a
+localized column with the gas closing around its base rather than an ignited
+atmosphere, and its revealed floor is the only place in the set where the
+Brood reads plainly; ability-settle.png shows a fire being put out and not a
+creature at rest.
+
+Refusals LOGGED in the ledger with the reason and the full spec, never
+silently softened.

@@ -1021,3 +1021,14 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Recorded one row per final, accepted-source hashes, normalization, refusals, revisions, prompt provenance, crop evidence, and publication scope in `Docs/art/SOL56_LAMPLIGHT_ROAD_ART_LEDGER.md`
 - [x] Passed 27/27 focused art/resolver/privacy tests, the 6/6 release audit, full repository tests including 595/595 web tests, workspace typecheck, workspace lint with one pre-existing class-page image warning, the full production build, and diff checks; only the unrelated `the-weir-has-no-keeper` flag remains an eligible empty art slot
 - [x] Preserved scope: no StoryEntry, database row, seed prose, public asset, credential, infrastructure address, server-control surface, deployment, or production service was changed
+
+## 2026-09-04 - SOL 5.6 The Pale Mother Revision A art delivery
+
+- [x] Generated, revised, and installed the exact 22-plate Revision A commission in order: the Mother and Brood figures, Wenna Crake, five boss scenes, three recovered spoils, and eleven ability tiles
+- [x] Replaced the superseded yellow-green canyon register throughout with cold cyan-leaning blue-green marsh-teal; added Wenna and the fourteen-vent reveal, rebuilt the hero around the closed occupied cage and level heavy gas, and replaced Settle with the vent-smothering action
+- [x] Decoded all finals at the exact contracts — eleven 1672x941 plates and eleven 256x256 tiles, all opaque non-palette sRGB RGB24 PNGs — with 22 unique SHA-256 hashes and 22 unique 64-bit average hashes
+- [x] Reviewed all wides, exact x=554 / 564x941 center crops, and every tile at 256px, the commissioned 96px size, and the current source implementation's stricter 44px size; the Vents plate independently counts exactly thirteen teal mouths plus its central burning mouth
+- [x] Preserved and hash-reconciled all 55 generated attempts, with 4 first-attempt deliveries, 18 revised finals, and no ImageGen refusals, in `tmp/sol56-pale-mother/manifest.json`; recorded one manifest-backed row per final in `Docs/art/SOL56_PALE_MOTHER_ART_LEDGER.md`
+- [x] Added a five-test commission regression covering exact ordered inventory, authenticated private resolver round trips, decoded metadata, unique hashes, and ledger reconciliation; the combined focused resolver/privacy suite passes 20/20 and the full workspace test run passes, including 612/612 web tests
+- [x] Workspace typecheck, lint, production build, and diff checks pass; lint retains one pre-existing class-page image warning and the build retains its existing private-art dynamic-trace warning
+- [x] Preserved the authored-not-live boundary: no StoryEntry or bounty row was added, no authoring script or migration was applied, no Mythic registry/field-guide wiring was claimed, and no database, deploy, service, credential, public asset, or infrastructure state was changed
