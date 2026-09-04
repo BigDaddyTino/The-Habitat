@@ -1,5 +1,7 @@
 import "../lib/environment";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { getPrismaClient } from "@habitat/db/client";
 
 /**
@@ -58,29 +60,124 @@ In short, The Radiant Path is an absolutist hybrid movement that seeks protected
 
 type ContributionSpec = {
   entrySlug: string;
-  contributor: string;
+  /**
+   * Who wrote it. A `username` credits a member by their codex name; a `name`
+   * credits somebody who is not a member, verbatim, and never by inventing a
+   * User row for them. Exactly one, and the database CHECK agrees.
+   */
+  contributor: { username: string } | { name: string };
   label: string;
   submittedAt: string;
   position?: number;
   /**
-   * The submission is captured from the live dossier rather than retyped:
-   * everything above `upToMarker`, exactly as stored. `expected` is the
-   * checksum — the capture must equal it once line endings are normalised, or
-   * the write is refused, because a first write that cannot prove what it is
-   * copying might preserve a mangled version of somebody's work forever.
+   * How we know these are their words, and the two cases are genuinely
+   * different.
+   *
+   * `capture` — the submission is lifted out of the live dossier rather than
+   * retyped: everything above `upToMarker`, exactly as stored. `expected` is
+   * the checksum, and a mismatch refuses the write, because a first write that
+   * cannot prove what it is copying might preserve a mangled version of
+   * somebody's work forever.
+   *
+   * `relayed` — the contributor never typed into the codex. They said it, and
+   * the owner wrote it down. There is nothing to check it against and pretending
+   * otherwise would be a fake gate, so the record says plainly that this is a
+   * relay and who relayed it. The words are still never edited.
+   *
+   * `document` — their submission was preserved verbatim in a design document
+   * rather than on the live dossier, which is where a reconciled creature brief
+   * keeps its appendix. Read out of the file between two markers and checked
+   * against a SHA, because retyping somebody's submission into a source file is
+   * how their punctuation quietly becomes ours.
+   *
+   * `credit` — **the words did not survive.** The member designed the thing,
+   * the codex built on it, and nobody kept what they wrote. This files a row
+   * with no body at all, and the card says so. It never substitutes the codex's
+   * prose for theirs, and a paraphrase under their name is not an option here
+   * by design rather than by discipline: there is no field to put one in.
    */
-  capture: { upToMarker: string | null; expected: string };
+  source:
+    | { kind: "capture"; upToMarker: string | null; expected: string }
+    | { kind: "relayed"; body: string; relayedBy: string }
+    | { kind: "document"; path: string; fromMarker: string; toMarker: string; sha256: string }
+    | { kind: "credit"; because: string };
 };
+
+const creditOf = (spec: ContributionSpec) => ("username" in spec.contributor ? spec.contributor.username : spec.contributor.name);
+
+/**
+ * Mackenzie Martino's Pale Mother, as she said it on 2026-09-04.
+ *
+ * She is not a member and does not need to be. Every word here is load-bearing
+ * in the dossier the codex built on top of it: "a spider" is why the creature
+ * is arachnid-first and faceless rather than a skeleton standing up; "the blue
+ * green place" is why Death Canyon's fissure light is a cold teal, which is
+ * also the thing that stops the canyon being mistaken for two other regions;
+ * "lots of little ones when it dies" is four hundred and eleven of them and the
+ * phase-two HUD. Her spelling and her capitals are hers.
+ */
+const paleMotherOriginal = `Daddy I want a spider in the blue green place and i want it to have lots of little ones when it dies`;
 
 const contributions: ContributionSpec[] = [
   {
+    entrySlug: "the-pale-mother",
+    contributor: { name: "Mackenzie Martino" },
+    label: "The original creature, in her words",
+    submittedAt: "2026-09-04T00:00:00.000Z",
+    source: { kind: "relayed", body: paleMotherOriginal, relayedBy: "tino" },
+  },
+  {
     entrySlug: "the-radiant-path",
-    contributor: "schlotzsky",
+    contributor: { username: "schlotzsky" },
     label: "Original faction dossier",
     submittedAt: "2026-09-02T11:07:00.000Z",
     // Everything above Tino's faith weave, which he added at 18:21 the same
     // day and which is not Ryan's.
-    capture: { upToMarker: "## Faith", expected: radiantPathOriginal },
+    source: { kind: "capture", upToMarker: "## Faith", expected: radiantPathOriginal },
+  },
+
+  // ---------------------------------------------------------------------
+  // Hunter Martino. Two creatures, and the codex has been building on both of
+  // them without his name on either. The two are filed differently because
+  // what survives of them is different, and pretending otherwise would be the
+  // dishonest half of doing this at all.
+
+  {
+    // His words DID survive. The reconciliation kept them whole in Appendix A
+    // of the design document, which is the whole reason that appendix exists,
+    // and this reads them back out of the file rather than retyping them.
+    entrySlug: "the-blackweir-anaconda",
+    contributor: { username: "hunterthekid26" },
+    label: "Original creature design",
+    submittedAt: "2026-09-02T00:00:00.000Z",
+    source: {
+      kind: "document",
+      path: "Docs/bloomfall/BLOOMFALL_BLACKWEIR_ANACONDA.md",
+      fromMarker: "Absolutely. I think making the Anaconda",
+      toMarker: "### Appendix A notes",
+      sha256: "876c4ef6b16469f1445c7734eab50d9c5c3be399403a0f4e21e997391832017b",
+    },
+  },
+  {
+    // His words did NOT survive. The Hollow Wing went into the codex as a
+    // summary with a three-phase boss described inside it; what he actually
+    // wrote is in a chat log or in nobody's hands, and it is not in this
+    // repository — `author-hollow-wing.ts` is the codex's build on the design,
+    // not the design.
+    //
+    // The owner ruled on 2026-09-04 that he gets the credit anyway, which is
+    // right: the authorship is not in question, only the artifact. So this is
+    // a credit row with no body, and the card says the original was not kept
+    // instead of quoting the codex at itself under his name.
+    //
+    // If the original ever turns up, replace this source with a `document` or
+    // `relayed` one. The row is keyed on entry + label, so the words will land
+    // in the card that is already standing.
+    entrySlug: "the-hollow-wing-creature",
+    contributor: { username: "hunterthekid26" },
+    label: "Original creature design",
+    submittedAt: "2026-08-31T00:00:00.000Z",
+    source: { kind: "credit", because: "His original wording was not kept anywhere in the codex or the repository." },
   },
 ];
 
@@ -96,43 +193,100 @@ async function main() {
   for (const spec of contributions) {
     const entry = await db.storyEntry.findUnique({ where: { slug: spec.entrySlug }, select: { id: true, body: true, title: true } });
     if (!entry) throw new Error(`No entry "${spec.entrySlug}".`);
-    const contributor = await db.user.findFirst({ where: { username: spec.contributor }, select: { id: true } });
-    if (!contributor) throw new Error(`No member "${spec.contributor}".`);
+    const credit = creditOf(spec);
+
+    // Exactly one credit column is set, and the database CHECK says the same
+    // thing — a member is credited by their account, a non-member by name, and
+    // nobody is ever given a fake User row so that a card can render.
+    let contributorUserId: string | null = null;
+    let contributorName: string | null = null;
+    if ("username" in spec.contributor) {
+      const contributor = await db.user.findFirst({ where: { username: spec.contributor.username }, select: { id: true } });
+      if (!contributor) throw new Error(`No member "${spec.contributor.username}".`);
+      contributorUserId = contributor.id;
+    } else {
+      contributorName = spec.contributor.name;
+    }
 
     const stored = await db.storyEntryContribution.findFirst({
-      where: { entryId: entry.id, contributorUserId: contributor.id, label: spec.label },
+      where: { entryId: entry.id, label: spec.label, ...(contributorUserId ? { contributorUserId } : { contributorName }) },
       select: { id: true, body: true, position: true, submittedAt: true },
     });
 
-    // The fidelity gate. Once the rewrite lands the live body no longer holds
-    // the original at all, which is fine — but only if the row was already
-    // filed. Nothing is ever written from an unverified capture.
-    const live = entry.body ?? "";
-    const marker = spec.capture.upToMarker;
-    const cut = marker ? live.indexOf(marker) : -1;
-    const captured = (marker && cut >= 0 ? live.slice(0, cut) : live).replace(/\s+$/, "");
-    const matches = normalise(captured) === normalise(spec.capture.expected);
-
-    if (!stored && !matches) {
-      throw new Error(
-        `Refusing to file ${spec.contributor}'s original for "${entry.title}": what is on the live dossier does not match the checksum in this script, ` +
-        `so there is no proof of what they actually wrote. Recover it from StoryRevision or from the member before filing.`,
-      );
+    // The fidelity gate, and it only applies where there is something to check
+    // against. A relayed quote has nothing on the dossier; a credit has no
+    // words at all. Inventing a check for either would be theatre — what they
+    // get instead is a record that says plainly how the row came to exist.
+    let body: string | null;
+    if (spec.source.kind === "credit") {
+      body = null;
+    } else if (spec.source.kind === "relayed") {
+      body = stored?.body ?? spec.source.body;
+    } else if (spec.source.kind === "document") {
+      // Read out of the design document between its two markers and checked
+      // against the SHA. A mismatch means the appendix moved or was edited, and
+      // filing from an appendix nobody has re-read is how a contributor's work
+      // quietly becomes a slightly wrong copy of itself.
+      const source = spec.source;
+      const lines = readFileSync(path.join(process.cwd(), "..", "..", source.path), "utf8").replace(/\r\n/g, "\n").split("\n");
+      const from = lines.findIndex((line) => line.startsWith(source.fromMarker));
+      const to = lines.findIndex((line) => line.startsWith(source.toMarker));
+      if (from < 0 || to < 0 || to <= from) {
+        throw new Error(`Refusing to file ${credit}'s original for "${entry.title}": the markers in ${source.path} no longer bracket anything.`);
+      }
+      const extracted = lines.slice(from, to).join("\n").replace(/\n+---\n*$/, "").trim();
+      const digest = createHash("sha256").update(extracted).digest("hex");
+      if (digest !== source.sha256) {
+        throw new Error(
+          `Refusing to file ${credit}'s original for "${entry.title}": ${source.path} now hashes to ${digest}, not ${source.sha256}. ` +
+          `Somebody edited the appendix. Re-read it, confirm the words are still his, and update the checksum deliberately.`,
+        );
+      }
+      body = stored?.body ?? extracted;
+    } else {
+      const live = entry.body ?? "";
+      const marker = spec.source.upToMarker;
+      const cut = marker ? live.indexOf(marker) : -1;
+      const captured = (marker && cut >= 0 ? live.slice(0, cut) : live).replace(/\s+$/, "");
+      const matches = normalise(captured) === normalise(spec.source.expected);
+      if (!stored && !matches) {
+        throw new Error(
+          `Refusing to file ${credit}'s original for "${entry.title}": what is on the live dossier does not match the checksum in this script, ` +
+          `so there is no proof of what they actually wrote. Recover it from StoryRevision or from the member before filing.`,
+        );
+      }
+      body = stored && !matches ? stored.body : captured;
     }
 
     const position = spec.position ?? 0;
-    const body = stored && !matches ? stored.body : captured;
+    const provenance =
+      spec.source.kind === "credit" ? `credit only — ${spec.source.because}`
+      : spec.source.kind === "relayed" ? `${body?.length ?? 0} chars, relayed verbatim by ${spec.source.relayedBy}`
+      : spec.source.kind === "document" ? `${body?.length ?? 0} chars read from ${spec.source.path}, checksum matched`
+      : `${body?.length ?? 0} chars captured verbatim, checksum matched`;
+
     if (!stored) {
-      changes.push(`file ${spec.contributor}'s "${spec.label}" on ${spec.entrySlug} (${body.length} chars captured verbatim, checksum matched)`);
+      changes.push(`file ${credit}'s "${spec.label}" on ${spec.entrySlug} (${provenance})`);
       if (!apply) continue;
       await db.storyEntryContribution.create({ data: {
-        id: randomUUID(), entryId: entry.id, contributorUserId: contributor.id,
+        id: randomUUID(), entryId: entry.id, contributorUserId, contributorName,
         label: spec.label, body, position, submittedAt: new Date(spec.submittedAt),
         createdByUserId: actor.id,
       } });
       await db.storyRevision.create({ data: {
         id: randomUUID(), entityType: "ENTRY", entityId: entry.id, action: "CREATED", actorUserId: actor.id,
-        summary: `Preserved ${spec.contributor}'s original submission on the dossier, website-only and never exported`,
+        // The summary does NOT name the contributor, and the first version of
+        // this line did. StoryRevision rows ARE carried in the outbound bundle
+        // (`snapshot.revisions`), so "Preserved <name>'s original submission …
+        // website-only and never exported" shipped a contributor's real name
+        // to the game build inside a sentence promising it had not — and the
+        // first one it did that to was a nine-year-old's full name.
+        //
+        // The credit lives on the contribution row, which is structurally
+        // unreachable from the bundle. The audit trail only needs to say that
+        // a submission was filed and how it was verified; `actorUserId`
+        // already records who filed it.
+        summary: `Preserved a contributor's original submission on the dossier (${provenance}), website-only and never exported`,
       } });
       continue;
     }
@@ -142,7 +296,7 @@ async function main() {
     // never silently rewritten by a script that ran a second time.
     const same = stored.position === position && stored.submittedAt.toISOString() === new Date(spec.submittedAt).toISOString();
     if (same) continue;
-    changes.push(`reconcile the filing of ${spec.contributor}'s "${spec.label}" on ${spec.entrySlug} (position or date only; the words are untouched)`);
+    changes.push(`reconcile the filing of ${credit}'s "${spec.label}" on ${spec.entrySlug} (position or date only; the words are untouched)`);
     if (!apply) continue;
     await db.storyEntryContribution.update({ where: { id: stored.id }, data: { position, submittedAt: new Date(spec.submittedAt) } });
   }

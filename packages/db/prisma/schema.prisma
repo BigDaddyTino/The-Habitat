@@ -2314,13 +2314,25 @@ model StoryEntry {
 model StoryEntryContribution {
   id                 String     @id @default(uuid()) @db.Uuid
   entryId            String     @db.Uuid
-  contributorUserId  String     @db.Uuid
+  /// The contributor, when they are a member. Exactly one of this and
+  /// `contributorName` is set, enforced by a CHECK — credit is not identity,
+  /// and a contributor with no account must never be given a fake User row
+  /// just so a card can render their name.
+  contributorUserId  String?    @db.Uuid
+  /// The contributor's name, when they are not a member. Rendered verbatim.
+  contributorName    String?    @db.VarChar(120)
   /// What this submission was, in the contributor's frame — "Original faction
   /// dossier", "Original character brief". Shown as the card's subtitle.
   label              String     @db.VarChar(160)
   /// The submission exactly as written. Never edited, never tidied, never
   /// spell-checked. A correction to a contributor's own words is a new row.
-  body               String     @db.Text
+  ///
+  /// Null means the words did not survive. That row is a CREDIT rather than a
+  /// contribution: the member designed the thing, the codex built on it, and
+  /// nobody kept what they wrote. The card renders their name at the same
+  /// weight and says the original is missing — it never substitutes the
+  /// codex's prose for theirs.
+  body               String?    @db.Text
   /// Display order when one entry carries more than one submission.
   position           Int        @default(0)
   /// When they wrote it, which is usually not when this row was created.
@@ -2329,7 +2341,7 @@ model StoryEntryContribution {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   entry              StoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
-  contributor        User       @relation("StoryContributionAuthor", fields: [contributorUserId], references: [id], onDelete: Restrict)
+  contributor        User?      @relation("StoryContributionAuthor", fields: [contributorUserId], references: [id], onDelete: Restrict)
   creator            User       @relation("StoryContributionCreator", fields: [createdByUserId], references: [id], onDelete: Cascade)
 
   @@unique([entryId, position])

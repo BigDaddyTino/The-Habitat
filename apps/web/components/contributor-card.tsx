@@ -17,7 +17,19 @@ import { StoryProse } from "@/components/story-prose";
 export type Contribution = {
   id: string;
   label: string;
-  body: string;
+  /**
+   * Their words, or `null` when the words did not survive.
+   *
+   * The second case is a CREDIT, added by owner ruling on 2026-09-04: a member
+   * designed something, the codex built on it, and nobody kept what they
+   * actually wrote. The authorship is not in doubt and the prose is gone.
+   *
+   * A credit renders at the same weight, in the same gold, under the same
+   * name — and says so, rather than putting the codex's writing in the box and
+   * calling it theirs. **Credit does not require a surviving artifact, and a
+   * missing original is never quietly filled in.**
+   */
+  body: string | null;
   contributor: string;
   submittedAt: string;
 };
@@ -47,20 +59,35 @@ export function ContributorCards({ contributions }: { contributions: Contributio
       {contributions.map((contribution) => (
         <article className="contributor-card" key={contribution.id}>
           <header>
-            <p className="contributor-eyebrow"><Award aria-hidden="true" size={13} /> Contributor&apos;s original</p>
+            <p className="contributor-eyebrow">
+              <Award aria-hidden="true" size={13} /> {contribution.body === null ? "Designed by" : "Contributor's original"}
+            </p>
             <h2>{contribution.contributor}</h2>
             <p className="contributor-label">{contribution.label} · submitted {contribution.submittedAt}</p>
           </header>
-          <div className="contributor-body">
-            {/* A resolver that resolves nothing, on purpose: a contributor's
-                words render as they were written and are never silently turned
-                into links to pages that did not exist when they wrote them. */}
-            <StoryProse body={forDisplay(contribution.body)} resolve={() => null} />
-          </div>
+          {contribution.body !== null ? (
+            <div className="contributor-body">
+              {/* A resolver that resolves nothing, on purpose: a contributor's
+                  words render as they were written and are never silently turned
+                  into links to pages that did not exist when they wrote them. */}
+              <StoryProse body={forDisplay(contribution.body)} resolve={() => null} />
+            </div>
+          ) : null}
           <footer>
-            Written by {contribution.contributor} and kept here whole. The dossier above is the codex&apos;s
-            build on top of it; this is the original, unedited. It stays on the website and is never
-            written to the outbound codex.
+            {contribution.body !== null ? (
+              <>
+                Written by {contribution.contributor} and kept here whole. The dossier above is the codex&apos;s
+                build on top of it; this is the original, unedited. It stays on the website and is never
+                written to the outbound codex.
+              </>
+            ) : (
+              <>
+                This creature was designed by {contribution.contributor}, and the dossier above is the
+                codex&apos;s build on top of that design. Their original wording was not kept, so there is
+                nothing to quote here — and nothing else goes in this box, because the codex&apos;s prose
+                under somebody else&apos;s name is not a credit. The authorship is theirs regardless.
+              </>
+            )}
           </footer>
         </article>
       ))}

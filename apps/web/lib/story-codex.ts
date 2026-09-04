@@ -1631,6 +1631,7 @@ export async function listEntryContributions(entrySlug: string) {
       label: true,
       body: true,
       submittedAt: true,
+      contributorName: true,
       contributor: { select: writerSelect },
     },
   });
@@ -1638,7 +1639,10 @@ export async function listEntryContributions(entrySlug: string) {
     id: row.id,
     label: row.label,
     body: row.body,
-    contributor: storyMemberName(row.contributor),
+    // A member is credited by their codex name; a contributor who is not a
+    // member is credited by the name on the row. The database CHECK guarantees
+    // exactly one of the two is set, so this never has to guess.
+    contributor: row.contributorName ?? storyMemberName(row.contributor),
     submittedAt: row.submittedAt.toISOString().slice(0, 10),
   }));
 }

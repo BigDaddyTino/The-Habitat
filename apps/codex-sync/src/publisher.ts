@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { copyFile, link, mkdir, readFile, rename, stat } from "node:fs/promises";
+import { copyFile, link, mkdir, readFile, rename, rm, stat } from "node:fs/promises";
 import path from "node:path";
 import {
   codexBundleContractVersion,
@@ -197,6 +197,22 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
   const releaseRelative = `releases/${snapshotId}`;
   const releasePath = path.join(syncRoot, "releases", snapshotId);
   const stagingPath = path.join(syncRoot, ".staging", `publish-${snapshotId}-${randomBytes(4).toString("hex")}`);
+  // Everything from here to the rename builds inside `.staging`, and a failure
+  // anywhere in between used to leave that directory on the share forever.
+  //
+  // That is not a tidiness problem, it is the outage: staged assets are
+  // HARDLINKS into the blob store, NTFS caps a file at 1024 links, and the
+  // publisher retries every few seconds. So one failed publish leaked a
+  // directory full of links, which brought the next publish closer to the cap,
+  // which made it fail, which leaked another — a spiral that wedged the share
+  // on 2026-09-03 and left the game build reading a stale bundle for a day
+  // while the service still reported itself Running. 7,652 abandoned staging
+  // directories were recovered from it.
+  //
+  // The failure path now cleans up after itself. The publish still fails
+  // safely — the last complete release stays active — but it fails without
+  // making the next one worse.
+  try {
   await mkdir(path.join(stagingPath, "content"), { recursive: true });
   await mkdir(path.join(stagingPath, "compatibility"), { recursive: true });
 
@@ -263,6 +279,10 @@ export async function publishCodexBundle(repositoryRoot: string, syncRoot: strin
   };
   await replaceFileAtomically(path.join(syncRoot, "current.json"), jsonBytes(pointer));
   return { changed: true, snapshotId, contentSha256, assets: assets.length, lines: dialogue.counts.lines, report: validation.report };
+  } catch (error) {
+    await rm(stagingPath, { recursive: true, force: true }).catch(() => {});
+    throw error;
+  }
 }
 
 export async function publisherFingerprint(repositoryRoot: string) {
