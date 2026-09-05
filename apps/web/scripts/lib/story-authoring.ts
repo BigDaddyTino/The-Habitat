@@ -52,6 +52,8 @@ export type EdgeSpec = {
   condition?: string | null;
   effects?: string[];
   status?: Status;
+  /** Only meaningful on a labelled edge out of a CHOICE: the option text is a spoken player line. */
+  voiced?: boolean;
 };
 
 export type Change = { kind: "node" | "edge" | "arc" | "entry"; action: "create" | "update" | "unchanged"; label: string; detail?: string };
@@ -102,6 +104,13 @@ export class BoardWriter {
 
   /** Sets arc fields that are currently blank or different. */
   async arcFields(slug: string, fields: { hook?: string; summary?: string; title?: string; status?: Status }) {
+    // The columns are VarChar; a summary that overflows fails only on apply, after
+    // every card and branch before it has already been written. Refuse it up front.
+    const limits = { title: 120, summary: 500, hook: 500 } as const;
+    for (const [key, max] of Object.entries(limits)) {
+      const value = (fields as Record<string, string | undefined>)[key];
+      if (value !== undefined && value.length > max) throw new Error(`Arc "${slug}" ${key} is ${value.length} characters; the column holds ${max}.`);
+    }
     const arc = await this.db.storyArc.findUnique({ where: { slug }, select: { id: true, hook: true, summary: true, title: true, status: true } });
     if (!arc) throw new Error(`No arc "${slug}".`);
     const patch: Record<string, string> = {};
@@ -140,8 +149,10 @@ export class BoardWriter {
       completion: spec.completion ?? null,
       speakerEntryId,
       continuesInArcId,
-      canvasX: spec.x ?? 0,
-      canvasY: spec.y ?? 0,
+      // A rewrite that says nothing about placement keeps the card where the
+      // writers left it on the canvas; only a new card defaults to the origin.
+      canvasX: spec.x ?? existing?.canvasX ?? 0,
+      canvasY: spec.y ?? existing?.canvasY ?? 0,
     };
 
     if (!existing) {
@@ -181,9 +192,9 @@ export class BoardWriter {
       return;
     }
 
-    const siblings = await this.db.storyEdge.findMany({ where: { arcId, fromNodeId: from.id }, select: { id: true, toNodeId: true, label: true, condition: true, effects: true, status: true, position: true } });
+    const siblings = await this.db.storyEdge.findMany({ where: { arcId, fromNodeId: from.id }, select: { id: true, toNodeId: true, label: true, condition: true, effects: true, status: true, position: true, voiced: true } });
     const existing = siblings.find((edge) => edge.toNodeId === to.id && (edge.label ?? null) === (spec.label ?? null));
-    const data = { label: spec.label ?? null, condition: spec.condition ?? null, effects: spec.effects ?? [], status: (spec.status ?? "CANON") as Status };
+    const data = { label: spec.label ?? null, condition: spec.condition ?? null, effects: spec.effects ?? [], status: (spec.status ?? "CANON") as Status, voiced: spec.voiced ?? false };
 
     if (!existing) {
       const position = siblings.reduce((highest, edge) => Math.max(highest, edge.position), -1) + 1;
@@ -195,7 +206,7 @@ export class BoardWriter {
       return;
     }
 
-    const unchanged = existing.condition === data.condition && same(existing.effects, data.effects) && existing.status === data.status;
+    const unchanged = existing.condition === data.condition && same(existing.effects, data.effects) && existing.status === data.status && existing.voiced === data.voiced;
     if (unchanged) { this.changes.push({ kind: "edge", action: "unchanged", label: `${arcSlug}: ${spec.from} -> ${spec.to}` }); return; }
     this.changes.push({ kind: "edge", action: "update", label: `${arcSlug}: ${spec.from} -> ${spec.to}`, detail: spec.condition ? `now checks ${spec.condition}` : "rewired" });
     if (this.apply) {
