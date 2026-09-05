@@ -1,0 +1,165 @@
+{
+  "method": "built-in image_gen",
+  "prompts": [
+    {
+      "slot": "regions/wrackline.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. Wrackline: Seen at human eye level from tide line at grey dawn. Fishing village on black sand outside and below Port Arcadia's sheer engineered wall, so high its top is outside frame; jungle presses at far end. Fisher hulls hauled above tide, heavy wet nets on racks, one cookfire smoke, small stone chapel with one warm window lamp and foundation stones conspicuously older larger and differently cut. Foreground tide debris: torn plate, gritty rifle bolt, fuel drum, building door, salt-wet Stormglass uniforms. A dozen exhausted survivors sitting or standing, one kneeling over a motionless dead body, nobody helping because no help exists. Small flat grave stones up grassy left slope half lost in mist. Far right two expressionless fishers empty a full net BACK INTO sea. Grey dawn from sea, thin gold horizon, chapel lamp sole warm light on land. Unsanitized war aftermath, dried brown and fresh blood as appropriate; death understated within the whole place."
+    },
+    {
+      "slot": "flags/kestrel-shielded-the-forge.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail.  First person witness image at player's own eye level, nobody looking into camera. Inside a hardened room in a besieged forward camp. An ancient stone pedestal\netched with symbols nobody can read, wrapped in modern cabling, containment\nrings and gauges, a small sphere of turning energy suspended in the rings,\nlighting the room a colour that does not belong to any of the lamps. Every\nengineer in the camp is in this room, welding fresh plate onto a roof that\nwas tarpaulin an hour ago; sparks fall past the sphere. Through the open door\nbehind them, the camp's clinic tents stand unprotected under the open sky and\na wall's south face shows raw sandbags where plate should be."
+    },
+    {
+      "slot": "flags/kestrel-shielded-the-clinic.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image at player's own eye level; nobody looking at camera. A mess hall turned clinic: long tables under stretcher bodies, a medic with her\nsleeves rolled and her hands steadier than anyone else's in the room, new plate\nbeing bolted over the windows and a fresh roof going on while she works. Through\na gap in the wall, the Forge housing stands under its old corrugated roof, and\nthe camp's wall shows its unrepaired face. Blood on the tables is real blood. Castellan matches the existing portrait: tired middle-aged South Asian woman, dark hair streaked grey tied back, lined face, dark worn tactical clothing, subtle branching dark veins on rolled forearms."
+    },
+    {
+      "slot": "flags/kestrel-shielded-the-wall.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. The south face of a forward camp's wall at dusk, freshly plated, gun\nemplacements fed with stacked crates, a quartermaster with a clipboard walking\nthe line counting ammunition with her lips moving. Behind the wall, inside the\ncamp, the clinic tents are open to the sky and the Forge housing wears its old\nroof. Beyond the wire, distant Pearl armour — walking frames — standing still\nand watching. Okafor matches the existing portrait: older Black woman, greying braids pulled back, broad lined face with mottled scar-like Returnee skin, heavy worn dark tactical uniform."
+    },
+    {
+      "slot": "flags/believed-brask.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. Night, uphill, in the rain. A column of soldiers carrying wounded on stretchers\nand civilians carrying children up a dark slope behind a besieged camp, lit by\none hooded lamp at the front. Below and behind them, the camp's floodlit wall\nis visibly thin — long stretches with nobody on them. In the foreground a\nmechanic with an unhurried face is on his back under the Forge housing with a\nlamp in his teeth, chalking a long line across the concrete floor. The line is a\nchalk line, not a word. Brask matches existing portrait: lean middle-aged light-skinned man, tousled damp auburn hair, stubble, angular tired face, dark mechanic fatigues, a worn mechanical left arm."
+    },
+    {
+      "slot": "flags/glasswater-came-aboard.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A fishing harbour under fire at the wrong tide. Fishing families with their\nlives in handcarts and a clinic's patients on stretchers being lifted into\noverloaded hulls, while a Stormglass rearguard holds the coast road behind them\nagainst muzzle flashes in the palms. A harbourmaster with a radio in one hand\nis physically pushing a child into a boat with the other. The last of the light\nis going and the boats are still tied up. "
+    },
+    {
+      "slot": "flags/tempest-fired-last.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A coastal artillery battery on a north-east headland at night, its guns laid\nlow over the water, firing — the flash lighting the wet gun crew, the officer\nwith a hand raised, every face turned toward the sea and none toward the boats\nthey are not on. Below them, the evacuation boats clear a reef line under the\numbrella of the shells; out past the headland, a Pearl flotilla is turning\naway. Behind the battery the island is burning, and the ground under the guns\nhas a crack in it. Coyle matches established portrait: bald middle-aged Black man, strong lined face, headset and rain-blackened military coat."
+    },
+    {
+      "slot": "flags/tempest-crew-aboard.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. The same headland battery at night, abandoned — guns cold, breeches open,\nshell cases on the deck, the officer's coat over a rail. Down on the water,\nthe evacuation boats cross the reef line naked under Pearl fire: two hulls\nholed and low in the water, wounded on the decks in the open, a lighter's\nwheelhouse glass red on the inside. "
+    },
+    {
+      "slot": "flags/rook-left-on-the-dock.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. From the stern of an overloaded boat pulling away from a burning harbour at\nnight: the last dry stone of the pier, and on it a commander in a Stormglass\ncoat standing perfectly still with a dozen rearguard soldiers behind them,\nwatching the boat go. Pearl contractors coming down the quay behind them; the\npier's planking bulging upward from beneath. The commander is not waving, not\nshouting, not moving. Water is coming up through the boards around their boots. Rook matches existing portrait: androgynous middle-aged commander with short dark salt-and-pepper hair, weathered medium-brown skin, square stern face and dark military coat."
+    },
+    {
+      "slot": "flags/the-army-opened-a-road.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A wet military quay at grey dawn. Four crew-served guns and stacked powder\ncrates come off a fishing hull under tarpaulins while an officer of the\nPeninsula Expeditionary Army in a clean uniform counts them, twice, and then\nlooks at the people who brought them. In the middle distance a woman with her\nright arm ending above the elbow, dressing already grey, stands apart with the\nsurvivors who will not look at the party. "
+    },
+    {
+      "slot": "flags/owes-the-army.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A supper room in a middle city, glasses pushed aside, a contract of many pages\non the table between an Expeditionary Army officer and a table of exhausted\nStormglass survivors. A quartermaster is initialling a page. A commander stands\nbehind her with folded arms while the officer reads aloud, his mouth open\nmid-sentence. The pages are pages — a hand's rhythm of ink, no readable word. Okafor is an older Black woman with greying braids pulled back, broad lined face, mottled scar-like Returnee skin, heavy dark fatigues. Rook behind her is an androgynous middle-aged commander with short dark salt-and-pepper hair, weathered medium-brown skin, square stern face."
+    },
+    {
+      "slot": "flags/sold-the-pearl-archive.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A dockside at night. A man with a case, a car with its door open, and a line\nof roped Pearl prisoners being walked to it — one of them, a rider in flight\nharness with no bird, looking back over her shoulder at the party with polite,\nuntroubled curiosity. The case is open on the car's bonnet, full of files; a\ngloved hand is closing it. Above, a drone lattice's small red lights. Vane matches established portrait: young adult brown-skinned woman with curly dark hair tied loosely back, worn beige shirt under dark leather flight harness. She looks toward someone beside the viewer, never directly into lens. No bird in this scene."
+    },
+    {
+      "slot": "flags/owes-the-cartel.png",
+      "prompt": "Create one finished photorealistic AAA Mature 17+ action-RPG concept plate for Martino, landscape 1672 x 941 pixels PNG 8-bit RGB no alpha. Twenty years in the future; tropical war lost by the people depicted, practical near-future tech and matter-of-fact magic. Physically based materials, extraordinary real fabric weave, oxidized brass, salt, rust, wet green, black volcanic sand, natural cinematic lighting, credible asymmetrical tired faces, no glamour. No legible writing ANYWHERE: no letters, numerals, words, logos, watermarks, captions, borders, heraldry or icons. Documents carry only nonlinguistic ink rhythms. One clear subject and light; reads at thumbnail. First person witness image, player's own eye level, nobody looking at camera. A bonded warehouse on a waterfront, customs seal on the door. A quartermaster\nstands across a counter from a Cartel factor in a good coat; between them a\nmanifest, a count ledger, and a pen the factor has just put down. Behind the\nfactor, a wall of numbered lockers, one of them with a name-card in a brass\nslot and a key in it, unturned. The quartermaster has the horn from a lost\ncamp still on its cord around her neck and has not noticed it. Okafor matches existing portrait: older Black woman, greying braids pulled back, broad lined face with mottled scar-like Returnee skin, dark salt-stained fatigues. Locker numbers and name card must be only abstract unreadable marks, zero readable numerals or letters; customs seal is unlettered embossed wax."
+    }
+  ],
+  "delivered": [
+    {
+      "slot": "flags/kestrel-shielded-the-forge.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-72e54117-f8c4-4262-8392-513155ce2b52.png"
+    },
+    {
+      "slot": "flags/kestrel-shielded-the-wall.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-3608617f-7b1d-42e5-9c8e-3c274567fa0d.png"
+    },
+    {
+      "slot": "flags/believed-brask.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-e4b041c1-7760-4428-be33-76267067453d.png"
+    },
+    {
+      "slot": "flags/tempest-fired-last.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-a4d50780-5a57-4c16-b26c-4e4ca0ef7292.png"
+    },
+    {
+      "slot": "flags/tempest-crew-aboard.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-dcfaf783-ac25-4f95-aafa-e2ad9fa29cf5.png"
+    },
+    {
+      "slot": "flags/rook-left-on-the-dock.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-408f0d02-5153-46b8-b5e0-7dce362436f7.png"
+    },
+    {
+      "slot": "flags/the-army-opened-a-road.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-bf6543e1-6418-4aa6-9e94-c4abd8c9478e.png"
+    },
+    {
+      "slot": "flags/owes-the-army.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-62cf981e-d068-49da-be9d-ad333da61f67.png"
+    },
+    {
+      "slot": "flags/sold-the-pearl-archive.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-e41d7a88-ed9b-4838-ad7a-a293b9a2e860.png"
+    },
+    {
+      "slot": "flags/owes-the-cartel.png",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-48dbf6c3-310a-4ed8-8f55-3e12e871227f.png"
+    }
+  ],
+  "failures": [
+    {
+      "slot": "regions/wrackline.png",
+      "reason": "Image service moderation_blocked at output; category violence; request 043015ac-b0e4-4ccf-9290-3a293593bcc8",
+      "spec": "Grey dawn reveals a black-sand fishing village beneath an immense engineered wall, with exhausted survivors and one mourner kneeling over a body amid tide debris. A chapel lamp, misted grave stones, and two fishers returning their catch to the sea carry the quiet finality of the lost island."
+    },
+    {
+      "slot": "flags/kestrel-shielded-the-clinic.png",
+      "reason": "image generation failed: http 400 Bad Request: Some(\"{\\n  \\\"error\\\": {\\n    \\\"message\\\": \\\"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID de16600d-c0fd-42b5-8d4a-457a9ae8dbf5. safety_violations=[violence].\\\",\\n    \\\"type\\\": \\\"image_generation_user_error\\\",\\n    \\\"param\\\": null,\\n    \\\"code\\\": \\\"moderation_blocked\\\",\\n    \\\"moderation_details\\\": {\\n      \\\"moderation_stage\\\": \\\"output\\\",\\n      \\\"categories\\\": [\\n        \\\"violence\\\"\\n      ]\\n    }\\n  }\\n}\")",
+      "spec": "Castellan works with steady bloodied hands in a mess hall converted to a clinic as engineers bolt new plate over the windows and roof. The exposed Forge's old corrugated housing and unrepaired wall remain visible through a gap, while real blood stains the treatment tables."
+    },
+    {
+      "slot": "flags/glasswater-came-aboard.png",
+      "reason": "image generation failed: http 400 Bad Request: Some(\"{\\n  \\\"error\\\": {\\n    \\\"message\\\": \\\"Your request was rejected by the safety system. If you believe this is an error, contact us at help.openai.com and include the request ID 2953504d-d39a-4248-84f4-5c8bba33a14e. safety_violations=[violence].\\\",\\n    \\\"type\\\": \\\"image_generation_user_error\\\",\\n    \\\"param\\\": null,\\n    \\\"code\\\": \\\"moderation_blocked\\\",\\n    \\\"moderation_details\\\": {\\n      \\\"moderation_stage\\\": \\\"output\\\",\\n      \\\"categories\\\": [\\n        \\\"violence\\\"\\n      ]\\n    }\\n  }\\n}\")",
+      "spec": "Fishing families and clinic patients crowd into overloaded boats in a harbour under fire at the wrong tide. A harbourmaster pushes a child aboard while the Stormglass rearguard holds the palm-lined coast road and the boats remain tied."
+    }
+  ],
+  "corrections": [
+    {
+      "slot": "flags/tempest-fired-last.png",
+      "reason": "The foreground instrument housing carries a readable alphanumeric stencil; remove it and any dial numerals to meet zero-text law.",
+      "prompt": "Edit this existing Martino plate with only the following precise correction. The foreground instrument housing carries a readable alphanumeric stencil; remove it and any dial numerals to meet zero-text law. Preserve all other characters, scene, action, framing, photorealistic material detail, natural lighting, palette and composition. Output exactly 1672 x 941 PNG, 8-bit RGB, no alpha. Zero legible text anywhere: no letters, numerals, logos or watermark; documents contain nonlinguistic ink marks only.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-708888c4-8567-4fa0-968e-cf19613993e0.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/the-army-opened-a-road.png",
+      "reason": "Make the signals corporal's right arm visibly end above the elbow in a grey dressing; the generated distant figure does not clearly convey this required detail.",
+      "prompt": "Edit this existing Martino plate with only the following precise correction. Make the signals corporal's right arm visibly end above the elbow in a grey dressing; the generated distant figure does not clearly convey this required detail. Preserve all other characters, scene, action, framing, photorealistic material detail, natural lighting, palette and composition. Output exactly 1672 x 941 PNG, 8-bit RGB, no alpha. Zero legible text anywhere: no letters, numerals, logos or watermark; documents contain nonlinguistic ink marks only.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-cd81eb6a-76c7-4b7f-86c6-f46253406ed8.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/owes-the-army.png",
+      "reason": "Okafor must be the person initialling, directly beneath Rook's folded arms. Move pen and signing action to the older grey-braided Black quartermaster at centre; the dark-haired survivor on left should rest empty hands. Preserve unreadable marks, officer reading, lighting and composition.",
+      "prompt": "Edit this existing Martino plate with only the following precise correction. Okafor must be the person initialling, directly beneath Rook's folded arms. Move pen and signing action to the older grey-braided Black quartermaster at centre; the dark-haired survivor on left should rest empty hands. Preserve unreadable marks, officer reading, lighting and composition. Preserve all other characters, scene, action, framing, photorealistic material detail, natural lighting, palette and composition. Output exactly 1672 x 941 PNG, 8-bit RGB, no alpha. Zero legible text anywhere: no letters, numerals, logos or watermark; documents contain nonlinguistic ink marks only.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-62cf981e-d068-49da-be9d-ad333da61f67.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/sold-the-pearl-archive.png",
+      "reason": "Vane must look just past the viewer toward another party member, never into the camera. Shift her eyes and head slightly toward frame-left while preserving her over-shoulder glance and polite untroubled curiosity. Keep everything else unchanged.",
+      "prompt": "Edit this existing Martino plate with only the following precise correction. Vane must look just past the viewer toward another party member, never into the camera. Shift her eyes and head slightly toward frame-left while preserving her over-shoulder glance and polite untroubled curiosity. Keep everything else unchanged. Preserve all other characters, scene, action, framing, photorealistic material detail, natural lighting, palette and composition. Output exactly 1672 x 941 PNG, 8-bit RGB, no alpha. Zero legible text anywhere: no letters, numerals, logos or watermark; documents contain nonlinguistic ink marks only.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-e41d7a88-ed9b-4838-ad7a-a293b9a2e860.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/owes-the-cartel.png",
+      "reason": "Replace the small animal-horn pendant with the lost camp's actual signalling horn: long narrow aged BRASS military bugle/trumpet with a flared bell and verdigris oxidation, hanging vertically from a practical worn cord around Okafor's neck, as in her canonical quartermaster portrait. It should be a functional camp signalling instrument, not jewelry. Keep the rest unchanged.",
+      "prompt": "Edit this existing Martino plate with only the following precise correction. Replace the small animal-horn pendant with the lost camp's actual signalling horn: long narrow aged BRASS military bugle/trumpet with a flared bell and verdigris oxidation, hanging vertically from a practical worn cord around Okafor's neck, as in her canonical quartermaster portrait. It should be a functional camp signalling instrument, not jewelry. Keep the rest unchanged. Preserve all other characters, scene, action, framing, photorealistic material detail, natural lighting, palette and composition. Output exactly 1672 x 941 PNG, 8-bit RGB, no alpha. Zero legible text anywhere: no letters, numerals, logos or watermark; documents contain nonlinguistic ink marks only.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-48dbf6c3-310a-4ed8-8f55-3e12e871227f.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/tempest-fired-last.png",
+      "prompt": "Precise text-removal edit. At the BOTTOM EDGE near x880 y920 there is a rectangular ammunition box with a faint alphanumeric stencil. At far LOWER RIGHT near x1550 y835 another box carries faint numerals. COMPLETELY REMOVE ALL painted and embossed lettering from BOTH boxes, replacing each face with plain worn dark metal and random rust texture. No residual letter shapes. Leave the circular brass instrument face blank too. Preserve the entire rest of this exact scene. Output 1672 x 941 PNG 8-bit RGB no alpha. Photorealism and same lighting. Zero text, numerals, logos or watermark.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-a4d50780-5a57-4c16-b26c-4e4ca0ef7292.png",
+      "status": "applied"
+    },
+    {
+      "slot": "flags/the-army-opened-a-road.png",
+      "prompt": "Correct ONLY the small WOMAN standing in the MIDDLE DISTANCE at approximately x760 y300, just LEFT of the hanging rope and RIGHT of three hooded survivors. Her right arm (on the LEFT side of her body as we see her) must END ABOVE THE ELBOW, with a visibly grey cloth dressing around its rounded end. No forearm or hand below this right upper arm. Her left arm remains intact. She is a military signals corporal wearing a worn olive uniform. Bring this woman a little closer into clear middle distance if necessary so the missing limb is unmistakable. DO NOT alter or bandage either of the two large men on the LEFT foreground. Keep the four guns, officer, boats and all other composition unchanged. Output 1672 x 941 PNG 8-bit RGB no alpha. Photorealism and same lighting. Zero text, numerals, logos or watermark.",
+      "source": "C:\\Users\\administrator.MARTINOBEAR.000\\.codex\\generated_images\\01a07122-6a41-7fe3-898d-6837f261e7c3\\exec-bf6543e1-6418-4aa6-9e94-c4abd8c9478e.png",
+      "status": "applied"
+    }
+  ]
+}

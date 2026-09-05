@@ -1,0 +1,119 @@
+[
+  {
+    "slot": "regions/wrackline.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/regions/wrackline.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/kestrel-shielded-the-forge.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/kestrel-shielded-the-forge.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/kestrel-shielded-the-clinic.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/kestrel-shielded-the-clinic.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/kestrel-shielded-the-wall.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/kestrel-shielded-the-wall.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/believed-brask.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/believed-brask.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/glasswater-came-aboard.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/glasswater-came-aboard.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/tempest-fired-last.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/tempest-fired-last.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/tempest-crew-aboard.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/tempest-crew-aboard.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/rook-left-on-the-dock.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/rook-left-on-the-dock.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/the-army-opened-a-road.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/the-army-opened-a-road.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/owes-the-army.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/owes-the-army.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/sold-the-pearl-archive.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/sold-the-pearl-archive.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/owes-the-cartel.png",
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/owes-the-cartel.png",
+    "valid": true
+  }
+]

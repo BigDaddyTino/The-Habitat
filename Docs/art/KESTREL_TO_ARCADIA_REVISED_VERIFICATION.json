@@ -1,0 +1,27 @@
+[
+  {
+    "slot": "regions/wrackline.png",
+    "delivered": true,
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/regions/wrackline.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/kestrel-shielded-the-clinic.png",
+    "delivered": true,
+    "width": 1672,
+    "height": 941,
+    "bitDepth": 8,
+    "colorType": 2,
+    "src": "/codex-art/flags/kestrel-shielded-the-clinic.png",
+    "valid": true
+  },
+  {
+    "slot": "flags/glasswater-came-aboard.png",
+    "delivered": false,
+    "fileExists": false
+  }
+]
