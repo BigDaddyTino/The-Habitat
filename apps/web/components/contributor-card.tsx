@@ -82,10 +82,10 @@ export function ContributorCards({ contributions }: { contributions: Contributio
               </>
             ) : (
               <>
-                This creature was designed by {contribution.contributor}, and the dossier above is the
-                codex&apos;s build on top of that design. Their original wording was not kept, so there is
-                nothing to quote here — and nothing else goes in this box, because the codex&apos;s prose
-                under somebody else&apos;s name is not a credit. The authorship is theirs regardless.
+                Designed by {contribution.contributor}, from their own imagination. The dossier above is the
+                codex&apos;s build on that design. The codex does not hold a copy of what they wrote, so
+                nothing is quoted here — the codex&apos;s own prose under their name would not be their
+                words. If the original turns up, it goes in this box exactly as written.
               </>
             )}
           </footer>

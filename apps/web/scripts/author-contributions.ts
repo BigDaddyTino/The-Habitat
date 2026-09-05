@@ -90,11 +90,15 @@ type ContributionSpec = {
    * against a SHA, because retyping somebody's submission into a source file is
    * how their punctuation quietly becomes ours.
    *
-   * `credit` — **the words did not survive.** The member designed the thing,
-   * the codex built on it, and nobody kept what they wrote. This files a row
-   * with no body at all, and the card says so. It never substitutes the codex's
-   * prose for theirs, and a paraphrase under their name is not an option here
-   * by design rather than by discipline: there is no field to put one in.
+   * `credit` — **the codex does not hold a copy of what they wrote.** The
+   * member designed the thing from their own imagination and wrote it down; the
+   * codex built on it and kept only its own build. This files a row with no
+   * body, and the card says the copy is missing from *our* records — a fact
+   * about the codex, never about the contributor. It never substitutes the
+   * codex's prose for theirs, and a paraphrase under their name is not an
+   * option here by design rather than by discipline: there is no field to put
+   * one in. When the original turns up, swap this for `document` or `relayed`
+   * and the words land in the card that is already standing.
    */
   source:
     | { kind: "capture"; upToMarker: string | null; expected: string }
@@ -159,16 +163,16 @@ const contributions: ContributionSpec[] = [
     },
   },
   {
-    // His words did NOT survive. The Hollow Wing went into the codex as a
-    // summary with a three-phase boss described inside it; what he actually
-    // wrote is in a chat log or in nobody's hands, and it is not in this
-    // repository — `author-hollow-wing.ts` is the codex's build on the design,
-    // not the design.
+    // The Hollow Wing is his, from his own imagination — he wrote it down. What
+    // the codex holds is its own build on that design (`author-hollow-wing.ts`),
+    // not his text: the summary it went in as was already a paraphrase, and the
+    // repository has no copy of what he actually wrote.
     //
-    // The owner ruled on 2026-09-04 that he gets the credit anyway, which is
-    // right: the authorship is not in question, only the artifact. So this is
-    // a credit row with no body, and the card says the original was not kept
-    // instead of quoting the codex at itself under his name.
+    // The owner ruled on 2026-09-04 that he is credited regardless, which is
+    // right: the authorship is not in question, only whether we kept the page.
+    // So this is a credit row with no body, and the card says the codex does
+    // not hold a copy — a fact about our records, not about him — instead of
+    // quoting the codex at itself under his name.
     //
     // If the original ever turns up, replace this source with a `document` or
     // `relayed` one. The row is keyed on entry + label, so the words will land
@@ -177,7 +181,7 @@ const contributions: ContributionSpec[] = [
     contributor: { username: "hunterthekid26" },
     label: "Original creature design",
     submittedAt: "2026-08-31T00:00:00.000Z",
-    source: { kind: "credit", because: "His original wording was not kept anywhere in the codex or the repository." },
+    source: { kind: "credit", because: "the codex does not hold a copy of what he wrote" },
   },
 ];
 
