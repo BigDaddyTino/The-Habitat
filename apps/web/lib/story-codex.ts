@@ -1,4 +1,5 @@
 import "@/lib/environment";
+import { systemInstanceFields } from "@/lib/story-world-connections";
 import { getPrismaClient } from "@habitat/db/client";
 import { clusterBoards, type AtlasArc, type AtlasCompanion, type AtlasEdge, type AtlasJoin, type AtlasNode, type CampaignAtlas } from "@/lib/campaign-atlas";
 import {
@@ -430,6 +431,17 @@ export async function getStoryEntry(slug: string) {
         connections.push({ slug: canonicalStoryEntryRouteSlug(candidate.slug), title: nationTerminologyText(candidate.title), kind: candidate.kind, relation });
       }
     };
+    // A sheet field that IS an instance of a system — a region carrying a Veil
+    // Anchor tier, a region with a Soul Forge — is read here from the system's
+    // side, so the Veil Anchors page lists every Anchor on the map by
+    // derivation and cannot drift from the sheets the way a hand-kept note
+    // did (the Outfall carried Tier I for a week while the system listed two
+    // regions that have no Anchor at all).
+    for (const spec of systemInstanceFields) {
+      if (candidate.kind !== "REGION" || storageSlug !== spec.system) continue;
+      const value = typeof meta[spec.field] === "string" && (meta[spec.field] as string).trim() ? (meta[spec.field] as string).trim() : null;
+      if (value) add(spec.relation(value));
+    }
     if (referencesSlug(meta.home)) add("calls this home");
     if (referencesSlug(meta.seat)) add("is based here");
     if (referencesSlug(meta.parent)) add(candidate.kind === "SYSTEM" ? "is a subsystem of this" : candidate.kind === "THREAD" ? "grew out of this thread" : candidate.kind === "CREATURE" ? "belongs to this species" : candidate.kind === "FACTION" ? "answers to this power" : "belongs inside this region");

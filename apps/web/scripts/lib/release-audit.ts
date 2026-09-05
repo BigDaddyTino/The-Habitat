@@ -16,6 +16,7 @@ import { newestRegisteredStoryAtlasArtVersion, resolveStoryAtlasArt } from "../.
 import { buildAtlasIntegrityAudit, createFilesystemAtlasArtworkInspector } from "./atlas-integrity";
 import { loadAtlasAuditSource } from "./atlas-integrity-db";
 import { auditGeographicHierarchy, type GeographicEntry } from "./geographic-hierarchy";
+import { auditWorldConnections } from "../../lib/story-world-connections";
 
 /**
  * The one audit a release has to pass.
@@ -375,6 +376,27 @@ export async function runReleaseAudit({ honourWaivers = true }: { honourWaivers?
     }
   }
   graph.notes.push(`${populated}/${arcs.length} boards populated, ${nodes.length} scenes, ${edges.length} branches`);
+
+  // --- 7. world connections ----------------------------------------------------
+
+  // Every sheet field that names something else, read from BOTH ends. The
+  // needs-work scan already asks whether a reference resolves; this asks
+  // whether the other end agrees. A defect is two ends disagreeing — a system
+  // note pinned to a region that carries no instance of that system, a field
+  // naming the wrong kind of entry — and fails the gate. A gap is one end
+  // silent (a road only one region lists, a leader whose own sheet does not
+  // name the faction) and is reported by count, because writers add the
+  // second end as they go and a deploy is not the place to block on it.
+  const connections = check("CONNECTIONS — every world connection is recognized from both ends");
+  const web = auditWorldConnections(entries, arcs);
+  for (const finding of web.findings) {
+    if (finding.severity !== "defect") continue;
+    connections.failures.push(`${finding.kind.toLowerCase().replaceAll("_", " ")} ${finding.slug} ${finding.field} → ${finding.target} — ${finding.detail}`);
+  }
+  const gapCounts = new Map<string, number>();
+  for (const finding of web.findings) if (finding.severity === "gap") gapCounts.set(finding.code, (gapCounts.get(finding.code) ?? 0) + 1);
+  connections.notes.push(`${web.defects} defect${web.defects === 1 ? "" : "s"}, ${web.gaps} one-way connection${web.gaps === 1 ? "" : "s"}, ${web.notes} note${web.notes === 1 ? "" : "s"} across ${entries.length} entries`);
+  if (gapCounts.size) connections.notes.push(`one-way: ${[...gapCounts.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([code, count]) => `${count} ${code.toLowerCase().replaceAll("_", " ")}`).join(", ")} — run scripts/audit-world-connections.ts for the list`);
 
   return { checks, ok: checks.every((entry) => entry.failures.length === 0), waived: waivedFindings };
 }
