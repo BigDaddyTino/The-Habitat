@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { atlasHealth, clusterBoards, layoutSpine, longestPathDepth, ATLAS_COL, ATLAS_ROW, type CampaignAtlas } from "./campaign-atlas";
+import { atlasHealth, chapterStats, clusterBoards, interactionCounts, interactionOf, layoutSpine, longestPathDepth, shortCondition, ATLAS_COL, ATLAS_ROW, type CampaignAtlas } from "./campaign-atlas";
 
 const node = (id: string, arcSlug: string, extra: Partial<CampaignAtlas["nodes"][number]> = {}) => ({
   id, key: id, kind: "SCENE" as const, title: id, arcSlug,
@@ -166,4 +166,43 @@ test("an implied gap never counts as a wire between two boards", () => {
   // The whole point of an implied join is that nothing connects them, so it
   // must not be the thing that makes them look connected.
   assert.equal(clusters.length, 2);
+});
+
+test("a lane banner counts cards, decisions, exits and voiced lines per chapter", () => {
+  const card = (id: string, arcSlug: string, kind: "SCENE" | "CHOICE" | "ENDING", lines: number) =>
+    ({ id, key: id, kind, title: id, arcSlug, endingKind: null, lines, entry: false, terminal: false });
+  const stats = chapterStats({ nodes: [card("a", "one", "SCENE", 4), card("b", "one", "CHOICE", 0), card("c", "one", "ENDING", 2), card("d", "two", "CHOICE", 1)] });
+  assert.deepEqual(stats.get("one"), { cards: 3, decisions: 1, endings: 1, lines: 6 });
+  assert.deepEqual(stats.get("two"), { cards: 1, decisions: 1, endings: 0, lines: 1 });
+  assert.equal(stats.get("three"), undefined, "a chapter with no cards has no entry, and the banner falls back to zeros");
+});
+
+test("a branch condition is cut back to the flag that another chapter set", () => {
+  assert.equal(shortCondition("defended-the-island — the party held Forward Camp Kestrel"), "defended-the-island");
+  assert.equal(shortCondition("walked-the-east-road"), "walked-the-east-road");
+  // Prose conditions stay prose, but never run the whole width of the map.
+  assert.equal(shortCondition("The party holds Pearl prisoners or recovered intelligence worth the cargo space"), "The party holds Pearl prisoners or…");
+});
+
+test("a card is a decision, played, or passing, by what the player does on it", () => {
+  const card = (kind: "SCENE" | "BEAT" | "CHOICE" | "QUEST_STEP" | "DIALOGUE" | "ENDING", lines: number) => ({ kind, lines });
+  const one = [{ label: null }];
+  const two = [{ label: "Go left" }, { label: "Go right" }];
+  assert.equal(interactionOf(card("CHOICE", 0), one), "decision");
+  assert.equal(interactionOf(card("SCENE", 0), two), "decision", "two labelled ways on is a choice whatever the kind says");
+  assert.equal(interactionOf(card("QUEST_STEP", 0), one), "played");
+  assert.equal(interactionOf(card("DIALOGUE", 0), one), "played");
+  assert.equal(interactionOf(card("SCENE", 3), one), "played", "somebody speaks to the player");
+  assert.equal(interactionOf(card("BEAT", 0), one), "passing");
+  assert.equal(interactionOf(card("ENDING", 0), []), "passing");
+  assert.equal(interactionOf(card("ENDING", 2), []), "played");
+});
+
+test("interaction counts add up to every card", () => {
+  const node = (id: string, kind: "SCENE" | "CHOICE" | "QUEST_STEP", lines: number) => ({ id, key: id, kind, title: id, arcSlug: "one", endingKind: null, lines, entry: false, terminal: false });
+  const counts = interactionCounts({
+    nodes: [node("a", "SCENE", 0), node("b", "CHOICE", 0), node("c", "QUEST_STEP", 0), node("d", "SCENE", 1)],
+    edges: [{ id: "e1", from: "a", to: "b", label: null, condition: null }],
+  });
+  assert.deepEqual(counts, { decision: 1, played: 2, passing: 1 });
 });

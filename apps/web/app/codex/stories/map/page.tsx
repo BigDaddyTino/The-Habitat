@@ -1,14 +1,27 @@
 import Link from "next/link";
 import { ArrowLeft, GitMerge, Layers, Lightbulb, MapPinned, TriangleAlert, UsersRound } from "lucide-react";
 import { requireRole } from "@/lib/authorization";
-import { getCampaignAtlas, getCanonNavigator, storyReadRole } from "@/lib/story-codex";
-import { atlasHealth } from "@/lib/campaign-atlas";
+import { getCampaignAtlas, getCanonNavigator, getStoryCursor, storyReadRole } from "@/lib/story-codex";
+import { atlasHealth, interactionCounts } from "@/lib/campaign-atlas";
 import { storyArcCategoryLabels } from "@habitat/shared";
 import { StoryLiveSync } from "@/components/story-live-sync";
 import { CanonNavigator } from "@/components/canon-navigator";
 import { CampaignAtlasMap } from "@/components/campaign-atlas-map";
 
 export const metadata = { title: "The campaign map | Story Codex" };
+
+/** "4 minutes ago", from the newest revision's timestamp; null when nothing has ever been saved. */
+function relativeTime(ms: number): string | null {
+  if (!Number.isFinite(ms) || ms <= 0) return null;
+  const seconds = Math.max(0, Math.round((Date.now() - ms) / 1000));
+  if (seconds < 60) return "moments ago";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} days ago`;
+}
 
 /**
  * The whole campaign on one canvas: every mainline card from the first quest
@@ -22,8 +35,10 @@ export const metadata = { title: "The campaign map | Story Codex" };
  */
 export default async function CampaignMapPage() {
   await requireRole(storyReadRole);
-  const [atlas, nav] = await Promise.all([getCampaignAtlas(), getCanonNavigator()]);
+  const [atlas, nav, cursor] = await Promise.all([getCampaignAtlas(), getCanonNavigator(), getStoryCursor()]);
   const health = atlasHealth(atlas);
+  const play = interactionCounts(atlas);
+  const lastSave = relativeTime(Number(cursor.split(":")[0]));
   const titleOf = (slug: string) => [...atlas.spine, ...atlas.side].find((arc) => arc.slug === slug)?.title ?? slug;
 
   return (
@@ -43,6 +58,12 @@ export default async function CampaignMapPage() {
           <Link href="/codex/stories/campaign"><Layers aria-hidden="true" size={13} /> The chapter view</Link>
           <span>Six cards and the roads between them, when you want the shape rather than the detail.</span>
         </p>
+        <p className="atlas-live">
+          <span className="pulse" aria-hidden="true" />
+          <b>Live.</b> Read from the boards on every visit and redrawn the moment anyone saves anywhere in the Stories room.
+          Nothing on this map is stored, so nothing on it can go stale or be lost.
+          {lastSave ? <span>Last save in the codex: {lastSave}.</span> : null}
+        </p>
       </div>
 
       <div className="canon-workspace">
@@ -52,6 +73,9 @@ export default async function CampaignMapPage() {
             <div><b>{health.chapters}</b><span>chapters</span></div>
             <div><b>{health.cards}</b><span>cards</span></div>
             <div><b>{health.branches}</b><span>branches</span></div>
+            <div className="is-decision"><b>{play.decision}</b><span>you decide</span></div>
+            <div className="is-played"><b>{play.played}</b><span>you play</span></div>
+            <div className="is-passing"><b>{play.passing}</b><span>you pass through</span></div>
             <div><b>{health.handoffs}</b><span>handoffs</span></div>
             <div><b>{health.flagJoins}</b><span>flag joins</span></div>
             <div><b>{health.sideBoards}</b><span>boards off it</span></div>

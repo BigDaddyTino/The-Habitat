@@ -305,3 +305,79 @@ export function clusterBoards(boards: readonly AtlasArc[], joins: readonly Atlas
   }
   return clusters.sort((left, right) => right.length - left.length);
 }
+
+// -------------------------------------------------------- what a lane holds
+
+export type ChapterStats = { cards: number; decisions: number; endings: number; lines: number };
+export const emptyChapterStats: ChapterStats = { cards: 0, decisions: 0, endings: 0, lines: 0 };
+
+/**
+ * What each chapter actually holds, for its lane banner: how many cards, how
+ * many of them are decisions the player makes, how many exits, and how much of
+ * it is voiced. A chapter with thirteen cards and one decision is a corridor;
+ * the banner should say so without anybody having to count.
+ */
+export function chapterStats(atlas: Pick<CampaignAtlas, "nodes">): Map<string, ChapterStats> {
+  const stats = new Map<string, ChapterStats>();
+  for (const node of atlas.nodes) {
+    const current = stats.get(node.arcSlug) ?? { ...emptyChapterStats };
+    current.cards += 1;
+    if (node.kind === "CHOICE") current.decisions += 1;
+    if (node.kind === "ENDING") current.endings += 1;
+    current.lines += node.lines;
+    stats.set(node.arcSlug, current);
+  }
+  return stats;
+}
+
+/**
+ * A branch condition, short enough to sit on a line.
+ *
+ * Conditions are free text the game interprets; by convention the flag slug
+ * comes first and a prose gloss follows a dash ("defended-the-island — the
+ * party held Forward Camp Kestrel"). The map wants the slug, because the slug
+ * is the thing another chapter set, and a reader following the thread back
+ * needs the name and not the sentence.
+ */
+export function shortCondition(condition: string, max = 44): string {
+  const head = (condition.split(/\s+[—–-]{1,2}\s+/)[0] ?? condition).trim();
+  if (head.length <= max) return head;
+  // Cut on a word, not mid-word, unless the first word alone is most of the room.
+  const cut = head.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max / 2 ? cut.slice(0, space) : cut).trimEnd()}…`;
+}
+
+// ------------------------------------------------------ how a card is played
+
+/**
+ * What the player actually does on a card, read off the board rather than
+ * tagged by hand:
+ *
+ *   `decision` — the card is a CHOICE, or offers two or more labelled ways on.
+ *                The player picks, and the pick is remembered.
+ *   `played`   — the player acts or is addressed: a quest start or step, a
+ *                dialogue, or any card with voiced lines on it.
+ *   `passing`  — narration with one way out and nobody speaking. What is
+ *                happening around the player while they walk through it.
+ *
+ * Endings are classified like anything else — an ending with lines is played,
+ * a silent one is passing — because the question is about the player's hands,
+ * not about where the card sits.
+ */
+export type Interaction = "decision" | "played" | "passing";
+
+export function interactionOf(node: Pick<AtlasNode, "kind" | "lines">, outgoing: readonly Pick<AtlasEdge, "label">[]): Interaction {
+  const labelled = outgoing.filter((edge) => edge.label?.trim()).length;
+  if (node.kind === "CHOICE" || labelled >= 2) return "decision";
+  if (node.kind === "QUEST_START" || node.kind === "QUEST_STEP" || node.kind === "DIALOGUE" || node.lines > 0) return "played";
+  return "passing";
+}
+
+export function interactionCounts(atlas: Pick<CampaignAtlas, "nodes" | "edges">): Record<Interaction, number> {
+  const outgoing = new Map<string, AtlasEdge[]>();
+  for (const edge of atlas.edges) outgoing.set(edge.from, [...(outgoing.get(edge.from) ?? []), edge]);
+  const counts: Record<Interaction, number> = { decision: 0, played: 0, passing: 0 };
+  for (const node of atlas.nodes) counts[interactionOf(node, outgoing.get(node.id) ?? [])] += 1;
+  return counts;
+}

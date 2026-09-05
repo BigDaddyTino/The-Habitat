@@ -533,3 +533,41 @@
 .atlas-note{margin:12px 0 0;border-top:1px solid #2d342d;padding-top:10px;color:#96a095;font-size:10.5px;line-height:1.65}
 .atlas-note b{color:#dcc58d}
 .atlas-note a{color:#c5a85f}
+
+/* The campaign map is derived, never stored: the page says so, and the
+   heartbeat dot is the same fact made visible. */
+.atlas-live{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:10px 0 0!important;color:#8d968b;font-size:11px}
+.atlas-live b{color:#a8c79c;font-weight:600}
+.atlas-live>span{color:#7e8a7c}
+.atlas-live .pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8fbf8a;animation:atlas-pulse 2.4s ease-out infinite}
+@keyframes atlas-pulse{0%{box-shadow:0 0 0 0 rgba(143,191,138,.55)}100%{box-shadow:0 0 0 9px rgba(143,191,138,0)}}
+/* A branch gated on an earlier decision is drawn as a thread, not a road, and
+   names the flag it reads. */
+.atlas-legend .swatch.is-conditioned{border-top:2px dashed #7f9bb8;width:16px}
+/* Hovering a card lights only what leads in and out of it. */
+.atlas-canvas .react-flow__edge.is-dim{opacity:.12;transition:opacity .15s ease}
+.atlas-canvas .react-flow__edge.is-lit{opacity:1}
+.atlas-canvas .react-flow__edge.is-lit .react-flow__edge-path{stroke-width:3px}
+.atlas-lane-stats{display:inline-flex;align-items:center;gap:4px;font-style:normal}
+.atlas-lane-stats i{color:#c6974c;font-style:normal;font-weight:700}
+
+/* How a card is played, as a colour the eye reads before the words: a decision
+   the player makes, a card they act or are spoken to on, or narration they
+   walk through while the world happens around them. */
+.atlas-card.is-decision{background:linear-gradient(160deg,#2a2112,#171410);border-color:#6b5628}
+.atlas-card.is-decision strong{color:#f1dfae}
+.atlas-card.is-played{background:linear-gradient(160deg,#17202a,#111518);border-color:#3d4c5e}
+.atlas-card.is-played strong{color:#dbe3ea}
+.atlas-card.is-passing{background:linear-gradient(160deg,#1a1c1a,#121412);border-color:#363b36;opacity:.82}
+.atlas-card.is-passing strong{color:#a7ac9f;font-weight:500}
+.atlas-card.is-passing .atlas-card-kicker,.atlas-card.is-passing .atlas-card-arc{color:#6c746a}
+.atlas-card-play{display:inline-flex;align-items:center;gap:4px;font-style:normal;text-transform:uppercase;letter-spacing:.09em}
+.atlas-card.is-decision .atlas-card-play{color:#d9b46a}
+.atlas-card.is-played .atlas-card-play{color:#9fb8d2}
+.atlas-card.is-passing .atlas-card-play{color:#7a8078}
+.atlas-legend .swatch.is-decision{border-top:0;width:14px;height:10px;background:#3a2c14;border:1px solid #8a6f36}
+.atlas-legend .swatch.is-played{border-top:0;width:14px;height:10px;background:#1a2634;border:1px solid #4d6178}
+.atlas-legend .swatch.is-passing{border-top:0;width:14px;height:10px;background:#1c1e1c;border:1px solid #454a45}
+.atlas-counts>div.is-decision b{color:#e0bd72}
+.atlas-counts>div.is-played b{color:#b8cde2}
+.atlas-counts>div.is-passing b{color:#a7ac9f}

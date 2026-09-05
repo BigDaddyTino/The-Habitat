@@ -4,9 +4,9 @@ import "@xyflow/react/dist/style.css";
 import { Background, Controls, Handle, MarkerType, MiniMap, Position, ReactFlow, type Edge, type Node, type NodeProps } from "@xyflow/react";
 import Link from "next/link";
 import { ArrowRight, Flag, GitBranch, Lock, MapPin, TriangleAlert, UsersRound } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { storyArcCategoryLabels, storyNodeKindLabels, storyStoryStageLabels, type StoryStoryStage } from "@habitat/shared";
-import { ATLAS_COL, ATLAS_ROW, ATLAS_SIDE_GAP, layoutSpine, type AtlasArc, type AtlasCompanion, type AtlasNode, type CampaignAtlas } from "@/lib/campaign-atlas";
+import { ATLAS_COL, ATLAS_ROW, ATLAS_SIDE_GAP, chapterStats, emptyChapterStats, interactionOf, layoutSpine, shortCondition, type AtlasArc, type AtlasCompanion, type AtlasNode, type CampaignAtlas, type ChapterStats, type Interaction } from "@/lib/campaign-atlas";
 
 /**
  * The campaign, drawn once: every mainline card down one spine, every branch
@@ -21,10 +21,12 @@ import { ATLAS_COL, ATLAS_ROW, ATLAS_SIDE_GAP, layoutSpine, type AtlasArc, type 
  * that nothing actually connects. The map is allowed to be unflattering.
  */
 
-type SpineData = { node: AtlasNode; arc: AtlasArc; index: number; dangling: boolean };
+type SpineData = { node: AtlasNode; arc: AtlasArc; index: number; dangling: boolean; interaction: Interaction };
+
+const interactionLabels: Record<Interaction, string> = { decision: "you decide", played: "you play it", passing: "you pass through" };
 type SideData = { arc: AtlasArc; why: string };
 type CompanionData = { companion: AtlasCompanion };
-type LaneData = { arc: AtlasArc; index: number; width: number };
+type LaneData = { arc: AtlasArc; index: number; width: number; stats: ChapterStats };
 type AtlasFlowNode =
   | Node<SpineData, "card">
   | Node<SideData, "side">
@@ -35,14 +37,14 @@ const stageLabel = (value: string | null) =>
   value && value in storyStoryStageLabels ? storyStoryStageLabels[value as StoryStoryStage] : value;
 
 function SpineCard({ data }: NodeProps<Node<SpineData, "card">>) {
-  const { node, arc, index, dangling } = data;
+  const { node, arc, index, dangling, interaction } = data;
   return (
-    <Link className={`atlas-card kind-${node.kind.toLowerCase()}${node.entry ? " is-entry" : ""}${node.kind === "ENDING" ? " is-ending" : ""}${dangling ? " is-dangling" : ""}`} href={`/codex/arc/${arc.slug}?node=${node.id}`}>
+    <Link className={`atlas-card kind-${node.kind.toLowerCase()} is-${interaction}${node.entry ? " is-entry" : ""}${node.kind === "ENDING" ? " is-ending" : ""}${dangling ? " is-dangling" : ""}`} href={`/codex/arc/${arc.slug}?node=${node.id}`}>
       <Handle className="atlas-handle" position={Position.Top} type="target" />
       <span className="atlas-card-kicker">
         <i>{index + 1}</i>
         {storyNodeKindLabels[node.kind]}
-        {node.lines > 0 ? <em>{node.lines} line{node.lines === 1 ? "" : "s"}</em> : null}
+        <em>{node.lines > 0 ? `${node.lines} line${node.lines === 1 ? "" : "s"} · ` : ""}<span className="atlas-card-play">{interactionLabels[interaction]}</span></em>
       </span>
       <strong>{node.title}</strong>
       <span className="atlas-card-arc">{arc.title}</span>
@@ -97,14 +99,17 @@ function CompanionChain({ data }: NodeProps<Node<CompanionData, "chain">>) {
 
 /** A chapter's banner across the top of its lane, so the map names itself. */
 function LaneHeading({ data }: NodeProps<Node<LaneData, "lane">>) {
-  const { arc, index, width } = data;
+  const { arc, index, width, stats } = data;
   return (
     <Link className={`atlas-lane${arc.locked ? " is-locked" : ""}`} href={`/codex/arc/${arc.slug}`} style={{ width }}>
       <span className="atlas-lane-kicker">Chapter {index + 1}{arc.locked ? <Lock aria-hidden="true" size={9} /> : null}</span>
       <strong>{arc.title}</strong>
       <span className="atlas-lane-foot">
         {arc.region ? <i><MapPin aria-hidden="true" size={9} /> {arc.region.title}</i> : <i className="is-missing"><TriangleAlert aria-hidden="true" size={9} /> no region</i>}
-        <em>{arc.nodeCount} card{arc.nodeCount === 1 ? "" : "s"} <ArrowRight aria-hidden="true" size={10} /></em>
+        <em className="atlas-lane-stats">
+          <i>{stats.cards}</i> card{stats.cards === 1 ? "" : "s"} · <i>{stats.decisions}</i> decision{stats.decisions === 1 ? "" : "s"} · <i>{stats.lines}</i> line{stats.lines === 1 ? "" : "s"}
+          <ArrowRight aria-hidden="true" size={10} />
+        </em>
       </span>
     </Link>
   );
@@ -120,6 +125,7 @@ const joinStyle = {
 
 function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; width: number } {
   const { placed, lanes, width, rows } = layoutSpine(atlas);
+  const stats = chapterStats(atlas);
   const arcOf = new Map(atlas.spine.map((arc) => [arc.slug, arc]));
   const nodeById = new Map(atlas.nodes.map((node) => [node.id, node]));
   const dangling = new Set(atlas.danglingEndings.map((ending) => ending.nodeId));
@@ -136,10 +142,13 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
     width: lane.width,
     height: 86,
     position: { x: lane.x, y: -ATLAS_ROW * 1.5 },
-    data: { arc: arcOf.get(lane.arcSlug)!, index: atlas.spine.findIndex((arc) => arc.slug === lane.arcSlug), width: lane.width },
+    data: { arc: arcOf.get(lane.arcSlug)!, index: atlas.spine.findIndex((arc) => arc.slug === lane.arcSlug), width: lane.width, stats: stats.get(lane.arcSlug) ?? emptyChapterStats },
     draggable: false,
     selectable: false,
   }));
+
+  const outgoing = new Map<string, typeof atlas.edges>();
+  for (const edge of atlas.edges) outgoing.set(edge.from, [...(outgoing.get(edge.from) ?? []), edge]);
 
   const nodes: AtlasFlowNode[] = atlas.nodes.map((node) => ({
     id: node.id,
@@ -147,7 +156,7 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
     width: 236,
     height: 78,
     position: placed.get(node.id) ?? { x: 0, y: 0 },
-    data: { node, arc: arcOf.get(node.arcSlug)!, index: orderInArc.get(node.id) ?? 0, dangling: dangling.has(node.id) },
+    data: { node, arc: arcOf.get(node.arcSlug)!, index: orderInArc.get(node.id) ?? 0, dangling: dangling.has(node.id), interaction: interactionOf(node, outgoing.get(node.id) ?? []) },
     draggable: false,
     selectable: false,
   }));
@@ -214,16 +223,20 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
     }
   });
 
-  // Branches inside a chapter.
+  // Branches inside a chapter. A branch gated on a condition is where a chapter
+  // reads an earlier decision, so it is drawn as a thread and names the flag —
+  // that is the thing a reader following a consequence backwards is looking for.
   for (const edge of atlas.edges) {
+    const condition = edge.condition ? shortCondition(edge.condition) : null;
     edges.push({
       id: `branch:${edge.id}`,
       source: edge.from,
       target: edge.to,
-      label: edge.label ?? undefined,
-      markerEnd: { type: MarkerType.ArrowClosed, color: "#5d6a58" },
-      style: { stroke: "#4d5849", strokeWidth: 1.4 },
-      labelStyle: { fill: "#9aa695", fontSize: 8.5 },
+      label: condition ? `${edge.label ?? "then"} · if ${condition}` : edge.label ?? undefined,
+      className: condition ? "is-conditioned" : undefined,
+      markerEnd: { type: MarkerType.ArrowClosed, color: condition ? "#7f9bb8" : "#5d6a58" },
+      style: condition ? { stroke: "#7f9bb8", strokeWidth: 1.5, strokeDasharray: "4 4" } : { stroke: "#4d5849", strokeWidth: 1.4 },
+      labelStyle: { fill: condition ? "#bcd0e2" : "#9aa695", fontSize: 8.5 },
       labelBgStyle: { fill: "#12170f", fillOpacity: 0.9 },
       labelBgPadding: [5, 3],
     });
@@ -255,11 +268,24 @@ function build(atlas: CampaignAtlas): { nodes: AtlasFlowNode[]; edges: Edge[]; w
 
 export function CampaignAtlasMap({ atlas }: { atlas: CampaignAtlas }) {
   const flow = useMemo(() => build(atlas), [atlas]);
+  // Hovering a card lights only the lines that touch it. With a hundred and
+  // more cards on one canvas, the question a reader actually has is "what
+  // leads here and where does it go", and the answer should not need a legend.
+  const [focus, setFocus] = useState<string | null>(null);
+  const edges = useMemo(() => {
+    if (!focus) return flow.edges;
+    return flow.edges.map((edge) => ({
+      ...edge,
+      className: [edge.className, edge.source === focus || edge.target === focus ? "is-lit" : "is-dim"].filter(Boolean).join(" "),
+    }));
+  }, [flow, focus]);
   return (
     <>
       <div className="atlas-canvas">
         <ReactFlow
-          edges={flow.edges}
+          edges={edges}
+          onNodeMouseEnter={(_, node) => { if (node.type !== "lane") setFocus(node.id); }}
+          onNodeMouseLeave={() => setFocus(null)}
           fitView
           fitViewOptions={{ padding: 0.08 }}
           maxZoom={1.4}
@@ -282,11 +308,15 @@ export function CampaignAtlasMap({ atlas }: { atlas: CampaignAtlas }) {
         </ReactFlow>
       </div>
       <ul className="atlas-legend">
+        <li><span className="swatch is-decision" /> You decide — a choice the game remembers</li>
+        <li><span className="swatch is-played" /> You play it — a task, a conversation, or somebody speaking to you</li>
+        <li><span className="swatch is-passing" /> You pass through — what happens around you while you walk; no hands on it</li>
         <li><span className="swatch is-handoff" /> Structural handoff — an ending that names the next chapter, exported to the game</li>
         <li><span className="swatch is-flag" /> Flag join — set in one board, read in another</li>
         <li><span className="swatch is-implied" /><TriangleAlert aria-hidden="true" size={11} /> No join written yet — consecutive chapters nothing connects</li>
         <li><span className="swatch is-chain" /> Companion chain — first named here, then runs on its own clock</li>
-        <li><Flag aria-hidden="true" size={11} /> Click any card to open it on its own board</li>
+        <li><span className="swatch is-conditioned" /> Gated branch — a choice that reads an earlier decision; the flag is named on the line</li>
+        <li><Flag aria-hidden="true" size={11} /> Hover a card to light only what leads in and out of it; click it to open its board</li>
       </ul>
     </>
   );
