@@ -27,7 +27,7 @@ const apply = process.argv.includes("--apply");
 const SLUG = "the-angel-of-the-forges";
 
 const title = "The Angel of the Forges";
-const summary = "The owner's end-boss idea, stored as an idea: the angel who watches over the player, keeps them at the front of every Soul Forge queue, appears now and then across the campaign — and controls all the Forges. Brainstorming; not laid out yet.";
+const summary = "The owner's end-boss idea, stored as an idea: an angel who controls every Soul Forge and keeps the player at the front of the queue, needs the player's Echo given freely, walks the campaign as several faces, rules the floating island — and is where every lost Echo goes. The corrupter of souls. The Old Hunger. Brainstorming.";
 
 const body = `**Status: brainstorming. This is an idea the owner wanted stored before it was lost, not canon.** Nothing below is confirmed, nothing is named, and nothing reaches the game.
 
@@ -35,7 +35,36 @@ const body = `**Status: brainstorming. This is an idea the owner wanted stored b
 
 > the angel that watches over the player and keeps him in the front of the soulforge queue and pops up once in a while — i don't have him all laid out yet, he is just an idea — he controls all the soul forges, that end boss man.
 
-That is the whole of it so far. Everything else on this page is the codex pointing out where he already fits.
+## The second pass, in the owner's words (2026-09-06, later the same day)
+
+> END GAME BOSS — is an Angel. Controls all soul forges, makes sure the player is front of line. He needs the player's echo, but it has to be given freely, not taken.
+>
+> Meets and helps the player randomly throughout the game. Is a shapeshifter — is multiple characters you meet through the game, but you don't know until later. Is guiding you toward him.
+>
+> Lives and rules the floating island.
+>
+> When a soul forge is destroyed or depleted and those echos have nowhere to go, the echo has to go somewhere. The echos go to him. *Where is the island's disappearing magic actually going?* HERE IT IS.
+>
+> Who are the risen? He changes the echo, mutates it, and reworks them into the Risen.
+>
+> He is the corrupter of souls. He is the Old Hunger.
+
+Still brainstorming. Stored so it is not lost. Everything below it is the codex pointing out where he already fits — and where he now collides with what is written, which is the owner's to rule.
+
+## What this answers that canon left open
+
+- **[[the-old-hunger]]'s own open questions** — *"Is the silhouette beneath Ignit the Hunger itself?"* and *"Where is the island's disappearing magic actually going?"* — are answered in one stroke: every Echo in Kestrel's Core went to the sea floor and then to him. The shape under the water in the strait, the one Wrackline throws a net back to every morning, is him or his.
+- **The Old Hunger took the children** (owner ruling, [[the-empty-cribs]]). If he is the Hunger, then the thing that emptied the cribs is the thing at the front of the player's queue, and the campaign's kindest presence and its oldest appetite are one figure.
+- **The Lizzarnix rule and the gift.** [[the-three-origins-of-magic]]: the only magic that consumes no one is *willingly given*; a Lizzarnix returns from the egg because it died willingly. A do-not-reconstruct can only be filed by the person's own hand. He needs the Echo **given**, not taken — which is why he cannot simply take the player's, why the front of the queue is a courtship, and why the children of a people who give were worth taking.
+- **[[the-risen]]** — canon says they climb out where the war broke the ground deep enough and that the Ashen Court is the *likeliest, unconfirmed* name behind them. This makes them his: held Echoes with nowhere to go, reworked. Every Risen used to be somebody's return that never came.
+
+## Where it collides with what is written (owner to rule)
+
+- [[the-old-hunger]] is written as *"not organized; orbited"* — an appetite with followers, not a person. An angel who rules a city is a person. Either the Hunger is what the cults see of him from below, or the entry needs a line.
+- [[the-soul-forge]] says a destroyed Forge *"holds nothing — every Echo in that register is gone from it."* True as far as the machine knows. Where they went is now his.
+- [[the-risen]] and [[the-ashen-court]] both lean toward the Court. The Court would then be using his dead, or competing for them; the Court already reroutes around places where the Hunger's pattern is visible.
+- **The Floating City.** [[the-floating-city]] and [[floating-city-council]] exist as places and a power; neither has a ruler written. He rules it. What the Council is to him — mask, priesthood, or hostages — is unwritten.
+- **Shapeshifter, met as several people.** Which faces are his is the most dangerous decision on this page and belongs to the owner alone. Once a face is his, every scene that face is in becomes his scene. Nothing on any board may hint at it until he says which.
 
 ## What canon has been holding open for him
 
@@ -60,24 +89,25 @@ const meta = {
   priority: "critical",
   spoilerLevel: "ending",
   parent: null,
-  characters: ["brother-aster", "ilse-vetch", "nag", "tino"],
+  characters: ["brother-aster", "ilse-vetch", "nag", "tino", "amanda"],
   companions: [],
-  factions: ["the-congregation-of-the-bound", "the-radiant-path"],
-  locations: [],
+  factions: ["the-congregation-of-the-bound", "the-radiant-path", "the-old-hunger", "floating-city-council", "the-ashen-court"],
+  locations: ["the-floating-city", "the-starting-island"],
   arcs: [],
   companionMissions: [],
   bosses: [],
   canonPackets: [],
-  tags: ["end-boss", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea"],
+  tags: ["end-boss", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely"],
   openQuestions: [
-    "What is he? An angel in the world's own sense — a willing-light being — or the intelligence that built the first Forges, or something the Forges made? The three answers are three different games.",
-    "Why the player? Chosen, marked, bought, owed, mistaken for somebody else — or is the player's exception the bait and the angel the hook?",
-    "How does 'pops up once in a while' play: a figure in the reclamation light nobody else sees, a face in the Core, a voice on the platform in the first hour, a stranger who is always at the front of a queue? He must never settle Tino's fate or explain the visions until those arcs spend it.",
-    "Is 'controls all the Soul Forges' literal — every Core answers to him — or the queue only? If literal, the Congregation, the Path, Brother Aster and every keeper on the peninsula have been working for him without knowing.",
-    "What is his relationship to NAG? Same thing, opposite things, or the watch is the one instrument he cannot see through.",
-    "What is he to the Old Hunger and the Ashen Court — is he the third thing under the war, or the fourth?",
-    "What does the end boss fight cost the player — is the front of the queue revoked, and does the player finish the campaign as ordinary as everybody else?",
     "His name. The owner has not given one; nothing on any board names him until he does.",
+    "Which characters are him. The shapeshifter faces are the owner's alone to assign; once a face is his, every scene it stands in is his. Nothing hints at it on a board until he says which.",
+    "What the Floating City Council is to him — mask, priesthood, or hostages — and whether the city knows what rules it.",
+    "How 'the Echo must be given freely' plays at the end: what he offers for it, what the player can refuse, and whether refusing is the win, the loss, or the third ending.",
+    "Old Hunger reconciliation: canon writes it as an appetite orbited by cults, not a person. Is the Hunger what the cults see of him from below, or does the entry gain a line?",
+    "The Risen and the Ashen Court: canon leans toward the Court as their maker. Does the Court use his dead, compete for them, or answer to him?",
+    "What is he to NAG — the one instrument he cannot see through, or the other half of the same gift?",
+    "How 'pops up once in a while' plays without settling Tino's fate or the visions before their arcs spend them.",
+    "What the fight costs the player: is the front of the queue revoked, and does the player finish as ordinary as everybody else?",
   ],
 };
 
