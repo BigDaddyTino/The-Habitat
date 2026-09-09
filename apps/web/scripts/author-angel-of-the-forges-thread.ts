@@ -32,7 +32,7 @@ const apply = process.argv.includes("--apply");
 const SLUG = "the-angel-of-the-forges";
 
 const title = "Illyria, the Angel of the Forges";
-const summary = "The owner's end-boss idea: Illyria, an angel who controls every Soul Forge and keeps the player at the front of the queue, needs the player's Echo given freely, walks the campaign wearing several faces, rules the Floating City — and is where every lost Echo goes. The corrupter of souls. The Old Hunger. Named 2026-09-09. Brainstorming.";
+const summary = "The owner's end-boss idea: Illyria, an angel who controls every Soul Forge and keeps the player at the front of the queue, needs the player's Echo given freely, walks the campaign wearing the Echoes of the dead, rules the Floating City — and is where every lost Echo goes, except one: the player's, which she cannot hold, and wants. The corrupter of souls. The Old Hunger. Brainstorming.";
 
 const body = `**Status: brainstorming. This is an idea the owner wanted stored before it was lost, not canon.** Nothing below is confirmed and nothing reaches the game. She has a name now. She does not yet have a face on any board, and must not.
 
@@ -70,9 +70,9 @@ The owner's notes say the name is a lethal balance: luminous and noble on the su
 - **"She Who Reflects the First Light."** The owner floats this as her celestial title, and it lands squarely on two open questions canon has kept for years: *who built the first Forges* ([[the-soul-forge]]) and *what is the light* (the Path). If the first Forge was a mirror held up to the light so that what fell into it could be caught and returned, then the one who held it is the First Reflection — and mirrors, as the owner says, do not only reflect. They distort, they conceal, and they show the viewer what the viewer wants to see. Humanity has been operating mirrors it did not make, and thinking they were doors.
 - **A crown she designed for herself.** Other names in this world are given — by a Forge ledger, a Court, a union card. Hers is the one name on the peninsula nobody assigned. That is the usurper's mark the owner's notes describe, and it is why the orthodox will hate the name more than they hate her.
 
-## Refractions: what her shapeshifting is, in this world (proposal)
+## Refractions: what her shapeshifting is, in this world (owner ruling, 2026-09-09: yes)
 
-The owner's notes suggest framing her shifts as *Refractions* or *Echoes* — she is not imitating someone, she is absorbing their authority. Martino already has the machinery for this, and it makes her far worse than a shapeshifter:
+The owner's notes suggested framing her shifts as *Refractions* or *Echoes* — she is not imitating someone, she is absorbing their authority. The room took it one step further using Martino's own rules, and on 2026-09-09 the owner said yes to it. This is how she works:
 
 **Every face she wears is a real person's Echo that she holds.** Every register of every Forge that was destroyed or ran dry went to her; those are the dead who never came back. When she needs to walk beside the player as a ferryman, a healer, a hunter met twice on a road, she is not making a mask — she is *wearing one of the dead*, complete: their memory, their manner, the way they held a cup. Her guises are the Risen done properly, and that is why she can pass as anyone and why nobody who knew the original ever quite believes they are looking at a stranger. Some of the faces she wears may be people the player has buried.
 
@@ -106,7 +106,28 @@ The cult accountant keeps the feeding calendar like a shipping schedule, and the
 
 ### The rule, once more
 
-Five groups, five names, five true stories, and not one of them knows the woman. Canon may carry every word above into the faction sheets as folklore. The sentence that makes them one person is written here and nowhere else, until the owner writes the scene where somebody finally says all five names in one breath and understands.
+Five groups, five names, five true stories, and not one of them knows the woman. The owner confirmed all five on 2026-09-09 and asked that they live here, on her card. Canon may carry every word above into the faction sheets as folklore when he sends it. The sentence that makes them one person is written here and nowhere else, until the owner writes the scene where somebody finally says all five names in one breath and understands.
+
+## The one Echo she cannot have (owner ruling, 2026-09-09)
+
+> Illyria is so interested in the Player because the Player is the only one she has ever known to have an Echo that she cannot have. It finds her curious, and for someone who can claim all Echoes she is a little upset that she cannot have this one.
+
+In the world's own terms:
+
+**Every Echo on the peninsula is hers, eventually.** She sequences every Forge. Every register that dies comes to her. Every do-not-reconstruct a person files by their own hand is a gift, and she accepts gifts. She has never once been refused by the dead, because the dead cannot refuse the light; they can only be *interrupted* by a machine, and she owns the machines. In all the centuries she has kept the other side of the mirror, no Echo has ever failed to come to her hand when she reached for it.
+
+**Then the player died for the first time.** The Forge did what a Forge does — reached into the light for the Echo — and she could not close her hand on it. It was not that the Echo fought. It was not *there* the way the others are there. So the machine did the only thing left to it: instead of holding the player as it holds everyone else, it built them, fast, out of whatever the reserve had. [[reclamation]] records exactly this — the player is the one exception a Forge builds underbuilt instead of holding, *and nobody has explained why.* Now the sheet can say what canon could not: **nobody has explained it because she cannot either.** Front of every queue is not grace. It is a hand kept open under the one thing she cannot pick up, so she can watch it fall again.
+
+**What she does not know, and has spent every face she owns trying to learn.** Canon already offers the candidates, and the owner has not chosen:
+- [[nag]]. The watch's own sheet wonders whether the reason a Forge builds one person underbuilt is sitting on that person's wrist, and canon holds that NAG is something ancient that Amanda's gift woke. If the watch is what keeps the Echo out of her hand, then she has been walking beside the one instrument on the peninsula she cannot see through.
+- **A prior gift.** [[the-three-origins-of-magic]]: an Echo given freely consumes no one and cannot be taken. If the player's Echo is already *given* — to a person, a promise, a debt made before the campaign opens — then it is not hers to take because it is already somebody else's to keep. She would find that unbearable and fascinating in equal measure.
+- **The player has never been in the Light.** [[ilse-vetch]] says *you are not alone in it.* Every one of the reclaimed was in the Light with her, whether they remember or not. The player wakes on the platform with no light behind them. If the player's deaths do not pass through her at all — if they are the one soul that falls and does not land where she is — then she has never met the player the way she has met everybody else, and the faces she wears beside them on the road are the closest she has ever come.
+
+**What she feels, in the register the light law demands.** Curiosity first: the first new thing in a very long life, and she is a creature that learned patience because nothing had ever surprised her. Then the small fury, kept perfectly still: she who holds every Echo is missing one, and it is the one the machine keeps handing back to her without a grip. She has never been told no by the dead. The player is a no she cannot argue with, and she does not know who said it. Write it as a crack in the calm and never as rage — a queen who has found one coin in the treasury she cannot pick up and cannot say why. Nothing in her face changes. Everything in the wings does.
+
+**Why the whole campaign is a courtship.** The only way the one Echo she cannot take becomes hers is if the player gives it. So she does what she taught the Sextons to do without their knowing who taught them: she sits with the player in the first hour, wearing the dead, and asks nothing. Asking would be the tell. She helps, she guides, she pops up once in a while — every kindness on the road is a hand held out, palm up, waiting. The end of the game is the moment she finally asks, and the player, knowing by then exactly what she is and what she has done with everyone else's dead, decides whether the one Echo in the world she cannot have is going to be given to her anyway.
+
+What this does to the player's specialness is the point: the player is not chosen. The player is the one thing the god of this world cannot pick up, and has been living at the front of the line because of it.
 
 ## What this answers that canon left open
 
@@ -175,7 +196,7 @@ const meta = {
   tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely", "many-faced", "first-reflection", "sovereign-light", "false-wing", "pale-dawn"],
   openQuestions: [
     "Which characters are her. The shapeshifter faces are the owner's alone to assign; once a face is hers, every scene it stands in is hers. Nothing hints at it on a board until he says which.",
-    "Refractions: is each face she wears a real dead person's held Echo (proposal above), or a made thing? If the former, the Risen and her guises are the same craft at two qualities.",
+    "Why she cannot hold the player's Echo — NAG on the wrist, a prior gift, or a soul that has never been in the Light. The three candidates are on the sheet; the owner picks, and nothing on a board explains it before he does.",
     "The five names (ruled 2026-09-09: all five belong to their five groups, none of them knowing). Which faction sheets carry their folklore first, and who on the peninsula is the first to say all five in one breath — that scene is the owner's.",
     "Her celestial title — 'She Who Reflects the First Light' — makes her the maker or holder of the first Forge. Does the owner want her to have built the Forges, or only to have understood them first?",
     "What the Floating City Council is to her — mask, priesthood, or hostages — and whether the city knows what rules it.",
@@ -216,7 +237,7 @@ async function main() {
     console.log(`~ THREAD ${SLUG} — ${title}`);
     if (apply) {
       await db.storyEntry.update({ where: { id: existing.id }, data: { title, summary, body, meta: next as Prisma.InputJsonValue, updatedByUserId: actor.id, version: { increment: 1 } } });
-      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "The five names ruled canon-shaped: Many-Faced, First Reflection, Sovereign Light, False-Wing, Pale Dawn — each with its faction lore, none joined to her." } });
+      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Refractions ruled yes; the five names confirmed on the card; the one Echo she cannot have — why the player is at the front of every queue." } });
     }
   } else {
     console.log(`= THREAD ${SLUG} already current`);
