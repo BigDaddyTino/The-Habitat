@@ -176,11 +176,11 @@ The room did not know it was leaving her room. It was.
 
 ## Image brief for Sol (owner's direction, 2026-09-09)
 
-The owner's direction: incredibly beautiful, radiant, very sexy, very skimpy armour — she shapeshifts, so she does not wear much; black hair, red irises, olive skin; a figure any man looking at her would want. The full prompt is kept here so the art has one source. The finished piece goes in the thread's art slot (\`codex-art/threads/the-angel-of-the-forges.png\`); it must never appear on a board or beside any character who might be one of her faces.
+The owner's direction: incredibly beautiful, radiant, very sexy, very skimpy armour — she shapeshifts, so she does not wear much; golden hair (owner changed it from black on 2026-09-09, after seeing the first render), red irises, olive skin; a figure any man looking at her would want. The full prompt is kept here so the art has one source. The finished piece goes in the thread's art slot (\`codex-art/threads/the-angel-of-the-forges.png\`); it must never appear on a board or beside any character who might be one of her faces.
 
 > **Illyria, the Angel of the Forges — key art, single figure, full body, portrait orientation.**
 >
-> A woman of impossible, radiant beauty standing at the edge of a floating city at the hour before dawn, the sea far below her and the lights of a drowned island still glowing under the water. She is the most desirable thing in the frame and she knows it. Olive skin with a warm, lit-from-within glow, as if a light with no source is standing just behind her. Long, heavy black hair, loose, moving in a wind that touches nothing else. Eyes with deep red irises — not glowing, just wrong in a way you notice second — held on the viewer with total calm and faint amusement.
+> A woman of impossible, radiant beauty standing at the edge of a floating city at the hour before dawn, the sea far below her and the lights of a drowned island still glowing under the water. She is the most desirable thing in the frame and she knows it. Olive skin with a warm, lit-from-within glow, as if a light with no source is standing just behind her. Long, heavy golden hair, loose, moving in a wind that touches nothing else. Eyes with deep red irises — not glowing, just wrong in a way you notice second — held on the viewer with total calm and faint amusement.
 >
 > Her figure is flawless and frankly sensual: full, perfect breasts; a narrow waist; wide hips and a round, high, perfect ass; long, strong, bare legs. She wears almost nothing and it is armour anyway: a few plates of pale platinum-white metal, mirror-polished so they reflect the viewer, placed only where they draw the eye — a breastplate cut in a deep, plunging V that opens to the sternum, so the collarbones, the centre of her chest and the full upper curve of her décolletage are bare skin framed by metal; a hip-guard that is more chain than plate; one greave on one leg; one gauntlet. Fine chains of white metal cross her bare skin between the plates. Every reflective surface on her shows something slightly different from what is actually in front of her.
 >
@@ -190,7 +190,7 @@ The owner's direction: incredibly beautiful, radiant, very sexy, very skimpy arm
 >
 > Expression: warm, patient, a little tender, the way you would look at someone you are about to help and have already decided how it ends. Nothing in her face is cruel. Everything in the wings is.
 >
-> Palette: platinum white, warm olive and gold skin, deep black hair, blood-red iris, cold pre-dawn blue behind her, the sick green-gold of the drowned island's lights below. Painterly realism, cinematic key-art lighting, extreme detail on skin, metal and glass. She is meant to be wanted and she is meant to be feared, for the same reason. No nudity: the plates and chains cover what they must and not one inch more. No halo, no feathers, no text.
+> Palette: platinum white, warm olive and gold skin, deep golden hair, blood-red iris, cold pre-dawn blue behind her, the sick green-gold of the drowned island's lights below. Painterly realism, cinematic key-art lighting, extreme detail on skin, metal and glass. She is meant to be wanted and she is meant to be feared, for the same reason. No nudity: the plates and chains cover what they must and not one inch more. No halo, no feathers, no text.
 
 ## Questions the room should argue before anybody writes a scene
 
@@ -257,7 +257,7 @@ async function main() {
     console.log(`~ THREAD ${SLUG} — ${title}`);
     if (apply) {
       await db.storyEntry.update({ where: { id: existing.id }, data: { title, summary, body, meta: next as Prisma.InputJsonValue, updatedByUserId: actor.id, version: { increment: 1 } } });
-      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "The red stone at her throat — the colour of her eyes — as the owner's candidate for what she trades; image brief reworded around the neckline and the necklace." } });
+      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Her hair is golden now (owner ruling after the first render); the red stone at her throat as the candidate object she trades; brief reworded around the neckline and the necklace." } });
     }
   } else {
     console.log(`= THREAD ${SLUG} already current`);
