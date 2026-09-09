@@ -32,7 +32,7 @@ const apply = process.argv.includes("--apply");
 const SLUG = "the-angel-of-the-forges";
 
 const title = "Illyria, the Angel of the Forges";
-const summary = "The owner's end-boss idea: Illyria, an angel who controls every Soul Forge and keeps the player at the front of the queue, needs the player's Echo given freely, walks the campaign wearing the Echoes of the dead, rules the Floating City — and is where every lost Echo goes, except one: the player's, which she cannot hold, and wants. The corrupter of souls. The Old Hunger. Brainstorming.";
+const summary = "The owner's end-boss idea: Illyria, an angel who controls every Soul Forge and keeps the player at the front of the queue, needs the player's Echo given freely, walks the campaign wearing the Echoes of the dead, rules the Floating City — and is where every lost Echo goes, except one: the player's, which she cannot hold, and wants — so at the very end she asks: give it, refuse and fight, or merge and open Hard Mode. The corrupter of souls. The Old Hunger. Brainstorming.";
 
 const body = `**Status: brainstorming. This is an idea the owner wanted stored before it was lost, not canon.** Nothing below is confirmed and nothing reaches the game. She has a name now. She does not yet have a face on any board, and must not.
 
@@ -129,6 +129,20 @@ In the world's own terms:
 
 What this does to the player's specialness is the point: the player is not chosen. The player is the one thing the god of this world cannot pick up, and has been living at the front of the line because of it.
 
+## The very end: three roads in front of her (owner ruling, 2026-09-09)
+
+> Since she cannot take his Echo he has to give it willingly. That is why she helps the player throughout the campaign. At the VERY END of the campaign — not written yet — the player will have a decision in front of her: Give the Echo and receive something in return. Refuse, and the boss battle begins. Third option: merge your Echo and hers together as one, become a super abomination and start at level 1 again, like when you become an abomination with only a small fragment of your Echo — and this can start Hard Mode, which is a future implementation.
+
+So ruled. The campaign's last scene is not a fight. It is a woman the player has met a dozen times under a dozen faces, finally wearing her own, holding out her hand, palm up, and asking for the one thing on the peninsula she has never been able to take. Everything she did on the road was for this minute. The player chooses, and the choice is the ending. Nothing about the scene is written yet; what follows is how the three roads sit in the world's own rules, so the room knows the shape before anybody writes a line.
+
+**Give.** The Echo goes to her the only way it ever could — willingly — and by [[the-three-origins-of-magic]] a gift consumes no one, so the player does not burn for it. She keeps her word and gives something back; what that something is belongs to the owner. The room's law for it: it must be real, it must be enormous, and it must be exactly what the player has spent the whole campaign wanting, because her whole method is to know what the viewer wants to see. Whether she also keeps the promise she made to the dead she wears is the story's last question. This is the ending the [[the-radiant-path]] would call salvation and the [[the-congregation-of-the-bound]] would refuse to have a word for.
+
+**Refuse.** The hand closes on nothing for the second time in her life, and the calm finally cracks. The boss battle begins — the fight [[the-empty-cribs]] has been ending on without a name for years. Refractions ruled yes gives the fight its shape: she has as many bodies as she holds Echoes, and the player has spent the campaign taking them from her one refused reclamation at a time, so what the player fights at the end is what is *left* of her — the faces still in the wings. The player's front-of-queue privilege is at stake here; whether she can revoke it mid-fight, and whether the player finishes the game as ordinary as everybody else, stays open below.
+
+**Merge.** The third road, and the one only Martino could offer. The player does not give the Echo and does not keep it: the two Echoes are made one. Canon already has the precedent — [[abominations]] are what a person becomes when [[the-seven-phases-of-corruption]] completes, the phase nobody has been recorded returning from, and the owner's rule for the player crossing that line is a body remade from a small fragment of their own Echo, back at level 1. This is that, done on purpose, with her. What comes out is not an abomination of infusion; it is an abomination of the light — a super-abomination carrying two Echoes and every face she ever wore, standing on the platform at level 1 with a fragment of itself and all of her. This road is the door into **Hard Mode** (future implementation: nothing below it is designed yet, only reserved). What Hard Mode is — the same peninsula with her gone from the queues and nobody at the front of the line; the world as it would be if the Forges had a different keeper; the Risen answering to the player — is the owner's, and no board may guess at it.
+
+**What this locks and what it leaves open.** Locked: three roads, in this order, at the very end, in front of her, and that she asks rather than takes. Open, and the owner's: what she gives in return; the boss fight's design and cost; what the merged thing is called and what it can do; and everything about Hard Mode past the fact that Merge opens it.
+
 ## What this answers that canon left open
 
 - **[[the-old-hunger]]'s own open questions** — *"Is the silhouette beneath Ignit the Hunger itself?"* and *"Where is the island's disappearing magic actually going?"* — are answered in one stroke: every Echo in Kestrel's Core went to the sea floor and then to her. The shape under the water in the strait, the one Wrackline throws a net back to every morning, is her or hers.
@@ -193,14 +207,14 @@ const meta = {
   canonPackets: [],
   facets: ["story", "characters", "systems", "regions"],
   sections: [],
-  tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely", "many-faced", "first-reflection", "sovereign-light", "false-wing", "pale-dawn"],
+  tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely", "many-faced", "first-reflection", "sovereign-light", "false-wing", "pale-dawn", "three-endings", "hard-mode", "abomination"],
   openQuestions: [
     "Which characters are her. The shapeshifter faces are the owner's alone to assign; once a face is hers, every scene it stands in is hers. Nothing hints at it on a board until he says which.",
     "Why she cannot hold the player's Echo — NAG on the wrist, a prior gift, or a soul that has never been in the Light. The three candidates are on the sheet; the owner picks, and nothing on a board explains it before he does.",
     "The five names (ruled 2026-09-09: all five belong to their five groups, none of them knowing). Which faction sheets carry their folklore first, and who on the peninsula is the first to say all five in one breath — that scene is the owner's.",
     "Her celestial title — 'She Who Reflects the First Light' — makes her the maker or holder of the first Forge. Does the owner want her to have built the Forges, or only to have understood them first?",
     "What the Floating City Council is to her — mask, priesthood, or hostages — and whether the city knows what rules it.",
-    "How 'the Echo must be given freely' plays at the end: what she offers for it, what the player can refuse, and whether refusing is the win, the loss, or the third ending.",
+    "The end is ruled (Give / Refuse / Merge, see the sheet). Still the owner's: what she gives in return for the Echo; the boss fight's design and what it costs the player; what the merged super-abomination is called and can do; and everything about Hard Mode beyond the fact that Merge opens it.",
     "Old Hunger reconciliation: canon writes it as an appetite orbited by cults, not a person. Is the Hunger what the cults see of her from below, or does the entry gain a line?",
     "The Risen and the Ashen Court: canon leans toward the Court as their maker. Does the Court use her dead, compete for them, or answer to her?",
     "What is she to NAG — the one instrument she cannot see through, or the other half of the same gift?",
@@ -237,7 +251,7 @@ async function main() {
     console.log(`~ THREAD ${SLUG} — ${title}`);
     if (apply) {
       await db.storyEntry.update({ where: { id: existing.id }, data: { title, summary, body, meta: next as Prisma.InputJsonValue, updatedByUserId: actor.id, version: { increment: 1 } } });
-      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Refractions ruled yes; the five names confirmed on the card; the one Echo she cannot have — why the player is at the front of every queue." } });
+      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "The very end ruled: Give, Refuse, or Merge — the three roads in front of her, and Merge opens Hard Mode (future)." } });
     }
   } else {
     console.log(`= THREAD ${SLUG} already current`);
