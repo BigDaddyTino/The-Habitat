@@ -78,15 +78,35 @@ The owner's notes suggest framing her shifts as *Refractions* or *Echoes* — sh
 
 This gives the reveal its teeth. It also gives the fight a mechanic: she has as many bodies as she has stolen Echoes, and the player's road through the campaign has been taking them from her one refused reclamation at a time.
 
-## Epithets, and who uses them (proposal — the owner picks)
+## Five names for one woman (owner ruling, 2026-09-09)
 
-The owner's list, re-homed into Martino's mouths. None is canon until he says so:
+> We can use all of these. They are the names of something each faith or faction calls her without actually knowing it is Illyria herself. They can have lore and stories about the epithets, but never draw the solid line to Illyria herself.
 
-- **Illyria the Many-Faced** — what the [[the-ashen-court]] calls her when it finally understands what has been rerouting its dead.
-- **Illyria the First Reflection** — the [[the-congregation-of-the-bound]]'s name for her, spoken once and never again; their whole discipline is not asking who else is in the light, and this is the answer they were not asking about.
-- **Illyria the Sovereign Light** — the [[the-radiant-path]]'s name, said with love. The Path is right about the light and wrong about who is in it.
-- **Illyria False-Wing** — the insult. Martino has no choir of orthodox angels to sneer at her; the closest thing is the [[floating-city-council]], if the Council turns out to be a priesthood that knows what it serves and hates it.
-- **Illyria the Pale Dawn** — the [[the-old-hunger]]'s cults, from below, who see only the light of her coming and think it is morning.
+So ruled. Each of the five is a real thing inside its group — a word with a history, stories, a rule about when it is said — and not one of the five groups knows the other four are talking about the same woman. **The solid line exists only on this sheet.** No faction sheet, no Sexton, no cultist, no board, no sheet of hers may ever join a name to her. When the room writes any of these into its faction's canon, it writes the folklore and stops.
+
+### The Many-Faced — the Ashen Court's discrepancy
+
+The Court prices wars. It keeps accounts of the dead it expects to claim through a rift, and for as long as the Court has kept books there has been a line the envoys do not like to read aloud: dead that should have risen for the Court climb out of the broken ground *already claimed*. [[the-risen]] answer to nobody the Court can name. The demon nobility's word for that column is **the Many-Faced**, and the story under it is old: a rift opened under a battlefield where three of the Court's own envoys had died, and what came up out of the crater wore their three faces, and bowed, and walked away in three directions. Court etiquette since then forbids the name at any table laid with mirrors. The Court reroutes around certain places — canon says the places belong to the Hunger; the envoys believe they are stepping around the Many-Faced, and would be insulted to hear the two names put together. Displaced nobility watching a burning estate is the Court's whole posture on the Drain; the Many-Faced is the tenant they cannot evict and have never once seen.
+
+### The First Reflection — the Congregation's one unspoken line
+
+The Sexton's office is not asking where the dead are between the falling and the platform. In the oldest platform ledgers, the ones that predate the Sextons having a name, there is a marginal gloss in the first keeper's hand that every Sexton is shown once, at ordination, and never again: *the platform is a mirror; the First Reflection keeps the other side.* The Bound's doctrine is that this is not a name. It is a description of the machine — a platform is polished, a body forms on it, of course something is reflected. The story the Sextons do not tell is that the first keeper, sitting the first hour with the first reclaimed, looked down into the platform's polish and saw a face looking back that was not the reclaimed's and was not the keeper's, and wrote the gloss, and closed the ledger, and that the not-asking began that night and has not stopped. [[the-sexton-of-heartland]] has an altar that talks back ([[brother-aster]]) and has never put the question to it. That is the office.
+
+### The Sovereign Light — what the Radiant Path says with love
+
+[[ilse-vetch]]'s testimony has five words in it the four articles never quote: *you are not alone in it.* Among the Radiant — the rung that claims to remember — there is a fifth article, unwritten, passed only in the Remembering: someone is in the Light with you, and she is kind. The Path calls her **the Sovereign Light**: sovereign because the Light is hers and not the machine's, because the Forge is a landlord and she is the owner who has never charged anyone rent. The Remembering ends with a question the Unlit are not allowed to hear asked — *was anyone there?* — and the Returned who say yes describe a woman, and no two of them describe the same one: different hair, different age, a foreman's widow, a girl from the waterfront, an old woman with a lantern. The Path takes the differences as proof. She meets each of the dead as that one needs to be met. It is the tenderest doctrine on the peninsula, and it is the only one of the five names said out loud with joy — funded, without the Path knowing, by the [[crimson-choir]], which is the second thing the Path does not know about who its friends are.
+
+### False-Wing — the Floating City Council's unlicensed anomaly
+
+The Council charges gods rent and licenses every faith but one. It also keeps one thing it will not license and cannot name in a minute: the city holds altitude it cannot afford. The ballast engineers' lift arithmetic has a discrepancy — the city floats on more than the Council funds, maintains, or understands — and the engineers' private word for the surplus is **the false wing**: the second wing nobody built. The engineers who have seen the projections started attending church; the councillor whose family seat predates the current altitude keeps a sealed room and a ledger of what the room cost; the spymaster carries the same discrepancy as a budget line and watches the ground for whoever is going to present the bill. In the ground-born districts the word has turned to folklore the ordinances cannot reach: *the city flies on a stolen wing, and one day the owner comes for it.* Said at altitude, False-Wing is an insult — the name of a fraud the city is committing on itself. She rules the city. The Council believes it does. The Council is the only one of the five that is afraid of the right thing.
+
+### The Pale Dawn — what the Hunger's cults are waiting for
+
+The cult accountant keeps the feeding calendar like a shipping schedule, and the calendar was inherited, and its last entry is not a feeding. It is a date that recurs, is never reached, and moves: **the Pale Dawn**. The coastal village that throws one net's catch back every morning at first light no longer remembers being told to; the telling, three great-grandmothers ago, was *for the pale dawn*. The cults' most disquieting claim — that the Hunger grows less patient as the world drains, that the reserves are not vanishing but *going somewhere* — ends in the Pale Dawn: the morning the Hunger has been fed enough to rise, when the light on the water at first light will not be the sun but the thing beneath coming up into it. They are right about the light. They are wrong about the direction. She is not coming up from under the strait. She has been above them, in the sky over the lake, the whole time, and the dawn the cults throw their catch to is the one thing on the peninsula that has never needed feeding.
+
+### The rule, once more
+
+Five groups, five names, five true stories, and not one of them knows the woman. Canon may carry every word above into the faction sheets as folklore. The sentence that makes them one person is written here and nowhere else, until the owner writes the scene where somebody finally says all five names in one breath and understands.
 
 ## What this answers that canon left open
 
@@ -152,11 +172,11 @@ const meta = {
   canonPackets: [],
   facets: ["story", "characters", "systems", "regions"],
   sections: [],
-  tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely"],
+  tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely", "many-faced", "first-reflection", "sovereign-light", "false-wing", "pale-dawn"],
   openQuestions: [
     "Which characters are her. The shapeshifter faces are the owner's alone to assign; once a face is hers, every scene it stands in is hers. Nothing hints at it on a board until he says which.",
     "Refractions: is each face she wears a real dead person's held Echo (proposal above), or a made thing? If the former, the Risen and her guises are the same craft at two qualities.",
-    "Which epithet is hers, and in whose mouth. The five proposals are re-homed from the owner's notes; none is canon.",
+    "The five names (ruled 2026-09-09: all five belong to their five groups, none of them knowing). Which faction sheets carry their folklore first, and who on the peninsula is the first to say all five in one breath — that scene is the owner's.",
     "Her celestial title — 'She Who Reflects the First Light' — makes her the maker or holder of the first Forge. Does the owner want her to have built the Forges, or only to have understood them first?",
     "What the Floating City Council is to her — mask, priesthood, or hostages — and whether the city knows what rules it.",
     "How 'the Echo must be given freely' plays at the end: what she offers for it, what the player can refuse, and whether refusing is the win, the loss, or the third ending.",
@@ -196,7 +216,7 @@ async function main() {
     console.log(`~ THREAD ${SLUG} — ${title}`);
     if (apply) {
       await db.storyEntry.update({ where: { id: existing.id }, data: { title, summary, body, meta: next as Prisma.InputJsonValue, updatedByUserId: actor.id, version: { increment: 1 } } });
-      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Named her: Illyria. She is a woman. The owner's name notes read against Martino, Refractions proposed, epithets re-homed, Sol image brief added." } });
+      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "The five names ruled canon-shaped: Many-Faced, First Reflection, Sovereign Light, False-Wing, Pale Dawn — each with its faction lore, none joined to her." } });
     }
   } else {
     console.log(`= THREAD ${SLUG} already current`);
