@@ -973,6 +973,7 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
     // by the Idea Center's own action and only carried through, like the packets.
     facets: facets.filter((value): value is StoryThreadMeta["facets"][number] => (storyIdeaFacets as readonly string[]).includes(value)),
     sections: asArray(source.sections) as StoryThreadMeta["sections"],
+    artSlots: asArray(source.artSlots) as StoryThreadMeta["artSlots"],
     tags: splitLines(tags),
     openQuestions: splitLines(openQuestions),
   };

@@ -233,3 +233,19 @@
 .idea-facet-picker.is-compact .idea-facet-option { min-height: 38px; padding: 7px 10px; }
 .idea-footnote { margin: 22px 0 0; color: var(--idea-soft); font-size: 12px; line-height: 1.6; }
 .idea-footnote a { color: var(--brass); }
+
+/* key art & scenes — the codex art slots an idea wears or is waiting for */
+.idea-art h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-family: var(--font-display); font-size: 20px; color: var(--paper); }
+.idea-art h2 small { color: var(--idea-soft); font-family: var(--font-mono); font-size: 10px; }
+.idea-art-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 14px; }
+.idea-art-slot { margin: 0; border: 1px solid var(--idea-line); background: #0f130f; }
+.idea-art-slot.is-key { grid-column: 1 / -1; }
+.idea-art-slot img { display: block; width: 100%; max-height: 720px; object-fit: contain; background: #0a0d0a; }
+.idea-art-slot.is-key img { aspect-ratio: auto; }
+.idea-art-slot:not(.is-key) img { aspect-ratio: 3 / 4; object-fit: cover; }
+.idea-art-empty { display: grid; place-items: center; aspect-ratio: 3 / 4; border-bottom: 1px dashed #4b554a; background: repeating-linear-gradient(135deg, #10150f 0 12px, #131813 12px 24px); color: #5d665c; }
+.idea-art-slot.is-key .idea-art-empty { aspect-ratio: 16 / 7; }
+.idea-art-slot figcaption { display: grid; gap: 4px; padding: 9px 11px; font-size: 12.5px; color: #cbbd97; }
+.idea-art-slot figcaption strong { font-family: var(--font-display); font-size: 16px; color: var(--paper); }
+.idea-art-slot figcaption code { color: var(--idea-soft); font-family: var(--font-mono); font-size: 9.5px; word-break: break-all; }
+.idea-art-slot.is-filled { border-color: #5d5137; }

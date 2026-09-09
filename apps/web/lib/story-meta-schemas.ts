@@ -284,6 +284,7 @@ export const threadMetaSchema = z.object({
   // the packets — a sheet that forgets them must fail loudly, not wipe them.
   facets: z.array(z.enum(storyIdeaFacets)).max(storyIdeaFacets.length),
   sections: z.array(z.object({ id: z.string().uuid(), facet: z.enum(storyIdeaFacets), body: z.string().trim().min(1).max(6000), authorUserId: z.string().uuid(), authorName: metaText(120), at: z.string().max(40) })).max(60),
+  artSlots: z.array(z.object({ key: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(40), label: metaText(120) })).max(12),
   tags: metaLines(20, 40),
   openQuestions: metaLines(30, 500),
 });

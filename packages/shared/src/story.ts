@@ -1364,6 +1364,8 @@ export type StoryThreadMeta = {
   facets: StoryIdeaFacet[];
   /** Extra detail per facet, written by anybody, attributed. */
   sections: StoryIdeaSection[];
+  /** Pictures the idea is waiting for: each key is a file `threads/<slug>-<key>.png`. */
+  artSlots: StoryIdeaArtSlot[];
   tags: string[];
   openQuestions: string[];
 };
@@ -1557,4 +1559,10 @@ export type StoryIdeaSection = {
   authorName: string;
   /** ISO date-time. */
   at: string;
+};
+
+/** A picture an idea is waiting for. The file is `private/codex-art/threads/<slug>-<key>.png`. */
+export type StoryIdeaArtSlot = {
+  key: string;
+  label: string;
 };

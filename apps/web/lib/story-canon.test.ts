@@ -97,6 +97,7 @@ test("the thread sheet refuses a save that forgot the packets", () => {
     canonPackets: [packet()],
     facets: [],
     sections: [],
+    artSlots: [],
     tags: [],
     openQuestions: [],
   };

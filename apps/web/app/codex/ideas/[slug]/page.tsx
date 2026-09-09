@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Bookmark, BookmarkCheck, Check, FileText, ImagePlus, Link2, MessageSquareText, Pencil, ScrollText, Trash2, TriangleAlert } from "lucide-react";
+import { ArrowLeft, Bookmark, BookmarkCheck, Check, FileText, Frame, ImagePlus, Link2, MessageSquareText, Pencil, ScrollText, Trash2, TriangleAlert } from "lucide-react";
 import { storyIdeaFacetBlurbs, storyIdeaFacetColors, storyIdeaFacetLabels, storyIdeaFacets, storyIdeaStageLabels, storyThreadStatuses } from "@habitat/shared";
 import { addComment, resolveComment } from "@/app/codex/actions";
 import { deleteIdeaAttachment, setIdeaAttachmentCaption, setIdeaFacets, setIdeaStage, toggleIdeaBookmark, updateIdeaText } from "@/app/codex/ideas/actions";
@@ -63,6 +63,25 @@ export default async function IdeaPage({ params, searchParams }: { params: Promi
       <div className="idea-page-grid">
         <div className="idea-page-main">
           <IdeaDetail idea={idea} initialTab={initialTab} interactive viewerId={user.id} />
+
+          {idea.keyArt || idea.artSlots.length ? (
+            <section className="idea-art" id="art">
+              <h2><Frame aria-hidden="true" size={16} /> Key art &amp; scenes <small>{[idea.keyArt ? 1 : 0, ...idea.artSlots.map((slot) => (slot.url ? 1 : 0))].reduce((a, b) => a + b, 0)} of {idea.artSlots.length + 1} in</small></h2>
+              <p className="idea-hint">The codex art slots for this idea. A picture appears here the moment its file is dropped in the folder named on the empty slot — no upload, no save.</p>
+              <div className="idea-art-grid">
+                <figure className={`idea-art-slot is-key${idea.keyArt ? " is-filled" : ""}`}>
+                  {idea.keyArt ? <a href={idea.keyArt} rel="noopener" target="_blank"><img alt={`${idea.title} — key art`} src={idea.keyArt} /></a> : <div className="idea-art-empty" aria-hidden="true"><Frame size={28} /></div>}
+                  <figcaption><strong>Key art</strong>{idea.keyArt ? null : <code>private/codex-art/threads/{idea.slug}.png</code>}</figcaption>
+                </figure>
+                {idea.artSlots.map((slot) => (
+                  <figure className={`idea-art-slot${slot.url ? " is-filled" : ""}`} key={slot.key}>
+                    {slot.url ? <a href={slot.url} rel="noopener" target="_blank"><img alt={`${idea.title} — ${slot.label}`} loading="lazy" src={slot.url} /></a> : <div className="idea-art-empty" aria-hidden="true"><Frame size={28} /></div>}
+                    <figcaption><strong>{slot.label}</strong>{slot.url ? null : <code>{slot.path}</code>}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="idea-attachments" id="pictures">
             <h2><ImagePlus aria-hidden="true" size={16} /> Pictures &amp; files <small>{idea.attachments.length}</small></h2>

@@ -194,6 +194,10 @@ The owner's direction: incredibly beautiful, radiant, very sexy, very skimpy arm
 
 ### The three roads, as three images (2026-09-09)
 
+**Key art: in (2026-09-09).** The owner accepted a render and it sits in the thread's art slot (\`private/codex-art/threads/the-angel-of-the-forges.png\`): golden hair, mirror-plate armour with the deep V, the fractured-mirror wings full of faces, a marble city in living flowers and ivy, the drowned island green under the sea. One note for the owner, not a correction: in that render her irises and the stone came out **violet**, and the ruling on this sheet is **red**. Either the sheet changes or the next render does; the room has not changed the sheet.
+
+**The three scenes below have their own slots** on this idea's page — three placeholders that fill in the moment the files land: \`the-angel-of-the-forges-give.png\`, \`the-angel-of-the-forges-refuse.png\`, \`the-angel-of-the-forges-merge.png\`, all under \`private/codex-art/threads/\`. Portrait orientation, PNG, at least 2048 on the long side. Match the accepted key art: her golden hair, her armour, the marble city, the living ground.
+
 One scene, one woman, one minute, three ways it goes. All three share the same stage — the platform at the edge of the Floating City before dawn, the drowned island glowing under the sea below — and the same Illyria as the key art above (golden hair, red irises, olive skin, mirror-plate armour with the deep V, the red stone at her chest, fractured-mirror wings full of faces). **The player is never given a face.** The player is a figure seen from behind or in silhouette: a hooded travelling coat, a pack, a weapon on the back, so any player can be that shape. No board may use these; they are for the Idea Center and the owner.
 
 > **GIVE.** Same stage, same woman, tender and quiet. Illyria stands close to the player, who is seen from behind in a hooded travelling coat, close enough that her mirror wings curve around both of them like a room. Her right hand is out, palm up, and resting in it is a small sphere of soft white light — the player's Echo — lifting from the player's chest into her hand in a thin thread of light. With her left hand she is reaching past the player's shoulder to fasten a fine white-metal chain around their neck: the red stone, her stone, now leaving her chest for the player's, the only red thing in the frame. Her expression is the tenderest thing on the peninsula: eyes half-closed, the faint smile of someone receiving the one gift she could never take. In the wings every reflected face has gone still and peaceful, all of them looking at the player. The light between the two figures is warm and gold; the sky behind is the first real blue of dawn breaking. Painterly realism, cinematic lighting, extreme detail on skin, metal, glass and the stone. No nudity, no halo, no feathers, no text.
@@ -223,6 +227,12 @@ const meta = {
   canonPackets: [],
   facets: ["story", "characters", "systems", "regions"],
   sections: [],
+  // The pictures she is waiting for. Files: private/codex-art/threads/the-angel-of-the-forges-<key>.png
+  artSlots: [
+    { key: "give", label: "The Give ending — the stone leaves her chest for the player's" },
+    { key: "refuse", label: "The Refuse ending — the hand closes on nothing, the wings shatter" },
+    { key: "merge", label: "The Merge ending — two Echoes become one abomination of light" },
+  ],
   tags: ["end-boss", "illyria", "soul-forge", "angel", "the-light", "the-player-exception", "owner-idea", "the-old-hunger", "the-risen", "shapeshifter", "floating-city", "echo-given-freely", "many-faced", "first-reflection", "sovereign-light", "false-wing", "pale-dawn", "three-endings", "hard-mode", "abomination"],
   openQuestions: [
     "Which characters are her. The shapeshifter faces are the owner's alone to assign; once a face is hers, every scene it stands in is hers. Nothing hints at it on a board until he says which.",
@@ -267,7 +277,7 @@ async function main() {
     console.log(`~ THREAD ${SLUG} — ${title}`);
     if (apply) {
       await db.storyEntry.update({ where: { id: existing.id }, data: { title, summary, body, meta: next as Prisma.InputJsonValue, updatedByUserId: actor.id, version: { increment: 1 } } });
-      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Three image briefs for the three roads — Give, Refuse, Merge — on one stage, with the player never given a face." } });
+      await db.storyRevision.create({ data: { id: randomUUID(), entityType: "ENTRY", entityId: existing.id, action: "UPDATED", actorUserId: actor.id, summary: "Key art accepted and in her slot; three art slots opened for the Give, Refuse and Merge scenes." } });
     }
   } else {
     console.log(`= THREAD ${SLUG} already current`);

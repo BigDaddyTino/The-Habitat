@@ -219,6 +219,7 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
     canonPackets: [],
     facets: ["story", "characters"],
     sections: [],
+    artSlots: [],
     companionMissions: [
       "the-woman-in-the-peninsula",
       "smoke-in-her-hair",

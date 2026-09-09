@@ -141,6 +141,7 @@ export async function POST(request: Request) {
     canonPackets: [],
     facets,
     sections: [],
+    artSlots: [],
     tags: [],
     openQuestions: [],
   };

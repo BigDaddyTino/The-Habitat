@@ -114,7 +114,7 @@ async function main() {
     const thread = await db.storyEntry.findUnique({ where: { slug }, select: { id: true, kind: true, meta: true } });
     if (!thread || thread.kind !== "THREAD") { console.warn(`! ${slug} is not a thread; skipped`); continue; }
     const current = thread.meta as Record<string, unknown>;
-    const meta = { ...current, facets, sections: Array.isArray(current.sections) ? current.sections : [] };
+    const meta = { ...current, facets, sections: Array.isArray(current.sections) ? current.sections : [], artSlots: Array.isArray(current.artSlots) ? current.artSlots : [] };
     const parsed = schema.safeParse(meta);
     if (!parsed.success) { console.error(slug, JSON.stringify(parsed.error.issues, null, 1)); process.exitCode = 2; return; }
     if (stableJson(thread.meta) === stableJson(meta)) { console.log(`= ${slug} facets already ${facets.join(", ")}`); continue; }
@@ -152,6 +152,7 @@ async function main() {
       canonPackets: [],
       facets: idea.facets,
       sections: [],
+      artSlots: [],
       tags: idea.tags,
       openQuestions: [],
     };

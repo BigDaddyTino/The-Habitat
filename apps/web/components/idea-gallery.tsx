@@ -52,8 +52,8 @@ export function IdeaGallery({ ideas, viewerId, view, openSlug }: { ideas: IdeaCa
     <>
       <div className={view === "list" ? "idea-list" : "idea-grid"}>
         {ideas.map((idea) => (
-          <article className={`idea-card${view === "list" ? " is-list" : ""}${idea.cover ? " has-cover" : ""}`} key={idea.id} onClick={onCardClick(idea.slug)} onKeyDown={(event) => { if (event.key === "Enter" && event.target === event.currentTarget) show(idea.slug); }} tabIndex={0}>
-            {idea.cover && view === "grid" ? <img alt={idea.cover.caption ?? ""} className="idea-cover" loading="lazy" src={`${idea.cover.url}`} /> : null}
+          <article className={`idea-card${view === "list" ? " is-list" : ""}${idea.cover || idea.keyArt ? " has-cover" : ""}`} key={idea.id} onClick={onCardClick(idea.slug)} onKeyDown={(event) => { if (event.key === "Enter" && event.target === event.currentTarget) show(idea.slug); }} tabIndex={0}>
+            {(idea.cover || idea.keyArt) && view === "grid" ? <img alt={idea.cover?.caption ?? ""} className="idea-cover" loading="lazy" src={idea.cover?.url ?? idea.keyArt ?? ""} /> : null}
             <div className="idea-card-body">
               <header className="idea-card-head">
                 <FacetBadges facets={idea.facets} small />
@@ -90,7 +90,7 @@ export function IdeaGallery({ ideas, viewerId, view, openSlug }: { ideas: IdeaCa
               </div>
               <button aria-label="Close" className="idea-icon-button is-close" onClick={() => show(null)} type="button"><X aria-hidden="true" size={18} /></button>
             </header>
-            {current.cover ? <img alt={current.cover.caption ?? ""} className="idea-drawer-cover" src={current.cover.url} /> : null}
+            {current.cover || current.keyArt ? <img alt={current.cover?.caption ?? ""} className="idea-drawer-cover" src={current.cover?.url ?? current.keyArt ?? ""} /> : null}
             <IdeaDetail idea={current} interactive={false} viewerId={viewerId} />
             <footer className="idea-drawer-foot">
               <Link className="save-server" href={`/codex/ideas/${current.slug}`}>Open the full page <ArrowUpRight aria-hidden="true" size={13} /></Link>

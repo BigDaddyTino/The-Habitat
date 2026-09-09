@@ -60,3 +60,14 @@ export function cutOnWord(source: string, max: number): string {
 export function ideaPreview(summary: string | null, body: string | null, max = 180): string {
   return cutOnWord(plainStoryProse((summary?.trim() || body?.trim() || "").replace(/\s+/g, " ")), max);
 }
+
+/** The pictures an idea is waiting for, in the order the sheet lists them; malformed rows are dropped. */
+export function ideaArtSlotsOf(meta: unknown): Array<{ key: string; label: string }> {
+  const rows = asRecord(meta).artSlots;
+  if (!Array.isArray(rows)) return [];
+  return rows.flatMap((row) => {
+    const record = asRecord(row);
+    if (typeof record.key !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(record.key)) return [];
+    return [{ key: record.key, label: typeof record.label === "string" && record.label.trim() ? record.label : record.key.replaceAll("-", " ") }];
+  });
+}

@@ -6,8 +6,9 @@ import {
   type StoryIdeaSection,
   type StoryThreadStatus,
 } from "@habitat/shared";
+import { codexArtSlot, findCodexArt } from "./codex-art";
 import { ideaAttachmentUrl, isIdeaImageType } from "./idea-attachments";
-import { ideaFacetsOf, ideaPreview, ideaSectionsOf, ideaStatusOf } from "./story-ideas-pure";
+import { ideaArtSlotsOf, ideaFacetsOf, ideaPreview, ideaSectionsOf, ideaStatusOf } from "./story-ideas-pure";
 
 export { ideaFacetsOf, ideaPreview, ideaSectionsOf, ideaStatusOf, ideaTabs } from "./story-ideas-pure";
 
@@ -59,6 +60,8 @@ export type IdeaCard = {
   commentCount: number;
   attachmentCount: number;
   cover: IdeaAttachment | null;
+  /** The thread's key art from the codex art slot, when somebody has dropped one in. */
+  keyArt: string | null;
   sections: StoryIdeaSection[];
   tags: string[];
   bookmarked: boolean;
@@ -125,6 +128,7 @@ export async function listIdeas(viewerId: string, filter: IdeaFilter = {}): Prom
         commentCount: row._count.comments,
         attachmentCount: attachments.length,
         cover: attachments.find((item) => item.isImage) ?? null,
+        keyArt: findCodexArt("threads", canonicalStoryEntryRouteSlug(row.slug)),
         sections: ideaSectionsOf(row.meta),
         tags: strings(asRecord(row.meta).tags),
         bookmarked: row.bookmarks.some((bookmark) => bookmark.userId === viewerId),
@@ -144,6 +148,8 @@ export type IdeaComment = { id: string; body: string; author: IdeaPerson; create
 export type Idea = IdeaCard & {
   version: number;
   attachments: IdeaAttachment[];
+  /** Named pictures the idea is waiting for; `url` is set once the file is on disk. */
+  artSlots: Array<{ key: string; label: string; url: string | null; path: string }>;
   comments: IdeaComment[];
   /** Thread-only detail, shown inside the Story tab. */
   categories: string[];
@@ -210,6 +216,7 @@ export async function getIdea(slug: string, viewerId: string): Promise<Idea | nu
     commentCount: row.comments.length,
     attachmentCount: attachments.length,
     cover: attachments.find((item) => item.isImage) ?? null,
+    keyArt: findCodexArt("threads", canonicalStoryEntryRouteSlug(row.slug)),
     sections: ideaSectionsOf(row.meta),
     tags: strings(meta.tags),
     bookmarked: row.bookmarks.some((bookmark) => bookmark.userId === viewerId),
@@ -218,6 +225,7 @@ export async function getIdea(slug: string, viewerId: string): Promise<Idea | nu
     updatedAt: row.updatedAt,
     version: row.version,
     attachments,
+    artSlots: ideaArtSlotsOf(meta).map((slot) => ({ ...slot, url: findCodexArt("threads", `${canonicalStoryEntryRouteSlug(row.slug)}-${slot.key}`), path: codexArtSlot("threads", `${canonicalStoryEntryRouteSlug(row.slug)}-${slot.key}`) })),
     comments: row.comments.map((comment) => ({ id: comment.id, body: comment.body, author: person(comment.author), createdAt: comment.createdAt, resolvedAt: comment.resolvedAt })),
     categories: strings(meta.categories),
     stages: strings(meta.stages),

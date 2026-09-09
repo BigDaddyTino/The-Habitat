@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { storyIdeaFacets, storyIdeaStageLabel, storyIdeaStageLabels, storyThreadStatuses } from "@habitat/shared";
-import { ideaFacetsOf, ideaPreview, ideaSectionsOf, ideaStatusOf, ideaTabs } from "./story-ideas-pure";
+import { ideaArtSlotsOf, ideaFacetsOf, ideaPreview, ideaSectionsOf, ideaStatusOf, ideaTabs } from "./story-ideas-pure";
 import { cutOnWord } from "./story-ideas-pure";
 
 test("facets come back in canonical order and unknown ones are dropped", () => {
@@ -62,4 +62,11 @@ test("cutOnWord never cuts inside a word when it can help it", () => {
   assert.ok(cut.length <= 20);
   assert.equal(cut, "the quick brown…");
   assert.equal(cutOnWord("the quick brown fox jumps over the lazy dog", 21), "the quick brown fox…");
+});
+
+test("art slots keep only well-formed keys and fall back to the key for a label", () => {
+  const rows = ideaArtSlotsOf({ artSlots: [{ key: "give", label: "The Give ending" }, { key: "Bad Key", label: "x" }, { key: "refuse" }, "junk", { label: "no key" }] });
+  assert.deepEqual(rows, [{ key: "give", label: "The Give ending" }, { key: "refuse", label: "refuse" }]);
+  assert.deepEqual(ideaArtSlotsOf({}), []);
+  assert.deepEqual(ideaArtSlotsOf({ artSlots: "give" }), []);
 });

@@ -1003,6 +1003,7 @@ export async function createEntry(formData: FormData) {
         canonPackets: [],
         facets: formData.getAll("facets").filter((value): value is StoryThreadMeta["facets"][number] => (storyIdeaFacets as readonly unknown[]).includes(value)),
         sections: [],
+        artSlots: [],
         tags: [],
         openQuestions: [],
       }
