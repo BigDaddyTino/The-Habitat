@@ -34,7 +34,7 @@ const schema = metaSchemasByKind.THREAD!;
 const facetsByThread: Record<string, StoryIdeaFacet[]> = {
   "the-empty-cribs": ["story", "characters"],
   "the-fuse-at-heartland": ["story", "regions"],
-  "the-angel-of-the-forges": ["story", "characters", "systems", "regions"],
+  "the-angel-of-the-forges": ["story", "characters", "systems", "regions"], // also set by author-angel-of-the-forges-thread.ts
 };
 
 type ImplementedIdea = {
