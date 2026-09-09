@@ -9,10 +9,16 @@ import {
 } from "lucide-react";
 
 /**
- * The codex header, grouped so it stops growing sideways: two flagship
+ * The codex header, grouped so it stops growing sideways: three flagship
  * links stay on the bar, and everything else files into three dropdowns —
  * the Library (the shelves), Play (the game-system surfaces), and Story
  * (the writing). The active route lights its group even when closed.
+ *
+ * Ideas is on the bar rather than under Story (owner, 2026-09-09): the Idea
+ * Center holds ideas of every kind — systems, models, regions, characters —
+ * and filing it under one of the kinds it holds said the wrong thing about
+ * what it is. It is also the one surface here anybody is meant to write to,
+ * so it should never be two clicks away.
  */
 
 type NavLink = { href: string; label: string; icon: typeof BookMarked; exact?: boolean };
@@ -22,6 +28,7 @@ type NavItem = NavLink | NavGroup;
 const items: NavItem[] = [
   { href: "/codex", label: "Overview", icon: BookMarked, exact: true },
   { href: "/codex/map", label: "Atlas", icon: MapPinned },
+  { href: "/codex/ideas", label: "Ideas", icon: Lightbulb },
   {
     label: "Library",
     icon: Library,
@@ -57,7 +64,6 @@ const items: NavItem[] = [
     links: [
       { href: "/codex/stories", label: "Stories", icon: GitBranch },
       { href: "/codex/stories/map", label: "Campaign map", icon: Route },
-      { href: "/codex/ideas", label: "Ideas", icon: Lightbulb },
       { href: "/codex/timeline", label: "Timeline", icon: History },
     ],
   },
