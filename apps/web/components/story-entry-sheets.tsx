@@ -13,7 +13,7 @@
 
 import { useMemo, useState } from "react";
 import { Images, Plus, ShieldAlert, Trash2 } from "lucide-react";
-import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyInvolvementKinds, storyInvolvementKindLabels, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, storyFaceRigs, storyVoiceConsentKinds, storyVoiceConsentKindLabels, storyVoiceStatuses, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
+import { storyCompanionMissionStatuses, storyCompanionMissionStatusLabels, storyCorruptionPhase, storyCorruptionPhaseLabel, storyCorruptionPhases, storyCreatureCategories, storyFactionStances, storyInvolvementKinds, storyInvolvementKindLabels, storyMagicOrigins, storyControlKinds, storyRegionTypes, storySettlementTiers, storySpoilerLevels, storyStoryStages, storyStoryStageLabels, storySystemCategories, storySystemStatuses, storyIdeaFacetLabels, storyIdeaFacets, storyThreadCategories, storyThreadCategoryLabels, storyThreadPriorities, storyThreadStatuses, storyThreadStatusLabels, storyVeilAnchorTiers, storyVeilAnchorTierLabels, storySoulForgeStates, storySoulForgeStateLabels, storyFaceRigs, storyVoiceConsentKinds, storyVoiceConsentKindLabels, storyVoiceStatuses, type StoryCharacterMeta, type StoryCompanionMissionMeta, type StoryCreatureMeta, type StoryEventMeta, type StoryFactionMeta, type StoryItemMeta, type StoryRegionMeta, type StorySystemMeta, type StoryThreadMeta } from "@habitat/shared";
 import { updateEntryMeta } from "@/app/codex/actions";
 import { getFactionBranding } from "@/lib/faction-branding";
 import gallery from "@/lib/model-gallery.json";
@@ -943,6 +943,7 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
   const [arcList, setArcList] = useState(asArray(source.arcs).map(text));
   const [missionList, setMissionList] = useState(asArray(source.companionMissions).map(text));
   const [bosses, setBosses] = useState(asArray(source.bosses).map(text));
+  const [facets, setFacets] = useState(asArray(source.facets).map(text));
   const [tags, setTags] = useState(asArray(source.tags).map(text).join("\n"));
   const [openQuestions, setOpenQuestions] = useState(asArray(source.openQuestions).map(text).join("\n"));
 
@@ -968,6 +969,10 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
     // every canon packet the thread holds on the next save. Packets are
     // written by the push/weave/withdraw actions, never edited here.
     canonPackets: asArray(source.canonPackets) as StoryThreadMeta["canonPackets"],
+    // The Idea Center reads these. Facets are edited here; sections are written
+    // by the Idea Center's own action and only carried through, like the packets.
+    facets: facets.filter((value): value is StoryThreadMeta["facets"][number] => (storyIdeaFacets as readonly string[]).includes(value)),
+    sections: asArray(source.sections) as StoryThreadMeta["sections"],
     tags: splitLines(tags),
     openQuestions: splitLines(openQuestions),
   };
@@ -990,6 +995,7 @@ export function ThreadSheet({ entryId, version, meta, characters, factions, regi
 
       <div className="thread-create-taxonomy">
         <fieldset><legend>Categories</legend>{storyThreadCategories.map((option) => <label key={option}><input checked={categories.includes(option)} onChange={() => toggle(categories, setCategories, option)} type="checkbox" /> {storyThreadCategoryLabels[option]}</label>)}</fieldset>
+        <fieldset><legend>What kind of idea is it</legend>{storyIdeaFacets.map((option) => <label key={option}><input checked={facets.includes(option)} onChange={() => toggle(facets, setFacets, option)} type="checkbox" /> {storyIdeaFacetLabels[option]}</label>)}</fieldset>
         <fieldset><legend>Story stages it touches</legend>{storyStoryStages.map((option) => <label key={option}><input checked={stages.includes(option)} onChange={() => toggle(stages, setStages, option)} type="checkbox" /> {storyStoryStageLabels[option]}</label>)}</fieldset>
       </div>
 

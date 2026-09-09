@@ -1360,6 +1360,10 @@ export type StoryThreadMeta = {
   bosses: string[];
   /** Settled material pushed toward canon, still waiting to be woven in. */
   canonPackets: StoryCanonPacket[];
+  /** What kind of thing this idea is — the Idea Center badges and tabs. */
+  facets: StoryIdeaFacet[];
+  /** Extra detail per facet, written by anybody, attributed. */
+  sections: StoryIdeaSection[];
   tags: string[];
   openQuestions: string[];
 };
@@ -1477,4 +1481,80 @@ export type MartinoStoryExport = {
   revisionCursor: string | null;
   arcs: StoryExportArc[];
   bible: StoryExportEntry[];
+};
+
+// ---------------------------------------------------------------------------
+// The Idea Center
+//
+// An idea is a THREAD entry seen from the front door. The thread machinery
+// (statuses, canon packets, the connection web) stays exactly what it was; the
+// Idea Center adds two things a family can use without reading a design doc:
+// FACETS — what kind of thing the idea is — and plain-language STAGE labels
+// over the thread statuses the room already keeps.
+// ---------------------------------------------------------------------------
+
+/** What kind of thing an idea is. Several at once is normal; none is allowed. */
+export const storyIdeaFacets = ["story", "systems", "models", "regions", "characters"] as const;
+export type StoryIdeaFacet = (typeof storyIdeaFacets)[number];
+
+export const storyIdeaFacetLabels: Record<StoryIdeaFacet, string> = {
+  story: "Story",
+  systems: "Systems",
+  models: "Models",
+  regions: "Regions",
+  characters: "Characters",
+};
+
+/** One accent per facet, used on badges and the selected tab — never on whole cards. */
+export const storyIdeaFacetColors: Record<StoryIdeaFacet, string> = {
+  story: "#9a84ae",
+  systems: "#7b93b8",
+  models: "#d8a657",
+  regions: "#8fbf8a",
+  characters: "#c97d84",
+};
+
+/** What that facet's tab is for, in the words the form shows. */
+export const storyIdeaFacetBlurbs: Record<StoryIdeaFacet, string> = {
+  story: "Plot, scenes, quests, consequences, and the questions it leaves open.",
+  systems: "Mechanics, rules, and how the thing would actually work in play.",
+  models: "How it looks — sketches, reference images, art direction, what has to be built.",
+  regions: "Where it lives, what the place is like, and what it connects to.",
+  characters: "People and creatures — who they are, what they want, who they know.",
+};
+
+/**
+ * The stage an idea is at, in plain language. One vocabulary over the thread
+ * statuses the room keeps, so a card says "New" where the sheet says
+ * "brainstorming" and both mean the same row.
+ */
+export const storyIdeaStageLabels: Record<StoryThreadStatus, string> = {
+  "brainstorming": "New",
+  "under-discussion": "Exploring",
+  "planned": "Planned",
+  "approved": "Approved",
+  "in-development": "Building",
+  "implemented": "In game",
+  "on-hold": "Someday",
+  "rejected": "Dropped",
+  "archived": "Archived",
+};
+
+export function storyIdeaStageLabel(status: StoryThreadStatus | null | undefined) {
+  return status ? storyIdeaStageLabels[status] : "New";
+}
+
+/**
+ * A facet section: extra detail about one aspect of an idea, written by
+ * anybody, attributed. The overview stays the proposer's; sections are how
+ * the rest of the family adds to an idea without replacing its author.
+ */
+export type StoryIdeaSection = {
+  id: string;
+  facet: StoryIdeaFacet;
+  body: string;
+  authorUserId: string;
+  authorName: string;
+  /** ISO date-time. */
+  at: string;
 };

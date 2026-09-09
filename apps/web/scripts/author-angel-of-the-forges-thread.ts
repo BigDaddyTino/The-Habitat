@@ -113,7 +113,7 @@ const meta = {
 
 async function main() {
   const actor = await db.user.findFirstOrThrow({ where: { role: "ADMIN", isActive: true }, orderBy: { id: "asc" }, select: { id: true } });
-  const schema = metaSchemasByKind.THREAD;
+  const schema = metaSchemasByKind.THREAD!;
   const parsed = schema.safeParse(meta);
   if (!parsed.success) { console.error(JSON.stringify(parsed.error.issues, null, 1)); process.exitCode = 2; return; }
 

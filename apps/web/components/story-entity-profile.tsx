@@ -392,7 +392,7 @@ export function StoryEntityProfile({ entry, existingArcSlugs = [], factionOption
               {child.summary ? <p><StoryProseLine resolve={resolveProse} text={child.summary} /></p> : null}</div>
             </li>)}</ul>
           </div> : null}
-          {isThread && words(meta.tags).length ? <p className="thread-board-tags is-profile">{words(meta.tags).map((tag) => <Link href={`/codex/threads?tag=${encodeURIComponent(tag)}`} key={tag}>#{tag}</Link>)}</p> : null}
+          {isThread && words(meta.tags).length ? <p className="thread-board-tags is-profile">{words(meta.tags).map((tag) => <Link href={`/codex/ideas?tag=${encodeURIComponent(tag)}`} key={tag}>#{tag}</Link>)}</p> : null}
           {isFaction && words(meta.goals).length ? <div className="entity-goals"><p className="eyebrow">What they want</p><ul>{words(meta.goals).map((goal) => <li key={goal}><Swords aria-hidden="true" size={12} />{goal}</li>)}</ul></div> : null}
           {isRegion ? <div className="entity-contained-places">
             <p className="eyebrow"><MapPin aria-hidden="true" size={12} /> Inside {entry.title}</p>

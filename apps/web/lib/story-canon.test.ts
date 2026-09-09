@@ -95,6 +95,8 @@ test("the thread sheet refuses a save that forgot the packets", () => {
     companionMissions: [],
     bosses: [],
     canonPackets: [packet()],
+    facets: [],
+    sections: [],
     tags: [],
     openQuestions: [],
   };

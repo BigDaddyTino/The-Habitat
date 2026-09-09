@@ -137,7 +137,7 @@ export default async function CanonWorkspacePage({ searchParams }: { searchParam
             {pending.length === 0 ? (
               <div className="empty-data"><Inbox aria-hidden="true" size={22} /><div>
                 <h2>Nothing is waiting to be woven in.</h2>
-                <p>When part of a thread stops being an argument, <Link href="/codex/threads">open that thread</Link> and send that part here.</p>
+                <p>When part of an idea stops being an argument, <Link href="/codex/ideas">open it in the Idea Center</Link> and send that part here from its story sheet.</p>
               </div></div>
             ) : (
               <ul className="canon-packet-cards">

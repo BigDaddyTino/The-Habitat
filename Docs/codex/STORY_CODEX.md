@@ -25,7 +25,7 @@ Two halves, severable:
 | `/codex/stories` | USER | The stories room: canon and threads, the room law, and where a new story is opened |
 | `/codex/stories/canon` | USER | The canon workspace: the navigator, every board by kind, the canon inbox, and the connection web |
 | `/codex/stories/campaign` | USER | The macro board: which chapter hands to which, derived from the endings themselves |
-| `/codex/threads` | USER | The development room: story threads argued from brainstorm toward canon |
+| `/codex/ideas` | USER | The Idea Center: every idea — story, systems, models, regions, characters — argued from New toward In game, with pictures and files; story threads live here (`/codex/threads` redirects) |
 | `/codex/promises` | USER | The flag ledger: every promise a scene plants and where it comes due |
 | `/codex/timeline` | USER | Ten thousand years of the long hunt on one line |
 | `/codex/library/[collection]` | USER | Visual, searchable libraries for characters, factions, regions, creatures, items, events, themes, and rules |

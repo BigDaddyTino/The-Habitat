@@ -22,6 +22,7 @@ import {
   storyLockTtlMs,
   storyNodeKinds,
   storyStoryStages,
+  storyIdeaFacets,
   storyThreadCategories,
   type StoryArcCategory,
   type StoryCanonPacket,
@@ -111,6 +112,7 @@ function refreshCodex(arcSlug?: string | null) {
   revalidatePath("/codex/bible");
   revalidatePath("/codex/review");
   revalidatePath("/codex/threads");
+  revalidatePath("/codex/ideas");
   revalidatePath("/codex/promises");
   revalidatePath("/codex/timeline");
   revalidatePath("/codex/map");
@@ -999,6 +1001,8 @@ export async function createEntry(formData: FormData) {
         companionMissions: [],
         bosses: [],
         canonPackets: [],
+        facets: formData.getAll("facets").filter((value): value is StoryThreadMeta["facets"][number] => (storyIdeaFacets as readonly unknown[]).includes(value)),
+        sections: [],
         tags: [],
         openQuestions: [],
       }
@@ -1212,7 +1216,7 @@ export async function archiveEntry(formData: FormData) {
   refreshCodex();
   // Land the writer back on the shelf the entry lived on — threads have
   // their own board rather than a library collection.
-  if (entry.kind === "THREAD") redirect("/codex/threads");
+  if (entry.kind === "THREAD") redirect("/codex/ideas");
   const collection = entry.kind === "CHARACTER" ? "characters" : entry.kind === "FACTION" ? "factions" : entry.kind === "REGION" ? "regions" : entry.kind === "COMPANION_MISSION" ? "companion-missions" : "all";
   redirect(collection === "all" ? "/codex/bible" : `/codex/library/${collection}`);
 }

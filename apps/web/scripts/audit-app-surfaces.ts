@@ -86,7 +86,7 @@ async function main() {
     "/dev/season-trophies",
     "/admin", "/admin/claims", "/admin/community", "/admin/discord", "/admin/members", "/admin/operations", "/admin/pulse",
     "/admin/seasons", "/admin/servers", "/admin/story", "/admin/titles",
-    "/codex", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises", "/codex/review",
+    "/codex", "/codex/bible", "/codex/timeline", "/codex/ideas", "/codex/promises", "/codex/review",
     "/codex/stories", "/codex/stories/canon", "/codex/stories/campaign",
     ...collections.map((c) => `/codex/library/${c}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}`),

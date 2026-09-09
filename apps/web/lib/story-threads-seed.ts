@@ -217,6 +217,8 @@ export const emptyCribsSeed: { slug: string; title: string; summary: string; bod
     locations: ["the-peninsula", "port-arcadia"],
     arcs: ["the-captivity-arc"],
     canonPackets: [],
+    facets: ["story", "characters"],
+    sections: [],
     companionMissions: [
       "the-woman-in-the-peninsula",
       "smoke-in-her-hair",

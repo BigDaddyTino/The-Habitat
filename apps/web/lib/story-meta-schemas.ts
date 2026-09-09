@@ -17,6 +17,7 @@ import {
   storySystemCategories,
   storySystemStatuses,
   storySoulForgeStates,
+  storyIdeaFacets,
   storyThreadCategories,
   storyThreadPriorities,
   storyThreadStatuses,
@@ -278,6 +279,11 @@ export const threadMetaSchema = z.object({
   // packets through gets a loud validation failure instead of a silent save
   // that deletes every packet the thread was carrying.
   canonPackets: z.array(canonPacketSchema).max(60),
+  // The Idea Center: what kind of thing this is, and the attributed detail
+  // anybody added per facet. Required with no default for the same reason as
+  // the packets — a sheet that forgets them must fail loudly, not wipe them.
+  facets: z.array(z.enum(storyIdeaFacets)).max(storyIdeaFacets.length),
+  sections: z.array(z.object({ id: z.string().uuid(), facet: z.enum(storyIdeaFacets), body: z.string().trim().min(1).max(6000), authorUserId: z.string().uuid(), authorName: metaText(120), at: z.string().max(40) })).max(60),
   tags: metaLines(20, 40),
   openQuestions: metaLines(30, 500),
 });

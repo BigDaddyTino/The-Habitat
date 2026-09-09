@@ -552,6 +552,8 @@ model User {
   storyEntryLocks                StoryEntry[]                   @relation("StoryEntryLock")
   storyContributions             StoryEntryContribution[]       @relation("StoryContributionAuthor")
   storyContributionsFiled        StoryEntryContribution[]       @relation("StoryContributionCreator")
+  storyAttachments               StoryEntryAttachment[]         @relation("StoryAttachmentUploader")
+  storyBookmarks                 StoryEntryBookmark[]
   storyRevisions                 StoryRevision[]                @relation("StoryRevisionActor")
   storyComments                  StoryComment[]                 @relation("StoryCommentAuthor")
   storyCommentsResolved          StoryComment[]                 @relation("StoryCommentResolver")
@@ -2293,6 +2295,8 @@ model StoryEntry {
   worldConnectionsFrom StoryWorldConnection[] @relation("StoryWorldConnectionFrom")
   worldConnectionsTo   StoryWorldConnection[] @relation("StoryWorldConnectionTo")
   contributions        StoryEntryContribution[]
+  attachments          StoryEntryAttachment[]
+  bookmarks            StoryEntryBookmark[]
 
   @@index([kind, status, title])
   @@index([status, updatedAt])
@@ -2802,4 +2806,40 @@ model StoryLine {
   @@unique([nodeId, number])
   @@index([nodeId, retiredAt, order])
   @@index([speakerEntryId])
+}
+
+/// A picture or file attached to a bible entry — the Idea Center's drawings
+/// and references, though any entry can carry one. The bytes live on disk
+/// outside the build output (see apps/web/lib/idea-attachments.ts) and reach a
+/// browser only through the auth-gated /codex-attachments route; `storedName`
+/// is a UUID plus a vetted extension and is the only way in.
+model StoryEntryAttachment {
+  id               String     @id @default(uuid()) @db.Uuid
+  entryId          String     @db.Uuid
+  /// The name the member gave the file. Shown as its label, never used on disk.
+  fileName         String     @db.VarChar(200)
+  storedName       String     @unique @db.VarChar(80)
+  contentType      String     @db.VarChar(80)
+  bytes            Int
+  sha256           String     @db.Char(64)
+  caption          String?    @db.VarChar(300)
+  uploadedByUserId String     @db.Uuid
+  createdAt        DateTime   @default(now())
+  entry            StoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  uploader         User       @relation("StoryAttachmentUploader", fields: [uploadedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([entryId, createdAt])
+}
+
+/// A member's saved ideas. One row per (member, entry); the Idea Center's
+/// "Saved" tab is this table filtered to the viewer.
+model StoryEntryBookmark {
+  userId    String     @db.Uuid
+  entryId   String     @db.Uuid
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entry     StoryEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@id([userId, entryId])
+  @@index([entryId])
 }

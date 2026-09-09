@@ -55,7 +55,7 @@ export default async function StoryHubPage() {
         <p>
           The main story, the side quests, the contracts posted around the map, each companion&apos;s own road, and everything
           that comes through the Veil. Settled story lives in <strong>canon</strong>; ideas still being argued live in
-          <strong> threads</strong>, and travel across when the room stops arguing about them.
+          <strong> ideas</strong>, and travel across when the room stops arguing about them.
         </p>
         <Link className="primary-link story-open-shortcut" href="#open-a-story"><Plus aria-hidden="true" size={14} /> Open a new story</Link>
       </div>
@@ -75,14 +75,14 @@ export default async function StoryHubPage() {
           <ArrowRight aria-hidden="true" size={15} />
         </Link>
 
-        <Link className="codex-stories-card is-threads" href="/codex/threads">
+        <Link className="codex-stories-card is-threads" href="/codex/ideas">
           <Lightbulb aria-hidden="true" size={22} />
           <span>
-            <small>{threads.length} thread{threads.length === 1 ? "" : "s"}</small>
-            <strong>Story threads</strong>
-            <p>Where an idea gets argued into existence — proposed by a member, discussed in the open, and moved toward canon a piece at a time.</p>
+            <small>{threads.length} idea{threads.length === 1 ? "" : "s"}</small>
+            <strong>Idea Center</strong>
+            <p>Where anything gets argued into existence — a scene, a system, a creature, a place, a person — proposed by a member, kept under their name, and moved toward canon a piece at a time. Story threads live here.</p>
             <em>{threadsWithPackets > 0
-              ? `${threadsWithPackets} thread${threadsWithPackets === 1 ? " has" : "s have"} material waiting in the canon inbox.`
+              ? `${threadsWithPackets} idea${threadsWithPackets === 1 ? " has" : "s have"} material waiting in the canon inbox.`
               : "Nothing is waiting to be woven in right now."}</em>
           </span>
           <ArrowRight aria-hidden="true" size={15} />

@@ -69,7 +69,7 @@ async function main() {
 
   const collections = ["characters", "factions", "regions", "species", "items", "events", "themes", "rules", "systems", "companion-missions"];
   const surfaces = [
-    "/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/threads", "/codex/promises", "/codex/talents",
+    "/codex", "/codex/stories", "/codex/stories/canon", "/codex/bible", "/codex/timeline", "/codex/ideas", "/codex/promises", "/codex/talents",
     ...collections.map((c) => `/codex/library/${c}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}`),
     ...arcs.map((a) => `/codex/arc/${a.slug}/flow`),
@@ -126,7 +126,7 @@ async function main() {
   // The stories room: both doors, the create form, and the room law that
   // used to live inline on the landing page.
   must("/codex/stories", "canon door", "/codex/stories/canon");
-  must("/codex/stories", "threads door", "/codex/threads");
+  must("/codex/stories", "idea center door", "/codex/ideas");
   must("/codex/stories", "open-a-story form", "open-a-story");
   must("/codex/stories", "kind-of-story picker on the create form", 'name="category"');
   must("/codex/stories", "title field on the create form", 'name="title"');

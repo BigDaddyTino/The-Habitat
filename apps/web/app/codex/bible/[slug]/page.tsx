@@ -216,7 +216,7 @@ export default async function StoryEntryPage({ params, searchParams }: { params:
   return (
     <section className="page-shell codex-shell codex-entry-shell">
       <StoryLiveSync refreshOnHeartbeat />
-      <Link className="codex-back entity-profile-back" href={entry.kind === "THREAD" ? "/codex/threads" : collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {entry.kind === "THREAD" ? "story threads" : collection ?? "the bible"}</Link>
+      <Link className="codex-back entity-profile-back" href={entry.kind === "THREAD" ? "/codex/ideas" : collection ? `/codex/library/${collection}` : "/codex/bible"}><ArrowLeft aria-hidden="true" size={13} /> Back to {entry.kind === "THREAD" ? "the Idea Center" : collection ?? "the bible"}</Link>
       <StoryEntityProfile
         addChildKind={defaultChildPlaceKind(entry.meta?.type)}
         arcsHere={entry.arcsHere}

@@ -57,7 +57,7 @@ const items: NavItem[] = [
     links: [
       { href: "/codex/stories", label: "Stories", icon: GitBranch },
       { href: "/codex/stories/map", label: "Campaign map", icon: Route },
-      { href: "/codex/threads", label: "Threads", icon: Lightbulb },
+      { href: "/codex/ideas", label: "Ideas", icon: Lightbulb },
       { href: "/codex/timeline", label: "Timeline", icon: History },
     ],
   },
