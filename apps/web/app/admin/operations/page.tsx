@@ -1,19 +1,13 @@
 import "@/lib/environment";
 import { getPrismaClient } from "@habitat/db/client";
-import { CirclePlay, RefreshCw, Square, Upload } from "lucide-react";
 import Link from "next/link";
 import { requireRole } from "@/lib/authorization";
 import { requestServerCommand } from "./actions";
 import { OperationsRefresh } from "./operations-refresh";
+import { OperationButtons } from "./operation-buttons";
+import "./operations.css";
 
 const db = getPrismaClient();
-const controls = [
-  { action: "START", label: "Start", icon: CirclePlay, destructive: false },
-  { action: "STOP", label: "Stop", icon: Square, destructive: true },
-  { action: "RESTART", label: "Restart", icon: RefreshCw, destructive: true },
-  { action: "UPDATE", label: "Update", icon: Upload, destructive: true },
-] as const;
-
 export default async function AdminOperationsPage() {
   await requireRole("ADMIN");
   const [servers, commands] = await Promise.all([
@@ -37,11 +31,12 @@ export default async function AdminOperationsPage() {
       <div className="page-intro operation-intro">
         <div><p className="eyebrow">Admin / operations</p><h1>World control.</h1></div>
         <OperationsRefresh />
-        <p>Commands enter a durable queue, then the MartServ102 agent accepts only its configured named services. A successful command means Windows accepted the service operation; monitoring verifies the world afterward.</p>
+        <p>Click a button to run an operation. Update stops the world if needed, installs the update, then starts it again. Progress appears here automatically; monitoring confirms when the world is ready to join.</p>
       </div>
       <div className="operations-grid">
         {servers.map((server) => {
           const command = server.commands[0] ?? null;
+          const busy = command !== null && ["REQUESTED", "AUTHORIZED", "DISPATCHED", "RUNNING"].includes(command.status);
           return <article className={`operation-world ${server.controlEnabled ? "enabled" : ""}`} key={server.id}>
             <div className="operation-world-heading">
               <p className={`eyebrow operation-state ${stateTone(server.actualState)}`}>{formatLabel(server.actualState)}</p>
@@ -55,13 +50,13 @@ export default async function AdminOperationsPage() {
               <div><dt>Players</dt><dd>{playerLabel(server.runtimeState?.playerCount, server.runtimeState?.maxPlayers)}</dd></div>
             </dl>
             <div className={`operation-command-status ${command ? commandTone(command.status) : "neutral"}`}>
-              {command ? <><strong>{formatLabel(command.action)} {formatLabel(command.status)}</strong><span>{command.errorCode ? `Reason: ${formatLabel(command.errorCode)}` : commandDetail(command.result, command.completedAt ?? command.dispatchedAt ?? command.requestedAt)}</span></> : <><strong>No command queued</strong><span>Telemetry above remains agent-owned.</span></>}
+              {command ? <><strong>{formatLabel(command.action)} {formatLabel(command.status)}</strong><span>{command.errorCode ? commandErrorMessage(command.errorCode) : commandDetail(command.result, command.completedAt ?? command.dispatchedAt ?? command.requestedAt, command.status)}</span></> : <><strong>No command queued</strong><span>Telemetry above remains agent-owned.</span></>}
             </div>
-            {server.controlEnabled ? <div className="operation-actions">{controls.map(({ action, label, icon: Icon, destructive }) => <form action={requestServerCommand} key={action}><input name="serverId" type="hidden" value={server.id} /><input name="action" type="hidden" value={action} />{destructive ? <input aria-label={`Type ${action} to authorize ${label} for ${server.displayName}`} name="confirmation" placeholder={action} maxLength={12} required /> : <input name="confirmation" type="hidden" value="" />}<button className={destructive ? "operation-button danger" : "operation-button"} title={label} type="submit"><Icon aria-hidden="true" size={15} />{label}</button></form>)}</div> : <div className="operation-disabled"><p>Enable lifecycle control only after this world&apos;s local service pair has been installed and verified.</p><Link href="/admin/servers">Open world registry</Link></div>}
+            {server.controlEnabled ? <form className="operation-command-form" action={requestServerCommand}><input name="serverId" type="hidden" value={server.id} /><OperationButtons busy={busy} /></form> : <div className="operation-disabled"><p>Enable lifecycle control only after this world&apos;s local service pair has been installed and verified.</p><Link href="/admin/servers">Open world registry</Link></div>}
           </article>;
         })}
       </div>
-      <section className="operation-history"><div><p className="eyebrow">Command ledger</p><h2>Recent operations</h2></div>{commands.length === 0 ? <p className="operation-disabled">No server commands have been authorized.</p> : <ol>{commands.map((command) => <li key={command.id}><div><strong>{command.server.displayName}</strong><span>{command.action.toLowerCase()} requested by {command.requestedBy.name ?? command.requestedBy.email ?? "administrator"}</span></div><div className={`ledger-status ${commandTone(command.status)}`}><strong>{formatLabel(command.status)}</strong><time dateTime={(command.completedAt ?? command.dispatchedAt ?? command.requestedAt).toISOString()}>{formatTime(command.completedAt ?? command.dispatchedAt ?? command.requestedAt)}</time>{command.errorCode ? <span>{formatLabel(command.errorCode)}</span> : null}</div></li>)}</ol>}</section>
+      <section className="operation-history"><div><p className="eyebrow">Command ledger</p><h2>Recent operations</h2></div>{commands.length === 0 ? <p className="operation-disabled">No server commands have been authorized.</p> : <ol>{commands.map((command) => <li key={command.id}><div><strong>{command.server.displayName}</strong><span>{command.action.toLowerCase()} requested by {command.requestedBy.name ?? command.requestedBy.email ?? "administrator"}</span></div><div className={`ledger-status ${commandTone(command.status)}`}><strong>{formatLabel(command.status)}</strong><time dateTime={(command.completedAt ?? command.dispatchedAt ?? command.requestedAt).toISOString()}>{formatTime(command.completedAt ?? command.dispatchedAt ?? command.requestedAt)}</time>{command.errorCode ? <span>{commandErrorMessage(command.errorCode)}</span> : null}</div></li>)}</ol>}</section>
     </section>
   );
 }
@@ -100,11 +95,37 @@ function playerLabel(playerCount: number | null | undefined, maxPlayers: number 
   return maxPlayers === null || maxPlayers === undefined ? String(playerCount) : `${playerCount} / ${maxPlayers}`;
 }
 
-function commandDetail(result: unknown, at: Date): string {
-  if (isRecord(result) && result.detail === "update_started") return `Update service started ${formatTime(at)}`;
+function commandDetail(result: unknown, at: Date, status: string): string {
+  if (status === "AUTHORIZED" || status === "REQUESTED") return "Queued. Waiting for the worker to begin this operation.";
+  if (isRecord(result) && typeof result.phase === "string") {
+    const labels: Record<string, string> = {
+      QUEUED: "Update queued. Waiting for the updater.",
+      STOPPING: "Stopping the world before updating?",
+      UPDATING: "Installing the update. This may take several minutes?",
+      STARTING: "Update installed. Starting the world?",
+      SUCCEEDED: "Update complete. Game process started; monitoring checks readiness.",
+      FAILED: "Update failed. Check the reported reason before retrying.",
+    };
+    return labels[result.phase] ?? `Recorded ${formatTime(at)}`;
+  }
   return `Recorded ${formatTime(at)}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object";
+}
+
+function commandErrorMessage(code: string): string {
+  const messages: Record<string, string> = {
+    service_stop_incomplete: "The game process did not exit after the stop request.",
+    service_stop_failed: "Windows could not stop the game service.",
+    service_start_failed: "The game process did not start successfully.",
+    service_timeout: "The Windows service did not finish the operation in time.",
+    steamcmd_failed: "Steam did not complete the update. The server was left stopped.",
+    updater_busy: "Another Steam update was already running. Try again after it finishes.",
+    update_interrupted: "The update service stopped before completing the operation.",
+    server_start_failed: "The update installed, but the game did not start successfully.",
+    agent_action_unavailable: "The agent did not complete this request. Check the current world state before retrying.",
+  };
+  return messages[code] ?? `Reason: ${formatLabel(code)}`;
 }

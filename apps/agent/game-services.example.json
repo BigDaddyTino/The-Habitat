@@ -1,3 +1,6 @@
 {
-  "valheimPassword": "REPLACE_WITH_YOUR_VALHEIM_PASSWORD"
+  "valheimPassword": "REPLACE_WITH_YOUR_VALHEIM_PASSWORD",
+  "projectZomboidDataDirectory": "C:\\REPLACE_WITH_EXISTING_ZOMBOID_DATA_FOLDER",
+  "projectZomboidInitialHeapMiB": 1024,
+  "projectZomboidMaxHeapMiB": 4096
 }

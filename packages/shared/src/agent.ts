@@ -16,14 +16,38 @@ export const agentServerActions = ["start", "stop", "restart", "update"] as cons
 
 export type AgentServerAction = typeof agentServerActions[number];
 
+export const agentActionErrorCodes = ["control_not_configured", "update_not_configured", "update_status_unavailable", "palworld_shutdown_failed", "service_unavailable", "service_start_failed", "service_stop_failed", "service_stop_incomplete", "service_timeout"] as const;
+export type AgentActionErrorCode = typeof agentActionErrorCodes[number];
+
 export type AgentServerActionResult = {
   key: string;
   action: AgentServerAction;
   accepted: boolean;
   executedAt: string;
   serviceState: "RUNNING" | "STOPPED" | "PENDING" | "UNKNOWN";
-  detail: "requested" | "already_in_requested_state" | "update_started" | "server_service_must_be_stopped";
+  detail: "requested" | "already_in_requested_state" | "update_started" | "server_service_must_be_stopped" | "operation_in_progress";
+  operationId?: string;
 };
+
+export const agentUpdatePhases = ["QUEUED", "STOPPING", "UPDATING", "STARTING", "SUCCEEDED", "FAILED"] as const;
+export type AgentUpdatePhase = typeof agentUpdatePhases[number];
+export type AgentUpdateStatus = {
+  operationId: string;
+  phase: AgentUpdatePhase;
+  startedAt: string;
+  updatedAt: string;
+  errorCode: string | null;
+};
+
+export function isAgentUpdateStatus(value: unknown): value is AgentUpdateStatus {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.operationId === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(item.operationId)
+    && agentUpdatePhases.includes(item.phase as AgentUpdatePhase)
+    && typeof item.startedAt === "string" && Number.isFinite(Date.parse(item.startedAt))
+    && typeof item.updatedAt === "string" && Number.isFinite(Date.parse(item.updatedAt))
+    && (item.errorCode === null || typeof item.errorCode === "string" && /^[a-z_]{1,80}$/.test(item.errorCode));
+}
 
 export type AgentProcessObservation = {
   running: boolean;

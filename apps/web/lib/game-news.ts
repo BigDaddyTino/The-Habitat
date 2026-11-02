@@ -11,7 +11,7 @@ const steamAppIds: Record<string, number> = {
   "marvel-rivals": 2767030,
   "7-days-to-die": 251570,
   "project-zomboid": 108600,
-  dragonwilds: 3270700,
+  dragonwilds: 1374490,
   enshrouded: 1203620,
   palworld: 1623730,
   valheim: 892970,

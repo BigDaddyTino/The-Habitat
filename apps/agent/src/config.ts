@@ -43,6 +43,7 @@ const serverConfigurationSchema = z.object({
     serviceName: windowsServiceName,
     updateServiceName: windowsServiceName,
     timeoutMs: z.number().int().min(5_000).max(300_000).default(60_000),
+    updateStatusPath: localLogPath.optional(),
   }).strict().optional(),
 }).strict();
 

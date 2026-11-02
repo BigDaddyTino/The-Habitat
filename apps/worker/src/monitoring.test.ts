@@ -86,3 +86,50 @@ function fakeRepository(overrides: Partial<MonitoringRepository>): MonitoringRep
     ...overrides,
   };
 }
+
+test("observations collected before a completed stop cannot reverse its sleeping intent", async () => {
+  const { createPostgresMonitoringRepository } = await import("./monitoring.js");
+  const db = { $transaction: async () => { assert.fail("Stale telemetry must not write any rows"); } } as unknown as Parameters<typeof createPostgresMonitoringRepository>[0];
+  const repository = createPostgresMonitoringRepository(db);
+  const changed = { ...valheim, desiredState: "SLEEPING" as const, revision: new Date("2026-11-01T00:36:20Z") };
+  await repository.saveObservation(changed, { ...status, observedAt: "2026-11-01T00:36:25Z" }, new Date("2026-11-01T00:36:18Z"));
+  await repository.markAgentUnavailable(changed, "agent_unavailable", new Date("2026-11-01T00:36:18Z"));
+});
+
+test("a command changing a world between read and commit prevents stale telemetry writes", async () => {
+  const { createPostgresMonitoringRepository } = await import("./monitoring.js");
+  const revision = new Date("2026-11-01T00:36:18Z");
+  let comparisons = 0;
+  const db = { $transaction: async (callback: (transaction: unknown) => Promise<void>) => callback({
+    gameServer: { updateMany: async (query: { where: { id: string; updatedAt: Date } }) => {
+      assert.equal(query.where.id, valheim.id); assert.equal(query.where.updatedAt, revision);
+      comparisons += 1;
+      // The stored revision changed while the observation was in flight.
+      return { count: 0 };
+    } },
+    serverRuntimeState: { upsert: async () => { assert.fail("Do not write telemetry after losing the revision comparison"); } },
+  }) } as unknown as Parameters<typeof createPostgresMonitoringRepository>[0];
+  const repository = createPostgresMonitoringRepository(db);
+  await repository.saveObservation({ ...valheim, revision }, { ...status, observedAt: "2026-11-01T00:36:25Z" });
+  await repository.markAgentUnavailable({ ...valheim, revision }, "agent_unavailable", new Date("2026-11-01T00:36:25Z"));
+  assert.equal(comparisons, 2);
+});
+
+test("monitoring leaves an active update's desired state under command control", async () => {
+  const { settleTransitionalDesiredState } = await import("./monitoring.js");
+  assert.equal(settleTransitionalDesiredState({ ...valheim, desiredState: "UPDATING", controlActive: true }, status, new Date()), "UPDATING");
+  assert.equal(settleTransitionalDesiredState({ ...valheim, desiredState: "STOPPING", controlActive: true }, { ...status, process: { ...status.process, running: false } }, new Date()), "STOPPING");
+});
+
+test("monitoring carries the poll start time through a delayed agent response", async () => {
+  const pollStarted = new Date("2026-11-01T00:36:18Z");
+  let saved = false;
+  const repository: MonitoringRepository = {
+    findBySlug: async () => valheim,
+    findPreviouslyAgentMonitored: async () => [],
+    saveObservation: async (_server, _status, started) => { assert.equal(started, pollStarted); saved = true; },
+    markAgentUnavailable: async () => { assert.fail("Agent is available"); },
+  };
+  await runMonitoringCycle(repository, { pollStatuses: async () => [{ key: "valheim", status }] }, pollStarted);
+  assert.equal(saved, true);
+});

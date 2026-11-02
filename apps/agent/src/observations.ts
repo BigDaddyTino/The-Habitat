@@ -25,7 +25,7 @@ export async function observeServer(server: AgentServerConfiguration): Promise<{
   return { process, disk, executable, query, log };
 }
 
-export async function observeProcess(configuredProcessName: string, processCommandLineIncludes?: string): Promise<AgentProcessObservation> {
+export async function observeProcess(configuredProcessName: string, processCommandLineIncludes?: string, strict = false): Promise<AgentProcessObservation> {
   if (process.platform !== "win32") return emptyProcessObservation();
   const executableName = configuredProcessName.toLowerCase().endsWith(".exe") ? configuredProcessName : `${configuredProcessName}.exe`;
   try {
@@ -47,6 +47,7 @@ export async function observeProcess(configuredProcessName: string, processComma
       cpuSeconds: sumNullable(processes.map((item) => item.CPU)),
     };
   } catch {
+    if (strict) throw new Error("Process observation failed; refusing lifecycle control.");
     return emptyProcessObservation();
   }
 }

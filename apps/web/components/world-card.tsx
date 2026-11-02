@@ -35,7 +35,7 @@ export function WorldCard({ world }: { world: WorldView }) {
   }, [world.slug]);
   const playerLabel = world.players === null ? "No live count" : `${world.players} / ${world.capacity ?? "-"}`;
   return (
-    <Link href={`/worlds/${world.slug}`} className={`world-card world-card-link accent-${world.accent} state-${world.state.toLowerCase().replaceAll("_", "-")}${liveReaction ? ` live-${liveReaction.toLowerCase().replaceAll("_", "-")}` : ""}`} data-portal-preview={isPortalPreview ? "true" : undefined} aria-label={`Open ${world.worldName} server dossier`}>
+    <Link href={`/worlds/${world.slug}#join-world`} className={`world-card world-card-link accent-${world.accent} state-${world.state.toLowerCase().replaceAll("_", "-")}${liveReaction ? ` live-${liveReaction.toLowerCase().replaceAll("_", "-")}` : ""}`} data-portal-preview={isPortalPreview ? "true" : undefined} aria-label={`Join ${world.worldName}: Steam launch and connection details`}>
       <span className="world-portal-reaction" aria-hidden="true"><i /><i /><i /><i /><i /><b /></span>
       {liveReaction ? <span className="world-portal-caption" aria-hidden="true">{isPortalPreview ? "Visual effect preview" : liveReaction === "PORTAL_IGNITE" ? "Portal link established" : "Portal link disrupted"}</span> : null}
       <div className="world-card-topline">
@@ -48,7 +48,7 @@ export function WorldCard({ world }: { world: WorldView }) {
         <div><dt><UsersRound aria-hidden="true" size={14} /> Players</dt><dd>{playerLabel}</dd></div>
         <div><dt><Wifi aria-hidden="true" size={14} /> {world.ping === null ? "Last fire" : "Ping"}</dt><dd>{world.ping === null ? world.lastFire : `${world.ping} ms`}</dd></div>
       </dl>
-      <span className="world-link">Open server dossier <ArrowUpRight aria-hidden="true" size={16} /></span>
+      <span className="world-link">Launch &amp; connection details <ArrowUpRight aria-hidden="true" size={16} /></span>
     </Link>
   );
 }

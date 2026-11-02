@@ -22,7 +22,7 @@ export function createAgentServer(configuration: AgentConfiguration) {
     if (!hasValidAgentToken(request.headers.authorization, configuration.token)) return sendJson(response, 401, { error: "unauthorized" });
 
     try {
-      if (request.method === "GET") await handleGetRequest(request, response, configuration);
+      if (request.method === "GET") await handleGetRequest(request, response, configuration, serviceController);
       else await handlePostRequest(request, response, configuration, serviceController);
     } catch (error) {
       if (error instanceof InvalidRequestBodyError) return sendJson(response, 400, { error: "invalid_request_body" });
@@ -70,10 +70,17 @@ export function getBoundAddress(server: ReturnType<typeof createAgentServer>): A
   return address;
 }
 
-async function handleGetRequest(request: IncomingMessage, response: ServerResponse, configuration: AgentConfiguration): Promise<void> {
+async function handleGetRequest(request: IncomingMessage, response: ServerResponse, configuration: AgentConfiguration, serviceController: WindowsServiceController): Promise<void> {
   const pathname = new URL(request.url ?? "/", "http://agent.local").pathname;
   if (pathname === "/health") return sendJson(response, 200, getHealth());
   if (pathname === "/v1/servers") return sendJson(response, 200, getServers(configuration));
+
+  const updateMatch = /^\/v1\/servers\/([a-z0-9][a-z0-9-]{0,62})\/update$/.exec(pathname);
+  if (updateMatch) {
+    const configuredServer = configuration.servers.find((server) => server.key === updateMatch[1]);
+    if (!configuredServer) return sendJson(response, 404, { error: "not_found" });
+    return sendJson(response, 200, await serviceController.updateStatus(configuredServer));
+  }
 
   const historyMatch = /^\/v1\/servers\/([a-z0-9][a-z0-9-]{0,62})\/history$/.exec(pathname);
   if (historyMatch) {

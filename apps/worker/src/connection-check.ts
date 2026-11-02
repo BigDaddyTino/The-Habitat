@@ -84,7 +84,14 @@ async function main() {
           if (sources.length === 0) failures.push(`${serverKey}: missing ${kind}`);
           else if (!sources.some((source) => source.available)) failures.push(`${serverKey}: ${kind} unavailable`);
           else if (sources.some((source) => source.truncated)) failures.push(`${serverKey}: ${kind} scan truncated`);
-          else if (sources.every((source) => source.evidence.length === 0 && source.events.length === 0)) failures.push(`${serverKey}: ${kind} is readable but parsed zero player records (log format may not match the parser)`);
+          else if (sources.every((source) => source.evidence.length === 0 && source.events.length === 0)) {
+            // A current empty scan does not mean previously imported history vanished.
+            // Keep the check failing until source yield can be verified, but report
+            // the retained database evidence separately from the current log files.
+            const storedEvidence = await db.legacyPlayerEvidence.count({ where: { server: { slug: serverKey }, sourceKind: kind } });
+            const filesScanned = sources.reduce((count, source) => count + source.filesScanned, 0);
+            failures.push(`${serverKey}: ${kind} yielded zero player records from ${filesScanned} current source file(s); ${storedEvidence} previously imported evidence record(s) remain in the database. Inspect source retention/activity and parser format.`);
+          }
         }
       }
       if (failures.length) throw new Error(failures.join("; "));

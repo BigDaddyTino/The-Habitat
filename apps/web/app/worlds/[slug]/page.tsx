@@ -7,6 +7,8 @@ import { auth } from "@/auth";
 import { getPrismaClient } from "@habitat/db/client";
 import { getGameDispatches } from "@/lib/game-news";
 import { requestWake } from "./actions";
+import { WorldConnectionPanel } from "@/components/world-connection-panel";
+import { isPlayerGameSlug } from "@habitat/shared";
 
 const db = getPrismaClient();
 
@@ -55,6 +57,8 @@ export default async function WorldDetailPage({ params }: { params: Promise<{ sl
       <StatusBadge state={world.state} />
     </div>
 
+    {world.enabled && isPlayerGameSlug(world.slug) ? <WorldConnectionPanel slug={world.slug} state={world.state} canAccess={canRequestWake} /> : null}
+
     <div className="detail-grid">
       <article><Activity aria-hidden="true" /><h2>Current state</h2><p>{world.state === "SLEEPING" ? "This world is intentionally resting. It is not counted as an outage." : world.state === "UNKNOWN" ? "No agent telemetry has been recorded yet." : "State is reported by the private Habitat agent."}</p></article>
       <article>
@@ -74,7 +78,7 @@ export default async function WorldDetailPage({ params }: { params: Promise<{ sl
       {dispatches.length ? <ol>{dispatches.map((dispatch) => <li key={dispatch.id}><a href={dispatch.url} rel="noreferrer" target="_blank"><span>{dispatch.kind} · {when(dispatch.publishedAt)}</span><strong>{dispatch.title}</strong>{dispatch.summary ? <small>{dispatch.summary}</small> : null}</a></li>)}</ol> : <p>There are no recent game-announcement dispatches in the monitored feed.</p>}
     </section>
 
-    {world.state === "SLEEPING" ? <section className="wake-panel">
+    {world.state === "SLEEPING" ? <section id="wake-world" className="wake-panel">
       <div><p className="eyebrow">Community request</p><h2>Light the Fire</h2><p>{wakeRequest ? `${wakeRequest._count.votes} Habitat member${wakeRequest._count.votes === 1 ? " wants" : "s want"} this world awake.` : "Ask an administrator to review a wake request. This never starts the server automatically."}</p></div>
       {canRequestWake ? <form action={requestWake}><input name="serverId" type="hidden" value={world.id} /><button className="wake-button" type="submit">Light the Fire</button></form> : <p className="wake-sign-in">Sign in as a Habitat member to support this request.</p>}
     </section> : null}

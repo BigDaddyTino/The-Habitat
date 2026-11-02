@@ -1,4 +1,8 @@
-import { agentLegacyEventTypes, agentLegacyEvidenceKinds, agentServerActions, isStablePlayerProviderKey, type AgentLegacyHistory, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary } from "@habitat/shared";
+import { agentActionErrorCodes, agentLegacyEventTypes, agentLegacyEvidenceKinds, agentServerActions, isAgentUpdateStatus, isStablePlayerProviderKey, type AgentActionErrorCode, type AgentLegacyHistory, type AgentServerAction, type AgentServerActionResult, type AgentServerStatus, type AgentServerSummary, type AgentUpdateStatus } from "@habitat/shared";
+
+export class AgentActionError extends Error {
+  constructor(readonly code: AgentActionErrorCode, readonly httpStatus: number) { super(code); }
+}
 
 export type AgentStatusResult =
   | { key: string; status: AgentServerStatus }
@@ -40,6 +44,9 @@ export class HabitatAgentClient {
       console.error("[agent-client] action response body could not be parsed:", error instanceof Error ? error.message : String(error));
       return null;
     });
+    if (!response.ok && body && typeof body === "object" && "error" in body && agentActionErrorCodes.includes(body.error as AgentActionErrorCode)) {
+      throw new AgentActionError(body.error as AgentActionErrorCode, response.status);
+    }
     if (!isAgentServerActionResult(body) || (!response.ok && response.status !== 409)) throw new Error("Agent action was not accepted.");
     return body;
   }
@@ -54,6 +61,11 @@ export class HabitatAgentClient {
       }
     }));
     return histories.filter((history): history is AgentLegacyHistory => history !== null);
+  }
+
+  async readUpdateStatus(key: string): Promise<AgentUpdateStatus> {
+    if (!isServerKey(key)) throw new Error("Invalid update status request.");
+    return this.getJson(this.urlFor(`/v1/servers/${key}/update`), isAgentUpdateStatus);
   }
 
   private async getJson<T>(url: URL, isExpected: (value: unknown) => value is T, timeoutMs = 5_000): Promise<T> {
@@ -78,7 +90,8 @@ function delay(durationMs: number): Promise<void> {
 }
 
 function isAgentServerActionResult(value: unknown): value is AgentServerActionResult {
-  return isRecord(value) && isServerKey(value.key) && typeof value.executedAt === "string" && typeof value.accepted === "boolean" && agentServerActions.includes(value.action as AgentServerAction) && ["RUNNING", "STOPPED", "PENDING", "UNKNOWN"].includes(value.serviceState as string) && ["requested", "already_in_requested_state", "update_started", "server_service_must_be_stopped"].includes(value.detail as string);
+  return isRecord(value) && isServerKey(value.key) && typeof value.executedAt === "string" && typeof value.accepted === "boolean" && agentServerActions.includes(value.action as AgentServerAction) && ["RUNNING", "STOPPED", "PENDING", "UNKNOWN"].includes(value.serviceState as string) && ["requested", "already_in_requested_state", "update_started", "server_service_must_be_stopped", "operation_in_progress"].includes(value.detail as string)
+    && (value.detail !== "update_started" || typeof value.operationId === "string" && /^[0-9a-f-]{36}$/i.test(value.operationId));
 }
 
 function isServerSummaryArray(value: unknown): value is AgentServerSummary[] {

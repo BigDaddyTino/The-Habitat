@@ -1,8 +1,61 @@
 # Build Status
 
-Last updated: 2026-08-15
+Last updated: 2026-11-02
 
 This is the implementation source of truth. Checked items are built and locally validated; unchecked items are intentionally pending, require real-world verification, or remain outside the approved scope. Seeded registry/content data is never a claim of live telemetry.
+## 2026-11-02 - Project Zomboid native crash recovery
+
+- [x] Identified the retained native map/population crash, its preceding obsolete map-file EOF error, and an oversized 16 GiB initial/maximum Java heap on a shared 16 GiB host. A clean comparison found 2,363 obsolete media files; current game JAR/native-library hashes matched Steam.
+- [x] Backed up the current mod-free Build 42 world, settings, accounts, and crash evidence. Replaced the mixed installation with a fresh Steam-validated copy of the same stable build; retained the entire previous installation for rollback and left the separate Build 41 backup intact.
+- [x] Set a 1 GiB initial / 4 GiB maximum Java heap and persisted configurable limits through future updates/full installation. Four launcher tests, twelve update-workflow tests, agent typecheck, and all six read-only service configuration checks pass.
+- [x] Audited recovery Start succeeded; the existing world reached SERVER STARTED, bound its configured ports, and production monitoring reports process-running/query-reachable ONLINE. Account database and settings were retained; no new fatal report or map-file EOF error appeared during startup. Existing nonfatal vanilla/room-metadata log errors remain documented.
+- [x] Post-repair read-only review: chunkdata structure explains the EOF trigger and none of those files remain; all saved cells, vehicle types, and databases check out; both public ports answer and a public-address join is on record. 4 GiB fits about three concurrent players by the one measured session. A first 2 minute 37 second join on the clean installation loaded the saved character with no server errors.
+- [ ] Verify sustained gameplay stability. The original native failure occurred after approximately 3 hours 42 minutes; startup success cannot prove the root defect is eliminated.
+
+Details: [Project Zomboid crash recovery](PROJECT_ZOMBOID_CRASH_RECOVERY.md).
+## 2026-10-31 - Lifecycle recovery and fresh mod-free Zomboid world
+
+- [x] Recovered Dragonwilds' orphaned game process after backing up saves/logs, corrected its wrapper stop order, and verified a real managed start/stop. It remains intentionally sleeping.
+- [x] Preserved allow-listed agent failure reasons through the worker and displayed actionable failure messages on the operations page. Added revision/time guards so stale monitoring cannot overwrite a completed Stop or active Update.
+- [x] Recovered Zomboid's failed Steam update, moved obsolete loose Build 41 classes into protected backup storage, and synchronized its Java launch paths with the vendor launcher after future updates.
+- [x] Created the owner-approved fresh Build 42.21 world in separate protected storage. Preserved the old world and account database; both match their backup. Normal service startup reached listening state and live monitoring reported ONLINE.
+- [x] Added a fixed local Zomboid graceful shutdown helper for Stop/Restart/Update. A real update saved the running world, exited cleanly, checked Steam, synchronized startup settings, and restarted the service. Failed graceful shutdown aborts before Steam or forced termination.
+- [x] Targeted validation passed: 114 worker tests, 13 service-control tests, 12 isolated PowerShell workflow cases, affected typechecks, and the web release audit. The other four game worlds were not cycled during recovery.
+- [x] Researched current first-person mods and client requirements. The owner then explicitly chose a mod-free new world; no camera mod, loader, or performance patch was installed.
+- [ ] Verify a real outside-network player join and Build 42 player-history capture. The new log source is configured alongside the retained old source; no player activity was invented.
+
+Details: [Lifecycle review](SERVER_LIFECYCLE_REVIEW.md), [closed first-person research](PROJECT_ZOMBOID_FIRST_PERSON_RESEARCH.md).
+
+## 2026-10-31 - Dragonwilds history investigation
+
+- [x] Verified saved history remains intact: two player identities, two participation records, two joins, and two leaves; no unresolved history-evaluation failures.
+- [x] Traced the empty scan to the current retained log set: the 8:16 a.m. scan yielded six records, but only the logs opened during the 8:48/8:56 a.m. restarts remain, with no subsequent player-session entries. Older-source rotation/cleanup is the likely cause; its exact mechanism was not observed.
+- [x] Clarified the connection audit to report current source-file counts separately from evidence already preserved in the database. The live diagnostic, worker typecheck, and 14 history-parser tests pass their intended checks; the audit still flags the unverified empty source and passes the other ten checks.
+- [ ] Verify a real join/leave against the current game version and preserve raw session logs outside game-controlled rotation. Investigation did not restart games or alter stored history. Details: [Dragonwilds history investigation](DRAGONWILDS_HISTORY_INVESTIGATION.md).
+
+## 2026-10-31 - Player launch and connection controls
+
+- [x] Deployed prominent member-only join panels for all six managed worlds. Home, Games, and Worlds cards link directly to launch and manual connection controls; every game has separate copyable full address, IP, and port fields.
+- [x] Four source-backed Steam server-join links, game-launch actions for all six titles, and per-game manual steps. Corrected the Dragonwilds Steam app ID. Launching a game does not wake a server or prove successful joining.
+- [x] Verified the web and game hosts share one public IPv4 egress. Initially enabled the fixed HTTPS public-address lookup, then activated DNS resolution after the shared hostname was verified. Addresses refresh while visible, expire within 30 seconds, and fail closed. No router, firewall, or game process changed.
+- [x] Strict workspace typechecks, lint, all 842 tests, the 7-check release audit, isolated production build, and service health passed. Browser checks cover six real member API responses, signed-out/VIEWER/inactive denial, clipboard copying and selection fallback, desktop plus 390px/320px mobile layouts, and browser-only expiry/failure/state fixtures. Temporary QA membership and sessions were removed.
+- [x] Activated the owned DNS-only player A record with a 60-second TTL after validating the owner-supplied token. All seven other zone records remain unchanged. Public Cloudflare/Google resolvers and the web host resolve the current WAN address.
+- [x] Installed the updater and status runner in an Administrators/SYSTEM-only folder outside Git. The SYSTEM task runs at startup and every five minutes indefinitely, with retries and last-run/last-success status files; its initial execution and the following automatic five-minute execution both succeeded. Ten earlier mocked cases cover updater mutations and refusal/error paths.
+- [x] Enabled DNS mode in the web service's private environment, restarted the existing release, and verified health plus all six live member connection endpoints and desktop/mobile browser checks. Temporary QA membership and sessions were removed.
+- [x] Investigated the broader audit's Dragonwilds finding: saved history is intact, while the retained current logs contain no player sessions. Audit remains 10/11 until current source yield is verified; see the investigation above. This is not evidence of a failed player connection.
+- [ ] Verify actual launch-to-join behavior and manual joining from outside-network Steam PCs. Browser validation does not prove game-client behavior or router reachability.
+
+Operations: [Player connection deployment](PLAYER_CONNECTION_DEPLOYMENT.md). Evidence: [Player connection research](PLAYER_CONNECTION_RESEARCH.md).
+
+## 2026-10-31 - Shared player hostname research
+
+- [x] Compared the six managed games' local port configuration with official connection guidance; recorded findings and evidence limits in [Player connection research](PLAYER_CONNECTION_RESEARCH.md)
+- [x] Inspected installed Valheim and 7 Days to Die connection code for hostname/default-port behavior and Project Zomboid UI code for its prefilled port; distinguished inspection from actual outside-client testing
+- [x] Verified the requested domain's DNS provider and the player subdomain's current absence without changing DNS, game processes, or network access
+- [x] Researched an alternative requiring only players' existing browser and Steam: source-backed connection links for four games, launch-and-copy fallbacks for Palworld/Dragonwilds, and fresh server-side address resolution; documented numeric-IP favorite limitations and the correct Dragonwilds launch app ID
+- [x] Configure the shared hostname and dynamic updater; existing router, firewall, and management-access boundaries remain unchanged
+- [ ] Verify hostname input, default ports, and saved-favorite behavior from outside-network game clients
+- [x] Add source-backed per-game joining instructions and copy actions to the website; outside-client acceptance remains pending above
 
 ## Phase 0 - Repository and Documentation
 
@@ -397,3 +450,11 @@ This is the implementation source of truth. Checked items are built and locally 
 - [x] Full workspace verification after the Halls pass: strict typecheck, lint, all 231 tests, production build, and `git diff --check` are green
 - [x] Review pass repairs before deployment: `Most Verified Deaths` was rewritten from a `PLAYER_EVENT_COUNT` rule to an `ACTIVITY_VALUE_SUM` over `DEATHS_RECORDED`, because no code path evaluates records for a `PLAYER_DIED` event and the record could never have been awarded; the reconciler now replays candidates in chronological order so a history row can never carry a timestamp older than the row it supersedes; its unbounded `distinct` scan over every retained activity was replaced with one index-covered lookup per active member, matching the achievement catalogue reconciliation, so the cost tracks the roster rather than retained history; the halls only offer an activity receipt link when that evidence is actually viewable; the reduced-motion block now stops every looping decoration; the unfiltered empty state no longer tells the reader to clear filters they never set; and the superseded record-card rules were removed from the global stylesheet
 - [ ] Production deployment, idempotent seed, web/worker restart, and authenticated live Chrome verification remain pending; no seeded Shame definition or holder is claimed live yet
+
+## 2026-10-31 — Dedicated server lifecycle controls
+
+Deployed one-click Start / Stop / Restart / Update controls for all six service-backed worlds at `/admin/operations`. Update now tracks a durable stop ? SteamCMD ? start workflow, reports each phase, and only succeeds after SteamCMD confirms completion and the game process starts. Overlapping commands are blocked; admin authorization and audit records remain enforced. Corrected Zomboid's update target and explicit existing-world data directory; preserved Palworld's required startup flag. All 868 workspace tests, typechecks, release audit, and desktop/mobile control checks passed. No game services were cycled for testing. The retained 7 Days to Die ProjectZ mod startup error is a separate remaining limitation. See [SERVER_LIFECYCLE_REVIEW.md](SERVER_LIFECYCLE_REVIEW.md) for per-game findings, rollback details, and validation limits.
+
+## 2026-10-31 — Hostname-first player connection display
+
+Corrected the join panel to show the configured DNS hostname and game port as the primary copy address, with the hostname alone in the separate Server address field. Numeric IP details are now an expandable fallback; Steam links still use the current resolved address. The DNS record/updater were already healthy. Nine address regression tests, web typecheck, targeted lint, all seven release-audit gates, and the isolated build/health check passed. Live member browser checks verified all six games, clipboard values, fallback fields, and 390px/320px mobile layouts. No game services or network rules changed. Deployment: `.next-20261031-115505`; prior release retained for rollback.

@@ -26,6 +26,13 @@ $valheimPassword = [string]$configuration.valheimPassword
 if ([string]::IsNullOrWhiteSpace($valheimPassword) -or $valheimPassword -eq "REPLACE_WITH_YOUR_VALHEIM_PASSWORD") {
   throw "Set valheimPassword in the ignored local game-services.json before installing."
 }
+$pzDataDirectory = if ($configuration.PSObject.Properties['projectZomboidDataDirectory']) { [string]$configuration.projectZomboidDataDirectory } else { '' }
+$pzInitialHeapMiB = if ($configuration.PSObject.Properties['projectZomboidInitialHeapMiB']) { [int]$configuration.projectZomboidInitialHeapMiB } else { 1024 }
+$pzMaxHeapMiB = if ($configuration.PSObject.Properties['projectZomboidMaxHeapMiB']) { [int]$configuration.projectZomboidMaxHeapMiB } else { 4096 }
+if ($pzInitialHeapMiB -lt 512 -or $pzMaxHeapMiB -gt 32768 -or $pzInitialHeapMiB -gt $pzMaxHeapMiB) { throw 'Invalid Zomboid heap limits in game-services.json' }
+if ($pzDataDirectory -notmatch '^[A-Za-z]:\\[^"\r\n]+$' -or -not (Test-Path -LiteralPath (Join-Path $pzDataDirectory 'Server\servertest.ini')) -or -not (Test-Path -LiteralPath (Join-Path $pzDataDirectory 'db\servertest.db'))) {
+  throw 'Set projectZomboidDataDirectory in the ignored game-services.json to the existing, initialized world data folder before installing.'
+}
 
 function New-GameDefinition([string] $key, [string] $serviceName, [string] $updateServiceName, [string] $startWorkingDirectory, [string] $updateWorkingDirectory, [int] $stopTimeoutSeconds, [string] $startExecutable, [string] $startArguments, [string] $updateExecutable, [string] $updateArguments, [hashtable] $environment = @{}) {
   return [pscustomobject]@{ Key = $key; ServiceName = $serviceName; UpdateServiceName = $updateServiceName; StartWorkingDirectory = $startWorkingDirectory; UpdateWorkingDirectory = $updateWorkingDirectory; StopTimeoutSeconds = $stopTimeoutSeconds; StartExecutable = $startExecutable; StartArguments = $startArguments; UpdateExecutable = $updateExecutable; UpdateArguments = $updateArguments; Environment = $environment }
@@ -33,10 +40,10 @@ function New-GameDefinition([string] $key, [string] $serviceName, [string] $upda
 
 $games = @(
   (New-GameDefinition "valheim" "HabitatGameValheim" "HabitatUpdateValheim" "C:\ValheimServer" "C:\ValheimServer" 120 "C:\ValheimServer\valheim_server.exe" '-nographics -batchmode -name "Habitat" -port 2456 -world "HabitatValhalla" -password "%HABITAT_VALHEIM_PASSWORD%" -savedir "C:\ValheimData" -public 1 -saveinterval 1800 -backups 10 -backupshort 7200 -backuplong 43200 -logFile-' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\ValheimServer" +login anonymous +app_update 896660 +quit' @{ HABITAT_VALHEIM_PASSWORD = $valheimPassword; SteamAppId = "892970" })
-  (New-GameDefinition "palworld" "HabitatGamePalworld" "HabitatUpdatePalworld" "C:\steamcmd\palworld_server" "C:\steamcmd" 120 "C:\steamcmd\palworld_server\PalServer.exe" '-log -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -publiclobby' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\steamcmd\palworld_server" +login anonymous +app_update 2394010 +quit')
+  (New-GameDefinition "palworld" "HabitatGamePalworld" "HabitatUpdatePalworld" "C:\steamcmd\palworld_server" "C:\steamcmd" 120 "C:\steamcmd\palworld_server\PalServer.exe" '-log -useperfthreads -NoAsyncLoadingThread -UseMultithreadForDS -publiclobby -enable-gamedata-api' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\steamcmd\palworld_server" +login anonymous +app_update 2394010 +quit')
   (New-GameDefinition "dragonwilds" "HabitatGameDragonwilds" "HabitatUpdateDragonwilds" "C:\RSDragonwildsServer" "C:\steamcmd" 120 "C:\RSDragonwildsServer\RSDragonwildsServer.exe" '-log -NewConsole' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\RSDragonwildsServer" +login anonymous +app_update 4019830 +quit')
   (New-GameDefinition "enshrouded" "HabitatGameEnshrouded" "HabitatUpdateEnshrouded" "C:\Enshrouded" "C:\steamcmd" 120 "C:\Enshrouded\enshrouded_server.exe" '' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\Enshrouded" +login anonymous +app_update 2278520 +quit')
-  (New-GameDefinition "project-zomboid" "HabitatGameProjectZomboid" "HabitatUpdateProjectZomboid" "C:\pzserver" "C:\steamcmd" 180 "C:\pzserver\jre64\bin\java.exe" '-Djava.awt.headless=true -Dzomboid.steam=1 -Dzomboid.znetlog=1 -XX:+UseZGC -XX:-CreateCoredumpOnCrash -XX:-OmitStackTraceInFastThrow -Xms16g -Xmx16g -Djava.library.path=natives/;natives/win64/;. -cp "%PZ_CLASSPATH%" zombie.network.GameServer -statistic 0' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\steamcmd\steamapps\common\Project Zomboid Dedicated Server" +login anonymous +app_update 380870 +quit' @{ PZ_CLASSPATH = 'java/istack-commons-runtime.jar;java/jassimp.jar;java/javacord-2.0.17-shaded.jar;java/javax.activation-api.jar;java/jaxb-api.jar;java/jaxb-runtime.jar;java/lwjgl.jar;java/lwjgl-natives-windows.jar;java/lwjgl-glfw.jar;java/lwjgl-glfw-natives-windows.jar;java/lwjgl-jemalloc.jar;java/lwjgl-jemalloc-natives-windows.jar;java/lwjgl-opengl.jar;java/lwjgl-opengl-natives-windows.jar;java/lwjgl_util.jar;java/sqlite-jdbc-3.27.2.1.jar;java/trove-3.0.3.jar;java/uncommons-maths-1.2.3.jar;java/commons-compress-1.18.jar;java/' })
+  (New-GameDefinition "project-zomboid" "HabitatGameProjectZomboid" "HabitatUpdateProjectZomboid" "C:\pzserver" "C:\steamcmd" 180 "C:\pzserver\jre64\bin\java.exe" '-Djava.awt.headless=true -Dzomboid.steam=1 -Dzomboid.znetlog=1 -XX:+UseZGC -XX:-CreateCoredumpOnCrash -XX:-OmitStackTraceInFastThrow -Xms%HABITAT_PZ_INITIAL_HEAP% -Xmx%HABITAT_PZ_MAX_HEAP% -Djava.library.path=natives/;natives/win64/;. -cp "%PZ_CLASSPATH%" zombie.network.GameServer -statistic 0 -cachedir="%HABITAT_PZ_DATA_DIR%"' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\pzserver" +login anonymous +app_update 380870 +quit' @{ HABITAT_PZ_DATA_DIR = $pzDataDirectory; HABITAT_PZ_INITIAL_HEAP = ([string]$pzInitialHeapMiB+'m'); HABITAT_PZ_MAX_HEAP = ([string]$pzMaxHeapMiB+'m'); PZ_CLASSPATH = 'java/istack-commons-runtime.jar;java/jassimp.jar;java/javacord-2.0.17-shaded.jar;java/javax.activation-api.jar;java/jaxb-api.jar;java/jaxb-runtime.jar;java/lwjgl.jar;java/lwjgl-natives-windows.jar;java/lwjgl-glfw.jar;java/lwjgl-glfw-natives-windows.jar;java/lwjgl-jemalloc.jar;java/lwjgl-jemalloc-natives-windows.jar;java/lwjgl-opengl.jar;java/lwjgl-opengl-natives-windows.jar;java/lwjgl_util.jar;java/sqlite-jdbc-3.27.2.1.jar;java/trove-3.0.3.jar;java/uncommons-maths-1.2.3.jar;java/commons-compress-1.18.jar;java/' })
   (New-GameDefinition "7-days-to-die" "HabitatGame7DaysToDie" "HabitatUpdate7DaysToDie" "C:\7daysserver" "C:\steamcmd" 180 "C:\7daysserver\7DaysToDieServer.exe" '-logfile "C:\7daysserver\output_log_dedi_habitat.txt" -quit -batchmode -nographics -configfile=serverconfig.xml -dedicated' "C:\steamcmd\steamcmd.exe" '+force_install_dir "C:\7daysserver" +login anonymous +app_update 294420 +quit' @{ SteamAppId = "251570"; SteamGameId = "251570" })
 )
 
@@ -61,6 +68,7 @@ $environmentXml
     <autoRollAtTime>00:00:00</autoRollAtTime>
   </log>
   <stoptimeout>$($stopTimeoutSeconds)sec</stoptimeout>
+  <stopparentprocessfirst>$(if ($id -eq 'HabitatGameDragonwilds' -or $id.StartsWith('HabitatUpdate')) { 'false' } else { 'true' })</stopparentprocessfirst>
   <onfailure action="none" />
 </service>
 "@
@@ -114,3 +122,5 @@ foreach ($game in $games) {
 
 [System.IO.File]::WriteAllText($agentConfigurationPath, ($agentConfiguration | ConvertTo-Json -Depth 20), [System.Text.UTF8Encoding]::new($false))
 Write-Output "Generated and installed 12 local Habitat services. They are manual-start by design; restart HabitatAgent before portal control is enabled."
+
+& (Join-Path $PSScriptRoot "install-game-update-workflows.ps1") -InstallRoot $InstallRoot

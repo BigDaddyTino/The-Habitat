@@ -15,3 +15,4 @@ export * from "./worlds";
 export * from "./pulse";
 export * from "./telemetry-config";
 export * from "./live-events";
+export * from "./player-connections";
